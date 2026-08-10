@@ -1,0 +1,35 @@
+import { glob } from 'astro/loaders'
+import { defineCollection, z } from 'astro:content'
+
+// The folder Obsidian opens directly. Generated translations will land in a
+// separate build-managed folder later, kept out of the writing view.
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './content/blog' }),
+  schema: z.object({
+    title: z.string(),
+    // A future pubDate means scheduled: the build hides it until its time.
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    // The language this article was WRITTEN in; the other one is generated.
+    lang: z.enum(['pt', 'en']).default('pt'),
+    // THE SECTION — exactly one per post. Tags stay separate and many.
+    category: z.string(),
+    tags: z.array(z.string()).default([]),
+    series: z.string().optional(),
+    seriesOrder: z.number().optional(),
+    // Doubles as the hover-preview excerpt and the meta description.
+    description: z.string(),
+    heroImage: z.string().optional(),
+    heroImageAlt: z.string().optional(),
+    epigraph: z.string().optional(),
+    epigraphCite: z.string().optional(),
+    draft: z.boolean().default(true),
+    // Preserved from Ghost; everything renders public for now.
+    visibility: z.enum(['public', 'members', 'paid']).default('public'),
+    canonicalUrl: z.string().url().optional(),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+  }),
+})
+
+export const collections = { blog }

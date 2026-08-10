@@ -1,0 +1,67 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { render } from 'astro:content'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { formatDate, getPublishedPosts } from '../lib/posts'
+
+// Flat URLs: /{slug}/ exactly as Ghost had them, so moving a post between
+// sections only ever changes its `category`, never its URL.
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts()
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }))
+}) satisfies GetStaticPaths
+
+const { post } = Astro.props
+const { Content } = await render(post)
+---
+
+<BaseLayout
+  title={post.data.seoTitle ?? post.data.title}
+  description={post.data.seoDescription ?? post.data.description}
+  lang={post.data.lang}
+>
+  <article>
+    <h1>{post.data.title}</h1>
+    <p class="meta">
+      <time datetime={post.data.pubDate.toISOString()}>
+        {formatDate(post.data.pubDate, post.data.lang)}
+      </time>
+      <span>·</span>
+      <span>{post.data.category}</span>
+    </p>
+    {
+      post.data.epigraph && (
+        <blockquote class="epigraph">
+          <p>{post.data.epigraph}</p>
+          {post.data.epigraphCite && <cite>{post.data.epigraphCite}</cite>}
+        </blockquote>
+      )
+    }
+    <Content />
+  </article>
+</BaseLayout>
+
+<style>
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-block: -0.5rem 2.5rem;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+
+  .epigraph {
+    margin-inline: 0;
+    padding-inline-start: 1.2rem;
+    border-inline-start: 2px solid var(--rule);
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .epigraph cite {
+    display: block;
+    font-size: 0.85rem;
+    font-style: normal;
+  }
+</style>
