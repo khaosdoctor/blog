@@ -1,0 +1,28 @@
+---
+title: Olá, mundo (de novo)
+pubDate: 2026-08-07
+lang: pt
+category: meta
+tags:
+  - astro
+  - blog
+description: O primeiro post do blog reconstruído em Astro, saindo do Ghost depois de seis anos.
+draft: false
+epigraph: A melhor ferramenta de escrita é a que não te interrompe.
+epigraphCite: alguém, provavelmente
+---
+
+Este post existe para provar que o pipeline funciona: frontmatter validado por Zod,
+MDX renderizado, URL plana em `/ola-mundo/`, tema claro e escuro seguindo o sistema.
+
+## O que já está de pé
+
+- Coleção `blog` lendo `content/blog/` (a pasta que o Obsidian abre direto)
+- `draft: true` e `pubDate` no futuro somem do build
+- Layout mínimo, sem JavaScript nenhum
+
+```ts
+const posts = await getPublishedPosts()
+```
+
+O resto vem na Fase 1: os 235 posts migrados, sidenotes, hover previews e i18n.
