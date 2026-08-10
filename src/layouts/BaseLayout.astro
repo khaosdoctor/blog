@@ -1,0 +1,120 @@
+---
+interface Props {
+  title: string
+  description: string
+  lang?: string
+}
+
+const { title, description, lang = 'pt' } = Astro.props
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+  </head>
+  <body>
+    <header>
+      <a href="/" class="home">lsantos.dev</a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>Lucas Santos</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  /* ponytail: theming is native light-dark() + color-scheme, no toggle and no
+     JS yet. A manual toggle needs a stored preference — add it with the real
+     design in Phase 1. */
+  :root {
+    color-scheme: light dark;
+    --bg: light-dark(#fffdf9, #14161a);
+    --fg: light-dark(#1a1c20, #e6e4e0);
+    --muted: light-dark(#5d6169, #9a9ea6);
+    --accent: light-dark(#0b5ea8, #7cc0ff);
+    --rule: light-dark(#e4e0d8, #2a2d33);
+    --measure: 68ch;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0 1.5rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-serif, Georgia, 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  header,
+  main,
+  footer {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+
+  header {
+    display: flex;
+    padding-block: 2rem 3rem;
+  }
+
+  .home {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .home:hover {
+    color: var(--accent);
+  }
+
+  footer {
+    margin-block: 5rem 3rem;
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  a {
+    color: var(--accent);
+    text-underline-offset: 0.2em;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  pre {
+    padding: 1rem;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { formatDate, getPublishedPosts } from '../lib/posts'
+
+const posts = await getPublishedPosts()
+---
+
+<BaseLayout title="Lucas Santos" description="Artigos sobre desenvolvimento, tecnologia e opinião.">
+  <ul class="posts">
+    {
+      posts.map((post) => (
+        <li>
+          <a href={`/${post.id}/`}>{post.data.title}</a>
+          <p class="meta">
+            <time datetime={post.data.pubDate.toISOString()}>
+              {formatDate(post.data.pubDate, post.data.lang)}
+            </time>
+            <span>·</span>
+            <span>{post.data.category}</span>
+          </p>
+          <p>{post.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .posts {
+    padding: 0;
+    list-style: none;
+  }
+
+  .posts li + li {
+    margin-block-start: 2.5rem;
+  }
+
+  .posts a {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-block: 0.2rem;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+</style>
