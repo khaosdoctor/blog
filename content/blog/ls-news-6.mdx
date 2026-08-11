@@ -6,7 +6,7 @@ lang: pt
 category: "newsletter"
 description: "Muito obrigado por assinar e espero que você goste do conteúdo!"
 heroImage: "./ls-news-6/photo-1585776245991-cf89dd7fc73a-4b3cec54.jpg"
-draft: false
+draft: true
 visibility: "public"
 ---
 
@@ -54,7 +54,7 @@ Você já pensou em ganhar em dólares trabalhando remotamente para as maiores e
 
 # Links do mês
 
-### [Porque todas as APIs ReST estão erradas?](https://bit.ly/3c4LEh3)
+### [Porque todas as APIs ReST estão erradas?](https://htmx.org/essays/how-did-rest-come-to-mean-the-opposite-of-rest/)
 
 REST é provavelmente o termo mais mal utilizado na indústria de tecnologia hoje em dia. Grande parte porque todo mundo fala que uma API que retorna JSON é RESTful, mas, na verdade, o conceito original de REpresentational State Transfer era para ser construído somente sobre hipertexto e HTTP.
 
@@ -62,13 +62,13 @@ Esse é um excelente artigo (e possivelmente eu vou fazer um vídeo sobre) que e
 
 A grande ideia é de que toda resposta de API deva ser auto-contida a ponto de que qualquer cliente que esteja recebendo não precise fazer nenhum tipo de operação ou entender a lógica do sistema, só renderizar. E isso faz com que a própria aplicação seja completamente interativa. Recomendo a leitura
 
-### [O NPM agora tem um seletor de dependencias](https://bit.ly/3wlqRwt)
+### [O NPM agora tem um seletor de dependencias](https://github.blog/changelog/2022-08-03-introducing-the-new-npm-dependency-selector-syntax/)
 
 O comando `npm query` é o mais novo comando do NPM v8.16.0 que aceita algo chamado “seletor de dependências” e retorna um array das dependências que fazem um match com esse seletor
 
 A ideia desse comando é descobrir onde as suas dependências estão vivendo e o que elas estão fazendo ali. É bastante interessante principalmente para descobrir porque você tem 12 versões do react instalado na mesma aplicação, além disso ela tem uma versão programática que você pode usar com o pacote @npmcli/arborist que permitiria, por exemplo, que você tomasse ações dependendo dos tipos de dependências instaladas em um sistema
 
-### [Testando a velocidade do Bun.js](https://bit.ly/3dL7wyr)
+### [Testando a velocidade do Bun.js](https://techsparx.com/nodejs/bun/speed-test.html)
 
 O Bun é o mais novo runtime JavaScript que veio para fazer frente com o Deno e o Node, principalmente com o Node e, diferente do Deno, talvez ele tenha realmente uma chance.
 
@@ -76,11 +76,11 @@ A grande ideia é que o bun diz que é “incrívelmente rápido” (assim como 
 
 Esse autor tentou algo diferente, e se a gente rodasse algo realmente complexo. Infelizmente o resultado foi que, por conta do estado atual do Bun (muito novo) não foi possível executar todas as funções da aplicação, mas as que foram executadas mostraram uma performance levemente superior em alguns casos mais complexos e muito superior em casos mais leves.
 
-### [Criando CLIs atrativos usando TypeScript](https://bit.ly/3T5bMZz)
+### [Criando CLIs atrativos usando TypeScript](https://blog.terrible.dev/Building-attractive-CLIs-in-JavaScript/)
 
 Esse artigo é muito interessante porque ele mostra que bons CLIs são baseados em uma boa arquitetura e organização. Aqui ele usa o `commander.js` para criar um CLI simples e mostrar funcionalidades como tratamento de erros e _spinners_ de carregamento que melhoram muito a experiência de um usuário.
 
-### [Tudo que você precisa saber sobre Hashes](https://bit.ly/3T48t51)
+### [Tudo que você precisa saber sobre Hashes](https://notes.volution.ro/v1/2022/07/notes/1290a79c/)
 
 Nesse artigo o autor mostra os básicos de hashes, desde o que é um hash e casos de uso como hashmaps, armazenamento de senhas. Além disso ele separa hashes em vários tipos:
 
@@ -92,11 +92,11 @@ Nesse artigo o autor mostra os básicos de hashes, desde o que é um hash e caso
 -   Tokens
 -   Criptografia
 
-### [Uma introdução ao multi-threading do Node.js](https://bit.ly/3T8ZP5s)
+### [Uma introdução ao multi-threading do Node.js](https://blog.appsignal.com/2022/07/20/an-introduction-to-multithreading-in-nodejs.html)
 
 Um artigo muito bacana que mostra o que são threads (códigos que rodam em paralelo dentro de um único processo) e como o Node.js (e o JavaScript) lidam com isso através de filas e da libuv (que eu já expliquei [aqui](https://dev.to/_staticvoid/node-js-por-baixo-dos-panos-3-um-mergulho-no-event-loop-38l9)) e porque o child\_process que é tão útil não é multithreading.
 
-### [Autorização e autenticação com Serverless](https://bit.ly/3CkiiWx)
+### [Autorização e autenticação com Serverless](https://leejamesgilmore.medium.com/serverless-authorisation-e5bd9288f0ff)
 
 Um artigo direto e reto sobre como trabalhar com autenticação (confirmar que você é quem diz ser) e autorização (confirmar que você tem permissão de executar algo) em ambientes Serverless, nesse caso o AWS Lambda e Lambda Edge.
 

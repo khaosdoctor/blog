@@ -324,10 +324,41 @@ async function mirrorRemoteImage(url: string): Promise<void> {
   remoteFiles.set(url, target)
 }
 
+// --------------------------------------------------------------- link shorteners
+
+/**
+ * bit.ly links are expanded to their real targets once, at migration time.
+ * They resolve today, but a shortener is a single point of failure for 99 links
+ * and it puts a tracker between the reader and the destination. Resolved with
+ * redirect: 'manual' so we read the Location header without ever loading the
+ * target, and cached on disk so re-runs do no network work.
+ *
+ * Only bit.ly. aka.ms and amzn.to are left alone: the first is Microsoft's own
+ * and stable, the second is an affiliate link where the redirect IS the point.
+ */
+const BITLY_CACHE = join(homedir(), 'ghost-backups', 'bitly-cache.json')
+const bitlyMap = new Map<string, string>(
+  existsSync(BITLY_CACHE) ? Object.entries(JSON.parse(readFileSync(BITLY_CACHE, 'utf8')) as Record<string, string>) : [],
+)
+
+async function resolveShortLink(url: string): Promise<void> {
+  if (bitlyMap.has(url)) return
+  const response = await fetch(url, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(15000) })
+  const location = response.headers.get('location')
+  if (location === null || !/^https?:\/\//.test(location)) return
+  // One hop only. A shortener pointing at another shortener is a rabbit hole,
+  // and the first hop is what the reader was going to follow anyway.
+  bitlyMap.set(url, location.split('?utm_')[0])
+}
+
 // ------------------------------------------------------------------ conversion
 
 function normalizeHtml(html: string): string {
-  return html
+  const expanded = [...bitlyMap.entries()].reduce(
+    (current, [short, target]) => current.replaceAll(short, target),
+    html,
+  )
+  return expanded
     .replaceAll('__GHOST_URL__', GHOST_URL)
     .replaceAll('src="/content/', `src="${GHOST_URL}/content/`)
     .replaceAll('href="/content/', `href="${GHOST_URL}/content/`)
@@ -556,7 +587,36 @@ function describe(post: Post, meta: Meta | undefined): string {
  * wins even if a "meta" tag (video/github/podcasts/events/blog) comes first in
  * Ghost's tag order. Only falls back to meta when nothing else matched.
  */
+/**
+ * The newsletter split, per Lucas.
+ *
+ * Two very different things were both tagged as newsletter. The 12 posts tagged
+ * `backlog-newsletter` are real essays (median 2465 words: his first computer,
+ * first languages, 29 years of JavaScript, the Vim piece). The other 48 are
+ * `#newsletter` link roundups (median 726 words: ls-news, noticias-semanais,
+ * giro-de-noticias). The essays become ordinary posts filed under their real
+ * subject; the roundups stay drafts for him to go through later.
+ */
+function isBacklogEssay(postTags: string[]): boolean {
+  return postTags.some((tag) => tag.toLowerCase() === 'backlog-newsletter')
+}
+
+function isNewsletterRoundup(postTags: string[]): boolean {
+  const lower = postTags.map((tag) => tag.toLowerCase())
+  return lower.includes('#newsletter') && !lower.includes('backlog-newsletter')
+}
+
 function categoryFor(post: Post, postTags: string[]): string {
+  // A Backlog essay is filed by what it is actually about. Only one of the
+  // twelve is technical; the rest are career and opinion pieces.
+  if (isBacklogEssay(postTags)) {
+    for (const tag of postTags) {
+      const mapped = CATEGORY_OF[tag.toLowerCase()]
+      if (mapped !== undefined && mapped !== 'meta' && mapped !== 'newsletter') return mapped
+    }
+    return 'carreira'
+  }
+  if (isNewsletterRoundup(postTags)) return 'newsletter'
   if (post.status === 'sent') return 'newsletter'
   for (const tag of postTags) {
     const mapped = CATEGORY_OF[tag.toLowerCase()]
@@ -570,6 +630,8 @@ function categoryFor(post: Post, postTags: string[]): string {
 }
 
 const emailOnlyReview: string[] = []
+const roundupReview: string[] = []
+const backlogReview: string[] = []
 const privateReview: string[] = []
 const perPostNotes = new Map<string, string[]>()
 
@@ -605,6 +667,47 @@ for (const post of limited) {
   const hero = post.feature_image === null ? '' : normalizeHtml(post.feature_image)
   if (isMirrorableImage(hero)) remoteCandidates.add(hero)
 }
+// Expand bit.ly links once, before any conversion reads the html.
+const shortLinks = new Set<string>()
+for (const post of limited) {
+  for (const match of (post.html ?? '').matchAll(/https?:\/\/bit\.ly\/[A-Za-z0-9]+/g)) {
+    shortLinks.add(match[0])
+  }
+}
+const unresolvedShort: string[] = []
+if (shortLinks.size > 0) {
+  console.log(`expanding ${shortLinks.size} bit.ly links...`)
+  const links = [...shortLinks]
+  for (let start = 0; start < links.length; start += 8) {
+    await Promise.all(
+      links.slice(start, start + 8).map((url) =>
+        resolveShortLink(url).catch(() => {
+          unresolvedShort.push(url)
+        }),
+      ),
+    )
+  }
+  writeFileSync(BITLY_CACHE, JSON.stringify(Object.fromEntries(bitlyMap), null, 2))
+  writeFileSync(
+    join(args.report, 'review-expanded-links.md'),
+    [
+      `# bit.ly links expanded to their real targets (${bitlyMap.size})`,
+      ``,
+      `Every one of these replaced a bit.ly URL in a post. Two things to look at rather than trust:`,
+      `anything still on plain \`http://\`, and anything whose target has nothing to do with the post.`,
+      `An old shortlink can be repointed by whoever owns it, so the target today is not necessarily`,
+      `what you linked years ago.`,
+      ``,
+      ...[...bitlyMap.entries()]
+        .sort(([, a], [, b]) => Number(b.startsWith('http://')) - Number(a.startsWith('http://')))
+        .map(([short, target]) => `- ${target.startsWith('http://') ? '**insecure** ' : ''}\`${short}\` -> ${target}`),
+    ].join('\n'),
+  )
+  const missed = links.filter((url) => !bitlyMap.has(url))
+  console.log(`expanded ${links.length - missed.length} of ${links.length}`)
+  for (const url of missed) if (!unresolvedShort.includes(url)) unresolvedShort.push(url)
+}
+
 console.log(`mirroring ${remoteCandidates.size} remote images...`)
 const candidateList = [...remoteCandidates]
 const CONCURRENCY = 8
@@ -664,6 +767,8 @@ for (const post of limited) {
   const postTags = tagsByPost.get(post.id) ?? []
   const isPrivate = postTags.some((tag) => tag.toLowerCase() === '#private')
   const emailOnly = meta?.email_only === 1 || meta?.email_only === true
+  const roundup = isNewsletterRoundup(postTags)
+  const isDraft = post.status === 'draft' || emailOnly || roundup
   const series = seriesBySlug.get(post.slug)
   const hero = post.feature_image === null ? null : resolveAsset(normalizeHtml(post.feature_image))
   const publicTags = postTags.filter((tag) => !tag.startsWith('#'))
@@ -721,7 +826,10 @@ for (const post of limited) {
       // Only Ghost's own drafts stay unpublished. A `#private` tag is a Ghost
       // INTERNAL tag: it hides the tag from listings, it does not unpublish the
       // post, and these all have live URLs today.
-      ['draft', post.status === 'draft' ? 'true' : 'false'],
+      // Drafted, in order: Ghost's own drafts; email-only sends, which never had
+      // a web page at all in Ghost; and the newsletter roundups, which Lucas
+      // wants held back for a manual pass.
+      ['draft', isDraft ? 'true' : 'false'],
       ['visibility', yamlString(post.visibility)],
       ['canonicalUrl', canonical === null ? null : yamlString(canonical)],
       ['seoTitle', metaTitle.length > 0 && metaTitle !== post.title ? yamlString(metaTitle) : null],
@@ -732,6 +840,16 @@ for (const post of limited) {
 
   if (emailOnly) {
     emailOnlyReview.push(`- [ ] \`${post.slug}\` — ${post.title} (${published.toISOString().slice(0, 10)})`)
+  }
+  if (roundup) {
+    roundupReview.push(
+      `- [ ] \`${post.slug}\` — ${post.title} (${published.toISOString().slice(0, 10)})`,
+    )
+  }
+  if (isBacklogEssay(postTags)) {
+    backlogReview.push(
+      `- \`${post.slug}\` -> category \`${categoryFor(post, postTags)}\` — ${post.title}`,
+    )
   }
   if (isPrivate && post.status !== 'draft') {
     privateReview.push(`- [ ] \`${post.slug}\` — ${post.title} (${published.toISOString().slice(0, 10)})`)
@@ -756,6 +874,11 @@ for (const [slug, list] of perPostNotes) {
   for (const note of list) reportLines.push(`- ${note}`)
   reportLines.push('')
 }
+if (unresolvedShort.length > 0) {
+  reportLines.push(`## bit.ly links that could not be expanded (${unresolvedShort.length})`, '')
+  for (const url of unresolvedShort) reportLines.push(`- ${url}`)
+  reportLines.push('')
+}
 if (missingAssets.size > 0) {
   reportLines.push(`## Assets referenced but not found locally (${missingAssets.size})`, '')
   for (const url of [...missingAssets].sort()) reportLines.push(`- ${url}`)
@@ -763,12 +886,43 @@ if (missingAssets.size > 0) {
 writeFileSync(join(args.report, 'report.md'), reportLines.join('\n'))
 
 writeFileSync(
+  join(args.report, 'review-newsletter-roundups.md'),
+  [
+    `# Newsletter roundups held back as drafts (${roundupReview.length})`,
+    ``,
+    `Tagged \`#newsletter\` without \`backlog-newsletter\`: ls-news issues, noticias-semanais,`,
+    `giro-de-noticias. Median 726 words, mostly links. They are in the repo with \`draft: true\`, so`,
+    `they build no page. Tick any that should be published and I will flip them.`,
+    ``,
+    `Worth knowing: these DO resolve on the old Ghost site today, so leaving them as drafts means`,
+    `those URLs will 404 after cutover. Say the word if you would rather have redirect stubs.`,
+    ``,
+    ...roundupReview,
+  ].join('\n'),
+)
+
+writeFileSync(
+  join(args.report, 'review-backlog-essays.md'),
+  [
+    `# Backlog essays, refiled by subject (${backlogReview.length})`,
+    ``,
+    `Tagged \`backlog-newsletter\`, median 2465 words. These are real posts, so they are published`,
+    `and filed under their actual subject rather than under \`newsletter\`. The category comes from`,
+    `each post's own topic tags, defaulting to \`carreira\` for the career and opinion pieces.`,
+    `Moving one is a one-line frontmatter edit.`,
+    ``,
+    ...backlogReview,
+  ].join('\n'),
+)
+
+writeFileSync(
   join(args.report, 'review-email-only.md'),
   [
     `# Email-only posts (${emailOnlyReview.length})`,
     ``,
-    `These were newsletter-only issues in Ghost. They are imported as normal published posts.`,
-    `Tick the ones that should NOT be on the site and I'll set them to draft or delete them.`,
+    `Ghost email-only posts have NO web page: these were sent as email and never had a URL.`,
+    `They are imported with \`draft: true\`, so publishing one would be adding a page that never`,
+    `existed rather than preserving anything. Tick any you want on the site.`,
     ``,
     ...emailOnlyReview,
   ].join('\n'),
