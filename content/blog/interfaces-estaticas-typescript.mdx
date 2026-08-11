@@ -19,7 +19,7 @@ Eu não vou entrar em detalhes sobre o que são métodos estáticos ou não est�
 
 Mas vale a pena dar aquela refrescada na memória.
 
-### Métodos estáticos
+## Métodos estáticos
 
 Métodos estáticos, ou atributos estáticos, são atributos que existem em qualquer instância de uma classe, eles são definidos no nível de construtor, ou seja, a própria classe possui esses métodos e, portanto, todas as instâncias dessas classes também vão possuir.
 
@@ -55,7 +55,7 @@ A gente precisa chamar o método direto do construtor da classe:
 const p = Person.fromObject(etc)
 ```
 
-## O problema
+# O problema
 
 Métodos estáticos são muito comuns em linguagens fortemente tipadas, porque você tem uma clara separação entre o momento estático da classe e o momento "dinâmico".
 
@@ -89,7 +89,7 @@ interface Serializable {
 
 Agora vai, certo? Infelizmente não, porque mesmo que você implemente o método manualmente, a classe ainda dirá que você não implementou o método `fromObject`.
 
-### O problema da reflexão estática
+## O problema da reflexão estática
 
 E o problema vai mais além, por exemplo, se quiséssemos fazer uma classe de banco de dados que usa o nome da entidade direto da classe para poder criar um arquivo, isso é feito através da propriedade `name` em qualquer classe, essa é uma propriedade estática que existe em todos os objetos instanciáveis:
 
@@ -131,7 +131,7 @@ class DB {
 
 Então estamos em uma escolha, ou a gente prioriza a instância ou a gente prioriza o construtor...
 
-## A solução
+# A solução
 
 Felizmente, temos uma solução para esse problema, ela não é muito bonita, mas existem algumas ideias no repositório do TypeScript (como [essa](https://github.com/microsoft/TypeScript/issues/33892) e [essa](https://github.com/microsoft/TypeScript/issues/34516)) que vem [desde 2017](https://github.com/microsoft/TypeScript/issues/13462) que estão analisando a possibilidade de adicionar definições estáticas à interfaces.
 

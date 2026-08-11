@@ -19,6 +19,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 
 const SOURCE_DIR = 'content/blog'
 const OUTPUT_ROOT = 'content/translated'
@@ -242,6 +243,15 @@ for (const post of changed) {
   }
 
   const parsed = parseResponse(text)
+
+  // The model is untrusted output, not reviewed migration content: run it through
+  // the same denylist captions get before it's allowed anywhere near set:html.
+  const unsafeField = [...parsed.fields].find(([, value]) => sanitizeCaption(value) !== value)
+  if (unsafeField !== undefined || sanitizeCaption(parsed.body) !== parsed.body) {
+    console.error(`unsafe HTML in translated output for ${post.slug} (field: ${unsafeField?.[0] ?? 'body'}) — skipped`)
+    continue
+  }
+
   const output = `---\n${rebuildFrontmatter(frontmatter, parsed.fields, args.locale, post.slug)}\n---\n\n${parsed.body}\n`
   const target = join(outputDir, `${post.slug}.mdx`)
   writeFileSync(target, output)

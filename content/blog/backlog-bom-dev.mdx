@@ -12,6 +12,9 @@ visibility: "public"
 seoTitle: "É possível medir eficiência em tecnologia?"
 ---
 
+import figureImage1 from './backlog-bom-dev/DraggedImage.png'
+import figureImage2 from './backlog-bom-dev/DraggedImage-1.png'
+
 Mais um dia e mais um backlog no ar! Hoje quero trazer algo diferente: não é sobre história, nem diretamente sobre desenvolvimento, mas sobre devs no geral. Vamos falar sobre o **ato de fazer engenharia** e a _profissão de engenheiro de software como um todo_.
 
 Recentemente, recebi um [post interessante](https://www.seangoedecke.com/what-makes-strong-engineers-strong/?=&aid=recomink1dKTOjct0) do Sean Goedecke intitulado: _"What makes strong engineers strong"_, ou, em português, _"O que torna os engenheiros fortes, de fato, fortes."_ (a tradução não ajudou muito). Aqui, força não tem a ver com vigor físico, mas sim com execução, responsabilidade e a habilidade de entregar qualquer tipo de trabalho.
@@ -20,7 +23,7 @@ Inicialmente, a ideia era apenas comentar sobre esse artigo, mas descobri um [ar
 
 Então, vamos começar pelo começo.
 
-### Como chegamos aqui?
+## Como chegamos aqui?
 
 Antes de definir o que é um engenheiro forte ou fraco, eu tenho que explicar como a gente chegou aqui.
 
@@ -28,7 +31,7 @@ O [primeiro artigo](https://www.seangoedecke.com/weak-engineers/?__readwiseLocat
 
 Eu cheguei a ler o estudo, mas achei estranho que ele não menciona em nenhum momento uma divisão de trabalhadores remotos ou no escritório, então eu não sei de onde vieram os dados relacionados às porcentagens de eficiência. Da mesma forma, o estudo não menciona nenhum tipo de resultado financeiro, então também não sei de onde vieram os dados para calcular que _esses engenheiros geram um prejuízo de $500B_:
 
-<Figure src="./backlog-bom-dev/DraggedImage.png" alt="Tabela mostrando o custo de &quot;engenheiros fantasma&quot;" caption="<span style=&quot;white-space: pre-wrap;&quot;>Tabela mostrando o custo de &quot;engenheiros fantasma&quot;</span>" />
+<Figure src={figureImage1} priority alt="Tabela mostrando o custo de &quot;engenheiros fantasma&quot;" caption="<span style=&quot;white-space: pre-wrap;&quot;>Tabela mostrando o custo de &quot;engenheiros fantasma&quot;</span>" />
 
 > Pode ser que esse seja outro estudo com base na mesma fonte. Contudo, não consegui confirmar de onde vieram esses números além do que está nas imagens. Se alguém souber, me avise.
 
@@ -36,7 +39,7 @@ De acordo com o estudo, 108 empresas enviaram 1,73 milhão de commits de 50.935 
 
 Uma das métricas usadas foi a quantidade de commits em um mês, algo que até [o próprio autor](https://x.com/yegordb/status/1859291435339743361/photo/1) considera pouco confiável. E já foi provado que não é uma boa métrica:
 
-<Figure src="./backlog-bom-dev/DraggedImage-1.png" alt="Em média, os engenheiros fracos entregam 2 a 3 commits por mês" caption="<span style=&quot;white-space: pre-wrap;&quot;>Em média, os engenheiros fracos entregam 2 a 3 commits por mês</span>" />
+<Figure src={figureImage2} alt="Em média, os engenheiros fracos entregam 2 a 3 commits por mês" caption="<span style=&quot;white-space: pre-wrap;&quot;>Em média, os engenheiros fracos entregam 2 a 3 commits por mês</span>" />
 
 Mas, ao que parece, o objetivo do estudo não era medir a eficiência dos participantes, mas criar um modelo para avaliar a eficiência de programadores — algo que praticamente _todo mundo_ na indústria tenta fazer desde sempre.
 
@@ -44,7 +47,7 @@ Enfim, esse foi o estudo que deu início a tudo isso. Mas como, afinal, definimo
 
 ---
 
-## Pausa para um aviso!
+# Pausa para um aviso!
 
 Essa newsletter só existe graças à comunidade e aos patrocinadores! E hoje o apoio vem da **Remessa Online**, que está ajudando demais a manter este projeto vivo 💙.
 
@@ -64,7 +67,7 @@ Pra economizar ainda mais, é só usar o cupom **LSANTOSDEV** para ter 15% nas 
 
 ---
 
-### A lenda da eficiência em tecnologia
+## A lenda da eficiência em tecnologia
 
 O primeiro artigo define engenheiros fortes e fracos como:
 
@@ -90,7 +93,7 @@ Eu quero acreditar que sou um excelente programador, provavelmente é a melhor c
 
 Você não pode – e nem vai – ser bom em tudo, isso se chama: _ser uma pessoa normal_.
 
-### O que faz um bom dev
+## O que faz um bom dev
 
 No primeiro artigo ele diz enfaticamente:
 
@@ -107,7 +110,7 @@ Isso me parece um pouco contraditório. Logo de cara, a _velocidade_ aparece com
 
 Concordo com três dos pilares, mas a _velocidade_ merece uma discussão à parte. Já a _habilidade técnica_, acho que é algo implícito — você precisa de um certo nível de habilidade para ser um bom dev, então não vou focar nisso agora.
 
-#### Velocidade
+### Velocidade
 
 A velocidade jamais deve ser considerada a principal métrica para avaliar bons ou maus engenheiros. Embora seja importante cumprir prazos, entregar algo rápido e sem qualidade é praticamente o mesmo que não entregar nada.
 
@@ -129,7 +132,7 @@ Tudo isso porque eu pensei no agora e nem sequer dei valor para o que eu precisa
 
 Claro que temos que pesar o que precisamos no momento, não podemos ser sempre perfeitos e entregar o melhor possível, muitas vezes o _feito é melhor do que perfeito_, e está tudo bem.
 
-#### Qualidade vs Eficiência
+### Qualidade vs Eficiência
 
 Eu sempre gosto de lembrar que ser um _"bom engenheiro"_ é bem diferente de ser um _"engenheiro eficiente"_. Geralmente, bons engenheiros acabam sendo eficientes, mas nem todo engenheiro eficiente é necessariamente bom.
 
@@ -145,7 +148,7 @@ E o próprio autor manda uma frase bem interessante:
 
 Isso vai exatamente de encontro com o que acabei de falar. Errar rápido e consertar ainda mais rápido, pra mim, não é sinônimo de qualidade. É só um sinal de que você esgotou todas as opções que não funcionam e ficou com a primeira que dá certo, sem se preocupar se é a melhor solução ou não.
 
-#### Pragmatismo e Confiança
+### Pragmatismo e Confiança
 
 Essas duas qualidades merecem destaque juntas, porque, na minha opinião, são as mais importantes para qualquer dev (ou pessoa técnica, no geral).
 
@@ -163,7 +166,7 @@ Por outro lado, é importante saber bater o pé e confiar nas suas habilidades q
 
 Claro, tudo em excesso é ruim. Ser pragmático demais e abandonar tudo em favor de dados pode ser tão prejudicial quanto ser confiante demais e achar que sempre está certo.
 
-### O paradoxo do aprendizado
+## O paradoxo do aprendizado
 
 Existe um paradoxo interessante que explica muito sobre a dinâmica do mercado à medida que você ganha mais experiência. Sean fala algo nesse ponto com o qual concordo totalmente: por que é mais fácil encontrar "engenheiros fracos" em posições sêniores do que juniores?
 
@@ -186,7 +189,7 @@ Então enquanto uma pessoa errar e quiser aprender, se mostrando aberta, para mi
 
 Jamais tenha medo de errar, todo mundo está aqui aprendendo.
 
-### O que eu penso disso tudo
+## O que eu penso disso tudo
 
 No geral, ambos os artigos são bem interessantes e muito bem escritos. São pontos bastante interessantes para se manter na cabeça e discutir.
 

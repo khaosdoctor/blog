@@ -21,21 +21,21 @@ Então eu resolvi escrever essa série de artigos sobre criptografia, pra que vo
 
 Esse é o primeiro artigo da série. Aqui a gente só vai trocar uma ideia sobre os principais conceitos e as principais ideias que você precisa saber para que você possa acompanhar os demais artigos da série! Então bora lá!
 
-### Esse artigo é parte de uma série:
+## Esse artigo é parte de uma série:
 
 -   [**Criptografia #0: Conceitos iniciais**](/criptografia-essencial/) 👈 Você está aqui
 -   [Criptografia #1: Criptografia Assimétrica com RSA](/criptografia-assimetrica-com-rsa/)
 -   [Criptografia #2: Chaves Simétricas](/criptografia-simetrica/)
 -   [Criptografia #3: Entendendo Hashes](/hashes/)
 -   [Criptografia #4: Assinaturas Digitais](/assinaturas-digitais/)
--   [Criptografia #5: Diffie-Helman e mecanismos de troca de chaves](/key-exchange/)
+-   Criptografia #5: Diffie-Helman e mecanismos de troca de chaves
 -   [Criptografia #6: Certificados digitais e HTTPS](/certificados-https/)
 
 > [!WARNING] ❗
 > ****Um aviso!****
 > Eu não sou um criptólogo, tampouco estudei criptografia formalmente. Os conceitos aqui são resultado puramente da minha pesquisa pessoal. Enquanto esse artigo pode ser usado para estudo, ele não deve ser utilizado como base para aplicações sensíveis.
 
-## Criptografia
+# Criptografia
 
 Esse é um conceito que eu já expliquei no meu canal:
 
@@ -53,7 +53,7 @@ Todo **meio** precisa ter uma forma de encriptar um dado e opcionalmente uma for
 
 No final, a aplicação do **meio** na **mensagem** usando a **chave** nos dá uma **cifra** ou **ciphertext** que é o texto criptografado que será transmitido.
 
-## Chaves
+# Chaves
 
 Chaves são o meio que usamos para manter uma mensagem segura, sua senha do computador é uma chave, por exemplo. Chaves podem ter várias classificações
 
@@ -65,7 +65,7 @@ Chaves são o meio que usamos para manter uma mensagem segura, sua senha do comp
 -   _Virtual_: O oposto, uma chave que é formada de bits e não existe fisicamente
 -   _Mista_: Uma chave física que contém uma chave virtual ([Yubikeys](https://www.yubico.com) são um exemplo)
 
-## Os pilares da segurança
+# Os pilares da segurança
 
 Quando falamos de segurança e criptografia, temos alguns conceitos principais que a maioria dos algoritmos precisam implementar:
 
@@ -73,7 +73,7 @@ Quando falamos de segurança e criptografia, temos alguns conceitos principais q
 -   **Integridade:** O dado só pode ser acessado por usuários autorizados
 -   **Não-Repúdio:** Garante que alguém não pode negar uma ação porque o próprio sistema tem a prova de que aquela ação foi feita por determinado usuário (garantia de origem)
 
-## Criptografia Simétrica
+# Criptografia Simétrica
 
 Vamos falar mais sobre isso nos próximos artigos, mas a criptografia simétrica é um tipo de criptografia onde temos apenas uma chave que serve tanto para criptografar quando descriptografar um dado.
 
@@ -83,13 +83,13 @@ Porém a criptografia simétrica não precisa ter apenas uma chave. A _Enigma_ (
 
 <YouTube id="CbObdmRBrms" />
 
-## Criptografia Assimétrica
+# Criptografia Assimétrica
 
 Diferente da criptografia simétrica, um esquema assimétrico tem sempre mais que uma chave, geralmente um **par de chaves** (o RSA é o mais conhecido). As duas chaves estão conectadas de alguma forma, seja matematicamente (através de [Exponenciação Modular](https://en.wikipedia.org/wiki/Modular_exponentiation) por exemplo), ou fisicamente conectadas no caso de hardware.
 
 Geralmente uma parte ou ambas as partes são privadas, uma parte é feita para encriptar uma mensagem que pode ser decriptada apenas pela outra parte, que é uma forma de provar que a primeira parte (quem mandou) é realmente quem diz ser (não-repúdio, o usuário não pode negar quem ele é)
 
-## Cifras de bloco ou stream
+# Cifras de bloco ou stream
 
 Algoritmos de criptografia podem criptografar dados por bloco ou em uma stream de dados:
 
@@ -98,7 +98,7 @@ Algoritmos de criptografia podem criptografar dados por bloco ou em uma stream d
 
 <CourseCTA />
 
-## Hash functions
+# Hash functions
 
 Funções de criptografia irreversíveis que recebem um dado de entrada e geram um bloco de tamanho fixo na saída, muito usados para garantir integridade. Hashes tem 3 propriedades muito importantes:
 
@@ -106,7 +106,7 @@ Funções de criptografia irreversíveis que recebem um dado de entrada e geram 
 -   **Previsibilidade:** A mesma entrada sempre gera a mesma saída
 -   **Não colisão:** dois hashes gerados para valores diferentes não podem ter a mesma saída (veja o [exemplo com o SHA1](https://shattered.io))
 
-## XOR Encryption
+# XOR Encryption
 
 A criptografia XOR é uma forma de aplicar uma chave a uma cifra. Algoritmos de stream muitas vezes usam esse tipo de aplicação para criptografar a mensagem.
 
@@ -122,25 +122,25 @@ A ideia é aplicar a operação XOR (e**X**clusive **OR**) bit a bit na mensagem
 
 Todo o texto digital é uma sequencia de bits 0 ou 1, quando geramos uma chave, ela também é uma sequencia de bits 0 ou 1, se usarmos `chave XOR texto` vamos obter um texto criptografado, e se aplicarmos a operação novamente no texto criptografado com a mesma chave, o texto volta ao normal.
 
-## Chaves Efêmeras (Ephemeral Keys)
+# Chaves Efêmeras (Ephemeral Keys)
 
 Um tipo de chave que é gerada apenas para executar um determinado passo de algum algoritmo, ou então como parte da criptografia de outra chave através de _Key Wrapping_ (quando criptografamos uma chave com outra chave).
 
 Essas chaves são usadas uma vez e descartadas, além de não terem ligação com o dado original, por isso, efêmeras.
 
-## Rainbow Table
+# Rainbow Table
 
 Quando estamos falando de hashes, cada hash só pode ter uma saída única para cada entrada, uma das formas de se atacar e descobrir hashes é computando TODOS os hashes para TODAS as combinações de letras possíveis. Essas tabelas de computação são conhecidas como Rainbow Tables.
 
 Hackers geralmente usam senhas criptografadas de bancos de dados para buscar se os valores originais estão na tabela, por exemplo, `123456` criptografado com o hash `MD5` é `f447b20a7fcbf53a5d5be013ea0b15af`, se um banco de dados com senhas vazar, qualquer `f447b20a7fcbf53a5d5be013ea0b15af` que aparecer pode ser comparado em uma rainbow table para obter o resultado `123456`.
 
-## Salt
+# Salt
 
 Um salt é uma sequência aleatória de bytes (geralmente 16 ou mais) que é adicionada ao final de um texto que será criptografado como um hash a fim de aumentar a entropia e reduzir a chance de ataques por **Rainbow Tables** já que `123456` é diferente de `123456A96!@#$F@f`.
 
 Os salts são incluídos no final das senhas dos usuários na criação de uma conta e salvos no banco lado a lado com a senha em hash, quando vamos comparar se a senha é a mesma, basta somar a senha com o salt para verificar se produz o mesmo hash salvo.
 
-## Outras letrinhas
+# Outras letrinhas
 
 -   **Integrated Encryption Schemes (IES):** Modelos de criptografia que aplicam tanto criptografia simétrica quanto assimétrica para criar uma forma segura de comunicação. O HTTPS é baseado em um modelo deste tipo
 -   **Eliptic Curve Cryptography (ECC)**: Ao invés de usar números primos muito grandes, esse modelo usa uma função de curva elíptica para criar um número que pode ser utilizado como chave
@@ -153,7 +153,7 @@ Os salts são incluídos no final das senhas dos usuários na criação de uma c
 -   **AES:** Algoritmo de criptografia simétrica (também conhecido como Rijndael)
 -   **MD5, SHA, Argon2, PBKDF2, Blake2:** Algoritmos de hashing
 
-## Conclusão
+# Conclusão
 
 Muito conteúdo e muita coisa pra ver, certo? Você não precisa decorar todos esses nomes, salva essa página lá nos seus favoritos e consulte quando quiser! Espero que você tenha gostado da jornada até aqui! Fica comigo porque vai ter muito mais!
 

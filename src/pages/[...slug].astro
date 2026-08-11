@@ -13,7 +13,7 @@ import RawEmbed from '../components/RawEmbed.astro'
 import Sidenote from '../components/Sidenote.astro'
 import Video from '../components/Video.astro'
 import { formatDate, getPublishedPosts } from '../lib/posts'
-import { getSeriesNavigation, slugify } from '../lib/taxonomy'
+import { buildSeriesMap, getSeriesNavigation, slugify } from '../lib/taxonomy'
 
 /**
  * Injected into every post so migrated MDX can use these tags with no import
@@ -35,18 +35,36 @@ const mdxComponents = {
 
 // Flat URLs: /{slug}/ exactly as Ghost had them, so moving a post between
 // sections only ever changes its `category`, never its URL.
+//
+// Series navigation and hreflang translations both used to be looked up once
+// per post page (an O(N) collection fetch each, N times over). Build the
+// shared indices here instead, once, and hand each post its own slice.
 export const getStaticPaths = (async () => {
-  const posts = await getPublishedPosts()
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }))
+  const [posts, allTranslations] = await Promise.all([
+    getPublishedPosts(),
+    getCollection('translated'),
+  ])
+  const seriesMap = buildSeriesMap(posts)
+  const translationsByPost = new Map<string, typeof allTranslations>()
+  for (const entry of allTranslations) {
+    const current = translationsByPost.get(entry.data.translationOf) ?? []
+    current.push(entry)
+    translationsByPost.set(entry.data.translationOf, current)
+  }
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      series: getSeriesNavigation(post, seriesMap),
+      translations: translationsByPost.get(post.id) ?? [],
+    },
+  }))
 }) satisfies GetStaticPaths
 
-const { post } = Astro.props
+const { post, series, translations } = Astro.props
 const { Content, remarkPluginFrontmatter } = await render(post)
-const series = await getSeriesNavigation(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
 
-// hreflang only claims a translation that actually exists in this build.
-const translations = await getCollection('translated', ({ data }) => data.translationOf === post.id)
 const self = new URL(Astro.url.pathname, Astro.site).href
 const alternates = [
   { lang: 'pt-BR', href: self },

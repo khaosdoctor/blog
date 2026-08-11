@@ -15,7 +15,7 @@ Agora é oficial! No meu [último post](/typescript-5/) sobre esse assunto, eu t
 
 A grande maioria das funcionalidades se manteve, então o [post](/typescript-5/) ainda é válido e eu não vou me repetir aqui, mas vou mostrar as principais diferenças desde o RC beta e a release oficial.
 
-### Decorators
+## Decorators
 
 A primeira mudança veio nos decorators. Se você se lembra bem, decorators são pequenas funções que podem ser usadas como constructos da linguagem que vão adicionar comportamento a uma função já existente como, por exemplo, adicionar um log de debug:
 
@@ -61,7 +61,7 @@ function loggedMethod(originalMethod: any, context: ClassMethodDecoratorContext)
 
 Basicamente é uma função que retorna uma função. A diferença entre o RC e a versão final é que decorators agora podem ser usados antes de declarações como `export` e `export default`, antes você só poderia usar um decorator em uma declaração direta e, só então, exportar a função.
 
-### Module Resolution = Bundler
+## Module Resolution = Bundler
 
 Uma outra mudança que foi introduzida no TypeScript 5.0 na verdade é uma adição a uma modificação criada no 4.7. Nessa versão, a chave `module` recebeu duas novas opções, `node16` e `nodenext` que modelavam precisamente a forma como o Node.js tratava os [ESModules](/os-ecmascript-modules-estao-aqui/). No entanto, o Node tem várias restrições que não existem em outras ferramentas, a principal delas sendo que os arquivos importados precisam ter a extensão explicitamente descrita:
 
@@ -73,7 +73,7 @@ Isso não era verdade para a maioria dos bundlers ou outros toolings que tem uma
 
 Para essa modificação, a diferença entre o RC e a versão final é que o tipo `bundler` agora só poderá ser usado se a flag `module` for `esnext`. Isso foi feito, segundo o time, para garantir que todos os `import`s não sejam transformados em require antes de o bundler resolver as dependências.
 
-### Mudanças no compilador
+## Mudanças no compilador
 
 Enquanto tivemos várias modificações legais nessa versão, o compilador foi o que mais teve ganhos! Todo o compilador foi movido para módulos, como [o time descreveu aqui](https://devblogs.microsoft.com/typescript/typescripts-migration-to-modules/) e isso acarretou algumas coisas:
 
@@ -89,7 +89,7 @@ Além disso, a migração para módulos transformou o TS em um foguete, tendo o 
 
 ![](./novidades-no-typescript-5-0/image-13.png)
 
-## Conclusão
+# Conclusão
 
 Todas as demais modificações continuaram iguais, então eu fortemente recomendo que você leia o artigo original sobre as mudanças que vieram no RC, porque elas são muito úteis e podem te ajudar a ter mais ferramental para criar suas aplicações.
 

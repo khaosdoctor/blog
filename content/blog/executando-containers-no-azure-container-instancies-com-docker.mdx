@@ -11,6 +11,12 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './executando-containers-no-azure-container-instancies-com-docker/image-9.png'
+import figureImage2 from './executando-containers-no-azure-container-instancies-com-docker/image-10.png'
+import figureImage3 from './executando-containers-no-azure-container-instancies-com-docker/image-11.png'
+import figureImage4 from './executando-containers-no-azure-container-instancies-com-docker/image-12.png'
+import figureImage5 from './executando-containers-no-azure-container-instancies-com-docker/image-13.png'
+
 Se você já utiliza Docker então, provavelmente, já executou um container em sua máquina. Porém, já imaginou como seria se você pudesse executar diretamente um container em uma infraestrutura cloud sem precisar fazer nada novo?
 
 No mês passado o time do Docker [anunciou](https://www.docker.com/blog/running-a-container-in-aci-with-docker-desktop-edge/) que as novas versões do Docker para desktop (chamadas de versões _Edge_) estariam ganhando o suporte **nativo** aos **[Azure Container Instances](https://azure.microsoft.com/services/container-instances/?WT.mc_id=personal-blog-ludossan)**, ou seja, poderíamos rodar containers da nossa máquina diretamente para um ambiente cloud sem precisar baixar nenhuma imagem localmente!
@@ -39,11 +45,11 @@ O Docker Edge é uma versão experimental do Docker que recebe todas as atualiza
 
 Uma vez que o Docker estiver instalado, você deverá ver esta tela:
 
-<Figure src="./executando-containers-no-azure-container-instancies-com-docker/image-9.png" alt="" caption="Imagem mostrando a página principal de preferências do Docker Edge" />
+<Figure src={figureImage1} priority alt="" caption="Imagem mostrando a página principal de preferências do Docker Edge" />
 
 Veja na aba `Command Line` se você possui a opção `Enable Cloud Experience` ativada:
 
-<Figure src="./executando-containers-no-azure-container-instancies-com-docker/image-10.png" alt="" caption="Imagem mostrando a opção &quot;Enable Cloud Experience&quot; ativa nas ferramentas do Docker" />
+<Figure src={figureImage2} alt="" caption="Imagem mostrando a opção &quot;Enable Cloud Experience&quot; ativa nas ferramentas do Docker" />
 
 Com isto você já tem a integração ativa, agora o que precisamos fazer é criar um contexto!
 
@@ -83,11 +89,11 @@ Para conseguirmos buscar o caminho que devemos acessar para vermos a nossa API o
 
 Veja que tenho que acessar o IP `13.86.141.148` para poder ver o resultado da API no browser, vamos lá!
 
-<Figure src="./executando-containers-no-azure-container-instancies-com-docker/image-11.png" alt="" caption="Imagem mostrando o browser acessando o IP anterior e o resultado da API com a frase &quot;Hello World&quot;" />
+<Figure src={figureImage3} alt="" caption="Imagem mostrando o browser acessando o IP anterior e o resultado da API com a frase &quot;Hello World&quot;" />
 
 Veja que, se acessarmos o portal da Azure, vamos ter o nosso recurso criado como se tivéssemos criado manualmente!
 
-<Figure src="./executando-containers-no-azure-container-instancies-com-docker/image-12.png" alt="" caption="Imagem do portal da Azure com o nosso recurso &quot;node-api&quot; criado" />
+<Figure src={figureImage4} alt="" caption="Imagem do portal da Azure com o nosso recurso &quot;node-api&quot; criado" />
 
 Para removermos, basta executar o comando `docker rm <nome>`, veja que não é possível executar o comando `docker stop` porque este tipo de integração não permite que paremos o container remotamente. Se digitarmos `docker rm node-api` vamos ter o nosso ACI removido da azure e o nosso container parado!
 
@@ -118,7 +124,7 @@ Fazemos o mesmo processo. Porém, ao invés de rodar o comando `docker run` vamo
 
 Depois podemos utilizar o comando `docker ps` normalmente para pegar o IP público e ver o site no ar:
 
-<Figure src="./executando-containers-no-azure-container-instancies-com-docker/image-13.png" alt="" caption="Site da DockerCon no ar utilizando a integração com ACI" />
+<Figure src={figureImage5} alt="" caption="Site da DockerCon no ar utilizando a integração com ACI" />
 
 ### Limitações
 

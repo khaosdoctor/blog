@@ -1,7 +1,7 @@
 ---
 // Self-hosted rather than a CDN link, per the plan: no third-party requests.
+// Without this the one post with LaTeX renders its formulas as raw $...$ text.
 import 'katex/dist/katex.min.css'
-
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
 
@@ -68,13 +68,14 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     />
   </head>
   <body>
+    <a href="#main-content" class="skip-link">{t(locale, 'skipToContent')}</a>
     <header>
       <a href={home} class="home">lsantos.dev</a>
       <nav aria-label={t(locale, 'search')}>
         <a href={locale === 'en' ? '/en/busca/' : '/busca/'}>{t(locale, 'search')}</a>
       </nav>
     </header>
-    <main>
+    <main id="main-content">
       <slot />
     </main>
     <footer>
@@ -144,6 +145,22 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
   header {
     display: flex;
     padding-block: 2rem 3rem;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: -3rem;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    z-index: 1;
+  }
+
+  .skip-link:focus-visible {
+    top: 0.5rem;
   }
 
   .home {

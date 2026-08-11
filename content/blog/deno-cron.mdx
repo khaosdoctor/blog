@@ -11,6 +11,8 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './deno-cron/image-1.png'
+
 Continuando com as nossas novidades sobre Deno, dessa vez eu quero trazer algo que eu pessoalmente já precisei várias vezes mas nunca encontrei uma solução, cronjobs!
 
 Cronjobs são processos que rodam repetitivamente em um intervalo pré-determinado. A ideia é bem simples, e eles são largamente utilizados para várias coisas, por exemplo, agendamentos de ações que devem acontecer em um determinado horário como postagens de redes sociais, ou então até mesmo processamento de cartões de crédito, eles são os famosos **batch jobs**.
@@ -55,7 +57,7 @@ No segundo parâmetro usamos uma sintaxe igual a do crontab (que você pode pega
 
 Localmente esse cron vai se comportar como se fosse um `setInterval`, porém no Deno Deploy ele vai ter a sua própria aba, como essa que eu criei no [playground do deno](https://dash.deno.com/playground/good-gecko-26):
 
-<Figure src="./deno-cron/image-1.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Veja a aba Cron</span>" />
+<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Veja a aba Cron</span>" />
 
 Se abrirmos a aba Cron no topo, vamos ver todas as execuções do Cronjob, bem como os logs na aba de logs:
 
@@ -86,7 +88,7 @@ Se este cronjob falhar, ele vai ter uma nova tentativa em 1 segundo, depois 4 de
 
 ## Limitações e detalhes
 
-Por enquanto a [documentação do cron](https://docs.deno.com/kv/manual/cron) diz que só é possível criar cronjobs no top-level domain. Ou seja, **não é possível criar um cron dentro de uma função** ou dentro de algum escopo, dessa forma é necessário que você já saiba o que precisa ser executado de antemão. Para criar cronjobs dinâmicos as [filas](https://blog.lsantos.dev/deno-kv-queues/) podem ser uma boa opção!
+Por enquanto a [documentação do cron](https://docs.deno.com/kv/manual/cron) diz que só é possível criar cronjobs no top-level domain. Ou seja, **não é possível criar um cron dentro de uma função** ou dentro de algum escopo, dessa forma é necessário que você já saiba o que precisa ser executado de antemão. Para criar cronjobs dinâmicos as [filas](/deno-kv-queues/) podem ser uma boa opção!
 
 Além disso o **fuso horário do Deno Cron é UTC, independente do local.**
 

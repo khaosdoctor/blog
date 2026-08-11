@@ -18,6 +18,7 @@ const posts = (
     { lang: 'en', href: new URL('/en/', Astro.site).href },
   ]}
 >
+  <h1 class="visually-hidden">Lucas Santos</h1>
   <p class="note">
     These articles are written in Portuguese and translated automatically. <a href="/">Read the originals</a>.
   </p>
@@ -38,6 +39,18 @@ const posts = (
 </BaseLayout>
 
 <style>
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .note {
     margin-block-end: 2.5rem;
     color: var(--muted);

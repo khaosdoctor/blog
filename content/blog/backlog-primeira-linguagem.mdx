@@ -11,6 +11,18 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './backlog-primeira-linguagem/image-3.png'
+import figureImage2 from './backlog-primeira-linguagem/image-4.png'
+import figureImage3 from './backlog-primeira-linguagem/image-13.png'
+import figureImage4 from './backlog-primeira-linguagem/image-6.png'
+import figureImage5 from './backlog-primeira-linguagem/image-1.png'
+import figureImage6 from './backlog-primeira-linguagem/image-5.png'
+import figureImage7 from './backlog-primeira-linguagem/image-9.png'
+import figureImage8 from './backlog-primeira-linguagem/image-2.png'
+import figureImage9 from './backlog-primeira-linguagem/image-7.png'
+import figureImage10 from './backlog-primeira-linguagem/image-8.png'
+import figureImage11 from './backlog-primeira-linguagem/image-10.png'
+
 > Essa edição do _Backlog_ é especial porque é a primeira (e provavelmente única em anos) a ser publicada no Natal. Considere este e-mail meu presente para você, que acompanha este projeto tão importante para mim. Muito obrigado pelo apoio 💙
 
 Para começar, não haveriam devs sem algo que a gente pudesse escrever para transformar nossos pensamentos em algo útil que um computador possa executar. A gente precisa de uma forma, uma linguagem, para dizer ao computador o que a gente quer fazer, e assim tivemos a ideia de criar as **linguagens de programação**.
@@ -19,7 +31,7 @@ Mas como essas linguagens surgiram? Qual é a história por trás delas? E, mais
 
 Antes de responder, a gente precisa explorar o contexto da evolução das linguagens de programação. Esse processo não aconteceu do dia para a noite – levou mais de 200 anos para chegarmos onde estamos hoje.
 
-### Onde tudo começou
+## Onde tudo começou
 
 Antes de qualquer computador ou máquina de calcular, e mais de 100 anos antes de Alan Turing, um tecelão francês chamado Joseph Marie Jacquard revolucionou a forma como os teares funcionavam. Em 1804, ele criou e patenteou o famoso [tear de Jacquard](https://en.wikipedia.org/wiki/Jacquard_machine), projetado para criar padrões complexos automaticamente.
 
@@ -33,17 +45,17 @@ O tear de Jacquard era completamente programável por meio de cartões perfurado
 
 Embora o tear de Jacquard fosse uma aplicação simples de uma DSL (_Domain Specific Language_, ou uma linguagem projetada para um propósito específico), seu trabalho inspirou o desenvolvimento de linguagens mais complexas, capazes de serem interpretadas por diferentes tipos de máquinas.
 
-### Ada Lovelace e a nota G
+## Ada Lovelace e a nota G
 
 > Finalmente ela aparece!
 
 Trinta e seis anos após Jacquard patentear seu tear, em 1840, o professor [Charles Babbage](https://en.wikipedia.org/wiki/Charles_Babbage) foi convidado a dar um seminário em Torino, na Itália, sobre os avanços de seu projeto mais ambicioso: o motor analítico (um tema para um futuro _Backlog_). Esse seminário foi a única apresentação pública que Babbage fez sobre a máquina revolucionária que estava desenvolvendo.
 
-<Figure src="./backlog-primeira-linguagem/image-3.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Charles Babbage</span>" />
+<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Charles Babbage</span>" />
 
 Durante a palestra, um engenheiro chamado [Luigi Menabrea](https://en.wikipedia.org/wiki/Luigi_Menabrea) – que mais tarde se tornaria primeiro-ministro da Itália – tomou notas detalhadas para entender o funcionamento do complexo modelo que, no futuro, seria conhecido como o primeiro computador mecânico do mundo (mesmo que nunca tenha sido construído).
 
-<Figure src="./backlog-primeira-linguagem/image-4.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Uma construção do que seria o motor analítico</span>" />
+<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Uma construção do que seria o motor analítico</span>" />
 
 Babbage tinha uma amiga e mentorada importante: [Ada Lovelace](https://en.wikipedia.org/wiki/Ada_Lovelace). Desde 1833, ele e Ada, uma brilhante matemática e filha do poeta Lord Byron, trocavam cartas e notas sobre suas pesquisas e avanços matemáticos. Após uma conversa com Charles Wheatstone, Ada recebeu a sugestão de traduzir as notas de Luigi Menabrea para o inglês como uma forma de contribuir com o trabalho. Ao concluir a tradução, Babbage sugeriu que ela adicionasse seus próprios pensamentos em forma de apêndices, que Ada chamou simplesmente de "notas".
 
@@ -59,7 +71,7 @@ As [notas](https://en.wikipedia.org/wiki/Note_G) de Ada eram três vezes mais ex
 
 E ela fez isso sem nunca ter nem visto a máquina em si (que nunca foi completamente construída) ou ter usado qualquer parte dela. E hoje a gente reclama quando não consegue usar uma API sem documentação...
 
-## Pausa para um aviso!
+# Pausa para um aviso!
 
 Essa newsletter só existe graças à comunidade e aos patrocinadores! E hoje o apoio vem da **Remessa Online**, que está ajudando demais a manter este projeto vivo 💙.
 
@@ -80,7 +92,7 @@ Use o cupom **LSANTOSDEV5** e aproveite.
 
 💙 **Apoie o meu trabalho**: Se você gosta do conteúdo e quer dar uma força, mesmo com apenas R$1, isso já faz toda a diferença! [Clique aqui](https://github.com/sponsors/khaosdoctor)!
 
-### Plankalkül, quase lá...
+## Plankalkül, quase lá...
 
 O mundo da computação permaneceu praticamente o mesmo por cerca de 100 anos. Mas, entre 1943 e 1948, um cientista alemão chamado [Konrad Zuse](https://en.wikipedia.org/wiki/Konrad_Zuse) (se pronuncia “Zuza”) começou a perceber um grande problema: nenhuma linguagem de computação existente era [Turing-completa](https://en.wikipedia.org/wiki/Turing-complete), o que as tornava inadequadas para seus computadores Z1 a Z3.
 
@@ -88,7 +100,7 @@ O mundo da computação permaneceu praticamente o mesmo por cerca de 100 anos. M
 
 Os computadores de Zuse começaram como máquinas de calcular mecânicas, parecidas com as ideias de Babbage. Mas, ao chegar à terceira versão (o Z3), ele criou algo revolucionário: um computador totalmente digital e programável. Agora, tudo o que faltava era uma linguagem que seu computador pudesse entender...
 
-<Figure src="./backlog-primeira-linguagem/image-13.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>O Zuse Z3, o primeiro computador digital do mundo</span>" />
+<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>O Zuse Z3, o primeiro computador digital do mundo</span>" />
 
 Por que não criar a sua própria linguagem? Foi exatamente o que Zuse fez. Ele se baseou em conceitos matemáticos, incluindo o cálculo proposicional – um campo complexo da matemática – para desenvolver um modelo de programação.
 
@@ -124,17 +136,17 @@ Com a ocupação dos aliados, ele foi proibido de continuar desenvolvendo comput
 
 > Apesar de não ter sido implementada originalmente, a publicação de Zuse teve impacto significativo no desenvolvimento de linguagens posteriores, como o ALGOL e o APL, que já discutimos na edição #2.
 
-### Agora sim, a mãe de TODAS as linguagens
+## Agora sim, a mãe de TODAS as linguagens
 
 Até aqui, a maioria das linguagens foi criada de forma um tanto artesanal: seus criadores basicamente estruturavam tudo o que sabiam sobre computação em um sistema funcional. Algumas dessas linguagens, como a APT usada no M70 que vimos na outra edição, eram tão específicas que exigiam até mesmo teclados especiais, cheios de símbolos exclusivos – bem diferente do que usamos hoje.
 
 Mas isso começou a mudar em 1954 com o surgimento do [FORTRAN](https://en.wikipedia.org/wiki/Fortran) (abreviação de _**FOR**mula **TRAN**slation_), a primeira linguagem de programação comercial bem-sucedida. Desenvolvido por uma equipe liderada por John Backus na IBM, o FORTRAN trouxe uma abordagem prática e eficiente, que revolucionou o jeito de programar.
 
-<Figure src="./backlog-primeira-linguagem/image-6.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Árvore das linguagens de programação (</span><a href=&quot;https://www.levenez.com/lang/lang.pdf&quot;><span style=&quot;white-space: pre-wrap;&quot;>https://www.levenez.com/lang/lang.pdf</span></a><span style=&quot;white-space: pre-wrap;&quot;>)</span>" />
+<Figure src={figureImage4} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Árvore das linguagens de programação (</span><a href=&quot;https://www.levenez.com/lang/lang.pdf&quot;><span style=&quot;white-space: pre-wrap;&quot;>https://www.levenez.com/lang/lang.pdf</span></a><span style=&quot;white-space: pre-wrap;&quot;>)</span>" />
 
 Por trás dessas linguagens revolucionárias, havia um desafio técnico gigantesco: fazer os computadores entendê-las.
 
-#### Compiladores
+### Compiladores
 
 Entre a invenção de Zuse em 1943 e 1954, qualquer código escrito para um computador precisava ser traduzido diretamente em instruções de máquina específicas para aquele hardware. Era como escrever um programa exclusivo para cada processador, usando uma linguagem que só aquele processador entendia – muitas vezes composta por símbolos matemáticos.
 
@@ -142,11 +154,11 @@ Em 1950, surgiu uma invenção revolucionária: o **compilador**. Ele permitiu a
 
 A primeira dessas linguagens, pasmem, também se chamava _Autocode_. Ela foi criada em 1952 por Alick Glennie, junto com seu próprio compilador. Essa linguagem é considerada **a primeira linguagem compilada da história**, embora fosse pouco usada fora dos computadores [Manchester Mark I](https://en.wikipedia.org/wiki/Harvard_Mark_I).
 
-<Figure src="./backlog-primeira-linguagem/image-1.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um programa em autocode para calcular uma função cúbica</span>" />
+<Figure src={figureImage5} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um programa em autocode para calcular uma função cúbica</span>" />
 
 Essa evolução trouxe uma mudança radical: agora era possível criar códigos usando um sistema único, onde apenas o compilador precisava ser ajustado para cada máquina. Isso simplificou enormemente o desenvolvimento de novas linguagens de programação e abriu caminho para avanços ainda maiores na área.
 
-#### A história do FORTRAN
+### A história do FORTRAN
 
 No final de 1953, John Backus apresentou uma proposta ousada para seus superiores na IBM: criar uma alternativa mais prática e eficiente ao [Assembly](https://en.wikipedia.org/wiki/Assembly_language) para programar o mainframe IBM 704. A ideia era simplificar a vida da galera, permitindo que eles se concentrassem mais no problema e menos nas instruções de máquina.
 
@@ -173,7 +185,7 @@ A versão inicial do FORTRAN tinha 32 palavras-chave (Golang, por exemplo, tem 2
 
 Quando ele foi criado, não existiam discos ou telas, a maioria dos programas era ainda feita em cartões perfurados, então os desenvolvedores tinham um "formulário" para poder criar, apagar e testar o código antes de transferir para um cartão final.
 
-<Figure src="./backlog-primeira-linguagem/image-5.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um formulário para codar FORTRAN</span>" />
+<Figure src={figureImage6} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um formulário para codar FORTRAN</span>" />
 
 E, nesses cartões perfurados, existiam algumas colunas específicas que eram destinadas a uso de controle, por exemplo:
 
@@ -183,15 +195,15 @@ E, nesses cartões perfurados, existiam algumas colunas específicas que eram de
 -   De 7 a 72 era onde escrevíamos os programas
 -   De 73 até 80 eram ignoradas porque o IBM 704 só lia 72 colunas, então eram muito usadas para anotações ou identificação, como a ordem dos cartões e etc.
 
-<Figure src="./backlog-primeira-linguagem/image-9.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um cartão FORTRAN com um statement</span>" />
+<Figure src={figureImage7} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um cartão FORTRAN com um statement</span>" />
 
 Lembrando que cada cartão perfurado representava somente UM statement, ou seja, cada cartão era uma keyword ou uma linha, o cartão acima poderia ter sido um `IF`.
 
-#### Evoluções
+### Evoluções
 
 Após a versão inicial, o FORTRAN continuou evoluindo – e ainda evolui. É a linguagem de programação mais antiga ainda em uso ativo, com sua versão mais recente lançada em 2023. A primeira grande atualização, o **FORTRAN II**, trouxe um avanço significativo: o suporte à programação procedural, permitindo a criação de sub-rotinas e modularizando o código de forma mais eficiente.
 
-<Figure src="./backlog-primeira-linguagem/image-2.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um programa em FORTRAN II</span>" />
+<Figure src={figureImage8} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um programa em FORTRAN II</span>" />
 
 A versão inicial do FORTRAN não tinha funções ou rotinas, todo o código tinha que ser replicado e copiado, mas na versão II era possível usar as keywords `SUBROUTINE`, `FUNCTION` e `END` para criar uma rotina, além de `CALL` e `RETURN`. Mas as versões iniciais ainda não suportavam recursão.
 
@@ -204,7 +216,7 @@ Mas talvez a evolução mais importante tenha sido o **FORTRAN 66**. Essa versã
 -   A keyword `DATA` para especificar valores iniciais
 -   `GO TO` , `IF`, `DO` e muitos outros
 
-<Figure src="./backlog-primeira-linguagem/image-7.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>O mesmo programa do FORTRAN II em FORTRAN 66</span>" />
+<Figure src={figureImage9} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>O mesmo programa do FORTRAN II em FORTRAN 66</span>" />
 
 11 anos depois, o FORTRAN 77 é o que temos como início do que usamos hoje como linguagem de programação, incluindo mudanças como:
 
@@ -212,7 +224,7 @@ Mas talvez a evolução mais importante tenha sido o **FORTRAN 66**. Essa versã
 -   O primeiro uso de aspas para textos, já que agora era possível escrever em terminais
 -   Inclusão de `PROGRAM` para nomear programas
 
-<Figure src="./backlog-primeira-linguagem/image-8.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>O mesmo programa do FORTRAN 66 em FORTRAN 77</span>" />
+<Figure src={figureImage10} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>O mesmo programa do FORTRAN 66 em FORTRAN 77</span>" />
 
 Uma curiosidade interessante sobre o FORTRAN é como ele lidava com comentários e linhas vazias. Qualquer linha que começasse com a letra C era interpretada como um comentário. No entanto, o compilador do FORTRAN lia todas as linhas do programa em sequência – incluindo as linhas vazias, que frequentemente geravam erros. Para evitar problemas, era comum usar um comentário vazio para separar uma linha da outra.
 
@@ -240,13 +252,13 @@ end program helloworld
 
 Depois dessas versões, ainda temos o FORTRAN 95 até 2023, que implementou muitas mudanças até hoje, tornando o FORTRAN extremamente útil ainda hoje em dia.
 
-### O FORTRAN atualmente
+## O FORTRAN atualmente
 
 O FORTRAN ainda é amplamente utilizado em sistemas críticos e antigos, como na aviação, em mainframes e em aplicações que demandam computação extremamente rápida. Sua relevância está especialmente em cenários que exigem alta performance no processamento de grandes volumes de dados.
 
 A linguagem é uma escolha comum em áreas como simulações de mecânica de fluidos, modelagem espacial e terrestre, e no cálculo de temperaturas em oceanos. Graças à sua eficiência em cálculos numéricos intensivos, o FORTRAN continua muito usado em campos que dependem de simulações científicas e engenharia de alta precisão.
 
-<Figure src="./backlog-primeira-linguagem/image-10.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Computação da velocidade e temperatura em oceanos usando NEMO (em FORTRAN)</span>" />
+<Figure src={figureImage11} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Computação da velocidade e temperatura em oceanos usando NEMO (em FORTRAN)</span>" />
 
 O código FORTRAN em si sofreu várias modificações até ficar muito parecido com o que a gente entende como um código de programação, por exemplo, abaixo temos um programa para calcular a média dos números lidos:
 
@@ -293,7 +305,7 @@ Atualmente ainda existem repositórios que contém códigos FORTRAN como em jogo
 
 <Bookmark url="https://github.com/fortran-gaming?utm_source=chatgpt.com" title="Fortran Gaming" description="Modern and resurrected Fortran games. Includes candidates for conversion to Fortran in other languages. - Fortran Gaming" />
 
-## Legado
+# Legado
 
 O FORTRAN foi a primeira linguagem de alto nível a ser largamente distribuída e tudo que usamos atualmente é idêntico ou foi baseado em algum tipo de implementação trazida pelo FORTRAN. Linguagens de base como COBOL, BASIC e ALGOL foram fortemente influenciadas pelo FORTRAN e, em troca, influenciaram outras linguagens como o B, C e todas as que se sucederam.
 

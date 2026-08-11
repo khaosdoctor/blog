@@ -12,6 +12,9 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './node-test-runner/image-2.png'
+import figureImage2 from './node-test-runner/image-3.png'
+
 Como eu já mencionei [nesse outro artigo](/node-18/), o Node.js 18 veio cheio de novidades, entre eles a disponibilidade global do comando `fetch` e o começo da adoção do prefixo `node:` para importação de módulos do sistema que, inclusive, vamos precisar usar para falar de outra adição: o **test runner** nativo do sistema.
 
 ## O que é um test runner
@@ -279,11 +282,11 @@ $ npm i [-g] tap
 
 O tap aceita qualquer input do _stdin_ então basta que façamos um pipe para ele ao rodar os testes com: `node --test | tap`, e ai podemos obter uma saída bem mais fácil tanto para erros:
 
-<Figure src="./node-test-runner/image-2.png" alt="" caption="Uma saída de erro do TAP melhorada" />
+<Figure src={figureImage1} priority alt="" caption="Uma saída de erro do TAP melhorada" />
 
 Quanto para sucessos:
 
-<Figure src="./node-test-runner/image-3.png" alt="" caption="Uma saída de sucesso do TAP melhorada" />
+<Figure src={figureImage2} alt="" caption="Uma saída de sucesso do TAP melhorada" />
 
 ## Conclusão
 

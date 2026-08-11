@@ -13,6 +13,13 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './um-mergulho-em-imagens-de-containers-parte-1/image-1.png'
+import figureImage2 from './um-mergulho-em-imagens-de-containers-parte-1/image-2.png'
+import figureImage3 from './um-mergulho-em-imagens-de-containers-parte-1/image-5.png'
+import figureImage4 from './um-mergulho-em-imagens-de-containers-parte-1/image-6.png'
+import figureImage5 from './um-mergulho-em-imagens-de-containers-parte-1/image-7.png'
+import figureImage6 from './um-mergulho-em-imagens-de-containers-parte-1/image-8.png'
+
 Recentemente li uma série de artigos do [Scott Coulton](https://itnext.io/@scott.coulton?source=post_page-----44b45e47a1f7----------------------)[^1][^2][^3] no Medium sobre como escolher as imagens base para seus containers. Decidi então escrever estes artigos para que outras pessoas também possam entender como escolher melhor como começar a criar seus containers usando Docker da melhor forma possível!
 
 [^1]: [I Chose You Container Image - Part 1](https://itnext.io/i-cho-cho-chose-you-container-image-part-1-fa6671d9ae1f)
@@ -66,7 +73,7 @@ Um dos grandes problemas de imagens `full` é que, por terem muitos pacotes inst
 
 O próprio Docker Hub possui uma [ferramenta de análise de vulnerabilidades](https://docs.docker.com/docker-hub/official_images/#official-image-vulnerability-scanning) que pode ser utilizada diretamente do site, através da aba `Tags`. Como mostra a imagem a seguir.
 
-<Figure src="./um-mergulho-em-imagens-de-containers-parte-1/image-1.png" alt="" caption="Detecção de vulnerabilidades do Docker Hub" />
+<Figure src={figureImage1} priority alt="" caption="Detecção de vulnerabilidades do Docker Hub" />
 
 Como você pode ver, a própria imagem tem vulnerabilidades que você está "herdando" antes mesmo de fazer qualquer _deploy_ do seu código.
 
@@ -78,15 +85,15 @@ Uma imagem _slim_ é uma imagem um pouco menor. Toda a imagem _slim_ só possui 
 
 Um dos benefícios diretos do uso de imagens _slim_ é que, por ter menos pacotes, você tem menos dependências que podem estar sujeitas a vulnerabilidades. Veja um exemplo.‌
 
-<Figure src="./um-mergulho-em-imagens-de-containers-parte-1/image-2.png" alt="" caption="Vulnerabilidades de uma imagem slim" />
+<Figure src={figureImage2} alt="" caption="Vulnerabilidades de uma imagem slim" />
 
 Outro ganho interessante é que, justamente por serem mais "limpas", imagens _slim_ são muito menores em tamanho do que uma imagem _full_. Em casos mais extremos, **uma imagem** _**slim**_ **pode ser até 50% menor do que uma imagem** _**full.**_ Veja o exemplo da comparação do `debian:buster` com o `debian:buster-slim`.
 
-<Figure src="./um-mergulho-em-imagens-de-containers-parte-1/image-5.png" alt="" caption="Tamanho da imagem slim do Debian Buster" />
+<Figure src={figureImage3} alt="" caption="Tamanho da imagem slim do Debian Buster" />
 
 Agora veja o tamanho da imagem completa
 
-<Figure src="./um-mergulho-em-imagens-de-containers-parte-1/image-6.png" alt="" caption="Tamanho da imagem full do Debian Buster" />
+<Figure src={figureImage4} alt="" caption="Tamanho da imagem full do Debian Buster" />
 
 Veja que, se pegarmos a arquitetura `amd64`, que é a mais comum para processadores de 64 bits, e compararmos as versões full com **48.06MB** contra os **25.84MB** da mesma imagem, só que na versão slim. Isso é uma redução de **47%** no tamanho da imagem. Tudo isso só removendo pacotes não utilizados.
 
@@ -98,11 +105,11 @@ As imagens Alpine Linux são o tipo de imagem mais otimizada possível. Este tip
 
 Isso pode parecer um pouco complicado, mas veja como reduzimos a quantidade de vulnerabilidades só por reduzir os pacotes. Perceba que não há nenhuma vulnerabilidade crítica.
 
-<Figure src="./um-mergulho-em-imagens-de-containers-parte-1/image-7.png" alt="" caption="Vulnerabilidades de uma imagem Alpine" />
+<Figure src={figureImage5} alt="" caption="Vulnerabilidades de uma imagem Alpine" />
 
 Além disso, uma imagem `alpine` tem menos de **6MB** de tamanho **total.** No caso das imagens mais novas, esse tamanho pode chegar a pouco mais de **2MB.** Isso é uma redução de mais **95%** no tamanho geral da imagem.
 
-<Figure src="./um-mergulho-em-imagens-de-containers-parte-1/image-8.png" alt="" caption="Tamanho de uma imagem Alpine Linux" />
+<Figure src={figureImage6} alt="" caption="Tamanho de uma imagem Alpine Linux" />
 
 Os contras de se trabalhar com uma imagem Alpine é que é um sistema completamente diferente, você terá de aprender a lidar com seu package manager nativo, como ele não usa as bibliotecas padrões do Linux, provavelmente a grande maioria dos sistemas precisarão ser recompilados utilizando as ferramentas do Alpine.
 

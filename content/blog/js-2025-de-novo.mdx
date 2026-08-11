@@ -28,7 +28,7 @@ Como sempre acontece, o Rob Palmer, que é um dos membros do TC39, posta no seu 
 
 E algumas delas realmente foram passadas para os próximos estágios, nem todas as que eu previ, mas pelo menos 50% delas! Essa foi minha maior taxa de acerto desde sempre! Vamos ver tudo que foi discutido:
 
-### [Iterator helpers](https://github.com/tc39/proposal-iterator-helpers)
+## [Iterator helpers](https://github.com/tc39/proposal-iterator-helpers)
 
 Uma proposta que, na verdade, são várias. Aqui estamos falando não só dos helpers (que passaram para o estágio 4 e vão ser implementadas), mas também de outra proposta que eu comentei que poderiam ter avanços.
 
@@ -50,7 +50,7 @@ Veja que o Array, que é um iterable, tem `map`, mas o Set não tem, porque, por
 
 Além dessa proposta, outra que eu também comentei (que estava em estágio 2) passou para o 2.7, [Iterator Sequencing](https://github.com/tc39/proposal-iterator-sequencing?ref=blog.lsantos.dev). Que permite que a gente crie iterators concatenando outros iterators com `Iterator.concat` assim como fazemos com `Array.concat`.
 
-### [Import attributes](https://github.com/tc39/proposal-import-attributes) & [JSON Modules](http://github.com/tc39/proposal-json-modules)
+## [Import attributes](https://github.com/tc39/proposal-import-attributes) & [JSON Modules](http://github.com/tc39/proposal-json-modules)
 
 Agora vamos, finalmente, poder usar o que a gente já estava usando há meses. As duas propostas que modificam a forma que importamos JSON e outros módulos passaram para o estágio 4 e serão implementadas!
 
@@ -66,11 +66,11 @@ E então, cada módulo que será importado terá uma nova proposta como os JSON 
 
 Ambas as propostas foram passadas e agora teremos uma forma nativa de ler arquivos JSON diretamente do JS, algo que o Node já implementava, mas não era parte da especificação.
 
-### [RegExp Modifiers](https://github.com/tc39/proposal-regexp-modifiers)
+## [RegExp Modifiers](https://github.com/tc39/proposal-regexp-modifiers)
 
 Mais uma que passou para o estágio 4. Agora vamos poder usar os modificadores como `/i`, `/m` e outros diretamente nas RegExps do JS. Essa foi uma que eu não sabia que estava sendo votada, eu admito, achei que essa funcionalidade já estivesse presente no engine atual, mas aparentemente não era algo que foi implementado (diferente de todas as linguagens anteriores que implementaram logo de cara... Vai saber)
 
-### [Structs](https://github.com/tc39/proposal-structs)
+## [Structs](https://github.com/tc39/proposal-structs)
 
 Essa é uma proposta que eu realmente pensei que não fosse avançar tão rápido. Structs adicionam quatro objetos lógicos no JS:
 
@@ -83,7 +83,7 @@ A grande ideia dessa proposta começou com Structs, que seriam objetos fixos, qu
 
 As SharedStructs vão permitir que possamos utilizar objetos que compartilham memória entre arquivos, sem precisar usar Realms ou outras estruturas. Essa proposta acabou de passar para o estágio 2 e agora será o design que vai ser trabalhado!
 
-### [Extractors](https://github.com/tc39/proposal-extractors)
+## [Extractors](https://github.com/tc39/proposal-extractors)
 
 Extractors avançaram para o estágio 2. Eles nada mais são do que uma função que pode ser aplicada quando estamos fazendo um destructuring de um objeto. Isso permite que a gente faça tanto validação quando normalização dos valores, por exemplo, podemos deixar todas as chaves minúsculas:
 
@@ -100,7 +100,7 @@ const LowercaseExtractor({ nome, rua }) = { nome: 'LUCAS', rua: 'RUA' }
 console.log({ nome, rua }) // { nome: 'lucas', rua: 'rua' }
 ```
 
-### [Promise.try](https://github.com/tc39/proposal-promise-try)
+## [Promise.try](https://github.com/tc39/proposal-promise-try)
 
 Depois de [8 anos](https://x.com/ljharb/status/1843884468647682382), o Promise.try finalmente entrou em estágio 4 e será implementado na linguagem! Essa aqui eu tinha previsto no outro artigo também!
 
@@ -120,7 +120,7 @@ await Promise.try(F) // retorna F como promise
 
 Isso não é uma forma de rodar funções em paralelo ou de forma assíncrona, ele simplesmente chama função, que antes seria síncrona, de uma forma unificada como uma promise.
 
-### [Error.isError](https://github.com/tc39/proposal-is-error)
+## [Error.isError](https://github.com/tc39/proposal-is-error)
 
 Mais uma das que eu tinha previsto que poderiam sair do estágio atual, o `Error.isError` foi para o estágio 2.7 e está aguardando testes e validações. A ideia aqui é bem simples e eu realmente não sei porque não temos isso desde sempre, mas essa proposta permite que façamos algo parecido com o `Array.isArray`, só que com erros:
 
@@ -132,7 +132,7 @@ if (Error.isError(err)) {
 
 O que vai limitar o uso de `instanceof Error`, já que o `instanceof` pode ser modificado externamente.
 
-## Conclusão
+# Conclusão
 
 Existem outras propostas que também avançaram, mas sinceramente, não são algumas que vão fazer muita diferença na vida de todo mundo, duas mais interessantes foram o [Array.zip](https://github.com/tc39/proposal-array-zip) e os [Immutable ArrayBuffers](https://github.com/Agoric/tc39-proposal-immutable-arraybuffer) que podem ser modificadas nos próximos dias.
 

@@ -14,7 +14,7 @@ seoTitle: "Arquivos dotenv (.env) nativos com Node.js"
 
 Começando a semana com uma notícia incrível e uma das novidades mais aguardadas do Node.js em anos, o suporte **nativo** ao uso de arquivos de ambiente, os chamados **dotenvs** ou **env-config**.
 
-### dotenv
+## dotenv
 
 Um dos pacotes mais comuns e mais utilizados em toda a comunidade, não só do JavaScript, é o pacote [dotenv](https://npm.im/dotenv). Ele faz algo que é super simples mas ao mesmo tempo essencial: carrega variáveis de ambiente na memória do runtime.
 
@@ -31,7 +31,7 @@ USUARIO=123
 
 Porém a gente precisava sempre de um módulo para poder carregar essas variáveis, até a chegada do Deno.
 
-#### Deno
+### Deno
 
 O Deno mudou bastante a forma que runtimes olham para esses arquivos porque ele permite que você carregue diretamente da sua [standard library](https://deno.land/std@0.203.0/dotenv/mod.ts), ou seja, ao invés de termos que instalar um módulo a parte, podemos usar o que é nativo do runtime:
 
@@ -43,7 +43,7 @@ console.log(await load({export: true})); // { GREETING: "hello world" }
 console.log(Deno.env.get("GREETING")); // hello world
 ```
 
-### Node 20
+## Node 20
 
 O Node 20.6 traz [uma mudança](https://nodejs.org/en/blog/release/v20.6.0#built-in-env-file-support) fundamental que vai além até do que o Deno já fez, **agora é possível ler arquivos .env direto do runtime**.
 
@@ -75,7 +75,7 @@ Quando executarmos o nosso Node com o comando `node --env-file=.env index.js`, p
 
 Mas essa não é a única novidade.
 
-#### Node options
+### Node options
 
 O Node.js permite que você crie uma variável de ambiente chamada `NODE_OPTIONS`, ela permite que você defina todas as opções que seriam passadas ao node no comando principal diretamente na variável, ou seja, se quisermos, por exemplo, iniciar o Node com um inspetor (usando a flag `--inspect`) podemos utilizar: `NODE_OPTIONS='--inspect'` e agora todas as execuções de `node index.js`vão ser como se fossem escritas `node --inspect index.js`
 
@@ -87,6 +87,6 @@ NODE_OPTIONS='--inspect --loader=tsx'
 
 Como eu mostrei no [meu artigo sobre TSX](/tsx-loader/), podemos carregar arquivos TypeScript nativamente usando um loader, a ainda por cima podemos carregar o nosso arquivo de ambiente direto,  com o comando acima vamos poder rodar `node --env-file=.env index.ts`, por exemplo.
 
-## Conclusão
+# Conclusão
 
 Essa funcionalidade é gigante! Enquanto tira um pacote da nossa lista de dependências, ela ainda permite deixar o nosso código mais simples e direto, mas lembre-se que ela só está disponível a partir da versão **20.6**.

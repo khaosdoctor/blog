@@ -14,7 +14,7 @@ seoTitle: "Princípios do Deno KV"
 
 Já faz um tempo que eu comecei a falar de [Deno](/deno/), inclusive já [falei aqui sobre o Deno KV](/deno-kv/) quando ele ainda era uma experimentação alpha sem API definida. Agora sim temos a versão beta **oficial** que está sendo testada.
 
-### O que são bancos KV
+## O que são bancos KV
 
 KV é uma abreviação de "Key Value", que determina um conceito chamado **chave e valor** em armazenamentos de dados, inclusive este é o nome de um paradigma com o mesmo nome.
 
@@ -30,7 +30,7 @@ A proposta dos bancos de dados de chave e valor é que eles são super simples d
 
 E é isso... Não tem muito segredo além dessa ideia. O que a maioria dos bancos chave e valor tem de diferente são as formas como eles otimizam e armazenam essas estruturas de dados em memória ou em disco, os tipos de dados que são suportados e etc, mas a ideia base é essa.
 
-#### Vantagens
+### Vantagens
 
 As vantagens desse tipo de estrutura é que é **extremamente rápido** realizar uma busca ou inserir um valor, porque as chaves são indexadas por padrão e só existe um único valor para cada chave, então mesmo que existam bilhões de chaves, é fácil saber onde cada uma está com base no valor que elas possuem.
 
@@ -38,7 +38,7 @@ As vantagens desse tipo de estrutura é que é **extremamente rápido** realizar
 
 Muitas vezes, como era o caso do Redis há anos atrás, não havia nem necessidade para armazenamento em disco, a persistência era basicamente um dump da memória em um arquivo binário e depois a leitura desse mesmo arquivo quando o banco iniciasse novamente.
 
-#### Desvantagens
+### Desvantagens
 
 Justamente por não apresentarem nenhum tipo de relacionamento, Bancos de dados chave e valor não consegue representar muito bem estruturas muito complexas justamente porque eles não possuem nenhum tipo de estrutura que consiga relacionar um dado ao outro de forma nativa, na maioria das vezes o relacionamento está implícito no nome da chave. Por exemplo, se quisermos armazenar um professor e suas aulas, podemos fazer uma chave `professores:<id>`, e depois outra chave `professores:<id>:aulas`, isso vai definir que as aulas pertencem àquele professor.
 
@@ -58,7 +58,7 @@ A desvantagem dos bancos chave valor geralmente aparece aí. Quando temos que ar
 
 Agora que a gente já sabe quais são as vantagens e as desvantagens dos bancos de dados chave valor, vamos entender melhor como funciona o Deno KV.
 
-### Deno KV
+## Deno KV
 
 O Deno KV é um banco de dados chave e valor serverless e distribuído globalmente. Entre as propriedades dele, se destacam o fato de que ele tem consistência variável, então você pode escolher entre um modelo **fortemente consistente (strong consistency)** ou **fracamente consistente (eventual consistency)**.
 
@@ -91,7 +91,7 @@ Se você utilizou um nome diferente (ou caminho) vai ver que no local que você 
 
 > Você pode acessar esse banco de dados com qualquer client SQLite e ver o que tem dentro.
 
-### Uso
+## Uso
 
 O Deno KV suporta algumas operações e você pode ver o manual de todas elas diretamente na [API](https://deno.land/api@v1.35.1?s=Deno.Kv&unstable):
 
@@ -101,7 +101,7 @@ O Deno KV suporta algumas operações e você pode ver o manual de todas elas di
 -   Set
 -   Delete
 
-### `kv.set(key, value)`
+## `kv.set(key, value)`
 
 Usado para inserir um valor dentro do banco de dados. O uso é simples como:
 
@@ -128,7 +128,7 @@ const versionB = '000002fa526aacc90000'
 versionA > versionB // true, A é mais recente
 ```
 
-#### Key spaces
+### Key spaces
 
 Como comentamos anteriormente, podemos setar chaves com escopos, esses escopos são definidos por um array. Se a chave é uma string, o Deno vai assumir que a chave é simples, mas se passarmos um array, cada posição do array vai ser um escopo da chave:
 
@@ -147,7 +147,7 @@ Chaves podem ter [diversos tipos](https://deno.land/manual@v1.35.1/runtime/kv/ke
 
 Chaves não podem ser objetos, estruturas ou classes. Se a chave não existir ela será criada, se ela já existir, vai ser substituída. **Todas as operações de escrita são fortemente consistentes**.
 
-### `kv.get<T>(['chave'], options?)`
+## `kv.get<T>(['chave'], options?)`
 
 O [`get`](https://deno.land/api?s=Deno.Kv&p=prototype.get&unstable) é a versão individual do [`getMany`](https://deno.land/api?s=Deno.Kv&p=prototype.getMany&unstable), ambos são comandos para obter valores de dentro do banco de dados. Eles aceitam apenas chaves completas e não podem ser usados para listar, por exemplo, todas as chaves `['users']`.
 
@@ -178,7 +178,7 @@ Se uma chave não for encontrada, o resultado vai ser um objeto `{ key: ['chave'
 
 > É sempre uma boa ideia comparar se um valor existe pelo **versionstamp** e não pelo `value`, já que o `value` pode ser, de fato, nulo.
 
-### `kv.list<T>(selector, options?)`
+## `kv.list<T>(selector, options?)`
 
 O [list](https://deno.land/api?s=Deno.Kv&p=prototype.list&unstable) é uma versão mais poderosa do `get`, que é feito justamente para listar um número grande de chaves baseadas em um seletor específico.
 
@@ -227,7 +227,7 @@ console.log(users[0]);
 
 > Diferentemente do `prefix`, o `range` pode conter **chaves parciais**, ou seja, a chave pode conter qualquer tipo de caractere que bata com a expressão, como fizemos com `a` e `n`.
 
-### `kv.delete(chave)`
+## `kv.delete(chave)`
 
 Deleta uma chave. Se a chave não existir, nada acontece. Essas operações são sempre **fortemente consistentes**.
 
@@ -235,7 +235,7 @@ Deleta uma chave. Se a chave não existir, nada acontece. Essas operações são
 await kv.delete(['users', 'alice'])
 ```
 
-## E tem muito mais
+# E tem muito mais
 
 Este artigo vai cobrir somente as partes básicas do KV, porém vamos ter outro artigo cobrindo todas as partes **atômicas** e transações que o KV também possui, e mais para frente vamos falar sobre as propriedades de filas e pub/sub.
 

@@ -6,63 +6,39 @@ interface Props {
   src: ImageMetadata | string
   alt: string
   caption?: string
-  credit?: string
   wide?: boolean
-  width?: number
-  height?: number
+  /** Eager-loads this image instead of the default lazy. At most one per page. */
+  priority?: boolean
 }
 
-const { src, alt, caption, credit, wide = false, width, height } = Astro.props
+const { src, alt, caption, wide = false, priority = false } = Astro.props
 
-const isRemote = typeof src === 'string' && /^https?:\/\//.test(src)
+// The migration script emits a static `import` for every local image and
+// passes the resulting ImageMetadata here directly, so astro:assets can
+// optimise it (real srcset/sizes) and Vite can tell which images are actually
+// used. A bare string only ever means a genuinely remote, never-mirrored URL.
+const isRemote = typeof src === 'string'
 const safeCaption = caption && sanitizeCaption(caption)
 
-// ponytail: migrated posts pass images as plain relative strings (the migration
-// script writes MDX without import statements, per this component group's brief).
-// astro:assets can only optimise an imported ImageMetadata, so we resolve the
-// string ourselves: glob every image colocated under content/blog/ and match by
-// path suffix. Works as long as filenames are unique within their post folder,
-// which is how the Ghost export is laid out. Extensions are listed in both
-// cases since the filesystem match is case-sensitive but Ghost exports aren't
-// consistent about it.
-const localImages = import.meta.glob<{ default: ImageMetadata }>(
-  '/content/blog/**/*.{png,jpg,jpeg,gif,webp,avif,svg,PNG,JPG,JPEG,GIF,WEBP,AVIF,SVG}',
-)
-
-async function resolveLocalImage(relativePath: string): Promise<ImageMetadata> {
-  const suffix = relativePath.replace(/^\.\//, '')
-  const key = Object.keys(localImages).find((path) => path.endsWith(`/${suffix}`))
-  if (!key) throw new Error(`Figure: no local image matches "${relativePath}"`)
-  const mod = await localImages[key]()
-  return mod.default
-}
-
-const localImage = !isRemote && typeof src === 'string' ? await resolveLocalImage(src) : undefined
-const image = localImage ?? (typeof src === 'string' ? undefined : src)
+// This layout has one fixed reading column (--measure in BaseLayout.astro,
+// ~750px), wide or not, so a Figure image never needs to render past that
+// width. Clamped to the source's own intrinsic width too, so a screenshot
+// narrower than the column doesn't get upsized.
+const MAX_DISPLAY_WIDTH = 800
+const localWidth = isRemote ? undefined : Math.min(MAX_DISPLAY_WIDTH, (src as ImageMetadata).width)
 ---
 
 <figure class:list={['figure', { wide }]}>
   {
     isRemote ? (
-      <img
-        src={src as string}
-        alt={alt}
-        loading="lazy"
-        decoding="async"
-        width={width}
-        height={height}
-        class:list={[{ 'no-dimensions': !(width && height) }]}
-      />
+      <img src={src as string} alt={alt} loading="lazy" decoding="async" class="no-dimensions" />
     ) : (
-      <Image src={image as ImageMetadata} alt={alt} />
+      <Image src={src as ImageMetadata} alt={alt} width={localWidth} priority={priority} />
     )
   }
   {
-    (caption || credit) && (
-      <figcaption>
-        {safeCaption && <span class="caption" set:html={safeCaption} />}
-        {credit && <span class="credit">{credit}</span>}
-      </figcaption>
+    caption && (
+      <figcaption>{safeCaption && <span class="caption" set:html={safeCaption} />}</figcaption>
     )
   }
 </figure>
@@ -80,8 +56,7 @@ const image = localImage ?? (typeof src === 'string' ? undefined : src)
   }
 
   /* ponytail: remote images (Ghost embeds) have no build-time dimensions
-     without a network fetch. Reserve a common photo box by default to bound
-     layout shift; pass width+height when known to get the real ratio. */
+     without a network fetch. Reserve a common photo box to bound layout shift. */
   .figure :global(img.no-dimensions) {
     aspect-ratio: 3 / 2;
     object-fit: cover;
@@ -92,12 +67,6 @@ const image = localImage ?? (typeof src === 'string' ? undefined : src)
     color: var(--muted);
     font-size: 0.85rem;
     text-align: center;
-  }
-
-  .figure figcaption .credit {
-    display: block;
-    margin-block-start: 0.25rem;
-    font-size: 0.8rem;
   }
 
   /* ponytail: matches the body's own 1.5rem horizontal padding (BaseLayout),

@@ -14,7 +14,7 @@ seoDescription: "Recentemente a Docker anunciou uma nova API para o Docker compo
 
 Depois de muitos anos de pedidos, finalmente a Docker resolveu implementar um [watch](https://docs.docker.com/compose/file-watch/) mode no comando compose! Com ele a gente vai poder iniciar uma espécie de atualização automática dos nossos containers sempre que nossos arquivos forem modificados no disco!
 
-### O problema
+## O problema
 
 Um dos maiores problemas para quem usava (ou até usa) o Docker compose, é que, sempre que temos nosso cluster de containers ativo, e estamos desenvolvendo localmente com um desses containers, quando fazemos uma modificação em algum dos arquivos do projeto, precisamos reiniciar todo o compose para criar a nova imagem.
 
@@ -22,7 +22,7 @@ Geralmente, quando estamos fazendo uma API externa, por exemplo, não temos tant
 
 Porém, sempre que a gente atualiza um dos arquivos do projeto, temos que rodar aquele famoso `docker compose down` seguido de um `docker compose up --rebuild` para poder reconstruir o nosso serviço e continuar desenvolvendo.
 
-### A solução
+## A solução
 
 Por muitos anos, a galera sugeriu que o docker compose tivesse um modo watch, ou seja, um modo que pudesse ouvir o que está acontecendo com um determinado arquivo ou conjunto de arquivos do projeto e rodar um comando específico quando eles forem alterados. Depois de alguns anos, temos o **[compose file watch](https://docs.docker.com/compose/file-watch/) mode**. E o mais legal é que você não precisa habilitar ele para todos os seus serviços.
 
@@ -48,11 +48,11 @@ services:
 
 > No momento, o compose watch mode está em estado experimental, por isso temos que usar a chave `x-develop` para dizer que estamos ativando um comando beta.
 
-### Actions
+## Actions
 
 Existem dois tipos de actions pré definidas que você pode tomar: `sync` e `rebuild`:
 
-#### Sync
+### Sync
 
 Esse tipo de ação vai garantir que qualquer mudança feita no seu arquivo local, fora do container, seja adicionada ao container e substitua o arquivo que está dentro dele.
 
@@ -60,7 +60,7 @@ Esse tipo de ação vai garantir que qualquer mudança feita no seu arquivo loca
 
 Um caso de uso muito interessante disso é justamente no nosso amado JavaScript, especialmente com Node.js, o ideal é que a gente ignore completamente a pasta `node_modules` porque, por mais que a gente tenha muito código JS lá dentro, algumas dependências usam Native Modules, que não vão funcionar em ambientes diferentes do que eles foram criados e compilados para executar.
 
-#### Rebuild
+### Rebuild
 
 Quando usamos o Rebuild, vamos ter o equivalente de rodar `docker compose up --build <serviço>` sempre que salvarmos o `path`.
 
@@ -68,7 +68,7 @@ Enquanto o `sync` é mais recomendado para aplicações que podem fazer um _hot 
 
 > Outro caso de uso é para linguagens compiladas, que precisam passar pelo processo completo de build para serem refeitas, embora existam casos onde você pode somente trocar o binário de uma aplicação que será suficiente.
 
-#### Path e Target
+### Path e Target
 
 Ambas as ações vão acompanhadas de duas outras propriedades, o `path` e o `target`.
 
@@ -76,13 +76,13 @@ Em resumo, o `target` é o caminho do arquivo observado dentro do container, por
 
 Lembrando que, por regra, todos os caminhos são baseados no diretório de build da sua aplicação, ou seja, o local onde o docker encontrou o Dockerfile
 
-### Executando
+## Executando
 
 Para executar o docker compose watch, primeiramente precisamos criar a build do nosso serviço com `docker compose up -d --build --wait`, isso fará com que o docker inicie o compose e construa todas as imagens.
 
 Depois, podemos rodar `docker compose alpha watch` para iniciar o watch mode que vai ler as configurações que queremos do nosso arquivo.
 
-## Conclusão
+# Conclusão
 
 O Docker watch é um comando que será muito útil na maioria dos workflows de programação, especialmente quando temos que desenvolver aplicações de grande porte que permitem um Hot Reload.
 

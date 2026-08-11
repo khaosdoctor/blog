@@ -14,7 +14,7 @@ seoTitle: "Armazenamento chave-valor nativo com Deno KV"
 
 Mais um dia e mais uma atualização do runtime que não para de nos surpreender! O Deno anunciou que, desde a versão 1.32, agora conta com um banco de dados chave-valor nativo!
 
-### Não é tão estranho assim
+## Não é tão estranho assim
 
 Antes que você pense: "Mas por que alguém iria colocar um banco de dados em um runtime? Não é melhor ter uma lib para isso?". De fato, ter um banco de dados chave-valor dentro do runtime de forma nativa parece algo muito elaborado para uma standard lib, mas e se a gente já estiver fazendo isso há muitos anos e nem percebia?
 
@@ -37,7 +37,7 @@ Eu mesmo já fiz vários pequenos bancos de dados usando arrays e objetos para a
 
 Os maps mudaram a forma de pensar porque eles já tinham muitos dos métodos como o `delete`, nativos da API. Assim, criar um banco dessa forma era basicamente serializar e desserializar um array em um arquivo, que ainda continua sendo a maior complexidade.
 
-### Deno KV
+## Deno KV
 
 O time do Deno anunciou [recentemente](https://deno.land/manual@v1.32.4/runtime/kv) que a versão 1.32 do runtime já vai contar com uma implementação nativa de um Key-Value store (KV), porém de uma forma mais evoluída.
 
@@ -79,7 +79,7 @@ for await (const entry of kv.list({ prefix: ["users"] })) {
 
 > O método list também aceita outros [tipos de seletores,](https://deno.land/api@v1.32.4?unstable&s=Deno.Kv#method_list_0) como um range alfanumérico e várias [opções](https://deno.land/api@v1.32.4?s=Deno.KvListOptions&unstable=) para alterar o funcionamento, como `limit` e `cursor`
 
-#### Versões
+### Versões
 
 Se uma mesma chave é sobrescrita usando `kv.set` na mesma chave, o Deno vai automaticamente manter um conjunto de versões chamado `versionstamp`, que nada mais é do que um número bem grande que é o valor daquela versão.
 
@@ -92,7 +92,7 @@ results[0].versionstamp // "00000000000000010000"
 results[1].versionstamp // null
 ```
 
-## Conclusão
+# Conclusão
 
 O Deno KV pode não parecer algo super interessante à primeira vista, mas a forma como ele é elaborado permite que tenhamos uma grande facilidade quando vamos construir aplicações de pequeno e médio porte, principalmente por ter tudo à mão.
 

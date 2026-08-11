@@ -18,7 +18,7 @@ Essa é a funcionalidade chamada **explicit resource management**, ou gerenciame
 
 Em outras linguagens como o C#, o `using` já é uma keyword [bem famosa](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-statement), e ela existe em outras formas, como o `try-with-resources` do [Java](https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html) ou o `with` do [Python](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement), a ideia dessa proposta é poder atrelar o ciclo de vida de um recurso a ele mesmo, sem que a gente precise chamar outras funções como um `finally` para poder se desfazer desse recurso.
 
-### Gerenciamento de recursos
+## Gerenciamento de recursos
 
 Quando estamos falando de programação de mais baixo nível como C ou C++, gerenciamento de recursos é algo essencial, mas quando estamos em linguagens de mais alto nível, esse tipo de funcionalidade acaba se perdendo bastante já que o compilador ou o engine vai tomar conta disso pra gente.
 
@@ -73,7 +73,7 @@ export async function fazerQuery (query: string) {
 
 Enquanto isso é uma solução interessante, a gente escreveu uma quantidade considerável de código para poder fechar uma conexão... E é pra isso que a ideia do gerenciamento explícito existe, para tratar esses casos como algo primário.
 
-### Symbol.dispose
+## Symbol.dispose
 
 Tudo gira em torno de uma propriedade do arquivo chamada `Symbol.dispose`, que é um Símbolo interno de todas as classes.
 
@@ -145,7 +145,7 @@ export async function fazerQuery (query: string) {
 
 Não ajudou muito não é? A gente só moveu de um lado pro outro, apesar de agora termos um lugar específico para chamar toda a lógica, ainda sim é mais fácil do que ficar chamando os métodos específicos.
 
-### Using
+## Using
 
 Mas, se a gente quiser passar tudo para um lugar só, podemos tirar vantagem da nova keyword `using`, ela funciona como se fosse um `let` ou `const` mas ao invés de só declarar a variável, ela instrui o engine a chamar `Symbol.dispose` no final do escopo daquela função, então nossa função anterior pode ser reescrita assim:
 
@@ -210,7 +210,7 @@ func();
 
 Veja que eles são criados na ordem de A até D, mas destruídos de D até A. Inclusive, se você criar um escopo no meio da função, como é o caso de C e D, eles vão ser destruídos primeiro ao saírem do escopo.
 
-#### Assincronismo com Symbol.asyncDispose
+### Assincronismo com Symbol.asyncDispose
 
 Além de termos a versão síncrona, também temos a versão assíncrona do dispose. Ela se comporta da mesma forma, porém é uma função assíncrona e precisa ser usada com `await using` ao invés de `using`.
 
@@ -257,7 +257,7 @@ func();
 // Disposing a async
 ```
 
-### Tratamento de erros
+## Tratamento de erros
 
 O que acontece se a nossa função de dispose tiver um erro? Ou se tivermos um erro durante a função e também na hora de destruir a função? Neste caso temos um novo tipo de erro que é estendido de `Error`, o `SuppressedError`.
 
@@ -299,7 +299,7 @@ try {
 
 Então basicamente o erro mais recente vai ser o erro que foi gerado dentro do symbol, enquando o erro suprimido é o erro que foi gerado dentro da função antes do disposal ser chamado.
 
-## DisposableStacks
+# DisposableStacks
 
 Como você pode ter percebido, `Symbol.dispose` e a sua versão assíncrona podem ser ótimas soluções para códigos mais complexos, porque já estamos usando uma classe e podemos implementar a funcionalidade, mas quando temos um código simples como esse pode parecer meio demais ter que fazer toda essa lógica.
 
@@ -347,7 +347,7 @@ export class DisposableStack implements Disposable {
 
 A ideia é que você pode definir uma stack e chamar o método `defer` várias vezes para adicionar uma ou mais funções na stack de reciclagem.
 
-## Conclusão
+# Conclusão
 
 Para usar o using nas versões mais novas do TS você precisa mudar algumas opções no `compilerOptions` do `tsconfig`, essas incluem as opções que vão mudar o alvo da compilação para a versão 2022 e adicionar os polyfills necessários, ficando algo assim:
 

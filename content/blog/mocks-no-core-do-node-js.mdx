@@ -12,11 +12,15 @@ visibility: "public"
 seoTitle: "Implementando Date Mocks no Node Test Runner: Uma História"
 ---
 
+import figureImage1 from './mocks-no-core-do-node-js/image.png'
+import figureImage2 from './mocks-no-core-do-node-js/image-8.png'
+import figureImage3 from './mocks-no-core-do-node-js/image-7.png'
+
 Há um pouco mais de um ano, eu tive o grande prazer de trabalhar no [core do Node.js](https://github.com/nodejs/node/pull/48638), e foi uma das experiências mais interessantes que eu já tive (então se você tá usando Node hoje, tem código meu ai!), tanto que agora estou voltando a trabalhar e ajudar a comunidade a crescer em volta dele também, porém, o que eu quero te contar aqui é como funcionam os [Date mocks](/node-test-runner-mocks/) dentro do [Node Test Runner](/comecando-com-o-node-js-test-runner/), parte a parte!
 
 O objetivo desse artigo é tanto documentar o que foi feito nesta funcionalidade, mas também mostrar como não é tão complexo entender o código open source que temos por ai, e que você também pode contribuir para o projeto que mais curte.
 
-### O objetivo
+## O objetivo
 
 Tudo isso é muito bonito, mas o que são os mocks e para que a gente usaria algo assim?
 
@@ -45,17 +49,17 @@ Praticamente, mocks de datas são muito utilizados para testar funcionalidades q
 
 Graças à natureza dinâmica do JavaScript, isso não é tão complexo, mas eu descobri que você tem que conhecer bem a fundo a especificação para poder entender as consequências do que você pode fazer.
 
-### O começo
+## O começo
 
 Para a gente entender mais como funcionam os mocks, a gente precisa voltar um pouco para algumas PRs anteriores. O trabalho na minha PR começou com uma dica de um grande amigo, [Erick Wendel](https://github.com/ErickWendel), que tinha feito uma [PR](https://github.com/nodejs/node/pull/47775) alguns meses antes implementando os mocks para os timers (`setTimeout`, `setInterval` e etc).
 
-<Figure src="./mocks-no-core-do-node-js/image.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>a PR original do Erick</span>" />
+<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>a PR original do Erick</span>" />
 
 Quando eu comecei a usar o test runner nos meus projetos, logo eu já tive um grande problema: por mais que a gente pudesse fazer mocks de timers, eu não conseguia fazer mocks de datas! Ou seja, eu não podia resetar o relógio do meu teste e controlar como eu queria que ele se comportasse... Algo precisava ser feito.
 
 Eu sugeri essa ideia para o pessoal antes (poderia ter simplesmente feito, mas resolvi primeiro perguntar) e a maioria da galera gostou. Como outros test runners (Jest, Ava, Vitest, mocha, jasmine...) já tinham essa funcionalidade, seria interessante também tê-la implementada no NTR, isso traria mais adoção a plataforma.
 
-### O planejamento
+## O planejamento
 
 A ideia é que os mocks de datas se comportassem bem parecidos com a implementação do [Sinon](https://github.com/sinonjs/fake-timers/blob/main/src/fake-timers-src.js?rgh-link-date=2023-07-02T19%3A29%3A31Z), que também é a implementação usada no Jest, então significa que é uma API já conhecida da galera.
 
@@ -98,7 +102,7 @@ Com a API inicial decidida, vem a questão principal: **Como eu consigo mockar u
 
 <CourseCTA />
 
-### O código
+## O código
 
 Por incrível que pareça, toda a adição do date mock no Node foi feita em um único [arquivo](https://github.com/nodejs/node/blob/74ddce8853e8c3de90f1037940ee5dcf38201b65/lib/internal/test_runner/mock/mock_timers.js) chamado `mock_timers.js` dentro de `lib/internal/test_runner/mock`. Isso é uma prática bastante comum em projetos mais antigos e estabelecidos porque faz com que PRs sejam bem menores já que o arquivo é grande mas tem todas as alterações necessárias.
 
@@ -185,7 +189,7 @@ Quando comecei a ver a forma que os timeouts estavam implementados, eu tive uma 
 
 Então eu iria seguir o mesmo padrão, e é aí que a nossa história começa.
 
-#### É só uma função
+### É só uma função
 
 A nossa função que cria um objeto de data é relativamente simples:
 
@@ -459,7 +463,7 @@ O próximo passo é uma pequena alteração para evitar que, quando você fizer 
 
 Estamos chegando no fim, o que a gente precisa fazer agora é definir a única propriedade que já usamos bastante mas ainda não foi definida, o `kMock`, você chegou a perceber isso?
 
-#### kMock
+### kMock
 
 O `kMock` é um símbolo dentro da nossa implementação que, basicamente, é uma referência ao nosso objeto geral de Mocks para que a gente possa pegar as propriedades privadas como `#now` e o construtor original da data. Mas ele não foi definido até agora, isso não vai dar um problema sério?
 
@@ -560,7 +564,7 @@ Até agora nossa função está assim:
 }
 ```
 
-#### Toques finais
+### Toques finais
 
 O toque final é definir o protótipo da nossa `MockDate` para o protótipo original do Date, dessa forma não quebramos aplicações de quem está fazendo `instanceof Date`, além disso, definimos os métodos estáticos globais comuns que não vamos substituir e retornamos todo o nosso trabalho:
 
@@ -638,7 +642,7 @@ O toque final é definir o protótipo da nossa `MockDate` para o protótipo orig
 }
 ```
 
-### Métodos do mock
+## Métodos do mock
 
 Agora que temos o mock principal, podemos definir as outras funções que vem junto dele, primeiro temos que modificar o nosso método [`enable`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L644), para que ele também possa aceitar a nova API. A modificação que vamos fazer aqui é basicamente de validação:
 
@@ -763,19 +767,19 @@ runAll() { // L728
 }
 ```
 
-### E acaba por ai?
+## E acaba por ai?
 
 Essa foi a final da implementação dos timers, mas o trabalho não acabou. Como o artigo está longo eu não vou postar muito mais sobre isso. Os testes para essa funcionalidade foram outro tempo a parte, no total devo ter gasto pelo menos 13 horas nesse projeto, além de uns 3 meses em comentários, resoluções e tudo mais. No final, essa funcionalidade foi implementada na versão 21.2 do Node (tem até um [post](/node-21-2/) explicando como usar).
 
-<Figure src="./mocks-no-core-do-node-js/image-8.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Dá pra ver que eu estava bem feliz</span>" />
+<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Dá pra ver que eu estava bem feliz</span>" />
 
 Além disso, se você olhar no histórico da PR, vai ver que eu passei dias lutando com o CI do GitHub porque existiam os chamado _flaky tests_, que foram corrigidos pelo Yagiz um tempo depois.
 
-<Figure src="./mocks-no-core-do-node-js/image-7.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Eu estava ficando maluco já</span>" />
+<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Eu estava ficando maluco já</span>" />
 
 Esses flaky tests estavam impedindo que minha aplicação tivesse sinal verde, mas os erros não tinham nada a ver com o código que eu mudei. Por isso que é tão importante que contribuidores como nós possamos ajudar com a cobertura de testes e verificação do processo.
 
-## Conclusão
+# Conclusão
 
 Foi um artigo longo, mas eu quis trazer esse conteúdo aqui porque eu quero mostrar para você que é sim possível participar de projetos open source grandes e fazer a diferença mesmo em pequenas contribuições como essa.
 

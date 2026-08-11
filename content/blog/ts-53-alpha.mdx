@@ -19,7 +19,7 @@ A versão beta do TS 5.3 deve sair em setembro (um pouco antes do lançamento do
 
 O Matt do Total TypeScript compilou um pouco do que tem no documento nesse [outro artigo](https://www.totaltypescript.com/typescript-5-3), e eu vou aproveitar para poder resumir e explicar também fazendo um link com a documentação do [JavaScript](https://github.com/tc39/proposals).
 
-### Import Attributes
+## Import Attributes
 
 Essa é uma [proposta](https://github.com/tc39/proposal-import-attributes) aberta há um tempo, e o objetivo principal é que você pode especificar algumas opções de validação dos imports de módulos. No momento só estamos falando da validação do tipo do módulo, por exemplo, pra validar que um módulo é um arquivo JSON:
 
@@ -52,7 +52,7 @@ new Worker("foo.wasm", {
 
 Usar o `with` seguido de `type` é uma forma de deixar essa funcionalidade bem aberta porque será possível incluir mais propriedades depois. Imagina ser possível importar um pacote por uma das propriedades do `package.json` ou então até mesmo do arquivo.
 
-### Throw expressions
+## Throw expressions
 
 Essa é uma funcionalidade que eu vou falar em um futuro vídeo, mas é algo que estava faltando no JS há muito tempo. A [proposta](https://github.com/tc39/proposal-throw-expressions) para isso está ainda no estágio 2, o que é estranho para o TS, que costuma implementar a maioria das funcionalidades quando elas estão no estágio 3.
 
@@ -66,7 +66,7 @@ const userName = user.name || throw new Error('Name is required')
 
 Hoje isso não é possível.
 
-### Isolated Declarations
+## Isolated Declarations
 
 Existe um problema quando se trabalha com monorepos em quase todas as linguagens, porém em TypeScript isso é pior. Porque quando temos pacotes que dependem de outros pacotes, isso acaba invariavelmente gerando uma quantidade absurda de complexidade, principalmente para o TypeScript.
 
@@ -86,7 +86,7 @@ Essa [proposta](https://github.com/microsoft/TypeScript/pull/53463) adiciona uma
 
 O que ela faz é ativar um modo mais estrito, onde é necessário, por exemplo, colocar anotações de tipo em retorno de funções, principalmente para funções exportadas para fazer o TS não precisar inferir tudo.
 
-### Narrow de generics em funções
+## Narrow de generics em funções
 
 Existe um [problema latente](https://github.com/microsoft/TypeScript/issues/33014) no TypeScript que é o fato de que ele não vai fazer um _type narrowing_ em um tipo generico dentro de uma função quando a gente quer retornar algo baseado nesse tipo.
 
@@ -114,7 +114,7 @@ depLikeFun("f"); // boolean
 
 Só que se fizermos isso atualmente, vamos ter um erro dizendo que nossos retornos não são do tipo `never`. Isto porque o TS não faz um narrowing do nosso tipo genérico `T`. Na verdade o que ele está fazendo, segundo [essa issue](https://github.com/microsoft/TypeScript/pull/30769), é que quando passamos `F[T]` estamos dizendo "escreva F na chave T", portanto ele vai checar se `F[T]` tem um tipo que intersecta ambas as suas possibilidades (no caso `number` e `boolean`), então `number & boolean` é `never`.
 
-### Autocomplete em tipos de string
+## Autocomplete em tipos de string
 
 Um hack interessante – que eu descobri recentemente – é que você pode criar um _union type_ de strings e `string & {}`, dessa forma você ganha um auto complete do compilador, além de poder colocar qualquer outra string no lugar também:
 
@@ -147,7 +147,7 @@ type IconSize =
   | string;
 ```
 
-## O que vem por ai?
+# O que vem por ai?
 
 Esse é um artigo base, não sabemos se essas funcionalidades serão, de fato, adicionadas ao TS ou não, até porque o documento é um planejamento de trabalho e não um guia do que vai ser incluído por lá.
 

@@ -15,7 +15,7 @@ Uma das conversas mais polemicas em volta do TypeScript é o uso de Enums. Nesse
 
 Se você está na comunidade de TS há um tempo já sabe que existem dois lados assim como os adoradores de Java e JavaScript, mas se você está chegando agora, deixa eu te explicar sobre o que eu estou falando.
 
-### Enums e TypeScript
+## Enums e TypeScript
 
 Em TS você pode definir enumeradores, esses enumeradores são reflexos de uma [proposta](https://github.com/rbuckton/proposal-enum) adicionada no TC39 há anos, mas na verdade, o TS veio antes disso. Quando o TS foi criado, eles acreditavam que não haveria a ideia de adicionar um enumerador na linguagem, e enumeradores são de fato úteis na maioria das linguagens tipadas.
 
@@ -57,7 +57,7 @@ E você também pode obter as chaves usando `Object.keys(Country)`, por exemplo.
 
 E isso é basicamente o principal de enums que a gente vai precisar saber.
 
-### A polêmica dos enums
+## A polêmica dos enums
 
 Existe uma crescente comunidade de pessoas que não gostam de usar enumeradores no código. Pelos mais variados motivos (que a gente vai discutir aqui já já), não é muito difícil achar alguma coisa no Youtube se você colocar "TypeScript Enums" na busca.
 
@@ -65,11 +65,11 @@ Mas o que eu nunca gostei foi que, para mim, nenhum desses motivos era forte o s
 
 Como eu sempre tive essa dúvida, agora eu vou compartilhar com você quais são os dois lados dessa história para sanar esse problema de uma vez por todas.
 
-### Argumentos contra enums
+## Argumentos contra enums
 
 Vamos primeiro aos argumentos contra enumeradores.
 
-#### Não é algo que existe no JavaScript
+### Não é algo que existe no JavaScript
 
 Esse é um papo antigo sobre por que não usar enums: _"JavaScript não vem com isso de fábrica"_.
 
@@ -84,7 +84,7 @@ E isso até que faz sentido, mas se a gente for na dessa de tirar o código Type
 1.  Existe uma [proposta](https://github.com/rbuckton/proposal-enum) pra adicionar isso na linguagem (tá meio parada e talvez esquecida, mas tá lá)
 2.  E não é como se fosse nossa responsabilidade fazer isso, o TS já tem um compilador que serve justamente para remover as partes que não são JS e fazer o código funcionar
 
-#### Enums geram código em runtime
+### Enums geram código em runtime
 
 Por padrão, o TS não deve gerar código em tempo de execução, mas tem algumas coisas que quebram essa regra como [decorators](/javascript-decorators/) e enums.
 
@@ -113,7 +113,7 @@ var X;
 
 Um dos argumentos do porquê deveríamos nos importar com o que o TSC gera no final é que o Babel e outros compiladores usam plugins e isso pode confundi-los, mas isso na verdade não é realmente um argumento, porque se esses plugins não levam em conta uma característica base de uma linguagem, eles não são bons plugins.
 
-#### Objetos de enums não se comportam como queremos
+### Objetos de enums não se comportam como queremos
 
 Quando você tem o enum do parágrafo acima:
 
@@ -168,7 +168,7 @@ var HTTPMethods;
 
 O que apenas atribui a string ao valor e não ao índice. Então no nosso `Object.entries` não veríamos as chaves `[0, 1, 2]` porque elas não existem.
 
-#### Enums não aceitam valores que não são do enum
+### Enums não aceitam valores que não são do enum
 
 Quando você faz algo como:
 
@@ -221,7 +221,7 @@ log('hey', 'DEBUG')
 
 O que permite tanto usar a string `'DEBUG'` ainda mantendo o intellisense e também usar o tipo direto por `LogLevel.DEBUG`, mas, você precisa escrever o dobro de texto.
 
-#### Enums computados podem ter instruções if falsas
+### Enums computados podem ter instruções if falsas
 
 Se você fizer:
 
@@ -238,11 +238,11 @@ if (A.User) {
 
 Porque `User` é 0, logo, evite usar enums computados.
 
-### Argumentos a favor de enums
+## Argumentos a favor de enums
 
 Agora vamos aos argumentos a favor de enums.
 
-#### Refatoração Mais Rápida
+### Refatoração Mais Rápida
 
 Se precisar substituir a string `'POST'` no enum que definimos anteriormente:
 
@@ -267,7 +267,7 @@ O que não é realmente verdade, porque se você está trabalhando com projetos 
 
 Porque a maioria dessas pessoas não está fazendo uma alteração em 500 arquivos de 1500 linhas cada. Quando um projeto é pequeno, até médio, isso é ok. Mas quando você passa para o ramo de projetos gigantes, tudo isso para de fazer sentido e enums podem sim salvar sua refatoração.
 
-#### Strings Estritas e consistência
+### Strings Estritas e consistência
 
 Você pode argumentar que ser mais rigoroso sobre os parâmetros que você passa é melhor do que deixá-los abertos. Já que o TypeScript tem o objetivo de ser type safe e trazer segurança para o seu código.
 
@@ -277,7 +277,7 @@ E ai você tem outro argumento a favor, **consistência**. Quando você usa stri
 
 Isso é péssimo pra manutenção, enums ajudam a manter o seu código consistente, estrito e seguro.
 
-### Então, qual é o veredito?
+## Então, qual é o veredito?
 
 A verdade é que não existe um veredito. Eu pessoalmente sou do time que usa enums, porque eles são mais expressivos do que objetos, e são mais semânticos (pelo mesmo motivo que usamos `<main>` e não `<div>` em um HTML).
 
@@ -319,11 +319,11 @@ Dessa forma, você tem tanto o objeto quanto o tipo para esse valor, as chaves f
 
 A desvantagem é escrever mais e ter que se repetir no objeto LogLevel e no tipo, então é o dobro da escrita.
 
-## Conclusões
+# Conclusões
 
 Há algumas conclusões importantes a partir disso, a primeira é:
 
-#### Não use enums computados
+### Não use enums computados
 
 Evite usar enums numéricos computados, eles são propensos a vários erros (como a gente já viu), e você não controla a ordem das coisas.
 
@@ -347,11 +347,11 @@ enum Country {
 }
 ```
 
-#### Tente sempre usar enums de string
+### Tente sempre usar enums de string
 
 A partir do anterior, tente sempre usar enums de string para evitar o erro da declaração `false` como eu mostrei antes com o caso do `if` que sempre seria 0.
 
-#### Use const enums sempre que possível
+### Use const enums sempre que possível
 
 O TypeScript tem um outro tipo (que inclusive é bem explicado [nesse artigo](https://robinpokorny.com/blog/typescript-enums-i-want-to-actually-use/) de um colega aqui da Klarna), que são os **const enums**.
 
@@ -375,7 +375,7 @@ const enum Country {
 
 Não vai gerar código em runtime, mas você também não será capaz de usar o enum como um objeto, o que significa que você não será capaz de usá-los para extrair chaves ou valores, porque eles realmente não existem no código de produção.
 
-### O que eu uso
+## O que eu uso
 
 Eu tendo a fazer uma ordenação:
 

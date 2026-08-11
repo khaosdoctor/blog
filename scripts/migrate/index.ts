@@ -51,7 +51,7 @@ type Post = {
   plaintext: string | null
   custom_excerpt: string | null
   feature_image: string | null
-  published_at: string
+  published_at: string | null
   updated_at: string
   visibility: string
   canonical_url: string | null
@@ -201,8 +201,11 @@ function indexAssets(root: string): void {
 
 indexAssets(join(args.assets, 'images'))
 // The VM-only leftovers (3 mp4s, their posters, one stray image) come from the
-// pre-migration content tar, extracted next to the export.
-indexAssets(join(homedir(), 'ghost-backups', 'vm-content'))
+// pre-migration content tar, extracted next to the export. Indexed the same
+// way as the primary root, one call per images/media subfolder, so the keys
+// stay bare (`2023/12/foo.mp4`) and line up with what assetKey() produces.
+indexAssets(join(homedir(), 'ghost-backups', 'vm-content', 'images'))
+indexAssets(join(homedir(), 'ghost-backups', 'vm-content', 'media'))
 
 const missingAssets = new Set<string>()
 
@@ -331,19 +334,31 @@ function normalizeHtml(html: string): string {
 }
 
 /**
- * The page template already prints the title as the only h1, so a body that
- * starts its sections at h1 (208 of them across the export) has to move down a
- * level or the document outline is wrong for screen readers and for SEO.
+ * The page template already prints the title as the only h1, so the body's
+ * first heading level needs to land on h2, whatever level Ghost happened to
+ * start it at. Most bodies start at h1 (208 of them) and just shift down one
+ * level, but some (e.g. the "ls-news" newsletter template) never use an h1
+ * and start straight at h3/h4 with nothing above it, which would otherwise
+ * skip h2 entirely. Shifting by the same, uniform amount preserves whatever
+ * nesting the body already has; it does not fix skips that exist within the
+ * body itself (e.g. h2 straight to h4 with no h3), that's a content issue.
  */
 function demoteHeadings(html: string): string {
-  if (!/<h1[\s>]/i.test(html)) return html
-  const levels = [5, 4, 3, 2, 1]
-  const shifted = levels.reduce(
-    (current, level) =>
-      current.replace(new RegExp(`<(/?)h${level}([\\s>])`, 'gi'), `<$1h${level + 1}$2`),
-    html,
-  )
-  return shifted
+  // The level to shift from is whatever heading comes first in reading
+  // order, not the lowest level anywhere in the body: a stray, mis-tagged
+  // heading further down (an authoring mistake, e.g. one <h1> used mid-body
+  // as a section divider in an otherwise h2/h3 document) must not throw off
+  // the shift for the whole post.
+  const first = /<h([1-6])[\s>]/i.exec(html)
+  if (first === null) return html
+  const shift = 2 - Number(first[1])
+  if (shift === 0) return html
+  const order = shift > 0 ? [6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6]
+  return order.reduce((current, level) => {
+    const target = level + shift
+    if (target < 1 || target > 6) return current
+    return current.replace(new RegExp(`<(/?)h${level}([\\s>])`, 'gi'), `<$1h${target}$2`)
+  }, html)
 }
 
 /**
@@ -353,16 +368,18 @@ function demoteHeadings(html: string): string {
  * the slash would 404 on the new site even though it worked on the old one.
  */
 function normalizeLinks(markdown: string): string {
-  return markdown
+  const withKnownFixes = markdown
     .replaceAll(`${GHOST_URL}/`, '/')
     // Ghost's membership signup page does not exist here. Keep the sentence,
-    // drop the dead link.
-    .replace(/\[([^\]]*)\]\(\/signup\/?\)/g, '$1')
+    // drop the dead link. Covers bare /signup and /signup with a UTM query string.
+    .replace(/\[([^\]]*)\]\(\/signup(?:\?[^)]*)?\/?\)/g, '$1')
     // Ghost served tag archives at /tag/<slug>/; this site uses /tags/<slug>/.
     .replace(/\]\(\/tag\/([^)]+?)\/?\)/g, '](/tags/$1/)')
     .replace(/\]\(\/rss\/?\)/g, '](/rss.xml)')
-    // Ghost preview links (/p/<uuid>/) and the old donations page are both gone.
+    // Ghost preview links (/p/<uuid>/), the admin editor, and the old donations
+    // page are all gone.
     .replace(/\[([^\]]*)\]\(\/p\/[0-9a-f-]{36}\/?\)/gi, '$1')
+    .replace(/\[([^\]]*)\]\(\/ghost\/[^)]*\)/g, '$1')
     .replace(/\[([^\]]*)\]\(\/doacoes\/?\)/g, '$1')
     // A link written as "example.com/thing" with no scheme resolves against the
     // current post and 404s. It is always meant to be external.
@@ -374,6 +391,20 @@ function normalizeLinks(markdown: string): string {
       if (path.endsWith('/')) return `](${path})`
       return `](${path}/)`
     })
+  // The rule above promotes a bare domain with no scheme (e.g. a link written
+  // as "blog.lsantos.dev/x" instead of a proper relative path, a recurring
+  // Ghost editor slip) into an absolute https URL. When that domain is this
+  // site's own, collapse it back to root-relative like every other internal
+  // link, same as the very first replace in this chain.
+  const rooted = withKnownFixes.replaceAll(`${GHOST_URL}/`, '/')
+  // A handful of one-off authoring mistakes in the export point at posts that
+  // don't exist, or don't exist under that slug, on the new site. Keep the
+  // sentence, drop or correct the dead link.
+  return rooted
+    .replace(/\[([^\]]*)\]\(\/key-exchange\/?\)/g, '$1')
+    .replace(/\[([^\]]*)\]\(\/diffie-helman-key-exchange\/?\)/g, '$1')
+    .replace(/\(\/novos-metodos-set\/?\)/g, '(/ecma-2024-sets/)')
+    .replace(/\(\/noticias-semanais-3\/hipsters\.tech\)/g, '(/hipsters-tech-212/)')
 }
 
 /** `.../images/2020/11/foo.jpg` -> `2020/11/foo.jpg`, dropping Ghost size variants. */
@@ -478,6 +509,33 @@ function escapeProse(text: string): string {
   return text.replace(/[{}<]/g, (character) => `\\${character}`)
 }
 
+/**
+ * `<Figure src="./slug/name.png">` only ever gets a real srcset out of
+ * astro:assets if `src` is an imported ImageMetadata, not a runtime-resolved
+ * string (see src/components/Figure.astro). Rewrites every local Figure src
+ * into a static top-of-file `import`, reusing one identifier per unique
+ * path, and marks the first one `priority` since it is the post's first
+ * image. Remote `<Figure src="https://...">` tags are untouched.
+ */
+function hoistFigureImages(body: string): string {
+  const imports: string[] = []
+  const identifiers = new Map<string, string>()
+  let firstSeen = false
+  const withImports = body.replace(/<Figure src="(\.\/[^"]+)"/g, (_match, src: string) => {
+    const existing = identifiers.get(src)
+    const identifier = existing ?? `figureImage${identifiers.size + 1}`
+    if (existing === undefined) {
+      identifiers.set(src, identifier)
+      imports.push(`import ${identifier} from '${src}'`)
+    }
+    const priorityAttr = firstSeen ? '' : ' priority'
+    firstSeen = true
+    return `<Figure src={${identifier}}${priorityAttr}`
+  })
+  if (imports.length === 0) return withImports
+  return `${imports.join('\n')}\n\n${withImports}`
+}
+
 function describe(post: Post, meta: Meta | undefined): string {
   const excerpt = post.custom_excerpt?.trim() ?? ''
   if (excerpt.length > 0) return excerpt
@@ -486,12 +544,24 @@ function describe(post: Post, meta: Meta | undefined): string {
   const plain = (post.plaintext ?? '').replace(/\s+/g, ' ').trim()
   if (plain.length === 0) return post.title
   const sentence = /^(.{40,200}?[.!?])\s/.exec(plain)
-  const text = sentence === null ? plain.slice(0, 157) : sentence[1]
-  return text.length < plain.length && sentence === null ? `${text}...` : text
+  if (sentence !== null) return sentence[1]
+  const slice = plain.slice(0, 157)
+  const boundary = slice.lastIndexOf(' ')
+  const text = boundary === -1 ? slice : slice.slice(0, boundary)
+  return text.length < plain.length ? `${text}...` : text
 }
 
+/**
+ * Two passes: a substantive tag (typescript/javascript/infra/security/...)
+ * wins even if a "meta" tag (video/github/podcasts/events/blog) comes first in
+ * Ghost's tag order. Only falls back to meta when nothing else matched.
+ */
 function categoryFor(post: Post, postTags: string[]): string {
   if (post.status === 'sent') return 'newsletter'
+  for (const tag of postTags) {
+    const mapped = CATEGORY_OF[tag.toLowerCase()]
+    if (mapped !== undefined && mapped !== 'meta') return mapped
+  }
   for (const tag of postTags) {
     const mapped = CATEGORY_OF[tag.toLowerCase()]
     if (mapped !== undefined) return mapped
@@ -499,7 +569,6 @@ function categoryFor(post: Post, postTags: string[]): string {
   return 'meta'
 }
 
-const notes: string[] = []
 const emailOnlyReview: string[] = []
 const privateReview: string[] = []
 const perPostNotes = new Map<string, string[]>()
@@ -581,9 +650,11 @@ for (const post of limited) {
   })
 
   const html = demoteHeadings(normalizeHtml(post.html ?? ''))
-  const body = escapeMdxOutsideCode(normalizeLinks(turndown.turndown(html)))
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+  const body = hoistFigureImages(
+    escapeMdxOutsideCode(normalizeLinks(turndown.turndown(html)))
+      .replace(/\n{3,}/g, '\n\n')
+      .trim(),
+  )
 
   // \b matters: without it `sudo dpkg-reconfigure` reads as a Ghost class.
   const leftovers = [...body.matchAll(/\bkg-[a-z-]+/g)].map((match) => match[0])
@@ -599,7 +670,9 @@ for (const post of limited) {
   const description = describe(post, meta)
 
   const updated = new Date(post.updated_at)
-  const published = new Date(post.published_at)
+  // Ghost drafts carry a null published_at. Falling that into `new Date(null)`
+  // silently coerces to the 1970 epoch, so fall back to updated_at instead.
+  const published = post.published_at === null ? updated : new Date(post.published_at)
   const updatedIsMeaningful = updated.getTime() - published.getTime() > 24 * 60 * 60 * 1000
 
   const file = join(args.out, `${post.slug}.mdx`)
@@ -717,4 +790,3 @@ writeFileSync(
 console.log(`wrote ${limited.length} posts to ${args.out}`)
 console.log(`assets indexed: ${assetIndex.size}, missing: ${missingAssets.size}`)
 console.log(`posts with notes: ${perPostNotes.size} (see ${args.report}/report.md)`)
-if (notes.length > 0) console.log(notes.join('\n'))

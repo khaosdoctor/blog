@@ -11,13 +11,30 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './uma-introducao-a-service-mesh-com-linkerd/image.png'
+import figureImage2 from './uma-introducao-a-service-mesh-com-linkerd/image-1.png'
+import figureImage3 from './uma-introducao-a-service-mesh-com-linkerd/image-2.png'
+import figureImage4 from './uma-introducao-a-service-mesh-com-linkerd/image-3.png'
+import figureImage5 from './uma-introducao-a-service-mesh-com-linkerd/image-4.png'
+import figureImage6 from './uma-introducao-a-service-mesh-com-linkerd/image-5.png'
+import figureImage7 from './uma-introducao-a-service-mesh-com-linkerd/image-6.png'
+import figureImage8 from './uma-introducao-a-service-mesh-com-linkerd/image-7.png'
+import figureImage9 from './uma-introducao-a-service-mesh-com-linkerd/image-8.png'
+import figureImage10 from './uma-introducao-a-service-mesh-com-linkerd/image-9.png'
+import figureImage11 from './uma-introducao-a-service-mesh-com-linkerd/image-10.png'
+import figureImage12 from './uma-introducao-a-service-mesh-com-linkerd/image-11.png'
+import figureImage13 from './uma-introducao-a-service-mesh-com-linkerd/image-13.png'
+import figureImage14 from './uma-introducao-a-service-mesh-com-linkerd/image-14.png'
+import figureImage15 from './uma-introducao-a-service-mesh-com-linkerd/image-20.png'
+import figureImage16 from './uma-introducao-a-service-mesh-com-linkerd/image-21.png'
+
 Conversamos [recentemente](/service-mesh-1/) sobre **Service Mesh** e como este padrão de arquitetura pode salvar seu projeto de forma que ele ganhe mais observabilidade e facilidade de utilização.
 
 Falamos de Service Mesh de forma muito conceitual. Agora vamos colocar a mão na massa e criar nossa própria mesh utilizando o [Linkerd](https://linkerd.io/)!
 
 ## Linkerd
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image.png" alt="" caption="Uma breve história do Linkerd" wide />
+<Figure src={figureImage1} priority alt="" caption="Uma breve história do Linkerd" wide />
 
 O Linkerd é um projeto criado dentro do Twitter em 2013, quando a rede estava migrando sua arquitetura de uma plataforma de camadas para uma arquitetura de microsserviços. O projeto **Linkerd** foi transformado em open source em 2016 no que ficou conhecida como  a versão 0.1.
 
@@ -45,7 +62,7 @@ Para entendermos melhor o que estamos fazendo, vamos tentar entender como o Link
 -   **Control Plane:** Responsável por coletar e armazenar todas as informações de requisições e também controlar o fluxo de informações
 -   **Data Plane:** Aonde sua aplicação está localizada e aonde estamos tendo transferências de dados
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-1.png" alt="" caption="Overview da arquitetura do Linkerd" wide />
+<Figure src={figureImage2} alt="" caption="Overview da arquitetura do Linkerd" wide />
 
 Não vou passar por todas as camadas do sistema de forma completa, pois não é o intuito do artigo, mas vou falar um pouco de cada uma para podermos entender como todas as partes se comunicam.
 
@@ -72,7 +89,7 @@ Isto é feito através da injeção de dois containers dentro dos seus pods do K
 
 Uma das grandes facilidades do Linkerd é a existencia de uma interface web que mostra e controla todos os aspectos da malha.
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-2.png" alt="" caption="Interface web do Linkerd" wide />
+<Figure src={figureImage3} alt="" caption="Interface web do Linkerd" wide />
 
 #### Prometheus
 
@@ -84,7 +101,7 @@ Muitas vezes o cluster do Kubernetes já vem com um serviço do Prometheus, o se
 
 Busca métricas e as exibe em forma de gráficos e dashboards
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-3.png" alt="" caption="Dashboard do Grafana" wide />
+<Figure src={figureImage4} alt="" caption="Dashboard do Grafana" wide />
 
 ## E o Istio?
 
@@ -138,7 +155,7 @@ linkerd check --pre
 
 Isso vai garantir que todos os nomes e serviços estão disponíveis para que o Linkerd seja instalado
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-4.png" alt="" caption="Saída com sucesso do comando" />
+<Figure src={figureImage5} alt="" caption="Saída com sucesso do comando" />
 
 Então rodamos o comando:
 
@@ -156,7 +173,7 @@ linkerd check
 
 Se tudo correu bem, você deverá ter uma saída como esta:
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-5.png" alt="" caption="Saída de sucesso do linkerd check" />
+<Figure src={figureImage6} alt="" caption="Saída de sucesso do linkerd check" />
 
 Todos os workloads do Linkerd são instalados dentro de um _namespace_ próprio chamado `linkerd`, então você pode buscar todos os recursos que comentamos através do **kubectl** pelo comando:
 
@@ -168,11 +185,11 @@ kubectl get all -n linkerd
 
 Para começarmos a entender como o Linkerd funciona, você pode digitar o comando `linkerd dashboard &` e aguardar alguns segundos para a abertura do painel web.
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-6.png" alt="" caption="Painel web do Linkerd" wide />
+<Figure src={figureImage7} alt="" caption="Painel web do Linkerd" wide />
 
 Por este painel você será capaz de realizar executar todas as funcionalidades do Linkerd, bem como verificar o estado do seu cluster, ele também pode agir como uma forma de _dashboard_ para o Kubernetes, de certa forma. Basta vermos a seção **Workloads** no menu lateral:
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-7.png" alt="" wide />
+<Figure src={figureImage8} alt="" wide />
 
 Veja que estamos trabalhando no _namespace_ default. Isso pode ser trocado através do menu de seleção.
 
@@ -180,13 +197,13 @@ Veja que estamos trabalhando no _namespace_ default. Isso pode ser trocado atrav
 
 Se clicarmos na seção **Control Plane**, iremos ter uma visão geral de todo o nosso **Service Mesh**.
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-8.png" alt="" caption="Painel de visualização do Control Plane" wide />
+<Figure src={figureImage9} alt="" caption="Painel de visualização do Control Plane" wide />
 
 Veja que este painel nos mostra todo o status do sistema e também a quantidade de componentes que temos instalados.
 
 Mais abaixo, podemos ver a quantidade de namespaces que estão _"meshed",_ ou seja, que estão injetados pelo proxy do Linkerd de forma que estão gerando métricas:
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-9.png" alt="" caption="Perceba que apenas um namespaces está gerando métricas" />
+<Figure src={figureImage10} alt="" caption="Perceba que apenas um namespaces está gerando métricas" />
 
 ## Adicionando métricas
 
@@ -204,7 +221,7 @@ kubectl get deploy -o yaml | linkerd inject -
 
 Agora veja a diferença entre os dois arquivos. O arquivo injetado terá uma _annotation_ no template do pod desta forma:
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-10.png" alt="" caption="Anotação do Linkerd no pod" />
+<Figure src={figureImage11} alt="" caption="Anotação do Linkerd no pod" />
 
 Esta é a única mudança que é feita em seus deployments, ou seja, é muito fácil injetar o Linkerd em serviços que **já estão em produção** sem causar muitos efeitos colaterais.
 
@@ -216,7 +233,7 @@ kubectl get deploy -o yaml | linkerd inject - | kubectl apply -f -
 
 Assim que aplicarmos a mudança poderemos ver uma movimentação no _Control Plane_ de forma que ele estará carregando os nossos pods novamente para incluí-los nas métricas:
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-11.png" alt="" caption="O namespace está entrando no mesh" />
+<Figure src={figureImage12} alt="" caption="O namespace está entrando no mesh" />
 
 Veja que não temos um dos pods enviando métricas... O pod do MongoDB está fora do Mesh, mas por que?
 
@@ -242,11 +259,11 @@ Clique no nome do _namespace_ na aba Control Plane.
 
 Além de conseguirmos verificar as métricas dentro do painel do Linkerd, também podemos encontrar um dashboard do Grafana ao clicarmos no pequeno ícone laranja no canto direito
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-13.png" alt="" wide />
+<Figure src={figureImage13} alt="" wide />
 
 Vamos abrir o painel para o deployment `porto-backend`:
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-14.png" alt="" caption="Nosso dashboard está vazio" />
+<Figure src={figureImage14} alt="" caption="Nosso dashboard está vazio" />
 
 Veja que o dashboard não apresenta nenhum dado... Por que? Pois ainda não fizemos nenhuma requisição que possa ser capturada! Vamos entrar na nossa aplicação e criar alguns acessos. Para achar a URL da sua aplicação utilize o comando `kubectl get ing` para buscar os ingresses e assim as URLs.
 
@@ -278,7 +295,7 @@ Também podemos ver um mapa da aplicação que nos mostra quais são os serviço
 
 Se clicarmos no menu `Top` na seção Tools do menu lateral. Vamos poder selecionar um namespace ou recurso para podermos acompanhar em tempo real. Selecione o namespace `default` e faça algumas requisições para a aplicação. Veja que começamos a ter um acompanhamento de métricas:
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-20.png" alt="" wide />
+<Figure src={figureImage15} alt="" wide />
 
 ### Tap
 
@@ -286,7 +303,7 @@ Ainda na mesma visualização, veja que temos o ícone de um microscópio, este 
 
 Vamos abrir a aba `Tap` no menu lateral. Selecionar o namespace `default` no topo e clicar em `start`. Assim que fizermos algumas requisições, poderemos ver todas elas em tempo real
 
-<Figure src="./uma-introducao-a-service-mesh-com-linkerd/image-21.png" alt="" wide />
+<Figure src={figureImage16} alt="" wide />
 
 Ao clicarmos na seta esquerda, teremos uma visualização da request em detalhes
 

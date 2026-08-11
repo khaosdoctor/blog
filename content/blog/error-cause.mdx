@@ -13,11 +13,13 @@ seoTitle: "O que são erros no JavaScript e o que é o error.cause?"
 seoDescription: "Tratar erros é uma das habilidades mais importantes de qualquer dev e app, mas o que muita gente não sabe é que tem um jeito muito mais fácil!"
 ---
 
+import figureImage1 from './error-cause/image.png'
+
 Erros são provavelmente o principal construto de qualquer linguagem de programação. Eles existem em todas elas, a gente tem vários nomes para eles: bugs, erros, exceções, etc.
 
 A ideia do tratamento de erros não é nova, inclusive existem vários guias tanto novos quanto antigos que mostram muito bem como podemos tratar a maioria do que a gente chama de exceções. A ideia desse artigo veio de um [comentário](https://www.linkedin.com/feed/update/urn:li:activity:7018656849465892864?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7018656849465892864%2C7018885043116765184%29) em um [post no meu LinkedIn](https://www.linkedin.com/posts/lsantosdev_javascript-typescript-js-activity-7018656849465892864-6cmM?utm_source=share&utm_medium=member_desktop):
 
-<Figure src="./error-cause/image.png" alt="" caption="Muito obrigado ao Lucas por trazer esse conteúdo a tona!" />
+<Figure src={figureImage1} priority alt="" caption="Muito obrigado ao Lucas por trazer esse conteúdo a tona!" />
 
 Isso só se tornou ainda mais real quando vi os resultados da [State of JS 2022](https://2022.stateofjs.com/en-US/features/) que mostrava que, de todas as pessoas que sabiam da funcionalidade do `error.cause`, somente 27% delas usaram em algum momento.
 
@@ -25,7 +27,7 @@ Isso só se tornou ainda mais real quando vi os resultados da [State of JS 2022]
 
 Ou seja, está na hora de a gente aprender muito mais não só sobre o `error.cause`, mas sobre **erros no geral.** Então sem perder mais tempo, bora pra um **guia rápido e prático do que são erros no JavaScript** e como você pode melhorar as suas aplicações fazendo um bom uso deles!
 
-### O que REALMENTE são erros
+## O que REALMENTE são erros
 
 Quando começamos a programar, os nossos maiores medos estão voltados aos famosos _bugs_! Erros inesperados no sistema. Esses erros são chamados de **exceções** em desenvolvimento, porque são uma parte do código que não estava _programada_, portanto, é uma exceção à programação original.
 
@@ -54,7 +56,7 @@ Esse é um exemplo simples, mas a variável `error` ali pode receber vários tip
 
 Mas isso já existe há anos, como fazemos para lidar com a maioria desses erros?
 
-#### Lidando com múltiplos erros
+### Lidando com múltiplos erros
 
 Existem diversas formas de lidarmos com esses erros, uma das mais comuns – tão comum que está nos [exemplos da MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#differentiate_between_similar_errors) – é tratar a mensagem do erro com um `switch`, como esse aqui:
 
@@ -168,7 +170,7 @@ Podemos extrapolar esse modelo para criar o que chamamos de `errorMappers`, que 
 
 Quando estamos lidando com um erro de cada vez, está tudo certo, o problema é quando temos que encadear esses erros, e agora?
 
-## Contexto e encadeamento
+# Contexto e encadeamento
 
 Uma palavra que eu trouxe no início do artigo foi **contexto**, mas a gente não chegou a falar muito sobre ele ainda, e agora é o momento de dizer que **a parte mais importante em um erro é o seu contexto**.
 
@@ -178,7 +180,7 @@ Idealmente, as mensagens de erros devem ser strings fixas, não devendo conter n
 
 Também temos campos extras como `statusCode`, `statusMessage` e `id` onde setamos as informações relativas ao contexto daquele erro, mas como fazemos para passar isso para frente? É ai que entra o `error.cause`
 
-#### Error.cause
+### Error.cause
 
 O `error.cause` é uma proposta [relativamente recente do TC39](https://github.com/tc39/proposal-error-cause) que propõe a padronização da classe `Error` adicionando um campo extra opcional chamado `cause`, esse campo pode ser uma outra instância de `Error` ou qualquer tipo de objeto estruturado. Agora, a classe erro teria a seguinte assinatura:
 
@@ -337,7 +339,7 @@ Vamos ter a seguinte saída, caso tenhamos um erro nas nossas APIs:
 
 Veja que temos muito mais contexto e muito mais ideia do que aconteceu em todas as partes do erro, e não só o que está acontecendo nos últimos erros. Isso é particularmente útil quando estamos usando **microsserviços**, já que podemos ter um erro em qualquer parte de uma cadeia de chamadas, cada um desses erros deveria retornar uma causa, de forma que podemos encadear todos os erros que aconteceram e entender exatamente aonde o erro aconteceu.
 
-## Conclusão
+# Conclusão
 
 Tratamento de erros em qualquer linguagem não é algo simples, e o mais difícil é conseguir a **consistência** necessária para fazer com que todos os erros retornem da mesma forma, por isso que bibliotecas padronizadas de erros como o [Boom](https://github.com/hapijs/boom) são tão importantes.
 

@@ -12,6 +12,10 @@ visibility: "public"
 seoTitle: "O fim do código bem feito. Conheça o \"Slopware\""
 ---
 
+import figureImage1 from './slopware/image-5.png'
+import figureImage2 from './slopware/image-6.png'
+import figureImage3 from './slopware/image-8.png'
+
 No [último Backlog](/o-que-aconteceu-com-devs/) eu abordei um tema que estava me incomodando bastante nos últimos meses: o fato de que devs hoje estão ficando cada vez mais preguiçosos e delegando cada vez mais tarefas para a IA. Desde então tivemos o advento disso aqui, que eu estou nomeando agora como **Slopware**:
 
 > ✨ [https://t.co/6TyHKajGaJ](https://t.co/6TyHKajGaJ) has now gone from $0 to $1 million ARR in just 17 days! 💸 Revenue update: $87,000 MRR (which is $1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: [https://t.co/uc1J8Ia7QZ](https://t.co/uc1J8Ia7QZ) 📊 Stats update: 320,000 people have now flown in the… [https://t.co/scrq1lSJOT](https://t.co/scrq1lSJOT) [pic.twitter.com/NCc50FOgJa](https://t.co/NCc50FOgJa) — @levelsio (@levelsio) [March 11, 2025](https://twitter.com/levelsio/status/1899596115210891751?ref_src=twsrc%5Etfw)
@@ -72,9 +76,9 @@ E, para completar, temos esse vídeo fantástico da _Y Combinator_ dizendo por q
 
 O mais interessante é que esse vídeo é tão estranho, de tantas formas... Os comentários resumem muito melhor do que qualquer coisa que eu possa falar aqui:
 
-<Figure src="./slopware/image-5.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;100x mais rápido? O que vocês estão construindo? To-do lists?&quot;</span>" />
+<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;100x mais rápido? O que vocês estão construindo? To-do lists?&quot;</span>" />
 
-<Figure src="./slopware/image-6.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;Vibe coding é o futuro até você precisar fazer 'vibe debugging'&quot;</span>" />
+<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;Vibe coding é o futuro até você precisar fazer 'vibe debugging'&quot;</span>" />
 
 O próprio Garry Tan diz que uma das coisas que ficou clara nas pesquisas é que: _“Vibe coding é muito difícil de debugar”_. Eu imagino por quê… Talvez porque você não entende absolutamente nada do que está escrito ali? Ou talvez porque _debugar_ seja 90% de ser um programador?
 
@@ -100,7 +104,7 @@ O próprio Andrej menciona isso no tweet original. Então, não—_vibe coding_ 
 
 Voltando ao caso do simulador de voo, [nesse mesmo vídeo](https://youtu.be/VQFvugpxNJE?si=0vfYqCuB_7R7G2Dn&t=335), ele mostra o jogo rodando em produção, com milhares de pessoas acessando. Aos cinco minutos, também revela que o código estava vulnerável a **XSS (Cross-Site Scripting)**.
 
-<Figure src="./slopware/image-8.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;É tudo bonito até alguém 'vibe code' seu app de banco&quot;</span>" />
+<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;É tudo bonito até alguém 'vibe code' seu app de banco&quot;</span>" />
 
 O problema não é deixar de codar ou fingir que está codando. O problema é pedir para uma IA escrever o código, não entender o que está acontecendo, publicar o código sem questionar e, ainda assim, ignorar o mínimo de segurança. Isso coloca não apenas a sua empresa, mas milhares de outras pessoas em risco, tudo porque você se considera um “10x engineer”.
 
