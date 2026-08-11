@@ -10,7 +10,8 @@
  * Idempotent: it overwrites its own output. It never touches the Ghost VM.
  */
 import { createHash } from 'node:crypto'
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { homedir } from 'node:os'
 import TurndownService from 'turndown'
@@ -180,6 +181,55 @@ indexAssets(join(homedir(), 'ghost-backups', 'vm-content'))
 
 const missingAssets = new Set<string>()
 
+/**
+ * Animated GIFs are the worst thing in the corpus: one screen recording is
+ * 19MB, and neither webp nor avif meaningfully compresses an animation, so
+ * astro:assets just re-encodes it at the same size. ffmpeg turns it into a
+ * silent looping mp4 at roughly 1% of the bytes, which is what a reader on a
+ * phone actually wants. Falls back to shipping the GIF untouched when ffmpeg
+ * is missing.
+ */
+const GIF_MIN_BYTES = 256 * 1024
+const gifConversions = new Map<string, string | null>()
+
+function gifToMp4(source: string): string | null {
+  const cached = gifConversions.get(source)
+  if (cached !== undefined) return cached
+  if (statSync(source).size < GIF_MIN_BYTES) {
+    gifConversions.set(source, null)
+    return null
+  }
+  const target = source.replace(/\.gif$/i, '.mp4')
+  if (existsSync(target)) {
+    gifConversions.set(source, target)
+    return target
+  }
+  const result = spawnSync(
+    'ffmpeg',
+    [
+      '-y',
+      '-i',
+      source,
+      '-movflags',
+      'faststart',
+      '-pix_fmt',
+      'yuv420p',
+      // h264 needs even dimensions.
+      '-vf',
+      'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+      '-an',
+      target,
+    ],
+    { stdio: 'ignore' },
+  )
+  if (result.status !== 0) {
+    gifConversions.set(source, null)
+    return null
+  }
+  gifConversions.set(source, target)
+  return target
+}
+
 // ------------------------------------------------------- remote image mirroring
 
 /**
@@ -286,6 +336,22 @@ function assetKey(url: string): string {
   return path.replace(/^size\/[a-z]\d+\//, '')
 }
 
+/**
+ * Videos cannot go through astro:assets (it only handles images), so a
+ * post-relative `./slug/clip.mp4` would resolve against the post's own URL and
+ * 404. They are copied into public/ instead and referenced by absolute path,
+ * which is what a plain <video src> needs.
+ */
+const PUBLIC_VIDEO_DIR = join('public', 'videos')
+
+function publishVideo(slug: string, source: string): string {
+  const dir = join(PUBLIC_VIDEO_DIR, slug)
+  mkdirSync(dir, { recursive: true })
+  const name = basename(source)
+  copyFileSync(source, join(dir, name))
+  return `/videos/${slug}/${name}`
+}
+
 function makeResolver(slug: string, copied: Map<string, string>, note: (message: string) => void) {
   return (url: string): string => {
     if (url.length === 0) return url
@@ -301,6 +367,12 @@ function makeResolver(slug: string, copied: Map<string, string>, note: (message:
     const name = basename(key)
     const exact = assetIndex.get(key)
     if (exact !== undefined) {
+      const mp4 = /\.gif$/i.test(exact) ? gifToMp4(exact) : null
+      if (mp4 !== null) {
+        note(`animated GIF converted to mp4: ${name}`)
+        return publishVideo(slug, mp4)
+      }
+      if (/\.(?:mp4|webm|mov)$/i.test(exact)) return publishVideo(slug, exact)
       copied.set(exact, name)
       return `./${slug}/${name}`
     }
@@ -308,6 +380,7 @@ function makeResolver(slug: string, copied: Map<string, string>, note: (message:
     const candidates = assetsByName.get(name) ?? []
     if (candidates.length === 1) {
       note(`asset matched by filename, not path: ${url}`)
+      if (/\.(?:mp4|webm|mov)$/i.test(candidates[0])) return publishVideo(slug, candidates[0])
       copied.set(candidates[0], name)
       return `./${slug}/${name}`
     }
@@ -439,6 +512,7 @@ for (const post of limited) {
       const src = resolveAsset(element.getAttribute('src') ?? '')
       const alt = element.getAttribute('alt') ?? ''
       if (src.length === 0) return ''
+      if (src.endsWith('.mp4')) return `\n\n<Video src="${src}" caption="${alt.replace(/"/g, '&quot;')}" />\n\n`
       return `![${alt}](${src})`
     },
   })
@@ -469,6 +543,19 @@ for (const post of limited) {
   if (copied.size > 0) mkdirSync(assetDir, { recursive: true })
   if (copied.size === 0 && existsSync(assetDir)) rmSync(assetDir, { recursive: true, force: true })
   for (const [source, name] of copied) copyFileSync(source, join(assetDir, name))
+
+  // Prune assets a previous run left behind. Without this, changing how an
+  // asset is emitted (a GIF that became an mp4, say) leaves the old file in
+  // place, and astro:assets happily processes it into the build even though no
+  // post references it any more.
+  if (existsSync(assetDir)) {
+    const wanted = new Set(copied.values())
+    for (const entry of readdirSync(assetDir)) {
+      if (wanted.has(entry)) continue
+      rmSync(join(assetDir, entry), { force: true })
+      postNotes.push(`removed orphaned asset: ${entry}`)
+    }
+  }
 
   const metaTitle = meta?.meta_title?.trim() ?? ''
   const metaDescription = meta?.meta_description?.trim() ?? ''

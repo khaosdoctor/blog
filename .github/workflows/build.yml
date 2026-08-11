@@ -24,8 +24,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      # Builds and uploads the Pages artifact.
-      - uses: withastro/action@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # npm 11 blocks install scripts by default; package.json allowlists the
+      # one Astro actually needs (esbuild).
+      - run: npm ci
+
+      # `npm run build` = astro build + pagefind index.
+      - run: npm run build
+
+      # Fails the run if any post still carries Ghost markup or a stray
+      # component tag that never got a rule.
+      - name: Check migrated output
+        run: node scripts/check-output.ts
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
 
   # ponytail: no deploy job yet — the repo is private and Pages isn't enabled,
   # so actions/deploy-pages@v4 would only ever fail. Add it back at DNS cutover:
