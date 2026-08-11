@@ -1,0 +1,185 @@
+---
+title: "O que esperar do JavaScript em 2025"
+pubDate: 2024-07-24T11:00:49.000Z
+updatedDate: 2026-07-16T17:54:37.000Z
+lang: pt
+category: "typescript"
+tags: ["ecmascript", "javascript", "development"]
+description: "O que esperar do JavaScript em 2025? Saiba as principais propostas e funcionalidades que você pode receber no futuro!"
+heroImage: "./js-2025/articles--1--1.png"
+draft: false
+visibility: "public"
+---
+
+Todo ano o comitê que cuida do ECMAScript, conhecido como TC39, se reúne para discutir as principais mudanças e também para progredir, aprovar ou reprovar [propostas](https://github.com/tc39/proposals) existentes.
+
+Nesse artigo eu vou mostrar o que aconteceu na reunião deste ano que foi na Finlândia (aqui pertinho), as propostas que foram discutidas, mas eu também quero dar uma passada por algumas outras propostas que existem no repositório e fazer a minha aposta do que eu acho que vai acabar sendo realidade na próxima versão da especificação!
+
+Antes de tudo, se você não tem ideia do que eu estou falando, eu fiz um vídeo completo há uns anos explicando exatamente como todo esse processo funciona, inclusive a história por trás do JavaScript e dos nomes ECMA e TC39:
+
+<YouTube id="hDQu3AvvDfg" />
+
+## [Lazy Module Initialization](https://github.com/tc39/proposal-defer-import-eval)
+
+Essa proposta foi movida para o estágio 2.7 (que é quase um estágio já pronto para implementação).
+
+> Esse, na verdade, era o nome antigo da proposta, ela sofreu uma alteração e agora é chamada de "Deferred Import Evaluation"
+
+Essa é uma proposta que não vai ter muito efeito visual, em código, mas que vai permitir que as declarações de módulos sejam postergadas para serem executadas depois, isso pode criar um efeito muito bom de performance, especialmente em módulos que não precisam carregar logo no início da aplicação.
+
+A técnica de "não executar" algo é uma técnica de otimização bem conhecida pra todo dev JS. Então imagina se você conseguir postergar a execução do seu módulo mais pesado para somente quando ele for utilizado. Isso pode te salvar muitos segundos e ciclos de CPU.
+
+A sintaxe dessa proposta adiciona uma keyword `defer` na frente das declarações de módulos:
+
+```js
+// a
+import "b";
+import defer * as c from "c"
+
+setTimeout(() => {
+  c.value
+}, 1000);
+```
+
+Nesse exemplo, o módulo `b` vai ser carregado primeiro e somente quando o `c.value` for utilizado é que ele vai ser carregado.
+
+> [!CAUTION] ⚠️
+> É importante lembrar que top-level-await não pode ser executado no que a gente chama de __deferred initialization__ porque a execução do módulo que tem o top-level-await não tem como saber se o módulo que ele está usando vai responder agora ou depois, ou seja, se tiver top-level-await, não dá pra usar `import defer`
+
+<CourseCTA />
+
+## [Error.isError](https://github.com/tc39/proposal-is-error)
+
+Essa é uma feature interessante que, se você pensar bem, tem bastante impacto, ela foi passada para o estágio 2.
+
+O racional para essa proposta é que, quando estamos executando scripts em dois domínios diferentes, os erros que lançamos em um domínio não são a mesma instância de um erro em outro domínio.
+
+> Por domínio aqui eu não estou falando de sites e URLs, mas de domínios de execução (escopos), por exemplo, uma janela com um iFrame dentro tem dois escopos de execução (ou dois domínios) o da página principal e o domínio que está executando o iFrame
+
+A proposta do `Error.isError` é bastante simples, ela verifica se o erro em questão é um erro nativo e retorna um boolean (tem [um caso](https://tc39.es/proposal-is-error/#sec-iserror) onde ele dá um throw também) independente do domínio onde ele está sendo executado.
+
+Para exemplificar isso, imagina que a gente tem uma janela principal `jPrincipal` e um iframe `jIframe`. Se dermos um throw dentro do iFrame, o erro vai ser propagado para a janela principal porque é lá que estão os handlers de erros, mas se tivermos uma checagem do tipo `jIframeError instanceof Error` vamos ter um erro (irônico), porque a realidade é que a instância `Error` dentro do iFrame é diferente da instância de `Error` na `jPrincipal`.
+
+> Isso é porque todos os objetos, independente de onde eles estão, vão sempre ser passados como referência de memória no JavaScript, então a referência é sempre diferente
+
+Para essa verificação dar certo a gente teria que comparar dessa forma:
+
+```js
+jIframeError instanceof document.getElementsByTagName('iframe')[0].contentWindow.Error
+```
+
+Ou, com o `isError`:
+
+```js
+if (Error.isError(jIframeError) { ... }
+```
+
+## [RegExp Escaping](https://github.com/tc39/proposal-regex-escaping/)
+
+Essa proposta avançou para o estágio 2, e é provavelmente a maior prova de que qualquer proposta em qualquer momento pode ser aprovada ou até considerada, já que ela começou como uma [ideia](https://simonwillison.net/2006/Jan/20/escape/) de um cara postada em Janeiro de 2006, que criou uma [discussão](https://esdiscuss.org/topic/regexp-escape) em 2010 e agora está sendo implementada.
+
+A ideia básica dessa proposta é bem simples e bem útil. Quando a gente está criando uma RegExp no JavaScript, qualquer coisa que a gente colocar ali dentro vai ser interpretado como uma expressão regular válida, por exemplo:
+
+```js
+const s = "Eu quero arquivos com a extensão *.*"
+console.log(s.replace(new RegExp("*.*", "g"), ".pdf"))
+```
+
+Essa função vai dar um erro: "Nothing to Repeat". Isso porque você precisa escapar os caracteres, já que `*` e `.` são reservados na RegExp. Então você pode fazer algo como:
+
+```js
+const s = "Eu quero arquivos com a extensão *.*"
+console.log(s.replace(new RegExp("\\*\\.\\*", "g"), ".pdf"))
+```
+
+E agora temos "Eu quero arquivos com a extensão .pdf".
+
+Com essa nova proposta a ideia é fazermos:
+
+```js
+const s = "Eu quero arquivos com a extensão *.*"
+console.log(s.replace(new RegExp(RegExp.escape("*.*"), "g"), ".pdf"))
+```
+
+## [Promise.try](https://github.com/tc39/proposal-promise-try)
+
+Outra ideia simples que é basicamente um atalho para algo que a gente já faz hoje é fazer um wrap de uma função em uma promise. O que acontece com JavaScript (geralmente não com TypeScript) é que a gente está executando uma função externa que pode ou não ser uma [Promise](https://dev.to/_staticvoid/series/1993).
+
+Hoje, para não termos que ficar sabendo desses detalhes, a gente pode simplesmente fazer assim, imagine que `f` é a minha função que não sei se é uma promise:
+
+```js
+Promise.resolve().then(f)
+```
+
+O que isso faz é que cria uma Promise já resolvida e ai executa a função `f`, retornando um _thenable_ (um valor que podemos encadear com `.then`), mas isso tudo só acontece na próxima execução do event loop.
+
+Para podermos fazer tudo isso executar no mesmo tick, podemos ter uma aproximação mais direta:
+
+```js
+new Promise((resolve => resolve(f()))
+```
+
+Vai criar uma promise que vai executar `f` no mesmo tick do seu primeiro `then`.
+
+A proposta que agora está no estágio 3, ou seja, muito provável de ser implementada ainda esse ano ou no ano que vem. A ideia é criar o `Promise.try`:
+
+```js
+Promise.try(f).then(() => ...)
+```
+
+Que faz a mesma coisa do anterior.
+
+## Outras propostas interessantes
+
+Além dessas propostas, existem outras propostas que também foram discutidas, mas não chegaram a um estágio que pode estar mais avançado ainda. Fora algumas outras que ficaram no mesmo lugar, vamos falar dessas primeiro:
+
+### Propostas que se mantiveram no mesmo lugar
+
+-   [Async Iterators](https://github.com/tc39/proposal-async-iterator-helpers) (2): Uma sequencia de métodos de ajuda para Async Iterators (que eu já falei [aqui](/async-iterators-js/))
+-   [Base64](https://github.com/tc39/proposal-arraybuffer-base64) (3): Algo que eu já precisei muitas vezes, converter ByteArrays (UInt8Arrays, SharedArrays) para base64 e vice versa, hoje não temos um método nativo.
+-   [Cancellation](https://github.com/tc39/proposal-cancellation/) (1): Capacidade de cancelar promises no meio
+-   [Explicit Resource Management](https://github.com/tc39/proposal-explicit-resource-management) (3): Essa é a proposta do [Using](/ts-using/) que está em estágio 3
+-   [Intl.DurationFormat](https://github.com/tc39/proposal-intl-duration-format) (3): Parte do esforço de localização da Web utilizando uma forma nativa de transformar tempo em duração.
+-   [Intl.MessageFormat](https://github.com/tc39/proposal-intl-messageformat/issues/58) (1): O mesmo do anterior porém para textos arbitrários serem convertidos e interpolados com variáveis.
+-   [ShadowRealm](https://github.com/tc39/proposal-shadowrealm) (2): Uma forma de executar código de usuário em um domínio separado (falei sobre ele [aqui](/shadow-realms/))
+-   [Shared struct](https://github.com/tc39/proposal-structs) (1): A capacidade de adicionar objetos imutáveis (structs) no JS
+-   [Signals](https://github.com/tc39/proposal-signals) (1): Uma forma de se trabalhar com estados (à la React) de forma nativa com um protocolo único
+-   [Smart Units](https://github.com/tc39/proposal-smart-unit-preferences) (1): Mais uma do esforço de localização, pretendendo adicionar unidades de forma automática de acordo com o local
+-   [Source Maps](https://docs.google.com/presentation/d/1H6nu-Q0FllP2rsnCRxepiB_iBgsA0TMba5FGntDL5fg/edit?usp=sharing) (0): Cria uma especificação formal para os (já existentes) sourcemaps.
+-   [Temporal](https://github.com/tc39/proposal-temporal) (3): A proposta para a nova api de datas do JavaScript (detalhes [aqui](/temporal-api/))
+
+### Propostas tiveram ou podem ter avanços
+
+-   [Atomics.pause](https://github.com/syg/proposal-atomics-microwait) (2.7): Uma forma de pausar execução na forma de micropauses para operações que requerem um lock
+-   [Decimal](https://github.com/tc39/proposal-decimal) (1): A proposta que pretende adicionar números decimais corretos (finalmente) no JavaScript
+-   [ESM Phase Imports](https://github.com/tc39/proposal-esm-phase-imports) (2): Permite customizações na hora de carregar módulos no JS
+-   [Iterator Sequencing](https://github.com/tc39/proposal-iterator-sequencing) (2): Permite concatenar dois iteradores em um só de forma que os valores sejam sequenciais entre si.
+-   [Joint Iteration](https://github.com/tc39/proposal-joint-iteration) (2.7): Um novo método para poder executar iteradores de forma síncrona entre si, o famoso método `zip` do lodash
+-   [Discard Bindings](https://github.com/tc39/proposal-discard-binding) (2): Uma proposta interessante que propõe uma sintaxe para variáveis que não vão precisar ser associadas a nenhum endereço de memória, incluindo aquelas que a gente quer descartar de destructuring de Arrays e objetos.
+
+## Previsões
+
+Como sempre, vou fazer algumas previsões (que podem estar completamente erradas) para o que eu acho que pode pintar para a próxima versão do ECMAScript, vamos lá.
+
+Eu, pessoalmente acredito que algumas dessas propostas **não vão sair do lugar** por um bom tempo, duas delas os **Decimals** e **Temporal** eu tenho quase certeza que vão se manter do jeito que estão (o Decimals pode avançar um ou dois estágios), porque são propostas muito grandes para serem implementadas em um ano (o próprio temporal já está lá há uns 7).
+
+Dito isso, eu acredito que **Source Maps** podem ter um boost neste ano já que estamos começando a ver vários runtimes como o Node Test Runner, Vitest e vários outros usando esse padrão, então é possível que esse uso acabe empurrando a proposta para frente. Mas certeza que ela não vai ver a luz do dia por um bom tempo.
+
+Outras propostas que eu acredito que **podem sair** ainda na próxima versão (mas com menos certeza) são:
+
+-   **Async Iterator Helpers**: Implementações mais simples e métodos extras geralmente são adicionados porque não quebram a spec anterior
+-   **Shadow Realm**: Com as conversas de "realms" se intensificando (com o próprio Error.isError), acho bem provável que essa proposta também seja passada
+-   **Signals**: A galera está fazendo um barulho grande nessa proposta, porém ela está em estágio muito inicial para ter certeza de que viria na próxima versão, muito provavelmente não
+-   **Phase Imports**: Gestão de imports e carregamento de módulos está muito em alta principalmente por conta de WASM e de runtimes como o Deno
+-   **Deferred Imports**: O mesmo motivo do anterior
+-   **Error.isError**: A implementação de algo desse tipo não é algo complexo, e, portanto, eu acho que pode ser passada
+-   **Base64**: Da mesma forma, esse é um método que já está sendo pedido há tempos e é uma função relativamente primitiva.
+
+Agora, outras proposta eu tenho quase certeza que vão estar na próxima versão da spec
+
+-   Promise.try
+-   RegExp.escape
+-   Explicit Resource Management
+-   Pelo menos um dos métodos do Intl
+
+Vamos ver se essas previsões se mantém reais, se você tem opiniões diferentes, não esqueça de comentar lá nas minhas [redes](https://lsantos.dev) ou me chamar lá no [X](twitter.lsantos.dev) pra trocar uma ideia!

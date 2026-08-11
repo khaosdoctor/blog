@@ -1,0 +1,241 @@
+---
+title: "Definindo métodos estáticos em interfaces com TypeScript"
+pubDate: 2023-10-17T22:00:33.000Z
+updatedDate: 2026-07-16T15:56:01.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "javascript", "development"]
+description: "Você sabe como tipar métodos e propriedades estáticas no TypeScript? Vem aqui que eu vou te ensinar como fazer!"
+heroImage: "./interfaces-estaticas-typescript/articles-2.png"
+draft: false
+visibility: "public"
+---
+
+Ontem eu estava montando as aulas da [Formação TS](https://formacaots.com.br) e me deparei com algo que é bastante interessante e que eu mesmo já quebrei a cabeça por anos (inclusive ontem).
+
+Quando a gente fala em programação orientada a objetos uma das coisas mais difíceis de entender é o conceito de propriedades estáticas versus propriedades de instâncias, e isso é especialmente difícil quando tentamos tipar uma linguagem dinâmica em cima de uma tipagem estática.
+
+Eu não vou entrar em detalhes sobre o que são métodos estáticos ou não estáticos neste artigo porque existem muitos outros conteúdos na Internet que você pode consumir que vão ser muito mais detalhados do que eu posso ser aqui.
+
+Mas vale a pena dar aquela refrescada na memória.
+
+### Métodos estáticos
+
+Métodos estáticos, ou atributos estáticos, são atributos que existem em qualquer instância de uma classe, eles são definidos no nível de construtor, ou seja, a própria classe possui esses métodos e, portanto, todas as instâncias dessas classes também vão possuir.
+
+Um método estático comum é quando estamos criando um objeto de domínio, ou uma entidade de banco de dados, por exemplo:
+
+```ts
+class Person {
+  static fromObject (obj: Record<string, unknown>) {
+    const instance = new Person()
+    instance.prop = obj.prop
+    return instance
+  }
+
+  toObject () {
+    return {
+     prop: this.prop
+    }
+}
+```
+
+O método `fromObject` existe em todas as classes, ele está acima de qualquer instância e, por isso, não pode usar a palavra chave `this`, porque o `this` [ainda não foi inicializado](https://twitter.com/_StaticVoid/status/1708966256487911727), e também porque você está em um contexto acima de qualquer instância que o `this` poderia se referir.
+
+Nesse caso a gente está recebendo um objeto e criando uma nova instância da classe diretamente com ele. Para a gente executar esse código, ao invés de fazer algo padrão como:
+
+```ts
+const p = new Person()
+p.fromObject(etc) // erro, a propriedade não existe na instância
+```
+
+A gente precisa chamar o método direto do construtor da classe:
+
+```ts
+const p = Person.fromObject(etc)
+```
+
+## O problema
+
+Métodos estáticos são muito comuns em linguagens fortemente tipadas, porque você tem uma clara separação entre o momento estático da classe e o momento "dinâmico".
+
+Mas o que acontece quando a gente precisa tipar uma linguagem dinâmica com uma tipagem estática?
+
+No TypeScript a gente vai ter alguns erros quando tentarmos declarar, por exemplo, que uma classe tem métodos dinâmicos e estáticos e tentar descrever os dois em uma interface:
+
+```ts
+interface Serializable {
+  fromObject (obj: Record<string, unknown>): Person
+  toObject (): Record<string, unknown>
+}
+
+class Person implements Serializable 
+// Class 'Person' incorrectly implements interface 'Serializable'.
+// Property 'fromObject' is missing in type 'Person' but required in type
+// 'Serializable'.
+```
+
+Isso acontece porque interfaces no TypeScript atuam no "[lado dinâmico](https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes)" da classe, então é como se todas as interfaces fossem instâncias da classe em questão, mas não a classe em si.
+
+Felizmente, o TypeScript tem uma forma de declarar uma classe como um construtor, as chamadas **Constructor Signatures**:
+
+```ts
+interface Serializable {
+  new(...args: any[]): any
+  fromObject (obj: Record<string, unknown>): Person
+  toObject (): Record<string, unknown>
+}
+```
+
+Agora vai, certo? Infelizmente não, porque mesmo que você implemente o método manualmente, a classe ainda dirá que você não implementou o método `fromObject`.
+
+### O problema da reflexão estática
+
+E o problema vai mais além, por exemplo, se quiséssemos fazer uma classe de banco de dados que usa o nome da entidade direto da classe para poder criar um arquivo, isso é feito através da propriedade `name` em qualquer classe, essa é uma propriedade estática que existe em todos os objetos instanciáveis:
+
+```ts
+interface Serializable {
+  toObject (): any
+}
+
+class DB {
+  constructor (entity: Serializable) {
+    const path = entity.name // name não existe na propriedade
+  }
+}
+```
+
+Ok, então podemos substituir `entity.name` por `entity.constructor.name`, o que funciona, mas e quando a gente precisa criar uma nova entidade a partir de um objeto?
+
+```ts
+interface Serializable {
+  toObject (): any
+}
+
+class DB {
+
+  #entity: Serializable
+  constructor (entity: Serializable) {
+    const path = entity.constructor.name
+    this.#entity = entity
+  }
+
+  readFromFile () {
+    // lemos do arquivo aqui
+    const object = 'conteúdo do arquivo como um objeto'
+    return this.#entity.fromObject(object) // fromObject não existe
+  }
+
+}
+```
+
+Então estamos em uma escolha, ou a gente prioriza a instância ou a gente prioriza o construtor...
+
+## A solução
+
+Felizmente, temos uma solução para esse problema, ela não é muito bonita, mas existem algumas ideias no repositório do TypeScript (como [essa](https://github.com/microsoft/TypeScript/issues/33892) e [essa](https://github.com/microsoft/TypeScript/issues/34516)) que vem [desde 2017](https://github.com/microsoft/TypeScript/issues/13462) que estão analisando a possibilidade de adicionar definições estáticas à interfaces.
+
+Porém, enquanto essa ideia não chega, o que temos é a definição de duas partes da interface, a parte estática e a parte da instância:
+
+```ts
+export interface SerializableStatic {
+  new (...args: any[]): any
+  fromObject(data: Record<string, unknown>): InstanceType<this>
+}
+
+export interface Serializable {
+  id: string
+  toJSON(): string
+}
+```
+
+> É importante notar que o construtor em `new(...args: any[]): any` **precisa** ser tipado como `any` no retorno, caso contrário ela vira uma referência circular
+
+Tendo essas duas partes da classe tipadas, podemos dizer que a classe só implementa a parte da instância:
+
+```ts
+class Person implements Serializable {
+  // ...
+}
+```
+
+E ai agora, podemos dizer que nosso banco de dados vai receber dois type parameters, um será a parte estática, que vamos chamar de `S` e outro vai ser a parte dinâmica (ou da instância) que vamos chamar de `I`, `S` sempre vai estender `SerializableStatic` e `I` sempre vai estender `Serializable` e, por padrão, vai ser o tipo de uma instância de `S`, que pode ser definido pelo type utility `InstanceType<S>`:
+
+```ts
+class Database<S extends SerializableStatic, I extends Serializable = InstanceType<S>> { }
+```
+
+Agora podemos ter as nossas propriedades normalmente, por exemplo:
+
+```ts
+class Database<S extends SerializableStatic, I extends Serializable = InstanceType<S>> {
+  #dbPath: string
+  #data: Map<string, I> = new Map()
+  #entity: S
+
+  constructor(entity: S) {
+    this.#dbPath = resolve(dirname(import.meta.url), `.data/${entity.name.toLowerCase()}.json`)
+    this.#entity = entity
+    this.#initialize()
+  }
+}
+```
+
+E no nosso método `#initialize` vamos usar o método `fromObject` para poder ler diretamente do arquivo e transformar em uma instância de uma classe:
+
+```ts
+class Database<S extends SerializableStatic, I extends Serializable = InstanceType<S>> {
+  #dbPath: string
+  #data: Map<string, I> = new Map()
+  #entity: S
+
+  constructor(entity: S) {
+    this.#dbPath = resolve(dirname(import.meta.url), `.data/${entity.name.toLowerCase()}.json`)
+    this.#entity = entity
+    this.#initialize()
+  }
+
+  #initialize() {
+    if (existsSync(this.#dbPath)) {
+      const data: [string, Record<string, unknown>][] = JSON.parse(readFileSync(this.#dbPath, 'utf-8'))
+      for (const [key, value] of data) {
+        this.#data.set(key, this.#entity.fromObject(value))
+      }
+      return
+    }
+    this.#updateFile()
+  }
+}
+```
+
+Enquanto podemos ter métodos como `get` e `getAll`, ou até `save` que recebem e retornam instâncias apenas.
+
+```ts
+get(id: string): I | undefined {
+  return this.#data.get(id)
+}
+
+getAll(): I[] {
+  return [...this.#data.values()]
+}
+
+save(entity: I): this {
+  this.#data.set(entity.id, entity)
+  return this.#updateFile()
+}
+```
+
+Agora quando usarmos um banco de dados desse tipo como:
+
+```ts
+class Person implements Serializable {
+  // código aqui
+}
+
+const db = new DB(Person)
+const todas = db.getAll() // Person[]
+const umaOuNenhuma = db.get(1) // Person | undefined
+db.save(new Person()) // DB<Person>
+```
+
+> Se você curtiu esse conteúdo, vem aprender mais sobre TypeScript comigo lá na **Formação TS!** É só acessar [https://formacaots.com.br](https://formacaots.com.br) e fazer parte dos mais de 250 alunos que já estão curtindo!

@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "blog-scheduler",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "observability": { "enabled": true },
+  // One minute is the finest cron Cloudflare offers, which is exactly the
+  // precision the scheduling feature promises.
+  "triggers": { "crons": ["* * * * *"] },
+  "vars": {
+    "GITHUB_REPO": "khaosdoctor/blog",
+    "SITE_URL": "https://blog.lsantos.dev"
+  }
+  // GITHUB_TOKEN is a secret: wrangler secret put GITHUB_TOKEN
+}

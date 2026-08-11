@@ -1,0 +1,99 @@
+---
+title: "Apresentando o KEDA HTTP Add-on"
+pubDate: 2021-07-02T20:01:58.000Z
+updatedDate: 2026-07-16T16:13:51.000Z
+lang: pt
+category: "infra"
+tags: ["keda", "kubernetes", "containers"]
+description: "Aprenda a escalar suas aplicações no Kubernetes baseado em requisições HTTP no Kubernetes com o KEDA HTTP Add-on"
+heroImage: "./apresentando-o-keda-http-add-on/external-content.duckduckgo-1-1.png"
+draft: false
+visibility: "public"
+---
+
+Uma das coisas que me deixa ainda mais feliz em trabalhar com open source é quando podemos transformar os projetos em realidade e ajudar muitas pessoas com o que pretendemos fazer!
+
+Há um tempo atrás, iniciei uma jornada ajudando os mantenedores do [KEDA](https://keda.sh) a criar um novo add-on para o ecossistema e, finalmente, este add-on foi publicado e está em beta!
+
+## O que é o KEDA
+
+Atualmente, temos uma série de formas de escalar workloads no Kubernetes, todas elas usam a API de Autoscaling nativa para poder criar o que chamamos de _HorizontalPodAutoscalers_.
+
+Estes scalers permitem que façamos a escalabilidade baseado em recursos da máquina, como CPU e memória, e também (com bastante dificuldade) métricas customizadas provenientes de outros serviços como, por exemplo, a contagem de requisições ou então requisições por segundo de um ingress controller padrão.
+
+Porém, justamente por conta da dificuldade de fazer este tipo de escalabilidade nativamente, surgiram outros projetos para facilitar a escalabilidade não só através de métricas locais, mas também a partir de serviços externos. E, o mais importante, permitir que escalássemos as aplicações para **zero**.
+
+O caso mais comum é quando temos uma aplicação que é um _worker_, ou seja, ouve de uma fila de mensagens e processa apenas uma mensagem por vez. Não faz sentido que esta aplicação seja executada a todo momento, uma vez que ela não vai estar o tempo todo realizando algum trabalho, apenas consumindo recursos de máquina. Seria muito mais eficiente que não houvessem workers ativos até que uma mensagem exista na fila.
+
+E é ai que o **KEDA** (que significa _Kubernetes Event Driven Autoscaling_) entra em cena. O KEDA funciona com uma série de _scalers_, cada scaler é em si uma pequena aplicação que conecta a uma fonte de métricas e as repassa para o controlador principal, que toma a decisão de escalar ou não uma aplicação alvo.
+
+Dessa forma podemos escalar baseado em vários serviços. Inclusive, o KEDA possui [uma lista extensa de scalers já suportados](https://keda.sh/docs/2.3/scalers/), porém nenhum deles permitia fazer algo muito simples porém muito útil: escalar baseado na quantidade de requisições HTTP.
+
+## HTTP Add-on
+
+Escalar aplicações com base no tráfego de entrada delas é algo que não pensamos muito, porque quase sempre temos um site que fica recebendo milhares de requisições por minuto ou por segundo, ou seja, sempre temos que ter este site no ar.
+
+Mas talvez essa não seja a realidade, e por isso que, com o KEDA, poderíamos plugar um scaler usando o Prometheus para poder extrair métricas de requisições, mas isso exigiria uma instrumentação e também a instalação do Prometheus na sua instância, mesmo que você não estivesse utilizando ele como seu monitor principal. Pensando nisso, começamos a desenvolver a ideia do que viria a se tornar um add-on para o KEDA em si, não um scaler, mas parte do produto.
+
+[O artigo oficial de lançamento](https://keda.sh/blog/2021-06-24-announcing-http-add-on/) do projeto explica um pouco sobre a configuração e dá um pequeno tutorial de como começar a trabalhar com o KEDA Add-on, mas ainda sim vou fazer um pequeno tutorial e explicar alguns dos conceitos base que pensamos.
+
+### Como funciona?
+
+O add-on é baseado em três principais componentes que seguem a mesma ideia do padrão _operator_ do kubernetes:
+
+-   **Interceptor:** É o componente principal, ele intercepta todas as requisições HTTP que vem para o serviço da sua aplicação e verifica se o serviço já possui pelo menos uma aplicação para servir a requisição, então realiza uma contagem e faz um simples forwarding para a aplicação de destino. Caso contrário, "segura" a requisição até que a aplicação seja escalada.
+-   **External Scaler**: Este é um componente que já existe no KEDA, a possibilidade de você poder criar seu próprio scaler e implementar uma interface gRPC definida faz com que ele seja muito escalável. Este é um [scaler do tipo push](https://keda.sh/docs/2.1/scalers/external-push/) que realiza um ping no interceptor para saber a contagem da fila de pendencias e então transforma estes dados para que o KEDA possa entender.
+-   **Operator:** O operador é o cérebro de controle, ele roda pela conveniência de não precisar criar todas estas aplicações manualmente. Como o add-on é baseado em [CRDs](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/), a criação de um novo CRD do tipo `HTTPScaledObject` faz com que sejam criados tanto o serviço quando o interceptor e o scaler para sua aplicação.
+
+A arquitetura roda da seguinte maneira:
+
+<Figure src="./apresentando-o-keda-http-add-on/image.png" alt="" caption="Arquitetura do projeto KEDA HTTP" />
+
+Veja que o add-on não interfere na aplicação do usuário, que continua tendo poder completo sobre o load balancer e o ingress, bem como os serviços e o deploy da aplicação.
+
+## Como usar
+
+Como este projeto é um add-on do KEDA, precisamos primeiramente instalar o KEDA em um cluster Kubernetes. Para facilitar, vamos instalar tudo usando o Helm:
+
+```sh
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+helm install --create-namespace -n <namespace> keda kedacore/keda
+```
+
+Depois, podemos instalar o operador do add-on pelo mesmo serviço de charts:
+
+```sh
+helm install \
+  --create-namespace <namespace> \
+  http-add-on \
+  kedacore/keda-add-ons-http
+```
+
+Depois, podemos criar um objeto `HTTPScaledObject`:
+
+```yaml
+apiVersion: http.keda.sh/v1alpha1
+kind: HTTPScaledObject
+metadata:
+  name: meuApp
+spec:
+  scaleTargetRef:
+    deployment: meuDeployment
+    service: meuService
+    port: 8080
+```
+
+Isso é o suficiente para o add-on poder criar tudo para você e começar a escalar o seu app!
+
+## Conclusão e próximos passos
+
+Atualmente a **aplicação ainda está em beta** então não recomendamos o uso em produção, pois a API pode mudar drásticamente no futuro. Existem várias propostas novas que estamos considerando, como tráfego norte-sul através de Ingresses e a [Gateway API](https://github.com/kedacore/http-add-on/issues/33) e também leste-oeste (comunicação entre serviços) usando [service meshes](https://github.com/kedacore/http-add-on/issues/6).
+
+Além disso, estamos [constantemente atualizando o projeto](https://github.com/kedacore/http-add-on/) e criando novas issues e ajudando no desenvolvimento futuro do projeto!
+
+Este projeto é um esforço em conjunto de muitas pessoas, incluindo eu mesmo, o agradecimento vai para:
+
+-   [Aaron Schlesinger](https://github.com/arschles)
+-   [Aaron Wislang](https://github.com/asw101)
+-   [Tom Kerkhove](https://github.com/tomkerkhove/) e todo o grupo de [mantenedores do KEDA](https://github.com/orgs/kedacore/teams/keda-maintainers)

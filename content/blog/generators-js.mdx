@@ -1,0 +1,279 @@
+---
+title: "Para que servem os generators no JS?"
+pubDate: 2023-01-05T13:00:46.000Z
+updatedDate: 2026-07-16T16:04:21.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "ecmascript"]
+description: "Os generators não são uma API recente do JavaScript, porém ainda sim são pouco conhecidos. Vamos aprender para que você pode usar generators e como você pode levar suas habilidades para outro nível com essa funcionalidade"
+heroImage: "./generators-js/Blog-cover-Template.png"
+draft: false
+visibility: "public"
+seoDescription: "Os generators não são uma API recente do JavaScript, porém ainda sim são pouco conhecidos. Vamos aprender para que você pode usar generators."
+---
+
+Duas das estruturas mais interessantes - e também mais complexas - do JavaScript são os **iterators** e **generators**. Essas duas estruturas não são novas, na verdade eu escrevi tanto sobre [generators](https://medium.com/trainingcenter/javascript-entendendo-generators-408cbce9aee) quanto sobre [iterators](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495) em 2017, mas, mesmo que essas duas estruturas (principalmente os Iterators) sejam muito utilizadas em vários frameworks e até em construtos centrais da própria linguagem, como Promises e o nosso tão querido async/await, os generators ainda não são muito conhecidos e muito utilizados.
+
+Esse artigo é justamente para isso! Você vai entender como os generators podem ser usados nas suas aplicações de forma mais prática!
+
+## O que são os generators?
+
+Primeiro, vamos fazer uma recapitulação do que são os generators. Eles são um construto de baixo nível, geralmente usados para construir outras ferramentas. Um generator é uma função que retorna um _generator object_, que é um objeto que implementa o protocolo `iterable`, ou seja, ele tem um `Symbol.iterator` que é utilizado para poder realizar loops.
+
+A diferença é que uma _generator function_ retorna um tipo especial de iterator que pode suspender a sua própria execução, enquanto mantemos o próprio estado e contexto interno. Um generator é declarado com um `*` na frente de uma função, dessa forma:
+
+```js
+function *generator() {
+    yield 1
+    yield 2
+    yield 3
+}
+```
+
+Ou então:
+
+```js
+function* generator() {
+    yield 1
+    yield 2
+    yield 3
+}   
+```
+
+Os dois são a mesma coisa, podem ser utilizados de forma intercambiável. Esses dois generators estão retornando um iterador, ou seja, você pode chamar um `.next()` em cada um desses iteradores e, quando ele for executado, o valor que está depois de `yield` vai ser retornado a cada chamada, por exemplo:
+
+```js
+function* generator () {
+    yield 1
+    yield 2
+    yield 3
+}
+
+const g = generator()
+console.log(g.next()) // 1
+console.log(g.next()) // 2
+console.log(g.next()) // 3
+```
+
+Além disso podemos usar os generators com os operadores _spread_, por exemplo:
+
+```js
+function* generator () {
+    yield 1
+    yield 2
+    yield 3
+}
+
+const g = generator()
+console.log([...g]) // [1, 2, 3]
+```
+
+Mas eu não vou me estender muito aqui, se você quer saber o que são os generators, eu recomendo que você leia [o artigo que eu citei](https://medium.com/trainingcenter/javascript-entendendo-generators-408cbce9aee) porque ele vai te dar uma base bem sólida do que tudo significa.
+
+## Usos de Generators
+
+Chega de entender o que são os generators e vamos falar qual é a razão pela qual eles existem!
+
+### Lazy iterators
+
+Essa é provavelmente o uso mais comum de um generator. Quando eu falei que generators são situações especiais de iterators, eu também disse que eles tem uma característica muito incomum. Eles podem **pausar** a sua execução.
+
+O que isso significa? Basicamente, é que as chamadas para um generator, seja através de um loop como o `for .. of` ou `.next()`, vão ser executadas somente naquele determinado momento, por exemplo:
+
+```js
+function* jsFacts() {
+    yield 'Linguagem mais presente na Web'
+    yield 'Criada em 1995 por Brendan Eich'
+    yield 'Pode ser usada no backend com Node, Deno e outros'
+}
+
+for (let fact of jsFacts()) {
+    console.log(`JS: ${fact}`)
+}
+
+// JS: Linguagem mais presente na Web
+// JS: Criada em 1995 por Brendan Eich
+// JS: Pode ser usada no backend com Node, Deno e outros
+```
+
+O que está acontecendo aqui é que as strings não vão existir até que o próximo item seja chamado. Enquanto para strings isso pode ser meio sem sentido, generators como lazy iterators podem ser utilizados largamente para construir `recordSets`, que são estruturas que buscam dados, por exemplo, de um banco de dados e, ao invés de retornar todos os valores de uma única vez, retornam um a um de forma a não encher a memória.
+
+Por exemplo, vamos imaginar que temos um banco de dados com terabytes de informação, queremos pegar todos os dados, mas não queremos todos de uma vez, então podemos construir um _lazy iterator_, que vai chamar o banco de dados para devolver somente um dos valores por vez:
+
+```js
+const linha = [{
+  nome: 'Alan Turing', 
+  id: 1,
+  idade: 42,
+  titulo: 'Pai da computação'
+}, {
+  nome: 'Ada Lovelace',
+  id: 2,
+  idade: 36,
+  titulo: 'Primeira programadora'
+}, {
+  nome: 'Grace Hopper',
+  id: 3,
+  idade: 85,
+  titulo: 'Inventora do compilador'
+}]
+
+const findInDatabase = (skip, limit) => {
+  return linha.slice(skip, skip + limit)
+}
+
+function* recordSet() {
+  let skip = 0
+  const limit = 1
+  let currentRecord = findInDatabase(skip, limit)
+
+  while (currentRecord.length > 0) {
+    skip += limit
+    yield currentRecord[0]
+    currentRecord = findInDatabase(skip, limit)
+  }
+}
+```
+
+Se prestarmos atenção no que estamos fazendo, vamos ver que estamos definindo um estado interno que tem uma variável `skip`, que é a quantidade de registros que a gente quer pular do array (que é nosso banco), fazemos a primeira iteração e salvamos o registro atual no `currentRecord`, que é outra parte do estado interno. Daí podemos criar um loop validando se o resultado recebido é válido, ou seja, se ele ainda tem registros no banco, se sim, vamos somar o `skip` com o limite de dados que queremos, no caso é apenas 1 por vez, e retornar o resultado atual e então pausar a execução.
+
+Sempre que iniciarmos o nosso generator com:
+
+```js
+const records = recordSet()
+```
+
+Vamos executar todo o código até `yield currentRecord[0]`, então, quando fizermos:
+
+```js
+const records = recordSet()
+console.log(records.next()) // {value: { nome: 'Alan Turing', id: 1, idade: 42, titulo: 'Pai da computação' }, done: false }
+```
+
+Aí sim vamos executar o nosso generator e obter o valor que está vindo de `yield`, daí vamos executar novamente o loop até o próximo `yield`.
+
+Podemos também usar uma outra variação do generator para não termos o estado interno e definirmos a condição de parada dentro do loop dessa forma:
+
+```js
+function* recordSet() {
+  let skip = 0
+  const limit = 1
+
+  while (record.length > 0) {
+    const record = findInDatabase(skip, limit)
+    if (record.length === 0) return
+    skip += limit
+    yield record[0]
+  }
+}
+```
+
+Os valores que obtemos no `next` são objetos do tipo `{value: any, done: boolean}` que são provenientes do iterator que estamos acessando.
+
+### Ranges infinitos
+
+Outra coisa que podemos fazer é criar um contador infinito:
+
+```js
+function* infiniteSequence() {
+  var i = 0;
+  while (true) {
+    yield i++;
+  }
+}
+```
+
+O que pode não parecer muita coisa, mas é uma ferramenta poderosa de monitoramento global, por exemplo, se quisermos contar a quantidade de promises que uma aplicação criou durante o tempo de vida, podemos fazer algo assim:
+
+```js
+function* sequence() {
+  var i = 1
+  while (true) {
+    yield i++
+  }
+}
+
+const promisesCreatedCounter = sequence()
+let promisesCreatedTotal = 0
+
+const proxyPromise = new Proxy(Promise, {
+  get(target, prop) {
+    if (prop === 'prototype') {
+      promisesCreatedTotal = promisesCreatedCounter.next().value
+    }
+    return target[prop]
+  }
+})
+
+const p = new proxyPromise((resolve) => {
+  resolve('done')
+})
+
+p.then(() => {
+  console.log('Promise resolved')
+})
+
+console.log('Promises created: ' + promisesCreatedTotal) // Promises Created: 1
+```
+
+Além disso, cada instancia de uma sequência dessas é única, o que significa que você pode reutilizar o mesmo contador em diversos lugares que ele sempre vai começar do 1.
+
+### Funções utilitárias
+
+Como eu falei antes, é possível construir muitas ferramentas a partir dos generators, porque eles são uma ferramenta de baixo nível. Algumas das funções que podemos construir com ele são, por exemplo:
+
+#### take
+
+Uma função que, dado um iterable, vai pegar um número `n` de elementos desse iterable e retornar:
+
+```js
+const take = (n) => function*(iteravel) {
+    let i = 0
+    for (let elemento of iteravel) {
+        if (i >= n) return
+        yield elemento
+        i++
+    }
+}
+```
+
+Se a gente tiver um array do tipo `[1,2,3,4]` e fizermos `take(4)([1,2,3,4,5,6])` vamos ter `[1,2,3,4]`
+
+#### repeat
+
+Uma variação da função de sequencia onde temos o mesmo valor repetido infinitas vezes:
+
+```js
+function* repeat(valor) {
+    while (true) {
+        yield valor
+    }
+}
+```
+
+#### scan
+
+Podemos definir uma função que é parecida com um `Array.prototype.reduce` porém ao invés de termos um único valor final, podemos ter cada passo dos valores intermediários como um array:
+
+```js
+function* scan(reducer, valorInicial, iteravel) {
+  let resultado = valorInicial;
+  yield resultado;
+  for (const atual of iteravel) {
+    resultado = reducer(resultado, atual);
+    yield resultado;
+  }
+}
+```
+
+E muitas outras. O ponto é que essas funções individualmente podem não parecer muita coisa, mas elas permitem que a gente construa funções e sequencias mais complexas quando combinadas. E é sobre isso que os generators são, criação de pequenas funções que podem servir a um propósito maior.
+
+> Inclusive, muitas dessas funções estão descritas em uma proposta que vou escrever ainda por aqui chamada de [Iterator Helpers](\<https://www.proposals.es/proposals/Iterator helpers>).
+
+## Conclusão
+
+Generators provavelmente vão ser sempre pouco usados porque eles tem casos de uso muito específicos, mas é sempre interessante entender que essas ferramentas existem e que você pode tirar proveito delas.
+
+Fica atento(a) para os próximos artigos sobre Iterators e, se você não quiser perder nada sobre o conteúdo que eu lanço, se inscreve aqui na Newsletter!
+
+<Bookmark url="https://news.lsantos.dev" title="ls -news | Um newsletter por Lucas Santos" description="Um newsletter mensal! Tudo sobre o mundo tech através de pílulas simples e rápidas para quem tem pressa!" publisher="Lucas Santos <hellolsantos.dev>" />

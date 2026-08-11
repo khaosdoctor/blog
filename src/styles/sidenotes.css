@@ -1,0 +1,242 @@
+/*
+ * Shared styles for <Sidenote> and <MarginNote> (src/components/Sidenote.astro,
+ * src/components/MarginNote.astro). Both components render the same shape:
+ *
+ *   <span class="note sidenote|marginnote">
+ *     <input class="note-toggle" type="checkbox" id="…" />
+ *     <label class="note-marker" for="…"></label>
+ *     <span class="note-text">…inline content…</span>
+ *   </span>
+ *
+ * `.note-text` is real inline content in the paragraph flow — never moved,
+ * never duplicated — so it always reads correctly with CSS off (RSS readers,
+ * text browsers, view-source). Everything below is progressive decoration on
+ * top of that plain-text baseline:
+ *
+ *   - mobile-first base: the note is a tap/click-to-reveal popover, toggled
+ *     by a checkbox (the "checkbox hack" — zero JS, and deliberately not
+ *     <details>, which the spec asked to avoid).
+ *   - wide screens (see WIDE below): the popover mechanics switch off and
+ *     the note text floats into the right margin, Tufte-style, always
+ *     visible.
+ *   - print: the note is inlined next to its marker as a parenthetical.
+ *
+ * Body content rule: notes are INLINE ONLY (text, strong/em, a, code). Never
+ * put headings or block elements inside a Sidenote/MarginNote — the block
+ * neutraliser near the bottom of this file is a safety net for stray markup,
+ * not a license to use block content on purpose.
+ */
+
+/* ponytail: a media query can only see viewport width, not the rendered px
+   width of a `ch`-based column, so "enough margin room" is an approximation:
+   90rem (1440px) comfortably clears a 68ch serif column (~40-44rem) plus a
+   13rem note and a 2rem gap on the right, with slack to spare. The same
+   90rem threshold is hardcoded in the two @media blocks below. */
+
+.note {
+  position: relative;
+  display: inline;
+}
+
+/* Visually hidden but focusable/toggleable — the real control behind the
+   click. Stays this way at every width; only its relevance changes. */
+.note-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.note-toggle:focus-visible + .note-marker {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.note-marker {
+  cursor: pointer;
+  padding: 0.3rem;
+  margin: -0.3rem;
+  user-select: none;
+}
+
+/* The numbered reference mark. Counter lives on <main> (the post content
+   region in BaseLayout.astro) rather than <body>, so it works with zero JS,
+   resets fresh on every page, and doesn't clobber any future body-level
+   counter a later component might add — counter-reset declarations replace
+   rather than merge. */
+main {
+  counter-reset: sidenote;
+}
+
+.sidenote .note-marker {
+  counter-increment: sidenote;
+}
+
+.sidenote .note-marker::after {
+  content: counter(sidenote);
+  vertical-align: super;
+  font-size: 0.65em;
+  line-height: 0;
+  margin-inline-start: 0.05em;
+  color: var(--accent);
+}
+
+/* MarginNote has no number — just a small tap target so the popover is
+   discoverable when there is no margin to put the text in. */
+.marginnote .note-marker::after {
+  content: '•';
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+/* Popover baseline (narrow / no margin room): visually hidden until the
+   checkbox is checked, then a small card near the marker.
+   Deliberately NOT `display: none` — that would remove the note from the
+   accessibility tree entirely, leaving screen reader users with an
+   unlabelled checkbox and no way to know what it reveals. The same
+   visually-hidden clip technique used on `.note-toggle` above keeps the
+   note text in the accessibility tree (read inline, in place, like the
+   CSS-off baseline) while still hiding it visually until toggled. */
+.note-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.note-toggle:checked ~ .note-text {
+  position: absolute;
+  top: 1.6em;
+  left: 0;
+  z-index: 20;
+  width: max-content;
+  height: auto;
+  max-width: min(18rem, 80vw);
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.18);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--fg);
+  text-align: left;
+  text-wrap: pretty;
+}
+
+/* Progressive enhancement: where CSS anchor positioning exists, let the
+   popover anchor to its marker instead of the parent-relative guess above,
+   so it can't drift on wrapped lines. `anchor-name`/`position-anchor` are set
+   per-instance via inline style in the components (a build-time random id,
+   no client JS). Harmless no-op everywhere else. */
+@supports (position-anchor: --a) {
+  .note-toggle:checked ~ .note-text {
+    position: fixed;
+    inset: auto;
+    top: calc(anchor(bottom) + 0.35rem);
+    left: anchor(left);
+  }
+}
+
+/* Block children are a misuse of these components, but degrade gracefully
+   instead of breaking the popover layout if they slip in. */
+.note-text :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li, blockquote, pre, figure, table, hr) {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Wide screens: margin room exists, so skip the popover entirely and float
+   the note text into the right margin, always visible, Tufte-style. */
+@media (min-width: 90rem) {
+  .note-toggle {
+    display: none;
+  }
+
+  .marginnote .note-marker {
+    display: none;
+  }
+
+  .note-text {
+    display: inline;
+    position: static;
+    float: right;
+    clear: right;
+    width: 13rem;
+    height: auto;
+    margin-right: -15rem;
+    margin-top: 0.15rem;
+    margin-bottom: 0.4rem;
+    padding: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-text {
+    transition: none;
+  }
+}
+
+@media print {
+  .note-toggle,
+  .marginnote .note-marker {
+    display: none;
+  }
+
+  .note-text {
+    display: inline;
+    position: static;
+    float: none;
+    width: auto;
+    height: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    font-size: 0.9em;
+    font-style: italic;
+    color: inherit;
+  }
+
+  .note-text::before {
+    content: ' (';
+  }
+
+  .note-text::after {
+    content: ')';
+  }
+}

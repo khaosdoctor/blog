@@ -1,0 +1,109 @@
+---
+title: "ls -news #13: Polêmicas e segurança"
+pubDate: 2023-05-27T11:00:21.000Z
+updatedDate: 2026-07-16T16:00:18.000Z
+lang: pt
+category: "newsletter"
+description: "Muito obrigado por assinar e espero que você goste do conteúdo!"
+heroImage: "./ls-news-13/logo.png"
+draft: false
+visibility: "members"
+---
+
+Muito obrigado por assinar e espero que você goste do conteúdo! Não esqueça de preencher o feedback no final da newsletter para eu saber o que você quer ver por aqui nas próximas edições!
+
+---
+
+### Recomende a newsletter
+
+Se você gosta do meu conteúdo, recomende essa newsletter gratuita para outras pessoas também receberem essa curadoria que faço com todo o carinho todos os meses. Ela é grátis e eu coloco muito esforço para trazer sempre o melhor conteúdo possível!
+
+<Bookmark url="https://news.lsantos.dev" title="ls -news | Um newsletter por Lucas Santos" description="Um newsletter mensal! Tudo sobre o mundo tech através de pílulas simples e rápidas para quem tem pressa!" publisher="Lucas Santos <hellolsantos.dev>" />
+
+---
+
+### Testes de tipos? O que é isso?
+
+Esse artigo causou uma polêmica leve no meu [LinkedIn](https://www.linkedin.com/posts/lsantosdev_typescript-ts-typescript-activity-7062034756351238144-9pka?utm_source=share&utm_medium=member_desktop), será que vale a pena testar tipos? O que é esse teste de tipos afinal? Eu te explico tudo com detalhes aqui no artigo!
+
+[Type testing com TypeScript vale a pena?](/type-testing/)
+
+### O NPM ficou mais seguro! E você deveria começar a pensar nisso
+
+Esse mes o NPM anunciou o package provenance, uma forma de garantir que os pacotes são dos donos que dizem ser, além de ser uma forma de atestar que eles vem de onde vieram. Deixei no artigo todas as dicas pra você saber como usar e como ele funciona!
+
+[O que é o NPM package provenance?](/npm-provenance/)
+
+### Novidades da próxima versão do JS!
+
+O ECMA2023 está logo ai e já temos a lista de tudo que vai vir! Como eu faço todos os anos, compilei um artigo com todas as novidades comparadas às minhas previsões do ano passado! Será que eu acertei?
+
+[O que o ECMAScript 2023 está trazendo de novo?](/ecma-2023/)
+
+---
+
+## Links do mês
+
+#### [UUIDs estão obsoletos](https://leonid.shevtsov.me/post/uuids-are-obsolete/)
+
+Estariam os UUIDs chegando ao fim? O Leonid acha que sim. NEsse artigo mega interessante, ele diz que os UUIDs já não são mais necessários desde que os sistemas distribuídos, principalmente com Docker, se tornaram uma realidade.
+
+Além de eles serem propensos a gerarem colisões, eles não são intuitivos e também demoram mais para serem ordenados, ou até mesmo tem problemas de ordenação. No artigo ele propõe o uso de outro padrão chamado Snowflake ID, que é o mesmo que o Twitter usa e é super interessante.
+
+No snowflake, você pode calcular quando esse ID foi gerado, e ele continua sendo sequencial, além de não ter riscos de colisões. Outras pessoas também me recomendaram o [hashId](https://hashids.org/) que parecem ser bem legais também.
+
+Eu particularmente gosto de UUIDs e não vejo e nunca tive problema com eles, mas reconheço que eles são muito grandes e pesados para algo que deveria ser leve.
+
+#### [Alguém criou uma AI que é um Dev Junior](https://github.com/smol-ai/developer/)
+
+A galera da Smol AI criou o Smol Developer (Small Developer) que, segundo eles, é um dev junior completo que vai te ajudar a criar seu ambiente e boilerplates para a maioria das coisas que você precisa desde que você dê para ele um prompt.
+
+E novamente a A.I está nas notícias…
+
+#### [Aprenda a isolar o contexto do Jest ou senão…](https://jamiemagee.co.uk/blog/your-jest-tests-might-be-wrong/)
+
+Um artigo muito legal do Jamie Magee que mostra como você pode sofrer com problemas de vazamento de escopo no Jest, que é algo que eu passo diariamente.
+
+O Jest é um test runner baseado em JavaScript que foi feito pelo time da Meta com o intuito de ser um testador para o React, ele é um projeto super antigo e muito famoso, embora não seja o melhor, pelo menos na minha opinião. E um dos maiores problemas do Jest é justamente em relação à confusão que ele faz com o que é um Mock, o que é um módulo e etc.
+
+Esse artigo é mega interessante pra você aprender a usar resetAllMocks e outras opções padrões para evitar o vazamento entre testes.
+
+#### [A performance do Node.js em 2023](https://blog.rafaelgss.dev/state-of-nodejs-performance-2023)
+
+Esse é um artigo do nosso compatriota Rafael que é de longe um dos melhores artigos que eu já vi em relação a cobertura de testes e benchmarks do Node.js
+
+Ele passa por várias versões do Node e roda diversos testes de performance, explicando os motivos pelos quais cada teste teve o resultado que teve. Dá uma lida lá que realmente vale muito à pena
+
+#### [Uma lista de coisas novas do ES2023](https://h3manth.com/ES2023/)
+
+Se você não leu meu artigo desse mês, recomendo ler primeiro para poder ter um contexto, mas a galera fez uma lista de tudo que foi incluso do ES2023 com exemplos de código.
+
+#### [VSCode ganha uma ferramenta para debugar o Engine do JavaScript](https://devblogs.microsoft.com/typescript/introducing-deopt-explorer/)
+
+O Deopt explorer é uma ferramenta criada pelo time do TypeScript que visa debugar com detalhes os picos de deoptimização do V8.
+
+Esse é um artigo **MUITO** denso, se você não sabe muito sobre como o V8 funciona, eu recomendo ler sobre os internals do sistema, eu falo sobre otimizações do compilador [aqui](https://dev.to/_staticvoid/node-js-por-baixo-dos-panos-4-vamos-falar-do-v8-4pai), [aqui](https://dev.to/_staticvoid/node-js-por-baixo-dos-panos-6-o-novo-v8-9h5) e [aqui](https://dev.to/_staticvoid/node-js-por-baixo-dos-panos-10-otimizacoes-do-compilador-39oi) e fortemente recomendo essas leituras para você estar a par do que foi feito.
+
+A ideia é que agora você pode acompanhar tudo que o V8 fez no seu código para poder ter mais detalhes do porquê ele pode estar lento, a um nível muito mais baixo. Eu pessoalmente não acho que essa ferramenta é útil para a maioria dos projetos comuns, mas se você trabalha com projetos que exigem performance, isso é uma mina de ouro!
+
+#### [O que acontece quando você digita uma URL no browser?](https://systemdesign.one/what-happens-when-you-type-url-into-your-browser/)
+
+Esse artigo me lembrou o excelente livro do William Molinari [Desconstruindo a Web](https://desconstruindoaweb.com.br/) que mostra exatamente o que acontece desde o momento que você digita sua URL no browser, até o momento que você interage com a página na sua tela.
+
+Esse artigo faz a mesma coisa, só que com mais imagens e uma abordagem mais nova, já que o livro tem quase 10 anos já.
+
+---
+
+### Repositórios interessantes
+
+<Bookmark url="https://github.com/honojs/hono?ck_subscriber_id=1655181407" title="GitHub - honojs/hono: Ultrafast web framework for the Edges" description="Ultrafast web framework for the Edges. Contribute to honojs/hono development by creating an account on GitHub." publisher="honojs" />
+
+<Bookmark url="https://github.com/mjl-/mox" title="GitHub - mjl-/mox: modern full-featured open source secure mail server for low-maintenance self-hosted email" description="modern full-featured open source secure mail server for low-maintenance self-hosted email - GitHub - mjl-/mox: modern full-featured open source secure mail server for low-maintenance self-hosted email" publisher="mjl-" />
+
+<Bookmark url="https://github.com/matiaskorhonen/paper-age" title="GitHub - matiaskorhonen/paper-age: Easy and secure paper backups of secrets" description="Easy and secure paper backups of secrets. Contribute to matiaskorhonen/paper-age development by creating an account on GitHub." publisher="matiaskorhonen" />
+
+<Bookmark url="https://www.npmjs.com/package/@bufbuild/buf" title="@bufbuild/buf" description="The buf CLI is a tool for working with Protocol Buffers.. Latest version: 1.19.0-1, last published: 2 days ago. Start using @bufbuild/buf in your project by running `npm i @bufbuild/buf`. There are 3 other projects in the npm registry using @bufbuild/buf." />
+
+<Bookmark url="https://connect.build" title="Connect · Simple, reliable, interoperable. A better gRPC." />
+
+Gostou dessa newsletter? Dê seu [feedback neste link](https://forms.gle/8N3J8q3zoNkwdP4K7)

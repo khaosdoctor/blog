@@ -1,0 +1,241 @@
+---
+title: "Iniciando com ECMAScript Modules"
+pubDate: 2021-06-23T11:00:00.000Z
+updatedDate: 2026-07-16T16:14:16.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "nodejs"]
+description: "Os ES Modules são a próxima geração de importação de módulos no JavaScript. Entenda como essa funcionalidade promete revolucionar o que conhecemos."
+heroImage: "./os-ecmascript-modules-estao-aqui/photo-1493217465235-252dd9c0d632-cfd8efe8.jpg"
+draft: false
+visibility: "public"
+---
+
+Já faz algum tempo que se fala em termos disponibilidade de utilizarmos os ECMAScript Modules em nossos pacotes e código JavaScript. Apesar de o modelo ser suportado na web como um todo através de uma tag `<script type="module">` já faz algum tempo, só agora com a depreciação oficial do Node 10 em favor do Node 16 que vamos poder ter este suporte completo no servidor!
+
+> Veja um exemplo de uso de módulos ESM no browser [neste repositório](https://github.com/khaosdoctor/js-containerd-example/tree/main/child-process/static)
+
+## Um pouco de história
+
+Desde 2012 existem conversas no GitHub e nos repositórios oficiais do TC39 para a implementação padrão de um novo sistema de módulos que seja mais apropriado para os novos tempos do JavaScript.
+
+Atualmente, o modelo mais comum utilizado é o famoso `CommonJS`, com ele temos a sintaxe clássica do `require()` no topo de módulos Node.js, mas ele não era [suportado oficialmente pelos browsers](https://stackoverflow.com/questions/7576001/how-can-i-require-commonjs-modules-in-the-browser) sem a ajuda de plugins externos como o Browserify e o RequireJS.
+
+A exigência por um modelo de módulos começou a partir daí. Com as pessoas querendo modularizar suas aplicações JavaScript também no lado do cliente, mas implementar um sistema de módulos não é fácil e levou vários anos até que uma implementação aceitável surgisse.
+
+Com isso, agora temos o chamado ESM (ECMAScript Modules), que muitas pessoas já conheciam, principalmente por se tratar de uma sintaxe que já acompanha o TypeScript desde sua criação, ou seja, não vamos mais trabalhar com módulos através de `require()`, mas sim através de uma chave `imports` e outra `exports`.
+
+## CommonJS
+
+Em um caso clássico de uso do CommonJS temos um código que pode ser assim:
+
+```javascript
+function foo () { }
+
+module.exports = foo
+```
+
+Perceba que tudo que o Node.js (neste caso) vai ler, é um objeto chamado `module`, dentro deste nós estamos definindo uma chave `exports` que contém a lista de coisas que vamos exportar para este módulo. Depois, outro arquivo poderá importa-lo como:
+
+```js
+const foo = require('./foo')
+```
+
+Quando importamos um módulo usando esta sintaxe, nós o estamos carregando sincronamente, porque o algoritmo de resolução de módulos precisa primeiramente encontrar o tipo do módulo, se for um módulo local é obrigatório que o mesmo comece com `./` caso contrário a resolução de módulos irá buscar nas pastas conhecidas por módulos existentes.
+
+Depois de encontrar o módulo, precisamos ler o conteúdo, fazer o parsing e gerar o objeto `module` que será utilizado para descobrir o que podemos ou não importar deste módulo.
+
+Este tipo de importação, principalmente por ser sincrona, causa alguns problemas na hora de executar aplicações na natureza mais assíncrona do Node.js, portanto muitas pessoas acabavam importando os módulos somente quando necessários.
+
+## ESM
+
+No ESM temos uma mudança drástica de paradigma. Ao invés de importarmos módulos de forma síncrona, vamos começar a importar de forma assíncrona, ou seja, não vamos travar o event loop com algum tipo de I/O.
+
+Além disso, não temos mais que definir manualmente o que os módulos importam ou exportam, isso é feito através das duas keywords `imports` e `exports`, sempre que parseadas, o compilador irá identificar um novo símbolo que será exportado ou importado e adicionar automaticamente à lista de exportação.
+
+Os ESM também vem com algumas regras padrões que deixam a resolução de módulos mais precisa e, portanto, mais rápida. Por exemplo, é sempre obrigatório que você acrescente a extensão do arquivo quando importando algum módulo. O que significa que a importação de módulos somente pelo nome do arquivo não é mais válida:
+
+```js
+import foo from './foo.js'
+```
+
+Isso faz com que o sistema de resolução não tenha que saber que tipo de arquivo estamos tentando importar, pois com `require()` podemos importar vários tipos de arquivos além do `.js`, como JSON. O que nos leva para a segunda grande mudança, muitos dos tipos de arquivos que antes eram suportados por importação direta, agora precisam ser lidos via `fs.promises.readFile`.
+
+Por exemplo, quanto queríamos importar um arquivo JSON diretamente, poderíamos rodar um `require('arquivo.json')`, porém agora não temos mais essa capacidade e precisamos utilizar o módulo de leitura de arquivos para poder ler o JSON nativamente.
+
+> Existe uma API ainda experimental para poder permitir a funcionalidade no Node.js mas ela vem desativada por padrão, veja mais sobre ela [aqui](https://nodejs.org/api/esm.html#esm_json_modules)
+
+Então, para importar um JSON como um objeto você pode fazer assim:
+
+```js
+import {promises as fs} from 'fs';
+
+const packageJson = JSON.parse(await fs.readFile('package.json', 'utf8'))
+```
+
+Todo o caminho para um módulo no ESM é uma URL, portanto o modelo suporta alguns protocolos válidos como `file:`, `node:` e `data:`. Isso significa que podemos importar um módulo nativo do Node com:
+
+```js
+import fs from 'node:fs/promises'
+```
+
+Não vamos nos estender aqui, mas você pode checar mais sobre essa funcionalidade na [documentação do Node](https://nodejs.org/api/esm.html#esm_urls).
+
+O ESM também suporta uma nova extensão de arquivo chamada `.mjs`, que é muito útil porque não precisamos nos preocupar com a configuração, já que o Node e o JavaScript já sabem resolver este tipo de arquivo.
+
+Outras mudanças incluem a **remoção** de variáveis como `__dirname` dentro de módulos no Node.js. Isto porque, por padrão, módulos possuem um objeto chamado `import.meta`, que possui todas as informações daquele módulo, que antes eram populadas pelo runtime em uma variável global, ou seja, temos um estado global a menos para nos preocupar.
+
+Para poder resolver um caminho do módulo local a sem usar o `__dirname`, uma boa opção é utilizar o `fileURLToPath`:
+
+```js
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+```
+
+Embora você também possa importar utilizando a URL diretamente com `new URL(import.meta.url)` já que muitas APIs do Node aceitam URLs como parâmetros.
+
+Por fim, a mais esperada de todas as mudanças que vieram nos módulos é o **top-level await**, isso mesmo, não precisamos mais estar dentro de uma função `async` para executar um `await`, mas isso só para módulos! Então coisas deste tipo serão muito comuns:
+
+```js
+async function foo () {
+  console.log('Hello')
+}
+
+await foo() // Hello
+```
+
+Já até tivemos que utilizar essa funcionalidade dentro da nossa função para ler um arquivo JSON.
+
+## Interoperabilidade
+
+O ESM demorou tanto tempo porque ele precisava ser o mínimo compatível com o CommonJS da forma como ele estava no momento, por isso a interoperabilidade entre os dois é muito importante, já que temos muito mais módulos em CommonJS do que em ESM.
+
+No CJS (CommonJS) tínhamos a possibilidade de um import assíncrono usando a função `import()`, e estas expressões são suportadas dentro do CJS para carregar módulos que estão escritos em ESM. Então podemos realizar uma importação de um módulo ESM desta forma:
+
+```js
+// esm.mjs
+export function foo () {
+  return 1
+}
+
+// cjs.js
+const esm = import('./esm.mjs')
+esm.then(console.log) // { foo: [λ: foo], [Symbol(Symbol.toStringTag)]: 'Module' }
+```
+
+Do outro lado, podemos utilizar a mesma sintaxe de `import` para um módulo CJS, porém temos que ter em mente que todo módulo CJS vem com um namespace, no caso padrão de um módulo como o abaixo, o namespace será o `default`:
+
+```js
+function foo () { }
+module.exports = foo
+```
+
+E, portanto, para importar esse módulo podemos importar seu namespace através de um _named import_:
+
+```js
+import {default as cjs} from './cjs.js'
+```
+
+Ou então através de um import padrão:
+
+```js
+import cjs from './cjs.js'
+```
+
+> Se você quiser observar como é um export de um módulo CJS, basta executar um import geral com `import * as cjs from './cjs.js'` e logar o resultado no console.
+
+No caso do Node.js, também temos uma ótima opção onde, quando usamos exports nomeados com CJS, desta forma:
+
+```js
+exports.foo = () => {}
+exports.bar = () => {}
+```
+
+O runtime vai tentar resolver cada chave de `exports` para um `import` nomeado, ou seja, vamos poder fazer isso:
+
+```js
+import { foo } from './cjs.js'
+```
+
+## Principais diferenças
+
+Vamos resumir as principais diferenças entre os dois tipos de sistema de módulos para podermos aprender como utilizar:
+
+-   No ESM não existem `require`, `exports` ou `module.exports`
+-   Não temos as famosas _dunder vars_ como `filename` e `dirname`, ao invés disso temos `import.meta.url`
+-   Não podemos carregar JSON como módulos, temos que ler através de `fs.promises.readFile` ou então `module.createRequire`
+-   Não podemos carregar diretamente Native Modules
+-   Não temos mais `NODE_PATH`
+-   Não temos mais `require.resolve` para resolver caminhos relativos, ao invés disso podemos utilizar a montagem de uma URL com `new URL('./caminho', import.meta.url)`
+-   Não temos mais `require.extensions` ou `require.cache`
+-   Por serem URLs completas, módulos ESM podem levar query strings como se fossem páginas HTML, então é possível fazer algo desta forma `import {foo} from './module?query=string'`, isso é interessante para quando temos que fazer um bypass do cache.
+
+## Usando ESM com Node.js
+
+Existem duas formas de utilizar o ESM, através de arquivos `.mjs` ou através da adição da chave `type` no `package.json` com o valor `"module"`, isso vai permitir que você continue usando extensões `.js` mas que tenham módulos ao invés de CJS.
+
+```jsonc
+// Usando CJS
+{
+  "name": "pacote",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+}
+
+// Usando ESM
+{
+  "name": "pacote",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "exports": "./index.mjs",
+}
+```
+
+Se você está criando um novo pacote do zero com JavaScript, prefira começar já com ESM, para isso você não precisa nem adicionar uma chave `type` no seu `package.json`, basta que você altere a chave `"main"`, para `exports` como neste exemplo:
+
+```jsonc
+// Usando CJS
+{
+  "name": "pacote",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+}
+
+// Usando ESM
+{
+  "name": "pacote",
+  "version": "0.0.1",
+  "description": "",
+  "exports": "./index.mjs",
+}
+```
+
+Outro passo importante é você adicionar a chave `engines` restringindo quais são as versões do Node que podem executar seu pacote sem quebrar, para esta chave use os valores `"node": "^12.20.0 || ^14.13.1 || >=16.0.0"`.
+
+Se você estiver usando `'use strict'` em algum arquivo, remova-os.
+
+A partir daí todos os seus arquivos serão módulos e precisarão das refatorações padrões, como a troca de `require` por `import` e a adição das extensões nos nomes de arquivos locais. Como já falamos anteriormente.
+
+## ESM com TypeScript
+
+Apesar de utilizar o modelo ESM já há algum tempo, o TypeScript não costuma gerar compilados JavaScript no modelo ESM, somente com CJS. Para que possamos forçar o uso do ESM inclusive nos arquivos de distribuição gerados pelo TS, vamos precisar de algumas configurações básicas.
+
+Primeiramente vamos editar nosso `package.json` como se tivéssemos criando um módulo JS normal. Isso significa fazer esta lista de coisas:
+
+-   Criar uma chave `"type": "module"`
+-   Susbstituir `"main": "index.js"` por `"exports": "./index.js"`
+-   Adicionar a chave `"engines"` com o valor da propriedade `"node"` para as versões que mostramos anteriormente
+
+Depois, vamos gerar um arquivo `tsconfig.json` com `tsc --init` e modificá-lo para adicionar uma chave `"module": "ES2020"`. Isso já será suficiente para os arquivos finais serem expostos como ESM, porém existem algumas precauções que temos que ter quando escrevemos nossos arquivos em TypeScript:
+
+-   Não usar importações relativas parciais como `import index from '.'`, **sempre** use o caminho completo `import index from './index.js'`
+-   É recomendado usar o protocolo `node:` para importar módulos nativos do Node como o `fs`
+
+A parte mais importante e também a que, na minha opinião, é a que mais deixa a desejar para usarmos ESM com TS é que **sempre precisamos importar os arquivos com a extensão `.js`, mesmo que estejamos usando `.ts`,** ou seja, se dentro de um arquivo `a.ts` você quiser importar o módulo presente em `b.ts`, você precisará de um import do tipo `import {b} from './b.js'`.
+
+Isto porque ao compilar, como o TS já usa nativamente ESM como sintaxe, ele não vai remover ou corrigir as linhas de importação dos seus arquivos fonte.

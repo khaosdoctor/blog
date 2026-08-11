@@ -1,28 +1,120 @@
 ---
-title: Olá, mundo (de novo)
-pubDate: 2026-08-07
+title: "Olá, Mundo!"
+pubDate: 2020-07-23T00:23:11.000Z
+updatedDate: 2026-07-16T16:28:42.000Z
 lang: pt
-category: meta
-tags:
-  - astro
-  - blog
-description: O primeiro post do blog reconstruído em Astro, saindo do Ghost depois de seis anos.
+category: "meta"
+tags: ["blog", "news", "info"]
+description: "Depois de alguns meses pesquisando e trabalhando para uma nova fase de produção de conteúdos, este blog finalmente saiu do papel!"
+heroImage: "./ola-mundo/photo-1500576992153-0271099def59-faf5ded3.jpg"
 draft: false
-epigraph: A melhor ferramenta de escrita é a que não te interrompe.
-epigraphCite: alguém, provavelmente
+visibility: "public"
 ---
 
-Este post existe para provar que o pipeline funciona: frontmatter validado por Zod,
-MDX renderizado, URL plana em `/ola-mundo/`, tema claro e escuro seguindo o sistema.
+Olá pessoal! Este é o **primeiro artigo deste blog!**
 
-## O que já está de pé
+Quem já me conhece e acompanha meu trabalho sabe que sou um grande fã de escrita de conteúdo escrito e já escrevo há algum tempo sobre tecnologia. Nos últimos 4 anos venho escrevendo bastante para publicações como o [Medium](https://medium.com/@khaosdoctor) e o [Dev.to](https://dev.to/khaosdoctor), mas chegou a hora de evoluir para uma **nova fase da minha carreira como criador de conteúdo**.
 
-- Coleção `blog` lendo `content/blog/` (a pasta que o Obsidian abre direto)
-- `draft: true` e `pubDate` no futuro somem do build
-- Layout mínimo, sem JavaScript nenhum
+Neste post vou descrever tudo que me motivou a criar este blog, bem como vou descrever as tecnologias utilizadas e o que há de novo! Vamos lá!
 
-```ts
-const posts = await getPublishedPosts()
-```
+## Uma nova fase
 
-O resto vem na Fase 1: os 235 posts migrados, sidenotes, hover previews e i18n.
+<Figure src="https://images.unsplash.com/photo-1499244571948-7ccddb3583f1?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ" alt="The most powerful word in the world pops up everywhere. Ironically, this is on Sandown Pier on the Isle of Wight (UK) — a place that has not changed for 30 years." caption="Letreiro neon escrito &quot;change&quot; por <a href=&quot;https://unsplash.com/@rossf?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Ross Findon</a> / <a href=&quot;https://unsplash.com/?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Unsplash</a>" wide />
+
+Nos últimos anos sempre pensei em criar um local próprio para compartilhar meu conteúdo, não que eu não considere as outras publicações boas o suficiente, muito pelo contrário, elas são excelentes locais para se publicar conteúdo no geral. O que me fez mudar foram dois simples fatores: **controle e presença**
+
+### Controle
+
+O **controle** pelo simples fato de que eu gosto de ter o controle das minhas publicações para que eu possa criar integrações, modificar ou migrar o conteúdo, fazer backups seguros e manter o conteúdo de livre acesso. Além do controle do conteúdo em si, para mim é importante ter o controle sobre o **meio** onde eu estou publicando.
+
+Plataformas como o Medium ou o Dev.to, por mais incríveis que sejam, ainda são limitadas em alguns casos. E você, como autor, não tem controle sobre o que você pode fazer com o sistema, nem sobre quais integrações pode criar, além disso todo o seu conteúdo está nas mãos das pessoas que controlam essas redes e, se um dia quiserem, podem simplesmente sumir da mesma forma que apareceram.
+
+Além disso, ter um local próprio para publicar os meus conteúdos faz com que eu possa não só buscar novas formas de apresentar esse conteúdo, mas também que eu possa evoluir o site para ter novas funcionalidades bacanas e aplicar a minha marca pessoal. E ai entramos na **presença**.
+
+### Presença
+
+Um dos pontos que mais me deixava incomodado era que eu tinha que mostrar uma lista de redes sociais para as pessoas quando eu queria que elas encontrassem meu conteúdo, isso dilui um pouco a sua presença e o seu impacto porque fica muito mais difícil para que as pessoas achem você na rede.
+
+Outro ponto que me levou a criar este blog foi que eu poderia transformá-lo em um lugar "com a minha cara". Aplicar a marca que foi feita com carinho por [várias pessoas](https://twitter.com/_StaticVoid/status/1285626274225041409) que me ajudaram a transformar tudo isso que vocês estão vendo em realidade. Tendo poder sobre o front-end e podendo adicionar novas ferramentas, eu posso criar uma experiência diferente para algum tipo de post ou então até mesmo transformar o blog em um hub ou um agregador, em suma, eu posso fazer o que eu quiser!
+
+Por isso decidi que criar um blog seria a melhor alternativa, pois assim posso centralizar o conteúdo de forma que todos os meus artigos sairão deste único ponto e posso pedir para que as pessoas me encontrem somente por aqui também.
+
+## E agora? Como vai ser?
+
+A partir de agora, todos os conteúdos **novos** serão publicados primeiro neste blog. Eles também serão automaticamente replicados no [meu Dev.to](https://dev.to/khaosdoctor) através do [feed RSS](/rss).
+
+Todos os conteúdos antigos **continuarão existindo onde sempre estiveram**. A única coisa que muda é que, a partir de agora, todos os **novos conteúdos** vão ser postados somente aqui no meu [blog](/?utm_source=hello_world_post&utm_medium=in_post_link&utm_campaign=hello_world).
+
+Criar um blog próprio também me permitiu criar uma página exclusiva para todas as pessoas que desejarem me apoiar o meu trabalho e me ajudar nesta empreitada através de [doações ou contribuições](/doacoes).
+
+### Só artigos?
+
+Em resumo: **NÃO** 😌
+
+Como eu disse anteriormente, esta é uma nova fase de produção de conteúdos, ou seja, além do blog estarei também investindo em outros formatos de publicação de conteúdo. No momento o blog é o primeiro passo, porém já estou elaborando um [canal do YouTube](https://www.youtube.com/channel/UCki-WnBzwzpvbBDk4swJniQ?sub_confirmation=1) e também pensando em outras formas de compartilhar conteúdo de qualidade para ainda mais pessoas.
+
+Todos os vídeos serão publicados no canal e terão um post dedicado no blog! Assim fica fácil saber de tudo o que ocorreu! Mas não é só isso. A ideia é que o blog se torne um arquivo de todo o meu conteúdo, tanto escrito quando não escrito.
+
+Portanto, todas as minhas futuras palestras – que já podem ser encontradas no meu [SpeakerDeck](https://speakerdeck.com/khaosdoctor) – ficarão também disponíveis aqui com uma pequena descrição de como ocorreram, e os detalhes sobre aquele evento em si, ou seja, todo o conteúdo que eu já participei ou vou participar ficará guardado aqui em segurança para que todos possam encontrar!
+
+## Sempre alerta!
+
+Um dos grandes motivos que me influenciaram fortemente a criar um blog foi a possibilidade de ter uma _[newsletter](/signup)!_
+
+Uma das coisas que eu sinto mais falta em conteúdo escrito é que não temos a possibilidade de atingir as mesmas pessoas sempre, de estar em contato constante mesmo após quem leu já ter saído do blog.
+
+Meu objetivo com esta newsletter é enviar mensalmente (ou semanalmente, ainda não decidi) um resumo de todas as postagens que foram feitas, destacar postagens importantes, avisar quem está acompanhando sobre eventos, códigos de desconto e outras coisas legais que vão acontecer por aqui!
+
+Então, se você está lendo isso, considere se inscrever na lista de emails e fique por dentro de todas as novidades, você também vai receber códigos de desconto e conteúdos exclusivos. Prometo que não vou lotar a sua caixa de emails!
+
+window.onload = () => document.querySelector('iframe').contentWindow.document.querySelectorAll('header, .line-wrapper').forEach(e => e.style.display = 'none')
+
+## Por baixo dos panos
+
+Sei que provavelmente você é uma pessoa desenvolvedora e quer saber quais foram as tecnologias que eu utilizei para fazer este site não é mesmo? Vamos lá então!
+
+### A saga pelo CMS
+
+Desde que comecei a trabalhar com tecnologia o WordPress é uma das ferramentas mais utilizadas para a criação de blogs. O problema é que ele é muito pesado e eu, pessoalmente, não gosto muito de utilizá-lo, pois já tive muitos problemas no passado.
+
+Minha primeira opção seria criar um blog simples utilizando um gerador estático chamado [Hugo](https://gohugo.io\(), que é escrito em Golang. A ideia era simples: criar o blog, escrever o conteúdo em markdown e publicar tudo pelo GitHub Pages. Cheguei até a montar um repositório com uma pequena prova de conceito, porém infelizmente acabei não o usando justamente porque eu tinha mais planos para este blog do que simplesmente um blog. E o Hugo não é tão simples para criar algo mais complexo.
+
+Passei para o [Gatsby](https://gatsbyjs.com), que é essencialmente a mesma coisa, porém escrito em JavaScript usando React. A ideia surgiu quando vi um projeto chamado [Ghost](https://ghost.org), isso resolveria todos os meus problemas!
+
+O Ghost é um CMS Headless, isso significa que você pode plugar qualquer tipo de front-end nele e utilizar somente sua API para gerenciar e criar o conteúdo. Em suma, é como se você tivesse um WordPress sem o front-end, somente com a API aberta e o painel administrativo. Então eu teria um painel de gerenciamento de posts, login e senha, controle de acesso, a possibilidade de ter mais de uma pessoa escrevendo o mesmo artigo e muitas outras funções que qualquer CMS já tem de fábrica.
+
+Mas o que me ganhou foi a possibilidade nativa do Ghost integrar com um sistema de envio de newsletters, que era algo que eu já queria fazer há um tempo. Comecei o desenvolvimento usando Gatsby, mas depois que analisei e estudei o tema percebi que o que o Gatsby fazia não era nada mais nada menos do que puxar as postagens do Ghost remotamente.
+
+O Ghost já possuía um tema que vinha pré instalado, chamado [Casper](https://github.com/TryGhost/Casper) e um outro tema com a newsletter já implementada chamado [Lyra](https://github.com/TryGhost/lyra), portanto não tinha necessidade de ter ainda outra camada só para servir o front-end. Acabei largando o Gatsby e usando apenas o Ghost por completo
+
+### A infraestrutura
+
+O Ghost é o clássico projeto open source com suporte pago. Você pode baixar e instalar ele na sua própria máquina sem custo – que foi o que eu fiz – ou então pagar para usar a cloud deles já pré instalada.
+
+Meu objetivo era não gastar nenhum dinheiro para manter o blog em si, então utilizei os crédito da [Azure](https://azure.microsoft.com/?WT.mc_id=personal-blog-ludossan) que possuo por ter sido um [Microsoft MVP](https://mvp.microsoft.com/?WT.mc_id=personal-blog-ludossan) para criar os recursos que precisei na cloud e instalar o Ghost localmente.
+
+Portanto, este blog está rodando exclusivamente na [Azure](https://mvp.microsoft.com/?WT.mc_id=personal-blog-ludossan).
+
+### O front-end
+
+Eu não sou um front-end. Na verdade é uma das funções que menos desempenho no mundo de desenvolvimento. Então eu não tenho um vasto conhecimento em frameworks como o Vue, React, Angular ou qualquer outro. Portanto, a ideia era ser algo simples.
+
+Peguei o tema padrão, Lyra, como um início. Fiz um fork para [um novo repositório](https://github.com/khaosdoctor/blog-theme) para armazenar somente o tema do blog e todas as alterações que foram feitas nele.
+
+O Ghost trabalha com temas renderizados no lado do servidor utilizando o Handlebars como template engine. Então a partir daí foi simples, tive apenas que alterar o HTML, CSS e JavaScript das páginas para montar o meu layout em cima do layout padrão do blog. E este é o resultado.
+
+## O futuro
+
+Enquanto esse é o primeiro de muitos artigos que vão aparecer por aqui, este não é tudo que este blog pode ser!
+
+Para o futuro estou com a ideia de abrir este meio de conteúdo para que outras pessoas também possam escrever seus conteúdos por aqui! Assim criando um hub de ensino e colaboração! Mas isso fica para uma próxima!
+
+## Conclusão
+
+<Figure src="https://images.unsplash.com/photo-1549032305-e816fabf0dd2?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ" alt="" caption="Carta escrito &quot;thanks&quot; por <a href=&quot;https://unsplash.com/@kellysikkema?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Kelly Sikkema</a> / <a href=&quot;https://unsplash.com/?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Unsplash</a>" />
+
+Muito obrigado por acessar e por ler meu conteúdo, se você tiver qualquer feedback tanto sobre conteúdo quanto também sobre o site em si, por favor, entre em contato comigo em qualquer uma das minhas redes sociais (que podem ser encontradas no menu e no rodapé) ou então através do [meu site](https://lsantos.dev/?utm_source=blog&utm_medium=hello_world_post&utm_campaign=hello_world). Sempre estou disponível para responder!
+
+Se alguma coisa quebrou para você enquanto estava passeando por aqui, acesse a [página de issues do blog](https://github.com/khaosdoctor/blog-theme/issues/new?title=[BUG]:%20&labels=bug&assignees=khaosdoctor) e descreva seu problema que vou tentar corrigir o mais rápido possível.
+
+Muito obrigado por ler e acreditar em meu conteúdo! 😍

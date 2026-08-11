@@ -1,0 +1,207 @@
+---
+title: "O que é type-testing com TypeScript? É um anti-pattern? Vale a pena?"
+pubDate: 2023-06-14T22:46:19.000Z
+updatedDate: 2026-07-16T16:00:04.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "javascript", "nodejs", "development"]
+description: "Você sabia que existe um tipo de teste que você não pode fazer no JavaScript? Aprenda tudo sobre Type Testing com TypeScript!"
+heroImage: "./type-testing/articles-4.png"
+draft: false
+visibility: "public"
+seoTitle: "Type testing com TypeScript vale a pena?"
+---
+
+Recentemente eu [fiz um post](https://www.linkedin.com/feed/update/urn:li:share:7062034333103976448) comentando sobre **Type-Testing**, e como esse post rendeu! Eu fiquei super feliz por todos os comentários e dúvidas que a galera postou por lá.
+
+Por conta do alcance e também de que muitas pessoas tiveram algumas dúvidas super pertinentes, eu resolvi criar um artigo um pouco mais longo sobre o tema, explicando mais a fundo como tudo funciona e o que é esse tal de type-testing.
+
+## Type-Testing?
+
+Isso mesmo, existe uma outra forma de fazer testes que não é um teste unitário e nem um teste de integração. Estes são os **testes de tipos**.
+
+A ideia do type testing é justamente poder testar se a tipagem que você deu para determinada função ou arquivo está correta, pense nele como sendo um teste, só que para seus tipos ao invés do seu código.
+
+Idealmente um teste de tipos nem vai ser executado, todo o código só vai ser compilado pelo TypeScript e esse resultado vai ser exibido como uma forma de te mostrar se a sua tipagem está correta ou não. Isso garante que quem quer que esteja usando a aplicação vai ter uma garantia que os tipos estão batendo com o que está sendo provido.
+
+### Como testar tipos
+
+Existem várias formas de fazermos isso, a mais simples delas é basicamente chamar a tipagem da aplicação que você está querendo testar, e abusar bastante das diretivas como `// @ts-expect-error` que vão atuar como um teste negativo, garantindo que o seu tipo também está providenciando um erro quando esperado.
+
+Vamos falar dessa PR novamente, mas [recentemente incluí uma tipagem](https://lsantos.dev/keychain-pull) para uma biblioteca que não possuia tipagem nativa através de arquivos `.d.ts` no [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/). Nos arquivos de testes, temos que importar nossos tipos e testá-los como se estivéssemos chamando a aplicação:
+
+```ts
+import keychain = require('keychain');
+
+/**
+ * setPassword
+ */
+
+// @ts-expect-error
+// Errors when doesn't have the required properties
+keychain.setPassword({ account: 'some-account' }, err => {
+    if (err) {
+        err; // $ExpectType KeychainError
+    }
+});
+```
+
+Uma outra forma, um pouco mais complicada, é criar seus próprios tipos utilitários para testes. Imagine que estamos criando um pequeno framework que vai te ajudar a testar tipos:
+
+```ts
+type Expect<T extends true> = T
+type Equal<X, Y> = X extends Y ? (Y extends X ? true : false) : false
+
+type test = Expect<Equal<typeof 1, number>>
+
+// @ts-expect-error
+type test_error = Expect<Equal<typeof 1, string>>
+```
+
+#### Bibliotecas de testes
+
+Outro modo (muito mais fácil), é usar bibliotecas de testes, como o [vitest](https://npm.im/vitest), que possuem asserções de tipos. Então podemos fazer algo assim:
+
+```ts
+import { assertType, expectTypeOf } from 'vitest'
+import { suaLib } from 'lib'
+
+test('Tipos certos', () => {
+	expectTypeOf(suaLib).toBeFunction()
+    expectTypeOf(suaLib).parameter(0).toMatchTypeOf<{ x: 1 }>()
+})
+```
+
+Mas o vitest não é o único que faz isso. Outra lib muito interessante que é feita justamente para isso merece sua própria sessão.
+
+## TSD
+
+O [TSD](https://github.com/SamVerschueren/tsd) é uma biblioteca de testes de tipos focada especificamente em testar arquivos de declaração `.d.ts` (a gente falou sobre eles na [#SemanaTS](/semana-ts-2/)). A grande ideia desse pacote é que você pode usá-lo como se fosse o compilador nativo do TypeScript, porém com uma vantagem: seu código não vai ser executado de forma alguma.
+
+Ele procura arquivos com a extensão `.test-d.ts`, esses arquivos não são executados e muito menos compilados da forma nativa. O que vai acontecer é que o TSD vai procurar por asserções como `expectError` ou `expectType` e analisar o resultado delas contra os tipos que você escreveu no seu arquivo original.
+
+> Além disso, ele vai procurar na mesma pasta (ou em um caminho especificado), pelo arquivo `.d.ts` correspondente para poder testar.
+
+Um exemplo pode ser o próprio [arquivo de tipos](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/64842/files#diff-2dfda1c06c01252655eb83b1bd389beb27213848707db6a58180b71fcc229b25) que escrevi para o Keychain:
+
+```ts
+// Type definitions for keychain 1.4
+// Project: https://github.com/drudge/node-keychain
+// Definitions by: Lucas Santos <https://github.com/khaosdoctor>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+declare namespace keychainTypes {
+    interface KeyChainBaseOptions {
+        account: string;
+        service: string;
+        password: string;
+        type?: 'generic' | 'internet';
+    }
+
+    type KeychainErrorCodes =
+        | 'UnsupportedPlatform'
+        | 'NoAccountProvided'
+        | 'NoServiceProvided'
+        | 'NoPasswordProvided'
+        | 'ServiceFailure'
+        | 'PasswordNotFound';
+
+    type KeychainErrorType = `${KeychainErrorCodes}Error`;
+
+    class KeychainError extends Error {
+        code: KeychainErrorCodes;
+        type: KeychainErrorType;
+    }
+}
+
+declare function getPassword(
+    options: Pick<keychainTypes.KeyChainBaseOptions, 'account' | 'service'>,
+    callback: (err: keychainTypes.KeychainError, password: string) => void,
+): void;
+
+declare function setPassword(
+    options: keychainTypes.KeyChainBaseOptions,
+    callback: (err: keychainTypes.KeychainError) => void,
+): void;
+
+declare function deletePassword(
+    options: Pick<keychainTypes.KeyChainBaseOptions, 'account' | 'service'>,
+    callback: (err: keychainTypes.KeychainError) => void,
+): void;
+
+declare const keychain: typeof keychainTypes & {
+    getPassword: typeof getPassword;
+    setPassword: typeof setPassword;
+    deletePassword: typeof deletePassword;
+};
+
+export = keychain;
+```
+
+Podemos colocar esse arquivo em uma pasta com o nome de `index.d.ts`, depois criamos um arquivo `index.test-d.ts` com o seguinte conteúdo:
+
+```ts
+import { expectType } from 'tsd'
+import keychain from '.'
+
+expectType<string>(keychain.getPassword({
+  account: 'account',
+  service: 'service',
+}, (err, password) => { }))
+```
+
+Se rodarmos `npx tsd` na raiz, vamos ter uma saída de erro, porque não estamos esperando uma `string`. Se mudarmos o código para:
+
+```ts
+import { expectType } from 'tsd'
+import keychain from '.'
+
+expectType<void>(keychain.getPassword({
+  account: 'account',
+  service: 'service',
+}, (err, password) => { }))
+```
+
+Vamos ter a saída direta dos nossos tipos.
+
+## Testar tipos? Mas é pra isso que tipos servem
+
+Uma das principais dúvidas e comentários (até mesmo reclamações) no post era sobre precisar ou não precisar testar tipos. Acho que o que eu mais ouvi tanto neste post quanto nas minhas palestras sobre esse tema é a seguinte frase:
+
+> Porque eu vou testar meus tipos se os meus tipos já servem justamente para testar se eu estou mandando tudo certo?
+
+E isso está completamente correto! Não é sempre que vamos precisar testar nossos tipos, na verdade, esse tipo de teste nem é muito útil quando estamos criando aplicações comerciais ou até mesmo APIs.
+
+O uso principal de testes de tipos é quando temos bibliotecas externas que serão usadas por outras pessoas, ou quando estamos manualmente adicionando um arquivo de declaração (os famosos arquivos `.d.ts`) a uma função ou biblioteca que não possui tipos nativos.
+
+Um exemplo disso é justamente a [PR que abri](https://lsantos.dev/keychain-pull) no DefinitelyTyped, para tipar a biblioteca _Keychain_, que não possuía a tipagem nativa, nessa PR temos [esse arquivo](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/64842/files#diff-c25a3e5febc5fa482d7d81561d7151e30ca0ec342d137f078e8abaefcecbb9c3), ele é justamente um teste de tipos porque, para esse tipo de projeto – que é essencialmente um repositório de tipos externos – faz total sentido que testemos nossos tipos.
+
+O mesmo é válido, por exemplo, se você está desenvolvendo uma biblioteca que vai ser usada por outras pessoas e quer garantir que as suas mudanças vão continuar mantendo o uso da biblioteca da forma como você imaginou, especialmente quando você não tem testes unitários.
+
+### Testes de tipos vs outros testes
+
+Algumas pessoas me falaram que faria sentido substituir (em casos como esse da biblioteca) os testes unitários completamente e usar apenas os testes de tipo, porque eles são praticamente instantâneos e conseguem testar o uso da biblioteca.
+
+Eu sinceramente não recomendo, testes unitários estão mais preocupados em testar as respostas e o uso direto da sua aplicação ou biblioteca, testes de tipos não focam no resultado, mas sim no uso, portanto você precisa testar que os usos errados também estão apresentando erros, como eu faço [aqui](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/64842/files#diff-c25a3e5febc5fa482d7d81561d7151e30ca0ec342d137f078e8abaefcecbb9c3R15-R21):
+
+```ts
+// @ts-expect-error
+// Another error when missing options
+keychain.setPassword({ account: 'some-account', password: 'some-pass' }, err => {
+    if (err) {
+        err; // $ExpectType KeychainError
+    }
+});
+```
+
+## Conclusão, vale a pena?
+
+Provavelmente você está esperando uma conclusão, então ai vai a famosa palavra que qualquer senior vai falar: **depende**.
+
+Testes de tipos são outro tipo de teste, ou seja, outros arquivos, outra lógica, outra forma de pensar que precisam ser escritas por você (ou pelo ChatGPT), ou seja, isso demanda tempo.
+
+No entanto, ter testes de tipos adicionam uma camada extra de proteção, eles vão garantir de uma forma bastante leve que seus tipos estão corretos e que eles funcionam como esperado, tanto para você quanto para todas as demais pessoas que usarem.
+
+Então, como qualquer outra coisa, temos uma troca: maior tempo de desenvolvimento por uma maior segurança na aplicação.
+
+Eu, pessoalmente, não acho que valha a pena escrever testes de tipos para qualquer aplicação por padrão. Principalmente porque vai demandar mais tempo e dedicação, eu acredito que testes de tipos se mostrarão necessários quando você tiver um problema de tipos não testados, lembre-se: **não otimize antes da hora**.

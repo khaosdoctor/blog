@@ -1,0 +1,148 @@
+---
+title: "Usando Assertion Functions no TypeScript"
+pubDate: 2024-06-14T11:00:51.000Z
+updatedDate: 2026-07-16T17:56:05.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "nodejs", "deno"]
+description: "Aprenda a usar uma das features mais importantes e ainda sim mais desconhecidas do TypeScript! As assertion functions"
+heroImage: "./assertion-functions/articles-1.png"
+draft: false
+visibility: "public"
+---
+
+Recentemente vi um pessoal postando uma "novidade":
+
+<YouTube id="M-VU0fLjIUU" />
+
+No canal dele, o Primeagen mostrou como se faz o que ele chamou de "negative space programming", fico feliz que esse assunto tenha aparecido em canais grandes, mas essa técnica não é nova, existe há muitos e muitos anos, inclusive o próprio TypeScript tem uma função que faz exatamente isso, só que com tipos, eu [até falei sobre elas há uns anos](https://speakerdeck.com/khaosdoctor/typescript-tips-that-could-save-your-life?slide=30).
+
+Assertion functions são parte de um conjunto chamado de **Type Guards**. Junto com os [enums](/enums-no-typescript/), essas duas funções são uma das poucas que fazem o TypeScript sair do mundo da compilação e ir para o mundo do runtime, ou seja, o código que você escreve ali é, de fato, executado em runtime.
+
+## Type Guards e branded types
+
+Existem duas categorias de funções, a gente separa pra ficar mais simples de entender, mas essencialmente elas são a mesma coisa porém com usos diferentes.
+
+Primeiro temos os _type guards_.
+
+```ts
+function isNumber (n: unknown): n is number {
+  return typeof n === 'number'
+}
+```
+
+Essas funções retornam sempre um boolean dizendo se a condição passou ou não, no caso acima, estamos verificando se um valor `n` é um número. Mas qual é a diferença disso pra uma função normal?
+
+Ai vamos entrar no quesito de inferência de tipos. Tanto assertion functions quanto type guards conseguem modificar os tipos que o TS vai inferir a seguir, e elas funcionam muito bem com **branded types**. Mas o que são branded types?
+
+### Branded types (bem rápido)
+
+Vamos fazer um pequeno parênteses aqui. Branded types são tipos que representam variações específicas de um tipo mais amplo. Entendeu? Complicado né, vamos com exemplos.
+
+> [!NOTE] 🤚
+> Eu vou fazer outros artigos somente para explicar o que são branded types, mas vamos para a explicação simples por enquanto.
+
+Imagina que temos variáveis que são moedas em centavos, podemos ter euros, dólares e reais. Porém, mesmo que elas sejam todas string, elas não podem representar a mesma coisa, porque são moedas diferentes.
+
+```ts
+const eur: string = '1299'
+const usd: string = '1099'
+const brl: string = '90000'
+```
+
+Se criarmos uma função de conversão de euro para dólar, esperamos que o resultado seja em dólar, mas a entrada precisa ser em euros, como fazemos isso? Vamos criar um tipo que é uma variação de uma string, mas com uma propriedade escondida:
+
+```ts
+type EUR = string & { _brand: 'EUR' }
+type USD = string & { _brand: 'USD' }
+type BRL = string & { _brand: 'BRL' }
+
+const eur: EUR = '1299'
+const usd: USD = '1099'
+const brl: BRL = '90000'
+```
+
+Agora em uma função de conversão, podemos esperar somente um tipo:
+
+```ts
+function eurToUsd (in: EUR): USD {
+   return conversao(in) as USD
+ }
+```
+
+Viu o que eu fiz ali? Usar o `as` como conversão explícita de código é uma das únicas formas de você conseguir criar um branded type, além de você instanciar a variável diretamente, a outra forma é através de funções de criação como essa:
+
+```ts
+function makeEUR (v: string): EUR {
+  return v as EUR
+}
+```
+
+A outra forma de validarmos e garantirmos que um tipo é através de type guards, como eu mostro na palestra que mandei no link anterior:
+
+![](./assertion-functions/image.png)
+
+Claro, o uso de operações monetárias é um caso simples, no caso dos UUIDs por exemplo, isso pode ser um caso que vai evitar muitos bugs, já que você pode tipar seus parâmetros para receber apenas UUIDs a isso vai garantir que nenhuma string normal volte pra você.
+
+### Type Guards
+
+Dito isso, type guards são uma forma de garantir que todo um escopo vai ter o tipo definido pelo type guard. Por exemplo:
+
+```ts
+function isStringArray (a: unknown): a is string[] {
+  return Array.isArray(a) && typeof a[0] === 'string'
+}
+
+function foo (x: string[] | string) {
+  const v = x // v é string[] | string
+  if (isStringArray(v)) {
+    // v é string[] aqui dentro
+  }
+  
+  // v é agora string já que testamos se ele é um array e ele falhou
+}
+```
+
+Se você pegou a ideia dos branded types, você sabe onde eu quero chegar, ter type guards significa que você pode trocar o tipo de uma variável para um escopo inteiro em uma técnica que é chamada de **type narrowing**, ou seja, estamos transformando um tipo mais amplo em um tipo mais estreito. Que nem fizemos com `string[] | string` transformando apenas em `string[]` ou `string`.
+
+E isso significa que também podemos transformar tipos normais em branded types ou qualquer outro tipo que quisermos usando uma validação **que existe em runtime**, essa é a maior diferença. Todas as validações por type guards vão ser executadas durante o runtime da aplicação. Então você tem a validação não só em tempo de compilação mas também em tempo de execução.
+
+Além dos type guards, temos uma outra variação que é tão importante quanto. As assertion functions.
+
+## Assertion functions
+
+Funções de asserção são exatamente o tipo de técnica que ele está usando no corte que deixei no início do artigo. No JavaScript normal, isso é traduzido para o uso de `assert` (que no caso, ele importou do módulo `node:console` mas ele existe em um módulo a parte, o `node:assert`, que falei no [artigo sobre o Node Test Runner](/comecando-com-o-node-js-test-runner/))
+
+A ideia é que, ao invés de retornar um boolean, nós não retornamos, vamos parar a execução do programa e lançar uma exceção porque esse é um valor inesperado. Ela é uma variação dos type guards, porém de forma mais estrita.
+
+```ts
+function assertIsNumber (x: unknown): asserts x is number {
+  if (!typeof x === 'number') throw new Error('NaN')
+}
+```
+
+Além disso, assertion functions também tem uma sintaxe diferente, por isso que a gente acaba separando os dois, dessa forma a gente não mistura uma coisa com a outra. Mas os usos são os mesmos, por exemplo, vamos substituir a nossa função anterior por uma assertion function.
+
+```ts
+function assertStringArray (a: unknown): asserts a is string[] {
+  if (!Array.isArray(a) && typeof a[0] !== 'string') {
+    throw new Error ('Not a string array')
+  }
+}
+
+function foo (x: string[] | string) {
+  const v = x // v é string[] | string
+  assertStringArray(v)
+  // v é string[] a partir daqui
+}
+```
+
+Como você pode ver, um dos problemas com assertion functions é que elas não são inclusivas, ou seja, se você tem um union type entre dois tipos, assim que você usar uma assertion function, ela vai fazer a asserção somente de um deles, o outro vai ser ignorado, e qualquer coisa abaixo da assertion function vai ser inferido para o tipo que você colocou.
+
+Assertion functions são muito usadas em lugares onde a gente tem parâmetros opcionais, ou valores opcionais que são usados em fluxos específicos. Especialmente quando estamos tratando de objetos.
+
+## Conclusão
+
+Assertion functions são uma excelente forma de você garantir não só a tipagem do seu código em tempo de compilação, mas também garantir que, durante a execução, o código vai se comportar da mesma forma que você previu. Afinal de contas **computação é determinística** e a gente precisa saber o que a gente recebe e envia dos nossos programas.
+
+Para completar essa série eu vou falar mais sobre branded types em outro artigo, então fica por ai!

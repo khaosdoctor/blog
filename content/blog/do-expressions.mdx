@@ -1,0 +1,289 @@
+---
+title: "O que são as \"do expressions\" no JavaScript?"
+pubDate: 2022-09-07T13:00:17.000Z
+updatedDate: 2026-07-16T16:06:41.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "ecmascript", "development"]
+description: "Entenda o que são uma das mais famosas e importantes formas de expressões que estão chegando no JavaScript logo mais!"
+heroImage: "./do-expressions/Blog-cover-Template.png"
+draft: false
+visibility: "public"
+seoTitle: "O que são as \"do expressions\" do JavaScript?"
+---
+
+Em mais uma série de artigos sobre as mais recentes e mais animadoras propostas que temos no [TC39](https://github.com/tc39/proposals) eu trago mais uma dessas ideias que eu acho super legais e realmente espero (e dou meu suporte quando possível) que entrem na linguagem no futuro.
+
+Hoje a gente vai falar de uma proposta super interessante, não é algo novo, principalmente para quem já ouviu falar em **programação funcional**. A proposta toca no que é chamada de _[do expressions](https://github.com/tc39/proposal-do-expressions)_, ou expressões de bloco.
+
+> Essa é ainda uma proposta no estágio 1, ou seja, existe uma chance grande de ela ser rejeitada, porém, por ela estar há uns 5 anos aberta, eu acredito que ainda pode ter uma esperança!
+
+## Do expressions
+
+A proposta dá a ideia de uma "nova" keyword para o JavaScript, o `do`. Eu digo "nova" porque essa keyword já existe em expressões como `do while`, então a parte sintática da linguagem fica (um pouco) mais simples.
+
+Um bloco `do` é o que a gente chama de _programação orientada a expressões_, onde o resultado de uma atribuição, como `const x = 1`, pode ser o resultado de uma expressão mais complexa. Isso simplifica muito a escrita do código para não ficar usando ternários o tempo todo, que são bons, porém difíceis de ler.
+
+Alguns exemplos que podemos dar desse tipo de uso são para podermos ter as variáveis com o menor escopo possível, evitando que elas vazem para outro lugar, por exemplo, se quisermos fazer uma operação com uma variável X, ao invés de fazermos isso:
+
+```js
+function main(x, y, options) {
+  const finalX = par(x) && !options?.useY ? x + y : !par(x) ? x * 2 : 10
+  return options?.useY && options?.fromZero ? finalX-- : finalX
+}
+```
+
+Que é um código bastante complexo de ler, ou então podemos simplificar um pouco com:
+
+```js
+function main(x, y, options) {
+  let finalX = 10
+  if (par(x) && !options?.useY) finalX = x + y
+  else if (!par(x)) finalX = x * 2
+  if (options?.useY && options?.fromZero) finalX--
+  return finalX
+}
+```
+
+Mas ai teríamos uma variável acumuladora `finalX` dentro do escopo da função, se essa função fosse longa, poderíamos ter um memory leak. E se pudéssemos deixar essa expressão toda dentro do mesmo escopo? É isso que é proposto aqui:
+
+```js
+function main (x, y, options) {
+  return do {
+    let finalX = 10
+    if (par(x) && !options?.useY) finalX = x + y
+    else if (!par(x)) finalX = x * 2
+    if (options?.useY && options?.fromZero) finalX--
+    finalX
+  }
+}
+```
+
+Ou, se você só precisar atribuir a uma variável:
+
+```js
+function main (x, y, options) {
+  const x = do {
+    let finalX = 10
+    if (par(x) && !options?.useY) finalX = x + y
+    else if (!par(x)) finalX = x * 2
+    if (options?.useY && options?.fromZero) finalX--
+    finalX
+  }
+  // Resto do código
+}
+```
+
+Esse pode não ser o melhor exemplo, mas com este estilo de desenvolvimento você consegue reduzir o escopo para a menor unidade possível, a de expressão. Dessa forma o coletor de lixo do seu runtime vai saber o quando recursos podem ser liberados de uma forma mais eficiente, já que as expressões podem ser completamente descartadas quando terminam.
+
+### Usos
+
+Alguns usos interessantes:
+
+1.  Escopo mínimo de variáveis:
+
+```js
+let x = do {
+  let tmp = f();
+  tmp * tmp + 1
+};
+```
+
+2\. Uso de condicionais para um código mais legível:
+
+```js
+let x = do {
+  if (foo()) { f() }
+  else if (bar()) { g() }
+  else { h() }
+};
+```
+
+3\. _do expressions_ tem um uso excelente para linguagens de templating, como o JSX:
+
+```js
+return (
+  <nav>
+    <Home />
+    {
+      do {
+        if (loggedIn) {
+          <LogoutButton />
+        } else {
+          <LoginButton />
+        }
+      }
+    }
+  </nav>
+)
+```
+
+### O que é permitido
+
+Além de casos mais simples, alguns casos mais complexos, os chamados _edge cases_ são também permitidos, por exemplo:
+
+#### Atribuição usando `var`
+
+Por padrão, qualquer tipo de atribuição de variável retorna um resultado vazio, por isso (como vou mostrar logo mais) não é possível atribuir nenhum tipo de variável como uma expressão, exceto quando estamos usando `var`, pois o escopo da variável seria global e o valor poderia sofrer um _hoist_ para o topo da função local.
+
+#### Vazio
+
+Você pode usar um `do {}`, o que seria equivalente a ter uma função com `void 0`
+
+```js
+function v () {
+    return void 0
+}
+```
+
+#### Assincronismo com `await` ou `yield`
+
+Você pode usar `await` ou `yield` dependendo do escopo da função que contém o `do`, por exemplo, se a sua função for uma função `async`, você poderá usar um `do { await ... }`, caso seja um [generator](https://medium.com/trainingcenter/javascript-entendendo-generators-408cbce9aee) o mesmo vale para `yield x`.
+
+#### Erros com `throw`
+
+O `throw` funciona da forma como a gente espera, ou seja, podemos dar um `throw` em um erro dentro de uma `do` expression:
+
+```js
+const p = do {
+    if (!p?.prop) throw new Error('Ops')
+    else p.prop * 2
+}
+```
+
+#### Quebras de controle com `break`, `continue` ou `return`
+
+Da mesma forma, você pode usar keywords de quebra de controle quando você está em um escopo apropriado, por exemplo, usar um `return` se o `do` está dentro de uma função, da mesma forma que é possível usar `continue`ou `break` dentro de loops.
+
+Lembrando que `return` vai retornar da função como um todo, e não somente do `do`, então:
+
+```js
+function getUserId(blob) {
+  let obj = do {
+    try {
+      JSON.parse(blob)
+    } catch {
+      return null; // sai da função com retorno null
+    }
+  };
+  return obj?.userId;
+}
+```
+
+Um caso especial é que o JS pode se confundir quando as expressões `continue` e `break` não tem o que chamamos de _label_. Uma label é uma forma de dizer para o runtime que aquela expressão tem um nome, então podemos dizer para o JS exatamente qual é a estrutura de controle que estamos nos referindo, isso é especialmente útil quando temos loops aninhados:
+
+```js
+outer:
+for (let i = 0; i < 5; i++) {
+    inner:
+    for (let j = 0; j < 10; j++) {
+        if (i % 2 === 0) break outer
+    }
+}
+```
+
+Dessa forma, não é possível ter `continue` ou `break` sem uma label em `do`.
+
+#### Parâmetros de funções
+
+Você também pode usar `do` dentro de parâmetros de funções, e eles aceitam o `return`:
+
+```js
+function foo (p = do { 
+               if (!x) throw new Error('X is required') 
+	       else return null 
+}) {}
+```
+
+#### Conflito com o `do while`
+
+Para remediar o conflito da keyword `do` no `do while`, você pode usar as expressões `do` dentro de parenteses:
+
+```js
+do while (true) {
+    let x = (do { ... })
+}
+```
+
+### Limitações
+
+Por conta da quebra de sintaxe, especialmente em alguns casos, essa funcionalidade é bastante limitada no que pode ou não pode ser feito.
+
+Se alguma expressão como as abaixo são detectadas, o código automaticamente retorna um erro instantaneamente.
+
+#### Atribuições diretas
+
+Você não pode retorna apenas atribuições de variáveis:
+
+```js
+(do {
+  let x = 1;
+});
+```
+
+Isso acontece porque declarações tem um valor vazio como sendo o valor de "completude", ou seja, se nada acontecer, elas não retornam nada. Então se você fizer algo como `do { 'antes'; let x = 'depois'; }` isso tudo vai retornar `'antes'` e a segunda expressão não vai retornar nada.
+
+#### Criação de funções
+
+Da mesma forma você não pode criar funções dentro de expressões:
+
+```js
+(do {
+  function f() {}
+});
+```
+
+#### Loops
+
+Loops não são permitidos dentro de expressões, em nenhum caso, nem mesmo aninhados em outras estruturas de controle como `if`:
+
+```js
+(do {
+  while (cond) {
+    // código
+  }
+});
+```
+
+Ou
+
+```js
+(do {
+  if (condition) {
+    while (inner) {
+      // código
+    }
+  } else {
+    42;
+  }
+});
+```
+
+#### Labels fora de loops
+
+Você também não pode definir labels arbitrárias, somente labels que estão fora da expressão são válidas:
+
+```js
+(do {
+  label: {
+    let x = 1;
+    break label;
+  }
+});
+```
+
+#### `if` sem `else`
+
+Todos os `if`s dentro de uma expressão **devem** conter um `else` acompanhado:
+
+```js
+(do {
+  if (foo) {
+    bar
+  }
+});
+```
+
+## Conclusão
+
+Essa é uma proposta ainda muito no início, o que significa que provavelmente muito do que está escrito aqui vai mudar no futuro, porém ela promete trazer uma nova forma de fazer com que o seu código fique mais organizado e, quem sabe, mais eficiente em termos de uso de recursos.

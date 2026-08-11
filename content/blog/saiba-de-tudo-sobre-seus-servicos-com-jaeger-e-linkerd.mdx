@@ -1,0 +1,160 @@
+---
+title: "Saiba de tudo sobre seus serviços com Jaeger e Linkerd"
+pubDate: 2020-09-14T17:16:46.000Z
+updatedDate: 2026-07-16T16:24:20.000Z
+lang: pt
+category: "infra"
+tags: ["kubernetes", "linkerd", "jaeger", "containers", "development", "technology"]
+description: "Que tal observar a fundo TODAS as chamadas do seu sistema e conseguir entender quando tudo aconteceu? Vamos instalar o Jaeger e ter todo esse poder!"
+heroImage: "./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/unsplash_526360a842e20_1-13093fe9.jpg"
+draft: false
+visibility: "public"
+---
+
+Já falamos um pouco sobre o Linkerd no [último post](/uma-introducao-a-service-mesh-com-linkerd/), agora, para podermos estender ainda mais o nosso conhecimento sobre service mesh, vamos falar de um conceito interessante que vamos explorar com mais calma em outros artigos. Mas aqui vamos ter um exemplo prático! O **Tracing.**
+
+## Tracing
+
+Tracing é um dos elementos da tríade que compõe o que vamos tratar mais a frente como **Observabilidade**, porém, no momento vamos focar nesse aspecto.
+
+O tracing é a capacidade de poder acompanhar uma request de ponta a ponta verificando a ordem das chamadas dos serviços, o payload enviado e recebido por cada um, as respostas de cada serviço e também o tempo que cada request demorou.
+
+Implementar um tracing simples em uma aplicação não é uma tarefa complexa, basta fazermos um log de tudo que recebemos e enviamos. Porém, existe um outro conceito chamado **deep tracing** ou **distributed tracing** que é justamente voltado à aplicações distribuídas.
+
+E é ai que as coisas começam a ficar complicadas...
+
+### Deep Tracing
+
+Deep Tracing é o nome que se dá à técnica de ligar logs de uma chamada a outra, formando uma linha do tempo do que foi feito. A cada log, damos o nome de um **span** e uma request pode desencadear múltiplos spans, ainda mais quando estamos tratando com microsserviços que chamam uns aos outros em sequencia.
+
+Sendo muito simplista, o que o Deep Tracing faz é adicionar um header na request inicial que é chamado de **Request ID** – cada implementação da técnica tem seu próprio nome para isso. A cada nova request, esse ID é passado para frente e, combinada com a data da requisição, essas informações são utilizadas para construir um histórico de tudo que foi feito.
+
+O problema é que, para fazer a implementação manual disso tudo, temos que:
+
+-   Ter uma noção muito boa da nossa aplicação
+-   Interceptar todas as chamadas HTTP e colocar um header em cada uma delas
+
+O que não é uma tarefa fácil, por isso existem ferramentas como o Jaeger.
+
+## Jaeger
+
+O [Jaeger](https://www.jaegertracing.io/) é uma ferramenta open source hospedada pela CNCF que serve justamente para evitar a complicação de ter que faz o deploy e implementação de todas as partes móveis que compõem um sistema de tracing distribuído.
+
+Ele também utiliza o [Open Telemetry](https://opentelemetry.io/) um projeto que visa simplificar a telemetria de aplicações através de um conjunto padrão de ferramentas para obtenção de métricas.
+
+O Jaeger é escrito em Golang, o que torna ele super rápido e muito útil para sistemas que estão distribuídos ou então possuem uma malha complexa de serviços. Sabe o que mais vai bem com essa arquitetura? O Linkerd!
+
+## Linkerd e Jaeger
+
+Service Mesh e Observabilidade são conceitos que andam lado a lado, porém nem sempre você tem a capacidade de implementar ambos de forma simples. E é ai que tanto o Linkerd quanto o Jaeger brilham individualmente, mas, além de serem incríveis por si só, eles são ainda melhores **juntos**.
+
+Usar o Linkerd com o Jaeger é uma excelente forma de obter todas as informações e métricas possíveis de sua aplicação de forma rápida e prática, até porque o próprio Linkerd suporta add-ons que incluem tanto o Jaeger como o [OpenCensus Collector](https://opencensus.io/service/components/collector/), uma ferramenta de coleta de métricas.
+
+Mas chega de conceitos! A melhor forma de explicar o que é o Jaeger é através da prática! Então vamos colocar a mão na massa!
+
+## Aplicando Tracing
+
+> Para começar, vou assumir que você já está com o cluster criado e com o Linkerd Instalado, se você ainda não instalou tudo, volta para [o artigo anterior](/uma-introducao-a-service-mesh-com-linkerd/) e siga o tutorial até o final
+
+Com o nosso cluster configurado e o Linkerd já instalado, vamos começar instalando a configuração [all-in-one](https://www.jaegertracing.io/docs/1.8/getting-started/#all-in-one), que provê uma única imagem que contém todos os elementos necessários para que o tracing do Jaeger funcione tranquilamente.
+
+Para instalar essa configuração, vamos criar um novo arquivo chamado `config.yaml` e colocar o seguinte conteúdo nele:
+
+```yaml
+tracing:
+  enabled: true
+```
+
+Então, vamos executar um comando do Linkerd para adicionar o novo add-on, na pasta aonde você criou o novo arquivo execute o seguinte comando:
+
+```bash
+linkerd upgrade --addon-config config.yaml | kubectl apply -f -
+```
+
+Assim que terminarmos, devemos ter dois novos deploys, um chamado `linkerd-collector` e outro chamado `linkerd-jaeger` no namespace `linkerd`:
+
+<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-25.png" alt="" caption="Temos dois novos deployments dentro do namespace Linkerd" />
+
+### Anotações
+
+Para detectar as mudanças e começar a realizar o tracing, o Linkerd utiliza duas anotações novas nos nossos deployments, sempre que precisarmos fazer essa modificação vamos incluir estas linhas juntamente com a anotação `linkerd.io/inject: enabled`, ficando assim:
+
+```yaml
+spec:
+  template:
+    metadata:
+      annotations:
+      	linkerd.io/inject: enabled
+        config.linkerd.io/trace-collector: linkerd-collector.linkerd:55678
+        config.alpha.linkerd.io/trace-collector-service-account: linkerd-collector
+```
+
+### Instrumentação
+
+O tracing, diferentemente da maioria das técnicas do DevOps, exige uma instrumentação na aplicação, ou seja, temos que manualmente inserir o código do coletor de métricas no nosso sistema para que ele possa identificar e adicionar os headers e o ID para o trace.
+
+Isso pode ser feito de forma manual na nossa aplicação usando Node através [deste pacote](https://github.com/census-instrumentation/opencensus-node/tree/master/packages/opencensus-nodejs), porém, para mantermos o processo mais simples, vamos utilizar a aplicação padrão do Linkerd para testar.
+
+Primeiramente instalamos a aplicação com o comando
+
+```bash
+kubectl apply -f https://run.linkerd.io/emojivoto.yml
+```
+
+Depois executamos o seguinte comando para que possamos incluir a anotação que mostramos anteriormente
+
+```bash
+kubectl -n emojivoto patch -f https://run.linkerd.io/emojivoto.yml -p '
+spec:
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+        config.linkerd.io/trace-collector: linkerd-collector.linkerd:55678
+        config.alpha.linkerd.io/trace-collector-service-account: linkerd-collector
+'
+```
+
+Esperamos o deployment terminar de ser finalizado. Você pode executar o comando a seguir para acompanhar:
+
+```bash
+kubectl -n emojivoto rollout status deploy/web
+```
+
+Para finalizar, vamos ativar o tracing setando uma nova variável de ambiente no deployment com o seguinte comando
+
+```bash
+kubectl -n emojivoto set env --all deploy OC_AGENT_HOST=linkerd-collector.linkerd:55678
+```
+
+## Explorando o Jaeger
+
+Vamos ter certeza de que nossa implementação funcionou quando rodarmos o comando `linkerd dashboard` e virmos o ícone do Jaeger ao lado dos nossos namespaces
+
+<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-26.png" alt="" caption="Veja o ícone do logo do Jaeger ao lado do Grafana" />
+
+Se clicarmos nele, teremos todas as chamadas feitas dentro da aplicação e poderemos acompanhar o histórico de tudo que foi chamado via HTTP
+
+<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-27.png" alt="" caption="Cada círculo é uma chamada" wide />
+
+Se clicarmos em uma das linhas, conseguiremos ver por onde todas as requisições passaram e quais serviços foram chamados, bem como seus payloads e tempos
+
+<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-28.png" alt="" wide />
+
+Outra funcionalidade interessante é a capacidade do Jaeger identificar a possível arquitetura do sistema. Basta clicar na guia "System Architecture" e selecionar entre o grafo direcionado e o DAG:
+
+<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-29.png" alt="" caption="Diagrama de número de requisições" />
+
+<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-30.png" alt="" caption="Grafo direcionado" />
+
+Podemos também explorar cada uma das requisições individualmente através do mesmo ícone do Jaeger em cada uma das linhas quando iniciamos o "Live View" de uma rota.
+
+![](./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-32.png)
+
+## Conclusão
+
+Vamos falar mais de observabilidade por aqui no futuro, mas tenha em mente que o tracing é uma das principais razões pelo qual o service mesh é tão cobiçado. O poder que é possível extrair quando você sabe exatamente o que está acontecendo em seu sistema permite que você resolva bugs e trate erros de forma muito mais simples e rápida.
+
+Espero que tenham gostado do artigo, deixe seu comentário, curta e compartilhe! Vamos ajudar todo mundo a entender o que é tracing! Não se esqueça de se inscrever na [newsletter](/signup/) para mais conteúdo exclusivo!
+
+Até mais!

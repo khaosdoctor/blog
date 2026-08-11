@@ -1,0 +1,55 @@
+---
+title: "Já conhece os acessores automáticos no TypeScript?"
+pubDate: 2024-03-20T11:00:23.000Z
+updatedDate: 2026-07-16T17:57:47.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript"]
+description: "Você já conhece os acessores automáticos? Sabe que funcionalidade é essa? Então vamos entender melhor como ela funciona!"
+heroImage: "./acessores-automaticos-com-typescript/articles-5.png"
+draft: false
+visibility: "public"
+seoTitle: "Auto-accessors em TypeScript"
+seoDescription: "Entenda como funciona uma das features mais interessantes do TypeScript que não é muito utilizada. Os Auto-accessors, ou acessores automáticos!"
+---
+
+O TypeScript tem várias funcionalidades super interessantes que poucas pessoas conhecem, uma dessas funcionalidades é o uso de [auto-accessors em classes](https://devblogs.microsoft.com/typescript/announcing-typescript-4-9/#auto-accessors-in-classes).
+
+Presente desde o TypeScript 4.9, ela também é uma funcionalidade que está descrita na proposta [original de decorators](https://github.com/tc39/proposal-decorators) (que inclusive a gente já falou sobre [aqui](/javascript-decorators/)).
+
+<CourseCTA />
+
+Essencialmente, essa sintaxe funciona da seguinte maneira, quando temos um acessor, geralmente temos um método `get` que traz uma variável interna de uma classe, por exemplo:
+
+```ts
+class Pessoa {
+    #__nome: string;
+
+    get name() {
+        return this.#__nome;
+    }
+    set name(val: string) {
+        this.#__nome = val;
+    }
+
+    constructor(nome: string) {
+        this.nome = nome;
+    }
+}
+```
+
+Percebe que a gente tem não uma, mas 7 linhas só para poder criar um acessor que vai setar e obter a variável interna `#__nome`? Seria muito melhor se a gente pudesse fazer tudo isso de uma vez, e é pra isso que os auto-accessors existem. Tudo isso que eu escrevi pode virar isso aqui:
+
+```ts
+class Person {
+    accessor nome: string;
+
+    constructor(nome: string) {
+        this.nome = nome;
+    }
+}
+```
+
+Por baixo dos panos, o que os acessores automáticos vão fazer é exatamente o que fizemos no primeiro código, eles vão expandir o `nome` para uma variável privada interna da classe, e uma variável externa acessível somente por um getter e um setter.
+
+No geral, essa feature não é algo muito relacionado à lógica, mas sim a qualidade de vida, especialmente quando vamos criar decorators que precisam de vários getters e setters.

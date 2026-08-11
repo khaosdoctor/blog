@@ -1,0 +1,118 @@
+---
+title: "JavaScript ganha novos métodos para o Set"
+pubDate: 2024-07-04T11:00:40.000Z
+updatedDate: 2026-07-16T17:55:39.000Z
+lang: pt
+category: "typescript"
+tags: ["ecmascript", "javascript"]
+description: "O JavaScript acabou de ganhar novos métodos para os Sets em 2024, vamos explorá-los!"
+heroImage: "./ecma-2024-sets/articles--1-.png"
+draft: false
+visibility: "public"
+seoTitle: "Tudo sobre os novos métodos dos Sets em JavaScript"
+---
+
+Há 7 anos atrás, uma galera pediu para que os Sets tivessem outros métodos além dos padrões `add`, `has` e etc. Esses métodos foram pensados para casos onde você precisa trabalhar com múltiplos sets, por exemplo, criando uniões, intersecções e etc, que são operações muito comuns.
+
+Bom, 7 anos depois, [essa proposta](https://github.com/tc39/proposal-set-methods) finalmente chegou no estágio 4! Ou seja, ela vai finalmente ser implementada no JavaScript e nos browsers!
+
+> Se você não sabe o que são sets. Eles nada mais são do que estruturas parecidas com arrays, porém que só podem armazenar um valor uma única vez (já cobrimos essas técnicas [aqui](/removendo-itens-duplicados-no-javascript-es6/)). É uma forma de deduplicar um array de forma eficiente.
+
+A partir de agora, temos os seguintes novos métodos nos sets:
+
+> [!NOTE] 💡
+> Para deixar mais claro, vamos tomar que o set ****A**** é o Set inicial, e o set ****B**** é o set secundário
+
+## Set.prototype.intersection
+
+Retorna os elementos que estão tanto presentes em A e B:
+
+```js
+const A = new Set([1, 3, 5, 7, 9]);
+const B = new Set([1, 4, 9]);
+console.log(A.intersection(B)); // Set(2) { 1, 9 }
+```
+
+## Set.prototype.difference
+
+O oposto da intersecção, retorna itens que estão presentes em A mas não em B:
+
+```js
+const A = new Set([1, 3, 5, 7, 9]);
+const B = new Set([1, 4, 9]);
+console.log(A.difference(B)); // Set(3) { 3, 5, 7 }
+```
+
+<CourseCTA />
+
+## Set.prototype.union
+
+Junta ambos os sets em um único set. Uma operação que era bem chata de ser feita anteriormente porque tínhamos que ter dois sets separados, transformá-los em arrays e depois juntar em um terceiro set então esse método:
+
+```js
+const A = new Set([2, 4, 6, 8]);
+const B = new Set([1, 4, 9]);
+console.log(A.union(B)); // Set(6) { 2, 4, 6, 8, 1, 9 }
+```
+
+É uma redução disso aqui:
+
+```js
+const A = new Set([2, 4, 6, 8]);
+const B = new Set([1, 4, 9]);
+console.log(new Set([...A, ...B])); // Set(6) { 2, 4, 6, 8, 1, 9 }
+```
+
+## Set.prototype.symmetricDifference
+
+Esse método é bem interessante, ele retorna elementos que estão ou em A ou em B, mas **não** em ambos. Se você já conhece um pouco de lógica, isso é o equivalente de um portão lógico XOR (e**x**clusive **or**, ou _"ou exclusivo")._
+
+```js
+const A = new Set([2, 4, 6, 8]);
+const B = new Set([1, 4, 9]);
+console.log(A.symmetricDifference(B)); // Set(5) { 2, 6, 8, 1, 9 }
+```
+
+## Set.prototype.isSubsetOf
+
+Uma função de verificação que checa se A está **totalmente contido** em B:
+
+```js
+const A = new Set([4, 8, 12, 16]);
+const B = new Set([2, 4, 6, 8, 10, 12, 14, 16, 18]);
+console.log(A.isSubsetOf(B)); // true
+```
+
+## Set.prototype.isSupersetOf
+
+Da mesma forma, só que ao inverso, essa função indica se todos os elementos de B estão contidos em A:
+
+```js
+const A = new Set([4, 8, 12, 16]);
+const B = new Set([2, 4, 6, 8, 10, 12, 14, 16, 18]);
+console.log(B.isSupersetOf(A)); // true
+```
+
+## Set.prototype.isDisjointFrom
+
+Esse é o método final para fechar o ciclo, indicando que A e B são disjuntos, ou seja, que não existe nenhum elemento de A em B.
+
+> O que também implica que não existe nenhum elemento de B em A, então essa função é idempotente
+
+```js
+const A = new Set([2, 3, 5, 7, 11, 13, 17, 19]);
+const B = new Set([1, 4, 9, 16]);
+console.log(A.isDisjointFrom(B)); // true
+console.log(B.isDisjointFrom(A)); // true
+```
+
+## Conclusão
+
+Os novos métodos dos sets estão disponíveis nas versões:
+
+-   122 ou superior do Chrome
+-   122 ou superior do Edge
+-   127 ou superior do Firefox
+-   17 ou superior do Safari
+
+Você pode ver mais detalhes no [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/intersection)

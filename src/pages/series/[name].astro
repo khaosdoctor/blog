@@ -1,0 +1,62 @@
+---
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate } from '../../lib/posts'
+import { getSeries, slugify } from '../../lib/taxonomy'
+
+export const getStaticPaths = (async () => {
+  const series = await getSeries()
+  return [...series.entries()]
+    .filter(([, posts]) => posts.length > 1)
+    .map(([name, posts]) => ({ params: { name: slugify(name) }, props: { name, posts } }))
+}) satisfies GetStaticPaths
+
+const { name, posts } = Astro.props
+---
+
+<BaseLayout title={`${name} | Lucas Santos`} description={`Todos os artigos da série ${name}.`}>
+  <p class="kicker">Série</p>
+  <h1>{name}</h1>
+  <ol class="parts">
+    {
+      posts.map((post) => (
+        <li>
+          <a href={`/${post.id}/`}>{post.data.title}</a>
+          <time datetime={post.data.pubDate.toISOString()}>
+            {formatDate(post.data.pubDate, post.data.lang)}
+          </time>
+        </li>
+      ))
+    }
+  </ol>
+</BaseLayout>
+
+<style>
+  .kicker {
+    margin-block-end: 0;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin-block-start: 0.2rem;
+  }
+
+  .parts {
+    padding-inline-start: 1.4rem;
+  }
+
+  .parts li {
+    margin-block-end: 1rem;
+  }
+
+  .parts time {
+    display: block;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+  }
+</style>

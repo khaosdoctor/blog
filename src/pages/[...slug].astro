@@ -1,8 +1,37 @@
 ---
 import type { GetStaticPaths } from 'astro'
 import { render } from 'astro:content'
+import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
+import Bookmark from '../components/Bookmark.astro'
+import CourseCTA from '../components/CourseCTA.astro'
+import Epigraph from '../components/Epigraph.astro'
+import Figure from '../components/Figure.astro'
+import HoverPreviews from '../components/HoverPreviews.astro'
+import MarginNote from '../components/MarginNote.astro'
+import RawEmbed from '../components/RawEmbed.astro'
+import Sidenote from '../components/Sidenote.astro'
+import Video from '../components/Video.astro'
 import { formatDate, getPublishedPosts } from '../lib/posts'
+import { getSeriesNavigation, slugify } from '../lib/taxonomy'
+
+/**
+ * Injected into every post so migrated MDX can use these tags with no import
+ * lines. 246 files stay clean markdown, and the component set can be renamed
+ * here in one place instead of across the content.
+ */
+const mdxComponents = {
+  Bookmark,
+  CourseCTA,
+  Epigraph,
+  Figure,
+  MarginNote,
+  RawEmbed,
+  Sidenote,
+  Video,
+  Vimeo,
+  YouTube,
+}
 
 // Flat URLs: /{slug}/ exactly as Ghost had them, so moving a post between
 // sections only ever changes its `category`, never its URL.
@@ -12,7 +41,9 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths
 
 const { post } = Astro.props
-const { Content } = await render(post)
+const { Content, remarkPluginFrontmatter } = await render(post)
+const series = await getSeriesNavigation(post)
+const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
 ---
 
 <BaseLayout
@@ -26,9 +57,25 @@ const { Content } = await render(post)
       <time datetime={post.data.pubDate.toISOString()}>
         {formatDate(post.data.pubDate, post.data.lang)}
       </time>
-      <span>·</span>
-      <span>{post.data.category}</span>
+      <span aria-hidden="true">·</span>
+      <a href={`/${post.data.category}/`}>{post.data.category}</a>
+      {
+        readingTime !== undefined && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{readingTime} min</span>
+          </>
+        )
+      }
     </p>
+    {
+      series !== null && (
+        <p class="series">
+          Parte {series.index} de {series.total} da série{' '}
+          <a href={`/series/${slugify(series.name)}/`}>{series.name}</a>
+        </p>
+      )
+    }
     {
       post.data.epigraph && (
         <blockquote class="epigraph">
@@ -37,8 +84,36 @@ const { Content } = await render(post)
         </blockquote>
       )
     }
-    <Content />
+    <Content components={mdxComponents} />
+    {
+      post.data.tags.length > 0 && (
+        <ul class="tags">
+          {post.data.tags.map((tag) => (
+            <li>
+              <a href={`/tags/${slugify(tag)}/`}>{tag}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    {
+      series !== null && (
+        <nav class="series-nav" aria-label="Navegação da série">
+          {series.previous !== null && (
+            <a href={`/${series.previous.id}/`} rel="prev">
+              ← {series.previous.data.title}
+            </a>
+          )}
+          {series.next !== null && (
+            <a href={`/${series.next.id}/`} rel="next" class="next">
+              {series.next.data.title} →
+            </a>
+          )}
+        </nav>
+      )
+    }
   </article>
+  <HoverPreviews />
 </BaseLayout>
 
 <style>
@@ -63,5 +138,51 @@ const { Content } = await render(post)
     display: block;
     font-size: 0.85rem;
     font-style: normal;
+  }
+
+  .series {
+    padding: 0.6rem 0.9rem;
+    border-inline-start: 3px solid var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    font-size: 0.9rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block-start: 3rem;
+    padding: 0;
+    list-style: none;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+
+  .tags a {
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .tags a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .series-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-start: 2.5rem;
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--rule);
+    font-size: 0.9rem;
+  }
+
+  .series-nav .next {
+    margin-inline-start: auto;
+    text-align: end;
   }
 </style>

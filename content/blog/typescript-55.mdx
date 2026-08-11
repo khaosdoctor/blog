@@ -1,0 +1,231 @@
+---
+title: "A maior atualização do TypeScript em anos - TypeScript 5.5"
+pubDate: 2024-07-10T17:23:32.000Z
+updatedDate: 2026-07-16T17:55:26.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript"]
+description: "Saiba tudo sobre a maior atualização do TypeScript nos últimos anos!"
+heroImage: "./typescript-55/articles.png"
+draft: false
+visibility: "public"
+seoTitle: "O que há de novo no TypeScript 5.5?"
+---
+
+Depois de um tempinho sem postar as novidades do TypeScript aqui, eu finalmente estou de volta para mostrar o que está rolando de novo no mundo da linguagem mais amada da galera!
+
+O TypeScript 5.5 foi [oficialmente lançado](https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/) e está sendo considerado uma das mais importantes atualizações de todos os tempos. Essa nova versão melhora várias partes do código e do comportamento geral do TS, e também adiciona algumas coisas muito interessantes.
+
+## Predicados inferidos
+
+Uma das principais mudanças é a inferência automática de predicados conforme uma variável vai sendo alterada no código. Essa alteração foi feita [nesta PR](https://github.com/microsoft/TypeScript/pull/57465) recentemente, e sinceramente era algo que a maioria da galera não estava esperando que chegasse em uma versão recente.
+
+Por exemplo, quando temos algo desse tipo:
+
+```ts
+const foo: string | number = 'str'
+```
+
+Se tivermos qualquer código que usa `foo` depois dessa linha, qualquer declaração precisa ter o tipo `string | number` já que é o tipo original da variável. A gente pode fazer um _narrowing_ (que eu explico na Formação TS) e reduzir a quantidade possível de tipos, por exemplo, se eu quero pegar apenas a string:
+
+```ts
+const foo: string | number = 'str'
+
+if (typeof foo === 'string') {
+  // aqui dentro, foo é string
+}
+
+// aqui fora ele continua sendo string | number
+```
+
+Outro uso comum desse tipo de função é quando queremos criar [type guards](/assertion-functions/), ou seja, queremos trazer essa checagem para fora do if e reutilizar, podemos fazer assim:
+
+```ts
+function isString (v: unknown) {
+  return typeof v === 'string'
+}
+```
+
+Mas, sem a gente especificar manualmente o retorno dessa função, vamos ter algo bem estranho:
+
+```ts
+if (isString(foo)) {
+  console.log(foo); // string | number
+}
+```
+
+Isso acontece porque, dentro de uma função, o TS vai perder o narrowing. A forma de resolver isso é se a gente usar manualmente um _type predicate_, que é um sufixo que a podemos colocar para dizer para o TS que determinado tipo é um outro tipo:
+
+```ts
+function isString (v: unknown): v is string {
+  return typeof v === 'string'
+}
+
+if (isString(foo)) {
+  console.log(foo); // string
+}
+```
+
+Uma grande vantagem de usar esse tipo de função é que a gente pode passar ela para outro métodos, principalmente iterativos, como `map`, `filter` e `reduce`:
+
+```ts
+const foo = [0, "foo", 99, "bar"] // Array<string | number>
+const strings = arr.filter(isString) // string[]
+```
+
+Mas existe um problema com type guards que é o fato de a gente estar manualmente dizendo o que ele precisa saber, portanto o TS não vai reclamar se a gente fazer algo assim:
+
+```ts
+function isString (v: unknown): v is number {
+  return typeof v === 'string'
+}
+
+if (isString(foo)) {
+  console.log(foo); // number
+}
+```
+
+O que é totalmente errado. E é por isso que essa nova proposta existe. Você pode agora escrever a mesma função sem o predicado e o TS vai automaticamente inferir que essa função retorna o resultado correto.
+
+```ts
+function isString (v: unknown) {
+  return typeof v === 'string'
+}
+
+if (isString(foo)) {
+  console.log(foo); // string
+}
+```
+
+E isso usa uma primitiva principal do TypeScript que também é usada para poder inferir e fazer narrowing de outros tipos, então tudo que você precisar inferir a partir de `if`'s ou qualquer outra função que:
+
+-   Não tem uma declaração explícita de retorno
+-   O retorno inferido é `boolean`
+-   Tem um único `return` e nenhum return implícito
+-   Não modifica em nenhum momento o parâmetro recebido
+
+Vai ser uma candidata a ser utilizada como type predicate.
+
+<CourseCTA />
+
+## Acesso de objetos via índice agora funciona
+
+Um dos maiores problemas que provavelmente qualquer pessoa já passou com TS é quando temos que acessar objetos na forma `obj[chave]`. Por exemplo:
+
+```ts
+function foo(obj: Record<string, unknown>, key: string) {
+    if (typeof obj[key] === "string") {
+        obj[key].toUpperCase(); // Property 'toUpperCase' does not exist on type 'unknown'
+    }
+}
+```
+
+Mesmo que a gente faça a inferência de `string` manualmente, o TS ainda vai inferir `obj[key]` como sendo `unknown` porque qualquer valor de `obj[key]` esta definido como `unknown` no `Record<string, unknown>`.
+
+No TS 5.5 isso não acontece mais, desde que `obj` nem `key` sejam modificados durante a função.
+
+## Tag @import em JSDoc
+
+Para quem gosta ou precisa usar JS com TS no projeto, um dos principais problemas é importar um tipo só para fazer o type checking dentro de um arquivo JS. Essencialmente você tem três opções:
+
+1.  Importar como um namespace, mas o módulo ainda vai ser importado em runtime
+
+```js
+import * as modulo from "./modulo";
+
+/**
+ * @param {modulo.Tipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+2.  Usar a função `import()` dentro do JSDoc, mas isso não é reutilizável.
+
+```js
+/**
+ * @param {import("./modulo").Tipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+3.  Para deixar reutilizável, podemos usar o `typedef` do JSDoc, mas isso é muito longo de escrever, e pode ser super comprido em tipos complexos.
+
+```js
+/**
+ * @typedef {import("./modulo").Tipo} MeuTipo
+ */
+
+/**
+ * @param {MeuTipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+Agora o TS implementa uma nova definição do JSDoc que permite que você use imports no estilo ESM:
+
+```js
+/** @import * as modulo from "modulo" */
+
+/**
+ * @param {modulo.Tipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+## Checagem de sintaxe em RegExp
+
+Não tem muito o que falar aqui. Anteriormente o TS simplesmente deixava passar qualquer Regex como sendo válida, agora o compilador também vai chegar por sintaxes válidas e inválidas. Veja alguns exemplos:
+
+```ts
+let myRegex = /@robot(\s+(please|immediately)))? do some task/;
+//                                            ~
+// Unexpected ')'. Did you mean to escape it with backslash?
+```
+
+A checagem funciona com grupos de captura:
+
+```ts
+let myRegex = /@typedef \{import\((.+)\)\.([a-zA-Z_]+)\} \3/u;
+//                                                        ~
+// This backreference refers to a group that does not exist.
+// There are only 2 capturing groups in this regular expression.
+```
+
+E com grupos nomeados também:
+
+```ts
+let myRegex = /@typedef \{import\((?<importPath>.+)\)\.(?<importedEntity>[a-zA-Z_]+)\} \k<namedImport>/;
+//                                                                                        ~~~~~~~~~~~
+// There is no capturing group named 'namedImport' in this regular expression.
+```
+
+## Suporte para os novos métodos do Set
+
+O TS agora vai suportar os novos métodos dos Sets que vieram no [ECMAScript 2024](/novos-metodos-set) mesmo que eles ainda não tenham sido completamente implementados. Não vou dar detalhes aqui porque você pode ver no artigo que eu linkei que tem todas as explicações sobre cada método.
+
+## Outras mudanças
+
+-   Você pode usar o placeholder `${configDir}` dentro do arquivo `tsconfig.json` para apontar para o local onde o arquivo está localizado, isso é bem útil quando você tem arquivos de configuração separados ([veja explicação](https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#the-configdir-template-variable-for-configuration-files))
+-   A flag e propriedade `isolatedDeclarations` facilita a criação de bibliotecas públicas forçando o uso de retornos explícitos quando são necessários para gerar arquivos `.d.ts` ([veja explicação](https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#using-isolateddeclarations))
+-   As seguintes propriedades foram desabilitadas
+    -   `charset`
+    -   `target: ES3`
+    -   `importsNotUsedAsValues`
+    -   `noImplicitUseStrict`
+    -   `noStrictGenericChecks`
+    -   `keyofStringsOnly`
+    -   `suppressExcessPropertyErrors`
+    -   `suppressImplicitAnyIndexErrors`
+    -   `out`
+    -   `preserveValueImports`
+    -   `prepend` em referências de projetos
+    -   `newLine` implícito do SO
+-   Você não pode mais criar um tipo chamado `undefined`
