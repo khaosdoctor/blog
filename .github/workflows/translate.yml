@@ -1,0 +1,71 @@
+name: Translate
+
+# Translates posts that changed into English and commits the result back.
+# Runs before the site build sees them, so a push publishes both languages.
+#
+# Needs the ANTHROPIC_API_KEY repo secret. Without it the job exits cleanly
+# rather than failing every push.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/blog/**'
+  workflow_dispatch:
+    inputs:
+      all:
+        description: 'Retranslate every post, ignoring the hash cache'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: translate
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The job commits back, so it needs a real ref rather than a detached head.
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check for the API key
+        id: key
+        run: |
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "No ANTHROPIC_API_KEY secret set, skipping translation."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Translate changed posts
+        if: steps.key.outputs.present == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/translate.ts --locale en ${{ inputs.all && '--all' || '' }}
+
+      - name: Commit translations
+        if: steps.key.outputs.present == 'true'
+        run: |
+          if [ -z "$(git status --porcelain content/translated)" ]; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/translated
+          git commit -m "chore: update machine translations"
+          git push

@@ -86,7 +86,7 @@ Se este cronjob falhar, ele vai ter uma nova tentativa em 1 segundo, depois 4 de
 
 ## Limitações e detalhes
 
-Por enquanto a [documentação do cron](https://docs.deno.com/kv/manual/cron) diz que só é possível criar cronjobs no top-level domain. Ou seja, **não é possível criar um cron dentro de uma função** ou dentro de algum escopo, dessa forma é necessário que você já saiba o que precisa ser executado de antemão. Para criar cronjobs dinâmicos as [filas](blog.lsantos.dev/deno-kv-queues/) podem ser uma boa opção!
+Por enquanto a [documentação do cron](https://docs.deno.com/kv/manual/cron) diz que só é possível criar cronjobs no top-level domain. Ou seja, **não é possível criar um cron dentro de uma função** ou dentro de algum escopo, dessa forma é necessário que você já saiba o que precisa ser executado de antemão. Para criar cronjobs dinâmicos as [filas](https://blog.lsantos.dev/deno-kv-queues/) podem ser uma boa opção!
 
 Além disso o **fuso horário do Deno Cron é UTC, independente do local.**
 
