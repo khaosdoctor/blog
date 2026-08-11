@@ -34,6 +34,10 @@ const {
 const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
 const canonical = new URL(Astro.url.pathname, Astro.site).href
 const home = locale === 'en' ? '/en/' : '/'
+
+// Cloudflare Web Analytics: cookieless, no consent banner needed. Emitted only
+// when the token is set, so local builds and previews send nothing.
+const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 ---
 
 <!doctype html>
@@ -76,6 +80,15 @@ const home = locale === 'en' ? '/en/' : '/'
     <footer>
       <p>Lucas Santos</p>
     </footer>
+    {
+      analyticsToken && (
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: analyticsToken })}
+        />
+      )
+    }
     <script>
       // Registers the offline cache. Everything above works without it; this
       // only makes already-read posts available with no connection.
