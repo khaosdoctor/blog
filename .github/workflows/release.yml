@@ -1,0 +1,31 @@
+name: Release
+
+# Conventional releases. release-please reads the commits on main, keeps a
+# "chore(main): release x.y.z" PR up to date with the next version and the
+# changelog, and tags the release when that PR is merged. The version it writes
+# into package.json is what the site footer shows and what names the service
+# worker's caches.
+#
+# ponytail: release-please over semantic-release because it batches. Publishing
+# a post should not cut a release; merging the release PR should. Nothing is
+# published to npm — the package is private and there is no publish step.
+#
+# Commit types that move the version: feat (minor), fix (minor->patch), and any
+# commit with a `!` or BREAKING CHANGE (major). Use `content:` for writing, which
+# release-please ignores, so 200 posts do not inflate the version.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: node
