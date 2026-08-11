@@ -15,7 +15,7 @@ seoDescription: "Fique por dentro das principais novidades da versão 4.7 do Typ
 
 O TypeScript 4.7 chegou e, como não podemos deixar de lado, vamos passar pelas principais partes que foram anunciadas pelo time de desenvolvimento.
 
-### ESModules com suporte no Node.js
+## ESModules com suporte no Node.js
 
 Já faz um tempo que o Node.js está com suporte para ESM (inclusive [temos artigos aqui no blog](/os-ecmascript-modules-estao-aqui/) sobre isso), porém o TypeScript não estava exatamente acompanhando o que estava acontecendo, principalmente porque foi uma das mudanças mais críticas que aconteceram no ecossistema, já que todo o Node.js foi construído no modelo CommonJS (CJS).
 
@@ -31,7 +31,7 @@ No entanto, a versão 4.7 do TS já trás o suporte mais recente (Node 16) ao ES
 }
 ```
 
-#### Suporte a `type` e novas extensões
+### Suporte a `type` e novas extensões
 
 Como já falamos em outros artigos aqui no blog, basicamente, para usarmos ESM em um módulo Node.js, basta que ou chamemos o arquivo pela extensão `.mjs` ou então incluindo a chave `type` no `package.json` com o valor `module`.
 
@@ -64,7 +64,7 @@ Além disso, da mesma forma que temos as extensões `.mjs` e `.cjs` para interpr
 
 Todas as demais regras de ESM vs CJS continuam sendo aplicadas normalmente.
 
-### Exports, Imports e Auto-referência no package.json
+## Exports, Imports e Auto-referência no package.json
 
 Desde que começamos a ter ESM no Node.js, temos um novo campo no `package.json` que permite um pacote definir diferentes pacotes quando ele é importado via ESM ou CJS, esse campo é o `exports`:
 
@@ -119,7 +119,7 @@ Algo que é digno de nota:
 
 > A chave `types` deve vir sempre primeiro do que o `default` em um objeto `exports`
 
-### Analise de fluxo para elementos de um objeto
+## Analise de fluxo para elementos de um objeto
 
 Uma melhoria na detecção de tipos em chaves de objeto foi feita no TS 4.7, antigamente um código como esse:
 
@@ -179,7 +179,7 @@ f({
 
 Ou seja, o TS ficou mais inteligente para encontrar tipos de funções e seus retornos dentro de objetos que são, na verdade, parâmetros de outra função.
 
-### Instantiation Expressions
+## Instantiation Expressions
 
 Quando usamos generics em TS, na maioria das vezes as funções ficam extremamete genéricas, como é de se esperar. Porém se a gente quiser especializar elas um pouco, sempre temos que criar um wrapper, por exemplo, essa função retorna um tipo `Box`, que é genérico:
 
@@ -222,7 +222,7 @@ const ErrorMap = Map<string, Error>
 const errorMap = new ErrorMap() // tipo é Map<string, Error>
 ```
 
-### `extends` disponível para tipos `infer`
+## `extends` disponível para tipos `infer`
 
 Recentemente eu postei [aqui no blog](/infer-typescript/) um artigo sobre o que é o `infer` no TS. Em suma, ele permite que a gente extraia o tipo de uma variável quando estamos utilizando em uma clausula `extends`, por exemplo, quando queremos pegar o primeiro elemento de uma tupla somente se ele for uma string:
 
@@ -248,7 +248,7 @@ type FirstIfString<T> =
     : never
 ```
 
-### Variancia de tipos explícita
+## Variancia de tipos explícita
 
 Agora é possível anotar os tipos de entrada ou saída de uma função com um indicador de variância. A explicação inteira [é bastante complexa](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#optional-variance-annotations-for-type-parameters) e cobre um certo grupo de usos que são até que bem avançados.
 
@@ -288,13 +288,13 @@ Então se tivermos um tipo de saída no mesmo escopo, o TS pode ser bem mais rá
 
 > Mas atenção, não é recomendado que você saia por ai anotando todas as suas funções e todos os seus parâmetros com `in` ou `out` já que o TS faz um ótimo trabalho com isso.
 
-### Alterações menores:
+## Alterações menores:
 
 -   [Organização de imports baseada em grupos](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#group-aware-organize-imports)
 -   [Go to Source definition](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#go-to-source-definition)
 -   [Resolution mode pode ser customizado](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#resolution-customization-with-modulesuffixes)
 -   [Intellisense para completude de métodos em objetos](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#object-method-snippet-completions)
 
-## Conclusão
+# Conclusão
 
 É isso ai! Se você quiser saber mais sobre as novidades não só do TS mas também do Node.js não deixe de assinar a [minha newsletter](https://news.lsantos.dev) para receber as melhores notícias e os melhores conteúdos curados de tecnologia direto no seu email!

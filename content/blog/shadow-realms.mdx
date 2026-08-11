@@ -16,7 +16,7 @@ O JavaScript sempre foi e continua sendo uma linguagem bastante dinâmica, por c
 
 A escolhida de hoje é uma proposta que está sendo levada adiante por ninguém mais ninguém menos que nosso grande representante no TC39, [Leo Balter](https://twitter.com/leobalter) junto com mais um monte de pessoas incríveis e ela se chama [ShadowRealm](https://github.com/tc39/proposal-shadowrealm).
 
-### Um pouco de contexto
+## Um pouco de contexto
 
 Quando estamos falando de web, sempre temos que ter em mente que ela é como se fosse uma folha em branco, ou seja, temos muito espaço pra criar e experimentar com quase tudo.
 
@@ -28,7 +28,7 @@ Por outro lado, esse tipo de comportamento é o que torna possível aplicações
 
 Isso parece um problema de segurança, não?
 
-## Entra o ShadowRealm
+# Entra o ShadowRealm
 
 Realm, em inglês, é a palavra que define um "reino". Hoje em dia não temos muitos reinos por aí, mas imagina que isso sejam países. E, assim como países tem seus próprios problemas, fronteiras, leis e etc, os realms também tem seu próprio "mundo".
 
@@ -65,7 +65,7 @@ sr.evaluate('globalThis.value') // 42
 
 Existem outros exemplos bem legais do uso do ShadowRealms de forma mais básica [no blog post original dos autores](https://developer.salesforce.com/blogs/2022/04/introducing-shadowrealm) que é bem legal!
 
-### Injeção externa de valores
+## Injeção externa de valores
 
 Os ShadowRealms permitem que a gente execute funções e códigos arbitrários com o comando `evaluate`, que recebe uma string como parâmetro e funciona como uma versão um pouco mais segura do `eval`, mas ele ainda está sujeito a [Content Security Policies (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) no browser, então uma CSP de `unsafe-eval` iria desabilitar essa funcionalidade.
 
@@ -136,7 +136,7 @@ globalThis.total; // 42
 shadowGetTotal(); // 60
 ```
 
-### Implicações dos ShadowRealms
+## Implicações dos ShadowRealms
 
 Enquanto essa API ainda é uma proposta, ela já melhora muito a forma como trabalhamos com sandboxed code – quando executamos códigos em ambientes separados – hoje isso é feito com iFrames, que é a única forma relativamente boa de se separar dois contextos dentro do mesmo local.
 
@@ -144,6 +144,6 @@ Porém, com os SRs, é possível que tenhamos uma capacidade ainda maior de exec
 
 Indo ainda mais além, seria possível ainda rodar aplicações inteiras dentro de outras aplicações desde que essas aplicações sejam otimizadas e preparadas para trabalhar com modelos de mensagens, enfim, as possibilidades são muitas e são super animadoras!
 
-## Conclusão
+# Conclusão
 
 Se você quiser ficar por dentro dessa e de muitas outras novidades tanto do JS quanto do Node e tecnologia no geral com textos curados e na medida certa, não se esqueça de assinar [minha newsletter](https://news.lsantos.dev) para receber o melhor conteúdo todos os meses!

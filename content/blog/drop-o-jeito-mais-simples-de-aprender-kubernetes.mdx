@@ -11,6 +11,10 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './drop-o-jeito-mais-simples-de-aprender-kubernetes/image.png'
+import figureImage2 from './drop-o-jeito-mais-simples-de-aprender-kubernetes/image-1.png'
+import figureImage3 from './drop-o-jeito-mais-simples-de-aprender-kubernetes/image-2.png'
+
 > **NOVIDADE!**  
 > Este é o primeiro artigo de um novo tipo de conteúdo que estou chamando de [_drop_](/tags/drop/)_. Drops são pequenos textos (com até 5 minutos de leitura) que mostram aspectos interessantes de algum assunto. No geral, serão pequenos tutoriais ou dicas interessantes._  
 >   
@@ -74,17 +78,17 @@ Agora que temos o cluster rodando localmente, você pode usar o gerenciador de r
 
 Vamos obter a lista de pods do meu cluster usando a api com a request `GET http://localhost:8001/api/v1/namespaces/default/pods`:
 
-<Figure src="./drop-o-jeito-mais-simples-de-aprender-kubernetes/image.png" alt="" caption="Gerenciador Insomnia mostrando a saída da request para obter os pods do Kubernetes" />
+<Figure src={figureImage1} priority alt="" caption="Gerenciador Insomnia mostrando a saída da request para obter os pods do Kubernetes" />
 
 Alguns recursos, como os deployments, não estão no que chamamos de "core API" do Kubernetes. A core API é quando não precisamos especificar nada no campo `apiVersion` do recurso, como nos Pods, que é `apiVersion: v1`, isso significa que podemos acessar com `/api/v1`.
 
 Os deployments fazem parte de `apps/v1`, para isso temos um novo recurso base chamado `apis`, então podemos obter a lista de deployments com `http://localhost:8001/apis/apps/v1/namespaces/default/deployments`:
 
-<Figure src="./drop-o-jeito-mais-simples-de-aprender-kubernetes/image-1.png" alt="" caption="Insomnia com a resposta para a lista de deployments do kubernetes" />
+<Figure src={figureImage2} alt="" caption="Insomnia com a resposta para a lista de deployments do kubernetes" />
 
 O mesmo vale para os ingresses que estão em `networking.k8s.io/v1beta1` (ou em `v1` dependendo da versão do seu cluster). Desta forma o endereço é `http://localhost:8001/apis/networking.k8s.io/v1/namespaces/default/ingresses`
 
-<Figure src="./drop-o-jeito-mais-simples-de-aprender-kubernetes/image-2.png" alt="" caption="Insomnia mostrando a saída da requisição para a lista de ingresses" />
+<Figure src={figureImage3} alt="" caption="Insomnia mostrando a saída da requisição para a lista de ingresses" />
 
 > Quando estamos tratando com o namespace `default`, que é o padrão, podemos omitir completamente a parte `/namespaces/default`, ficando somente `http://localhost:8001/api/v1/pods`.
 

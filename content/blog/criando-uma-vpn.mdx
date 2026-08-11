@@ -12,6 +12,13 @@ visibility: "public"
 seoTitle: "Como criar sua própria VPN de forma rápida e fácil"
 ---
 
+import figureImage1 from './criando-uma-vpn/image.png'
+import figureImage2 from './criando-uma-vpn/image-1.png'
+import figureImage3 from './criando-uma-vpn/image-3.png'
+import figureImage4 from './criando-uma-vpn/image-7.png'
+import figureImage5 from './criando-uma-vpn/image-8.png'
+import figureImage6 from './criando-uma-vpn/image-12.png'
+
 ## Atualização - 2022!
 
 Opa pessoal! Por conta da grande demanda por esse artigo eu acabei fazendo um vídeo no meu canal do youtube! Assim fica muito mais fácil para poder explicar os conceitos.
@@ -76,11 +83,11 @@ Para criarmos o nosso servidor, você primeiro precisa ter uma conta na [Azure](
 
 Ao entrar no portal da Azure, pesquise no topo por "Virtual Machines", clique no ícone e você deverá cair em uma lista de máquinas virtuais, que provavelmente estará vazia, clique no botão "Add" logo abaixo do título:
 
-<Figure src="./criando-uma-vpn/image.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Adicionando uma máquina virtual</span>" />
+<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Adicionando uma máquina virtual</span>" />
 
 Selecione "Virtual Machine":
 
-<Figure src="./criando-uma-vpn/image-1.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Clique em &quot;Add&quot; e então em &quot;Virtual Machine&quot;</span>" />
+<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Clique em &quot;Add&quot; e então em &quot;Virtual Machine&quot;</span>" />
 
 Quando você selecionar a opção, vamos ter um formulário para ser preenchido, é importante que você preste atenção no que vamos colocar por aqui. Primeiro, vamos ter uma ideia de como este formulário se divide.
 
@@ -99,7 +106,7 @@ Agora atente-se ao que vamos colocar em cada campo:
 -   **Azure Spot Instance:** Há uma categoria de VMs na Azure que utilizam a capacidade não utilizada da cloud a um preço bem menor, as chamadas Spot Instances, porém o problema é que elas não tem garantia de disponibilidade, e seu servidor pode ser desalocado se a capacidade for necessária, queremos que o servidor seja o mais disponível possível, certo? Então vamos deixar isso aqui como "No".
 -   **Size:** Essa é a parte onde teremos que decidir o tamanho da nossa máquina, a Azure te dá vários tipos e tamanhos diferentes de máquinas, a mais comum é a DS2\_V3, porém ela é um canhão para o que queremos fazer, vamos selecionar então a máquina **B1s** que possui somente 1 núcleo e 1 Gb de RAM.
 
-<Figure src="./criando-uma-vpn/image-3.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Escolha o tamanho apropriado de máquina</span>" wide />
+<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Escolha o tamanho apropriado de máquina</span>" wide />
 
 Na próxima seção, vamos ter as configurações de autenticação.
 
@@ -121,11 +128,11 @@ Ao clicar em "Next" vamos para a seção de discos, não vamos incluir nenhum di
 
 Vamos dar um "Next" e passar batido pela seção de rede, pois não vamos mudar nada, na seção "Management", vamos desativar todas as opções:
 
-<Figure src="./criando-uma-vpn/image-7.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Desativamos todas as opções na seção de gerenciamento</span>" />
+<Figure src={figureImage4} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Desativamos todas as opções na seção de gerenciamento</span>" />
 
 Então clicamos no botão azul do lado esquerdo inferior "Review + Create". Após uma rápida revisão de configurações, seu servidor será criado, o processo em si demora alguns minutos, mas assim que estiver finalizado você poderá navegar para a tela do recurso, e verá algo parecido com isto:
 
-<Figure src="./criando-uma-vpn/image-8.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Painel de controle da VM</span>" wide />
+<Figure src={figureImage5} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Painel de controle da VM</span>" wide />
 
 ### Protegendo o servidor
 
@@ -342,7 +349,7 @@ Agora o seu arquivo está localizado na sua máquina local e a VPN está instala
 
 Para testar a VPN, se você estiver em um Mac e quiser que todo o seu tráfego passe pela sua VPN, que é o que eu faço por aqui, você vai precisar de um software gratuito chamado [TunnelBlick](https://tunnelblick.net/).
 
-<Figure src="./criando-uma-vpn/image-12.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Painel do TunnelBlick</span>" />
+<Figure src={figureImage6} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Painel do TunnelBlick</span>" />
 
 Basta baixar o software e clicar duas vezes sobre o arquivo `.ovpn` que você baixou e ele será importado para o sistema. A partir daí você poderá usar a VPN como qualquer outra.
 

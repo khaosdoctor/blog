@@ -16,7 +16,7 @@ Estivemos falando bastante sobre tipos, passamos com algumas boas e más prátic
 
 Eu não gosto de chamar de _técnicas avançadas_, mas, na falta de um nome melhor para descrevê-las, vou manter assim. Essas técnicas não são nada de outro mundo, mas são usos muito inteligentes do sistema de tipos para fazer com que ele trabalhe para você mais facilmente. Mas chega de introdução e vamos falar da nossa primeira técnica!
 
-### Satisfies
+## Satisfies
 
 Essa é uma "técnica" super recente, eu [já falei dela](/ts-satisfies/) aqui no blog antes. Eu não chamaria nem técnica porque ela é um operador novo, porém o uso desse operador é uma técnica bem interessante! Esse é o `satisfies`.
 
@@ -46,7 +46,7 @@ Agora, o tipo de `carro` vai ser `{ nome: string, ano: number, cor: string }` ao
 
 > Perceba que, em ambos os exemplos, nós tivemos que tirar a tipagem da variável e passar diretamente para o `satisfies`.
 
-#### Inferência profunda com `as const`
+### Inferência profunda com `as const`
 
 Esse caso merece estar separado porque é uma das formas mais legais de usar o `satisfies`. Mas você também pode dizer que um tipo é uma constante, usando `let v = 20 as const`, e o TS vai tipar esse valor como `type v = 20`, um **tipo literal**.
 
@@ -76,7 +76,7 @@ E agora vamos olhar os nossos tipos novamente:
 
 Veja que eles estão totalmente inferidos como readonly e com os tipos literais, o que permite que a gente passe para a nossa função o valor correto.
 
-### Branded types
+## Branded types
 
 Branded types são uma forma de validar determinados tipos de dados contra um determinado padrão, por exemplo, se quisermos validar que um valor monetário é válido, precisamos de duas informações: a moeda e a quantidade dessa moeda.
 
@@ -114,11 +114,11 @@ Voltando ao assunto de generics de ontem, você consegue ver uma forma de melhor
 
 ![](./tecnicas-avancadas-com-typescript-semanats-dia-4/image-22.png)
 
-### Type guards e assertion functions
+## Type guards e assertion functions
 
 Estas são as duas formas que podemos verificar e criar um type cast de um tipo normal para um branded type como eu falei anteriormente. Enquanto ambas podem ser usadas para a mesma coisa, **assertions functions** e **type guards** são fundamentalmente diferentes.
 
-#### Assertion Functions
+### Assertion Functions
 
 Assertion functions, como o nome já diz, são funções que se certificam que um valor passado é de um determinado tipo, caso elas não sejam, temos um erro. No TypeScript, assertion functions são definidas com a keyword `asserts <valor> is <tipo>`:
 
@@ -136,7 +136,7 @@ Assim, podemos usar da seguinte forma:
 
 ![](./tecnicas-avancadas-com-typescript-semanats-dia-4/image-26.png)
 
-#### Type Guards
+### Type Guards
 
 Os type guards são quase que exatamente a mesma coisa das assertion functions, porém ao invés de darem um throw no erro, vão retornar um booleano garantindo que eles são de um determinado tipo, usando a sintaxe `<valor> is <tipo>`:
 
@@ -146,7 +146,7 @@ Type guards são muito úteis quando você quer validar algum tipo, mas não que
 
 Junto com as assertion functions, os type guards são as formas mais seguras de se garantir que um determinado tipo é de uma determinada "brand", mas claro que você também pode usar funções normais que retornem o valor como `valor as Brand`, dado que você já vai fazer a validação antes do retorno.
 
-### Enums
+## Enums
 
 Enumeradores estão presentes na maioria das linguagens de programação que são estaticamente tipadas desde sempre. Porém eles [ainda não são uma realidade no JavaScript](https://github.com/rbuckton/proposal-enum). O TS implementa o padrão de enumerador, e eles não são considerados uma técnica avançada, mas saber quando usar enums e quando não usar sim.
 
@@ -170,7 +170,7 @@ Na função acima, você pode ver que o parâmetro `a` é do tipo `Animal` e cha
 
 Pessoalmente, eu não vejo problema, ainda mais por que não vamos ver esse código ou mexer nele manualmente, mas muitos acreditam que não é uma boa opção. Mas quais são as outras opções?
 
-#### Disjoint unions
+### Disjoint unions
 
 Uma outra forma de se fazer enums é o uso de disjoint unions, que são uniões de tipos literais:
 
@@ -180,7 +180,7 @@ Aqui a gente não tem o código do enum, mas também não podemos usar os tipos 
 
 > Você até pode "resolver" isso associando cada valor a uma constante e usando as constantes como parâmetros, mas isso não é muito melhor.
 
-#### Dicionário de constantes
+### Dicionário de constantes
 
 Outra forma é criar um dicionário:
 
@@ -192,7 +192,7 @@ Para resolver isso podemos usar um dicionário constante de constantes (complica
 
 ![](./tecnicas-avancadas-com-typescript-semanats-dia-4/image-33.png)
 
-#### Constant enums
+### Constant enums
 
 Existe outra forma de declarar um enum, que é um enum constante, ou seja, quando você compilar o código, todos os valores que foram usados no enum vão ser colocados de forma literal no código final, ou seja:
 
@@ -206,7 +206,7 @@ Veja que o enum deixou de existir, tirando o comentário, você nem saberia que 
 
 > A única forma de compartilhar const enums é ativando uma configuração chamada [`preserveConstEnums`](https://www.typescriptlang.org/tsconfig#preserveConstEnums) que, essencialmente, faz com que o const enum seja um enum normal.
 
-## Pra você treinar
+# Pra você treinar
 
 Bora corrigir os exercícios de ontem? Os tipos Flatten e FlattenDeep podem ser encontrados [aqui](https://www.typescriptlang.org/play?#code/PTAEGUEsFsAcBsCmBnAUAFwJ60aAYvAIbrqIB2APACqiIAepZAJsqIWZgNoC6AfKAF5QNeoxagAFJDIAzRACdQAVQCUPUAH5loAFzDUqEKACMoAPYBXUACZUAYzNlk6NnoLFGFTgHJj3gDSg3tbefIJBIYZgzvLSAOb2js6gAEZuRCTkFDHxPPxCvt4GUaAAIgCi4ACCeACSAPIlALQtrW1tBkYAciikTBjYuO6ZZKWIiLDUtAzk4uyY+cLTYqxSsgrKatygqKCa2qKzq9JyigAKWzt7e1rDjGMTFGf8u9d6Sq96VJ3R6LFkCQcThcdnSHnID0mnGhnByAO4CLCBT8P1AZAs0BSCkSwNATDBI0hFHRmIUi1sJXgkFI8kIkDQQOSiAJ93GUMKgR8IU53gAzAFQNDvAAWAU+ACsoURCMWhVQQA). Já a implementação das classes pode ser encontrada [aqui](https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgGIHsoFs7IN4BQyycUEuAFAJQBcyIArlgEbRHIBu6ANkytXUYs2AXwIEE3OAGdpyAIoM4AEygr0yYFgAO3CFgjg5GbLkLEE6ENLBQGCMJmQUy6kNwCeyKcvSCmrFBU+GLE7KTkAvQB0PjsxGRgDFAgyGAAFsDSAHQ+GgBU+cgATOxi7Fy8BlFCgXHEyInJqRlZuerIhcgAzGUE5ZIycgDCwFAIDNwaWrr6hmDGmDj1jeS+7l7KwHAGtn7RwlDslta29o5Qzq7rno1wwPu10MHmDa05WzsQe8gAvHcPfKlYjlYgRSgveKrJIpZAAWTgGWyAAUAJKdeGI9LZbToADuFHe2TUDwANCUqH0Kjw+M5IQ1oc1nAAWDEIpFotlYnH4wmZHIk9Dk7pUKgAel6IP64kGsmQABUoNsQABzSbTHR6AxGNBLMzHKw2OwOJwuNZWW7MGQQfyHcnXC1eODcGFwW2BF6gkiuOkrBLfJl8tpW6QoIpE52u4JikpU4iVWnUfDIMUx5FK6TLWzKtVSI4NJqwiOuJPh-nZSPJOB9ERAA).
 

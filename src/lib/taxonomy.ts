@@ -27,9 +27,8 @@ export async function getTags(): Promise<Map<string, Post[]>> {
 
 export type Series = { name: string; posts: Post[] }
 
-/** Series posts are ordered by seriesOrder, not by date. */
-export async function getSeries(): Promise<Map<string, Post[]>> {
-  const posts = await getPublishedPosts()
+/** Groups already-fetched posts by series, ordered by seriesOrder (not date). */
+export function buildSeriesMap(posts: Post[]): Map<string, Post[]> {
   const bySeries = new Map<string, Post[]>()
   for (const post of posts) {
     if (post.data.series === undefined) continue
@@ -46,17 +45,29 @@ export async function getSeries(): Promise<Map<string, Post[]>> {
   return bySeries
 }
 
-/** Previous/next within a series, so a reader can walk it in order. */
-export async function getSeriesNavigation(post: Post): Promise<{
+/** Series posts are ordered by seriesOrder, not by date. */
+export async function getSeries(): Promise<Map<string, Post[]>> {
+  const posts = await getPublishedPosts()
+  return buildSeriesMap(posts)
+}
+
+/**
+ * Previous/next within a series. Takes an already-built series map so callers
+ * that need this for every post (e.g. one call per post page) can build the
+ * map once instead of re-fetching and re-sorting the whole collection per call.
+ */
+export function getSeriesNavigation(
+  post: Post,
+  seriesMap: Map<string, Post[]>,
+): {
   name: string
   index: number
   total: number
   previous: Post | null
   next: Post | null
-} | null> {
+} | null {
   if (post.data.series === undefined) return null
-  const all = await getSeries()
-  const members = all.get(post.data.series)
+  const members = seriesMap.get(post.data.series)
   if (members === undefined || members.length < 2) return null
   const index = members.findIndex((member) => member.id === post.id)
   if (index === -1) return null

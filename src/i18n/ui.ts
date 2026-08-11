@@ -16,6 +16,7 @@ type UIKey =
   | 'allPosts'
   | 'categories'
   | 'tags'
+  | 'skipToContent'
 
 const ui: Record<Locale, Record<UIKey, string>> = {
   pt: {
@@ -34,6 +35,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     allPosts: 'Todos os posts',
     categories: 'Categorias',
     tags: 'Tags',
+    skipToContent: 'Pular para o conteúdo',
   },
   en: {
     tagline: 'A blog about JavaScript, TypeScript, web and tooling',
@@ -51,6 +53,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     allPosts: 'All posts',
     categories: 'Categories',
     tags: 'Tags',
+    skipToContent: 'Skip to content',
   },
 }
 

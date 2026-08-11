@@ -11,6 +11,12 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './deploy-de-imagens-docker-do-vscode-para-a-azure/container-use.png'
+import figureImage2 from './deploy-de-imagens-docker-do-vscode-para-a-azure/docker-login.png'
+import figureImage3 from './deploy-de-imagens-docker-do-vscode-para-a-azure/type-cr.png'
+import figureImage4 from './deploy-de-imagens-docker-do-vscode-para-a-azure/docker-images.png'
+import figureImage5 from './deploy-de-imagens-docker-do-vscode-para-a-azure/deploy.png'
+
 Comentamos [neste post](/executando-containers-no-azure-container-instancies-com-docker/) que o Docker estaria ganhando uma integração **nativa** com a Azure! Com essa integração o deploy de uma imagem docker direto para o [Azure Container Instances (ACI)](https://docs.microsoft.com/azure/container-instances/quickstart-docker-cli?WT.mc_id=blog-personal-ludossan) seria tão fácil quando um único  comando no Docker CLI.
 
 A integração já estava presente no Docker Edge, que é a versão beta do Docker. Agora temos a excelente [notícia](https://azure.microsoft.com/blog/azure-container-instances-docker-integration-now-in-docker-desktop-stable-release/?WT.mc_id=blog-personal-ludossan) de que esta integração chegou para todos os usuários do Docker! E, junto com ela, agora **temos a mesma integração direto no [VSCode](https://code.visualstudio.com/?WT.mc_id=blog-personal-ludossan)**!
@@ -35,7 +41,7 @@ Agora, vá até o marketplace do [VSCode](https://code.visualstudio.com/?WT.mc_i
 
 Perceba que, no final da barra lateral, teremos um menu chamado **Contexts**. Abra-o e clique com o botão direito sobre o contexto que você acabou de criar. Selecione _Use_:
 
-<Figure src="./deploy-de-imagens-docker-do-vscode-para-a-azure/container-use.png" alt="Selecione o contexto que vamos operar" caption="Use o contexto criado" />
+<Figure src={figureImage1} priority alt="Selecione o contexto que vamos operar" caption="Use o contexto criado" />
 
 Com o contexto selecionado, já temos tudo o que precisamos para fazer nosso deploy.
 
@@ -43,19 +49,19 @@ Com o contexto selecionado, já temos tudo o que precisamos para fazer nosso dep
 
 Com a extensão, podemos fazer login em nosso DockerHub ou [Azure Container Registry](https://azure.microsoft.com/services/container-registry/?WT.mc_id=blog-personal-ludossan):
 
-<Figure src="./deploy-de-imagens-docker-do-vscode-para-a-azure/docker-login.png" alt="Clique no botão de conexão para fazer o login" caption="Clique no botão de conexão para logar em um registro" />
+<Figure src={figureImage2} alt="Clique no botão de conexão para fazer o login" caption="Clique no botão de conexão para logar em um registro" />
 
 A partir daí podemos selecionar o tipo de registro que estamos usando
 
-<Figure src="./deploy-de-imagens-docker-do-vscode-para-a-azure/type-cr.png" alt="Selecione o serviço" caption="Selecione o tipo de CR que quer logar" />
+<Figure src={figureImage3} alt="Selecione o serviço" caption="Selecione o tipo de CR que quer logar" />
 
 E então teremos a listagem das nossas imagens hospedadas nestes serviços:
 
-<Figure src="./deploy-de-imagens-docker-do-vscode-para-a-azure/docker-images.png" alt="Veja as imagens" caption="Veja as imagens listadas" />
+<Figure src={figureImage4} alt="Veja as imagens" caption="Veja as imagens listadas" />
 
 Agora podemos abrir e selecionar uma das imagens, clicar com o botão direito, e selecionar _"Deploy Image to Azure Container Instances"_:
 
-<Figure src="./deploy-de-imagens-docker-do-vscode-para-a-azure/deploy.png" alt="" caption="Selecione a imagem e faça o deploy" />
+<Figure src={figureImage5} alt="" caption="Selecione a imagem e faça o deploy" />
 
 Veja o processo como um todo:
 

@@ -11,6 +11,13 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-25.png'
+import figureImage2 from './saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-26.png'
+import figureImage3 from './saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-27.png'
+import figureImage4 from './saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-28.png'
+import figureImage5 from './saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-29.png'
+import figureImage6 from './saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-30.png'
+
 Já falamos um pouco sobre o Linkerd no [último post](/uma-introducao-a-service-mesh-com-linkerd/), agora, para podermos estender ainda mais o nosso conhecimento sobre service mesh, vamos falar de um conceito interessante que vamos explorar com mais calma em outros artigos. Mas aqui vamos ter um exemplo prático! O **Tracing.**
 
 ## Tracing
@@ -73,7 +80,7 @@ linkerd upgrade --addon-config config.yaml | kubectl apply -f -
 
 Assim que terminarmos, devemos ter dois novos deploys, um chamado `linkerd-collector` e outro chamado `linkerd-jaeger` no namespace `linkerd`:
 
-<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-25.png" alt="" caption="Temos dois novos deployments dentro do namespace Linkerd" />
+<Figure src={figureImage1} priority alt="" caption="Temos dois novos deployments dentro do namespace Linkerd" />
 
 ### Anotações
 
@@ -131,21 +138,21 @@ kubectl -n emojivoto set env --all deploy OC_AGENT_HOST=linkerd-collector.linker
 
 Vamos ter certeza de que nossa implementação funcionou quando rodarmos o comando `linkerd dashboard` e virmos o ícone do Jaeger ao lado dos nossos namespaces
 
-<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-26.png" alt="" caption="Veja o ícone do logo do Jaeger ao lado do Grafana" />
+<Figure src={figureImage2} alt="" caption="Veja o ícone do logo do Jaeger ao lado do Grafana" />
 
 Se clicarmos nele, teremos todas as chamadas feitas dentro da aplicação e poderemos acompanhar o histórico de tudo que foi chamado via HTTP
 
-<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-27.png" alt="" caption="Cada círculo é uma chamada" wide />
+<Figure src={figureImage3} alt="" caption="Cada círculo é uma chamada" wide />
 
 Se clicarmos em uma das linhas, conseguiremos ver por onde todas as requisições passaram e quais serviços foram chamados, bem como seus payloads e tempos
 
-<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-28.png" alt="" wide />
+<Figure src={figureImage4} alt="" wide />
 
 Outra funcionalidade interessante é a capacidade do Jaeger identificar a possível arquitetura do sistema. Basta clicar na guia "System Architecture" e selecionar entre o grafo direcionado e o DAG:
 
-<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-29.png" alt="" caption="Diagrama de número de requisições" />
+<Figure src={figureImage5} alt="" caption="Diagrama de número de requisições" />
 
-<Figure src="./saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/image-30.png" alt="" caption="Grafo direcionado" />
+<Figure src={figureImage6} alt="" caption="Grafo direcionado" />
 
 Podemos também explorar cada uma das requisições individualmente através do mesmo ícone do Jaeger em cada uma das linhas quando iniciamos o "Live View" de uma rota.
 

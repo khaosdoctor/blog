@@ -14,11 +14,11 @@ const { html, title, caption } = Astro.props
 // which is exactly what this component exists to pass through, so a full sanitizer
 // would break the use case it's built for. Fail the build loudly instead of shipping
 // either one silently.
-if (/<script[\s>]/i.test(html)) {
+if (/<script\b/i.test(html)) {
   throw new Error(`RawEmbed: refusing <script> tag in embed HTML (title: "${title}")`)
 }
 
-if (/\bsrc=["']http:\/\//i.test(html)) {
+if (/\bsrc\s*=\s*["']?http:\/\//i.test(html)) {
   throw new Error(`RawEmbed: refusing plain-http src in embed HTML (title: "${title}")`)
 }
 

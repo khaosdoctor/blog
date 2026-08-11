@@ -1,7 +1,8 @@
 name: Translate
 
-# Translates posts that changed into English and commits the result back.
-# Runs before the site build sees them, so a push publishes both languages.
+# Translates posts that changed into English and opens a PR with the result.
+# Model output is untrusted, so it lands on a branch for review/merge rather
+# than going straight to main.
 #
 # Needs the ANTHROPIC_API_KEY repo secret. Without it the job exits cleanly
 # rather than failing every push.
@@ -20,6 +21,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: translate
@@ -57,8 +59,10 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/translate.ts --locale en ${{ inputs.all && '--all' || '' }}
 
-      - name: Commit translations
+      - name: Open a PR with the translations
         if: steps.key.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -z "$(git status --porcelain content/translated)" ]; then
             echo "Nothing changed."
@@ -66,6 +70,13 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="automated-translations"
+          git checkout -B "$BRANCH"
           git add content/translated
           git commit -m "chore: update machine translations"
-          git push
+          git push --force origin "$BRANCH"
+          if ! gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
+            gh pr create --base "${{ github.ref_name }}" --head "$BRANCH" \
+              --title "chore: update machine translations" \
+              --body "Automated translation output, generated from a live model. Review before merging."
+          fi

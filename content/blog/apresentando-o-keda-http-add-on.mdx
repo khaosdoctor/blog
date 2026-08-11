@@ -11,6 +11,8 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './apresentando-o-keda-http-add-on/image.png'
+
 Uma das coisas que me deixa ainda mais feliz em trabalhar com open source é quando podemos transformar os projetos em realidade e ajudar muitas pessoas com o que pretendemos fazer!
 
 Há um tempo atrás, iniciei uma jornada ajudando os mantenedores do [KEDA](https://keda.sh) a criar um novo add-on para o ecossistema e, finalmente, este add-on foi publicado e está em beta!
@@ -47,7 +49,7 @@ O add-on é baseado em três principais componentes que seguem a mesma ideia do 
 
 A arquitetura roda da seguinte maneira:
 
-<Figure src="./apresentando-o-keda-http-add-on/image.png" alt="" caption="Arquitetura do projeto KEDA HTTP" />
+<Figure src={figureImage1} priority alt="" caption="Arquitetura do projeto KEDA HTTP" />
 
 Veja que o add-on não interfere na aplicação do usuário, que continua tendo poder completo sobre o load balancer e o ingress, bem como os serviços e o deploy da aplicação.
 

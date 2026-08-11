@@ -11,7 +11,7 @@ draft: false
 visibility: "public"
 ---
 
-### Este artigo é parte de uma série
+## Este artigo é parte de uma série
 
 1.  [O guia completo do gRPC parte 1: O que é gRPC?](/guia-grpc-1/)
 2.  [O guia completo do gRPC parte 2: Mãos à obra com JavaScript](/o-guia-do-grpc-2/)
@@ -22,7 +22,7 @@ visibility: "public"
 
 Nos artigos anteriores desta série aprendemos o que é gRPC, como ele funciona e como podemos utilizar esse protocolo para trafegar dados entre sistemas com diferentes tecnologias e linguagens. Porém tudo isso foi feito usando somente os modelos mais simples de definição do protobuf, ou seja, estávamos enviando uma requisição simples e recebendo uma resposta simples em um modelo cliente/servidor.
 
-## Streaming
+# Streaming
 
 Além das que são chamadas _Unary Calls_, temos também _Streaming calls_, que nada mais são do que respostas e requisições realizadas por meio de uma stream de dados assíncrona. Temos três tipos de streaming calls no gRPC:
 
@@ -93,7 +93,7 @@ service NoteService {
 }
 ```
 
-## O que são streams
+# O que são streams
 
 Se você ainda não conhece o conceito de streams, não se preocupe, eu fiz uma série de artigos no iMasters somente sobre isso:
 
@@ -111,7 +111,7 @@ Nesta palestra eu mostrei visualmente o que isso significa:
 
 Por esse motivo, streams são muito utilizadas com arquivos e dados de grande porte, porque elas podem suportar uma quantidade imensa de informação usando pouquíssimos recursos.
 
-## Streams e gRPC
+# Streams e gRPC
 
 Como é tão simples de utilizar streams no gRPC, já era de se esperar que o suporte a elas no protocolo fosse muito bom. E isso é, de fato o que acontece, o suporte a streams no gRPC um dos melhores existentes e integram com quase todas as linguagens suportadas.
 
@@ -153,7 +153,7 @@ message NoteFindResponse {
 
 É importante ressaltar que estamos somente removendo a entidade de resposta porque, como estamos falando de uma stream, obviamente todos os dados que virão serão notas. Se mantivéssemos como uma resposta do tipo `{ note: { } }`, a cada chunk da stream teríamos um novo objeto `note` que teria (claro), uma nota dentro... Isso é bastante repetitivo.
 
-### Servidor
+## Servidor
 
 O próximo passo é alterar o nosso servidor, na verdade, somente uma pequena parte dele. A primeira e mais simples alteração que vamos fazer é remover o nosso pequeno banco de dados _in loco_ que temos nossas três notas fixas e passar ele para um arquivo `notes.json` que vai representar uma quantidade grande de dados.
 
@@ -228,7 +228,7 @@ Perceba que estamos chamando `call.write` e passando diretamente a nota, isto po
 
 No final, chamamos `call.end()`, o que é importante, pois instrui o cliente a fechar a conexão, se isso não for feito, o mesmo cliente não poderá fazer outra chamada para o mesmo serviço.
 
-### Client
+## Client
 
 Para o cliente, pouquíssima coisa irá mudar, na verdade, somente a chamada do método. Nossa chamada antiga podia ser feita de duas maneiras:
 
@@ -262,7 +262,7 @@ A stream também tem outro evento chamado `end`, que é executado quando a strea
 noteStream.on('end', () => {})
 ```
 
-## Clientside streaming
+# Clientside streaming
 
 Para completarmos o artigo e não deixarmos nada para trás. No caso de utilizarmos um modelo como:
 
@@ -311,7 +311,7 @@ call.end()
 
 A função interna do `find` só será executada após o método `end()` ser chamado.
 
-## Duplex streams
+# Duplex streams
 
 Para duplex streams (ou _bidirectional streams_), basta implementarmos, tanto do lado do servidor quanto do cliente, o parâmetro `call`. Este parâmetro é uma stream bidirecional que contém tanto o método `on` quanto o `write`.
 

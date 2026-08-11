@@ -12,6 +12,8 @@ visibility: "public"
 seoDescription: "Você já tentou criar um bot para o Telegram e ficou confuso sobre com tudo funcionava? Não fique mais! Com o GrammY tudo é muito mais fácil."
 ---
 
+import figureImage1 from './telegram-grammy-bot/image.png'
+
 Quando falamos de aplicações modernas, invariavelmente acabamos caindo nos tão famosos bots. O uso de bots para automatizar tarefas ou até mesmo facilitar a comunicação com APIs está cada vez mais comum, e uma das plataformas onde os bots estão cada vez mais comuns é o [Telegram](https://telegram.org/).
 
 Eu, pessoalmente, não me aventurei muito no mundo dos bots até recentemente, mas nessa aventura descobri uma ferramenta sensacional para facilitar (e até mesmo revolucionar) a forma como você cria bots para o Telegram, essa ferramenta é o [GrammY](https://grammy.dev/).
@@ -535,7 +537,7 @@ Para testarmos localmente podemos iniciar o nosso bot com `denon run -A ./src/mo
 
 Agora é só ir até o Telegram e realizar requisições usando o @ do seu bot:
 
-<Figure src="./telegram-grammy-bot/image.png" alt="" caption="Você pode tentar esse comando ai mesmo!" />
+<Figure src={figureImage1} priority alt="" caption="Você pode tentar esse comando ai mesmo!" />
 
 Porém, esse método exige que tenhamos que sempre ter uma URL para setar o nosso webhook, o que pode ser um problema, porque essa URL pode mudar. Com isso, para testar localmente, uma das melhores formas é utilizar uma arquitetura de long pooling, que vai periodicamente checar por novos eventos no Telegram.
 

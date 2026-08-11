@@ -18,13 +18,13 @@ Para o dia de hoje eu pensei em trazer um pouco do que sempre me perguntam vári
 
 Então hoje a gente vai discutir mais sobre as boas práticas de código, as melhores práticas de tipos e vamos também tocar nas melhores práticas de configurações, além de também explicar mais sobre **interfaces, tipos e enums**.
 
-### Melhores práticas de tipagem
+## Melhores práticas de tipagem
 
 Para começar, vamos falar das melhores práticas na hora de tipar os seus códigos usando TypeScript. Tenha em mente que essas práticas não são escritas em pedra e são as principais que tanto eu, pessoalmente, prefiro usar, quanto a comunidade também adota como sendo uma boa prática de código.
 
 Portanto, não é algo que você precise ser completamente inflexível quando alguém chegar e te perguntar, tudo depende do contexto e de onde você vai aplicar essas práticas.
 
-#### Nomenclaturas
+### Nomenclaturas
 
 A primeira boa prática é relacionada não a um tipo, mas ao seu bem estar mental quando está escrevendo tipos. **Sempre tente dar o nome mais descritivo possível para seus generics**, por exemplo, vamos usar esse código:
 
@@ -40,7 +40,7 @@ Podemos deixar esse tipo bem mais legível da seguinte maneira:
 
 O tamanho do texto aumentou consideravelmente, porém o código fica muito mais simples de ler e muito mais simples de entender.
 
-### O uso de generics
+## O uso de generics
 
 Usar generics como um todo pode ser considerada uma boa prática porque pode simplificar muito a forma como lemos e entendemos tipos, além de reduzir bastante a repetição. Por exemplo, imagine essa interface:
 
@@ -54,7 +54,7 @@ Que é outra boa prática mas não é o que estamos procurando agora, porque tem
 
 ![](./boas-praticas-ts-semana-ts-3/image-55.png)
 
-### Type aliases
+## Type aliases
 
 Dando continuidade ao que acabei de falar. O uso de aliases de tipo é algo super recomendado, especialmente quando temos que usar os tipos em múltiplos lugares, por exemplo:
 
@@ -74,7 +74,7 @@ Type aliases também são ótimos para fazermos nossos próprios **utility types
 
 O que leva a gente para o próximo tópico.
 
-### Interfaces
+## Interfaces
 
 Interfaces são as principais amigas de cada dev quando temos que codar algum tipo mais complexo, principalmente quando se trata de respostas de APIs. Existe uma miríade de elementos por trás do uso de interfaces e eles poderiam ter seu próprio post (se liga que pode aparecer no meu [blog](/) 👀), mas vamos ficar no básico por hoje.
 
@@ -96,7 +96,7 @@ E poderíamos deixar ela ainda mais genérica usando generics:
 
 ![](./boas-praticas-ts-semana-ts-3/image-66.png)
 
-##### Types vs Interfaces
+#### Types vs Interfaces
 
 Outra pergunta que eu recebi mais de uma vez em diversos locais é: "Qual é a diferença de tipos e interfaces?". Vou dar vários exemplos aqui e você pode ver todos eles [nesse link do TS Playground](https://www.typescriptlang.org/play?ssl=44&ssc=81&pln=28&pc=1#code/PTAEBUEsAcHsGdRwCYFMC2p6oE6gK7wCGyCoaoAZrDukaAMawB2AVvswC71OaRe5KRBqngAofp0HDUoAMJEcOWAEkBOISNABvMaFDLkReAC5QAJjEBfMWM4BPaLIVLY4R7IC8OvQdhHTC2tbJmZ4TkYARjMXZXcnUG9tPwCzcxtQ8MZzGMVlNSkNGUSdFOM0jJYshgBmXNd4r2zQEAJMThhYUABL0GN4WAZIAEOAN1QAGz62+klpEVtWgFEADykwgGOu0ch6NAYJxSIOllB0XABzfgusAGeepAR4AFvxqYxQOaKRcS-NZ0gOAY+AmXV0+hwREgsDMzHw6AARrhgn9inJAcDQT59MhdudOMpYfCkThgmJMhEhkCQTD5BiaSVkpDoWZIgAach41AE2nmUA2MStADyZ1E6C6zC2Dzg8Beb0YsHanXEDgS6OpoKgcEZBihtLhiNw-LsHjpGrcnR1uKI+MJoANJONgrAAEFEWQUB9sHhROtcaREHAcN0lTKCMQ+OpsAwAOdS3igABkoGdoFkqJ+4Zt02gREOo0hjAAFkRxmm1qhmMhfup-qAAAqiAb0cH2xWoMzhHDXXyQIxoImG0kCjOyF0TDhdVAVquIRuy2At3x5ydmAn4VC+aDKShNmhmIQTbC95Cdgk9yphCKN5B28eTnXMdtmADkN+UL45fZIHYs5g5K5PmuOAbhy26wLuC44AeebYF+p6gC+kTmDUyE1C+TrLKAHRhp6mC+pWaB4BQo4qqa9Y7nueDePOzZJqUgG0oecFIJRUHARuxoUqALrMEQZgURBVGPs+iG8UQn6fP2v7mAAbABE5AVQsGoGBbEDNB2EgbIArCgYqC8IRJBdL0hCKJ8tYyIGRzYcq5CyLACKsNyHo0AAjhuqZCoguDKIgJGWZm8BSnQkCIEimBoJQ-B9ggEiBbIACywjCGCvijIuMFHpu+jGOUoAAAxkqqzg0PgrD0Ek6WZVpnn6E+nD4DgSnrjlfTEIElgChM3JnClTBmMlDCpTqGX8cp2UAR1ZgFcaPWUmVFUxItlWlGNHGqW2jXNbSrVTfl6TkitJR0MNTBiKdI3eEwIEVYsYAFPMohprZuH+F6RqQOg0A9ecXDGYGNCgLA+AEsYjCHLKojxYUdbgN2RDMBcNKPd8sitgixi-g6yK5RM23jTjpK5TgqDjQAFAAlIkAB89rEsiAoHP0EAI0jDJfT9GCVpwiDw7s7OgqjdathSIEMJwQPk6TxnMBM9igJj2CDiSHIy6QcsK3mBMq7g1PaDYJNk6AVPYvo+nbcwJucEWYUAHRK7IABU2G2-Adva01RCU8Alj6DYAolaAACK+AkJCpBal0VX6IcpC68TfQy2YpueHTRNkszsoh2Ht7GZ832-TziCh+HxlR2bYv4BLUvqyw8ugHH+oMzg+uG0nxum62ELck1Vs2-bTegC7fvGrpYD1jQIZYO2AgWbDVmPGg+HhIRRpZ9g4hEAiXbCJSkOIAAYjQdBm9vu8Sx3RBUwnADcZKjmamKwC6O9g5f05+kfJ9LjiXI8gnXwzJm5DkzlUSkMR6SglfhfCIMcr5d18D3S2iFJQmTaPaAAX+cD8vgrBsl8NaW0vICEQj1KyawQA).
 
@@ -146,11 +146,11 @@ Porém, somente interfaces podem **estender de classes**, o que é super legal q
 
 ![](./boas-praticas-ts-semana-ts-3/image-74.png)
 
-### Unknown, Any e Never
+## Unknown, Any e Never
 
 Vamos falar das últimas práticas sobre tipos, os três cavaleiros do apocalipse: `any`, `never` e `unknown`.
 
-#### O uso de Any
+### O uso de Any
 
 Essencialmente desliga a inferência de tipos. É o equivalente de dizer que aquele tipo pode ser qualquer coisa. Qualquer tipo que tiver uma union ou intersection com `any` vai ser inferido como `any`. Usar `any` é considerada uma das piores práticas do TS.
 
@@ -162,7 +162,7 @@ Portanto, sem saber a estrutura, não podemo usar `unknown`, porque ele nos for�
 
 Mas é super importante dizer que, em 99% dos casos, é possível substituir `any` por qualquer outro tipo, inclusive a [própria documentação oficial](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html#any) diz para não usar `any` a não ser que você esteja migrando a sua base de JavaScript para TypeScript.
 
-#### O uso de Unknown
+### O uso de Unknown
 
 O `unknown` é a saída para os casos acima. O irmão mais correto do `any`, usar `unknown` diz que você não sabe qual é o tipo daquele dado, dessa forma o TS vai te obrigar a fazer um **type casting** (usando `dado as <novo tipo>`) antes de poder fazer qualquer coisa com ele.
 
@@ -180,7 +180,7 @@ A não ser que a pessoa que esteja usando essa função passe o argumento de ret
 
 > Na verdade, essa é a forma que o `fetch` nativo do browser é implementado.
 
-#### Never say never
+### Never say never
 
 O não-tipo. O tipo `never` é o tipo que não representa nenhum tipo, ele não pode ser intersectado ou unido com ninguém, ele é ele mesmo e representa o resultado de uma operação que nunca pode acontecer, ou seja, se você chegou no fim de um caso, recursão ou qualquer outra coisa, o `never` é seu amigo porque ele impede que este retorno seja misturado com qualquer outra coisa.
 
@@ -200,25 +200,25 @@ Podemos usar várias outras técnicas pra deixar a função completamente TypeSa
 
 ![](./boas-praticas-ts-semana-ts-3/image-80.png)
 
-## Configuração
+# Configuração
 
 Além das boas práticas de código, existem também as boas práticas de configuração, ou seja, configurar o compilador do TS de forma que ele consiga dar pra você o melhor da inferência de tipos sem deixar que você caia em ciladas.
 
 > Todas as opções que eu vou falar aqui são colocadas dentro da chave `compilerOptions` no seu `tsconfig.json`.
 
-#### Sempre use `strict: true`
+### Sempre use `strict: true`
 
 Como primeira recomendação, mantenha a opção `strict: true` ativa, isso vai garantir uma série de checagens de código explícitas que o compilador vai fazer por padrão, além de ser o modelo mais seguro e recomendado até mesmo pelos devs do TS.
 
 > Ativar essa opção vai automaticamente ativar as opções seguintes e mais [várias outras](https://www.typescriptlang.org/tsconfig#strict)
 
-#### Checagem estrita de nulls
+### Checagem estrita de nulls
 
 Outra recomendação é ativar a chave `strictNullChecks`, o que ela faz é que todos os tipos que possam retornar `undefined` ou `null` vão te dar um erro se você não checá-los, dessa forma:
 
 ![](./boas-praticas-ts-semana-ts-3/image-82.png)
 
-#### Indo um passo além com `noImplicityAny`
+### Indo um passo além com `noImplicityAny`
 
 Outra configuração super importante que deixa seu projeto muito mais seguro é remover a possibilidade do TS inferir qualquer variável para `any` sem dar nenhum erro. Como vimos antes, o `any` é o pior tipo de prática para se ter com TS, e remover a maior quantidade possível deles vai fazer o seu código muito mais seguro.
 
@@ -230,14 +230,14 @@ Tenha em mente que essa é uma opção bastante severa, especialmente se você e
 
 > Se você estiver a fim de usar o TS da forma como ele foi feito para ser usado, você pode ativar uma configuração [do ESLint chamada](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-explicit-any.md) `noExplicitAny`, que vai impedir que você use `any` em **qualquer lugar.**
 
-#### Outras boas configurações
+### Outras boas configurações
 
 -   `noUnusedLocals`: Dá um erro se existirem variáveis não usadas
 -   `noUnusedParameters`: Erros quando existem parâmetros não usados
 -   `noFallthroughCasesInSwitch`: Força o uso de `break` em `switch / case` para evitar que um `case` passe para o próximo
 -   `noUncheckedIndexedAccess`: Qualquer objeto que for acessado pelo índice (exemplo: `obj['indice']`) vai ter seu valor inferido como `<valor> | undefined` porque ele pode ser vazio e precisará ser checado.
 
-## Pra você treinar
+# Pra você treinar
 
 Antes de mandar o próximo desafio, vamos corrigir o desafio anterior! Onde tínhamos que tipar [esse arquivo](https://gist.github.com/khaosdoctor/9e9a30d5053974f7221be7e06ec19ffc). Você pode encontrar a resposta [aqui](https://gist.github.com/khaosdoctor/c38e01c1da0aaee69ce1c7bb5ed66b47)!
 

@@ -12,6 +12,10 @@ visibility: "public"
 seoTitle: "Como instalar e configurar o Neovim com LazyVim"
 ---
 
+import figureImage1 from './instalando-e-configurando-o-neovim/image-7.png'
+import figureImage2 from './instalando-e-configurando-o-neovim/image-8.png'
+import figureImage3 from './instalando-e-configurando-o-neovim/image-5.png'
+
 Eu sempre gostei do Vim, mas esse editor é mundialmente conhecido por ser uma das peças de software mais complexas de aprender já criadas, até ganhando a fama de ser o lugar que você entra e nunca mais sai.
 
 ![A meme-worthy compilation of images from a group called "People who managed  to exit vim" : r/vim](https://i.redd.it/m9eh2jw08qm61.jpg)
@@ -24,7 +28,7 @@ Recentemente eu resolvi deixar de usar o VSCode 100% e começar a usar apenas o 
 
 Se você já conhece o editor, pode pular direto para a parte de instalação. Ou, se você quiser saber mais sobre a história do Vim, Vi e Neovim, deixa eu te contar.
 
-### Um pouco sobre Vim
+## Um pouco sobre Vim
 
 Se você não sabe o que é o [Vim](https://en.wikipedia.org/wiki/Vi_\(text_editor\)), em poucas palavras, é um dos editores de texto mais antigos que ainda estão em uso. Ele foi criado por um cara chamado [Bram Molenaar](https://en.wikipedia.org/wiki/Bram_Moolenaar) em 1991 como uma melhoria ao editor original _Vi_, criado por [Bill Joy](https://en.wikipedia.org/wiki/Bill_Joy) em 1976 como um modo _vi_sual para um outro editor chamado `ed`. Por isso que Vim é o acrônimo de "Vi improved".
 
@@ -43,7 +47,7 @@ O único problema é que ele tem uma das maiores curvas de aprendizado da histó
 
 Infelizmente o Vim sozinho, do jeito que ele vem "de fábrica", apesar de totalmente usável, não é o que eu chamaria de um bom editor de código, ele poderia ter sido lá em 1991, mas com o avanço das tecnologias, a integração cada vez mais próxima das linguagens com os editores e o movimento saindo dos grandes e complexos IDEs para editores menores com suporte a plugins deixou o Vim um pouco defasado, mesmo que ele tenha ganhado suporte a plugins.
 
-#### Entra o Neovim
+### Entra o Neovim
 
 Neovim é um fork do Vim original feito por um Brasileiro chamado [Thiago Arruda](https://github.com/tarruda) depois que ele [não conseguiu apoio](https://groups.google.com/g/vim_dev/c/65jjGqS1_VQ?pli=1) para implementar uma mudança no Vim original que permitiria que o editor tivesse múltiplas threads e pudesse ser controlado por processos externos. O primeiro commit do Neovim aconteceu em [31 de janeiro de 2014](https://github.com/neovim/neovim/commit/72cf89bce8e4230dbc161dc5606f48ef9884ba70).
 
@@ -53,21 +57,21 @@ A partir daí o NVim ganhou cada vez mais suporte da comunidade e um aporte de a
 
 <CourseCTA />
 
-### Pré requisitos
+## Pré requisitos
 
 Antes de a gente começar eu vou falar alguns pré-requisitos que você precisa ter para poder seguir esse tutorial de um jeito que você consiga aproveitar
 
-#### 1 - Tenha algum tipo de Linux
+### 1 - Tenha algum tipo de Linux
 
 Embora seja sim possível [instalar o Neovim em Windows com o Powershell](https://dev.to/hoo12f/setting-up-neovim-with-windows-powershell-2208), eu vou fazer a mesma coisa com um sistema Linux. Você pode estar usando Mac, alguma distribuição Linux, ou até mesmo o WSL no Windows com a distro que você preferir.
 
 Eu estou escrevendo esse artigo em um Arch Linux, mas tudo que eu falar aqui pode ser transposto para o Mac (Darwin) sem problemas, os arquivos ficam no mesmo lugar.
 
-#### 2 - Tenha uma shell pronta
+### 2 - Tenha uma shell pronta
 
 Eu estou usando um ZSH com o Zinit e vários plugins (você pode ver meus dotfiles [aqui](https://github.lsantos.dev/dotfiles/blob/master/general/base/.zshrc)), a shell em si não importa, você pode usar bash, sh, Fish, ou o que for, o importante é que você tenha ela totalmente configurada para evitar problemas com variáveis de ambiente.
 
-#### 3 - Instale o Neovim
+### 3 - Instale o Neovim
 
 Você pode instalar o Neovim seguindo diretamente as instruções do [site oficial](https://github.com/neovim/neovim/blob/master/INSTALL.md), no geral, para Mac você já deve ter ele instalado por padrão, caso contrário é só usar o [Homebrew](https://brew.sh) com `brew install neovim`.
 
@@ -79,7 +83,7 @@ Depois de instalado, quando você executar o neovim pela primeira vez digitando 
 
 > É possível sim sair do Neovim apertando `esc` e depois `:q!<enter>`
 
-#### 4 - NerdFonts
+### 4 - NerdFonts
 
 Uma parte importantíssima desse setup são as [NerdFonts](https://www.nerdfonts.com). Uma NerdFont é uma fonte comum, porém empacotada com **todos os ícones e glifos imaginados**. Basicamente é como se sua fonte Arial tivesse um monte de desenhos junto, incluindo ícones do Font Awesome e um monte de outros glifos transformados em fontes que a gente vê por ai.
 
@@ -102,11 +106,11 @@ $ yay -S ttf-meslo-nerd
 
 Se você quiser instalar outras fontes, eu também recomendo a _CaskaydiaCove Nerd Font_ (minha atual fonte)_, Fira Code Nerd Font_, e a _Hack_ que são fontes bem interessantes e fáceis de ver.
 
-#### 5 - Lazygit
+### 5 - Lazygit
 
 Instale o LazyGit, que é um cliente de git direto pelo terminal. Você pode instalar ele diretamente pelo brew com o `brew install lazygit` ou `yay lazygit` no caso do Arch.
 
-### Lazy e LazyVim
+## Lazy e LazyVim
 
 Eu não vou entrar em detalhes das bases do Vim, ou do Neovim, mas eu quero ir direto ao ponto e mostrar como você pode começar o mais rápido possível de um jeito bem simples com ele.
 
@@ -122,7 +126,7 @@ Pois bem, o mesmo criador do lazy.nvim deu um passo a mais e criou um "kit inici
 
 O LazyVim é extremamente parecido com o VSCode, o que torna todo o processo bem simples e fácil de transitar, além de ter uma série de comandos que já estão prontos e uma busca de keybindings pra você não se perder. Fora que ele também suporta mouse, então caso você queira clicar em alguma coisa é bem simples.
 
-#### Instalando
+### Instalando
 
 A instalação do LazyVim é bem direta, primeiro você faz um backup das suas configurações:
 
@@ -151,7 +155,7 @@ Agora é rodar o comando `nvim`, você já deve ver algumas mudanças na sua con
 
 Digite `:LazyHealth` e aperte enter, para garantir que tudo está rodando legal.
 
-#### A tecla \<leader>
+### A tecla \<leader>
 
 O Lazy, assim como muitos outros, tem uma tecla base para as demais combinações, essa tecla é a `<leader>` que é mapeada para a barra de espaço por padrão, aperte `<leader>` e você vai ver um guia de keybindings aparecendo na parte de baixo da tela, esse é um plugin chamado _WhichKey_ (que também foi criado pelo [Folke](https://github.com/folke), o criador do Lazy):
 
@@ -167,11 +171,11 @@ Você pode navegar por essa janela usando as letras no cabeçalho, por exemplo `
 
 Aperte `q` para sair do painel. Agora chegou o momento de fazer um tour pelas funcionalidades básicas
 
-### Tour básico
+## Tour básico
 
 Vamos começar com as funcionalidades mais simples e mais úteis.
 
-#### Explorer (Neotree)
+### Explorer (Neotree)
 
 O Lazy vem com um plugin chamado `neotree`, que é um plugin para mostrar uma barra de navegação de arquivos como o explorer do VSCode. Você pode acessar essa funcionalidade com `<leader>e`.
 
@@ -188,11 +192,11 @@ Você pode navegar por ela com HJKL, J e K vão descer e subir, H e L navegam pa
 -   `/`: Inicia a busca
 -   `?`: Mostra a lista de atalhos
 
-#### Movimentação
+### Movimentação
 
 Abra o vim na pasta `~/.config/nvim`, vamos começar dali. Selecione o arquivo `lua/config/lazy.lua`. Esse é o principal arquivo de configuração do lazy, mas a gente quase nunca vai mexer nele.
 
-<Figure src="./instalando-e-configurando-o-neovim/image-7.png" alt="" wide />
+<Figure src={figureImage1} priority alt="" wide />
 
 Aperte `<C-l>` ou `<Ctrl>+l` para voltar ao Neotree, agora abra o arquivo `options.lua`, veja que temos duas abas no topo, esses são os buffers, cada buffer é um arquivo em memória, e é importante dizer que não são abas!
 
@@ -207,11 +211,11 @@ Feche esse buffer com `<leader>bd`.
 >
 > Uma janela é como se fosse uma outra instância da sua janela do Vim, é como se fosse uma outra aba de um browser, um ambiente diferente e isolado de qualquer outro buffer
 
-#### Telescope
+### Telescope
 
 O Telescope é outro plugin feito para buscar arquivos. Vamos abrir outro arquivo com ele, aperte `<leader>ff` para abrir a janela do Telescope:
 
-<Figure src="./instalando-e-configurando-o-neovim/image-8.png" alt="" wide />
+<Figure src={figureImage2} alt="" wide />
 
 Aqui você pode digitar direto para buscar o arquivo, navegar com as setas ou com `<C-n>` e `<C-p>`, você também pode abrir a lista de atalhos com `<C-?>`. Abra outro arquivo com ele.
 
@@ -219,7 +223,7 @@ Aqui você pode digitar direto para buscar o arquivo, navegar com as setas ou co
 
 Existem infinitas opções do Telescope. Por exemplo, você pode buscar dentre todos os arquivos abertos (buffers) com `<leader>fb`, na verdade, a maioria das coisas que você pode fazer com o Telescope vai estar dentro de `<leader>f`, ou então de `<leader>s`, que são os comandos de busca globais.
 
-### Configuração
+## Configuração
 
 Agora que a gente sabe o básico, vamos começar a configurar o nosso editor. O Lazy vai inicialmente ler todos os arquivos dentro da pasta `lua/config` como configurações iniciais, começando com o `lazy.lua`, depois ele vai ler todos os plugins dentro da pasta plugins.
 
@@ -230,7 +234,7 @@ Então para poder adicionar novas funcionalidades a gente só precisa mudar esse
 -   `lua/config/autocmds.lua`: Se você tiver algum auto command do vim, aqui é o lugar de colocar
 -   `lua/plugins`: Qualquer arquivo lua aqui dentro será lido e adicionado nos plugins, então você pode separar por categoria (ui, search, code, etc) ou pelo nome do plugin, que é o que eu fiz.
 
-#### Lazy.lua
+### Lazy.lua
 
 Vamos começar pelo arquivo que a gente tem que modificar menos, o arquivo `lazy.lua`, aqui vamos habilitar somente o que são chamados de `LazyExtras`, configurações de fábrica que o Lazy já traz prontas e permite que você estenda ou modifique depois na pasta `plugins`.
 
@@ -244,7 +248,7 @@ Além disso, já vamos adicionar um tema, eu estou usando o tema `catpuccin` mod
 
 Outro detalhe é que, depois de algumas atualizações do Lazy, a integração do TypeScript acabou começando a usar um outro LSP (vamos falar dele já já) então eu acabei desabilitando essa configuração.
 
-### options.lua
+## options.lua
 
 O arquivo options é o arquivo que vai ter as opções principais, como tamanho dos espaços, colunas e etc, geralmente é um arquivo bem pequeno e bem pessoal, no meu caso eu coloquei apenas as configurações mais simples:
 
@@ -286,7 +290,7 @@ De cima para baixo, as configurações são as seguintes:
 -   Seto uma linha mais clara onde meu cursor estiver, tanto na horizontal quanto na vertical, isso ajuda a achar mais facilmente ele na tela
 -   A última opção é uma alteração para que o Vim reconheça a tecla Alt no Mac, que é mapeada para o command, veja o link no comentário para entender melhor como funciona
 
-### autocmds.lua
+## autocmds.lua
 
 Outra coisa interessantíssima do vim é que é possível executar comandos automaticamente de acordo com hooks de execução, por exemplo, sempre que entrar em um buffer que tenha um determinado nome, ou sempre que sair de algum buffer, e assim vai.
 
@@ -338,7 +342,7 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufFilePre", "BufRead" }, {
 
 Esse arquivo não é obrigatório, e muitas vezes vai estar vazio, a não ser que você tenha algum tipo de comando que queira sempre rodar de acordo com algum tipo de buffer, por exemplo, sempre executar um ESLint quando tiver em um arquivo JS ou algo assim.
 
-### keymaps.lua
+## keymaps.lua
 
 O último dos arquivos na pasta `config` é o arquivo `keymaps.lua`, como você deve imaginar, ele tem os atalhos de teclado que você quer customizar. Nesse ponto eu vou colocar o meu arquivo inteiro aqui, que é bastante grande, mas você não precisa seguir exatamente o que existe aqui, fique a vontade para poder adicionar os que você quiser.
 
@@ -458,7 +462,7 @@ A estrutura básica é `vim.keymap.set("modo", "atalho", "comando")`, seguido da
 
 ![](./instalando-e-configurando-o-neovim/image.png)
 
-## Plugins
+# Plugins
 
 Agora que acabamos todas as partes de configuração, podemos começar a falar de plugins, o grande poder do Neovim com o Lazy.
 
@@ -528,7 +532,7 @@ Estou passando as opções como uma table que está dizendo para o telescope red
 
 O que é ótimo para telas pequenas, já que eu não preciso saber o nome completo do local, apenas as primeiras letras.
 
-### Meus plugins
+## Meus plugins
 
 Eu não vou listar todos os meus plugins aqui, porque seriam muitos, mas vou deixar os meus dotfiles diretamente na pasta do meu Lazy para que você possa ver o que está acontecendo, eu optei por deixar os plugins divididos por tipo e por função, e não por grupo como parece ser o jeito que a comunidade gosta de fazer. Eu acho muito mais fácil dar manutenção quando eu sei o que o plugin faz ao invés de ter um arquivo com vários plugins dentro agrupado por funcionalidade.
 
@@ -536,7 +540,7 @@ Eu não vou listar todos os meus plugins aqui, porque seriam muitos, mas vou dei
 
 Para que a gente possa ter a funcionalidade que eu prometi, deixando o seu nvim igual o meu (pelo menos na aparência), vamos precisar de alguns plugins, o primeiro deles é o meu esquema de cores.
 
-#### Catpuccin e colorschemes
+### Catpuccin e colorschemes
 
 No geral, instalar temas para o Nvim é bem simples e você pode trocar de temas no LazyVim usando `<leader>UC`. Para instalar um colorscheme, é como se fossemos instalar um plugin comum, mas no final do arquivo temos que setar uma propriedade que diz ao LazyVim qual é o plugin que vamos escolher como o colorscheme principal. Eu tenho alguns temas instalados:
 
@@ -662,7 +666,7 @@ Acima de tudo é sua escolha, então não é algo que você precise pensar demai
   }
 ```
 
-#### Dashboard
+### Dashboard
 
 Para ter o dashboard customizado com um logo diferente, e até mesmo opções diferentes, o Lazy usa um projeto chamado Alpha.nvim, que é um gerador de dashboards, essencialmente o que eu fiz foi copiar a configuração original do do LazyVim que está nesse repositório:
 
@@ -672,17 +676,17 @@ E modificar o logo. Todo o resto eu deixei igual porque eu acho que as opções 
 
 ![](./instalando-e-configurando-o-neovim/image-4.png)
 
-#### LuaLine
+### LuaLine
 
 O Lualine é um plugin muito legal que adiciona várias coisas interessantes na parte de baixo do seu editor, como o branch do git, a pasta que você está, número de erros e avisos, caminho, último comando, e outras coisas. Além disso é totalmente customizável e você pode adicionar o que você quiser nela. No meu caso essa é a configuração:
 
-<Figure src="./instalando-e-configurando-o-neovim/image-5.png" alt="" wide />
+<Figure src={figureImage3} alt="" wide />
 
 Para não adicionar um arquivo super longo por aqui, vou deixar o link para o repositório na revisão atual:
 
 <Bookmark url="https://github.com/khaosdoctor/dotfiles/blob/4532db19eca517ccc6205fa22826aa8854d88d20/general/nvim/.config/nvim/lua/plugins/lualine.lua" title="dotfiles/general/nvim/.config/nvim/lua/plugins/lualine.lua at 4532db19eca517ccc6205fa22826aa8854d88d20 · khaosdoctor/dotfiles" description="My dotFiles. Contribute to khaosdoctor/dotfiles development by creating an account on GitHub." publisher="khaosdoctor" />
 
-## Conclusão
+# Conclusão
 
 Foi um artigo longo mas agora você consegue instalar e configurar o seu Neovim para começar a usar o poder que ele tem. Estamos longe de estar prontos e de acabar toda essa configuração, mas o importante é que você sinta que esse editor é o seu editor e você se sinta em casa com ele.
 

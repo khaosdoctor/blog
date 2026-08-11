@@ -13,14 +13,18 @@ seoTitle: "Criptografia assimétrica e chaves RSA - Como funcionam?"
 seoDescription: "Nesse artigo vamos aprender profundamente o que é RSA e assimetria criando nossa própria chave RSA manualmente e entendendo todos os conceitos!"
 ---
 
-### Este artigo é parte de uma série:
+import figureImage1 from './criptografia-assimetrica-com-rsa/image-1.png'
+import figureImage2 from './criptografia-assimetrica-com-rsa/image-2.png'
+import figureImage3 from './criptografia-assimetrica-com-rsa/image-13.png'
+
+## Este artigo é parte de uma série:
 
 -   [Criptografia #0: Conceitos iniciais](/criptografia-essencial/)
 -   [**Criptografia #1: Criptografia Assimétrica com RSA**](/criptografia-assimetrica-com-rsa/) 👈 Você está aqui
 -   [Criptografia #2: Chaves Simétricas](/criptografia-simetrica/)
 -   [Criptografia #3: Entendendo Hashes](/hashes/)
 -   [Criptografia #4: Assinaturas Digitais](/assinaturas-digitais/)
--   [Criptografia #5: Diffie-Helman e mecanismos de troca de chaves](/diffie-helman-key-exchange/)
+-   Criptografia #5: Diffie-Helman e mecanismos de troca de chaves
 -   [Criptografia #6: Certificados digitais e HTTPS](/certificados-https/)
 
 ---
@@ -38,7 +42,7 @@ Você pode ouvir falar de _Asymmetric-Key/Public-key Cryptosystems_ que é o gua
 
 Então hoje vamos falar sobre o que são esses sistemas, mas principalmente de um algoritmo específico, o RSA.
 
-### Chaves Assimétricas
+## Chaves Assimétricas
 
 Criptografia Assimétrica é um dos modelos mais comuns de criptografia que existem em tecnologia, por exemplo, para abrir essa blog você usou HTTPS, que é um protocolo HTTP em cima de outro protocolo de segurança chamado [TLS](https://en.wikipedia.org/wiki/Transport_Layer_Security) (_T_ransport _L_ayer _S_ecurity), este protocolo utiliza criptografia assimétrica.
 
@@ -51,7 +55,7 @@ Nesse sistema criptográfico, sempre vamos ter um componente que só é conhecid
 
 ![](./criptografia-assimetrica-com-rsa/image-5.png)
 
-Opcionalmente esses sistemas também podem possuir um valor público que é utilizado para gerar as **chaves públicas**, privadas, ou ambas ([Diffie-Helman](/diffie-helman-key-exchange/), por exemplo, tem um valor público usado para gerar a chave privada).
+Opcionalmente esses sistemas também podem possuir um valor público que é utilizado para gerar as **chaves públicas**, privadas, ou ambas (Diffie-Helman, por exemplo, tem um valor público usado para gerar a chave privada).
 
 ![](./criptografia-assimetrica-com-rsa/image-6.png)
 
@@ -61,7 +65,7 @@ Mas o que são essas chaves afinal?
 
 <CourseCTA />
 
-#### Chaves públicas
+### Chaves públicas
 
 São as partes públicas da criptografia assimétrica. A chave pública é quem criptografa as mensagens que só podem ser descriptografadas pela sua contraparte privada. Você vai ver ela sendo chamada de **Pk** para _Public Key_.
 
@@ -73,7 +77,7 @@ Calcular a chave privada a partir da chave pública é computacionalmente inviá
 
 Então, resumindo, a chave pública é conhecida por todo mundo e é utilizada para criptografar mensagens. Se você quer mandar uma mensagem para mim, você criptografa a sua mensagem usando a **minha** chave pública.
 
-#### Chaves privadas
+### Chaves privadas
 
 A chave privada (comumente chamada de **Sk** para _Secret Key_) é uma chave gerada a partir de pelo menos dois componentes privados (no caso do RSA, números primos bem grandes) que só são conhecidos pela pessoa que é dona da chave. Essa premissa garante que:
 
@@ -93,7 +97,7 @@ Resumindo, a chave privada é o oposto da pública, ela vai decriptar os dados, 
 
 A chave privada **deve ser conhecida somente pelo seu dono**, por isso que ela é privada. E, a partir dela, é possível derivar várias chaves públicas, mas como isso é possível?
 
-#### O que é criptografar?
+### O que é criptografar?
 
 Quando falamos de criptografia digital, não estamos mais falando de texto, estamos falando de números. Então "criptografar" algo com uma chave pública, "descriptografar" algo com a chave privada são apenas operações matemáticas que fazemos com uma chave.
 
@@ -101,7 +105,7 @@ Quando falamos de criptografia digital, não estamos mais falando de texto, esta
 
 Como ainda não discutimos o que são as chaves, eu vou deixar a explicação mais profunda pra nossa sessão de RSA, mas essa é a ideia, pegar um número, elevar ele a outro número e dividir por ainda mais um número, o resto da divisão é a mensagem criptografada (continue lendo para saber o que são esses números).
 
-### Derivação e inversão
+## Derivação e inversão
 
 Quando dizemos que uma chave pública pode ser derivada de uma chave privada (já vamos ver como fazer isso), estamos dizendo que tanto a chave pública quanto a **Sk** estão matematicamente conectadas.
 
@@ -117,7 +121,7 @@ Assim como tudo que é criptografado pela chave privada, pode ser descriptografa
 
 No caso de RSA, estamos falando de chaves que estão conectadas a partir de [exponenciação modular](https://en.wikipedia.org/wiki/Modular_exponentiation), e é exatamente esse critério que torna a criptografia assimétrica algo interessante.
 
-#### Exponenciação modular
+### Exponenciação modular
 
 Não vou me estender nesse tópico porque não é o nosso tema (inclusive esse parágrafo é mais uma curiosidade do que obrigatório), mas a exponenciação modular é uma operação de potenciação (exponenciação) sobre um módulo (sim, o resto da divisão de um número por outro como em `a % b`, chamado de [aritmética modular](https://en.wikipedia.org/wiki/Modular_arithmetic), um outro tema pra outra hora).
 
@@ -133,25 +137,25 @@ O resultado C é 1 porque `25/3` é `8` com resto de `1`. E a grande vantagem de
 
 Usando essa matemática, é possível criar um valor que, como um relógio, vai realizar um _wrap around_, ou seja, quando ele chegar em um determinado número, ele volta a ser 0 (assim como `a % b` em programação vai estar sempre entre `0` e `b-1`)
 
-### Asymmetric Encryption Schemes
+## Asymmetric Encryption Schemes
 
 Criptografia assimétrica é muito mais complexa e pode chegar a ser até 1000x mais lenta do que algoritmos simétricos (como o AES), por isso algoritmos assimétricos (como o RSA) não são utilizados constantemente, mas sim em conjunto com criptografia simétrica. A junção desses dois sistemas forma diversas técnicas que são chamadas de _esquemas de encriptação assimétrico._
 
 Como esses sistemas conseguem ser utilizados ao mesmo tempo? Um dos esquemas de encriptação é chamado de **KEM (Key Encapsulation Mechanism)** que basicamente consiste em criptografar uma chave com outra chave:
 
-<Figure src="./criptografia-assimetrica-com-rsa/image-1.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Criptografia simétrica e assimétrica em conjunto</span>" />
+<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Criptografia simétrica e assimétrica em conjunto</span>" />
 
 Aqui a gente está usando uma chave simétrica (muito mais leve) para criptografar um documento e gerar um **DEM Block.** Depois estamos criptografando a chave simétrica que usamos com uma chave pública de um usuário, criando o que é chamado de **KEM Block**, até agora é só uma chave criptografando outra chave.
 
 Depois juntamos os dois e mandamos para o nosso recipiente, dessa forma mesmo se o documento for interceptado, a chave não pode ser recuperada porque ela foi encriptada com a chave pública. O usuário que recebe o arquivo pode decriptar da seguinte forma:
 
-<Figure src="./criptografia-assimetrica-com-rsa/image-2.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Decriptando um DEM Block</span>" />
+<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Decriptando um DEM Block</span>" />
 
 Pegamos o DEM block, separamos em chave e arquivo, decriptamos a chave simétrica usando a chave privada, obtendo a chave simétrica original, que podemos usar para decriptar o arquivo encriptado.
 
 > O protocolo HTTPS funciona "mais ou menos" assim.
 
-## RSA
+# RSA
 
 Depois de entender muito sobre criptografia assimétrica, vamos finalmente falar de RSA!
 
@@ -168,7 +172,7 @@ Pontos chave:
 
 Lembre-se que, quando falamos de chaves aqui, estamos falando de números, nada mais. É como se fosse uma senha, só que ela tivesse 1234 dígitos (`2^4096`). Quando estamos "criptografando" algo, estamos aplicando uma operação de exponenciação entre a chave e o valor que queremos criptografar.
 
-<Figure src="./criptografia-assimetrica-com-rsa/image-13.png" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um número de 4096 bytes</span>" />
+<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um número de 4096 bytes</span>" />
 
 As chaves públicas e privadas do RSA derivam de dois números primos que chamamos de `p` e `q`, esses números são os componentes privados do RSA. Desses dois números é que vem a segurança.
 
@@ -183,7 +187,7 @@ E esse é um número simples, de 9 bits (`100000000`) e leva todo esse tempo. Ag
 > [!WARNING] 💡
 > É por isso que muita gente está preocupada com a capacidade de computadores quânticos de quebrar o RSA, porque teoricamente eles poderiam fatorar números de forma muito mais rápida
 
-### Chaves em RSA
+## Chaves em RSA
 
 As chaves em RSA são calculadas com alguns componentes, já falamos de três deles até aqui mas vou reiterar só para podermos nos lembrar, e agora eu vou deixar vários termos que não são triviais aqui também:
 
@@ -194,7 +198,7 @@ As chaves em RSA são calculadas com alguns componentes, já falamos de três de
 
 Essa lista não foi fácil de ler 🤣. Mas vamos quebrar esses passos gerando nossas próprias chaves manualmente. Mas, antes, vamos explicar um conceito que começamos lá atrás.
 
-#### O que é criptografar? (em RSA)
+### O que é criptografar? (em RSA)
 
 A gente sabe que criptografar é uma operação matemática, mas como ela se parece?
 
@@ -239,11 +243,11 @@ $plano = encriptada^d \mod n$
 
 A escolha desses números não foi arbitrária, existem algumas [regras que precisam ser seguidas](https://en.wikipedia.org/wiki/RSA_\(cryptosystem\)#Key_generation) e um pouco de computação não muito trivial, mas como eu prometi, vamos explorar isso no próximo capítulo.
 
-### Criando chaves
+## Criando chaves
 
 Para gerar um par de chaves real, vamos utilizar TypeScript para poder fazer as operações matemáticas.
 
-#### Definindo primos
+### Definindo primos
 
 Inicialmente vamos precisar definir alguns números, primeiro vamos começar com os nossos dois primos. Eles são os mais simples. A única regra é que eles precisam ser grandes e separados, mas, para facilitar nossas contas eu vou usar números primos pequenos, de 12 bits.
 
@@ -266,7 +270,7 @@ const q = 97
 const n = p*q
 ```
 
-#### Definindo expoentes
+### Definindo expoentes
 
 A definição dos expoentes é mais chata. Vamos precisar de um passo intermediário: definir o totiente de `n`.
 
@@ -452,7 +456,7 @@ Agora que temos `d`, `e` e `n` não precisamos mais de `p`, `q` ou `λ(n)`. `d` 
 
 Vamos fazer uma função para criptografar e descriptografar nossos dados, dado que ela é a mesma, vamos somente trocar os valores passados.
 
-#### Criptografando na mão
+### Criptografando na mão
 
 A função final de criptografia é bem simples:
 
@@ -613,7 +617,7 @@ const encrypted = encrypt(message, publicKey) // 698n
 const decrypted = encrypt(encrypted, privateKey) // 42n -> mensagem original
 ```
 
-#### Variação de Euler
+### Variação de Euler
 
 Se você leu até aqui, meus parabéns, não foi fácil! Mas eu queria te mostrar mais uma coisinha só! Lembra que eu comentei que podemos utilizar um totiente de Euler ao invés do totiente de Carmichael, e que ele é bem mais simples?
 
@@ -643,7 +647,7 @@ O que muda então? `φ(n)` é muito maior do que `λ(n)`, enquanto `λ(n)` é 48
 
 De qualquer forma, você pode ver a variação [aqui](https://gist.github.com/khaosdoctor/549d1a62e840974e8cd75518d1826273).
 
-### Conclusão
+## Conclusão
 
 Esse foi um dos maiores posts que eu já fiz, mas acredito que valeu muito a pena, exploramos a fundo o que é o RSA e como ele funciona, criamos duas chaves manualmente e testamos a criptografia manual. E agora?
 

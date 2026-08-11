@@ -2,29 +2,24 @@
 // Real <form> first: a plain GET to /busca/?q=... works with JS off, with
 // Pagefind not installed yet, and in dev where /pagefind/pagefind.js 404s.
 // The script below only enhances that baseline in place, it never replaces it.
+// The input starts empty; the client script below fills it from
+// window.location.search on load, the only place a real query string exists
+// on a static build.
 interface Props {
-  /**
-   * Best-effort prefill, e.g. Astro.url.searchParams.get('q') from the caller.
-   * On a static build this is always empty (see busca.astro) — the client
-   * script re-reads window.location.search itself, which is the real source
-   * of truth for the query on load.
-   */
-  initialQuery?: string
-  /** id for the form/results pair, only needed if a page ever renders <Search> more than once. */
-  resultsId?: string
+  action?: string
 }
 
-const { initialQuery = '', resultsId = 'search-results' } = Astro.props
+const { action = '/busca/' } = Astro.props
 ---
 
-<form action="/busca/" method="get" role="search" aria-label="Buscar no blog" data-search-form data-results-id={resultsId}>
+<form action={action} method="get" role="search" aria-label="Buscar no blog" data-search-form>
   <label for="search-q">Buscar no blog</label>
   <div class="row">
-    <input id="search-q" type="search" name="q" value={initialQuery} placeholder="ex: deno, astro, observabilidade" autocomplete="off" />
+    <input id="search-q" type="search" name="q" placeholder="ex: deno, astro, observabilidade" autocomplete="off" />
     <button type="submit">Buscar</button>
   </div>
 </form>
-<div id={resultsId} class="search-results" aria-live="polite" aria-atomic="false"></div>
+<div id="search-results" class="search-results" aria-live="polite" aria-atomic="false"></div>
 <noscript>
   <p class="search-noscript">
     A busca completa depende de JavaScript. Sem ele, o formulário acima ainda funciona: ele recarrega esta página com
@@ -128,8 +123,7 @@ const { initialQuery = '', resultsId = 'search-results' } = Astro.props
     if (!form) return
 
     const input = form.querySelector<HTMLInputElement>('input[name="q"]')
-    const resultsId = form.dataset.resultsId ?? 'search-results'
-    const resultsEl = document.getElementById(resultsId)
+    const resultsEl = document.getElementById('search-results')
     if (!input || !resultsEl) return
 
     // Astro prerenders this page once at build time, so any `value` baked

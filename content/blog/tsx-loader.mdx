@@ -16,7 +16,7 @@ Quem nunca se perguntou como é possível que runtimes como o [Deno](/tags/deno/
 
 Bom, enquanto a ideia de rodar nativamente TS, sem um processo de compilação, ainda é distante, a gente consegue sim rodar arquivos TypeScript diretamente no Node.js sem nenhum passo de compilação, esses são os chamados **loaders**
 
-### Loaders
+## Loaders
 
 Os loaders são funções que atuam como ganchos entre a leitura de um módulo e e a execução do mesmo, por exemplo, muita gente está acostumada a usar o `ts-node` ou o `ts-node-dev`.
 
@@ -26,7 +26,7 @@ Ambos esses pacotes são loaders, eles recebem os arquivos que serão carregados
 
 Um loader então pode escolher qual é o arquivo que ele vai trabalhar, no nosso caso o `.ts`, e ai realizar uma ação sobre ele que, no caso, vai ser transpilar para JavaScript e mandar para o Node avaliar o código.
 
-#### TSX
+### TSX
 
 O [TSX](https://npm.im/tsx) é a versão mais nova e melhorada do nosso `ts-node`, usando [ESBuild](https://esbuild.github.io) para transpilar os arquivos de TS para JS muito rápido.
 
@@ -46,7 +46,7 @@ Se rodarmos o comando `tsx index.ts`, vamos ter um output `3125`, mesmo sem ter 
 
 O tsx também tem um modo watch que pode ser executado com `tsx watch <arquivo>`, para ficar observando as alterações de um arquivo.
 
-### TSX como loader
+## TSX como loader
 
 Executar um arquivo (ou todos os seus arquivos) através de um loader é tão simples quanto criar um script `start` no seu `package.json` com o seguinte conteúdo:
 
@@ -58,7 +58,7 @@ E executar como `npm start`.
 
 > Usar o TSX como loader não permite que ele seja usado com qualquer outra opção, como o `watch`
 
-#### Estendendo a funcionalidade
+### Estendendo a funcionalidade
 
 Uma das coisas que podemos fazer desde a versão 20.6 do Node é carregar [diretamente arquivos de configuração de ambiente](https://nodejs.org/en/blog/release/v20.6.0#built-in-env-file-support) presentes em arquivos `.env`. Mas como a gente pode usar tanto o loader como os arquivos de configuração?
 
@@ -74,7 +74,7 @@ Experimente executar esse comando por ai nos seus projetos para facilitar o dese
 
 > **Importante:** Carregar arquivos TS diretamente do disco e realizar a compilação com loaders é bem mais lento do que transpilar primeiro e passar os arquivos JavaScript direto, por isso é recomendável que você faça isso apenas para ambientes de desenvolvimento.
 
-## Atualização Out-2023
+# Atualização Out-2023
 
 A partir da versão 20.6 do Node, a opção `--loader` foi [depreciada](https://nodejs.org/api/cli.html#--experimental-loadermodule), agora a opção que temos que passar é `--import`:
 

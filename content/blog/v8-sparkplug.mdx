@@ -11,6 +11,9 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './v8-sparkplug/image.png'
+import figureImage2 from './v8-sparkplug/image-1.png'
+
 O JavaScript é uma caixinha de surpresas, essa parece ser uma linguagem extremamente simples que roda em todos os lugares. Mas é justamente essa versatilidade que torna o JS cada vez mais complexo.
 
 Há um tempo atrás publiquei uma [sequencia de 10 artigos](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-1-conhecendo-nossas-ferramentas-34b6) sobre como o NodeJS funciona por baixo dos panos. E muito do que eu falei ali não se limita apenas ao NodeJS, mas sim ao JavaScript como um todo.
@@ -27,7 +30,7 @@ Estas etapas são o que chamamos de _pipeline_ de compilação. Pense nela como 
 
 Eu não vou entrar em detalhes de como ele funciona aqui, porque eu já fiz isso [na parte 4 da minha sequencia de artigos](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-4-vamos-falar-do-v8-4pai), mas hoje, temos a seguinte pipeline:
 
-<Figure src="./v8-sparkplug/image.png" alt="" caption="Um fluxograma do fluxo de código do V8" />
+<Figure src={figureImage1} priority alt="" caption="Um fluxograma do fluxo de código do V8" />
 
 Veja que temos três etapas principais, a primeira é o parser de código, onde o código é interpretado de texto para uma representação intermediária chamada de **bytecode** (entenda mais sobre ele [aqui](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-8-entendendo-bytecodes-jib)) e passada para um outro interpretador chamado **Ignition**. O trabalho do Ignition é justamente otimizar os bytecodes para que o próximo compilador possa otimizá-lo ainda mais.
 
@@ -49,7 +52,7 @@ Além disso, com um modelo de dois compiladores na pipeline, não era possível 
 
 A solução, criar um novo compilador e colocar no meio dos dois:
 
-<Figure src="./v8-sparkplug/image-1.png" alt="" caption="A nova pipeline simplificada" />
+<Figure src={figureImage2} alt="" caption="A nova pipeline simplificada" />
 
 Esse compilador foi chamado de Sparkplug.
 

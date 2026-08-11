@@ -18,7 +18,7 @@ Em 2020 eu participei de um dos episódios do Hipsters.tech onde a gente falou b
 
 Quatro anos depois, o Deno finalmente chegou na versão 2.0, e dessa vez eu acho que ele realmente tem a capacidade de ser o substituto do Node.js. Mas deixa eu te dizer por que eu acho isso.
 
-### O que é Deno?
+## O que é Deno?
 
 Antes de a gente começar, o que é o Deno? Há um ano eu e o Roz fizemos uma palestra sobre ele no Iugu Talks4Devs. Vale a pena dar uma olhada:
 
@@ -30,7 +30,7 @@ Deno é escrito em Rust e roda TypeScript nativamente, então você não precisa
 
 [Vamos falar sobre o Deno](/deno/)
 
-### Deno 2.0
+## Deno 2.0
 
 O Deno 2.0 ainda se mantém fiel às funcionalidades que ele veio inicialmente para prover, e os problemas que ele veio inicialmente para resolver. Embora ele tenha se perdido um pouco no meio do caminho (já vamos falar sobre isso), ele ainda se manteve bem constante no que ele promete e no que ele entrega.
 
@@ -75,7 +75,7 @@ Eu não vou passar parte a parte sobre cada mudança, esse artigo não tem esse 
 
 <CourseCTA />
 
-## Opniões
+# Opniões
 
 No geral, eu gostei bastante dessa nova versão do Deno, porém tem algumas coisas que eu achei um pouco estranhas. A primeira delas é o suporte a `package.json` e `node_modules` que foram coisas que explicitamente foram ditas que o Node tinha de ruim e que não seriam implementadas nesse novo runtime. Porém aqui estamos com suporte completo ao Node.
 
@@ -110,7 +110,7 @@ Agora não é mais necessário ter o Express no `package.json`, e nem instalar n
 
 E isso me leva a outro assunto, que é o `deno.json` em si, que era uma das propostas originais de não ter um arquivo JSON que define todo o projeto. Enquanto ele não é necessário nem obrigatório (a não ser que você queira publicar algo no JSR), meio que se tornou uma boa prática ter esse arquivo ali. E isso é, basicamente, outro `package.json`.
 
-### JSR e Deno PM
+## JSR e Deno PM
 
 O Deno seguiu um pouco nos passos do Bun incluindo um package manager dentro do binário, o que eu acho que vai completamente contra o que eles propuseram inicialmente (inclusive tem até um [blog post do próprio Ryan Dahl sobre isso](https://deno.com/blog/package-json-support)). Eu, pessoalmente, gosto muito do modelo de importação direto por URL que tínhamos antes (e, acredito, que ainda temos no Deno) que é uma forma mais decentralizada de manter os seus pacotes e não entregar o controle dele para organizações privadas, que podem simplesmente remover, alterar, ou até tomar conta de um pacote público.
 
@@ -131,7 +131,7 @@ A ideia é boa, por exemplo, se você rodar `deno install`:
 
 Isso significa que você pode usar literalmente qualquer tipo de pacote que você quiser de qualquer origem que você quiser, ou seja, você pode usar pacotes presentes no JSR com `import x from 'jsr:pacote@versao'` junto com `import x from 'https://url.com'` e `import x from 'npm:pacote@versao'`. Apesar de interessante, eu imagino a bagunça que isso vai ser em projetos grandes.
 
-## Será o fim do Node.js?
+# Será o fim do Node.js?
 
 Pela primeira vez eu tenho que dizer que realmente não sei. Com a adoção do Deno em maior escala a cada dia que passa, e a inabilidade do Node.js implementar as mesmas funcionalidades na mesma velocidade, eu vejo que muita gente vai acabar migrando para Deno sim, mas não acho que seja o fim do Node.js.
 
@@ -139,7 +139,7 @@ Apesar de ser mais devagar, o Node.js tem feito grandes feitos e está implement
 
 Mas eu não acho que todas essas adições sejam suficientes para manter o projeto no ar, o Node é um projeto que tem muitas dependências, tem muitas cabeças envolvidas e muita política também, muitas empresas dependem desse projeto e estão tentando guiar para seu próprio benefício com membros nos comitês. Eventualmente, o Deno (ou o Bun, ou o próximo runtime) vai aparecer com uma funcionalidade que não temos como negar, por exemplo, no caso do Deno, para mim você poder compilar tudo para um binário é algo que é incrível, e muitas pessoas pensam o mesmo, mas isso raramente vai chegar ao Node.
 
-## Conclusão
+# Conclusão
 
 O Deno 2.0 vem com muitas coisas boas e realmente vale a pena testar, talvez até mesmo implementar em um projeto e deixar ele rodando por um tempo, vou fazer alguns testes com projetos Node.js que tenho e quem sabe posto os futuros resultados por aqui, ou na minha newsletter!
 

@@ -13,6 +13,9 @@ seoTitle: "OCI, CRI, Runtimes? Entendendo o ecossistema de containers."
 seoDescription: "Recentemente o Kubernetes iniciou a depreciação do Docker. O que isso significa para você? Vamos mergulhar e aprender mais sobre o ecossistema de containers"
 ---
 
+import figureImage1 from './oci-cri-docker-ecossistema-de-containers/image.png'
+import figureImage2 from './oci-cri-docker-ecossistema-de-containers/image-2.png'
+
 _Imagem de capa por [ItsVit](https://itsvit.com/blog/docker-kubernetes-till-death-us-part/)_
 
 Recentemente o time do Kubernetes anunciou que estaria [descontinuando o suporte ao Docker](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#deprecation) a partir da versão 1.22. Neste artigo vamos falar desta alteração e vou explicar o que são todas as ferramentas que temos disponíveis hoje para rodar nossos containers! Então vamos entrar nessa sopa de letrinhas que é o CRI, OCI, ContainerD e muito mais!
@@ -39,7 +42,7 @@ Para ter a capacidade de trocar de runtime sem precisar compilar toda o cluster 
 
 O CRI é um plugin que permite que um Kubelet se distancie da camada de runtimes utilizando uma API feita utilizando gRPC. Em suma, a equipe desacoplou a aplicação do Kubelet do runtime, fazendo com que eles sejam inseridos como plugins, bastando que eles implementem a interface gRPC correspondente. Agora, ao invés de o Kubelet ter de se adaptar as mudanças de interface dos runtimes, os runtimes teriam que criar um plugin que seguiria uma interface obrigatória do Kubelet, desta forma a manutenção e a contribuição ficariam muito mais fáceis.
 
-<Figure src="./oci-cri-docker-ecossistema-de-containers/image.png" alt="" caption="Diagrama de funcionamento do CRI" />
+<Figure src={figureImage1} priority alt="" caption="Diagrama de funcionamento do CRI" />
 
 Não vamos entrar em detalhes da implementação do gRPC, mas a lista de serviços suportados está descrita em um protofile bastante intuitivo:
 
@@ -116,7 +119,7 @@ Depois de depreciar a interface do Dockershim, o uso do ContainerD diretamente f
 
 Isso vem em partes porque o próprio ContainerD já possui uma integração com o CRI via plugin que é habilitado por padrão, então o Kubelet se comunica com o plugin do CRI do ContainerD que, por sua vez, executa a implementação do `runc` e então os containers propriamente ditos, conforme o diagrama abaixo, também do Michael Brown:
 
-<Figure src="./oci-cri-docker-ecossistema-de-containers/image-2.png" alt="" caption="Diagrama de funcionamento do ContainerD com o Kubelet" />
+<Figure src={figureImage2} alt="" caption="Diagrama de funcionamento do ContainerD com o Kubelet" />
 
 O daemon do ContainerD lida com todas as chamadas do Kubelet através do plugin do CRI, chamando os shims necessários para modificação (que são mantidos pelo proprio time do ContainerD) e executando os containers através do  `runc`.
 

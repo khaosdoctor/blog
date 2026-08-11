@@ -11,6 +11,8 @@ draft: false
 visibility: "public"
 ---
 
+import figureImage1 from './o-que-ha-de-novo-no-typescript-4-0/XLsqvHe-ca302083.gif'
+
 No dia 20 de Agosto de 2020, o TypeScript anunciou a sua mais nova versão, a 4.0! Então, neste artigo, me preparei para apresentar para vocês as últimas mudanças e novidades da versão!
 
 Apesar de ser uma **major version** as alterações que foram introduzidas nesse release não são muito substanciais e, pode se acalmar, não temos nenhuma breaking change :D
@@ -33,7 +35,7 @@ function tupla (args_0: string, args_1: number) {}
 
 Que é essencialmente a mesma coisa, porém, na hora de fazermos o código, o nosso _intellisense_ – que é uma das grandes vantagens do uso do TypeScript, no geral – vai nos dar uma nomenclatura que não ajuda ninguém, como podemos ver no gif abaixo
 
-<Figure src="./o-que-ha-de-novo-no-typescript-4-0/XLsqvHe-ca302083.gif" alt="" caption="Nomenclatura como args_0 e args_1" />
+<Figure src={figureImage1} priority alt="" caption="Nomenclatura como args_0 e args_1" />
 
 Agora, com a versão 4.0, podemos incluir nomes nas nossas tuplas para que elas sejam nomeadas durante o intellisense:
 
