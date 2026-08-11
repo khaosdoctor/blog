@@ -22,7 +22,11 @@ Bancos de dados chave e valor não são raros e nem novos, existem centenas dess
 
 A proposta dos bancos de dados de chave e valor é que eles são super simples de serem utilizados, porque eles não tem nenhuma complexidade inerente a eles, você consegue imaginar um banco de dados KV como sendo uma tabela:
 
-\<table>\<tbody>\<tr>\<td>\<strong>Chave\</strong>\</td>\<td>\<strong>Valor\</strong>\</td>\</tr>\<tr>\<td>nome\</td>\<td>Lucas\</td>\</tr>\<tr>\<td>idade\</td>\<td>28\</td>\</tr>\<tr>\<td>profissao\</td>\<td>dev\</td>\</tr>\</tbody>\</table>
+| **Chave** | **Valor** |
+| --- | --- |
+| nome | Lucas |
+| idade | 28 |
+| profissao | dev |
 
 E é isso... Não tem muito segredo além dessa ideia. O que a maioria dos bancos chave e valor tem de diferente são as formas como eles otimizam e armazenam essas estruturas de dados em memória ou em disco, os tipos de dados que são suportados e etc, mas a ideia base é essa.
 
@@ -145,7 +149,7 @@ Chaves não podem ser objetos, estruturas ou classes. Se a chave não existir el
 
 ### `kv.get<T>(['chave'], options?)`
 
-O `[get](https://deno.land/api?s=Deno.Kv&p=prototype.get&unstable)` é a versão individual do `[getMany](https://deno.land/api?s=Deno.Kv&p=prototype.getMany&unstable)`, ambos são comandos para obter valores de dentro do banco de dados. Eles aceitam apenas chaves completas e não podem ser usados para listar, por exemplo, todas as chaves `['users']`.
+O [`get`](https://deno.land/api?s=Deno.Kv&p=prototype.get&unstable) é a versão individual do [`getMany`](https://deno.land/api?s=Deno.Kv&p=prototype.getMany&unstable), ambos são comandos para obter valores de dentro do banco de dados. Eles aceitam apenas chaves completas e não podem ser usados para listar, por exemplo, todas as chaves `['users']`.
 
 ```ts
 const res = await kv.get(['users', 'alice'])

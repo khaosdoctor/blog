@@ -27,3 +27,8 @@ pnpm-debug.log*
 .migration/
 # open questions and decisions for Lucas, not part of the site
 QUESTIONS.md
+
+# incident writeup for Lucas: internal, and the repo goes public later
+SECURITY-INCIDENT.md
+# scratch build output from review agents
+dist-review/

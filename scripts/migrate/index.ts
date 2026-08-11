@@ -17,7 +17,7 @@ import { homedir } from 'node:os'
 import TurndownService from 'turndown'
 // @ts-expect-error the gfm plugin ships no types
 import { gfm } from 'turndown-plugin-gfm'
-import { addCardRules, addFootnoteRules, addMathRule } from './cards.ts'
+import { addCardRules, addFootnoteRules, addMathRule, addTableRule } from './cards.ts'
 
 const GHOST_URL = 'https://blog.lsantos.dev'
 const ASSETS_REPO_RAW = 'https://raw.githubusercontent.com/khaosdoctor/blog-assets/master/'
@@ -94,6 +94,31 @@ const CATEGORY_OF: Record<string, string> = {
   podcasts: 'meta',
   video: 'meta',
 }
+
+/**
+ * Posts created by whoever compromised the Ghost install on 2026-07-30: eleven
+ * empty posts titled "S", "V" and "SYSINFO-blog.lsantos.dev", published between
+ * 13:06 and 15:47 UTC. They are attacker markers, not content, and one of them
+ * was appearing in the RSS feed of the new site.
+ *
+ * Note the migration never reads `codeinjection_head`/`codeinjection_foot`, so
+ * the loader script that the same intruder appended to all 247 real posts on
+ * 2026-07-16 does not come across. That is checked, not assumed: see the
+ * codeinjection guard below.
+ */
+const COMPROMISED_SLUGS = new Set([
+  'rce',
+  'rce-2',
+  'rce-3',
+  'rce-4',
+  'rce-5',
+  'rce-6',
+  'rce-7',
+  'rce-8',
+  'rce-9',
+  'rce-10',
+  'sysinfo-e522dabe',
+])
 
 const args = parseArgs()
 const raw = JSON.parse(readFileSync(args.export, 'utf8'))
@@ -321,11 +346,34 @@ function demoteHeadings(html: string): string {
   return shifted
 }
 
-/** Internal links become root-relative so they survive any domain change. */
+/**
+ * Internal links become root-relative so they survive any domain change, and
+ * get the trailing slash the site's routing requires. Ghost served both
+ * `/post` and `/post/`; Astro only serves the second, so a link written without
+ * the slash would 404 on the new site even though it worked on the old one.
+ */
 function normalizeLinks(markdown: string): string {
   return markdown
     .replaceAll(`${GHOST_URL}/`, '/')
-    .replace(/\]\(\/(?!\/)([^)\s]*)\)/g, (_full, path: string) => `](/${path})`)
+    // Ghost's membership signup page does not exist here. Keep the sentence,
+    // drop the dead link.
+    .replace(/\[([^\]]*)\]\(\/signup\/?\)/g, '$1')
+    // Ghost served tag archives at /tag/<slug>/; this site uses /tags/<slug>/.
+    .replace(/\]\(\/tag\/([^)]+?)\/?\)/g, '](/tags/$1/)')
+    .replace(/\]\(\/rss\/?\)/g, '](/rss.xml)')
+    // Ghost preview links (/p/<uuid>/) and the old donations page are both gone.
+    .replace(/\[([^\]]*)\]\(\/p\/[0-9a-f-]{36}\/?\)/gi, '$1')
+    .replace(/\[([^\]]*)\]\(\/doacoes\/?\)/g, '$1')
+    // A link written as "example.com/thing" with no scheme resolves against the
+    // current post and 404s. It is always meant to be external.
+    .replace(/\]\((?!https?:|\/|#|mailto:)([a-z0-9-]+(?:\.[a-z]{2,})+[^)\s]*)\)/gi, '](https://$1)')
+    .replace(/\]\((\/[^)\s]*)\)/g, (_full, path: string) => {
+      // Leave anchors, files with an extension, and already-slashed paths alone.
+      if (path.includes('#') || path.includes('?')) return `](${path})`
+      if (/\.[a-z0-9]{2,5}$/i.test(path)) return `](${path})`
+      if (path.endsWith('/')) return `](${path})`
+      return `](${path}/)`
+    })
 }
 
 /** `.../images/2020/11/foo.jpg` -> `2020/11/foo.jpg`, dropping Ghost size variants. */
@@ -456,7 +504,21 @@ const emailOnlyReview: string[] = []
 const privateReview: string[] = []
 const perPostNotes = new Map<string, string[]>()
 
-const articles = posts.filter((post) => post.type === 'post')
+const articles = posts.filter((post) => post.type === 'post' && !COMPROMISED_SLUGS.has(post.slug))
+
+// The intruder's payload lived in Ghost's per-post code injection, which this
+// migration never reads. Verify that rather than trust it: if a post carries an
+// injected remote-script loader, say so loudly.
+const injected = posts.filter((post) =>
+  /gist\.githubusercontent|new Function\(/.test(
+    `${(post as unknown as { codeinjection_head?: string }).codeinjection_head ?? ''}${(post as unknown as { codeinjection_foot?: string }).codeinjection_foot ?? ''}`,
+  ),
+)
+if (injected.length > 0) {
+  console.warn(
+    `NOTE: ${injected.length} posts in the export carry an injected remote-script loader in Ghost's code injection fields. None of it is migrated, but the live Ghost site is still serving it.`,
+  )
+}
 const selected = args.only === null ? articles : articles.filter((post) => post.slug === args.only)
 const limited = args.limit > 0 ? selected.slice(0, args.limit) : selected
 
@@ -501,6 +563,7 @@ for (const post of limited) {
   turndown.use(gfm)
   turndown.keep(['kbd', 'sub', 'abbr', 'mark'])
   addFootnoteRules(turndown)
+  addTableRule(turndown)
   addMathRule(turndown, { resolveAsset, note: (message) => postNotes.push(message) })
   addCardRules(turndown, { resolveAsset, note: (message) => postNotes.push(message) })
 
@@ -522,7 +585,8 @@ for (const post of limited) {
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 
-  const leftovers = [...body.matchAll(/kg-[a-z-]+/g)].map((match) => match[0])
+  // \b matters: without it `sudo dpkg-reconfigure` reads as a Ghost class.
+  const leftovers = [...body.matchAll(/\bkg-[a-z-]+/g)].map((match) => match[0])
   if (leftovers.length > 0) postNotes.push(`leftover Ghost classes: ${[...new Set(leftovers)].join(', ')}`)
 
   const meta = metaById.get(post.id)

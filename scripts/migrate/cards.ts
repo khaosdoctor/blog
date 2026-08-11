@@ -125,6 +125,52 @@ export function addFootnoteRules(turndown: TurndownService): void {
   })
 }
 
+/**
+ * Ghost's older editor emitted tables with no `<th>` at all. turndown-plugin-gfm
+ * only converts a table it can find a header row for, so those fell through to
+ * the escaper and rendered as literal `\<table>\<tbody>...` tag soup in the
+ * post. This promotes the first row to the header, which is what the table
+ * meant anyway.
+ */
+export function addTableRule(turndown: TurndownService): void {
+  turndown.addRule('headerless-table', {
+    // q() matters: domino's querySelector returns undefined, not null.
+    filter: (node) => node.nodeName === 'TABLE' && q(node as unknown as Element, 'th') === null,
+    replacement: (_content, node) => {
+      const element = node as unknown as Element
+      const rows = queryAll(element, 'tr')
+      if (rows.length === 0) return ''
+      const cells = (row: Element): string[] =>
+        queryAll(row, 'td, th').map((cell) => turndown.turndown(cell.innerHTML).replace(/\s*\n\s*/g, ' ').trim())
+      const header = cells(rows[0])
+      if (header.length === 0) return ''
+      const body = rows.slice(1).map(cells)
+      const line = (values: string[]): string => `| ${values.join(' | ')} |`
+      const separator = `| ${header.map(() => '---').join(' | ')} |`
+      return `\n\n${[line(header), separator, ...body.map(line)].join('\n')}\n\n`
+    },
+  })
+
+  /**
+   * `<code><a href=...>text</a></code>` came out as a markdown link trapped
+   * inside a code span, which renders as literal `[text](url)`. The link is the
+   * point, so keep it and put the code formatting on its label.
+   */
+  turndown.addRule('code-wrapped-link', {
+    filter: (node) => {
+      if (node.nodeName !== 'CODE') return false
+      const element = node as unknown as Element
+      const links = queryAll(element, 'a')
+      return links.length === 1 && text(element) === text(links[0])
+    },
+    replacement: (_content, node) => {
+      const link = q(node as unknown as Element, 'a')
+      if (link === null) return ''
+      return `[\`${text(link)}\`](${attr(link, 'href')})`
+    },
+  })
+}
+
 export function addCardRules(turndown: TurndownService, ctx: CardContext): void {
   // --------------------------------------------------------------- image card
   turndown.addRule('kg-image-card', {
