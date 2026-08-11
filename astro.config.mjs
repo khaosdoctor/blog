@@ -22,7 +22,8 @@ export default defineConfig({
       styleOverrides: { borderRadius: '4px', codeFontSize: '0.85rem' },
     }),
     mdx(),
-    sitemap({ filter: (page) => !page.includes('/busca/') }),
+    // The search page and the offline fallback are chrome, not content.
+    sitemap({ filter: (page) => !page.includes('/busca/') && !page.includes('/offline/') }),
   ],
   markdown: {
     remarkPlugins: [remarkReadingTime, remarkMath],
