@@ -1,0 +1,87 @@
+---
+title: "Atualização Automática de SO com Unattended Upgrades"
+pubDate: 2020-11-11T16:10:23.000Z
+updatedDate: 2026-07-16T16:21:31.000Z
+lang: pt
+category: "infra"
+tags: ["cloud", "security", "architecture"]
+description: "Que tal configurar seu servidor para que ele nunca mais precise da sua interação para realizar atualizações de segurança?"
+heroImage: "./atualizacao-automatica-de-so-com-unattended-upgrades/photo-1602763288580-927cfda37a72-b4c18378.jpg"
+draft: false
+visibility: "public"
+seoTitle: "Atualizando VMs Automaticamente com Unattended Upgrades"
+seoDescription: "Que tal configurar seu servidor para que ele nunca mais precise da sua interação para realizar atualizações de sistema operacional?"
+---
+
+Quando estamos criando máquinas virtuais, um dos maiores problemas que temos é manter os nossos sistemas operacionais atualizados e livres de bugs e falhas de segurança.
+
+Na maioria dos casos, o SO já possui um sistema interno para atualização automática, porém, quando estamos usando um sistema operacional baseado em pacotes como, por exemplo, o Linux, digamos um Ubuntu 18.4 Server, temos que constantemente rodar comandos como `apt update` e `apt upgrade` para instalar as últimas versões dos pacotes do sistema e assim atualizar para a última versão e corrigir possíveis falhas de segurança.
+
+## O problema
+
+O grande problema com estas abordagens é que precisamos constantemente entrar na máquina, rodar o comando e sair. Para solucionar isso, temos as famosas crontabs. Podemos por exemplo executar o seguinte comando:
+
+```bash
+crontab -e
+```
+
+Para editar a nossa crontab, e ai podemos cadastrar a seguinte linha:
+
+```bash
+0 3 */5 * * sudo apt update && sudo apt upgrade -y
+```
+
+Esta linha vai fazer com que executemos os comandos de atualização a cada 5 dias as 3 da manhã. É uma boa prática realizar a atualização sempre fora dos horários de utilização da máquina, então esta hora pode ser definida por você sem problemas.
+
+Da mesma forma, a frequência de execução fica a critério de quem está configurando a máquina, eu costumo executar o processo a cada 5 dias porque geralmente não temos grandes atualizações diariamente.
+
+Porém, se tivermos outras atualizações que necessitam de um reboot, por exemplo, atualizações de Kernel, então vamos ter que entrar e reiniciar a máquina manualmente... Deve haver um jeito mais simples de fazer isso, não?
+
+## Unattended Upgrades
+
+O Ubuntu (e acredito que a maioria dos sistemas baseados no Debian), possuem um pacote chamado `unattended-upgrades`, que pode ser combinado com alguns outros pacotes para prover uma funcionalidade sensacional em termos de segurança e atualização de SO.
+
+Para começar, vamos remover a nossa crontab criada anteriormente e deixar o sistema limpo de novo. Depois, vamos instalar os seguintes pacotes:
+
+```bash
+sudo apt install -y unattended-upgrades apt-listchanges bsd-mailx
+```
+
+O `bsd-mailx` irá pedir algumas configurações iniciais para setar o seu email, estas configurações são específicas de máquina para máquina, mas o ideal é que você escolha a opção `Internet Site` para poder configurar o FQDN do seu próprio domínio. Se você precisar realizar alguma reconfiguração do pacote pois ele não está funcionando, use o comando a seguir:
+
+```bash
+sudo dpkg-reconfigure -plow postfix
+```
+
+Isto fará com que a janela de configuração seja aberta novamente, se você prefere reconfigurar utilizando o arquivo de configuração, basta editar o arquivo `/etc/postfix/main.cf`, não se esqueça de executar um restart do postfix depois de salvar o arquivo com o comando:
+
+```bash
+sudo systemctl restart postfix
+```
+
+Agora, vamos ativar o pacote para as atualizações estáveis usando o seguinte comando:
+
+```bash
+sudo dpkg -plow unattended-upgrades
+```
+
+Então podemos abrir o arquivo de configuração, use o seu editor preferido para editar o arquivo `/etc/apt/apt.conf.d/50unattended-upgrades`. Este arquivo contém todas as configurações necessárias para definirmos a funcionalidade de atualização do pacote, primeiro, vamos configurar nosso email para recebermos notificações de atualizações importantes, para isso vamos setar a chave `Unattended-Upgrade::Mail` com o nosso email escolhido, ficando `Unattended-Upgrade::Mail "hello@lsantos.dev";`.
+
+Agora vamos configurar uma série de outras chaves para podermos obter o máximo do pacote:
+
+```
+Unattended-Upgrade::Automatic-Reboot "true";  # Para reiniciar o sistema após uma atualização de Kernel
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot-Time "03:00"; # Que horas queremos que o sistema reinicie
+```
+
+Agora podemos rodar o comando `sudo unattended-upgrades --dry-run` para poder testar se as nossas configurações estão corretas. Este comando não deve ter nenhuma saída, se este é o resultado então está tudo certo!
+
+## Conclusão
+
+Com a instalação destes pacotes podemos ficar mais tranquilos em relação a atualizações de sistemas operacionais e também podemos manter as nossas VMs atualizadas de forma mais concisa.
+
+Se você leu [o último artigo sobre criar uma VPN própria](/criando-uma-vpn/), a aplicação desta técnica e também [2FA usando SSH](/aplicando-two-factor-authentication-no-ssh/) podem ser uma boa pedida para deixar a sua VM rodando tranquilamente!
+
+Até mais!

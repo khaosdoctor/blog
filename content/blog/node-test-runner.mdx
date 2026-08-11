@@ -1,0 +1,292 @@
+---
+title: "Tudo o que você precisa saber sobre o novo test runner do Node.js"
+pubDate: 2022-05-25T11:53:00.000Z
+updatedDate: 2026-07-16T16:09:19.000Z
+lang: pt
+category: "javascript"
+tags: ["nodejs", "javascript", "development"]
+description: "Saiba tudo sobre o novo test runner do Node.js 18 e como você pode usá-lo para testar seu código."
+heroImage: "./node-test-runner/photo-1628440501245-393606514a9e-4d05e37b.jpg"
+heroImageAlt: "Um alvo cheio de dardos verdes e vermelhos"
+draft: false
+visibility: "public"
+---
+
+Como eu já mencionei [nesse outro artigo](/node-18/), o Node.js 18 veio cheio de novidades, entre eles a disponibilidade global do comando `fetch` e o começo da adoção do prefixo `node:` para importação de módulos do sistema que, inclusive, vamos precisar usar para falar de outra adição: o **test runner** nativo do sistema.
+
+## O que é um test runner
+
+Antes de começar eu quero dar uma breve introdução do que é um test runner e por que ele é tão necessário em praticamente qualquer ambiente de desenvolvimento.
+
+Qualquer código pode ser testado automaticamente, isso significa criar uma outra porção de código – que, ironicamente, não é testado – que contenha uma chamada para a função original e guarde o resultado dessa chamada para ser comparado com uma saída de sucesso ou de erro dependendo do caso a ser testado.
+
+As bibliotecas para fazer a asserção (testar se um resultado é o esperado) já são nativas com o módulo `assert` do Node.js, então poderíamos ter um arquivo como esse aqui:
+
+```js
+const add = (a, b) => a + b
+export { add }
+```
+
+E testar essa função simples usando o módulo `assert`:
+
+```js
+import { add } from './function.mjs'
+import assert from 'node:assert'
+
+let result = add(1, 2)
+assert.equal(result, 3, 'add(1, 2) should return 3')
+
+result = add(1, '2')
+assert.equal(result, 3, 'add(1, "2") should not return 3')
+```
+
+Para executar é tão simples quando `node addTest.mjs`, no entanto o que aconteceria se a gente tivesse centenas ou milhares de testes? Iríamos continuar executando o mesmo arquivo? Separar em vários? Como lidaríamos com o crescimento e automação da base?
+
+E é ai que os test runners entram em cena. O trabalho deles é orquestrar as execuções de testes para que elas sejam as mais eficientes possíveis e, ao mesmo tempo, informativas. Provendo dados como cobertura de código e erros internos.
+
+### Por que um test runner?
+
+Ferramentas como o Mocha, Jest, Jasmine e Ava já são super conhecidas no mercado por existirem desde... Bom... Desde sempre, então por que o test runner do Node faria alguma diferença? Já temos ótimas ferramentas por ai...
+
+A resposta é simples: padronização. Um dos maiores problemas, pelo menos na minha opinião, é que todas essas ferramentas se comportam de maneiras diferentes e tem APIs diferentes – se não a gente não teriam diferentes ferramentas – e isso reduz cada vez mais a quantidade de pessoas que executam testes automatizados em seus códigos.
+
+Não escrever testes leva a uma maior quantidade de sistemas não testados que são suscetíveis não só a falhas de securança (no caso mais grave), como também a falhas críticas de sistema, e muitos sistemas críticos não possuem testes.
+
+Com ferramentas nativas do ecossistema ao invés de ferramentas terceiras, diminuimos tanto a barreira para a entrada de devs que vão escrever testes de forma nativa, como também padronizamos a API para que outras ferramentas possam ser intercambiáveis entre si.
+
+## O `node:test`
+
+O módulo test é a solução para o problema que eu acabei de mencionar, ele está disponível a partir da versão 18 do Node.js, embora você precise instalar a versão 18.1.0 para conseguir rodar a ferramenta com sucesso na linha de comando (não me pergunte o porquê).
+
+Apesar de estar presente na versão LTS, o estado da API de testes ainda está descrito como **experimental**, ou seja, a API tem compatibilidade próxima da final com o resto do sistema, mas é possível que as próximas versões sofram algumas alterações ou até tenham comandos removidos, portanto ainda não é aconselhável para ambientes de produção.
+
+### Usando o `node:test`
+
+Começando com a importação, já vamos ver uma grande diferença, precisamos importar o módulo com o prefixo `node:`, se o módulo `test` não for importado seguindo o prefixo, o Node vai tentar carregar um módulo local chamado `test`.
+
+> No momento só esse módulo tem esse requerimento, mas eu acredito que isso seja parte de um plano de longo prazo de converter todos os módulos nativos para dentro do prefixo `node:`
+
+As linhas mais comuns serão:
+
+```js
+import test from 'node:test'
+```
+
+O módulo vai exportar uma função chamada `test` (que a gente poderia muito bem chamar do que a gente quisesse, o mais comum é o `describe`). A função tem a seguinte assinatura:
+
+```ts
+type Options = { 
+  concurrency: number, 
+  only: boolean, 
+  skip: boolean | string, 
+  todo: boolean | string 
+}
+
+type test = (name: string, options?: Options | Function, fn: Function) => Promise<any>
+```
+
+-   `name`: o nome do teste, será aqui que você vai descrever o que o teste está testando
+-   `options`: Um objeto opcional de opções, se não for passado, o segundo argumento será a função de teste a ser executada
+    -   `concurrency`: O númeto de testes que podem ser executados ao mesmo tempo dentro desse escopo, se não especificado, os subtestes vão herdar do parente mais próximo
+    -   `only`: Se for `true`, quando o CLI for executado em modo `--only` esse teste será executado, se não será pulado
+    -   `skip`: Por padrão é `false`, se for `true` ou uma string, pulará o teste (com a string sendo a razão)
+    -   `todo`: A mesma coisa do `skip` porém o teste é marcado como to-do, ou para ser feito.
+-   `fn`: A função a ser executada como teste, só é o terceiro parâmetro se houver um objeto de opções. Ela pode ser uma função síncrona ou assíncrona.
+
+Um teste pode ter 3 tipos:
+
+-   **Síncrono**: uma função síncrona que vai dar o teste como falho se houver um `throw`
+
+```js
+test('teste síncrono passando', (context) => {
+  // Não lança exceções, portanto o teste passa
+  assert.strictEqual(1, 1);
+});
+
+test('teste síncrono falhando', (context) => {
+  // Lança uma exceção e gera uma falha
+  assert.strictEqual(1, 2);
+});
+```
+
+-   **Assíncrono com [Promises](https://dev.to/_staticvoid/series/1993):** Uma função assíncrona na forma de uma Promise que vai falhar se a promise for [rejeitada](https://dev.to/_staticvoid/series/1993)
+
+```js
+test('assíncrono passando', async (context) => {
+  // Sem exceções, a Promise resolve, sucesso!
+  assert.strictEqual(1, 1);
+});
+
+test('assíncrono falhando', async (context) => {
+  // Qualquer exceção faz a promise rejeitar, portanto: erro
+  assert.strictEqual(1, 2);
+});
+
+test('falhando manualmente', (context) => {
+  return new Promise((resolve, reject) => {
+    setImmediate(() => {
+      reject(new Error('podemos falhar a promise diretamente também'));
+    });
+  });
+});
+```
+
+-   **Assíncrono com Callbacks:** A mesma coisa do anterior, porém a função de teste recebe um segundo parâmetro de callback (geralmente chamado de `done`) que, se executado sem nenhum parâmetro, irá fazer o teste ser bem sucedido, caso contrário, o primeiro parâmetro será o erro.
+
+```js
+test('callback passando', (context, done) => {
+  // Done() é a função de callback, sem parâmetros, ela passa!
+  setImmediate(done);
+});
+
+test('callback falhando', (context, done) => {
+  // Done é invocado com um parâmetro de erro
+  setImmediate(() => {
+    done(new Error('Mensagem de erro do teste'));
+  });
+});
+```
+
+Para deixar mais próximo do que já utilizamos hoje, como eu mencionei no início, podemos chamar a função `test` como `describe`:
+
+```js
+import describe from 'node:test'
+
+describe('Meu teste aqui', (context) => {})
+```
+
+### Subtestes
+
+Assim como os frameworks de teste mais famosos, o Node test runner também possui a capacidade de fazer subtestes.
+
+Por padrão a função `test` vai aceitar um segundo parâmetro, como você deve ter percebido nos exemplos anteriores, que é uma função que leva dois parâmetros, um `context` e, se passado, um `callback` que é chamado de `done`.
+
+O objeto de contexto é uma classe do tipo `TextContext` e vai ter as seguintes propriedades:
+
+-   `context.diagnostic(message: string)`: Você pode usar essa função para escrever saídas em texto para o protocolo TAP, que vamos comentar mais para frente. Pense nisso como uma saída de debug, ao invés de um `console.log`, você poderá usar o `diagnostic` para poder receber as informações no final do relatório dos testes.
+-   `context.runOnly(shouldRunOnlyTests: boolean`: É uma forma programática de executar o test runner com a flag `--test-only`, se o parâmetro da função for `true` esse contexto só vai rodar testes que tem a opção `only` setada. Se você executar o Node com `--test-only` essa função não é executada.
+-   `context.skip([message: string])` e `context.todo([message: string])`: O mesmo que passar os parâmetros `skip` e `todo` para a função
+-   `context.test([name][, options][, fn])`: É recursivamente a mesma função, dessa forma elas podem continuar sendo aninhadas
+
+Para criar um subteste, basta chamar `context.test` dentro de um `test` de mais alto nível:
+
+```js
+test('top level', async (context) => {
+  await context.test('subtest 1', (context) => {
+    	assert.strictEqual(1,1)
+  })
+    
+  await context.test('subtest 2', (context) => {
+    	assert.strictEqual(1,1)
+  })
+})
+```
+
+É importante notar que os subtestes precisam ser assíncronos, caso contrário as funções não irão ser executadas.
+
+### Skip, only e todo
+
+Os testes podem receber flags especiais como parâmetros, atualmente existem 3 flags existentes:
+
+-   `skip` vai ser pulado caso a opção `skip` seja resolvida para `true`, ou seja, uma string ou qualquer outro valor. Se for uma string, como já comentei antes, a mensagem será exibida na saída do teste no final:
+
+```js
+// Skip sem mensagem
+test('skip', { skip: true }, (t) => {
+  // Nunca executado
+});
+
+// Skip com mensagem
+test('skip com mensagem', { skip: 'this is skipped' }, (t) => {
+  // Nunca executado
+});
+
+test('skip()', (t) => {
+  // Tente sempre retornar a chamada da função
+  return t.skip();
+});
+
+test('skip() com mensagem', (t) => {
+  // Tente sempre retornar a chamada de função
+  return t.skip('this is skipped');
+});
+```
+
+-   `only` é uma flag utilizada quando o test runner é executado com a flag `--test-only` na linha de comando. Quando essa flag é passada, somente os testes com a propriedade `only` como `true` serão executados. Essa é uma forma bastante dinâmica de pular ou rodar somente testes específicos.
+
+```js
+// Vamos assumir que rodamos o comando node com a flag --test-only
+test('esse vai ser executado', { only: true }, async (t) => {
+  // Todos os subtestes dentro desse teste vão rodar
+  await t.test('vai ser executado');
+
+  // Podemos atualizar o contexto para parar de executar
+  // No meio da função
+  t.runOnly(true);
+  await t.test('o subteste vai ser pulado');
+  await t.test('esse vai ser executado', { only: true });
+
+  // Voltando para o estado anterior
+  // onde executamos todos os testes
+  t.runOnly(false);
+  await t.test('agora este também vai rodar');
+
+  // Explicitamente não executando nenhum destes testes
+  await t.test('skipped 3', { only: false });
+  await t.test('skipped 4', { skip: true });
+});
+
+// A opção `only` não é setada então o teste não vai ser executado
+test('não executado', () => {
+  // Nunca vai rodar
+  throw new Error('fail');
+});
+```
+
+-   `todo` é uma simples mensagem que vai marcar o teste como "a fazer", ao invés de executar ou pular o teste. Ela funciona exatamente como todas as demais flags e pode também ser definida no objeto de opções.
+
+## Rodando da linha de comando
+
+Para executar, podemos simplesmente rodar o comando `node` seguido da flag `--test`, se quisermos executar arquivos específicos, basta que passemos eles para o comando como último parâmetro:
+
+```bash
+$ node --test arquivo.js outro.cjs outro.mjs diretorio/
+```
+
+Se não passarmos nenhum parâmetro, o runner vai seguir os seguintes passos para determinar quais são os arquivos de testes a serem executados:
+
+1.  Sem passar nenhum caminho, o cwd, ou diretório de trabalho será o diretório atual, que será recursivamente buscado nos seguintes termos:
+    1.  O diretório **não** é o `node_modules` (a não ser se específicado)
+    2.  Se um diretório chamado `test` é encontrado, todos os arquivos dentro deste diretório serão tratados como arquivos de teste
+    3.  Para todos os demais diretórios, qualquer arquivo com a extensão `.js`, `.cjs` ou `.mjs` são tratados como teste se:
+        -   São chamados `test` seguindo a regex `^test$` como em `test.js`
+        -   Arquivos que começam com `test-` seguindo a regex `^test-.+`, como `test-exemplo.cjs`
+        -   Arquivos que possuam `.test`, `-test` ou `_test` no final dos seus nomes base (sem a extensão), sequindo a regex `.+[\.\-\_]test$`, como `exemplo.test.js` ou `outro.test.mjs`
+
+Cada teste é executado em seu próprio processo filho usando `child_process`, se o processo finaliza com o código 0 (sem erro), é considerado como correto, caso contrário será uma falha.
+
+> O mais interessantes é que qualquer tipo de teste que emita uma saída TAP poderá ser executado pelo test runner do Node, mesmo que ele não use o `node:test` internamente.
+
+### Usando o TAP para uma saída mais legível
+
+O test runner usa um protocolo bastante famoso chamado TAP (_Test Anything Protocol_), ele é ótimo, mas é extremamente feio e difícil de ler quando executamos através da linha de comando. Além de que a saída padrão não possui algumas análises como a de cobertura de código.
+
+Para isso, existem pacotes como o [node-tap](https://www.npmjs.com/package/tap), que fazem o parsing desse protocolo para exibir de forma muito mais amigável a saída do usuário. Para usar basta instalar localmente ou globalmente:
+
+```bash
+$ npm i [-g] tap
+```
+
+O tap aceita qualquer input do _stdin_ então basta que façamos um pipe para ele ao rodar os testes com: `node --test | tap`, e ai podemos obter uma saída bem mais fácil tanto para erros:
+
+<Figure src="./node-test-runner/image-2.png" alt="" caption="Uma saída de erro do TAP melhorada" />
+
+Quanto para sucessos:
+
+<Figure src="./node-test-runner/image-3.png" alt="" caption="Uma saída de sucesso do TAP melhorada" />
+
+## Conclusão
+
+O test runner do node vai ser uma das ferramentas que mais podem impactar fluxos de código em praticamente todas as aplicações e isso significa que é possível que outros pacotes e outros sistemas comecem a utilizar essas premissas para definir o padrão de testes em todos os ambientes JavaScript.
+
+Lembrando que a documentação do pacote [está no ar](https://nodejs.org/api/test.html) no site do Node!

@@ -1,0 +1,116 @@
+---
+import {
+  AUTHOR_NAME,
+  AUTHOR_TWITTER_HANDLE,
+  buildBreadcrumbJsonLd,
+  buildPrimaryJsonLd,
+  DEFAULT_LOCALE,
+  SITE_NAME,
+  toJsonLdScript,
+  toOgLocale,
+  type BreadcrumbItem,
+} from '../lib/seo'
+
+export interface Alternate {
+  lang: string
+  href: string
+}
+
+interface Props {
+  title: string
+  description: string
+  canonical: string
+  type: 'website' | 'article'
+  publishedAt?: Date
+  updatedAt?: Date
+  lang: string
+  /** Absolute or root-relative path; resolved against `canonical` for og:image/twitter:image (both require absolute URLs). */
+  image?: string
+  tags?: string[]
+  series?: string
+  noindex?: boolean
+  alternates?: Alternate[]
+}
+
+const {
+  title,
+  description,
+  canonical,
+  type,
+  publishedAt,
+  updatedAt,
+  lang,
+  image,
+  tags,
+  series,
+  noindex = false,
+  alternates = [],
+} = Astro.props
+
+const absoluteImage = image ? new URL(image, canonical).href : undefined
+
+const jsonLd = buildPrimaryJsonLd(type, {
+  title,
+  description,
+  canonical,
+  lang,
+  image: absoluteImage,
+  publishedAt,
+  updatedAt,
+  tags,
+  series,
+})
+
+// Derived from Astro.site (astro.config.mjs) instead of a duplicate constant,
+// so the domain has exactly one source of truth.
+const homeUrl = Astro.site ? new URL('/', Astro.site).href : '/'
+
+// ponytail: breadcrumb is just Home -> current page. A category/series crumb
+// would need a URL for that intermediate page, which this component isn't
+// given — add it once section index pages exist.
+const breadcrumbItems: BreadcrumbItem[] = [
+  { name: SITE_NAME, url: homeUrl },
+  { name: title, url: canonical },
+]
+const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems)
+
+const xDefault = alternates.find((alt) => alt.lang === DEFAULT_LOCALE) ?? alternates[0]
+const robots = noindex ? 'noindex,nofollow' : 'index,follow'
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content={AUTHOR_NAME} />
+<meta name="robots" content={robots} />
+<link rel="canonical" href={canonical} />
+
+{alternates.map((alt) => <link rel="alternate" hreflang={alt.lang} href={alt.href} />)}
+{xDefault && <link rel="alternate" hreflang="x-default" href={xDefault.href} />}
+
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content={toOgLocale(lang)} />
+{absoluteImage && <meta property="og:image" content={absoluteImage} />}
+{
+  type === 'article' && (
+    <>
+      {publishedAt && <meta property="article:published_time" content={publishedAt.toISOString()} />}
+      {updatedAt && <meta property="article:modified_time" content={updatedAt.toISOString()} />}
+      <meta property="article:author" content={AUTHOR_NAME} />
+      {tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+    </>
+  )
+}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:site" content={AUTHOR_TWITTER_HANDLE} />
+<meta name="twitter:creator" content={AUTHOR_TWITTER_HANDLE} />
+{absoluteImage && <meta name="twitter:image" content={absoluteImage} />}
+
+<script type="application/ld+json" set:html={toJsonLdScript(jsonLd)} />
+<script type="application/ld+json" set:html={toJsonLdScript(breadcrumbJsonLd)} />

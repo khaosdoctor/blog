@@ -1,0 +1,49 @@
+---
+import { t } from '../i18n/ui'
+import type { Locale } from '../i18n/ui'
+
+interface Props {
+  lang: Locale
+  originalHref: string
+}
+
+const { lang, originalHref } = Astro.props
+
+if (!/^(\/|https:)/.test(originalHref)) {
+  throw new Error(`LangBanner: originalHref must be an internal path or an https URL, got "${originalHref}"`)
+}
+
+const suggestFixUrl = new URL('https://github.com/khaosdoctor/blog/issues/new')
+suggestFixUrl.searchParams.set('title', `Translation: ${Astro.url.pathname}`)
+suggestFixUrl.searchParams.set('body', 'Suggest a translation fix for this page')
+---
+
+<div class="lang-banner" role="doc-notice">
+  <p>
+    {t(lang, 'machineTranslated')}
+    {' '}
+    <a href={originalHref}>{t(lang, 'readOriginal')}</a>
+    {' / '}
+    <a href={suggestFixUrl.href}>{t(lang, 'suggestFix')}</a>
+  </p>
+</div>
+
+<style>
+  .lang-banner {
+    margin-block-end: 2rem;
+    padding: 0.75rem 1rem;
+    background: var(--rule);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--fg);
+  }
+
+  .lang-banner p {
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .lang-banner a {
+    font-weight: 500;
+  }
+</style>

@@ -1,0 +1,204 @@
+---
+title: "A versão 21.2 do Node é a mais especial de todas!"
+pubDate: 2023-11-24T23:50:58.000Z
+updatedDate: 2026-07-16T15:55:11.000Z
+lang: pt
+category: "javascript"
+tags: ["nodejs", "javascript", "development"]
+description: "Vem comigo entender o que mudou na versão 21.2 do Node.js, por que essa é uma das versões mais especiais de todas! E o que isso significa!"
+heroImage: "./node-21-2/articles-3.png"
+draft: false
+visibility: "public"
+seoTitle: "Node 21.2 melhora o test runner com suporte a Date Mocks"
+---
+
+Eu postei recentemente [um artigo](/node-21/) comentando sobre as novidades da versão 21 do Node, porém uma dessas atualizações ficou de fora!
+
+E essa é justamente a [versão 21.2](https://nodejs.org/en/blog/release/v21.2.0) do runtime que, para mim, é a versão mais especial de todas, porque dessa vez eu estava lá ajudando a tornar o Node ainda melhor!
+
+![](./node-21-2/image.png)
+
+Isso ai! Depois de quase 3 anos fora do ambiente open source, eu resolvi voltar a fazer parte do ecossistema mais uma vez, e dessa vez já no Node.js!
+
+> [!TIP] 💡
+> Eu fiz [um post no LinkedIn](https://www.linkedin.com/posts/lsantosdev_opensource-mocks-javascript-activity-7131061453322649600-qmc9?utm_source=share&utm_medium=member_desktop) sobre isso, se você quiser dar uma olhada depois! Mas aqui eu vou focar na atualização em si!
+
+### Por que é especial?
+
+Porque eu estou nela! 😎, brincadeira! Claro que essa versão é especial para mim, mas ela também é especial por um outro motivo, **essa vai ser a primeira vez que temos capacidade de testar 100% de uma aplicação com o test runner nativo do Node!**
+
+O Node adicionou suporte a um [test runner nativo](/node-test-runner/) há algumas versões atrás, mas infelizmente o suporte da ferramenta era bem... Estranho. Não tínhamos como fazer mocks, não existia uma forma legal de fazer asserções de código e o output era bem duvidoso.
+
+Aos poucos, o test runner foi melhorando e está se tornando cada vez mais importante no ecossistema. Tanto que na versão 20 já é possível utilizar ele normalmente para poder testar grande parte das aplicações que criamos.
+
+Mas ainda tínhamos um problema, não conseguimos testar aplicações que dependem do tempo. Simplesmente não tínhamos como mockar nada que fosse relacionado a data ou hora, então qualquer aplicação que depende de timers como `setTimeout` ou outros não poderiam ser testados. Com a [adição dos timers no sistema de mocking](https://github.com/nodejs/node/pull/47775) começamos a ter o suporte para os timers, então `setTimeout`, `setInterval` e `setImmediate` estavam cobertos.
+
+Só que ainda não tínhamos suporte a datas, não podíamos mockar um objeto de date como o `Date`. E foi ai que eu tive a ideia de construir na implementação do Erick e aumentar com o suporte a `Date`, e agora todas as opções de data estão cobertas!
+
+### Date mocks
+
+A documentação completa do módulo está já ao vivo na versão mais nova [das docs do Node](https://nodejs.org/dist/latest-v21.x/docs/api/test.html#dates), mas eu vou passar por alguns exemplos por aqui:
+
+<Bookmark url="https://nodejs.org/dist/latest-v21.x/docs/api/test.html#dates" title="Test runner | Node.js v21.2.0 Documentation" />
+
+Antes de tudo, é importante que você leia o meu [artigo original sobre o test runner](/node-test-runner/) para entender como ele funciona, mas essencialmente, temos uma flag `--test` que pode ser passada para o comando do Node, essa flag vai executar quaisquer arquivos que sejam passados depois como um teste e vai reportar no formato de texto.
+
+```shell
+node --test arquivo.test.js
+```
+
+Para inicializar um arquivo de teste a gente pode simplesmente criar um arquivo qualquer que tenha a extensão `.js`, `.mjs` ou `.cjs`. E ai importar o módulo de testes do Node, vamos criar um teste simples por exemplo:
+
+```js
+import assert from 'node:assert';
+import { test } from 'node:test';
+
+test('mocks the Date object', (context) => {
+  assert.ok(true) // ok
+});
+```
+
+Você também pode usar o modelo de `describe` e `it`:
+
+```js
+import assert from 'node:assert';
+import { describe, it } from 'node:test';
+
+describe('mocks the Date object', () => {
+  it('should pass', () => {
+    assert.ok(true)
+  })
+});
+```
+
+Até aqui estamos só testando o nosso teste, mas vamos criar uma função que é dependente do nosso objeto de data, por exemplo, uma função que nos diz qual é o dia da semana atual:
+
+```js
+const dayIndex = [
+  'Domingo', 
+  'Segunda', 
+  'Terça', 
+  'Quarta', 
+  'Quinta', 
+  'Sexta', 
+  'Sábado'
+]
+
+function getWeekDay() {
+  const today = new Date()
+  return dayIndex[today.getDay()]
+}
+```
+
+Como podemos testar uma função que depende da data de hoje? Sem que a gente precise substituir o comportamento da mesma? A resposta são **Date mocks!**
+
+Um pouco mais abaixo, vamos iniciar um teste simples, que vai garantir que estamos fazendo um mock do nosso objeto de data, podemos fazer isso através do contexto do teste em um objeto chamado `mock.timers` usando a função `enable`.
+
+```js
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
+
+describe('getWeekDay', () => {
+  it('deve substituir o objeto de data', (c) => {
+    c.mock.timers.enable({ apis: ['Date'] })
+    assert.strictEqual(Date.now(), 0)
+    c.mock.timers.reset()
+  })
+})
+```
+
+Veja que chamamos a função `enable`, passamos um objeto `{ apis: ['Date'] }` este objeto recebe as configurações de quais APIs são habilitadas para os mocks, você pode ver todas as configurações [na documentação oficial](https://nodejs.org/dist/latest-v21.x/docs/api/test.html#timersenableenableoptions).
+
+> [!CAUTION] ⚠️
+> Se você está usando a versão 21.2, a tipagem não está correta no TypeScript porque [minha PR para adicionar os tipos](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/67035) ainda não foi incluída, mas deve ser adicionada na próxima versão par (22).
+>
+> Então se o seu VSCode não te der a tipagem correta, não se preocupa, só se certifique que você está usando a versão 21.2 ou superior.
+
+Perceba também que estamos usando um objeto `c`, que é o contexto do teste. Os mocks de tempo estão somente habilitados em contexto local, para evitar que você habilite um mock e não desabilite ele completamente em um contexto global para outros testes. E, no fim do teste, é igualmente importante que façamos o reset dos mocks com `reset` assim podemos voltar o estado original.
+
+> Quando inicializamos o mock de data sem nenhum parâmetro, estamos dizendo que queremos inicializar a data na época 0, ou seja, dia 1º de Janeiro de 1970.
+
+Agora que a gente já sabe que estamos fazendo o mock correto, vamos testar para todos os dias da semana. Para isso vamos fazer um loop, setando o nosso relógio para uma data específica a cada vez, um teste para cada dia da semana:
+
+```js
+  it('deve retornar o dia da semana correto', (c) => {
+    c.mock.timers.enable({ apis: ['Date'] })
+    const dates = [
+      new Date('2023-11-12T00:00:00.000Z'),
+      new Date('2023-11-13T00:00:00.000Z'),
+      new Date('2023-11-14T00:00:00.000Z'),
+      new Date('2023-11-15T00:00:00.000Z'),
+      new Date('2023-11-16T00:00:00.000Z'),
+      new Date('2023-11-17T00:00:00.000Z'),
+      new Date('2023-11-18T00:00:00.000Z'),
+    ]
+
+    for (const [i, date] of dates.entries()) {
+      c.mock.timers.setTime(date.getTime())
+      assert.strictEqual(getWeekDay(), dayIndex[i])
+    }
+    c.mock.timers.reset()
+  })
+```
+
+Veja que agora estamos criando um array de datas que representam uma semana, essa semana vai ser passada para o objeto de data do nosso mock através do `setTime` que é o método que define qual é a data atual do sistema!
+
+Esse método sempre recebe um inteiro positivo, diferentemente da chave `now` do método `enable` (como em `enable({ apis: ['Date'], now: new Date() })`), então a gente precisa executar o `getTime` e, no final de tudo, chamar o `reset`.
+
+Se rodarmos `node --no-warnings --test date.mjs`, vamos ter um teste feito com sucesso!
+
+```bash
+❯ node --no-warnings --test date.mjs
+▶ getWeekDay
+  ✔ deve substituir o objeto de data (0.423292ms)
+  ✔ deve retornar o dia da semana correto (0.765291ms)
+▶ getWeekDay (2.142209ms)
+
+ℹ tests 2
+ℹ suites 1
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58.35425
+```
+
+### Dates e timers
+
+Diferentemente dos timers, as datas são um objeto global, ou seja, se você executar o `enable` com um `Date`, **todas as datas serão mockadas**, isso também inclui o relógio interno que é utilizado pelos timers como `setTimeout` e `setInterval`, ou seja, se você avançar a data, vai avançar os timers também.
+
+Então imagine a seguinte situação: Você tem um objeto de data que é um mock, e também um timer para ser executado em 1 segundo. Se você avançar o objeto de data usando `setTime` em, digamos, 1 hora, você **vai obrigatoriamente executar a função do timer**, já que vai ser como se o tempo tivesse passado 1 hora para o futuro.
+
+Felizmente esse teste é bem simples de fazer, basta começarmos o mock dos nossos timers (o que vai parar o relógio interno do Node) e criar um timeout de 1 segundo, depois avançar o tempo em mais do que isso:
+
+```js
+import assert from 'node:assert';
+import { test } from 'node:test';
+
+test('executa os timers quando a data passa', (context) => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  const fn = context.mock.fn(); // Criamos uma função mock
+  setTimeout(fn, 1000);
+
+  context.mock.timers.setTime(800);
+  // Ainda não passou 1s, o timer não foi executado
+  assert.strictEqual(fn.mock.callCount(), 0);
+  // A data foi adiantada
+  assert.strictEqual(Date.now(), 800);
+
+  // Estamos adiantando mais a data
+  context.mock.timers.setTime(1200);
+  // Agora nosso timer é executado
+  assert.strictEqual(fn.mock.callCount(), 1);
+  assert.strictEqual(Date.now(), 1200);
+});
+```
+
+É importante lembrar disso porque os timers são independentes da data quando mockados, ou seja, você pode controlá-los de forma individual, porém quando você ativa os mocks para ambas as datas E os timers, então ambos vão funcionar em conjunto porque eles usam o mesmo relógio interno.
+
+## Conclusão
+
+Esse é um artigo muito especial para mim porque, pela primeira vez, estou descrevendo e ensinando como utilizar uma funcionalidade que eu mesmo fiz.
+
+O test runner ainda é um projeto em andamento e tem muita coisa para melhorar, então vamos um passo de cada vez que, aos poucos, vamos ter um dos melhores runners nativos!

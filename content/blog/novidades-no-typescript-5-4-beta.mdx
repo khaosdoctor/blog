@@ -1,0 +1,175 @@
+---
+title: "Novidades do TypeScript 5.4"
+pubDate: 2024-02-14T11:00:19.000Z
+updatedDate: 2026-07-16T15:53:14.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript"]
+description: "Veja as principais mudanças no TypeScript 5.4 beta! Incluindo o novo tipo NoInfer com explicações profundas!"
+heroImage: "./novidades-no-typescript-5-4-beta/articles-1.png"
+draft: false
+visibility: "public"
+---
+
+Mais um dia e mais uma versão do TS está no ar! Dessa vez a gente vai trocar uma ideia sobre as principais mudanças no beta do TypeScript 5.4.
+
+Lembrando que essa versão é um beta e pode ser que todas as funcionalidades não cheguem à versão final.
+
+## Melhor inferência em closures
+
+Um dos grandes problemas que o TS tinha em inferência (ou type narrowing) era que, muitas vezes, dentro de closures como o `map` o tipo não seria inferido de forma correta.
+
+Um exemplo clássico disso é quando temos um parâmetro que pode ser mais de um tipo, mas dentro da função é inferido para um único tipo:
+
+```ts
+function uppercaseStrings(x: string | number) {
+    if (typeof x === "string") {
+        return x.toUpperCase();
+    }
+}
+```
+
+Aqui, o TS vai saber que o tipo é uma string, porque estamos explicitamente dizendo que o tipo é string na checagem, portanto se ele passou ali, então é uma string.
+
+Mas, quando usamos o mesmo tipo depois de ele ter sofrido o narrow, como nesse exemplo que a equipe do TS deu:
+
+```ts
+function getUrls(url: string | URL, names: string[]) {
+    if (typeof url === "string") {
+        url = new URL(url);
+    }
+
+    return names.map(name => {
+        url.searchParams.set("name", name)
+        //  ~~~~~~~~~~~~
+        // error!
+        // Property 'searchParams' does not exist on type 'string | URL'.
+
+        return url.toString();
+    });
+}
+```
+
+O problema é que, dentro da closure do `map`, o TS não inferia corretamente que o tipo URL não poderia ser algo diferente de uma URL, já que, se ele fosse uma string, ele seria convertido.
+
+> [!NOTE] 💡
+> Para resolver esse problema, é muito comum criar uma nova variável intermediária que vai receber o valor final como `let url = typeof url === 'string' ? new URL(url) : url`
+
+Só que, dentro do map, o TypeScript identificava que essa URL seria modificada em outro lugar, portando ele usa o valor do parâmetro, e ai temos um erro. Na nova versão, o TS é mais inteligente e consegue inferir os tipos baseados na última associação da variável então:
+
+1.  Se for um parâmetro ou uma variável do tipo `let`
+2.  Se essas variáveis forem usadas em funções que não são hoisted
+3.  O TS vai olhar o último lugar que essa variável sofre uma mudança e inferir o tipo a partir dali.
+
+Porém se você modificar a variável em qualquer outro lugar, mesmo usando o mesmo valor, isso vai invalidar todas as tipagens posteriores porque não há como saber que o tipo se mantém.
+
+<CourseCTA />
+
+## NoInfer\<T>
+
+Um novo utility type que veio para prevenir que o TS faça inferência de argumentos genéricos que são passados. Isso é algo que comentamos muito no módulo de generics da [**Formação TypeScript**](https://formacaots.com.br), existem dois tipos de generics:
+
+1.  Generics explícitos são aqueles que você pode passar diretamente o tipo: `foo<string>('param')`
+2.  Generics implícitos são inferidos pelo TS, então se `foo` fosse algo como `foo<T> (a: T)`, poderíamos fazer `foo('param')` e o TS iria inferir nosso parâmetro como string
+
+Porém nem sempre essa inferência funciona, especialmente para tipos super complexos. O exemplo que o time do TS deu aqui, porém, é bastante simples e ajuda a entender melhor o que está acontecendo:
+
+```ts
+function createStreetLight<C extends string>(colors: C[], defaultColor?: C) {
+    // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "red");
+```
+
+Aqui temos uma função que aceita uma lista de cores e uma cor opcional, então se chamamos a função como esperado, tudo funciona legal:
+
+```ts
+function createStreetLight<C extends string>(colors: C[], defaultColor?: C) {
+    // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "red");
+```
+
+Porém, quando usamos uma cor que não está no array de cores, o TS vai inferir que essa cor também é parte do array original:
+
+```ts
+// Aqui o generic C se torna red | yellow | green | blue
+createStreetLight(["red", "yellow", "green"], "blue");
+```
+
+Existem duas formas atualmente de resolver esse problema, a primeira é criar um enumerador ou objeto com as cores permitidas:
+
+```ts
+
+const colors = ["red", "yellow", "green"] as const;
+function createStreetLight<C extends typeof colors[number]>(colors: C[], defaultColor?: C) {
+  // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "blue");
+// Blue vai ter um erro de não permitido pois não está no array original
+```
+
+Porém o ideal seria que a gente não precisasse ter um tipo externo e pudesse inferir um tipo a partir de outro, por isso geralmente criamos um outro generic que estende o primeiro:
+
+```ts
+function createStreetLight<C extends string, D extends C>(colors: C[], defaultColor?: D) {
+}
+
+createStreetLight(["red", "yellow", "green"], "blue");
+//                                            ~~~~~~
+// error!
+// Argument of type '"blue"' is not assignable to parameter of type '"red" | "yellow" | "green" | undefined'.
+```
+
+Veja que `D extends C` vai fazer a inferência de D com base no primeiro generic, portanto o segundo parâmetro não é atrelado ao primeiro. Mas, embora isso não seja ruim, criar um novo tipo genérico que só vai ser usado para isso é um pouco demais, por isso temos o novo tipo `NoInfer`.
+
+Ele faz justamente isso, quando colocamos o `NoInfer` no parâmetro, estamos dizendo que não queremos que o TS faça uma nova inferência de um tipo original, então é como se falássemos "Pare de inferir o tipo aqui"
+
+```ts
+function createStreetLight<C extends string>(colors: C[], defaultColor?: NoInfer<C>) {
+    // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "blue");
+//                                            ~~~~~~
+// error!
+// Argument of type '"blue"' is not assignable to parameter of type '"red" | "yellow" | "green" | undefined'.
+```
+
+Uma outra forma de pensar nele é como "Não use esse parâmetro como candidato para uma inferência".
+
+## groupBy em Objetos e Maps
+
+Seguindo as propostas de agrupamentos (como a do [Array](/array-groupby-stage-3/)), agora temos os métodos estáticos `Object.groupBy` e `Map.groupBy`. Que, basicamente, recebem um iterável e transformam esse iterável em um objeto ou um map agrupado por uma determinada função.
+
+> Essa proposta já estava na lista de propostas do TC39 há um bom tempo
+
+```ts
+const array = [0, 1, 2, 3, 4, 5];
+
+const myObj = Object.groupBy(array, (num, index) => {
+    return num % 2 === 0 ? "par": "impar";
+});
+```
+
+Isso vai nos dar um objeto final:
+
+```ts
+const myObj = {
+    par: [0, 2, 4],
+    impar: [1, 3, 5],
+};
+```
+
+O mesmo vale para o `Map.groupBy` só que, ao invés de produzir um objeto no final, vamos ter um map.
+
+> [!CAUTION] ⚠️
+> É importante dizer que essas tipagens só vão estar funcionais se você utilizar o `target` como `esnext` ou ajustar as suas configurações no `lib` para conter essas tipagens. Mas, no futuro, essas funções vão estar em um target `es2024`
+
+## Outras mudanças
+
+-   Os Import Attributes agora são tipados corretamente
+-   Adicionadas quick fixes para parâmetros que faltavam no editor

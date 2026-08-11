@@ -1,0 +1,247 @@
+---
+// Real <form> first: a plain GET to /busca/?q=... works with JS off, with
+// Pagefind not installed yet, and in dev where /pagefind/pagefind.js 404s.
+// The script below only enhances that baseline in place, it never replaces it.
+interface Props {
+  /**
+   * Best-effort prefill, e.g. Astro.url.searchParams.get('q') from the caller.
+   * On a static build this is always empty (see busca.astro) — the client
+   * script re-reads window.location.search itself, which is the real source
+   * of truth for the query on load.
+   */
+  initialQuery?: string
+  /** id for the form/results pair, only needed if a page ever renders <Search> more than once. */
+  resultsId?: string
+}
+
+const { initialQuery = '', resultsId = 'search-results' } = Astro.props
+---
+
+<form action="/busca/" method="get" role="search" aria-label="Buscar no blog" data-search-form data-results-id={resultsId}>
+  <label for="search-q">Buscar no blog</label>
+  <div class="row">
+    <input id="search-q" type="search" name="q" value={initialQuery} placeholder="ex: deno, astro, observabilidade" autocomplete="off" />
+    <button type="submit">Buscar</button>
+  </div>
+</form>
+<div id={resultsId} class="search-results" aria-live="polite" aria-atomic="false"></div>
+<noscript>
+  <p class="search-noscript">
+    A busca completa depende de JavaScript. Sem ele, o formulário acima ainda funciona: ele recarrega esta página com
+    sua consulta salva na URL.
+  </p>
+</noscript>
+
+<script>
+  // ponytail: Pagefind ships its own ranked index + snippet extraction, we only
+  // glue its JS API to our own markup so results keep the site's styling
+  // instead of Pagefind's default UI CSS. Import is dynamic + try/caught: the
+  // bundle at /pagefind/pagefind.js only exists after the owner adds the
+  // pagefind postbuild step, so it's a normal 404 in dev, not an error.
+  interface PagefindResult {
+    data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }>
+  }
+
+  interface PagefindModule {
+    init?: () => Promise<void>
+    search: (query: string) => Promise<{ results: PagefindResult[] }>
+  }
+
+  // Cap how many results get rendered: an unqualified term (e.g. "de") can
+  // match a large share of the site, and Pagefind returns every match with
+  // no limit of its own.
+  const MAX_RESULTS = 20
+
+  // Bumped on every search; a stale async response checks it before writing
+  // to the DOM so a slow earlier query can't clobber a faster later one.
+  let searchGeneration = 0
+
+  async function loadPagefind(): Promise<PagefindModule | null> {
+    try {
+      // @vite-ignore -- generated into dist/ post-build, never a source module
+      return await import(/* @vite-ignore */ '/pagefind/pagefind.js')
+    } catch {
+      return null
+    }
+  }
+
+  function showMessage(target: HTMLElement, message: string): void {
+    target.replaceChildren(document.createTextNode(message))
+  }
+
+  function updateUrl(query: string): void {
+    const url = new URL(window.location.href)
+    url.searchParams.delete('q')
+    if (query) url.searchParams.set('q', query)
+    window.history.replaceState({}, '', url)
+  }
+
+  async function renderResults(pagefind: PagefindModule, target: HTMLElement, query: string): Promise<void> {
+    const generation = ++searchGeneration
+
+    if (!query) {
+      target.replaceChildren()
+      return
+    }
+
+    showMessage(target, 'Buscando...')
+    const { results } = await pagefind.search(query)
+    if (generation !== searchGeneration) return // a newer search has already started
+
+    if (results.length === 0) {
+      showMessage(target, `Nenhum resultado para "${query}".`)
+      return
+    }
+
+    const list = document.createElement('ul')
+    list.className = 'search-results-list'
+    for (const result of results.slice(0, MAX_RESULTS)) {
+      const data = await result.data()
+      if (generation !== searchGeneration) return
+      // data.url only comes from this site's own Pagefind index today, but
+      // guard against a future indexing misconfig emitting an external URL.
+      if (!data.url.startsWith('/')) continue
+      const item = document.createElement('li')
+      const link = document.createElement('a')
+      link.href = data.url
+      link.textContent = data.meta.title ?? data.url
+      const excerpt = document.createElement('p')
+      // Pagefind's excerpt is its own generated HTML (wraps matches in <mark>),
+      // not user input, so innerHTML here is the documented, intended usage.
+      excerpt.innerHTML = data.excerpt
+      item.append(link, excerpt)
+      list.append(item)
+    }
+
+    if (generation !== searchGeneration) return
+    target.replaceChildren(list)
+    if (results.length > MAX_RESULTS) {
+      const more = document.createElement('p')
+      more.className = 'search-results-more'
+      more.textContent = `E mais ${results.length - MAX_RESULTS} resultado(s).`
+      target.append(more)
+    }
+  }
+
+  async function main(): Promise<void> {
+    const form = document.querySelector<HTMLFormElement>('[data-search-form]')
+    if (!form) return
+
+    const input = form.querySelector<HTMLInputElement>('input[name="q"]')
+    const resultsId = form.dataset.resultsId ?? 'search-results'
+    const resultsEl = document.getElementById(resultsId)
+    if (!input || !resultsEl) return
+
+    // Astro prerenders this page once at build time, so any `value` baked
+    // into the input's HTML is stale for a static build. The live query
+    // only exists in the browser's address bar, so that's the source of
+    // truth for "read the initial query on load".
+    const queryFromUrl = new URLSearchParams(window.location.search).get('q')
+    if (queryFromUrl !== null) input.value = queryFromUrl
+    if (input.value.trim()) showMessage(resultsEl, 'Buscando...')
+
+    const pagefind = await loadPagefind()
+    if (!pagefind) {
+      if (input.value.trim()) showMessage(resultsEl, 'O índice de busca ainda não foi gerado neste ambiente (rode o build). Envie o formulário para navegar normalmente.')
+      return
+    }
+
+    if (pagefind.init) await pagefind.init()
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault()
+      const query = input.value.trim()
+      updateUrl(query)
+      void renderResults(pagefind, resultsEl, query)
+    })
+
+    const initial = input.value.trim()
+    if (initial) void renderResults(pagefind, resultsEl, initial)
+  }
+
+  void main()
+</script>
+
+<style>
+  form {
+    margin-block-end: 1.5rem;
+  }
+
+  label {
+    display: block;
+    margin-block-end: 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .row {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  input[type='search'] {
+    flex: 1;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  input[type='search']:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .search-results :global(.search-results-list) {
+    padding: 0;
+    list-style: none;
+  }
+
+  .search-results :global(.search-results-list li + li) {
+    margin-block-start: 2rem;
+  }
+
+  .search-results :global(a) {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .search-results :global(p) {
+    margin-block: 0.3rem 0;
+    color: var(--muted);
+  }
+
+  .search-results :global(.search-results-more) {
+    font-size: 0.9rem;
+  }
+
+  .search-noscript {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>

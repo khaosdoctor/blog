@@ -1,0 +1,27 @@
+---
+/**
+ * <MarginNote>inline text</MarginNote>
+ *
+ * Same mechanics as <Sidenote> (src/components/Sidenote.astro) but
+ * unnumbered: no counter mark sits in the text flow, the note just sits in
+ * the margin. Called from migrated MDX content without an import.
+ *
+ * - On wide viewports the note text floats into the right margin, unmarked,
+ *   always visible.
+ * - On narrow viewports there is no margin to show it in, so a small dot
+ *   becomes the tap/click target for a popover (checkbox hack, zero JS).
+ * - Slot content MUST be inline only: text, <strong>, <em>, <a>, <code>.
+ *   Never headings or block elements.
+ */
+import '../styles/sidenotes.css'
+
+// ponytail: build-time id (this is a static site) — same reasoning as
+// Sidenote.astro.
+const id = `mn-${crypto.randomUUID()}`
+---
+
+<span class="note marginnote">
+  <input type="checkbox" id={id} class="note-toggle" aria-label="mostrar nota lateral" />
+  <label for={id} class="note-marker" style={`anchor-name: --${id}`}></label>
+  <span class="note-text" style={`position-anchor: --${id}`}><slot /></span>
+</span>

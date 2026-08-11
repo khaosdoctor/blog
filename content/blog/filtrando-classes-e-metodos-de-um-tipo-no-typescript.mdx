@@ -1,0 +1,112 @@
+---
+title: "Filtrando classes e métodos de um tipo no TypeScript"
+pubDate: 2024-04-03T11:00:57.000Z
+updatedDate: 2026-07-16T17:57:24.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript"]
+description: "Saiba como criar um tipo no TypeScript que pode te ajudar a criar funcionalidades como filtros através da remoção de métodos de classes!"
+heroImage: "./filtrando-classes-e-metodos-de-um-tipo-no-typescript/articles-7.png"
+draft: false
+visibility: "public"
+---
+
+Nesse post bem curtinho eu quero apresentar um problema que sempre temos quando estamos lidando com TypeScript: **como a gente pode listar todas as propriedades de uma classe**?
+
+Vamos supor que você queira fazer uma função de filtro, e essa função receba uma classe e permita que você filtre por todas as propriedades dessa classe, naturalmente um tipo que pode resolver o problema é esse aqui:
+
+```ts
+function filterBy<T, V extends keyof T>(origin: T, key: V, value: T[V]) {
+  //
+}
+```
+
+Mas quando chamamos essa função vamos ter um problema:
+
+![](./filtrando-classes-e-metodos-de-um-tipo-no-typescript/image-18.png)
+
+Veja que esse tipo nos dá todas as opções possíveis, porque estamos pegando todas as chaves de `Foo`, inclusive os métodos.
+
+Se quisermos que apenas as propriedades, ou seja, `prop`, `getter` e `setter` sejam retornadas, podemos criar um tipo mapeado (_mapped type_), vamos chamar de `OnlyProps`:
+
+```ts
+type OnlyProps<ClassType> = Pick<ClassType, {
+    [Key in keyof ClassType]: ClassType[Key] extends Function 
+                              ? never 
+                              : Key
+}[keyof ClassType]>;
+```
+
+Vamos quebrar esse tipo, de dentro para fora:
+
+```ts
+{
+    [Key in keyof ClassType]: ClassType[Key] extends Function 
+                              ? never 
+                              : Key
+}
+```
+
+Aqui estamos criando um objeto mapeado onde:
+
+1.  `Key` são todas as chaves de `ClassType`, que é nossa classe original, isso significa que vamos retornar um outro objeto (isso vai ser importante depois)
+2.  Para cada chave `Key`, verificamos se aquela propriedade `ClassType[Key]` é uma função, se for, retornamos `never`, ou seja, ignoramos.
+    1.  Se não, retornamos o nome da chave.
+
+No final, esse mapped type deveria criar um tipo desse formato se usássemos com `Foo`:
+
+```ts
+{
+  prop: 'prop',
+  method: never,
+  readonly getter: 'getter',
+  setter: 'setter'
+}
+```
+
+> Vamos chamar esse tipo de `ObjetoMapa`, só para a gente ter uma referência nos próximos passos.
+
+<CourseCTA />
+
+Agora, pegamos o objeto mapa (que é um objeto, lembre-se disso), e transformamos em uma união de chaves:
+
+```ts
+type ObjetoMapa = {
+  prop: 'prop',
+  method: never,
+  readonly getter: 'getter',
+  setter: 'setter'
+}
+
+type UnionMapa<T> = ObjetoMapa[keyof T] // "prop" | "getter" | "setter"
+```
+
+Essencialmente, o que esse passo faz é transformar tudo em uma union para que o `Pick` possa trabalhar, e veja que estamos removendo tudo que é `never`, esse é o segredo.
+
+Agora simplesmente estamos fazendo:
+
+```ts
+type OnlyProps<T> = Pick<T, "prop" | "getter" | "setter">
+```
+
+Que vai pegar somente essas chaves do objeto. No final podemos modificar a nossa função para usar esse tipo:
+
+```ts
+function filterBy<T, V extends keyof OnlyProps<T>>(origin: T, key: V, value: T[V]) {
+  //
+}
+```
+
+Percebeu o `keyof OnlyProps<T>`? Porque queremos a união das chaves novamente, essencialmente poderíamos ter feito o seguinte que é até mais simples:
+
+```ts
+type OnlyProps<T> = {
+  [K in keyof T]: T[K] extends Function ? never : K
+}[keyof T];
+
+function filterBy<T, V extends OnlyProps<T>>(origin: T, key: V, value: T[V]) {
+  //
+}
+```
+
+Removemos o `Pick` da equação, porém usar o `Pick` deixa o tipo mais versátil porque podemos utilizá-lo como objeto também.

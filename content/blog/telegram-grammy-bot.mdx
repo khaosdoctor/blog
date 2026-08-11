@@ -1,0 +1,557 @@
+---
+title: "Criando bots para o Telegram com o GrammY"
+pubDate: 2022-10-05T13:00:00.000Z
+updatedDate: 2026-07-16T16:06:06.000Z
+lang: pt
+category: "javascript"
+tags: ["deno", "typescript", "bots", "telegram", "grammy"]
+description: "Aprenda a criar bots incríveis para o Telegram usando uma ferramenta sensacional que vai revolucionar a forma como você trabalhar com automações."
+heroImage: "./telegram-grammy-bot/Blog-cover-Template-2.png"
+draft: false
+visibility: "public"
+seoDescription: "Você já tentou criar um bot para o Telegram e ficou confuso sobre com tudo funcionava? Não fique mais! Com o GrammY tudo é muito mais fácil."
+---
+
+Quando falamos de aplicações modernas, invariavelmente acabamos caindo nos tão famosos bots. O uso de bots para automatizar tarefas ou até mesmo facilitar a comunicação com APIs está cada vez mais comum, e uma das plataformas onde os bots estão cada vez mais comuns é o [Telegram](https://telegram.org/).
+
+Eu, pessoalmente, não me aventurei muito no mundo dos bots até recentemente, mas nessa aventura descobri uma ferramenta sensacional para facilitar (e até mesmo revolucionar) a forma como você cria bots para o Telegram, essa ferramenta é o [GrammY](https://grammy.dev/).
+
+Nesse artigo a gente vai criar um bot que busca repositórios no GitHub e envia em um chat de forma inline, ou seja, vamos apenas escrever `@bot` e mandar o nome do repositório para que ele busque o repositório de acordo com o que for digitado.
+
+Mas antes, vamos entender como funciona o fluxo de mensagens de um bot no Telegram.
+
+## Como funciona um bot do Telegram
+
+O Telegram é conhecido mundialmente por ser uma plataforma simples e fácil tanto de usar quanto de estender. E por extensões, temos vários tipos de bots que podemos criar e utilizar todo o poder da plataforma, criando botões, menus e até mesmo sites completos que podem ser exibidos de volta para os usuários. Na verdade, grande parte do próprio Telegram funciona na base de bots.
+
+Toda a interação do seu bot com o Telegram acontece com base em um _webhook_, ou seja, a cada novo evento de uma nova mensagem ou qualquer outra atividade que aconteceu diretamente com o seu bot ou em algum grupo que ele esteja inserido vai ser enviada através de uma requisição `POST` para um endereço que você definir para o bot.
+
+> O endereço do seu webhook não é definido por padrão, mas vamos definir ele um pouco mais tarde com um endpoint específico.
+
+Cada tipo de atualização de mensagem no Telegram, ele vai criar um evento. Esse evento pode ser de um dos tipos [descritos aqui na documentação](https://core.telegram.org/bots/api#update). A resposta sempre vai ser um JSON com uma chave `update_id` e a próxima chave vai ser o tipo do evento que foi enviado. Por exemplo, se estamos recebendo um update de um envio de mensagens, então estamos esperando um evento do tipo `message`, portanto o payload que vamos receber vai ser o seguinte:
+
+```json
+{
+    "update_id": 821159882,
+    "message": {
+        "message_id": 1600269,
+        "from": {
+            "id": 172983467,
+            "is_bot": false,
+            "first_name": "Lucas",
+            "last_name": "Santos",
+            "username": "lhs_santoss",
+            "language_code": "en"
+        },
+        "chat": {
+            "id": 172983467,
+            "first_name": "Lucas",
+            "last_name": "Santos",
+            "username": "lhs_santoss",
+            "type": "private"
+        },
+        "date": 1664119114,
+        "text": "Teste"
+    }
+}
+```
+
+Tudo que está dentro do campo `message.from` é relativo ao usuário que enviou o evento de update, e tudo que está dentro da chave `message.chat` é relativo **ao chat onde o bot foi ativado**.
+
+Para responder a uma requisição, podemos ou responder a própria chamada de update com o resultado que queremos que seja respondido (pode ser o envio de outra mensagem, um teclado, uma query inline e etc), ou então enviando uma resposta diretamente para a API de bots do telegram que é `https://api.telegram.org/bot<token>/<metodo>`, onde o token é o token do seu bot recebido do botFather e o método é um dos [métodos descritos aqui na documentação](https://core.telegram.org/bots/api#available-methods).
+
+Então eu poderia enviar uma mensagem de volta para um usuário que me enviou essa mensagem, além de responder à requisição original, usando a request `https://api.telegram.org/bot123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11/sendMessage` com os parâmetros [descritos aqui](https://core.telegram.org/bots/api#sendmessage).
+
+## Criando seu primeiro bot
+
+Para você começar a criar um bot no Telegram, você primeiro precisa conversar com outro bot chamado **BotFather**. É só clicar [nesse link](https://t.me/BotFather) para poder falar direto com ele.
+
+Depois é só digitar `/newbot` e ir respondendo as perguntas de acordo com o que for perguntado.
+
+> Lembre-se que todos os bots do Telegram precisam ter o nome de usuário terminados em `bot`, e é bastante difícil de achar um nome válido que ainda não esteja sendo usado.
+
+Feito isso, o bot vai te responder com um token de acesso, **mantenha esse token seguro**, porque vai ser com ele que vamos poder controlar o seu bot.
+
+> Se você quer entender um pouco mais, [a documentação oficial tem um guia completo](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
+
+Tendo feito isso, vamos liberar uma porta local para a nuvem para podermos conectar o nosso bot e testar as nossas mensagens. A gente pode fazer isso com o [ngrok](https://ngrok.io), basta baixar e instalar o binário do NGROK e executar o comando:
+
+```bash
+ngrok http <sua-porta>
+```
+
+No caso vou estar usando a 8000, então vamos digitar `ngrok http 8000`, a resposta do ngrok vai travar o seu shell e vai te dar um link mais ou menos desse tipo `https://<string>.<regiao>.ngrok.io`, no meu caso foi `https://fb83-80-216-0-139.eu.ngrok.io`.
+
+Usando a sua ferramenta de requisições preferida ([insomnia](https://insomnia.rest/), [postman](https://www.postman.com/)) faça uma requisição GET para `https://api.telegram.org/bot<token>/setwebhook?url=<urldongrok>`, lembrando que a URL precisa ter todo o protocolo junto dela, portanto no meu caso seria algo assim:
+
+```
+https://api.telegram.org/bot1234512345:ABCDEFABCDEFABCDEFABCDEFABCDEF-AbcdefAbcdef/setwebhook?url=https://fb83-80-216-0-139.eu.ngrok.io
+```
+
+Você deve receber uma resposta como:
+
+```json
+{
+  "ok": true,
+  "result": true,
+  "description": "Webhook was set"
+}
+```
+
+Agora podemos começar a codar o nosso bot!
+
+## **GrammY**
+
+O [GrammY](https://grammy.dev/) é uma biblioteca feita exclusivamente para criação de bots para o Telegram, abstraindo grande parte chata de ter que gerenciar todo o contexto e fluxo das conversas manualmente. Além disso ele suporta plugins e pode ser estendido com várias funcionalidade super legais que facilitam ainda mais a criação de um bot para o Telegram.
+
+Se você quiser dar uma olhada no modelo tradicional de criação de bots, veja esse ponto do repositório deste bot que vamos criar:
+
+<Bookmark url="https://github.com/khaosdoctor/telegram-gh-bot/tree/af0f3b1f71d7687eebc3537bf7e22cfb14d2a411" title="GitHub - khaosdoctor/telegram-gh-bot at af0f3b1f71d7687eebc3537bf7e22cfb14d2a411" description="First telegram bot without frameworks for study. Contribute to khaosdoctor/telegram-gh-bot development by creating an account on GitHub." publisher="khaosdoctor" />
+
+E compare com a versão final que vamos fazer nesse artigo:
+
+<Bookmark url="https://github.com/khaosdoctor/telegram-gh-bot/tree/main" title="GitHub - khaosdoctor/telegram-gh-bot: First telegram bot without frameworks for study" description="First telegram bot without frameworks for study. Contribute to khaosdoctor/telegram-gh-bot development by creating an account on GitHub." publisher="khaosdoctor" />
+
+### Deno
+
+O GrammY é um framework voltado especialmente para o uso com o [Deno](https://deno.land), eu particularmente acho sensacional porque ele permite que você execute TypeScript diretamente do compilador, além de que a resolução de dependências dentro de um arquivo do Deno, através dos módulos sendo importados diretamente pela URL, são muito mais simples e diretas.
+
+Então o primeiro passo é instalar o runtime do deno na sua máquina para poder ter acesso ao comando `deno`.
+
+## Inicializando o projeto
+
+Para você criar o seu ambiente usando o Deno, se você estiver usando o VSCode, é só instalar [a extensão oficial do Deno](https://deno.land/manual@v1.25.4/vscode_deno) e criar uma nova pasta, abra essa pasta dentro do VSCode e, usando `CTRL/CMD + SHIFT + P`, procure por **"Deno Initialize workspace configuration"**.
+
+Isso vai criar uma nova pasta `.vscode` e um arquivo `settings.json` dentro dela. Vamos deixar ele assim:
+
+```json
+{
+  "deno.enable": true,
+  "deno.unstable": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.organizeImports": true
+  },
+  "editor.defaultFormatter": "denoland.vscode-deno"
+}
+```
+
+Agora vamos criar os arquivos base. Essa parte vai de gosto, mas eu gosto de criar uma pasta `src` com todos os arquivos fonte juntos e deixar os arquivos de configuração na raiz.
+
+Vamos começar criando o arquivo `import-map.json`, que vai criar um de-para de nomes dos sites base e das bibliotecas para um alias mais simples, vamos deixar assim:
+
+```json
+{
+  "imports": {
+    "x/": "https://deno.land/x/",
+    "std/": "https://deno.land/std@0.156.0/"
+  }
+}
+```
+
+Isso está dizendo para o Deno que, quando importarmos algo como `x/nome` ele vai substituir o `x/` por `https://deno.land/x/` e o nome do nosso pacote, apenas uma facilitação para não precisar escrever o site inteiro sempre.
+
+Agora podemos dizer para o deno onde achar esse arquivo e também criar o equivalente aos nossos scripts do NPM no arquivo `deno.json`, que é o equivalente ao `package.json`:
+
+```json
+{
+  "importMap": "./import-map.json",
+  "tasks": {
+    "start": "denon run -A ./src/utils/pooling.ts",
+    "setWebhook": "deno run -A ./src/utils/setWebhook.ts"
+  }
+}
+```
+
+Aqui eu tenho duas tasks, uma delas é o `start` que vai inicializar nosso bot e outra é o `setWebhook` que vai realizar a criação do webhook de forma programática como estávamos fazendo antes. Ainda não criamos nenhum dos dois, mas vamos criar logo mais.
+
+Perceba que eu estou usando o `denon` que é o equivalente do `nodemon` pro Deno, para instalar esse pacote é só rodar `deno install -qAf --unstable https://deno.land/x/denon/denon.ts`
+
+Com as configurações feitas, vamos criar um arquivo de variáveis de ambiente chamado `.env` e vamos colocar as seguintes variáveis:
+
+```bash
+BOT_SECRET="Uma string qualquer"
+BOT_TOKEN="Seu token do bot"
+GH_API_TOKEN="Um token do github"
+```
+
+Para o `BOT_SECRET` gere uma sequencia de 64 caracteres aleatórios, esse vai ser uma chave de segurança para garantir que seu bot é quem diz ser.
+
+No `BOT_TOKEN` vamos usar o token que o botfather nos deu, e por fim vamos entrar no [GitHub](https://github.com/settings/tokens) para criar um novo token, ele não precisa ter nenhuma permissão já que vamos só usar a api para buscar os repositórios, isso não requer nenhuma permissão especial.
+
+## Criando o bot
+
+Primeiro, vamos criar a pasta `src` e dentro dela um arquivo que vai ser o nosso arquivo de configuração, de lá vamos puxar todas as variáveis do sistema uma única vez. Vamos chamar esse arquivo de `config.ts`:
+
+```ts
+import * as dotenv from 'std/dotenv/mod.ts'
+await dotenv.config({ export: true })
+
+export const config = {
+  bot: {
+    token: Deno.env.get('BOT_TOKEN') ?? '',
+    secret: Deno.env.get('BOT_SECRET') ?? ''
+  },
+  gh: {
+    token: Deno.env.get('GH_API_TOKEN') ?? ''
+  }
+}
+export type AppConfig = typeof config
+```
+
+Estamos importando o `dotenv`, o módulo que carrega as variáveis de ambiente diretamente de um arquivo `.env`, veja que estamos importando somente com `std/dotenv` ao invés de usar todo o caminho original da URL.
+
+Depois, vamos criar um arquivo que vai facilitar a nossa vida quando precisarmos criar o nosso webhook outras vezes caso necessário. Vamos criar uma pasta `utils` e dentro dela um arquivo `setWebhook.ts`.
+
+Nesse arquivo vamos importar o objeto de Bot do GrammY, que representa toda a interface para a API de bots do Telegram e o nosso arquivo de configuração.
+
+```ts
+import { Bot } from 'x/grammy@v1.11.0/mod.ts'
+import { config } from '../config.ts'
+```
+
+Agora vamos iniciar um novo bot com o nosso token chamando a função init:
+
+```ts
+import { Bot } from 'x/grammy@v1.11.0/mod.ts'
+import { config } from '../config.ts'
+
+const bot = new Bot(config.bot.token)
+await bot.init()
+```
+
+Por padrão o GrammY tem uma API que sobrescreve todas as demais APIs do Telegram e cria uma interface de fácil uso, mas se você precisar ou quiser chamar algum método direto da API, você pode utilizar o objeto `bot.api` que contém todos os métodos com seus parâmetros.
+
+Lembra que chamamos `https://bot.telegram.org/bot<token>/setWebhook`? Então vamos usar a função `bot.api.setWebhook` e passar o primeiro parâmetro do nosso programa para ela, enviando também o secret do nosso bot, o arquivo todo fica assim:
+
+```ts
+import { Bot } from 'x/grammy@v1.11.0/mod.ts'
+import { config } from '../config.ts'
+
+const bot = new Bot(config.bot.token)
+await bot.init()
+await bot.api.setWebhook(Deno.args[0], { secret_token: config.bot.secret }).then(console.log)
+```
+
+### Separando a pesquisa
+
+Como vamos fazer um bot para pesquisar no GitHub, a ideia é que digitemos `@nossobot <nome do repositório>`, e ai podemos fazer uma pesquisa pelo usuário ou pelo nome do repositório sem problemas, então vamos separar essa funcionalidade do resto do bot para podermos manter tudo organizado.
+
+Vamos criar uma pasta chamada `core` e dentro dela um arquivo `gh.ts`. A partir daqui vamos usar a _fetch API_ para poder fazer chamadas diretamente à API do GitHub, mas vamos primeiro definir os nossos tipos.
+
+Um item do GitHub tem uma resposta como essa:
+
+```ts
+export interface GHSearchItem {
+  id: number
+  name: string
+  full_name: string
+  owner: {
+    login: string
+    id: number
+    avatar_url: string
+    url: string
+    html_url: string
+  }
+  html_url: string
+  description: string
+  fork: boolean
+  stargazers_count: number
+  watchers_count: number
+  language: string
+  forks_count: number
+}
+```
+
+Enquanto o resultado completo da resposta da API é o seguinte:
+
+```ts
+export interface GHSearchResult {
+  total_count: number
+  incomplete_results: boolean
+  items: GHSearchItem[]
+}
+```
+
+Agora vamos criar a nossa função de busca, a ideia é que vamos receber o parâmetro que estamos buscando, remover a URL, se existir, e de lá fazer a chamada para o nosso endpoint e limitar o resultado a 3 itens por vez.
+
+O nosso arquivo final fica mais ou menos assim:
+
+```ts
+import { config } from '../config.ts'
+
+export interface GHSearchResult {
+  total_count: number
+  incomplete_results: boolean
+  items: GHSearchItem[]
+}
+
+export interface GHSearchItem {
+  id: number
+  name: string
+  full_name: string
+  owner: {
+    login: string
+    id: number
+    avatar_url: string
+    url: string
+    html_url: string
+  }
+  html_url: string
+  description: string
+  fork: boolean
+  stargazers_count: number
+  watchers_count: number
+  language: string
+  forks_count: number
+}
+
+export const search = async (query: string) => {
+  const sanitized = query.replace('https://github.com/', '')
+  const result = await fetch(`https://api.github.com/search/repositories?q=${sanitized}&per_page=3`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/vnd.github.v3+json',
+      Authorization: `Bearer ${config.gh.token}`
+    }
+  })
+  return result.json() as Promise<GHSearchResult>
+}
+```
+
+### O Bot
+
+Agora, vamos para a parte principal, o nosso bot. Para isso vamos criar um novo arquivo dentro de `src` chamado `bot.ts`, lá vamos colocar toda a lógica que cerca o nosso bot e tudo que precisamos fazer para ele poder funcionar e responder as mensagens, mas não vamos ouvir o servidor ainda.
+
+Primeiro vamos importar a classe `Bot` do Grammy, juntamente com nossas configurações e a interface de busca que acabamos de fazer:
+
+```ts
+import { Bot } from 'x/grammy@v1.11.0/mod.ts'
+import type { AppConfig } from './config.ts'
+import { search } from './core/gh.ts'
+```
+
+Depois vamos criar uma função chamada `getBot`, essa função vai trazer nosso bot já configurado. A primeira coisa que precisamos fazer é dizer para o bot que queremos responder a um tipo especial de mensagem chamado `inline_query`, que é quando o usuário está digitando diretamente na caixa de mensagens.
+
+Para isso, vamos ter que voltar no nosso Telegram e falar com o BotFather novamente, porque, por padrão, o modo inline no bot vem desativado, então temos que mandar o comando `/setInline`, com isso, o BotFather vai perguntar qual é o bot que você quer alterar as configurações, basta selecionar um da lista.
+
+Após selecionar, mande na próxima mensagem, qual será o texto de placeholder que aparecerá enquanto o usuário está buscando, no nosso caso vai ser **"Search GitHub Repos..."**. E pronto, já estamos prontos.
+
+Agora vamos no nosso arquivo `bot.ts` e vamos criar um listener para a nossa mensagem:
+
+```ts
+function getBot(config: AppConfig) {
+  const bot = new Bot(config.bot.token)
+
+  bot.on('inline_query', async (ctx) => {
+```
+
+O nosso objeto de contexto `ctx` recebe uma série de propriedades da requisição do Telegram para a gente, como a query que o usuário fez, qual é o tipo, ID e etc. E vamos checar se a query está preenchida, ou seja, se o usuário já escreveu algo na query, se não, vamos responder com um array vazio de resultados:
+
+```ts
+function getBot(config: AppConfig) {
+  const bot = new Bot(config.bot.token)
+
+  bot.on('inline_query', async (ctx) => {
+    const { query } = ctx.inlineQuery
+    if (!query) return ctx.answerInlineQuery([])
+```
+
+Aqui vamos usar o comando `ctx.answerInlineQuery` porque queremos que o resultado seja respondido em uma lista de resultados que aparece no topo da caixa de texto, e não como uma mensagem, esse método recebe um array de resultados que segue um padrão específico que vamos montar quando tivermos algum resultado do GitHub.
+
+Se o usuário já fez uma query, vamos passar essa query para o GitHub e verificar se temos algum resultado, isso é bem simples porque o GitHub retorna uma contagem total de resultados na resposta:
+
+```ts
+function getBot(config: AppConfig) {
+  const bot = new Bot(config.bot.token)
+
+  bot.on('inline_query', async (ctx) => {
+    const { query } = ctx.inlineQuery
+    if (!query) return ctx.answerInlineQuery([])
+
+    const results = await search(query)
+    if (results.total_count <= 0) return ctx.answerInlineQuery([])
+```
+
+Caso encontremos alguma coisa, vamos responder usando `ctx.answerInlineQuery` com o resultado de um `map` pelo array de resultados do GitHub, montando a nossa mensagem.
+
+O objeto de resposta da inline query segue a seguinte estrutura:
+
+```ts
+interface AnswerInlineQuery {
+    type: 'article' // Fixo
+    id: string // ID unico do item da resposta
+    title: string // Título da resposta
+    url: string // URL do item da resposta
+    cache_time?: number // Tempo que a resposta fica em cache no Telegram
+    input_message_content: { // Conteúdo da mensagem enviada ao selecionar a resposta
+    	message_text: string
+        parse_mode: 'Markdown'|'HTML'|'MarkdownV2'
+    }
+    hide_url: boolean // Se a URL deve ser escondida na lista de resultados
+    description: string // Descrição do resulttado
+    thumb_url: string // Thumbnail do resultado
+}
+```
+
+Nós temos todas essas informações direto da API do GitHub, basta montarmos o nosso objeto da seguinte forma:
+
+```ts
+function getBot(config: AppConfig) {
+  const bot = new Bot(config.bot.token)
+
+  bot.on('inline_query', async (ctx) => {
+    const { query } = ctx.inlineQuery
+    if (!query) return ctx.answerInlineQuery([])
+
+    const results = await search(query)
+    if (results.total_count <= 0) return ctx.answerInlineQuery([])
+
+    return ctx.answerInlineQuery(
+      results.items.map((item) => ({
+        type: 'article',
+        id: item.id.toString(),
+        title: item.full_name,
+        url: item.html_url,
+        cache_time: 300,
+        input_message_content: {
+          message_text: `[${item.full_name}](${item.html_url})
+  _${item.description || 'No Description'}_
+
+  *Stars:* ${item.stargazers_count}
+  *Forks:* ${item.forks_count}
+  *Language:* ${item.language}`,
+          parse_mode: 'Markdown'
+        },
+        hide_url: true,
+        description: item.description || 'No description',
+        thumb_url: item.owner.avatar_url
+      }))
+    )
+```
+
+Veja que eu estou mandando um texto em Markdown no body da mensagem, esse texto vai ser enviado quando o usuário selecionar aquele resultado. Você pode mudar essa imagem para retornar o que você achar mais legal.
+
+Por fim retornamos o bot e exportamos a nossa função, o arquivo total fica dessa forma:
+
+```ts
+import { Bot } from 'x/grammy@v1.11.0/mod.ts'
+import type { AppConfig } from './config.ts'
+import { search } from './core/gh.ts'
+
+function getBot(config: AppConfig) {
+  const bot = new Bot(config.bot.token)
+
+  bot.on('inline_query', async (ctx) => {
+    const { query } = ctx.inlineQuery
+    if (!query) return ctx.answerInlineQuery([])
+
+    const results = await search(query)
+    if (results.total_count <= 0) return ctx.answerInlineQuery([])
+
+    return ctx.answerInlineQuery(
+      results.items.map((item) => ({
+        type: 'article',
+        id: item.id.toString(),
+        title: item.full_name,
+        url: item.html_url,
+        cache_time: 300,
+        input_message_content: {
+          message_text: `[${item.full_name}](${item.html_url})
+  _${item.description || 'No Description'}_
+
+  *Stars:* ${item.stargazers_count}
+  *Forks:* ${item.forks_count}
+  *Language:* ${item.language}`,
+          parse_mode: 'Markdown'
+        },
+        hide_url: true,
+        description: item.description || 'No description',
+        thumb_url: item.owner.avatar_url
+      }))
+    )
+  })
+  return bot
+}
+
+export { getBot }
+```
+
+## Juntando tudo
+
+Para colar todas as partes juntas, vamos criar o arquivo `src/mod.ts` que é o arquivo principal de entrada do Deno. Nele a gente vai inicializar o nosso bot usando webhooks, para isso vamos ter que importar a função `webhookCallback` do GrammY que serve justamente para setar o bot para ouvir determinadas requisições usando um servidor padrão web, no nosso caso o `std/http`.
+
+Primeiro vamos importar tudo o que precisamos:
+
+```ts
+import { webhookCallback } from 'x/grammy@v1.11.0/mod.ts'
+import { serve } from 'x/sift@0.5.0/mod.ts'
+import { getBot } from './bot.ts'
+import { config } from './config.ts'
+const bot = getBot(config)
+```
+
+Agora vamos inicializar o nosso handler de resposta para o servidor:
+
+```ts
+import { webhookCallback } from 'x/grammy@v1.11.0/mod.ts'
+import { serve } from 'x/sift@0.5.0/mod.ts'
+import { getBot } from './bot.ts'
+import { config } from './config.ts'
+const bot = getBot(config)
+
+const handleUpdate = webhookCallback(bot, 'std/http', { 
+	secretToken: config.bot.secret 
+})
+```
+
+A função `handleUpdate` é o retorno do GrammY quando dizemos para ele criar um objeto de resposta com `bot` usando o `std/http` como servidor. No entanto, não estamos utilizando o módulo nativo do Deno para criar um servidor web, mas sim o Sift, que é um framework web para criação de servidores sem fugir muito do padrão que o Deno já possui.
+
+A ideia é que temos uma função `serve`, assim como temos na `std/http`, mas podemos passar um objeto de configuração para essa função, onde cada chave é a rota que estamos ouvindo, e o valor da chave é o handler de resposta:
+
+```ts
+import { webhookCallback } from 'x/grammy@v1.11.0/mod.ts'
+import { serve } from 'x/sift@0.6.0/mod.ts'
+import { getBot } from './bot.ts'
+import { config } from './config.ts'
+const bot = getBot(config)
+
+const handleUpdate = webhookCallback(bot, 'std/http', { secretToken: config.bot.secret })
+
+serve({
+  '/': (req) => {
+    return req.method === 'POST' ? handleUpdate(req) : new Response('Not found', { status: 404 })
+  }
+})
+```
+
+Veja que estamos sempre ouvindo a rota `/`, e quando detectamos que a rota não é um POST, vamos responder com um status 404, do resto vamos passar a nossa requisição para o bot.
+
+## Testando localmente
+
+Para testarmos localmente podemos iniciar o nosso bot com `denon run -A ./src/mod.ts` e ele já deve estar ouvindo com sucesso na porta que definirmos.
+
+> Se você tiver um erro na hora de executar, tente cachear localmente as dependências com `deno cache --reload ./src/mod.ts` ou `CMD + SHIFT + P` no VSCode e procure por "Deno: Cache" e selecione "Deno: Cache Dependencies"
+
+Agora é só ir até o Telegram e realizar requisições usando o @ do seu bot:
+
+<Figure src="./telegram-grammy-bot/image.png" alt="" caption="Você pode tentar esse comando ai mesmo!" />
+
+Porém, esse método exige que tenhamos que sempre ter uma URL para setar o nosso webhook, o que pode ser um problema, porque essa URL pode mudar. Com isso, para testar localmente, uma das melhores formas é utilizar uma arquitetura de long pooling, que vai periodicamente checar por novos eventos no Telegram.
+
+Isso é super simples, o que precisamos fazer é iniciar o nosso bot em outro modo que não o de WebHooks, vamos criar um novo arquivo em `utils/pooling.ts`:
+
+```ts
+import { getBot } from '../bot.ts'
+import { config } from '../config.ts'
+
+const bot = getBot(config)
+bot.start({
+  onStart: ({ username }) => console.log(`Bot started as @${username}`),
+  drop_pending_updates: true
+})
+```
+
+Por padrão, o `bot.start` do GrammY vai iniciar o bot em modo de long pooling, enquanto você precisa explicitamente dizer para ele iniciar em um modelo de Webhook.
+
+Depois, basta que executemos nossa task no Deno com `deno task start` e vamos ter o mesmo resultado.

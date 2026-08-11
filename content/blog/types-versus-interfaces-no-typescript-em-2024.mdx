@@ -1,0 +1,262 @@
+---
+title: "Types versus interfaces em 2024 - qual usar?"
+pubDate: 2024-04-10T11:00:35.000Z
+updatedDate: 2026-07-16T17:57:10.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript"]
+description: "Qual é a diferença entre tipos e interfaces no TypeScript? Quando usar um e outro?"
+heroImage: "./types-versus-interfaces-no-typescript-em-2024/articles-4-1.png"
+draft: false
+visibility: "public"
+---
+
+Essa é a pergunta de um milhão de dólares. Acho que, depois de "eu tenho que saber JavaScript pra aprender TypeScript" essa foi a pergunta que eu mais recebi até hoje: **"Quando usar interfaces e quando usar tipos?"**
+
+E eu vou mais além! Por que interfaces existem se os tipos já fazem tudo que elas precisam?
+
+Pra gente entender isso tudo vamos ter que entender o que é um tipo, e o que é uma interface e qual é a diferença entre os dois
+
+## Tipos
+
+Tipos são os blocos de construção do TypeScript, inclusive está no nome. São as coisas mais importantes e básicas que temos na nossa linguagem.
+
+Um tipo pode representar **qualquer outro tipo** no TypeScript, não apenas tipos simples e primitivos, mas objetos também.
+
+Então a gente pode fazer coisas simples como:
+
+```ts
+type str = string
+type n = number
+```
+
+Quanto:
+
+```ts
+type pessoa = {
+  nome: string
+}
+type filter = (predicate: string) => string
+```
+
+Ou seja, tipos podem representar qualquer objeto e qualquer interface no TypeScript.
+
+## Interfaces
+
+Interfaces vem de uma abordagem orientada a objeto, oposta a uma abordagem mais funcional dos tipos. Elas existem desde a primeira versão do TypeScript e foram criadas para tornar possíveis padrões de projeto que exigem polimorfismo
+
+Diferente de tipos, interfaces representam apenas objetos, elas não podem representar tipos simples ou primitivos.
+
+```ts
+interface pessoa {
+  nome: string
+}
+```
+
+## Diferenças entre tipos e interfaces
+
+Quando estamos lidando com essas duas ferramentas que são muito parecidas, fica difícil saber quando usar um e quando usar outro. Antes de entrar nesse ponto, eu quero deixar essa seção especificamente para dizer as diferenças entre tipos e interfaces.
+
+### Interfaces não expressam tipos mapeados
+
+Diferente de tipos, interfaces não conseguem expressar tipos mapeados, por exemplo, se a gente quiser ter um tipo `Partial<T>` não podemos ter uma interface:
+
+```ts
+type partial<T> = {
+  [K in keyof T]?: T[K]
+}
+
+interface Pessoa {
+    nome: string
+}
+
+type partialPessoa = partial<Pessoa>
+```
+
+### Tipos não expressam extensões de forma eficiente
+
+Como a gente viu antes, tipos seguem uma abordagem mais funcional, diferente de interfaces que seguem uma abordagem mais orientada a objetos.
+
+Isso significa que quando a gente tem um tipo que estende outro tipo, ou seja, ele é a união desses dois tipos, a gente precisa representar assim:
+
+```ts
+type idade = { idade: number }
+type nome = { nome: string }
+type pessoa = nome & idade // { nome: string, idade: number }
+```
+
+Enquanto a gente pode expressar em interfaces usando a keyword `extends`:
+
+```ts
+interface Nome {
+  nome: string
+}
+
+interface Pessoa extends Nome {
+  idade: number
+}
+```
+
+Eu, particularmente, acho interfaces mais simples de ler nesse caso. Mas tipos tem um problema quando temos que tratar com uniões e intersecções: eles _não_ podem ser cacheados.
+
+Toda a validação e todo o cálculo de tipos é feito em tempo real pelo compilador, enquanto interfaces poem ser cacheadas porque elas não podem ser alteradas dinamicamente, somente por algo chamado _declaration merging_ que, coincidentemente (ou não), é o nosso próximo tópico.
+
+<CourseCTA />
+
+### Interfaces suportam declaration merging
+
+Declaration merging também é chamado de "tipo aberto", enquanto interfaces são tipos abertos, todos os type aliases são considerados tipos fechados, por exemplo, não podemos criar dois tipos com o mesmo nome:
+
+```ts
+type dog = string
+type dog = number // erro
+```
+
+Um tipo só pode existir em um único lugar, uma única vez, enquanto interfaces podem fazer o que é chamado de declaration merging, ou seja, se declaramos ela múltiplas vezes, as diferenças entre a primeira declaração e a segunda são adicionadas no mesmo tipo:
+
+```ts
+interface Pessoa {
+  nome: string
+} // Pessoa é um objeto { nome: string }
+
+interface Pessoa {
+  idade: number
+} // Pessoa agora é { nome: string, idade: number }
+```
+
+Enquanto muitas pessoas consideram isso um problema (e usam regras de lint como o [no-redeclare](https://typescript-eslint.io/rules/no-redeclare/) do ESLint), outros consideram algo ok. A verdade é que essa funcionalidade não é só ok, mas ela é necessária para o TS funcionar.
+
+Se você observar as bibliotecas padrões do TS, você vai perceber que temos uma série de interfaces que são redeclaradas, por exemplo, na `lib.es2015.promise.d.ts`, temos a declaração do que é uma promise como construtor, já no `lib.es5.d.ts` temos a declaração da própria promise:
+
+```ts
+interface Promise<T> {
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;
+
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult>;
+}
+```
+
+Agora, temos outra standard library, a `lib.es2018.promise.d.ts` que redeclara a mesma interface que eu acabei de mostrar, mas ela adiciona o `finally` na interface:
+
+```ts
+interface Promise<T> {
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): Promise<T>;
+}
+```
+
+Isso é importante porque o time do TS não precisa manter arquivos gigantescos, a cada nova versão do ECMAScript, a galera pode criar uma nova standard library somente com as mudanças. **Sem declaration merging, o TypeScript não conseguiria se manter.**
+
+### **Index signatures são diferentes em tipos e interfaces**
+
+Quando criamos um tipo que é um objeto, por exemplo:
+
+```ts
+type Pessoa = {
+  nome: string
+  idade: number
+}
+```
+
+Vamos conseguir fazer algo que, na minha opinião, não deveria acontecer. Que é associar uma index signature direto para o tipo, mesmo se ele não tiver uma:
+
+```ts
+type Pessoa = {
+  nome: string
+  idade: number
+}
+
+const Joao: Pessoa = {
+  nome: 'João',
+  idade: 32
+}
+
+type RecordGenerico = Record<string, number|string>
+const meuRecord: RecordGenerico = Joao
+```
+
+Então é como se o nosso tipo `Pessoa` implicitamente tivesse isso aqui:
+
+```ts
+type Pessoa = {
+  nome: string
+  idade: number
+  [x: string]: string|number
+}
+```
+
+Significando que a gente pode associar chaves que são parte de quaisquer tipos presentes no objeto do type alias.
+
+Em interfaces isso não é permitido, e você precisa explicitamente dizer que a interface possui uma index signature, caso contrário você vai ter um erro:
+
+```ts
+interface Pessoa {
+  nome: string
+  idade: number
+}
+
+const Joao: Pessoa = {
+  nome: 'João',
+  idade: 32
+}
+
+type RecordGenerico = Record<string, number|string>
+const meuRecord: RecordGenerico = Joao // erro
+```
+
+Mas isso funciona:
+
+```ts
+interface Pessoa {
+  nome: string
+  idade: number
+  [x: string]: string|number
+}
+
+const Joao: Pessoa = {
+  nome: 'João',
+  idade: 32
+}
+
+type RecordGenerico = Record<string, number|string>
+const meuRecord: RecordGenerico = Joao
+```
+
+## Quando usar cada um
+
+Não existe um ganho ou perda ao usar só tipos ou só interfaces, então o uso fica muito à critério de quem está utilizando esses recursos. Eu, pessoalmente, prefiro a seguinte estrutura:
+
+-   Se eu estou definindo um tipo que é um objeto, então **uso interfaces**
+-   Para todos os outros casos, **use tipos**
+
+Por que?
+
+Simplesmente porque interfaces foram pensadas com a ideia de modelar objetos dinâmicos no JavaScript, e tipos não. Então quando estamos usando interfaces o TypeScript faz uma série de otimizações para poder deixar a sua compilação um pouco mais rápida.
+
+Além disso, interfaces podem ser estendidas de uma forma mais expressiva, e você pode trabalhar com declaration merging (com cuidado) para poder expressar tipos altamente dinâmicos, coisa que não é possível com tipos.
+
+Mas, os tipos são muito flexíveis, então faz sentido você usar tipos em casos como:
+
+1.  Criar um alias para reduzir a complexidade de um tipo mais elaborado
+2.  Expressar utility types
+3.  Criar genéricos que vão ser utilizados como helpers
+
+O uso de interfaces é algo bastante pessoal. No geral, o meu conselho é que você **seja consistente**. Então se você está usando interfaces para objetos, não use tipos e se você está usando apenas tipos, não use interfaces.
+
+Porém você vai ver que é bem difícil não utilizar interfaces, especialmente se você está seguindo orientação a objetos, porque é uma forma muito mais expressiva de implementar classes por exemplo.

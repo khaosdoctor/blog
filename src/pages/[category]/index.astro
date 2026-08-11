@@ -1,0 +1,46 @@
+---
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import PostList from '../../components/PostList.astro'
+import { getPublishedPosts } from '../../lib/posts'
+import { getCategories } from '../../lib/taxonomy'
+
+// Section landing pages live at /{category}/, the same shape as a post URL.
+// Astro gives this dynamic route priority over the [...slug] rest route, so the
+// only real hazard is a category named exactly like a post: fail the build
+// instead of silently shadowing an article.
+export const getStaticPaths = (async () => {
+  const [categories, posts] = await Promise.all([getCategories(), getPublishedPosts()])
+  const slugs = new Set(posts.map((post) => post.id))
+  for (const category of categories.keys()) {
+    if (slugs.has(category)) {
+      throw new Error(
+        `Category "${category}" collides with a post of the same slug. Rename the category or the post.`,
+      )
+    }
+  }
+  return [...categories.entries()].map(([category, categoryPosts]) => ({
+    params: { category },
+    props: { category, posts: categoryPosts },
+  }))
+}) satisfies GetStaticPaths
+
+const { category, posts } = Astro.props
+---
+
+<BaseLayout
+  title={`${category} | Lucas Santos`}
+  description={`Todos os artigos da seção ${category}.`}
+>
+  <h1>{category}</h1>
+  <p class="count">{posts.length} {posts.length === 1 ? 'artigo' : 'artigos'}</p>
+  <PostList posts={posts} />
+</BaseLayout>
+
+<style>
+  .count {
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+</style>

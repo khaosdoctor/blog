@@ -1,0 +1,81 @@
+---
+interface Props {
+  html: string
+  title: string
+  caption?: string
+}
+
+const { html, title, caption } = Astro.props
+
+// ponytail: `html` is trusted, developer-reviewed migration content pulled from the
+// author's own Ghost export (build-time only, never live user input). We still refuse
+// the two cheapest attack surfaces rather than fully sanitizing: some legitimate
+// widgets from the migration (Twitter/Instagram) genuinely need their own <script>,
+// which is exactly what this component exists to pass through, so a full sanitizer
+// would break the use case it's built for. Fail the build loudly instead of shipping
+// either one silently.
+if (/<script[\s>]/i.test(html)) {
+  throw new Error(`RawEmbed: refusing <script> tag in embed HTML (title: "${title}")`)
+}
+
+if (/\bsrc=["']http:\/\//i.test(html)) {
+  throw new Error(`RawEmbed: refusing plain-http src in embed HTML (title: "${title}")`)
+}
+
+const hasFrame = /<(iframe|embed)[\s>]/i.test(html)
+const embedHtml = hasFrame ? patchFrameAttrs(html, title) : html
+
+// Backfills accessibility/perf/privacy attributes onto <iframe>/<embed> tags without
+// clobbering ones the source markup already set, scoped per-tag (not per-document) so
+// multiple frames in one embed all get patched and none get double-patched.
+function patchFrameAttrs(source: string, frameTitle: string): string {
+  const escapedTitle = frameTitle.replaceAll('"', '&quot;')
+  return source
+    .replace(/<(iframe|embed)(?![^>]*\bloading=)([^>]*)>/gi, '<$1$2 loading="lazy">')
+    .replace(/<(iframe|embed)(?![^>]*\btitle=)([^>]*)>/gi, `<$1$2 title="${escapedTitle}">`)
+    .replace(
+      /<(iframe|embed)(?![^>]*\breferrerpolicy=)([^>]*)>/gi,
+      '<$1$2 referrerpolicy="strict-origin-when-cross-origin">',
+    )
+}
+---
+
+<figure class="raw-embed">
+  <div class:list={['container', hasFrame && 'framed']}>
+    <div set:html={embedHtml} />
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .raw-embed {
+    margin-block: 2rem 1rem;
+    margin-inline: 0;
+  }
+
+  .container.framed {
+    position: relative;
+    /* 16:9 aspect ratio */
+    padding-block-end: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .container.framed :global(iframe),
+  .container.framed :global(embed) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  figcaption {
+    margin-block-start: 0.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    text-align: center;
+  }
+</style>

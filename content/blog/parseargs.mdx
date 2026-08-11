@@ -1,0 +1,501 @@
+---
+title: "CLIs mais simples com Util.parseArgs"
+pubDate: 2022-10-20T13:00:04.000Z
+updatedDate: 2026-07-16T16:05:43.000Z
+lang: pt
+category: "javascript"
+tags: ["nodejs", "javascript", "typescript"]
+description: "Entenda sobre como o Node.js facilitou a criação de ferramentas de linhas de comando com o novo método parseArgs!"
+heroImage: "./parseargs/Blog-cover-Template-1.png"
+draft: false
+visibility: "public"
+---
+
+Aplicações de linha de comando, os famosos CLI's (_Command Line Interfaces_), são extremamente comuns, principalmente quando estamos lidando com devs.
+
+Essas aplicações costumam ser ordens de grandeza mais leves do que uma aplicação com uma interface gráfica, são mais simples de serem utilizadas e permitem automação e _scripting_ de forma nativa, tudo isso sacrificando a interface e um pouco da experiência de usuário, já que é necessário que você tenha um pouco – ou as vezes, muito – conhecimento de ambientes de linha de comando para poder começar a usar as funcionalidades básicas.
+
+Enquanto a psrte de UI está ficando cada vez mais avançada com bibliotecas como o [blessed](https://github.com/chjj/blessed), e a UX está cada vez mais avançada com outras libs como o [inquirer](https://github.com/SBoudrias/Inquirer.js), a DX, ou _Developer Experience_, continua a mesma. Desenvolver um CLI acaba sendo complicado e cheio de pequenos hacks que temos que fazer, principalmente para poder entender o que o usuário enviou no comando inicial, os chamados _argumentos_.
+
+Hoje, algumas bibliotecas famosas como o [Yargs](http://yargs.js.org/), o [commander](https://github.com/tj/commander.js/), [meow](https://github.com/sindresorhus/meow) e [caporal](https://caporal.io) facilitam a tarefa de ter que pegar os argumentos da linha de comando e enviá-las para a aplicação executar alguma coisa, mas isso é algo tão simples que as pessoas se perguntam: "Por que isso não é nativo do Node.js?", bom essa espera acabou.
+
+## `util.parseArgs`
+
+Na versão 18, o Node.js implementou uma API **experimental** chamada `util.parseArgs`. O objetivo é justamente facilitar e automatizar a forma como buscamos argumentos de linha de comando para melhorar (e até mesmo eliminar) a necessidade de bibliotecas externas para fazer a mesma coisa.
+
+Ela tem uma API bastante simples, que leva apenas um objeto de configuração:
+
+```js
+import { parseArgs } from 'node:util'
+const { values, positionals } = parseArgs({ args, options })
+```
+
+O objeto de configuração tem quatro opções:
+
+-   `args`: O array de argumentos que queremos parsear, por padrão, ele vai ser o `process.argv` removenvo os dois primeiros argumentos que são o `execPath` e o `filename` (o caminho do comando do Node que foi executado e o nome do arquivo que está rodando) e deixando apenas o que veio depois.
+-   `options`: É um outro objeto que é usado para definir quais são os argumentos que vão ser identificados como válidos pelo programa, essa chave é obrigatória e é um objeto com itens que devem seguir essa interface:
+    -   `type`: Uma string definindo qual é o tipo do argumento, no momento o `parseArgs` só suporta `string` e `boolean`
+    -   `multiple`: Um boolean que define se o argumento pode ser passado múltiplas vezes. Se for `true`, todos os valores desse argumento vão ser coletados em um array, caso contrário, a última opção setada vai ser a escolhida. Por padrão, o valor é `false`
+    -   `short`: O alias da opção em um único caractere, por exemplo, a abreviação de `--all` ser `-A` então o `short` será `A`
+-   `strict`: Se o programa deve lançar um erro caso algum argumento não reconhecido por `options` seja passado, é `true` por padrão
+-   `allowPositionals`: Se o comando vai aceitar argumentos posicionais, ou seja, se podemos passar argumentos que não tem flags como `-a`, esses argumentos serão recebidos em um array próprio que fizemos o destructuring como `positionals`
+-   `tokens`: Retorna os tokens que foram passados. Essa função é mais útil quando você quer estender o comportamento da função original, não tanto quando você quer apenas usar a base da função.
+
+O retorno do `parseArgs` é um objeto com três chaves:
+
+-   `values`: Um mapa de todos os nomes das opções com seus valores respectivos
+-   `positionals`: Um array de strings com os argumentos posicionais passados, em ordem.
+-   `tokens`: Um array de objetos retornado se a opção `tokens` da configuração for `true`
+
+O objeto de tokens pode ter tokens de dois tipos, ou opções ou argumentos posicionais. Todos eles vão ser retornados em um único objeto que vai ter todos os tokens. Todos os valores desse objeto vão ter pelo menos duas chaves:
+
+-   `kind`: Ou `option` ou `positional` ou `option-terminator`
+-   `index`: O indice do elemento no array de argumentos, de forma que o argumento original de um token possa ser obtido com `args[token.index]`
+
+Para tokens do tipo opções (os que tem as flags), vamos ter algumas propriedades extras:
+
+-   `name`: O nome **longo** do token, por exemplos `all`
+-   `rawName`: O nome original da opção, sem remover os traços, do jeito que foi passado para o comando, por exemplo, `--all`
+-   `value`: O valor do argumento, se for um boolean, esse valor vai ser `undefined`
+-   `inlineValue`: Se o valor foi especificado de forma inline como `--foo=bar`
+
+Pra argumentos posicionais, sem opções, só vamos ter o valor em uma chave `value` que é o equivalente a `args[index]`
+
+Esses tokens vão ser sempre retornados na ordem que foram passados, então é possível estener a funcionalidade caso você precise suportar algum tipo de argumento antes de outro argumento.
+
+Outra coisa importante é quando temos os chamados _short option groups_, que são casos como `-abc` nesses casos, cada um deles vai ser expandido para um token diferente, então se tivermos casos comuns como `-vvv` vamos ter três tokens do tipo option.
+
+Vamos a alguns exemplos.
+
+### Opções simples
+
+Imagine que temos o seguinte código:
+
+```js
+const options = {
+  verbose: {
+    type: 'boolean',
+    short: 'v',
+  },
+  color: {
+    type: 'string',
+    short: 'c',
+  },
+  times: {
+    type: 'string',
+    short: 't',
+  },
+}
+
+const { values, positionals } = parseArgs({options, args: ['-v', '-c', 'green']})
+```
+
+Teremos em `values` o seguinte objeto:
+
+```js
+{
+  __proto__: null,
+  verbose: true,
+  color: 'green'
+}
+```
+
+Já o nosso array de `positionals` será vazio porque não estamos específicando que queremos posicionais. Veja que em `values` as chaves serão sempre os nomes completos das opções.
+
+### Parâmetros posicionais
+
+Se modificarmos o código para permitir `positionals` dessa forma:
+
+```js
+const { values, positionals } = parseArgs({
+    options,
+    allowPositionals: true,
+    args: [
+      'home.html', '--verbose', 'main.js', '--color', 'red', 'post.md'
+    ]
+  })
+```
+
+Vamos ter a seguinte saída em `values`:
+
+```js
+{
+    __proto__:null,
+    verbose: true,
+    color: 'red'
+}
+```
+
+Porém agora vamos ter um array de opções posicionais em `positionals`:
+
+```js
+['home.html', 'main.js', 'post.md']
+```
+
+Veja que eles aparecem na ordem que estamos enviando no código.
+
+### Opções múltiplas
+
+Se utilizarmos a mesma opção várias vezes normalmente, como eu mencionei antes, somente uma chave vai ser criada, por exemplo:
+
+```js
+const options = {
+  'bool': {
+    type: 'boolean',
+  },
+  'str': {
+    type: 'string',
+  },
+}
+parseArgs({
+  options, args: [
+    '--bool', '--bool', '--str', 'yes', '--str', 'no'
+  ]
+})
+```
+
+Vamos ter um `values` como:
+
+```js
+{
+  __proto__:null,
+  bool: true,
+  str: 'no'
+}
+```
+
+Veja que só temos o último valor da opção. Agora, se passarmos o parâmetro `multiple` para qualquer tipo de opção no nosso objeto `options`:
+
+```js
+const options = {
+  'bool': {
+    type: 'boolean',
+    multiple: true,
+  },
+  'str': {
+    type: 'string',
+    multiple: true,
+  },
+}
+parseArgs({
+  options, args: [
+    '--bool', '--bool', '--str', 'yes', '--str', 'no'
+  ]
+})
+```
+
+Vamos ter o seguinte valor em `values`:
+
+```js
+{
+  __proto__:null,
+  bool: [ true, true ],
+  str: [ 'yes', 'no' ]
+}
+```
+
+### Shorthands conexos
+
+Existe um tipo de valor que podemos passar para uma linha de comando que é conhecida como **shorthand**, a ideia é que, quando setamos múltiplas opções booleanas, podemos agrupar todos em um único `-`, por exemplo, ao invés de `main.js -v -s` podemos fazer `main.js -vs`.
+
+Isso também funciona no `parseArgs` sem precisar fazer nada de mais, só precisamos setar a opção `short` para essas propriedades:
+
+```js
+const options = {
+  'verbose': {
+    type: 'boolean',
+    short: 'v',
+  },
+  'silent': {
+    type: 'boolean',
+    short: 's',
+  },
+  'color': {
+    type: 'string',
+    short: 'c',
+  },
+}
+parseArgs({options, args: ['-vs']})
+```
+
+Vai nos dar esse objeto de `values`:
+
+```js
+{
+  __proto__:null,
+  verbose: true,
+  silent: true,
+}
+```
+
+### Option terminators
+
+Existe um tipo de opção específica chamada de **terminator**, isso é, após esse argumento, todo o resto é tratado como posicional. No caso da maioria dos shells, essa opção é o `--`, por exemplo, quando queremos executar um comando do NPM antigamente e enviar um argumento ao comando que seria executado, fazíamos: `npm run <comando> -- param param param` e o comando iria receber os três parâmetros individualmente. O mesmo vale para o `parseArgs`:
+
+```js
+const options = {
+  'verbose': {
+    type: 'boolean',
+  },
+  'count': {
+    type: 'string',
+  },
+}
+
+parseArgs({options, allowPositionals: true,
+ args: [
+   'how', 
+   '--verbose', 
+   'are', 
+   '--', 
+   '--count', 
+   '5', 
+   'you'
+ ]
+})
+```
+
+O objeto `values` será:
+
+```js
+{
+  __proto__:null,
+  verbose: true
+}
+```
+
+E vamos ter os `positionals`:
+
+```js
+[ 'how', 'are', '--count', '5', 'you' ]
+```
+
+## Tokens
+
+Quando falamos de tokens, a funcionalidade é um pouco mais complexa, pra isso precisamos explicar como essa API funciona, de fato.
+
+O `parseArgs` funciona em duas fases:
+
+-   A primeira fase é parsear o array de argumentos em um array de tokens. O objetivo disso é que a gente tenha uma espécie de array de argumentos parseados parecidos com o que a gente já tem, mas com anotações de tipos, se o argumento é uma opção, se é um argumento posicional e etc
+-   Na segunda fase, a saída dessa primeira fase é lida pelo parser e acabamos com o array que temos anteriormente.
+
+A gente pode ter acesso à primeira parte como uma saída se setarmos o array de configurações com a opção `tokens` como `true`. Ai vamos ter uma chave `tokens` na saída final.
+
+O tipo desse objeto vai ser a seguinte interface (como explicada [aqui](https://2ality.com/2022/08/node-util-parseargs.html#parseargs-tokens)):
+
+```ts
+type Token = OptionToken | PositionalToken | OptionTerminatorToken;
+
+interface CommonTokenProperties {
+    /** Onde o token começa na string? */
+  index: number;
+}
+
+interface OptionToken extends CommonTokenProperties {
+  kind: 'option';
+
+  /** Nome longo */
+  name: string;
+
+  /** O nome da opção no array `args` */
+  rawName: string;
+
+  /** O valor da opção. Sempre `undefined` para boolean. */
+  value: string | undefined;
+
+  /** O valor está inline (ex --level=5)? */
+  inlineValue: boolean | undefined;
+}
+
+interface PositionalToken extends CommonTokenProperties {
+  kind: 'positional';
+
+  /** O valor do argumento posicional, args[token.index] */
+  value: string;
+}
+
+interface OptionTerminatorToken extends CommonTokenProperties {
+  kind: 'option-terminator';
+}
+```
+
+Vamos a um exemplo, digamos que temos o seguinte array de opções:
+
+```js
+const options = {
+  'bool': {
+    type: 'boolean',
+    short: 'b',
+  },
+  'flag': {
+    type: 'boolean',
+    short: 'f',
+  },
+  'str': {
+    type: 'string',
+    short: 's',
+  },
+}
+```
+
+Quando rodarmos `parseArgs({ options, tokens: true, args: [ '--bool', '-b', '-bf' ] })`, vamos obter o seguinte objeto:
+
+```js
+{
+    values: {
+      __proto__:null,
+      bool: true,
+      flag: true,
+    },
+    positionals: [],
+    tokens: [
+      {
+        kind: 'option',
+        name: 'bool',
+        rawName: '--bool',
+        index: 0,
+        value: undefined,
+        inlineValue: undefined
+      },
+      {
+        kind: 'option',
+        name: 'bool',
+        rawName: '-b',
+        index: 1,
+        value: undefined,
+        inlineValue: undefined
+      },
+      {
+        kind: 'option',
+        name: 'bool',
+        rawName: '-b',
+        index: 2,
+        value: undefined,
+        inlineValue: undefined
+      },
+      {
+        kind: 'option',
+        name: 'flag',
+        rawName: '-f',
+        index: 2,
+        value: undefined,
+        inlineValue: undefined
+      },
+    ]
+  }
+```
+
+É importante notar que, mesmo que a gente tenha uma única opção chamada `bool`, vamos ter três índices no array porque estamos passando a chave três vezes. Um exemplo mais completo pode ser usando terminadores e também inline values como aqui:
+
+```js
+parseArgs({
+    options, allowPositionals: true, tokens: true,
+    args: [
+      'command', '--', '--str', 'yes', '--str=yes'
+    ]
+})
+```
+
+Que vai nos dar a seguinte saída:
+
+```js
+{
+    values: {
+      __proto__:null,
+    },
+    positionals: [ 'command', '--str', 'yes', '--str=yes' ],
+    tokens: [
+      { kind: 'positional', index: 0, value: 'command' },
+      { kind: 'option-terminator', index: 1 },
+      { kind: 'positional', index: 2, value: '--str' },
+      { kind: 'positional', index: 3, value: 'yes' },
+      { kind: 'positional', index: 4, value: '--str=yes' }
+    ]
+  }
+```
+
+Veja que quando usamos um terminador, todos os demais valores são considerador posicionais.
+
+Um exemplo seria usar essa funcionalidade para poder implementar um CLI que usa subcomandos, como por exemplo o git com `git commit` ou a Azure com `az aks create`. Vou passar por [essa implementação](https://2ality.com/2022/08/node-util-parseargs.html#using-tokens-to-implement-subcommands) explicando como ela funcionaria.
+
+Primeiro, vamos definir uma função para buscar o primeiro comando, que é um posicional, e depois vamos buscar o primeiro elemento posicional que acharmos:
+
+```js
+function parseSubcommand(config) {
+  // Permitindo posicionais já que o subcomando é posicional
+  const {tokens} = parseArgs({
+    ...config, tokens: true, allowPositionals: true
+  });
+  // Encontra a primeira ocorrência do posicional
+  let firstPosToken = tokens.find(({kind}) => kind==='positional');
+  if (!firstPosToken) {
+    throw new Error('Command name is missing: ' + config.args);
+  }
+```
+
+Depois vamos pegar as opções do comando e chamar o parseArgs novamente:
+
+```js
+  const cmdArgs = config.args.slice(0, firstPosToken.index);
+  // Substituímos a ocorrencia em `config.args`
+  const commandResult = parseArgs({
+    ...config, args: cmdArgs, tokens: false, allowPositionals: false
+  })
+```
+
+Agora vamos pegar o subcomando desse comando:
+
+```js
+  const subcommandName = firstPosToken.value
+
+  const subcmdArgs = config.args.slice(firstPosToken.index+1)
+  // substituindo o `config.args`
+  const subcommandResult = parseArgs({
+    ...config, args: subcmdArgs, tokens: false
+  })
+
+  return {
+    commandResult,
+    subcommandName,
+    subcommandResult,
+  }
+}
+```
+
+A função toda ficaria assim:
+
+```js
+function parseSubcommand(config) {
+  const {tokens} = parseArgs({
+    ...config, tokens: true, allowPositionals: true
+  })
+  let firstPosToken = tokens.find(({kind}) => kind==='positional')
+  if (!firstPosToken) {
+    throw new Error('Command name is missing: ' + config.args)
+  }
+
+  //----- Command options
+  const cmdArgs = config.args.slice(0, firstPosToken.index)
+  const commandResult = parseArgs({
+    ...config, args: cmdArgs, tokens: false, allowPositionals: false
+  })
+
+  //----- Subcommand
+  const subcommandName = firstPosToken.value;
+
+  const subcmdArgs = config.args.slice(firstPosToken.index+1)
+  const subcommandResult = parseArgs({
+    ...config, args: subcmdArgs, tokens: false
+  })
+
+  return {
+    commandResult,
+    subcommandName,
+    subcommandResult,
+  }
+}
+```
+
+## Conclusão
+
+O `parseArgs` é uma excelente opção para facilitar a criação de CLIs e mostrar como podemos melhorar ainda mais o desenvolvimento de aplicações usando Node.js. Não se esqueça de ler a documentação oficial e o artigo que mostrei nesse post!

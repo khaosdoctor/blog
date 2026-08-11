@@ -1,0 +1,83 @@
+---
+title: "Veja o que há de novo no Node.js 16"
+pubDate: 2021-05-19T17:46:04.000Z
+updatedDate: 2026-07-16T16:15:02.000Z
+lang: pt
+category: "javascript"
+tags: ["nodejs", "javascript", "drop"]
+description: "Venha conhecer o que há de novo na versão 16 do mais famoso runtime para JavaScript do mundo!"
+heroImage: "./veja-o-que-ha-de-novo-no-node-js-16/NodeJS.png"
+draft: false
+visibility: "public"
+---
+
+Em abril de 2021 foi [anunciado o lançamento da versão 16 do Node.js](https://medium.com/the-node-js-collection/node-js-16-available-now-7f5099a97e70), como é de costume, as versões pares do runtime são as consideradas _production ready_ ou seja, as versões que serão definitivas para produção.
+
+Inicialmente, a versão LTS (Long Term Support), está sendo a versão 14 até outubro de 2021 enquanto a versão 16 segue como a versão _current._ Após outubro, a versão 14 entrará em estado de manutenção e a versão 16 será promovida a LTS, isso significa que a versão 14 receberá somente atualizações de segurança e manutenção, enquanto a versão 16 estará recebendo suporte ativo. Tudo isso pode ser visto no [calendário de releases oficial](https://github.com/nodejs/Release#release-schedule).
+
+<Figure src="./veja-o-que-ha-de-novo-no-node-js-16/image-4.png" alt="" caption="Calendário de releases do Node.js mostrando a versão 16 como current" />
+
+Esse controle de versões é importante, pois como podemos ver no diagrama, a versão 10 perdeu totalmente o suporte em maio, esta era a última versão que **não suportava ES Modules nativamente**, o que significa que agora todo mundo que mantém um pacote ou uma lib no NPM poderá utilizar por padrão a nova estrutura!
+
+Vamos as principais diferenças desta nova versão
+
+## V8 foi atualizado para versão 9.0
+
+O engine JavaScript mais conhecido do mundo foi atualizado para a versão 9.0 nessa release do Node.js, embora essa não seja a versão mais recente, ela já tem um incrível suporte a muitas coisas legais.
+
+> Na versão 9.1 do V8, teremos [suporte a top-level await](https://v8.dev/blog/v8-release-91#top-level-await), o que vai tornar a nossa vida muito mais simples
+
+Além das naturais melhorias de performance e estabilidade, esta versão tem uma modificação especial nas expressões regulares, que agora trazem uma nova chave para o resultado de `exec`. Anteriormente, não tínhamos como saber quais eram os inícios e finais de uma string que foi comparada com RegExp, ou seja, não tínhamos como saber em qual índice da string este valor apareceu, agora, através da chave `indices` podemos saber exatamente o início e o final de uma string que foi rodada contra uma RegExp que tenha a flag `/d` setada:
+
+```js
+const str = /(Java)(Script)/d.exec('JavaScript')
+
+str.indices // [ [0,10], [0,4], [4,10] ]
+str.indices[0] // [0,10] -> toda a string
+str.indices[1] // [0,4] -> primeiro grupo ("Java")
+str.indices[2] // [4,10] -> segundo grupo ("Script")
+```
+
+## Biblioteca `timers/promises` estável
+
+Sempre que precisamos usar uma função do tipo `setTimeout`, `setInterval` ou qualquer outra função que dependa de um timer, geralmente o que fazemos é uma de duas coisas:
+
+-   Trabalhar com um modelo convertido manualmente para promises
+
+```js
+function asyncTimeout (ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+;(async () => {
+  await asyncTimeout(3000)
+  console.log('Hello')
+})()
+```
+
+-   Usar o `util.promisify`
+
+```js
+const { promisify } = require('util')
+const asyncTimeout = promisify(setTimeout)
+
+;(async () => {
+  await asyncTimeout(3000)
+  console.log('Hello')
+})()
+```
+
+Agora temos uma API nativa de timers com promises que estava em beta na versão 15 do Node:
+
+```js
+import { setTimeout } from 'timers/promises';
+async function run() {
+  await setTimeout(5000);
+  console.log('Hello, World!');
+}
+run();
+```
+
+## Conclusão
+
+Temos algumas alterações muito legais para o que vem por ai no Node.js! Esperamos que, no futuro, tenhamos ainda mais mudanças e muitas outras novidades!

@@ -1,0 +1,92 @@
+---
+title: "Aplicações em tempo real com Deno KV"
+pubDate: 2024-01-24T11:00:34.000Z
+updatedDate: 2026-07-16T15:53:37.000Z
+lang: pt
+category: "javascript"
+tags: ["deno", "typescript"]
+description: "A criação de aplicações em tempo real se tornou muito mais fácil com uma ferramenta nova lançada pelo Deno na versão 1.38.5, o watch mode!"
+heroImage: "./deno-kv-watch/articles-1.png"
+draft: false
+visibility: "public"
+---
+
+Aplicações em tempo real sempre foram um grande problema para a maioria dos devs, principalmente porque elas seguem um paradigma bastante diferente do que a gente está acostumado a trabalhar.
+
+Por conta disso, a maioria das aplicações que precisavam ser feitas com algum tipo de comunicação em tempo real acabavam indo para uma direção como [WebSockets](https://pt.wikipedia.org/wiki/WebSocket), que são um pouco mais difíceis de implementar então geralmente recorríamos a long [polling](/ghost/#/editor/post/658c72263070ba187f699e8f) quando não tínhamos tanta pressa em receber as atualizações.
+
+O Deno mais uma vez inovou bastante em relação ao que pode ser feito com o runtime e as aplicações, deixando muito mais fácil a criação de aplicações em tempo real.
+
+## KV Watch
+
+Há um tempo eu publiquei um artigo aqui falando sobre o novo banco de dados chave-valor do Deno, o [Deno KV](/deno-kv-beta/).
+
+Só pra gente relembrar o que é o KV. Ele é um banco de dados no modelo chave-valor, ou seja, não temos estruturas como tabelas e etc, a maioria das nossas operações lógicas são feitas em cima de valores armazenados em chaves que seguem um padrão textual, por exemplo, os likes em um post com o ID `1234` poderia ser representado por um número armazenado na chave `posts:1234:likes`
+
+O KV tem várias APIs super interessantes, como as [filas](/deno-kv-queues) e o [cron](/deno-cron), mas a que torna tudo isso possível é o **watch**.
+
+Com essa nova API, o Deno KV pode observar mudanças em tempo real nas chaves, então sempre que uma dessas chaves mudar, a gente pode emitir um evento para algum lugar avisando dessa mudança.
+
+A nova API funciona a partir de um [async iterator](/async-iterators-js/) que vai retornar o novo valor da chave observada:
+
+```ts
+const db = await Deno.openKv()
+
+const stream = db.watch(["chave1"], ["chave", "2'])
+for await (const entries of stream) {
+  entries[0] // { key: ['chave1'], value: 'v', versionstamp: ... }
+  entries[1] // o mesmo porém com a chave 2
+}
+```
+
+## Construindo aplicações em tempo real
+
+Como a ideia desse artigo é ser bem curto e direto, eu não vou mostrar totalmente como podemos construir uma aplicação em tempo real aqui, mas vou dar um exemplo de como podemos trabalhar com essa nova ferramenta
+
+### Server-sent Events
+
+O mais comum quando estamos fazendo aplicações em tempo real no frontend é tentar criar algum tipo de conexão persistente entre o cliente e o servidor – na verdade, esse é provavelmente o único jeito – que a gente está bem acostumado a chamar de WebSocket.
+
+Existe um outro meio de criar essas conexões persistentes com um outro padrão da web chamado [Server-Sent Events](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events) (SSE), que é algo realmente implementado no [Oak](https://oakserver.github.io/oak/sse.html).
+
+SSE's são basicamente uma conexão que fica constantemente aberta a partir do cliente para o servidor, essencialmente um WebSocket, porém você pode fazer a comunicação por HTTP ao invés de realizar o envio de mensagens por TCP diretamente. E você faz isso através de um endpoint.
+
+No frontend, nós criamos uma `EventSource` com um endpoint:
+
+```ts
+const eventSource = new EventSource("/api/users/123/notification/subscribe")
+```
+
+Do lado do servidor, temos que ter um handler para essa rota, que vai criar uma stream de dados:
+
+```ts
+import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+
+const app = new Application();
+const router = new Router();
+
+router.get('/api/users/:id/notification/subscribe', async (ctx) => {
+  const target = ctx.sendEvents()
+  const events = kv.watch(['users', ctx.params.get('id'), 'notifications'])
+  for await (const {value} of events) {
+    target.dispatchMessage({ notification: value })
+  }
+})
+
+app.use(router.routes())
+await app.listen({ port: 8080 })
+```
+
+Sempre que tivermos uma alteração no nosso array de notificações, vamos mandar ele para o front-end e podemos atualizar nosso cliente.
+
+Claro que esse é um exemplo simples, mas mostra o que podemos fazer com essa API.
+
+---
+
+## Momento FTS!
+
+Se você curtiu esse artigo, eu também tenho um curso completo de TypeScript chamado **Formação TypeScript!**
+
+Eu te convido a dar uma olhadinha lá se você quiser aprender mais sobre TypeScript comigo e a nossa incrível comunidade com centenas de alunos e alunas!
+
+<Bookmark url="https://formacaots.com.br" title="Formação TS" description="O primeiro e mais completo curso de TypeScript do Brasil" />

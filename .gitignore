@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# migration working artifacts (inventory, review lists, the Ghost export)
+.migration/
+# open questions and decisions for Lucas, not part of the site
+QUESTIONS.md

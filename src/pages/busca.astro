@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Search from '../components/Search.astro'
+
+// This route is prerendered once at build time (output: "static"), so
+// Astro.url never carries a real visitor's query string — it's only here so
+// this keeps working for free if the site ever switches to server output.
+// The actual /busca/?q=deno-on-load behavior is read from window.location by
+// Search.astro's client script, the only place a real query string exists.
+const initialQuery = Astro.url.searchParams.get('q') ?? ''
+const title = initialQuery ? `Busca: "${initialQuery}" — Lucas Santos` : 'Busca — Lucas Santos'
+---
+
+<BaseLayout title={title} description="Buscar artigos no blog de Lucas Santos.">
+  <h1>Busca</h1>
+  <Search initialQuery={initialQuery} />
+</BaseLayout>

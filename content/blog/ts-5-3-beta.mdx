@@ -1,0 +1,80 @@
+---
+title: "Novidades do TS 5.3 - Beta!"
+pubDate: 2023-11-01T21:21:53.000Z
+updatedDate: 2026-07-16T15:55:35.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "javascript", "nodejs", "deno"]
+description: "Vamos entender todas as novidades da versão beta do TypeScript 5.3!"
+heroImage: "./ts-5-3-beta/articles-1.png"
+draft: false
+visibility: "public"
+---
+
+Como é de praxe, mais uma versão do TypeScript está liberada e eu estou aqui para contar mais sobre ela! Dessa vez a gente vai até fazer uma comparação com o que eu propus no [outro artigo](/ts-53-alpha/) quando falamos da versão alpha!
+
+Vamos lá!
+
+## Import Attributes
+
+Essa é uma novidade que já estava no outro artigo e que realmente foi implementada. A ideia dessa implementação é estar a par com a versão mais nova da [proposta de mesmo nome lá no TC39](https://github.com/tc39/proposal-import-attributes).
+
+> Vale dizer que essa foi a única das implementações do outro artigo que foi feita, então preciso trabalhar mais nas minhas habilidades de vidente 🔮
+
+Essencialmente o maior caso de uso para essa nova funcionalidade é forçar a leitura de um determinado módulo como um determinado tipo. Por exemplo, se quisermos importar um JSON somente como JSON:
+
+```ts
+import obj from "./something.json" with { type: "json" };
+```
+
+Imports dinâmicos também funcionam bem com essa nova implementação através de um segundo parâmetro:
+
+```ts
+const obj = await import("./something.json", {
+    with: { type: "json" }
+});
+```
+
+Vale notar duas coisas aqui, a primeira é que no [TS 4.5](https://devblogs.microsoft.com/typescript/announcing-typescript-4-5/#import-assertions) a gente já tinha uma versão anterior da mesma proposta quando ela era chamada **import assertions**, e essa versão vai ser gradualmente depreciada ao longo do tempo.
+
+Outra coisa é que o TS não vai checar o que existe dentro daquele campo, então você pode colocar um import com qualquer tipo:
+
+```ts
+import obj from './something.json' with { type: 'batata' }
+```
+
+Isso vai funcionar no TypeScript, mas, como a implementação é dependente do runtime e não do TS em si, o seu runtime pode não gostar disso.
+
+## Interação com Inlay Hints
+
+Uma das principais mudanças foi a inclusão de **inlay hints interativas**. Uma _inlay hint_ é uma anotação em cinza que fica na frente dos tipos e do seu editor, lá na [Formação TS](https://formacaots.com.br), por exemplo, nós deixamos todas elas ligadas e elas dão uma boa ajuda para entender o que existe naquela variável sem que você precisa passar o mouse em cima.
+
+> [!NOTE] 🤩
+> Inclusive aproveite pra ir lá [no site](https://formacaots.com.br) e garantir o melhor preço na Formação TS, o curso mais completo de TypeScript do Brasil!
+
+Anteriormente, elas eram apenas textos simples, mas agora você pode interagir com elas para ir até a definição entre outras coisas.
+
+![](https://devblogs.microsoft.com/typescript/wp-content/uploads/sites/11/2023/10/clickable-inlay-hints-for-types-5-3-beta.gif)
+
+## Otimizações gerais
+
+Na maioria das releases a gente tem melhorias de performance com otimizações gerais, neste caso tivemos duas principais
+
+### **Ignorar JSDoc no parsing**
+
+Como nem todas as aplicações vão precisar do JSDoc como string na hora de fazer o parsing do código, essa funcionalidade foi removida do `tsc` e, com isso, vamos ter uma velocidade maior de parsing no compilador, mas também um menor uso de memória.
+
+Como nem todas as aplicações precisam disso, a mesma funcionalidade foi exposta na API em si, de forma que elas possam usar a mesma funcionalidade. Então espere que ferramentas como o `ESLint` e outras fiquem mais rápidas também.
+
+### Otimização em unions e intersections
+
+Quando o TS identifica um misto de um union com um intersection, por exemplo `A & (B | C)` ele vai transformar tudo em uniões de intersecções, então esse exemplo vira `(A & B) | (A & C)`. Mas se você tiver uma união com 50.000 tipos `A & (B | C | D ....)` isso fica muito lento.
+
+Por isso as novas versões do TS vão olhar a sua união original (antes de transformar em uma intersecçã0) para poder ver se o tipo original está ali antes de sair testando todas as possibilidades.
+
+## Outras mudanças
+
+-   A propriedade `resolution-mode` nas importações de tipos `/// <reference types="pkg" resolution-mode="import" />` agora pode ser incluída nas import assertions com `import type { tipo } from 'pkg' with { 'resolution-mode': 'require' }`
+-   Narrowing do `switch (true)` onde agora é possível validar as cláusulas de cada `case` onde antes não era possível
+-   Da mesma forma as comparações com booleans ficaram melhores
+-   Você pode agora fazer narrow dentro de um `instanceof` customizado, isso mesmo, é possível modificar o valor da comparação de um `instanceof` através de uma propriedade `Symbol.hasInstance` , e agora o TypeScript vai levar em consideração essa mudança também (veja exemplos [aqui](https://devblogs.microsoft.com/typescript/announcing-typescript-5-3-beta/#instanceof-narrowing-through-symbol-hasinstance))

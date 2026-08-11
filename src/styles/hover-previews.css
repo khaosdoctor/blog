@@ -1,0 +1,85 @@
+/* Gwern/Quartz-style hover preview cards. Injected by HoverPreviews.astro;
+   targets DOM nodes created at runtime by hover-previews.ts, so this stays a
+   plain global stylesheet instead of an Astro scoped <style>. */
+
+.hp-card {
+  position: fixed;
+  z-index: 2147483000;
+  width: min(320px, calc(100vw - 2rem));
+  max-height: 60vh;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  overflow: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  cursor: grab;
+  /* Drag-to-reposition is mouse/pen only (see pointerType check in
+     startDrag); touch keeps native vertical scrolling of the description. */
+  touch-action: pan-y;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.hp-card.hp-open {
+  opacity: 1;
+}
+
+.hp-card:active {
+  cursor: grabbing;
+}
+
+.hp-card.hp-pinned {
+  border-color: var(--accent);
+}
+
+.hp-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hp-close:hover,
+.hp-close:focus-visible {
+  background: var(--rule);
+  color: var(--fg);
+}
+
+.hp-title {
+  display: block;
+  padding-inline-end: 1.4rem;
+  color: var(--fg);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hp-title:hover,
+.hp-title:focus-visible {
+  color: var(--accent);
+}
+
+.hp-desc {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-card {
+    transition: none;
+  }
+}
