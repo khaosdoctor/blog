@@ -1,0 +1,319 @@
+---
+title: "Como ter controle do seu cluster Kubernetes com affinity e tolerations"
+pubDate: 2021-03-02T12:00:00.000Z
+updatedDate: 2026-07-16T16:17:48.000Z
+lang: pt
+category: "infra"
+tags: ["kubernetes", "aks", "azure", "cloud", "containers", "development", "devops", "docker", "technology"]
+description: "Você controla seu cluster Kubernetes? Vamos aprender técnicas e conceitos que vão ajudar você a ter controle de suas aplicações dentro do modelo distribuído"
+heroImage: "./photo-1592156668899-2cc871c9ac2d-3143fbef.jpg"
+draft: false
+visibility: "public"
+---
+
+Quando estamos trabalhando com clusters Kubernetes, é comum termos aplicações que precisam estar em nós específicos. Isso é ainda mais comum quando temos uma série de nós que fazem parte do nosso cluster através de **Node Pools**.
+
+Neste artigo vamos aprender a controlar nossos nós com seletores, vamos aprender o conceito de **Node Pools** e também o conceito de **Node Affinity**. Por fim vamos entender todo a ideia por trás de **taints e tolerations**. E, com isso, vamos aprender a ter o controle completo do nosso cluster e de onde queremos nossas aplicações.
+
+> Como este artigo já assume que você conhece um pouco mais de Kubernetes, não vou dar as bases para entendê-lo, mas se você quiser entender um pouco mais, veja [meu curso gratuito de Kubernetes no Channel9](https://aka.ms/aks-bootcamp) e, para se aprofundar mais, [dê uma olhada no meu livro de Kubernetes da Casa do Código](https://tudosobrekubernetes.tech).
+
+## Por que precisamos de controle?
+
+Por padrão, o Kubernetes tem um scheduler que faz uma separação muito boa do seus pods e containers, por exemplo, ele vai sempre tentar fazer uma distribuição por igual de todas as aplicações pelo cluster, evitando colocar aplicações que precisam de mais recursos do que o nó atualmente possui.
+
+Em geral, essa é uma boa separação e uma boa estratégia, porém muitas vezes temos a necessidade de ter mais de um tipo de máquina para nossas aplicações, e é ai que temos que ter o controle exato de onde precisamos colocar nossas aplicações. Por exemplo, para aplicações de Machine Learning, por exemplo, as melhores máquinas são as que possuem uma GPU integrada, dessa forma podemos ter mais de uma **node pool** com máquinas diferentes.
+
+Porém não podemos colocar todas as nossas aplicações dentro de um nó com GPU, porque se não esgotaríamos o nó sem ter as aplicações que realmente precisam dele. Da mesma forma, não podemos ter só nós de GPU porque essas máquinas são muito caras.
+
+Então é ai que entra o conceito de seletores.
+
+## Node Selectors
+
+Todo a forma de restringir uma aplicação a algum nó é chamado de _node constraint_. A forma mais simples de criar uma restrição é através de um seletor de nós. Com esta técnica, você essencialmente obriga um Pod a ser registrado para rodar dentro de um nó específico.
+
+Como qualquer outro recurso do Kubernetes, os nós também permitem o agrupamento e taggeamento através de _labels_. Uma label é um par de chave e valor que pode ser criado a sua escolha. Será através destes pares que você vai restringir uma aplicação.
+
+### Criando uma label para um nó
+
+Quando criamos um nó em um cluster Kubernetes gerenciado, como o [AKS](https://azure.microsoft.com/services/kubernetes-service/?WT.mc_id=containers-12308-ludossan), podemos ver que a própria cloud já coloca algumas labels nestes nodes, além destas, existem [outras labels conhecidas e comuns](https://kubernetes.io/docs/reference/labels-annotations-taints/) que são adicionadas a todos os nós por padrão em um cluster.
+
+Podemos obter essa informação com o comando `kubectl describe nodes {nome}`, como podemos ver neste nó em um cluster que criei:
+
+```output
+Labels:             agentpool=nodepool1
+                    beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/instance-type=Standard_B2s
+                    beta.kubernetes.io/os=linux
+                    failure-domain.beta.kubernetes.io/region=eastus
+                    failure-domain.beta.kubernetes.io/zone=0
+                    kubernetes.azure.com/cluster=MC_keda_keda_eastus
+                    kubernetes.azure.com/mode=system
+                    kubernetes.azure.com/node-image-version=AKSUbuntu-1804-2021.01.06
+                    kubernetes.azure.com/role=agent
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=aks-nodepool1-24389357-vmss000000
+                    kubernetes.io/os=linux
+                    kubernetes.io/role=agent
+                    node-role.kubernetes.io/agent=
+                    node.kubernetes.io/instance-type=Standard_B2s
+                    storageprofile=managed
+                    storagetier=Premium_LRS
+                    topology.kubernetes.io/region=eastus
+                    topology.kubernetes.io/zone=0
+```
+
+Vamos criar uma nova label para este nó, vamos dizer que ele possui uma GPU através de uma label `processingtype=gpu`, para isso vamos usar o comando `label`:
+
+```bash
+kubectl label nodes {nome do nó} processingtype=gpu
+```
+
+> Se quisermos alterar uma label já existente podemos adicionar a flag `--overwrite` com o nome da label, por exemplo, se quisermos alterar o valor da label `processingtype` para CPU podemos rodar `kubectl label nodes {nome} processingtype=cpu --overwrite`
+
+É importante notar que labels só podem ter um valor por chave, ou seja, não podemos ter duas chaves `processingtype` com dois valores diferentes.
+
+### Usando Node Selectors
+
+Agora que temos a aplicação das labels em um nó, vamos criar um Pod simples.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+```
+
+Agora podemos adicionar uma outra chave dentro de `spec` que especifica que queremos um seletor para que a aplicação execute somente em nós que possuam a chave `processingtype` com o valor `gpu`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeSelector:
+    processingtype: gpu
+```
+
+Agora esta aplicação **sempre** será enviada para este nó.
+
+## Node Affinity
+
+A **Node Affinity** é um outro conceito muito próximo do que acabamos de falar como Node Selectors. A diferença é a sintaxe um pouco mais expressiva que permite que você crie seletores mais complexos com modelos `label in (valor, valor)` ou `label=valor`.
+
+A principal diferença entre os dois é que temos uma outra chave específica para a affinity dentro de uma spec de um Pod. Nesta spec vamos ter dois tipos de affinity:
+
+-   `requiredDuringSchedulingIgnoredDuringExecution`: Pense nisso como um node selector, os pods com essa chave vão ter que estar obrigatoriamente em um nó que seja compatível com as descrições dessa affinity.
+-   `preferredDuringSchedulngIgnoredDuringExecution`: Esta é uma forma mais "soft" do anterior. Ela diz que, basicamente, o pod tentará ser executado em um nó com estas labels, mas se não houver nenhum disponível, então ele será executado em outro nó.
+
+Os dois podem coexistir no mesmo pod, e é importante se atentar para a parte `IgnoredDuringExecution`, isso significa que, se um nó perder uma determinada label que permite que uma série de pods rodem nele, estes pods continuam existindo até que eles sejam recriados.
+
+Veja um exemplo de Pod que vai obrigatoriamente criar os containers dentro das zonas 1 ou 2 e vai preferir ambientes Linux, mas se não houverem, então podem ser executados em outros SOs:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: topology.kubernetes.io/zone
+            operator: In
+            values:
+            - 1
+            - 2
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: kubernetes.io/os
+            operator: In
+            values:
+            - Linux
+  containers:
+  - name: affinity
+    image: khaosdoctor/go-vote-api
+```
+
+> Você pode usar os operadores `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`. Usando o `NotIn` e `DoesNotExist` podemos alcançar o que é chamado de **anti-affinity**, que é para repelirmos um Pod de executar em determinados nós
+
+### Peso
+
+A chave `weight` é uma opção bastante interessante porque podemos utilizar o peso para que um nó tenha mais prioridade do que outros. O que acontece é que, quando o scheduler passar por estas regras, ele irá somar os `weight` de todas as regras de um nó que são satisfeitas pelas labels deste nó. Os nós que obtiverem a soma mais alta, serão os preferidos para ter este container.
+
+## Taints e Tolerations
+
+Sabemos que _affinity_ é uma propriedade de um Pod que atrai este pod para um grupo de nós. Temos também o oposto dessa propriedade, uma outra propriedade que afasta os Pods de um grupo de nós, chamamos estas propriedades de **taints**.
+
+**Taints** são aplicados a nós, então um nó possui um ou mais taints que vão repelir pods de serem enviados para ele. Do outro lado, temos as **tolerations** que são aplicadas a Pods. Um pod que tem uma _toleration_ que é compatível com um _taint_ vai poder ser agendado para iniciar neste nó, caso contrário ele será permanentemente repelido.
+
+Pense em taints e tolerations como uma forma permanente de repelir Pods de nós. Enquanto um NodeSelector ou NodeAffinity funcionam quando você explicitamente especifica uma série de labels, caso você não especifique essas propriedades, o Pod vai continuar sendo agendado em outro nó. Com uma taint em um nó, você repele **permanentemente** todos os pods que não possuam tolerations.
+
+> Lembre-se: Taints e Tolerations funcionam juntas, podemos ter um sem o outro, mas elas simplesmente não funcionariam. Toda toleration precisa de uma taint.
+
+### Criando uma taint
+
+Da mesma forma como criamos labels, podemos criar taints com o comando `kubectl taint nodes {nome}`, mas diferentemente de labels, taints possuem um efeito. Vamos a um exemplo:
+
+```bash
+kubectl taint node {nome} processingtype=gpu:NoSchedule
+```
+
+Veja que temos o template `chave=valor:efeito`, o efeito `NoSchedule` vai proibir que qualquer pod que não tenha uma toleration compatível de ser criado neste nó. Além deste efeito, temos outros dois:
+
+-   `PreferNoSchedule`: uma versão soft do `NoSchedule`, o sistema irá tentar evitar qualquer pod que não tenha uma toleration a isso seja criado neste nó.
+-   `NoExecute`: É uma forma ainda mais radical, significa que se um taint deste tipo for adicionado a um nó, todos os Pods que não suportarem esta taint com uma toleration compatível, serão **imediatamente removidos** do nó. Este tipo de efeito possui uma outra propriedade chamada `tolerationSeconds`, que diz quanto tempo vai demorar para que o nó possa remover os pods que não tem uma toleration compatível.
+
+Vamos a exemplos de tudo isso. Primeiramente, vamos imaginar que temos 3 nós, cada um terá uma taint diferente:
+
+```bash
+kubectl taint nodes node1 processingtype=cpu:PreferNoSchedule && \
+kubectl taint nodes node2 processingtype=gpu:NoSchedule && \
+kubectl taint nodes node3 processingtype=tpu:NoExecute
+```
+
+> Uma taint pode possuir mais de um efeito ao mesmo tempo, embora isso não faça tanto sentido
+
+O que temos aqui são:
+
+-   `node1` vai permitir a execução de pods dentro dele se não houver nenhum tipo de toleration nos pods. Já que ele é um nó simples de CPU
+-   `node2` não vai permitir que nenhum Pod que não tenha uma toleration compatível seja executado, já que só queremos pods de GPU rodando ali
+-   `node3` além de não permitir nenhum tipo de agendamento para ele, também vai automaticamente remover todos os pods que já estão sendo executados que não possuam a determinada toleration. Este é um nó caro já que usa TPUs, então queremos o máximo de controle por ali
+
+### Tolerando Taints
+
+Agora que criamos o taint no nosso node, vamos criar uma série de pods que toleram determinadas taints.
+
+Primeiramente vamos criar o pod que tolera a taint de TPU:
+
+```yaml title="c"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tpu
+  labels:
+    env: test
+spec:
+  containers:
+  - name: tpu
+    image: khaosdoctor/go-vote-api
+  tolerations:
+  - key: "processingtype"
+    operator: "Equals"
+    value: "tpu"
+    effect: "NoExecute"
+```
+
+> Diferentemente de uma affinity, as tolerations podem possuir os operadores `Equals` e `Exists`
+
+Este Pod poderá ser executado no nó que contém TPUs. Agora vamos fazer o mesmo para o setup de CPU e GPU:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu
+  labels:
+    env: test
+spec:
+  containers:
+  - name: gpu
+    image: khaosdoctor/go-vote-api
+  tolerations:
+  - key: "processingtype"
+    operator: "Equals"
+    value: "gpu"
+    effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu
+  labels:
+    env: test
+spec:
+  containers:
+  - name: cpu
+    image: khaosdoctor/go-vote-api
+  tolerations:
+  - key: "processingtype"
+    operator: "Equals"
+    value: "cpu"
+    effect: "PreferNoSchedule"
+```
+
+Além disso, quando estamos trabalhando com tolerations, a chave `value` não é obrigatória, podemos ter apenas uma taint de chave sem precisar de um valor.
+
+Para estes dois pods, teremos que eles podem ser incluídos em cada um dos nós que eles toleram. No entanto, um novo Pod que for criado sem nenhuma toleration será provavelmente criado no nó de CPU.
+
+### Taints padrões
+
+Quando um nó do Kubernetes entra em determinados estados, como "sem disco", "sem memória" ou qualquer outro estado que o impeça de ter novos Pods sendo agendados para ele, o sistema automaticamente adiciona [taints padrões](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#taint-based-evictions) que removem os Pods de acordo com cada uma dessas taints.
+
+Você pode criar tolerations para estas taints, por exemplo, quando um nó fica incomunicável, podemos dizer para seus Pods que eles esperem pelo menos 5 minutos antes de serem retirados e realocados com a chave `tolerationSeconds`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu
+  labels:
+    env: test
+spec:
+  containers:
+  - name: gpu
+    image: khaosdoctor/go-vote-api
+  tolerations:
+  - key: "node.kubernetes.io/unreachable"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 300
+```
+
+Dessa forma os nós não vão imediatamente remover os Pods que não forem compatíveis na esperança de que a sua rede volte antes disto. Você pode também aplicar esse tempo de toleration a qualquer outra taint.
+
+## Boas práticas para labels
+
+Existem algumas práticas para nomear suas labels para que elas fiquem eficientes e você consiga realizar suas tarefas de forma prática
+
+### Prefixos
+
+Como você pôde perceber no exemplo anterior, algumas das labels parecem um nome de domínio completo (FQDN) separado por um recurso, como em `topology.kubernetes.io/region`, a parte do DNS é chamada de **prefixo**.
+
+Prefixos são utilizados para poder dar a intenção de que as labels prefixadas são públicas, qualquer label sem nenhum prefixo é considerara uma label privada apenas ao usuário, embora possam ser vistas por outros usuários.
+
+[Como a documentação oficial diz](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set), qualquer aplicação que adiciona labels a objetos de usuários (como é o caso da própria Azure), deve obrigatoriamente possuir uma label com um prefixo.
+
+### Prefixos reservados
+
+Todas as labels com os prefixos que terminem em `kubernetes.io` ou `k8s.io` são geralmente reservadas para objetos do core do Kubernetes, isso não é uma obrigação ou algo que é forçado ao usuário, mas é uma convenção que deve ser seguida.
+
+### Labels recomendadas
+
+A [documentação oficial recomenda uma série de labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/) para serem colocadas **em todos os recursos** criados dentro do cluster. Elas são apenas recomendadas e não são obrigatórias em todas as aplicações. Além destas labels, algumas outras labels que eu particularmente gosto de colocar são:
+
+-   Labels que definem o time responsável pela aplicação como `team=campaign`
+-   Labels para definir os responsáveis pela aplicação com `owner=lucas_santos`
+-   Definição do ambiente da aplicação com `env=production`
+-   Último commit da versão atual com `sha=5acffe34d`, apenas para controle de versionamento
+
+## Conclusão
+
+Com taints, tolerations, affinity e selectors damos um passo a frente no controle dos nossos clusters de forma que podemos controlar ainda melhor o nosso ecossistema!
+
+Até mais!

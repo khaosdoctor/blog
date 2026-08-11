@@ -1,0 +1,777 @@
+---
+title: "Criando ambientes de teste dinamicamente com GitHub Actions"
+pubDate: 2021-06-09T13:00:00.000Z
+updatedDate: 2026-07-16T16:14:27.000Z
+lang: pt
+category: "infra"
+tags: ["github", "kubernetes", "helm", "aks", "ci"]
+description: "Já imaginou ter um ambiente diferente para feature que você quiser testar? Então que tal fazer isso usando GitHub actions e o poder do Kubernetes?"
+heroImage: "./photo-1584187167877-c7c4bbd60878-57996715.jpg"
+draft: false
+visibility: "public"
+---
+
+Como otimizar um pipeline de testes para que os times não tenham problemas de concorrência ao testar suas funcionalidades e seus módulos é um assunto recorrente em vários tópicos que tratei tanto no passado quanto recentemente.
+
+Inclusive, já fiz algumas talks sobre o assunto e tenho até [um repositório de exemplo](https://github.com/khaosdoctor/helm-dynamic-envs/) usando o [Azure DevOps](https://dev.azure.com/?WT.mc_id=containers-12314-ludossan) como ferramenta de CI. Você pode ver os slides e o vídeo abaixo!
+
+<YouTube id="tYy3HTR0f90" />
+
+iframe.speakerdeck-iframe \{ width: 37vw; \}
+
+A questão é: Como podemos fazer com que vários times de desenvolvimento consigam testar suas funcionalidades em um ambiente completamente separado dos demais de forma simples e rápida?
+
+A resposta está, é claro, em **containers**. Quando utilizamos o Kubernetes com Helm juntamente a uma ferramenta de CI, podemos fazer muitas coisas dinamicamente. Neste artigo, vou atualizar minha palestra anterior e mostrar a mesma aplicação, porém rodando no pipeline do GitHub Actions. Para deixar o cenário mais real, vamos utilizar a [Azure](https://azure.microsoft.com?WT.mc_id=containers-12314-ludossan) com o [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/?WT.mc_id=containers-12314-ludossan) baixando imagens de um [Azure Container Registry privado](https://azure.microsoft.com/services/container-registry/?WT.mc_id=containers-12314-ludossan) já integrado de forma privada com o cluster. Todos os dados serão armazenados em um [CosmosDB](https://azure.microsoft.com/services/cosmos-db/?WT.mc_id=containers-12314-ludossan) do tipo Mongo.
+
+Vamos lá!
+
+## Antes de começar
+
+Vamos ter que criar o ambiente antes de começar a mostrar como a parte dinâmica pode ser feita. Como esse não é o intuito do post, vou deixar apenas as referências de comandos do que vamos fazer por aqui, mas todas as documentações necessárias podem ser encontradas diretamente na documentação de cada serviço.
+
+Primeiramente você precisa ter uma conta na [Azure](https://azure.microsoft.com?WT.mc_id=containers-12314-ludossan), uma vez com esta conta, instale o [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?WT.mc_id=containers-12314-ludossan), vamos utilizar somente a linha de comando.
+
+O primeiro comando será o comando `az login` para fazer o login na sua conta e escolher qual será a subscription que será utilizada pra criar os recursos. Assim que o login estiver pronto, vamos começar criando o primeiro recurso, o resource group.
+
+```bash
+az group create -l eastus -n ship-manager-pipeline
+```
+
+Agora vamos criar o nosso ACR para poder armazenar nossas imagens:
+
+```bash
+az acr create -n shipmanager --sku Basic -g ship-manager-pipeline
+```
+
+Espere até o CR ser criado e execute o seguinte comando para habilitar o login via usuário e senha, só assim vamos poder fazer o login pelo nosso CI para poder construir as imagens:
+
+```bash
+az acr update -n shipmanager --admin-enabled true
+```
+
+Agora vamos partir para o CosmosDB, com um simples comando podemos criar toda a estrutura:
+
+```bash
+az cosmosdb create --kind MongoDB -n ship-manager-db -g ship-manager-pipeline
+```
+
+Este comando demora um pouco mais para ser executado, então seja paciente. É importante dizer que, apesar de ser incrível, o CosmosDB não é recomendado para este caso específico de criação de bancos de dados quando temos ambientes efêmeros como estes pois é mais complexo de remover futuramente. Mas, para simplificar, vamos utilizá-lo e vamos entender alternativas que podemos ter a esta abordagem mais a frente no artigo.
+
+Por fim vamos criar o nosso AKS que vai unir todas as partes:
+
+```bash
+az aks create -n ship-manager -g ship-manager-pipeline \
+--enable-addons http_application_routing \
+--attach-acr shipmanager \
+--vm-size Standard_B2s \
+--generate-ssh-keys \
+--node-count 2
+```
+
+Isso fará com que nosso AKS seja criado já em conjunto com o ACR, dessa forma não precisamos criar um secret para cada namespace com o nosso arquivo de login do Docker para baixar as imagens, e também não precisamos fazer um bind em uma service account.
+
+Obtenha as credenciais do AKS com o seguinte comando:
+
+```bash
+az aks get-credentials -n ship-manager -g ship-manager-pipeline --admin
+```
+
+Lembrando que você precisa ter o `kubectl` instalado na máquina para este comando funcionar, caso não o possua, use o comando `az aks install-cli` para instalá-lo.
+
+## Criando o chart
+
+O primeiro passo para a criação da pipeline é saber como ela vai funcionar, inicialmente vamos trabalhar somente com dois ambientes, o primeiro será o ambiente de produção e o segundo será o ambiente de testes.
+
+O ambiente de produção será publicado sempre que um push com uma tag `v*` for feito. Já o ambiente de teste será publicado em um push de qualquer outro branch que não seja o `master` ou `main` (dependendo do caso).
+
+Para que você possa acompanhar, preparei [este repositório de exemplo](https://github.com/khaosdoctor/helm-actions-dynamic-env-example) que contém tanto o código da aplicação quanto o código das actions em si.
+
+> Se você quiser acompanhar passo a passo, faça um _fork_ do repositório, mas não se esqueça de remover a pasta `.github` para que as actions sejam removidas.
+
+Antes de criar os arquivos da pipeline, vamos criar os arquivos do Helm, para podermos criar nosso chart! Crie uma pasta chamada `kubernetes` na raiz do repositório, depois crie uma segunda pasta chamada `ship-manager`.
+
+> Poderíamos criar o chart do helm de forma automática via CLI, porém ele cria vários arquivos que não precisamos, então vamos criá-lo manualmente para facilitar.
+
+Dentro da pasta `ship-manager` crie mais duas pastas: `templates` e `charts`. Agora crie dois arquivos no mesmo nível da pasta `templates`, um deles se chamará `Chart.yaml` e o outro `values.yaml`.
+
+Agora, vamos para dentro da pasta `charts`, nela, crie uma pasta `backend` e, dentro desta última adicione um arquivo `Chart.yaml` seguido de uma pasta `templates`.
+
+A estrutura final deverá ser assim:
+
+```
+kubernetes
+└── ship-manager
+    ├── Chart.yaml
+    ├── charts
+    │   └── backend
+    │       ├── Chart.yaml
+    │       └── templates
+    │
+    ├── templates
+    └── values.yaml
+```
+
+No arquivo `Chart.yaml` da pasta `ship-manager` vamos escrever o seguinte:
+
+```yml
+apiVersion: v2
+name: ship-manager
+description: Chart for the ship manager app
+version: 0.1.0
+```
+
+E no da pasta `backend` será o seguinte:
+
+```yml
+apiVersion: v2
+name: backend
+description: Chart for the backend part of the ship manager app
+version: 0.1.0
+```
+
+O que fizemos foi criar o arquivo equivalente a um `package.json` do Helm, ou seja, o arquivo que define o pacote que vamos instalar no nosso cluster.
+
+O Helm funciona com base em uma hierarquia, o que acabamos de criar aqui é uma ordem de dependências, ou seja, acabamos de dizer que o frontend da aplicação, que está no `ship-manager`, é dependente de um backend localizado na pasta `charts`, se criássemos outra pasta `charts` dentro de `backend` iríamos dizer que o backend é dependente dela e assim sucessivamente. Desta forma, quando damos apenas um comando, o Helm já instala todas as dependências em ordem para nós.
+
+Vamos criar nosso primeiro template, crie um arquivo `frontend.yaml` dentro da pasta `templates` localizada na pasta `ship-manager`. Este template vai ser o que vai ser de fato criado dentro do cluster. Nele vamos ter todos os recursos do Kubernetes, começando pelo Deployment:
+
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ship-manager-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ship-manager-frontend
+  template:
+    metadata:
+      labels:
+        app: ship-manager-frontend
+    spec:
+      containers:
+        - image: {{ required "Registry is required" .Values.global.registryName }}/{{ required "Image name is required" .Values.frontend.imageName }}:{{ required "Image tag is required" .Values.global.imageTag }}
+          name: ship-manager-frontend
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /usr/src/app/dist/config.js
+              subPath: config.js
+      volumes:
+        - name: config
+          configMap:
+            name: frontend-config
+```
+
+Veja que estamos utilizando placeholders do Helm para poder identificar partes que podem ser alteradas, e é isso que faz com que tudo seja possível. A criação de ambientes e alteração de variáveis em tempo de CLI e não depois de compilado faz com que possamos passar os valores que quisermos para essas variáveis ao criar o ambiente.
+
+Depois temos as outras configurações:
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ship-manager-frontend
+spec:
+  selector:
+    app: ship-manager-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ship-manager-frontend
+  annotations:
+    kubernetes.io/ingress.class: addon-http-application-routing
+spec:
+  rules:
+    - host: {{ default "ship-manager-frontend" .Values.frontend.ingress.hostname }}.{{ .Values.global.dnsZone }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ship-manager-frontend
+              servicePort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  config.js: |
+    const config = (() => {
+      return {
+        'VUE_APP_BACKEND_BASE_URL': 'http://{{ default "ship-manager-backend" .Values.backend.ingress.hostname }}.{{ .Values.global.dnsZone }}',
+        'VUE_APP_PROJECT_VERSION': '{{ .Values.global.imageTag }}'
+      }
+    })()
+```
+
+Perceba que estou buscando tudo de `.Values`, este é o arquivo `values.yaml` que vamos ver logo mais. Perceba também que a maioria das coisas que podem ser alteradas e que precisam ser alteradas, como o nome da imagem, a tag, o hostname e banco de dados, também são variáveis.
+
+Nestes casos, utilizar configmaps e secrets ajuda muito a manter a pipeline simples.
+
+O arquivo final será:
+
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ship-manager-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ship-manager-frontend
+  template:
+    metadata:
+      labels:
+        app: ship-manager-frontend
+    spec:
+      containers:
+        - image: {{ required "Registry is required" .Values.global.registryName }}/{{ required "Image name is required" .Values.frontend.imageName }}:{{ required "Image tag is required" .Values.global.imageTag }}
+          name: ship-manager-frontend
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /usr/src/app/dist/config.js
+              subPath: config.js
+      volumes:
+        - name: config
+          configMap:
+            name: frontend-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ship-manager-frontend
+spec:
+  selector:
+    app: ship-manager-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ship-manager-frontend
+  annotations:
+    kubernetes.io/ingress.class: addon-http-application-routing
+spec:
+  rules:
+    - host: {{ default "ship-manager-frontend" .Values.frontend.ingress.hostname }}.{{ .Values.global.dnsZone }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ship-manager-frontend
+              servicePort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  config.js: |
+    const config = (() => {
+      return {
+        'VUE_APP_BACKEND_BASE_URL': 'http://{{ default "ship-manager-backend" .Values.backend.ingress.hostname }}.{{ .Values.global.dnsZone }}',
+        'VUE_APP_PROJECT_VERSION': '{{ .Values.global.imageTag }}'
+      }
+    })()
+```
+
+Vamos fazer o mesmo com o backend, criando um arquivo `backend.yaml` na pasta `charts/backend/templates`:
+
+```yml
+# backend.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ship-manager-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ship-manager-backend
+  template:
+    metadata:
+      labels:
+        app: ship-manager-backend
+    spec:
+      containers:
+        - image: {{ required "Registry is required" .Values.global.registryName }}/{{ required "Image name is required" .Values.imageName }}:{{ required "Image tag is required" .Values.global.imageTag }}
+          name: ship-manager-backend
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: DATABASE_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  key: database_mongodb_uri
+                  name: backend-db
+            - name: DATABASE_MONGODB_DBNAME
+              value: {{ default "ship-manager" .Values.global.dbName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ship-manager-backend
+spec:
+  selector:
+    app: ship-manager-backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ship-manager-backend
+  annotations:
+    kubernetes.io/ingress.class: addon-http-application-routing
+spec:
+  rules:
+    - host: {{ default "ship-manager-backend" .Values.ingress.hostname }}.{{ .Values.global.dnsZone }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ship-manager-backend
+              servicePort: http
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-db
+type: Opaque
+stringData:
+  database_mongodb_uri: {{ required "DB Connection is required" .Values.global.dbConn | quote }}
+```
+
+Perceba que tenho algumas funções também, como `required`, `default` e `quote`, esta são [funções nativas do Helm](https://helm.sh/docs/chart_template_guide/function_list/) e quebram um bom galho quando a gente precisa de funcionalidades mais complexas.
+
+### O arquivo values
+
+Assim como os charts, o arquivo `values.yaml` é baseado em uma hierarquia de escopos, ou seja, tome como exemplo a nossa estrutura:
+
+```yml
+# values.yaml
+global:
+  chave: # Acessível a todos os charts, tanto o frontend como o backend como `.Values.global.chave`
+
+backend:
+  chave: # Acessível somente ao frontend e ao backend, porém para o frontend será `.Values.backend.chave` e o backend usará como `.Values.chave`
+
+frontend:
+  chave: # Acessível pelo frontend como `.Values.frontend.chave`, mas não pelo backend
+
+chave: # Acessível somente ao frontend como `.Values.chave`
+```
+
+Perceba que temos uma quebra de escopo dentro do arquivo values, as chaves que tem o mesmo nome dos seus charts dependentes serão acessadas somente por eles e pelos charts de mais alta ordem, então como o nosso frontend é o chart de maior ordem, ele tem acesso a todos os valores, enquanto o backend só tem acesso às chaves definidas sob `backend:`.
+
+Perceba também que dentro de `backend` o escopo sofre um "levelling", ou seja, o escopo é removido de dentro de `backend` então você não precisa acessar o valor como `.Values.backend.chave` se você estiver dentro do chart `backend`, mas somente como `.Values.chave`.
+
+> É possível ter mais arquivos values dentro dos charts dependentes e a regra se mantém a mesma, a diferença é que o chart de maior ordem será alterado, porém este padrão torna a manutenção bastante complexa.
+
+Nosso arquivo values precisa ter as mesmas chaves que definimos dentro dos nossos templates, então elas vão ser as seguintes:
+
+```yml
+global:
+  registryName:
+  imageTag:
+  dbName: ship-manager
+  dbConn:
+  dnsZone:
+
+backend:
+  imageName: ship-manager-backend
+  ingress:
+    hostname:
+
+frontend:
+  imageName: ship-manager-frontend
+  ingress:
+    hostname:
+```
+
+As chaves que estou deixando em branco são as que serão ou preenchidas pelo CLI ou pelas funções `default`.
+
+## Criando a pipeline
+
+Para criamos a pipeline, vamos utilizar o modo manual de criação, ou seja, vamos criar uma pasta `.github` e dentro dela uma pasta `workflows`. O primeiro workflow será o mais simples, o de produção.
+
+Dentro da pasta `workflows` vamos criar um arquivo `deploy-production.yml` (pode ser qualquer nome, na verdade) e começar escrevendo o nome da nossa pipeline e quais são os gatilhos que vão fazer ela funcionar.
+
+```yml
+name: Build and push the tagged build to production
+
+on:
+  push:
+    tags:
+      - 'v*'
+```
+
+Aqui estamos dizendo que nossa action vai rodar em todos os pushes com uma tag `v*`, ou seja, `v1.0.0` e até mesmo `vabc`, se você quiser reduzir as possibilidades pode usar regex como `v[0-9]\.[0-9]\.[0-9]`.
+
+Depois, vamos criar nosso primeiro job e definir uma variável em comum:
+
+```yml
+name: Build and push the tagged build to production
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  IMAGE_NAME: ship-manager
+
+jobs:
+  build_push_image:
+    runs-on: ubuntu-20.04
+```
+
+Criamos um job chamado `build_push_image` que vai rodar no ubuntu 20, e uma variável compartilhada que será o nome base da imagem. Agora vamos para a ação de verdade, vamos começar a criar os passos do nosso job, começando com dois super importantes:
+
+```yml
+name: Build and push the tagged build to production
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  IMAGE_NAME: ship-manager
+
+jobs:
+  build_push_image:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set env
+        id: tags
+        run: echo tag=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+```
+
+O primeiro passo é um checkout do nosso repositório, ele está praticamente presente em todas as actions e é sempre o primeiro passo. O segundo é a definição de uma segunda variável, o nome da tag.
+
+Por padrão `$GITHUB_REF` é ou o nome do branch ou o nome da tag como `/refs/heads/main` ou `/refs/tags/v1.0.0`, temos que remover o `/refs/*` e ficar só com o final, por isso estamos usando uma substituição via shell para adicioná-la as variáveis globais, porém esta variável só funciona **dentro deste job**.
+
+> Não podemos definir a variável dentro de `env` porque esta chave não executa nenhum tipo de shell, portanto não podemos usar substituição de valores e nem expansões.
+
+Agora vamos fazer o pipeline do Docker, ou seja, build e push das imagens do backend e frontend.
+
+```yml
+name: Build and push the tagged build to production
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  IMAGE_NAME: ship-manager
+
+jobs:
+  build_push_image:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set env
+        id: tags
+        run: echo tag=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to ACR
+        uses: docker/login-action@v1
+        with:
+          # Username used to log in to a Docker registry. If not set then no login will occur
+          username: ${{secrets.ACR_LOGIN }}
+          # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
+          password: ${{secrets.ACR_PASSWORD }}
+          # Server address of Docker registry. If not set then will default to Docker Hub
+          registry: ${{ secrets.ACR_NAME }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v2
+        with:
+          # Docker repository to tag the image with
+          tags: ${{secrets.ACR_NAME}}/${{ env.IMAGE_NAME }}-frontend:latest,${{secrets.ACR_NAME}}/${{ env.IMAGE_NAME }}-frontend:${{env.tag}}
+          labels: |
+            image.revision=${{github.sha}}
+            image.release=${{github.ref}}
+          file: frontend/Dockerfile
+          context: frontend
+          push: true
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v2
+        with:
+          # Docker repository to tag the image with
+          tags: ${{secrets.ACR_NAME}}/${{ env.IMAGE_NAME }}-backend:latest,${{secrets.ACR_NAME}}/${{ env.IMAGE_NAME }}-backend:${{env.tag}}
+          labels: |
+            image.revision=${{github.sha}}
+            image.release=${{github.ref}}
+          file: backend/Dockerfile
+          context: backend
+          push: true
+```
+
+O Docker tem 3 actions que são utilizadas, a primeira delas é o setup do `buildx` o utilitário de build de imagens do Docker, a segunda é o login em um registry, no caso será nosso ACR, e aqui temos o nosso primeiro `secret` que vamos criar dentro do nosso repositório, que serão os dados de login do ACR.
+
+Por fim, estamos criando e dando um push na imagem e criando as tags `latest` e o nome da `tag` do GitHub, desta forma sabemos quais são as imagens "de produção" e quais serão as de teste, adicionamos também duas labels para cada imagem, uma delas tem a revisão, o sha do nosso commit, e a outra o nome da tag.
+
+Com isso finalizamos nosso primeiro job, o segundo é a parte onde vamos fazer o deploy para o cluster. O início é o mesmo então vou omitir o conteúdo até aqui para focarmos só nessa parte:
+
+```yml
+# inicio do arquivo
+jobs:
+  build_push_image:
+    # job de envio da imagem
+
+  deploy:
+      runs-on: ubuntu-20.04
+      needs: build_push_image
+  
+      steps:
+        - uses: actions/checkout@v2
+  
+        - name: Set env
+          id: tags
+          run: echo tag=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+  
+        - name: Install Helm
+          uses: Azure/setup-helm@v1
+          with:
+            version: v3.3.1
+```
+
+Perceba que estamos criando uma relação entre os dois jobs com a chave `needs`, isso diz que o segundo job só será executado se o primeiro passar. Fazemos o checkout e copiamos a criação da variável, depois rodamos um step simples de instalação do Helm na máquina.
+
+```yml
+# inicio do arquivo
+jobs:
+  build_push_image:
+    # job de envio da imagem
+
+  deploy:
+      runs-on: ubuntu-20.04
+      needs: build_push_image
+  
+      steps:
+        - uses: actions/checkout@v2
+  
+        - name: Set env
+          id: tags
+          run: echo tag=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+  
+        - name: Install Helm
+          uses: Azure/setup-helm@v1
+          with:
+            version: v3.3.1
+
+      - name: Get AKS Credentials
+        uses: Azure/aks-set-context@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          # Resource group name
+          resource-group: ship-manager-pipeline
+          # AKS cluster name
+          cluster-name: ship-manager
+
+      - name: Run Helm Deploy
+        run: |
+          helm upgrade \
+            ship-manager-prd \
+            ./kubernetes/ship-manager \
+            --install \
+            --create-namespace \
+            --namespace production \
+            --set global.registryName=${{ secrets.ACR_NAME }} \
+            --set global.dbConn="${{ secrets.DB_CONNECTION }}" \
+            --set global.dnsZone=${{ secrets.DNS_NAME }} \
+            --set global.imageTag=${{env.tag}}
+```
+
+Por fim vamos ter o comando para obter as credenciais do Kubernetes e o deploy do Helm. Perceba que estamos fazendo o deploy para um namespace `production` e setando os valores do `values.yaml` através das flags `--set`, isso torna tudo mais fácil quando precisarmos remover os dados, pois só precisamos remover o namespace e tudo é deletado.
+
+A pipeline de testes é quase igual, a diferença é que estamos setando mais variáveis e mudamos o namespace de publicação e também o trigger. O outro arquivo, que chamei de `deploy-test` ficou assim:
+
+```yml
+# deploy-test.yml
+name: Build and push the tagged build to test
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+      - 'master'
+
+env:
+  IMAGE_NAME: ship-manager
+
+jobs:
+  build_push_image:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set env
+        id: tags
+        run: echo tag=${GITHUB_REF#refs/heads/} >> $GITHUB_ENV
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to ACR
+        uses: docker/login-action@v1
+        with:
+          # Username used to log in to a Docker registry. If not set then no login will occur
+          username: ${{secrets.ACR_LOGIN }}
+          # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
+          password: ${{secrets.ACR_PASSWORD }}
+          # Server address of Docker registry. If not set then will default to Docker Hub
+          registry: ${{ secrets.ACR_NAME }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v2
+        with:
+          # Docker repository to tag the image with
+          tags: ${{ secrets.ACR_NAME }}/${{ env.IMAGE_NAME }}-frontend:${{env.tag}}
+          labels: |
+            image.revision=${{github.sha}}
+          file: frontend/Dockerfile
+          context: frontend
+          push: true
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v2
+        with:
+          # Docker repository to tag the image with
+          tags: ${{ secrets.ACR_NAME }}/${{ env.IMAGE_NAME }}-backend:${{env.tag}}
+          labels: |
+            image.revision=${{github.sha}}
+          file: backend/Dockerfile
+          context: backend
+          push: true
+
+  deploy:
+    runs-on: ubuntu-20.04
+    needs: build_push_image
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set env
+        id: tags
+        run: echo tag=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+
+      - name: Install Helm
+        uses: Azure/setup-helm@v1
+        with:
+          version: v3.3.1
+
+      - name: Get AKS Credentials
+        uses: Azure/aks-set-context@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          # Resource group name
+          resource-group: ship-manager-pipeline
+          # AKS cluster name
+          cluster-name: ship-manager
+
+      - name: Run Helm Deploy
+        run: |
+          helm upgrade \
+            ship-manager-${{env.tag}} \
+            ./kubernetes/ship-manager \
+            --install \
+            --create-namespace \
+            --namespace test-${{env.tag}} \
+            --set global.registryName=${{ secrets.ACR_NAME }} \
+            --set global.dbConn="${{ secrets.DB_CONNECTION }}" \
+            --set global.dbName=ship-manager-test-${{env.tag}} \
+            --set global.dnsZone=${{ secrets.DNS_NAME }} \
+            --set backend.ingress.hostname=ship-manager-backend-${{env.tag}} \
+            --set frontend.ingress.hostname=ship-manager-frontend-${{env.tag}} \
+            --set global.imageTag=${{env.tag}}
+```
+
+### Secrets
+
+Agora que já temos as pipelines criadas, vamos ao GitHub criar nossos secrets! Abra o repositório no seu browser, navegue até a aba `Settings` e depois `secrets`, então clique em `New repository secret` para criar um novo secret local.
+
+Vamos criar um secret chamado `ACR_LOGIN` que será o nome do nosso ACR, ou seja, `shipmanager`. Outro chamado `ACR_NAME`, que não é bem um segredo, porque é o DNS do nosso CR, porém assim evitamos de ter um valor fixo na nossa action, este valor é o `shipmanager.azurecr.io`.
+
+> Ambas as informações podem ser obtidas no portal da Azure, sabendo o nome do ACR o login é o mesmo e o DNS é sempre `<nome>.azurecr.io`
+
+A senha do ACR pode ser obtida com um comando do AZ CLI: `az acr credential show -n shipmanager --query "passwords[0].value" -o tsv` e deve ser colocada em outro secret chamado `ACR_PASSWORD`.
+
+Para obtermos a chave do nosso AKS, vamos precisar de um acesso via service principal na Azure, que pode ser obtido pelo comando `az ad sp create-for-rbac --sdk-auth`, este comando vai te devolver um JSON, copie **todo o JSON** e cole no secret chamado `AZURE_CREDENTIALS`.
+
+A conexão com o banco do secret chamado `DB_CONNECTION` pode ser obtida também pelo comando `az cosmosdb keys list -n ship-manager-db -g ship-manager-pipeline --type connection-strings --query "connectionStrings[0].connectionString"`.
+
+E o secret final pode ser obtido através de uma query na lista de addons habilitados do AKS, como ligamos o HTTP Application Routing, vamos ter uma zona de DNS liberada que podemos obter com o comando `az aks show -n ship-manager -g ship-manager-pipeline --query "addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName` e colocar no secret chamado `DNS_NAME`.
+
+## Testando
+
+Commitamos nossas mudanças e agora vamos criar uma tag com `git tag -a v<versão> -m'nova versão` e depois `git push --tags` para podermos fazer a trigger na nosso build. Teremos um pequeno delay e então uma saída como esta:
+
+![](./image-2.png)
+
+Se visualizarmos a nossa aplicação depois de alguns minutos (o DNS demora para propagar), iremos ver que temos um endereço igual ao do nosso ingress (podemos obter o endereço do frontend com `kubectl get ing -n production`), ao acessar, vamos ter a nossa aplicação rodando:
+
+![](./image-3.png)
+
+Nossa aplicação está em um branch de produção e será acessível e atualizada para a versão mais nova sempre que fizermos um push com uma tag específica. O mesmo vai acontecer quando criarmos um novo branch e fizermos um push, experimente criar um branch qualquer e enviar um código!
+
+## Conclusão e melhorias
+
+A criação de um ambiente dinâmico não é simples, porém pode ser a solução entre um time que demora a testar suas funcionalidades para um time que pode ser muito mais eficiente. Neste exemplo chegamos aos 50% do que é necessário, a outra parte importante do pipeline é também **remover** seus recursos sempre que não estão mais utilizados.
+
+Por este motivo, utilizar outro banco de dados ao invés da mesma instância é muito mais preferível, o ideal seria criarmos uma dependência no chart backend para um chart do MongoDB completamente vazio, desta forma podemos ter certeza que este ambiente está totalmente isolado e podemos remover todo o ambiente sem nenhum problema.
+
+Deixem seus comentários e quem sabe podemos continuar essa série!

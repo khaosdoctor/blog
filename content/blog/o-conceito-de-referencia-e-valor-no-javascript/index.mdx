@@ -1,0 +1,245 @@
+---
+title: "O conceito de \"referência\" e \"valor\" no JavaScript"
+pubDate: 2024-02-21T11:00:38.000Z
+updatedDate: 2026-07-16T15:53:01.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "typescript"]
+description: "Entenda as diferenças entre referência e valor em JavaScript: primitivos são copiados, objetos criam ponteiros compartilhados. Aprenda técnicas de clonagem."
+heroImage: "./articles.png"
+draft: false
+visibility: "public"
+seoDescription: "Entenda as diferenças entre referência e valor em JavaScript: primitivos são copiados, objetos criam ponteiros compartilhados."
+---
+
+Durante uma conversa na comunidade da [Formação TS](https://formacaots.com.br), um dos alunos perguntou sobre um dos temas que eram muito famosos no passado, mas eu mesmo não ouço falar dele faz alguns anos. O conceito de **referência vs valor** no JavaScript.
+
+Então eu percebi que nunca tinha feito um conteúdo sobre isso e resolvi elaborar mais sobre esse tema.
+
+## O que é ref e val?
+
+Referencia e valor são conceitos bem antigos, eu lembro que o Visual Basic tinha duas keywords que permitiam que você escolhesse se o resultado seria um `ByVal` ou `ByRef`:
+
+```vb
+Public Sub ChangeFieldValue(ByVal cls As Class1)
+        cls.Field = 500
+End Sub
+
+Public Sub ChangeFieldReference(ByRef cls As Class1)
+  cls.Field = 500
+End Sub
+```
+
+A ideia é bastante simples:
+
+-   **Referências** apontam para o objeto original como um ponteiro, então alterações em qualquer variável com esse ponteiro, vão alterar o objeto original também
+-   **Valores** não alteram o objeto original porque o valor da variável é um clone do valor original, e não um ponteiro
+
+Mas como isso funciona no JavaScript?
+
+## No JavaScript
+
+No JavaScript a gente chama essa galera de **Reference Type** quando é uma referência ou **Value Type** para valores. Em suma, tudo que for um tipo primitivo em JS é passado **por valor**:
+
+-   Numbers
+-   Strings
+-   Booleans
+
+Sempre que você tiver um desses três tipos, você vai ter uma passagem por valor, ou seja, eles serão clonados quando você enviar a variável de um lugar para outro, por exemplo:
+
+```js
+let original = 10
+
+function vezesDois (num) {
+  num *= 2
+  return num
+}
+
+const mutado = vezesDois(original)
+
+console.log(mutado) // 20
+console.log(original) // 10
+```
+
+Veja que, mesmo que a gente modifique o valor da variável e associe ela novamente com o valor `num`, o valor `original` permaneceu `10`, porque _`num` é uma cópia do `original`._
+
+Agora e com as referências? Todo esse conceito é um pouco diferente.
+
+<CourseCTA />
+
+## Referências
+
+Tudo o que não for um primitivo no JS é tratado como um _objeto_, ou seja, muita coisa no JS é um objeto:
+
+-   Objetos (claro)
+-   Funções
+-   Arrays
+-   null
+-   RegExp
+-   Classes
+-   ...
+
+Quando você cria um objeto no JS de forma literal ou pelo construtor, você está criando um _ponteiro_ para algo chamado de _hidden class_ (eu tenho um [artigo só sobre isso](https://dev.to/_staticvoid/node-js-por-baixo-dos-panos-5-hidden-classes-e-alocacoes-de-variaveis-4bj), são 10 na verdade). Uma hidden class é um valor, o objeto que você criou aponta para esse valor, mas não vamos entrar em detalhes aqui.
+
+O que é importante saber é que, sempre que você tiver um objeto, quando passarmos o objeto para outra variável ou para outra função, o ponteiro que vai ser passado, e não o valor em si. E isso é **extremamente importante** porque qualquer alteração no ponteiro, vai alterar o objeto original.
+
+> [!TIP] 🤔
+> ****Você sabia?****
+> Esse é um dos motivos pelo qual podemos usar `const x = []` e depois modificar o array mesmo ele sendo constante, pois estamos modificando a referência e não o ponteiro. Mas se tentarmos associar `x = []` isso não é possível porque `[]` é outro objeto e outro ponteiro.
+
+O exemplo mais famoso disso são os métodos de arrays como `sort` e `reverse`, que modificam o array original (em conjunto com o `push` e o `pop` e muitos outros):
+
+```js
+const original = [1, 2, 3, 4, 5]
+
+function foo (arr: any[]) {
+  arr.reverse()
+}
+
+console.log(original) // [1, 2, 3, 4, 5]
+foo(original)
+console.log(original) // [5, 4, 3, 2, 1]
+```
+
+### Comparação
+
+Um outro ponto importante é quando falamos de comparações usando referências. Quando estamos usando valores, podemos fazer algo assim:
+
+```js
+const a = 10
+const b = 10
+console.log(a===b) // true
+```
+
+O que é totalmente válido visto que `a` e `b` tem o mesmo valor. Mas e se a gente fizer assim:
+
+```js
+const a = { nome: 'Lucas' }
+const b = { nome: 'Lucas' }
+console.log(a===b) // false
+```
+
+Isso complica a cabeça de muita gente, tanta gente que eu até fiz um tweet sobre isso:
+
+> VOCÊS ESTÃO PREPARADOS PARA ESSA THREAD? Vou passar ponto por ponto de todas as coisas que estão escritas aqui e vou explicar uma por uma pra NÃO FICAR NENHUMA DÚVIDA de que o JS não faz isso porque é uma falha da linguagem. [https://t.co/Spm1Oqflt4](https://t.co/Spm1Oqflt4) — Lucas Santos 🇧🇷🇸🇪 || formacaots.com.br 💎 (@\_StaticVoid) [April 3, 2022](https://twitter.com/_StaticVoid/status/1510709606569414663?ref_src=twsrc%5Etfw)
+>
+> — [via Twitter](https://twitter.com/_StaticVoid/status/1510709606569414663?ref_src=twsrc%5Etfw)
+
+Mas a realidade é que entender esse problema é bem simples. Lembra que falamos de ponteiros? Então, sempre que você cria um novo objeto com `{}` ou com o construtor, vamos ter um novo ponteiro, imagine que é algo assim:
+
+```js
+const a = {} // ponteiro: 0x89ac (exemplo)
+const b = {} // ponteiro: 0x1b3d
+
+console.log(a === b) // 0x89ac === 0x1b3d? false
+```
+
+Claro que ponteiros são um pouco diferentes do que eu mostrei, mas você pegou a ideia. Não podemos comparar objetos porque as referências são diferentes, e só podemos saber se dois objetos são iguais caso a referência de ambos sejam iguais:
+
+```js
+const a = {} // ponteiro: 0x89ac (exemplo)
+const b = a // ponteiro: 0x89ac
+
+console.log(a === b) // 0x89ac === 0x89ac? true
+```
+
+## Cloning
+
+Para sair desse problema e evitar que a gente modifique a variável original, existe o conceito de **clonagem**. Isso inclusive é um tema bastante interessante porque foi um dos temas do [artigo sobre os novos métodos de arrays](/array-es13/) aqui do blog.
+
+Quando clonamos um objeto, estamos pegando todas as propriedades do objeto original e jogando em outro ponteiro diferente, de forma que se mudarmos esse objeto, não vamos alterar a variável original. O mais comum era fazermos algo assim:
+
+```js
+const original = [1, 2, 3, 4, 5]
+
+function foo (arr: any[]) {
+  const clone = Object.assign([], arr)
+  return clone.reverse()
+}
+
+console.log(original) // [1, 2, 3, 4, 5]
+const clone = foo(original) // [5, 4, 3, 2, 1]
+console.log(original) // [1, 2, 3, 4, 5]
+```
+
+Veja que agora o array original continuou o mesmo. Com o tempo fomos removendo o uso do `Object.assign` para o uso do `StructuredClone`, que faz a mesma coisa mas com um twist:
+
+```js
+const original = [1, 2, 3, 4, 5]
+
+function foo (arr: any[]) {
+  const clone = structuredClone(arr)
+  return clone.reverse()
+}
+
+console.log(original) // [1, 2, 3, 4, 5]
+const clone = foo(original) // [5, 4, 3, 2, 1]
+console.log(original) // [1, 2, 3, 4, 5]
+```
+
+O twist é que, se você tem um objeto com outro objeto dentro, usando o `Object.assign` você só está clonando o ponteiro de fora, porque o próprio objeto tem um ponteiro para outro objeto dentro dele:
+
+```js
+const nested = { c: 1 }
+const objNested = {
+  a: {
+    b: nested
+  }
+}
+
+function modify(obj) {
+  obj.a.b.c = 10
+}
+
+console.log(objNested.a.b.c) // 1
+modify(objNested)
+console.log(objNested.a.b.c) // 10
+```
+
+E mesmo com o clone, isso não funciona:
+
+```js
+const nested = { c: 1 }
+const objNested = {
+  a: {
+    b: nested
+  }
+}
+
+function modify(obj) {
+  const clone = Object.assign({}, obj)
+  clone.a.b.c = 10
+}
+
+console.log(objNested.a.b.c) // 1
+modify(objNested)
+console.log(objNested.a.b.c) // 10
+```
+
+Porque é como se estivéssemos lendo isso aqui:
+
+```js
+const nested = { c: 1 } // ponteiro 0x1a
+const objNested = { // ponteiro 0x5b
+  a: {
+    b: nested // objNested.a.b === c -> 0x1a === 0x1a -> true
+  }
+}
+
+function modify(obj) {
+  const clone = Object.assign({}, obj) // clone.a.b é 0x1a
+  clone.a.b.c = 10 // estamos modificando o ponteiro de c aqui
+}
+
+console.log(objNested.a.b.c) // 1
+modify(objNested)
+console.log(objNested.a.b.c) // 10
+```
+
+Para funcionar, teríamos que falar que `objNested.a.b = Object.assign({}, objNested.a.b.c)`, isso é simples quando temos um objeto filho, mas quando temos vários, essa função fica complicada. Por conta disso podemos usar o `StructuredClone`.
+
+## Conclusão
+
+Espero que esse breve artigo tenha clarificado as ideias sobre as diferenças principais entre referências e valores com JavaScript, existe muito mais conteúdo legal sobre objetos por ai, inclusive, eu mesmo já escrevi [um artigo sobre protótipos](https://medium.com/trainingcenter/heran%C3%A7a-e-prot%C3%B3tipos-no-javascript-2c1e60e005a2) que vai te dar uma luz sobre como o JavaScript gerencia métodos e herança por baixo dos panos!
+
+Até mais!

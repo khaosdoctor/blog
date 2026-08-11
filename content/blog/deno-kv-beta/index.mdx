@@ -1,0 +1,244 @@
+---
+title: "Você já conhece o Deno KV?"
+pubDate: 2023-07-20T11:00:50.000Z
+updatedDate: 2026-07-16T15:59:17.000Z
+lang: pt
+category: "javascript"
+tags: ["deno", "databases", "typescript"]
+description: "Você já ouviu falar do novo Deno KV? Então chegou a hora de descobrir essa ferramenta que pode salvar a sua vida"
+heroImage: "./articles-1.png"
+draft: false
+visibility: "public"
+seoTitle: "Princípios do Deno KV"
+---
+
+Já faz um tempo que eu comecei a falar de [Deno](/deno/), inclusive já [falei aqui sobre o Deno KV](/deno-kv/) quando ele ainda era uma experimentação alpha sem API definida. Agora sim temos a versão beta **oficial** que está sendo testada.
+
+## O que são bancos KV
+
+KV é uma abreviação de "Key Value", que determina um conceito chamado **chave e valor** em armazenamentos de dados, inclusive este é o nome de um paradigma com o mesmo nome.
+
+Bancos de dados chave e valor não são raros e nem novos, existem centenas desses por ai, o mais famoso e utilizado hoje é o **Redis**, porém existem outros como o ETCD, Arango, Memcached, etc.
+
+A proposta dos bancos de dados de chave e valor é que eles são super simples de serem utilizados, porque eles não tem nenhuma complexidade inerente a eles, você consegue imaginar um banco de dados KV como sendo uma tabela:
+
+| **Chave** | **Valor** |
+| --- | --- |
+| nome | Lucas |
+| idade | 28 |
+| profissao | dev |
+
+E é isso... Não tem muito segredo além dessa ideia. O que a maioria dos bancos chave e valor tem de diferente são as formas como eles otimizam e armazenam essas estruturas de dados em memória ou em disco, os tipos de dados que são suportados e etc, mas a ideia base é essa.
+
+### Vantagens
+
+As vantagens desse tipo de estrutura é que é **extremamente rápido** realizar uma busca ou inserir um valor, porque as chaves são indexadas por padrão e só existe um único valor para cada chave, então mesmo que existam bilhões de chaves, é fácil saber onde cada uma está com base no valor que elas possuem.
+
+> Por esse motivo bancos de dados como o Redis e o Memcached são utilizados como caches de sites tão frequentemente. Porque a leitura é tão rápida que não impacta na performance.
+
+Muitas vezes, como era o caso do Redis há anos atrás, não havia nem necessidade para armazenamento em disco, a persistência era basicamente um dump da memória em um arquivo binário e depois a leitura desse mesmo arquivo quando o banco iniciasse novamente.
+
+### Desvantagens
+
+Justamente por não apresentarem nenhum tipo de relacionamento, Bancos de dados chave e valor não consegue representar muito bem estruturas muito complexas justamente porque eles não possuem nenhum tipo de estrutura que consiga relacionar um dado ao outro de forma nativa, na maioria das vezes o relacionamento está implícito no nome da chave. Por exemplo, se quisermos armazenar um professor e suas aulas, podemos fazer uma chave `professores:<id>`, e depois outra chave `professores:<id>:aulas`, isso vai definir que as aulas pertencem àquele professor.
+
+> Esse tipo de técnica é chamada de **secondary indexes (índices secundários).** E a nomenclatura das chaves é chamada de [Key Space](https://deno.land/manual@v1.35.1/runtime/kv/key_space)
+
+Portanto, sistemas relacionados ou com uma dependência clara entre seus dados geralmente ainda vão se beneficiar de banco de dados tradicionais SQL como Postgres. Mas isso não significa que a gente não possa representar nenhum tipo de relacionamento em bancos de dados do tipo chave valor. Da mesma forma que fizemos anteriormente, colocando o relacionamento diretamente no nome da chave, podemos também tirar vantagem de algo que o banco de dados chave e valor tem que os bancos de dados relacionais geralmente não tem: _a capacidade de armazenar qualquer tipo de valor em qualquer tipo de chave._
+
+A esse tipo de propriedade damos o nome de **schemaless**, ou seja, o banco de dados não possui nenhum tipo de tabela com um **schema** definido, que nem as tradicionais tabelas com colunas numéricas, varchar e etc. O Redis, por exemplo, pode armazenar desde strings (que incluem objetos JSON), até bytes, bitmaps e muito mais.
+
+Portanto é tecnicamente possível representar relacionamentos complexos usando somente o paradigma de chave e valor, porém, quanto mais complexos se tornam esses relacionamentos, mais complicado vai ser lidar com essas chaves na hora de trabalhar na sua aplicação. Uma vez que o banco de dados não vai te dar nenhuma ajuda para encontrar um relacionamento ou outro, você vai ter que fazer tudo manualmente no código.
+
+> Para mitigar grande parte desses problemas, o próprio Deno tem um [manual sobre índices secundários](https://deno.land/manual@v1.35.1/runtime/kv/secondary_indexes) que mostra como podemos fazer relacionamentos entre múltiplas chaves.
+
+A desvantagem dos bancos chave valor geralmente aparece aí. Quando temos que arquitetar um sistema que possui vários relacionamentos, rapidamente o seu código vai se tornar um emaranhado de resolução de dependências entre as entidades da sua aplicação. Sem falar que demora muito mais tempo pra você poder escrever o seu código já que você também vai ter que escrever toda a lógica do banco de dados.
+
+> Geralmente, a solução para algo como "listar todos os alunos de um professor" e "listar todos os professores de um aluno"  onde as chaves possuem relacionamentos iguais mas resultados opostos é duplicar a chave, uma para um lado do relacionamento e outra para outro lado.
+
+Agora que a gente já sabe quais são as vantagens e as desvantagens dos bancos de dados chave valor, vamos entender melhor como funciona o Deno KV.
+
+## Deno KV
+
+O Deno KV é um banco de dados chave e valor serverless e distribuído globalmente. Entre as propriedades dele, se destacam o fato de que ele tem consistência variável, então você pode escolher entre um modelo **fortemente consistente (strong consistency)** ou **fracamente consistente (eventual consistency)**.
+
+A diferença é que, no modelo de **strong consistency** você sempre vai ter acesso às chaves que foram inseridas logo após a sua inserção, não existe tempo de propagação ou qualquer coisa desse tipo. Da mesma forma que bancos de dados tradicionais, o KV também suporta transações.
+
+Nos modelos de **eventual consistency**, você vai estar sacrificando sua consistência por velocidade, ou seja, as leituras serão muito mais rápidas, mas nem sempre garantidas.
+
+No meu outro artigo já comentei sobre KV, porém ele ainda não estava completo. O que a gente tinha naquela época era uma versão alfa que foi liberada somente para os usuários verificarem o funcionamento das interfaces. Mas agora, já temos uma versão muito mais estável, mas que ainda não saiu para o público.
+
+O Deno KV está em **closed beta** e você pode [requisitar um acesso](https://dash.deno.com/kv) entrando no site [da documentação no Deno Deploy](https://deno.com/deploy/docs/kv), que é a cloud da Deno. A qual o KV já está totalmente integrado (o que também não existia no alfa). Durante o closed beta, o uso é gratuito e inclui 1GB de armazenamento.
+
+As APIs base se mantiveram as mesmas, então para criarmos um novo banco de dados ou abrirmos um existente basta fazermos:
+
+```ts
+// main.ts
+const kv = await Deno.openKv('nome opcional do banco');
+```
+
+É importante salientar que, até o momento da escrita desse artigo, o Deno Deploy ainda não suporta múltiplos bancos de dados. Então você pode utilizar um ternário para poder carregar um banco local ou padrão.
+
+```ts
+// main.ts
+const isProduction = Deno.env.get('DENO_ENV') === 'production'
+const kv = await Deno.openKv(isProduction ? '' : './meubanco.db')
+```
+
+Para executar, basta rodar `deno run --unstable -A main.ts`, lembrando que a opção `--unstable` precisa existir durante o beta.
+
+Se você utilizou um nome diferente (ou caminho) vai ver que no local que você escolheu, o Deno criou um banco de dados SQLite que é o backend que ele está usando para projetos locais.
+
+> Você pode acessar esse banco de dados com qualquer client SQLite e ver o que tem dentro.
+
+## Uso
+
+O Deno KV suporta algumas operações e você pode ver o manual de todas elas diretamente na [API](https://deno.land/api@v1.35.1?s=Deno.Kv&unstable):
+
+-   Get
+-   GetMany
+-   List
+-   Set
+-   Delete
+
+## `kv.set(key, value)`
+
+Usado para inserir um valor dentro do banco de dados. O uso é simples como:
+
+```ts
+const res = await kv.set(['users', 'alice'], { name: 'alice', age: 28 })
+```
+
+O resultado armazenado em `res` é um objeto com um **versionstamp**. Eu não vou me estender sobre eles aqui mas [a documentação explica bem](https://deno.land/manual@v1.35.1/runtime/kv/key_space#versionstamp), em suma, um versionstamp é um ID único incremental não sequencial que representa a versão do seu valor.
+
+```js
+//exemplo de resposta
+const res = {
+    versionstamp: '000002fa526aaccb0000'
+}
+```
+
+Assim como outros bancos como o MongoDB, o KV também armazena diferentes versões de um mesmo valor para que você possa comparar com os valores que você obtém de um  `get` com os de um `set`, já que é possível que a consistência seja fraca, é também possível que o valor que você obteve no `get` seja mais velho do que o valor que foi setado por conta do tempo de replicação.
+
+Dessa forma os versionstamps são comparáveis e ordenáveis, um stamp que é maior que outro significa que esse stamp é mais recente.
+
+```ts
+const versionA = '000002fa526aaccb0000'
+const versionB = '000002fa526aacc90000'
+versionA > versionB // true, A é mais recente
+```
+
+### Key spaces
+
+Como comentamos anteriormente, podemos setar chaves com escopos, esses escopos são definidos por um array. Se a chave é uma string, o Deno vai assumir que a chave é simples, mas se passarmos um array, cada posição do array vai ser um escopo da chave:
+
+```ts
+const chaveSimples = 'users'
+const chaveComEscopo = ['users', 'alice']
+```
+
+Chaves podem ter [diversos tipos](https://deno.land/manual@v1.35.1/runtime/kv/key_space#key-part-ordering), sendo eles:
+
+-   `Uint8Array` - Um array de bytes
+-   `string`
+-   `number`
+-   `bigint`
+-   `boolean`
+
+Chaves não podem ser objetos, estruturas ou classes. Se a chave não existir ela será criada, se ela já existir, vai ser substituída. **Todas as operações de escrita são fortemente consistentes**.
+
+## `kv.get<T>(['chave'], options?)`
+
+O [`get`](https://deno.land/api?s=Deno.Kv&p=prototype.get&unstable) é a versão individual do [`getMany`](https://deno.land/api?s=Deno.Kv&p=prototype.getMany&unstable), ambos são comandos para obter valores de dentro do banco de dados. Eles aceitam apenas chaves completas e não podem ser usados para listar, por exemplo, todas as chaves `['users']`.
+
+```ts
+const res = await kv.get(['users', 'alice'])
+// { key: ['users', 'alice'], value: 'valor', versionstamp: 'stamp' }
+```
+
+No segundo parâmetro, podemos passar um objeto de opções que contém apenas a chave `consistency`, que pode obter o valor de `'strong'` ou `'eventual'`.
+
+Além disso é possível especificar o tipo de retorno no Type parameter T, identificando qual é o tipo do objeto que será obtido ao retornar.
+
+```ts
+const res = await kv.get<string>(['users', 'alice']) // res é string
+```
+
+Da mesma forma, podemos usar o  `getMany` para poder obter mais de uma chave ao mesmo tempo:
+
+```ts
+const [res1, res2, res3] = await kv.getMany<[string, string, string]>([
+  ["users", "sam"],
+  ["users", "taylor"],
+  ["users", "alex"],
+]);
+```
+
+Se uma chave não for encontrada, o resultado vai ser um objeto `{ key: ['chave', 'buscada'], value: null, versionstamp: null }`.
+
+> É sempre uma boa ideia comparar se um valor existe pelo **versionstamp** e não pelo `value`, já que o `value` pode ser, de fato, nulo.
+
+## `kv.list<T>(selector, options?)`
+
+O [list](https://deno.land/api?s=Deno.Kv&p=prototype.list&unstable) é uma versão mais poderosa do `get`, que é feito justamente para listar um número grande de chaves baseadas em um seletor específico.
+
+`options` é um objeto de opções que pode conter várias chaves:
+
+-   `limit`: quantos objetos são trazidos na busca
+-   `cursor`: um cursor de onde resumir a iteração, se não existir, vai começar do início (ideal para paginação)
+-   `reverse`: antes de retornar o array, inverte o mesmo, essencialmente começando pelo final
+-   `consistency`: o mesmo do `get`
+-   `batchSize`: O list vai buscar valores em batches, quanto maior o batch, mais dados serão trazidos de uma vez. O valor padrão é 100, o máximo é 500.
+
+`selector` é um objeto cujas chaves são os seletores escolhidos. Existem dois tipos de seletores que podem ser utilizados:
+
+-   `prefix`: Busca todas as chaves que começam com um determinado prefixo, ou seja, cujos primeiros elementos do array sejam iguais aos elementos passados. Por exemplo: `{ prefix: ['users'] }` vai buscar todas as chaves que começam com `['users']`, incluindo `['users', 'alice']` ou `['users', 'bob']`.
+
+> Você também pode passar um parâmetro `start` e `end` para o `prefix` que diz onde a lista deve começar e terminar (contendo `start` e excluindo `end`)
+
+```ts
+const iter = kv.list<string>({ prefix: ["users"] }, { limit: 2 } )
+const users = [];
+for await (const res of iter) users.push(res);
+console.log(users[0]); 
+// { key: ["users", "alex"], value: "alex", versionstamp: "00a44a3c3e53b9750000" }
+console.log(users[1]); 
+// { key: ["users", "sam"], value: "sam", versionstamp: "00e0a2a0f0178b270000" }
+
+const iter = kv.list<string>({ prefix: ["users"], start: ["users", "taylor"] });
+const users = [];
+for await (const res of iter) users.push(res);
+console.log(users[0]); 
+// { key: ["users", "taylor"], value: "taylor", versionstamp: "0059e9035e5e7c5e0000" }
+```
+
+É importante notar que o resultado de qualquer `list` retorna um `asyncIterator` que pode ser iterado com `for await of`.
+
+-   `range`, se omitirmos a chave `prefix` e incluirmos apenas `start` e `end`, vamos trazer apenas as chaves que estão entre esses dois valores, excluindo `end` e incluindo `start`.
+
+```ts
+const iter = kv.list<string>({ start: ["users", "a"], end: ["users", "n"] });
+// usuários entre 'a' e 'm' já que 'n' não está incluso
+const users = [];
+for await (const res of iter) users.push(res);
+console.log(users[0]); 
+// { key: ["users", "alex"], value: "alex", versionstamp: "00a44a3c3e53b9750000" }
+```
+
+> Diferentemente do `prefix`, o `range` pode conter **chaves parciais**, ou seja, a chave pode conter qualquer tipo de caractere que bata com a expressão, como fizemos com `a` e `n`.
+
+## `kv.delete(chave)`
+
+Deleta uma chave. Se a chave não existir, nada acontece. Essas operações são sempre **fortemente consistentes**.
+
+```ts
+await kv.delete(['users', 'alice'])
+```
+
+# E tem muito mais
+
+Este artigo vai cobrir somente as partes básicas do KV, porém vamos ter outro artigo cobrindo todas as partes **atômicas** e transações que o KV também possui, e mais para frente vamos falar sobre as propriedades de filas e pub/sub.
+
+Porém, somente com as operações básicas, você já consegue fazer muita coisa, eu fortemente aconselho que você dê uma olhada no estado atual do Deno KV e teste ele no Deno Deploy para tirar as suas conclusões.
+
+Até mais!

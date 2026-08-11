@@ -6,7 +6,7 @@
  *
  * Exits non-zero on anything that would ship broken content.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const DIST = 'dist'
@@ -34,10 +34,17 @@ const files = walk(DIST)
 const pages = files.filter((file) => file.endsWith('.html'))
 
 // 1. Every published post produced a page.
-const published = readdirSync(CONTENT)
-  .filter((name) => name.endsWith('.mdx') || name.endsWith('.md'))
-  .filter((name) => !/^draft:\s*true/m.test(readFileSync(join(CONTENT, name), 'utf8')))
-const expected = published.map((name) => name.replace(/\.mdx?$/, ''))
+// One post is one folder holding index.md(x) and its images, so the slug is the
+// folder name. Anything else in content/blog (a stray note, a loose file) is not
+// a post and is deliberately not checked.
+const expected = readdirSync(CONTENT, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .filter((slug) => {
+    const file = ['index.mdx', 'index.md'].map((name) => join(CONTENT, slug, name)).find(existsSync)
+    if (file === undefined) return false
+    return !/^draft:\s*true/m.test(readFileSync(file, 'utf8'))
+  })
 for (const slug of expected) {
   if (!files.includes(join(DIST, slug, 'index.html'))) {
     failures.push({ check: 'missing page', detail: slug })

@@ -1,0 +1,237 @@
+---
+title: "As 5 coisas mais difíceis em computação"
+pubDate: 2022-08-03T14:00:00.000Z
+updatedDate: 2026-07-16T16:07:31.000Z
+lang: pt
+category: "career"
+tags: ["opinion", "development", "architecture"]
+description: "Depois de quase 11 anos de carreira, eu resolvi escrever um pouco sobre as coisas que eu acho mais complexas em programação, e não é escrever código!"
+heroImage: "./photo-1503525148566-ef5c2b9c93bd-cf552bb7.jpg"
+draft: false
+visibility: "public"
+---
+
+Existe uma frase super famosa no mundo da computação que diz o seguinte:
+
+> Existem apenas duas coisas difíceis em ciências da computação: Invalidação de cache e dar nome as coisas
+
+Essa frase foi dita por Phil Karlton há um bom tempo, e ainda hoje ela continua sendo muito real.
+
+Depois de ler [esse artigo sensacional](https://blog.frankel.ch/hard-things-computer-science/) do Nicolas Fränkel, um experiente engenheiro de software, eu resolvi dar os meus dois centavos em alguns destes tópicos e colocar minha visão do porquê eu acho que elas são difíceis no nosso ramo.
+
+Esse vai ser um artigo com _opiniões pessoais_, então não significa que eu estou completamente certo ou completamente errado sobre qualquer coisa, muito menos que você deva seguir cegamente minhas palavras aqui (e por favor, não faça isso), mas estou simplesmente colocando minha experiência na área e tudo que já passei para poder fazer algo que gosto muito: escrever sobre tecnologia.
+
+## Computação, no geral, é complicado
+
+Antes de começar a falar diretamente sobre as técnicas e coisas que eu acho mais complexas em computação, eu quero dar uma introdução sobre a computação em si.
+
+Primeiro de tudo, existem infinitas pessoas que vendem a ideia de que tudo em computação é fácil, que você consegue aprender tudo que você precisa e já estar completamente pronto para o mercado em menos de um ano. Enquanto isso pode ser verdade para _algumas pessoas_, a grande maioria de nós não tem esse dom, e não é porque a gente tem algum tipo de problema de falta de inteligência, mas porque **computação é difícil sim**.
+
+Conceitos que, para devs, são básicos e simples como manipulação de listas, alocação de memória, loops, mensagens, assíncronismo e etc. São, na verdade, extremamente complicados por natureza, por isso que, se você está aprendendo, jamais desista porque "todo mundo sabe isso e eu não". Sempre vai existir alguma coisa que você não vai saber, e computação requer estudo constante.
+
+Além de tudo, eu particularmente acredito que a grande maioria dos conceitos técnicos que todo mundo clama como difícil acabam sendo uma questão passageira, ou seja, você aprende como esse conceito funciona e nunca mais vai esquecer dele. No caso dos pontos que eu vou trazer aqui - tanto os técnicos quanto os não técnicos - são problemas que você simplesmente não tem como aprender completamente porque eles não são "ensináveis".
+
+Eu digo isso porque você tem como saber muito sobre eles, mas justamente pelo fato desses conceitos serem muito amplos e muito básicos, não tem como você simplemente saber tudo que existe, porque eles sempre vão mudar de acordo com alguma coisa que estamos fazendo no momento, de acordo com o tempo que estamos vivendo e com as aplicações que estamos desenvolvendo, então não existe uma resposta ou uma bala de prata, assim como qualquer coisa em computação, tudo **depende**.
+
+### Dar nome às coisas
+
+Desde quando comecei a programar eu não conheci uma _única pessoa_ que fale que nomear alguma coisa em desenvolvimento é fácil. Isso se dá principalmente porque cada um tem uma noção diferente do que é "certo" na hora de dar nome a algum tipo de variável ou conceito.
+
+Se você ainda não passou por isso, eu vou apresentar duas citações incríveis que eu li ao longo dos anos e que coincidentemente (ou não), apareceram no artigo que citei. A primeira delas foi dita por **Donald Knuth** um dos criadores do UML e um proeminente engenheiro de software que dedicou sua vida toda a, basicamente, nomear coisas:
+
+> Programas são criados para serem lidos por humanos e, acidentalmente, executados por computadores – Donald Knuth
+
+Essa é uma das frases mais verdadeiras que eu já vi, e eu discordei muito dela nos meus primeiros 2 anos como dev porque eu achava que meu código deveria ser o mais próximo do código que a máquina ia ler porque isso ia me fazer _Um DeV MeLhOr_ e, claramente, o mundo não funciona desse jeito.
+
+Por exemplo, eu posso te apresentar isso aqui:
+
+```js
+function f (t) {
+  if (t <= 1) return 1
+  return f(t-1) + f(t-2)
+}
+```
+
+Muito bonito, muito techy, mas completamente ilegível. A maioria das pessoas que já coda há algum tempo vai sacar que essa é uma função para calcular o N-ésimo termo de fibonnacci, mas só porque, em algum momento da vida dev, já teve que fazer essa função. Já alguém que nunca viu, vai ficar completamente alheio ao que está acontecendo, ainda mais porque é uma função recursiva, que é outro dos conceitos que todo dev dá por garantido, mas que não é tão simples assim.
+
+E se ela fosse escrita assim:
+
+```js
+function fibonnacci (termo) {
+  if (termo <= 1) return 1
+  return fibonnacci(termo - 1) + fibonnacci(termo - 2)
+}
+```
+
+Muito mais fácil, mas menos _HaCkEr_. Quando se trabalha em desenvolvimento de software, infraestrutura ou **absolutamente qualquer trabalho de time**, precisamos entender que nosso código não vai ser lido apenas pela máquina, mas sim pelas pessoas que fazem parte do nosso time. E, quanto mais fácil for para essas pessoas entenderem o que a gente fez, mais fácil vai ser para elas darem manutenção e sugerirem novas ideias. Uma outra frase super interessante que já ouvi e li em diversas variações é a do nosso sempre presente Martin Fowler:
+
+> Qualquer um escreve um código que um computador consegue entender. Apenas bons devs escrevem códigos que humanos podem ler. – Martin Fowler
+
+Outro ponto, um que concordo totalmente com o artigo que citei no primeiro parágrafo, principalmente porque eu já passe pela mesma situação incontáveis vezes (e ainda passo até hoje), é que o problema da falha de nomenclatura geralmente se dá em uma de duas formas:
+
+1.  Usar expressões diferentes para descrever o mesmo conceito
+2.  Usar a mesma expressão para descrever conceitos diferentes
+
+Os dois são igualmente horríveis de se trabalhar, o primeiro porque o conceito que você está tentando passar acaba se perdendo e ninguém sabe mais o que o outro está falando, isso é particularmente mais comum em empresas maiores onde áreas diferentes tem de lidar com a mesma ideia porém cada um dentro do seu espaço.
+
+Um exemplo disso que eu passo diariamente enquanto trabalhando em uma fintech é o conceito de "Autorização" em cartões de crédito. Isso porque para clientes finais, a ideia de autorizar uma cobrança não é amplamente divulgada, apenas a cobrança em si, portanto quando temos que conversar com áreas de suporte diretas com o cliente, temos vários problemas porque falamos de autorização e eles de "reserva" sem saber que são a mesma coisa. E isso, além de dificultar a comunicação, faz qualquer situação demorar pelo menos o dobro do tempo para ser resolvida, porque você precisa primeiro acertar um contrato entre as duas partes para, só depois, começar a trabalhar no problema em si.
+
+O segundo caso é muito mais sério, porque o contrato está estabelecido, só que cada uma das partes imagina que está falando de algo diferente e na hora de colocar em prática, nada sai como planejado.
+
+![Sempre achamos que a solução é criar algo novo do nosso jeito](https://imgs.xkcd.com/comics/standards_2x.png)
+
+Isso é uma das coisas mais interessantes que o [gRPC](/guia-grpc-1/) busca resolver em partes, principalmente com o uso de índices para descrever a posição dos campos ao invés de usar o nome do campo para identificar o dado (fora que temos uma economia grande de espaço).
+
+Por fim, o eterno problema do _casing em variáveis_, que nunca será resolvido porque algumas pessoas preferem usar `camelCase`, enquanto outras preferem `snake_case`. Em alguns casos, o problema é mais embaixo com sistemas legados que não aceitam diferentes casings, em outros casos temos um problema de comunicação interna, enfim, é o mesmo caso com tabs vs espaços (mas esse aqui tem algum tipo de benefício pelo menos).
+
+A ideia final é que você precisa passar a mensagem que você quer, de forma simples e concisa, mas ao mesmo tempo sendo descritivo o suficiente.
+
+### Datas, horas e timezones
+
+Eu sou um grande fã do tópico "como humanos medem o tempo", tanto em computação quanto fisicamente. Isso porque o conceito de tempo é a mesma ideia do conceito de dinheiro, ele não existe precisamente, é um acordo que a humanidade (quase) inteira criou para dizer que um dia é uma rotação, um ano é uma translação e um mês é um conjunto de 28, 29, 30 ou 31 dias.
+
+Especialmente quando estamos falando de tempo, temos que entender que a dimensão "tempo" é precisa e imutável, mas a medição que a gente faz dessa dimensão é completamente caótica e confusa.
+
+Para a gente ter uma medição significativa, ou seja, que tenha algum significado para alguém, a gente precisa de:
+
+-   Uma data com dia, mês e ano
+-   Um horário com horas, minutos e o fuso
+
+Sem qualquer uma das informações que compõe parte dessas medições, a informação fica incompleta. Por exemplo, um dia sem mês levanta a pergunta "de que mês?", uma hora sem o fuso quando estamos lidando com múltiplos países levanta a pergunta "mas essa hora aonde?".
+
+Esse é um problema tão grande, pelo menos para mim, que eu vou separar em duas partes.
+
+#### Calendários
+
+O maior problema da medição de tempo é que ela é tão fundamental que vários sistemas importantes dependem dela, mas ao mesmo tempo ela é tão confusa que você não tem como criar uma regra exata, porque existem sempre exceções ao que você está fazendo, o maior exemplo disso é, sem dúvida, o calendário.
+
+Alguns meses tem 30 dias, outros 31 e apenas um deles tem 28 dias, mas pode ter 29 a cada 4 anos. A lógica por trás da contagem é sólida, faz sentido, mas poderíamos ter sido mais eficientes e separado os meses em 28 dias e criado um mês extra (como [já foi pensado e discutido](https://pt.wikipedia.org/wiki/Calend%C3%A1rio_Fixo_Internacional)).
+
+Calendários também podem ser diferentes de acordo com o país que estamos, por exemplo, usamos o calendário Gregoriano, implementado pelo papa Gregório, porém essa implementação aconteceu em momentos diferentes da história, outros países, como a China, usam um calendário próprio que não é baseado nem no modelo Juliano nem no modelo Gregoriano.
+
+Outros países usam o calendário Hebreu, que é mais ou menos parecido, mas com uma contagem de tempo muito diferente, e ai cai a pergunta mais difícil de todas:
+
+> Como você cria um sistema global, que vai funcionar em diferentes partes do mundo e acatar e/ou converter diferentes contagens de tempo?
+
+Isso influencia muito em todo o tipo de sistema que criamos, principalmente nas estimativas de tempo para finalizar esses sistemas.
+
+#### Horários
+
+Fusos horários são provavelmente a coisa mais complicada que qualquer humano dá como garantida na sua vida.
+
+Sempre que penso em fusos, essa imagem incrível vem na minha cabeça:
+
+![](https://i.redd.it/syw7q6gc77f01.jpg)
+
+Fusos são ainda mais complicados do que os calendários porque a medição de dias, meses e anos é mais precisa, a Terra gira e isso define um dia, ponto. Agora, dividir esse dia em horas é muito mais complicado porque **horários não são tão constantes como datas**.
+
+O mesmo ponto no tempo pode ter horas diferentes dependendo do local onde você está no globo, as 10 horas da manhã no Brasil, não são 10 horas da manhã aqui na Suécia, muito pelo contrário, aqui a manhã já passou faz tempo.
+
+Mas também não podemos definir o dia só quando o Sol nasce até quando ele se põe, porque nos pontos com latitudes mais altas – como a própria Suécia – dias (momentos com luz do Sol) são realmente mais longos no verão e muito mais curtos no inverno, com períodos onde o [Sol nunca se põe](https://en.wikipedia.org/wiki/Midnight_sun).
+
+Então como a gente deixa todo mundo feliz? Criando uma separação de fusos horários. A conta é simples, a Terra é um globo, ela tem 360º de circunferência, se a gente dividir 360 pelas 24 horas de um dia, temos 15º, agora ficou simples, é só a gente adicionar uma hora para cada 15º que a gente passar no globo, não é?
+
+Bom, não funciona muito bem assim. A gente percebeu que seria um problema muito maior para determinados locais se a linha do fuso fosse exatamente uma reta, como deveria ser, alguns países teriam dezenas de fusos horários, outros países estariam com uma metade em um dia e a outra metade no dia seguinte e todo o tipo de coisa, então a gente **dobrou as linhas**.
+
+Isso significa que a maioria dos países não está em uma posição geográfica que condiz com o seu fuso, alguns implementam horários de verão, outros não, então países no mesmo fuso horário podem ter uma hora de diferença por causa disso, no pior dos casos – como o Brasil – o país tinha horário de verão e agora não tem mais.
+
+![](https://memegenerator.net/img/instances/85332300.jpg)
+
+Além disso, algo mais incomum, mas que acontece com uma certa frequência, são países que mudam seus próprios fusos (já que é tudo inventado mesmo, por que não complicar ainda mais) e a cereja do bolo são fusos horários que não seguem a regra, por exemplo, a Índia tem um fuso UTC+5:30 mas cada fuso horário tem uma hora inteira de duração.
+
+O que eu queri dizer aqui é que a forma como contamos o tempo é caótica do jeito que é, e ainda adicionamos exceções a essa contagem.
+
+### Estimativas
+
+Estimativas são um assunto complexo e polêmico no mundo de desenvolvimento de software, principalmente porque todo mundo está sempre tentando acertar a melhor data com precisão de 100%, ou seja, dizer que algo vai estar pronto em uma determinada data e ele realmente estar pronto nessa data.
+
+A realidade não é tão simples. Estimar algo é tentar advinhar quando as coisas vão acontecer, toda estimativa é um chute, por mais que você tenha infinitos dados, ainda é um chute a não ser que você consiga prever o futuro e todos os problemas que um projeto não só **pode** ter como **vai** ter.
+
+![](https://i.imgflip.com/1omm02.jpg)
+
+Uma das coisas mais legais do artigo que eu citei é que ele compara estimativas com coisas que não são softwares. A maioria das pessoas está tentada a comparar o desenvolvimento de um sistema complexo à construção de uma casa ou um prédio, a gente tem uma ideia muito boa de como e quando as coisas vão estar prontas no ramo de construção, mas ainda sim existe uma quantidade imensa de prédios que são entregues atrasados, mesmo que os humanos estejam construindo prédios pelos últimos milhares de anos. Mas por que é diferente?
+
+O grande problema de desenvolvimento é que é muito fácil customizar alguma coisa, o custo para customizar um sistema inteiro para um único fim é muito baixo se a gente comparar com o custo de construir algo que sirva a um único propósito.
+
+> Interessantemente, eu acho que a comparação de construção civil é muito mais próxima da infraestrutura de hardware do que do software, porque em ambos os casos você tem algo físico que não pode ser facilmente alterado.
+
+Algo que todas as estimativas falham bizarramente em prever são os problemas que temos ao longo do desenvolvimento do projeto. A gente sabe de coisas que podem acontecer, mas não sabemos se elas, de fato, vão acontecer, mas ainda sim a gente consegue se preparar pra elas, agora e as coisas que a gente não sabe que podem acontecer? Não tem como a gente se preparar pra algo que a gente não sabe.
+
+E é por isso que estimativas falham. Estimativas seriam uma ferramenta fantástica se a gente conseguisse dizer para um cliente que aquela estimativa não é um prazo final, mas infelizmente estamos tão condicionados a ouvir um _deadline_ que tratamos todas as estimativas como se fossem um, mesmo sabendo que não são.
+
+### Testes e garantias
+
+Seguindo a ideia das estimativas, vêm os testes e as famosas garantias de funcionamento. Ninguém (ou, pelo menos, pouquíssimas pessoas) está tentando incluir deliberadamente bugs no código, todo mundo quer ver seu código funcionar, quer ver o sistema rodando sem erros e sem dor de cabeças.
+
+Por isso mesmo que, da mesma forma que a gente não consegue estimar uma data de entrega, não dá pra garantir que qualquer peça de software funcione do jeito que ela foi feita pra funcionar, porque não sabemos quais são os bugs que vão acontecer com ela.
+
+A não ser que o sistema seja muito simples, é impossivel dizer com 100% de certeza que nada de errado vai acontecer durante toda a vida daquele produto.
+
+> "Mas eu faço testes automatizados: de integração, unitários, end-to-end e de mutação"
+
+Parabéns! Você está um passo mais perto de poder garantir com mais clareza que seu sistema funciona, mas ainda sim, mesmo em grandes empresas, a quantidade de erros por linha de código escrita ainda é absurdamente alta, **mesmo com testes automatizados**, e a gente se esquece que quem introduz bugs no código somos nós, as mesmas pessoas que criam os testes.
+
+### Computação distribuída
+
+Esse é um tema tão complexo que existem [aulas inteiras](https://youtube.com/playlist?list=PLeKd45zvjcDFUEv_ohr_HdUFe97RItdiB) só sobre como distribuir tarefas computacionais entre diversos processadores.
+
+A computação distribuída, para nivelar o conhecimento, é quando chegamos ao limite do que podemos fazer ocm um único computador, e a gente pode fazer muita coisa. Quando a gente chega nesse ponto, a única solução é distribuir a carga em diversos computadores, a gente chama isso de _load balancing_ e é um dos muitos conceitos em **computação distribuída**.
+
+Citando o próprio artigo (que cita [uma fonte da wikipédia](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing)), a gente confunde muito computação distribuída porque existem uma série de coisas que assumimos quando trabalhamos com ela:
+
+1.  Toda rede é confiável
+2.  A latência é zero
+3.  A largura da banda é infinita
+4.  A rede é sempre segura
+5.  Redes nunca mudam
+6.  Só existe um administrador
+7.  O custo para transportar mensagens é zero
+8.  Toda a rede é homogênea
+
+Enquanto algumas dessas falácias são mais irrisórias para sistemas menores, todas elas fazem muito sentido quando estamos falando de qualquer sistema que precisa se comunicar em uma distância um pouco mais longa.
+
+No artigo que citei, o autor mostra dois grandes problemas: **dual writes** e **leader election**. Eu vou estender com mais uma: **comunicação orientada a eventos**.
+
+#### Dual Writes
+
+O problema de escrita dupla está cada vez mais comum hoje em dia por conta da natureza distribuída da maioria dos sistemas. Ele consiste no problema que surge quando temos duas bases de dados distintas e temos que manter o mesmo estado entre ambas.
+
+Isso é muito comum em sistemas de fila e bancos de dados distribuídos como o Elastic Search, que dependem de múltiplas partes estarem em consistência para ter um resultado satisfatório. Muitos desses sistemas implementam modelos como o [Two-phase commit](https://en.m.wikipedia.org/wiki/Two-phase_commit_protocol) para poder garantir a consistência geral das partes.
+
+Pelo [Teorema de CAP](https://en.wikipedia.org/wiki/CAP_theorem) a gente só pode ter duas de três características de um sistema distribuído: Consistência, Disponibilidade ou Tolerância entre partições.
+
+Como o próprio artigo que citei mostra bem, isso não é muito uma escolha quando a gente transporta para o mundo da computação distribuída, já que todo o sistema é distribuído, a gente precisa escolher a tolerância porque não podemos ter um sistema que é distribuido sem ter a tolerância a trabalhar em partições.
+
+Isso nos deixa com mais duas escolhas, ou nosso sistema fica _disponível_ ou _consistente_. E é ok escolher a consistência em casos onde a disponibilidade não é a maior preocupação, mas em 99% dos casos não é isso que acontece, porque outros sistemas dependem que um determinado sistema esteja sempre disponível, então temos que sacrificar a consistência.
+
+A forma como lidamos com a falta de disponibilidade é, geralmente, implementando um sistema de fila que recebe as requisições e armazena os dados que não puderam ser processados pelo sistema principal.
+
+No caso da consistência, a ideia é aceitar que não vamos ter um estado consistente **todo o tempo**, mas **em algum momento do futuro**, em inglês o termo usado é **Eventual Consistency**. E existem infinitas formas de se implementar, nenhuma delas é trivial e sem riscos.
+
+#### Leader Election
+
+Eu não vou me estender muito sobre esse tema já que eu não tenho um conhecimento aprofundado nele agora, mas vamos dizer apenas que esse é um problema complexo tanto na computação quanto fora dela.
+
+Sistemas distribuídos geralmente funcionam com base em um líder, que é quem dita as regras do jogo e que diz quem vai fazer o que. Mas, como o líder é também uma cópia do sistema, ele está sujeito a falhas. E quanto um líder está fora do ar, outro precisa ser escolhido, e ai todas as partições de um sistema precisam entrar em **consenso**.
+
+Tanto em computação como em políticas públicas, consensos são muito difíceis, é só olhar para eleições em qualquer país. Em software é um pouco mais fácil, mas ainda sim temos algoritmos super complexos como o [Paxos](https://en.wikipedia.org/wiki/Paxos_\(computer_science\)) e o [Raft](https://en.wikipedia.org/wiki/Raft_\(algorithm\)) que tentam resolver o problema.
+
+Outro tipo de rede que resolve bem o problema é a Blockchain, tanto é que existem sistemas de consensos completamente diferentes em redes como o Bitcoin e o Ethereum, por exemplo.
+
+#### Comunicação orientada a eventos
+
+A cereja do bolo da computação distribuída é a emissão e recebimento de eventos, enquanto o conceito em si é bastante direto, a ideia de assincronismo não é comum para os nossos cérebros.
+
+Isso é tão verdade que eu [tenho uma série de artigos só sobre Promises](https://dev.to/_staticvoid/series/199311). Por algum motivo, nossos cérebros parecem ter uma dificuldade imensa em entender o conceito de assincronismo, e computação distribuída é basicamente toda orientada a eventos.
+
+Eventos podem acontecer ao mesmo tempo, em tempos diferentes, podem ter uma ordem ou não, ou seja, eles são sistemas complexos principalmente porque um não deve depender do outro e cada evento deveria ser indiferente do que aconteceu antes ou depois até ai parece tudo fácil, mas o grande problema é criar um **orquestrador** para esses eventos. Esse vai ser o sistema que precisa entender que evento deve produzir o que e qual é a ordem que eles devem ser executados, além disso, o orquestrador deve ser o responsável por implementar um sistema de fila morta (Dead Letter Queue ou DLQ) para os eventos que não tiveram sucesso, e também um sistema de tentativas para re-enfilerar mensagens que, por algum motivo, não podem ser processadas no momento atual.
+
+A gente entende eventos super bem, o problema é que entender que tudo isso que eu acabei de falar acontece _ao mesmo tempo_ parece fugir da nossa realidade e entrar em um paradoxo nos nossos cérebros. Essa é a principal razão pela qual sistemas distribuídos em geral não são bem implementados, ou por que [microsserviços](https://medium.com/@khaosdoctor/microservi%C3%A7os-dos-grandes-mon%C3%B3litos-%C3%A0s-pequenas-rotas-fbfd4ee99f36) falham tão espetacurlarmente em algumas implementações.
+
+O que deixa esse tópico ainda mais difícil é que, como tudo é assíncrono, só vamos perceber quando algo deu errado muito depois, principalmente por conta do acumulo de mensagens ou até mesmo pela quantidade de erros que vão sendo apresentados nos estados do sistema.
+
+Esse tópico também traz um outro assunto bastante complexo da computação que são as **condições de corrida** ou _Race Conditions_. Quando uma ação depende de uma certa cronologia para acontecer de forma que, se essa cronologia for quebrada, o resultado vai ser diferente. Por exemplo, se temos um contador que recebe uma chamada para leitura e outra pra incremento, se a chamada de incremento for executada antes da leitura teremos uma saída diferente do que iria acontecer se a leitura for feita antes do incremento.
+
+### Conclusão
+
+Esses tópicos são alguns dos que eu considero como temas complexos em computação, alguns tem soluções, outros não. E, com certeza, uns são mais complexos que outros, mas todos são difíceis da sua própria maneira, o importante é continuarmos nos aprofundando e estudando cada um desses tópicos.

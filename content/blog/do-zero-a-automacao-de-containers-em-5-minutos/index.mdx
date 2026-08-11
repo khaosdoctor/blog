@@ -1,0 +1,178 @@
+---
+title: "Do zero à automação com GitHub Actions em 7 minutos"
+pubDate: 2020-05-08T03:00:00.000Z
+updatedDate: 2026-07-16T16:29:04.000Z
+lang: pt
+category: "infra"
+tags: ["containers", "docker"]
+description: "Como começar do 0 e automatizar toda a sua pipeline de containers em menos de 7 minutos! Tudo com GitHub Actions"
+heroImage: "./articles-1-1.png"
+draft: false
+visibility: "public"
+canonicalUrl: "https://medium.com/@khaosdoctor/do-zero-%C3%A0-automa%C3%A7%C3%A3o-em-7-minutos-com-github-actions-ca08364e8c36"
+---
+
+Em um [artigo anterior](https://dev.to/azure/construindo-e-publicando-um-backend-graphql-completo-sem-escrever-uma-linha-de-codigo-g40), comentei como poderíamos criar um backend GraphQL completo apenas usando uma imagem Docker e um arquivo de configuração. Tudo isso hospedado no [Azure](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=blog-devto-ludossan). Agora vamos aprender a automatizar os deploys que são feitos para a nossa hospedagem e a atualização automática do nosso backend!
+
+Este projeto todo visa criar um backend para meu futuro arquivo de conteúdo que estará presente no [meu site](https://lsantos.dev/). Mas sempre que eu atualizar o backend ou mudar o schema do GraphQL vou ter que fazer todo o deploy do serviço novamente.
+
+Então, ao invés disso, eu gostaria que, a cada push no meu branch master, eu gerasse uma nova versão do arquivo e enviasse a atualização para o [Azure](https://portal.azure.com/?WT.mc_id=blog-devto-ludossan). Porém eu não quero ter que usar outras ferramentas para isso, quero manter toda a stack o mais simples possível, como estamos utilizando somente o GitHub e o [Azure](https://portal.azure.com/?WT.mc_id=blog-devto-ludossan), nada mais justo do que continuar no GitHub para fazer a automação, não é mesmo?
+
+Por isso que vamos usar os [**GitHub Actions**](https://azure.microsoft.com/blog/github-actions-for-azure-is-now-generally-available/?WT.mc_id=blog-devto-ludossan)
+
+Similar a outros provedores de CI como o Travis ou o Circle, o GitHub também possui um sistema de integração e automação do repositório. A facilidade deste sistema em relação aos outros é que você já está dentro do mesmo repositório e ja está dentro da mesma ferramenta.
+
+O projeto que vamos utilizar para automatizar será o [meu repositório publico de backend](https://github.com/khaosdoctor/site-backend):
+
+![](https://miro.medium.com/v2/resize:fit:700/0*H2hIsW4sxqkQ0-ck)
+
+Veja que o repositório é super simples, não contém muitos arquivos, apenas um `docker-compose.yml` para testes locais e o nosso arquivo `yml` do `mongoke` que será o schema GraphQL.
+
+No topo da página, ao lado de settings, temos o botão `Actions`, será lá que vamos configurar a nossa automação!
+
+![](https://miro.medium.com/v2/resize:fit:700/0*tmZFH1SNxaXB4AjI)
+
+O GitHub já possui uma série de workflows prontos, porém, infelizmente, ainda não temos nenhum para o que queremos fazer. Mas o que queremos fazer? Para deixar tudo mais claro, vamos listar todas as etapas do processo:
+
+1.  Recebemos um push na branch `master`
+2.  Conectamos com a [Azure](https://portal.azure.com/?WT.mc_id=blog-devto-ludossan) através de um [service principal](https://docs.microsoft.com/azure/app-service/deploy-github-actions?WT.mc_id=blog-devto-ludossan#create-a-service-principal) e de uma action chamada [Azure/login](https://github.com/Azure/login)
+3.  Depois vamos utilizar a action [Azure/cli](https://github.com/Azure/CLI) para poder executar o comando de deploy do nosso container
+
+Alguns detalhes que temos que perceber:
+
+-   O cache do GitHub Pages é um pouco longo, então vamos ter que gerar um número aleatório ou uma fingerprint para colocar na URL do nosso arquivo YAML do Mongoke
+-   Temos uma URI do MongoDB que deve ser um segredo
+
+## Criando um secret
+
+Primeiramente vamos tratar das nossas dependências, a dependência mais fácil de ser resolvida é criar a URL do MongoDB como um secret. Para isso vamos até a nossa aba `Settings` e clicamos em `Secrets`. Basta adicionar um novo secret clicando no link `Add new Secret` e preencher um nome e o conteúdo do mesmo. No caso estamos adicionando a URI do MongoDB, então vamos chamar este secret de `MONGODB_URI`
+
+![](https://miro.medium.com/v2/resize:fit:700/0*tDihPBBGIwg-3U2-)
+
+## Permitindo ações na Azure
+
+Para que possamos permitir que o GitHub execute ações em nosso nome na [Azure](https://portal.azure.com/?WT.mc_id=blog-devto-ludossan), vamos precisar criar um [Service Principal](https://docs.microsoft.com/azure/app-service/deploy-github-actions?WT.mc_id=blog-devto-ludossan#create-a-service-principal). Este recurso nos dá uma conta de aplicação para que possamos permitir que outras pessoas ou serviços conectem-se em nosso portal e realize ações em nosso nome.
+
+Para criarmos este recurso, vamos usar o [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest&WT.mc_id=blog-devto-ludossan). Depois de realizar o login com o comando `az login`, basta executar o seguinte comando:
+
+<RawEmbed title="Carbon" html="<iframe src=&quot;https://cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fcarbon.now.sh%2Fembed%3Fbg%3Drgba%28171%252C184%252C195%252C0%29%26t%3Ddracula%26wt%3Dnone%26l%3Dauto%26ds%3Dfalse%26dsyoff%3D20px%26dsblur%3D68px%26wc%3Dtrue%26wa%3Dtrue%26pv%3D56px%26ph%3D56px%26ln%3Dfalse%26fl%3D1%26fm%3DFira%2520Code%26fs%3D14px%26lh%3D133%2525%26si%3Dfalse%26es%3D2x%26wm%3Dfalse%26code%3Daz%252520ad%252520sp%252520create-for-rbac%252520--name%252520%25253Cnome-do-SP%25253E%252520--role%252520contributor%252520--scopes%252520%25252Fsubscriptions%25252F%25253CID-da-subscription%25253E%25252FresourceGroups%25252F%25253Cnome-do-resourcegroup%25253E%252520--sdk-auth&amp;display_name=Carbon&amp;url=https%3A%2F%2Fcarbon.now.sh%2F%3Fbg%3Drgba%28171%25252C184%25252C195%25252C0%29%26t%3Ddracula%26wt%3Dnone%26l%3Dauto%26ds%3Dfalse%26dsyoff%3D20px%26dsblur%3D68px%26wc%3Dtrue%26wa%3Dtrue%26pv%3D56px%26ph%3D56px%26ln%3Dfalse%26fl%3D1%26fm%3DFira%252520Code%26fs%3D14px%26lh%3D133%252525%26si%3Dfalse%26es%3D2x%26wm%3Dfalse%26code%3Daz%25252520ad%25252520sp%25252520create-for-rbac%25252520--name%25252520%2525253Cnome-do-SP%2525253E%25252520--role%25252520contributor%25252520--scopes%25252520%2525252Fsubscriptions%2525252F%2525253CID-da-subscription%2525253E%2525252FresourceGroups%2525252F%2525253Cnome-do-resourcegroup%2525253E%25252520--sdk-auth&amp;image=https%3A%2F%2Fcarbon.now.sh%2Fstatic%2Fbrand%2Fbanner.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07&amp;type=text%2Fhtml&amp;scroll=auto&amp;schema=carbon&quot; allowfullscreen=&quot;&quot; frameborder=&quot;0&quot; height=&quot;480&quot; width=&quot;1024&quot; title=&quot;Carbon&quot; class=&quot;eo n ff dy bg&quot; scrolling=&quot;no&quot; style=&quot;box-sizing: inherit; top: 0px; width: 680px; height: 318.75px; position: absolute; left: 0px;&quot;></iframe>" />
+
+Para obter o ID da sua subscription basta executar o comando `az account list` e buscar a chave `id` da subscription que estiver com a chave `isDefault` marcada como `true`. Você também pode dar qualquer nome ao seu Service Principal, faça com que ele seja descritivo para saber a quem você está garantindo permissões.
+
+Por último, outro detalhes importante é somente dar as permissões aos recursos necessários, ou seja, não vamos criar um SP para a conta **TODA**, mas sim somente para o _Resource Group_ que precisamos, no meu caso, este RG se chama `personal-website` e é onde eu estou agrupando todos os recursos relativos ao meu site.
+
+Este comando deve dar uma resposta em JSON do tipo:
+
+<RawEmbed title="Carbon" html="<iframe src=&quot;https://cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fcarbon.now.sh%2Fembed%3Fbg%3Drgba%28171%252C184%252C195%252C0%29%26t%3Ddracula%26wt%3Dnone%26l%3Dapplication%252Fjson%26ds%3Dfalse%26dsyoff%3D20px%26dsblur%3D68px%26wc%3Dtrue%26wa%3Dtrue%26pv%3D56px%26ph%3D56px%26ln%3Dfalse%26fl%3D1%26fm%3DFira%2520Code%26fs%3D14px%26lh%3D133%2525%26si%3Dfalse%26es%3D2x%26wm%3Dfalse%26code%3D%25257B%25250A%252520%252520%252522clientId%252522%25253A%252520%252522xxxxxxx%252522%25252C%25250A%252520%252520%252522clientSecret%252522%25253A%252520%252522xxxxxxxx%252522%25252C%25250A%252520%252520%252522subscriptionId%252522%25253A%252520%252522xxxxxxxx%252522%25252C%25250A%252520%252520...%25250A%25257D&amp;display_name=Carbon&amp;url=https%3A%2F%2Fcarbon.now.sh%2F%3Fbg%3Drgba%28171%25252C184%25252C195%25252C0%29%26t%3Ddracula%26wt%3Dnone%26l%3Dapplication%25252Fjson%26ds%3Dfalse%26dsyoff%3D20px%26dsblur%3D68px%26wc%3Dtrue%26wa%3Dtrue%26pv%3D56px%26ph%3D56px%26ln%3Dfalse%26fl%3D1%26fm%3DFira%252520Code%26fs%3D14px%26lh%3D133%252525%26si%3Dfalse%26es%3D2x%26wm%3Dfalse%26code%3D%2525257B%2525250A%25252520%25252520%25252522clientId%25252522%2525253A%25252520%25252522xxxxxxx%25252522%2525252C%2525250A%25252520%25252520%25252522clientSecret%25252522%2525253A%25252520%25252522xxxxxxxx%25252522%2525252C%2525250A%25252520%25252520%25252522subscriptionId%25252522%2525253A%25252520%25252522xxxxxxxx%25252522%2525252C%2525250A%25252520%25252520...%2525250A%2525257D&amp;image=https%3A%2F%2Fcarbon.now.sh%2Fstatic%2Fbrand%2Fbanner.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07&amp;type=text%2Fhtml&amp;scroll=auto&amp;schema=carbon&quot; allowfullscreen=&quot;&quot; frameborder=&quot;0&quot; height=&quot;480&quot; width=&quot;1024&quot; title=&quot;Carbon&quot; class=&quot;eo n ff dy bg&quot; scrolling=&quot;no&quot; style=&quot;box-sizing: inherit; top: 0px; width: 680px; height: 318.75px; position: absolute; left: 0px;&quot;></iframe>" />
+
+Copie toda essa resposta e crie um novo secret no GitHub chamado `AZURE_CREDENTIALS`:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*Oq5QyAMOR7AC7i1Q)
+
+Agora devemos ter dois secrets criados:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*q-RIyElRwFa3zXTU)
+
+## Criando um workflow
+
+Para criarmos o nosso primeiro workflow, basta voltarmos para o painel `Actions` ao lado de `Settings` e clicar no botão `Set up this workflow`:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*diYWMxG2TpJ82Sm1)
+
+Esta ação deve levar para uma nova tela com um modelo inicial do código:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*v0JNCLX9rAi2SaRx)
+
+Perceba que as GitHub Actions nada mais são do que um arquivo YAML que ficam em uma pasta `<seu repo>/.github/workflows` e este será o nome do workflow, portanto é importante que ele seja bastante descritivo. Vamos dar o nome do nosso de `publish-prod.yml`:
+
+![](https://miro.medium.com/v2/resize:fit:537/0*i8B-FwSTTrZuKtlV)
+
+O conteúdo que temos é o seguinte:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*zExvrp9-LVopTWg5oYZmcQ.png)
+
+Primeiro, vamos setar um nome para nosso workflow, este será o nome que aparecerá na UI do GitHub, então podemos deixar um pouco mais bonito:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*Jc3jshv1vu5YrAVs8ZHofQ.png)
+
+Agora vamos definir em qual tipo de ação queremos que ele rode. Como queremos que ele rode em qualquer push ou PR no branch `master`, não vamos fazer nenhuma alteração, mas se precisássemos alterar esta ação, teríamos que mudar a chave `on`. Para verificar quais são as ações disponíveis, basta clicar no editor e apertar `ENTER` que um _intellisense_ será mostrado:
+
+![](https://miro.medium.com/v2/resize:fit:290/0*bxe5Hg2B5h7kiL7s)
+
+> _Veja que temos várias ações possíveis, para detalhar melhor, veja [_a documentação oficial_](https://help.github.com/en/actions/reference/events-that-trigger-workflows#webhook-events)_
+
+Então vamos criar uma seção para compartilhar variáveis de ambiente e conteúdos que vamos usar na parte mais a frente do nosso script, por exemplo, o nome do container e também o nome do resource group. Para isso criamos um bloco `env`:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*c-TtD9itKom4CReF-j8i6g.png)
+
+Agora vamos, de fato, criar a máquina e o que chamamos de `runner`, que é quem vai rodar o nosso código de testes e de publicação. Todo o workflow é composto de um ou mais jobs que podem ser executados sequencialmente ou em paralelo. No nosso caso não temos que fazer muita coisa, apenas conectar e fazer o deploy. Portando vamos modificar a seção `jobs`:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*D2e42TJpQIis6nKobJBM8w.png)
+
+Iremos rodar nosso job em uma imagem do Ubuntu, veja as demais opções [na documentação](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on). Depois disso vamos configurar os nossos `steps`, um step é uma sequencia de tarefas que serão executadas como partes de um `job`, ou seja, aqui será o lugar onde vamos executar o nosso login e o nosso deploy!
+
+Para isso vamos modificar a chave `steps` e vamos remover todo o conteúdo, então vamos utilizar os steps pré prontos da Azure para poder fazer o login! Podemos pesquisar na caixa de texto lateral por `Azure/login`:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*4bBSYavjQ9JDtefl)
+
+Ao clicar no nome do step, vamos ter um tutorial de como usá-lo, neste caso é bastante simples, basta copiarmos o seguinte código para dentro do nosso step:
+
+![](https://miro.medium.com/v2/resize:fit:446/1*fXK7Z3X6sywzaANHPrjx2A.png)
+
+E será aqui que vamos setar o nosso primeiro secret, precisamos do `AZURE_CREDENTIALS` que criamos anteriormente para poder prover as credenciais de acesso para o login. Para usar um secret basta colocá-lo entre chaves duplas como em: `${{ secrets.AZURE_CREDENTIALS }}`.
+
+Nosso arquivo está assim:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*dGzjWLVNondqNe0LielzuQ.png)
+
+Vamos criar um segundo step que vamos chamar de `Deploy ACI`, que será aonde vamos executar o nosso comando do Azure CLI. Para isso vamos utilizar outro step com o comando `run` que vai conter a linha que vamos executar em nosso CLI. Em nosso a caso, já com as variáveis substituídas, será esta:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*YIcLMWWZALr7IO2Ws26ClA.png)
+
+Vamos observar bem a última parte onde criamos a variável `MONGOKE_CONFIG_URL`, esta variável sozinha não vai ser suficiente, temos que concatená-la com o valor do SHA do commit para não sofrermos com o cache. Para concatenarmos variáveis, temos que trabalhar somente no nível de steps, pois expressões não são permitidas a níveis de jobs ou do workflow como um todo. Vamos então criar um outro step e chamá-lo de `Create URL`.
+
+Neste step, vamos executar uma [**Workflow Command**](https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#using-workflow-commands-to-access-toolkit-functions), que são comandos nativos do GitHub Actions, que podem ser acessados com a sintaxe `::comando`. No nosso caso vamos usar o comando `set-env`, que serve para criar uma nova variável de ambiente, a sintaxe é a seguinte: `::set-env name=<nome>::<valor>` e ai poderemos utilizar as expressões de concatenação:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*wWgcaTtCATvy1NJwauG-cA.png)
+
+Veja que estamos concatenando `${{ env.MONGOKE_CONFIG_URL }}` com `?v=` e pegando os seis primeiros digitos de uma [variável nativa de ambiente](https://help.github.com/pt/actions/configuring-and-managing-workflows/using-environment-variables) chamada `GITHUB_SHA`. Vamos adicionar este step após o login:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*6NT5gNCwS6FEm5tEaNkfqw.png)
+
+Agora vamos para o último passo, onde vamos executar o nosso comando, com uma pequena alteração, ao invés de utilizar a variável `MONGOKE_CONFIG_URL`, vamos trocar para a nossa nova variável `MONGOKE_URL`:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*qqSANiai1089JDWGBh3O8Q.png)
+
+Nosso arquivo final será assim:
+
+![](https://miro.medium.com/v2/resize:fit:700/1*UrbN1mgPw9gYrP-XNJVBWg.png)
+
+Agora podemos clicar no botão `Start Commit` e esperar o nosso action ser executado:
+
+![](https://miro.medium.com/v2/resize:fit:427/0*hctS-h0CJzc1EjO2)
+
+## Acompanhando o workflow
+
+Podemos acompanhar o nosso workflow na aba `Actions`:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*wb7qZMr5Ajrjx__0)
+
+Lembrando que **workflows não executados nenhuma vez não vão aparecer na lista**. Basta clicarmos no nome do workflow para podermos ver o que aconteceu:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*mB8OsipEyxiwF3Bg)
+
+Agora podemos observar no portal da Azure que nosso container foi atualizado:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*5UcnCdFkuZaJQmzL)
+
+E que também nossas URLs estão corretas:
+
+![](https://miro.medium.com/v2/resize:fit:700/0*sH4PNq2JApgDUMwd)
+
+## Conclusão
+
+Em 7 minutos automatizamos todo o processo de deploy da nossa aplicação para a Azure e, sem perceber, ganhamos muito tempo com uma ação simples e rápida que pode ser feita em poucos minutos!
+
+Em outros artigos vamos explorar ainda mais os GitHub Actions para outras ferramentas e modelos de aplicação distribuída!
+
+Não deixe de acompanhar mais do meu conteúdo no meu blog e se inscreva na newsletter para receber notícias semanais!

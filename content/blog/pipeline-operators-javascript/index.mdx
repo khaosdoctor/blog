@@ -1,0 +1,182 @@
+---
+title: "Pipeline operators no JavaScript"
+pubDate: 2022-04-04T14:00:00.000Z
+updatedDate: 2026-07-16T16:10:07.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "ecmascript", "development"]
+description: "Entenda tudo sobre a proposta que vem ganhando muita aderência no ECMAScript, o operadores de pipeline."
+heroImage: "./photo-1531259579224-36e9afe800f3-29591291.jpg"
+draft: false
+visibility: "public"
+---
+
+O **JavaScript** está sempre evoluindo e, [c](/js-tipos-proposal/)[omo](/js-tipos-proposal/) de [costume](/novos-tipos-js/), vou escrever sobre mais uma das [propostas](https://github.com/tc39/proposal-pipeline-operator#tacit-unary-function-application-syntax) que vem ganhando aderência na comunidade. Os **pipeline operators**. Essa proposta ainda está no estágio 1, ou seja, muito inicial no processo, mas já vem se arrastando por [mais ou menos 6 anos](https://github.com/tc39/proposal-pipeline-operator/commit/3d4e985dba6e2a5b2bdc1999268537e2071131b6). Embora você consiga testar ela online usando o [Babel](https://babeljs.io/repl#?browsers=&build=&builtIns=false&corejs=false&spec=false&loose=false&code_lz=MYewdgzgLgBAZgSzAQwDYwLwwNoHICyApjBAgObK4C6MAUAD4B8MApAHShjDJQAUeKCDABOhACaEhEEMATIEEagEoGzdp2588IAK4xCAW1wAaGLgAWUKAAcIALgD0D1BGRgoICGwkA3ZatY2ACsQJF5cMxUmGE5pVEI2VBAyXhYlIA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=true&fileSize=false&timeTravel=false&sourceType=module&lineWrap=false&presets=env%2Cstage-1&prettier=true&targets=Node-16&version=7.17.8&externalPlugins=%40babel%2Fplugin-syntax-typescript%407.16.7%2Cbabel-plugin-const-enum%401.2.0&assumptions=%7B%7D).
+
+Se você ainda não sabe como o JavaScript funciona e como ele evolui eu te convido a assistir o meu vídeo explicando um pouco sobre esse assunto:
+
+<YouTube id="hDQu3AvvDfg" caption="Você pode ver mais vídeos lá no meu canal em https://youtube.lsantos.dev" />
+
+Essa [não é a primeira vez](https://github.com/tc39/proposal-pipeline-operator#tc39-has-rejected-f-pipes-multiple-times) que pipeline operators são sugeridos na linguagem (na verdade, é a terceira), mas agora pode ser um pouco diferente porque temos um outro conjunto de informações que podemos usar para poder completar esse quebra cabeça.
+
+## Qual é a proposta
+
+Os pipeline operators podem ser traduzidos como **operadores de fluxo**, e a ideia é basicamente a mesma da função `.pipe` que temos presente em streams (que eu já expliquei [aqui](https://imasters.com.br/back-end/streams-no-node-js-o-que-sao-streams-afinal-parte-01), [aqui](https://imasters.com.br/back-end/streams-no-node-js-o-que-sao-streams-afinal-parte-02) e [aqui](https://imasters.com.br/back-end/streams-no-node-js-o-que-sao-streams-afinal-parte-03)), essencialmente o funcionamento deles seria realizar chamadas de funções passando a saída de uma função para a entrada de outra, bem parecido com o que o `|` do bash, por exemplo, faz.
+
+A maior diferença é que, diferente do `|`, que só aceita **funções unárias**, ou seja, funções que tem um único parâmetro de entrada (como `(x) => {}`), os pipe operators deveriam poder aceitar qualquer tipo de operação.
+
+Para entender um pouco melhor  como esses operadores funcionam e por que eles foram sugeridos na linguagem a gente primeiro tem que entender dois estilos de programação e duas formas de se escrever código, o **deep nesting** e **fluent interfaces**. E depois saber um pouco da história por trás de **linguagens funcionais**.
+
+## Deep Nesting
+
+Quando estamos falando de pipelines, basicamente estamos falando de execuções de funções sequenciais, ou seja, o resultado de uma função ou expressão é passado para a próxima, como uma receita de bolo, onde após cada etapa, pegamos o que já temos e passamos para a próxima fase do processo até ter um resultado final.
+
+Um grande exemplo disso é a função `reduce` do array, que basicamente aplica a consecutivamente a mesma função sobre um conjunto de valores que é modificado, passando o resultado do conjunto da execução anterior para a próxima:
+
+```js
+const numeros = [1,2,3,4,5]
+numeros.reduce((atual, acumulador) => acumulador + atual, 0)
+// 1 => { atual: 1, acumulador: 0 }
+// 2 => { atual: 2, acumulador: 1 }
+// 3 => { atual: 3, acumulador: 3 }
+// 4 => { atual: 4, acumulador: 6 }
+// 5 => { atual: 5, acumulador: 10 }
+// 6 => { atual: undefined, acumulador: 15 }
+// 7 => resultado 15
+```
+
+Isso também pode ser feito com o que é chamado de nesting, que é quando passamos uma execução de função para outra consecutivamente, então imaginando que a gente tivesse a soma que usamos no `reduce` anteriormente, poderíamos representar essa mesma função através de:
+
+```js
+function soma (a, b) { return a + b }
+soma(5, 
+     soma(4, 
+          soma(3, 
+               soma(2, 
+                    soma(1, 0)
+                   )
+              )
+         )
+    )
+```
+
+Acho que é fácil entender qual é o problema por aqui... O deep nesting, junto com o [currying](https://en.wikipedia.org/wiki/Currying) são técnicas que, apesar de serem também bastante utilizadas em linguagens orientadas a objeto, são muito mais comuns em linguagens que tem abordagens mais funcionais como o [Hack](https://en.wikipedia.org/wiki/Hack_\(programming_language\)), Clojure e [F#](https://en.wikipedia.org/wiki/F_Sharp_\(programming_language\)). Isto porque essas linguagens, como o próprio nome já diz, são baseadas em funções para trabalhar com dados de uma forma um pouco mais parecida com o sistema conhecido como [Lambda-Cálculo](https://en.wikipedia.org/wiki/Lambda_calculus) na matemática.
+
+O ponto é que deep nesting é muito difícil de ler, porque não sabemos de onde está vindo o dado inicial e também porque a leitura precisa começar de dentro para fora (ou da direita para a esquerda), porque temos que saber o resultado da primeira função passada para poder inferir o resultado da última chamada.
+
+Por outro lado, deep nesting é aplicável a praticamente todos os tipos de expressões, podemos ter operações aritméticas, arrays, `await`, `yield` e todo tipo de coisa, por exemplo, a função anterior poderia (e provavelmente vai, no [compilador](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-10-otimizacoes-do-compilador-39oi)) ser escrita assim:
+
+```js
+const resultado = (5 + 
+ (4 + 
+  (3 + 
+   (2 + 
+    (1 + 0)
+   )
+  )
+ )
+)
+```
+
+Currying é quando temos funções que são unárias por natureza, então quando queremos compor alguma coisa, nós retornamos uma função que vai chamar outra função, dessa forma podemos compor as duas funções como se fossem duas chamadas, por exemplo, uma função que multiplica dois números:
+
+```js
+const multiplicaDois = x => y => x * y
+const resultado = multiplicaDois(5)(2) // -> 10
+```
+
+O currying, apesar de elegante, é um pouco custoso porque temos que digitar bem mais e, além disso, as funções mais longas e complexas acabam ficando mais complicadas para poderem ser lidas por qualquer pessoa. Ainda sim, currying é muito utilizado principalmente por libs como o [Ramda](https://ramdajs.com), que são orientadas para currying desde o seu design.
+
+Mas, existe uma outra forma de escrita que a maioria de nós já está um pouco acostumado: as **fluent interfaces**.
+
+## Fluent Interfaces
+
+Você provavelmente já se deparou com interfaces fluentes em algum momento da sua vida, mesmo que não saiba do que estamos falando. Se você um dia já usou jQuery ou até mesmo as funções mais comuns de arrays em JavaScript, você já usou uma interface fluent.
+
+Esse tipo de design também é chamado de **method chaining**.
+
+A grande ideia das fluent interfaces é que você não precisa chamar o objeto novamente para poder executar uma função diferente, mas subsequente, com os mesmos dados do seu objeto original, por exemplo:
+
+```js
+const somaDosImpares = [1, 2, 3]
+	.map(x => x * 2)
+	.filter(x => x % 2 !== 0)
+	.reduce((prev, acc) => prev+acc, 0)
+```
+
+O maior exemplo até hoje desse modelo de arquitetura é o jQuery, que consistem em um único mega objeto principal chamado `jQuery` (ou `$`) que recebe dúzias e mais dúzias de métodos filhos que retornam o mesmo objeto principal, de forma que você consegue encadear todos eles. Isso também se parece bastante com um padrão de projeto chamado **[builder](https://imasters.com.br/javascript/design-patterns-com-javascript-typescript-padroes-criacionais).**
+
+Perceba que eu não estou chamando meu array novamente, eu simplesmente vou **encadeando** (daí que vem o termo "chaining") os métodos desse array um após o outro e vou ter o mais próximo que temos hoje a uma interface que seja ao mesmo tempo bastante legível e também imita o comportamento de fluxo que queremos obter com os pipeline operators.
+
+O problema é que a aplicabilidade desse método é limitada porque ele só é possível se você está trabalhando em um paradigma que tem funções designadas como métodos para uma classe, ou seja, quando estamos trabalhando diretamente com orientação a objetos.
+
+Mas, por outro lado, quando ele é aplicado, a leitura e a usabilidade ficam tão fáceis que muitas bibliotecas fazem aquela "gambiarra" no código só para poder usar method chaining. Pense bem, quando temos esse tipo de design:
+
+-   Nosso código flui da esquerda para a direita, como estamos acostumados
+-   Todas as expressões que poderiam sofrer um nesting ficam no mesmo nível
+-   Todos os argumentos são agrupados sob o mesmo elemento principal (que é o objeto em questão)
+-   A edição do código fica trivial, porque se precisarmos adicionar mais etapas, é só incluir uma nova função no meio, se precisarmos remover, é só deletar a linha
+
+O maior problema é que não podemos acomodar todas as interfaces e tipos de funções dentro desse mesmo design, porque não podemos retornar expressões aritméticas (como `1+2`) ou `await` ou `yield`, nem objetos literais ou arrays. Vamos ficar sempre limitados ao que uma função ou método podem fazer.
+
+## Entram os pipe operators
+
+Os operadores de fluxo combinam os dois mundos e melhoram a aplicabilidade de ambos os modelos em uma interface mais unificada e mais fácil de ler. Então ao invés de ter um monte de métodos aninhados ou então um monte de funções, podemos simplesmente fazer assim:
+
+```js
+const resultado = [1,2,3].map(x => x*2) |> %[0] // => 2
+```
+
+A sintaxe é simples: na esquerda do operador `|>` temos qualquer expressão que produz um valor, esse valor produzido será jogado para um placeholder (ou objeto temporário) que, por enquanto, está como `%`, ou seja, o `%` é o resultado do que está a **esquerda** do `|>`. E então, à direita do operador, temos a transformação feita com o resultado obtido, o resultado final dessas duas expressões é a saída e vai ser o que será atribuído ao `resultado`.
+
+Se você analisar usando o [Babel](https://babeljs.io/repl#?browsers=defaults%2C%20not%20ie%2011%2C%20not%20ie_mob%2011&build=&builtIns=false&corejs=3.21&spec=false&loose=false&code_lz=MYewdgzgLgBFICECGECmA2ALDAvDAFACYCUuAfDAgK4BmNqATgHQ0MgC2RxT8AylAwCWYAOb4A5ACMUGTOOIAoBaEixpaACqoAHrDziAFlCgAHCAC4A9JYA2EJGHgQmhVADdxMAD4UApDxAAVRMTRgBhGXxSHzhEGSx8X2IgA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=true&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=env%2Cstage-0&prettier=false&targets=Node-16&version=7.17.8&externalPlugins=&assumptions=%7B%7D), para o código abaixo:
+
+```js
+const toBase64 = (d) => Buffer.from(d).toString('base64')
+
+const baseText = 'https://lsantos.dev' 
+|> %.toUpperCase() 
+|> toBase64(%)
+```
+
+Vamos obter a seguinte saída:
+
+```js
+"use strict";
+
+const toBase64 = d => Buffer.from(d).toString('base64');
+
+const baseText = toBase64('https://lsantos.dev'.toUpperCase());
+```
+
+Da mesma forma, se usarmos funções com currying, o babel vai ser capaz de decifrar essa informação e criar uma representação válida.
+
+Atualmente existem duas implementações mais famosas do pipe, a primeira delas é a do F#, uma linguagem de programação funcional criada pela Microsoft baseada no OCaml. A segunda é a do Hack, uma linguagem criada pelo Facebook há um bom tempo que é, essencialmente, um PHP com tipos estáticos.
+
+A maior diferença entre os operadores é que, no caso da versão do Hack, ele aceita qualquer tipo de expressão como sendo um operador válido tanto para o lado esquerdo quanto para o lado direito da expressão através da variável especial `%`.
+
+Então podemos fazer qualquer coisa, literalmente:
+
+```js
+value |> someFunction(1, %, 3) // function calls
+value |> %.someMethod() // method call
+value |> % + 1 // operator
+value |> [%, 'b', 'c'] // Array literal
+value |> {someProp: %} // object literal
+value |> await % // awaiting a Promise
+value |> (yield %) // yielding a generator value
+```
+
+Já no caso do F#, estamos um pouco mais limitados à funções que são unárias, portanto a variável `%` não existe, dessa forma precisamos sempre ter algum tipo de função do lado direito do operador:
+
+```js
+const f = soma(1,2) |> x => soma(x, 3)
+```
+
+Entre outros motivos explicados [aqui](https://2ality.com/2022/01/pipe-operator.html), a proposta está focando principalmente em poder aplicar o modelo do Hack ao JavaScript e não o modelo do F#.
+
+## Conclusão
+
+Por enquanto esse operador ainda está tentando sair do papel, porém, já existem planos descritos [nesta seção](https://github.com/tc39/proposal-pipeline-operator#possible-future-extensions) que mostram que algumas outras opções para estender o operador já estão em análise como operadores condicionais e opcionais usando `if` ou então `?` e operadores em loop com `for of`, além do uso deste operador com o `catch`.
+
+Não existe uma data ou horizonte ainda para essa proposta ser posta em prática, mas existem muitos olhos em cima do que está acontecendo!

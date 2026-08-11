@@ -1,0 +1,336 @@
+---
+title: "Uma Introdução à Service Mesh com Linkerd"
+pubDate: 2020-09-10T21:26:02.000Z
+updatedDate: 2026-07-16T16:24:46.000Z
+lang: pt
+category: "infra"
+tags: ["kubernetes", "containers", "linkerd", "architecture", "technology", "development", "cloud"]
+description: "Observabilidade, logging, controle de tráfego. Tudo o que você sempre sonhou para microsserviços de forma simples e rápida com Linkerd"
+heroImage: "./photo-1490253599483-a908627eb692-f1415d7e.jpg"
+draft: false
+visibility: "public"
+---
+
+import figureImage1 from './image.png'
+import figureImage2 from './image-1.png'
+import figureImage3 from './image-2.png'
+import figureImage4 from './image-3.png'
+import figureImage5 from './image-4.png'
+import figureImage6 from './image-5.png'
+import figureImage7 from './image-6.png'
+import figureImage8 from './image-7.png'
+import figureImage9 from './image-8.png'
+import figureImage10 from './image-9.png'
+import figureImage11 from './image-10.png'
+import figureImage12 from './image-11.png'
+import figureImage13 from './image-13.png'
+import figureImage14 from './image-14.png'
+import figureImage15 from './image-20.png'
+import figureImage16 from './image-21.png'
+
+Conversamos [recentemente](/service-mesh-1/) sobre **Service Mesh** e como este padrão de arquitetura pode salvar seu projeto de forma que ele ganhe mais observabilidade e facilidade de utilização.
+
+Falamos de Service Mesh de forma muito conceitual. Agora vamos colocar a mão na massa e criar nossa própria mesh utilizando o [Linkerd](https://linkerd.io/)!
+
+## Linkerd
+
+<Figure src={figureImage1} priority alt="" caption="Uma breve história do Linkerd" wide />
+
+O Linkerd é um projeto criado dentro do Twitter em 2013, quando a rede estava migrando sua arquitetura de uma plataforma de camadas para uma arquitetura de microsserviços. O projeto **Linkerd** foi transformado em open source em 2016 no que ficou conhecida como  a versão 0.1.
+
+Em 2017, o projeto foi doado a [CNCF](https://www.cncf.io/) (Cloud Native Computing Foundation), que é um braço da Linux Foundation dedicado a cuidar de projetos open source. Alguns [projetos](https://www.cncf.io/projects/) como o Kuberntes, Helm, Brigade, Harbor, Envoy e o CoreDNS fazem parte dessa incrível fundação.
+
+Recentemente, em 2018, o Linkerd chegou a versão 2.0. O Linkerd v2 foi lançado corrigindo uma série de problemas e tendo como base as lições aprendidas na v1. O projeto inicial tinha a intenção de ser altamente configurável, poderoso e multiplataforma. Já a v2 tinha como objetivo ser muito mais simples. Os principais objetivos de design da versão dois eram:
+
+-   Zero configuração
+-   Simples e leve
+-   Pensado para Kubernetes
+
+Por padrão, o Linkerd já nos proporciona uma série de funcionalidade nativas:
+
+-   **Detecção de protocolos**: O Linkerd pode, além de fazer um proxy para protocolos TCP e gRPC, detectar se o tráfego é do tipo HTTP ou gRCP automaticamente.
+-   **Proxy HTTP 1.1/2 e gRPC:** Se qualquer um destes protocolos for usado, o Linkerd pode, nativamente, extrair métricas, fazer proxies, lógicas de tentativas e load balancing.
+-   **Injeção automática e zero configuração:** Como vamos ver mais adiante, o Linkerd é super simples de se instalar, mesmo em clusters com aplicações existentes. Portanto isso facilita muito a adoção da ferramenta
+-   **mTLS automático por padrão:** Por padrão, toda comunicação interna é criptografada usando mTLS
+-   **Observabilidade:** Além de logs e métricas, o Linkerd pode construir um grafo de serviços baseado somente nos tráfegos de entrada e saída. Tudo com métricas e dados.
+-   **Divisão de tráfego:** Uma técnica bastante comum para aplicações distribuídas é chamada de _Canary Deployment_. Que é quando fazemos o deploy de aplicações parcialmente, através do redirecionamento de parte do tráfego gradualmente para a aplicação nova enquanto a aplicação antiga ainda está funcionando. O Linkerd nativamente proporciona essa funcionalidade.
+
+### Arquitetura
+
+Para entendermos melhor o que estamos fazendo, vamos tentar entender como o Linkerd funciona e qual é a arquitetura que ele segue. Para isso temos dois conceitos que são inerentes de **service mesh**.
+
+-   **Control Plane:** Responsável por coletar e armazenar todas as informações de requisições e também controlar o fluxo de informações
+-   **Data Plane:** Aonde sua aplicação está localizada e aonde estamos tendo transferências de dados
+
+<Figure src={figureImage2} alt="" caption="Overview da arquitetura do Linkerd" wide />
+
+Não vou passar por todas as camadas do sistema de forma completa, pois não é o intuito do artigo, mas vou falar um pouco de cada uma para podermos entender como todas as partes se comunicam.
+
+#### Proxy
+
+A única parte que existe no **data plane**. É a responsável por capturar informações e métricas dos containers onde suas aplicações estão rodando.
+
+Isto é feito através da injeção de dois containers dentro dos seus pods do Kubernetes:
+
+-   Init Container: Vai ser executado antes do container do pod e vai configurar as regras de acesso, IP e rotas para que toda a comunicação passe primeiro pelo proxy do Linkerd
+-   Proxy Container: É a camada que vai capturar as requisições e extrair métricas para análise.
+
+#### Controller
+
+É a parte com mais responsabilidades. Ela contém o core do Linkerd e possui diversas funcionalidades:
+
+-   Host do servidor de API
+-   Atua como CA (autoridade certificadora) para o mTLS
+-   Informação de service discovery e balanceamento de carga para o proxy
+-   Permite o **tap**, que é a inspeção em tempo real do tráfego de rede em uma ou mais rotas/aplicações
+-   Injeta os proxies automaticamente nos containers iniciados
+
+#### Web
+
+Uma das grandes facilidades do Linkerd é a existencia de uma interface web que mostra e controla todos os aspectos da malha.
+
+<Figure src={figureImage3} alt="" caption="Interface web do Linkerd" wide />
+
+#### Prometheus
+
+Serviço de coleta de métricas do proxy. Busca e armazena temporariamente as métricas coletadas das suas aplicações.
+
+Muitas vezes o cluster do Kubernetes já vem com um serviço do Prometheus, o serviço do Linkerd não é configurado para análise, somente para performance, então ele **não armazena mais do que 6h de métricas**.
+
+#### Grafana
+
+Busca métricas e as exibe em forma de gráficos e dashboards
+
+<Figure src={figureImage4} alt="" caption="Dashboard do Grafana" wide />
+
+## E o Istio?
+
+Uma das principais perguntas que as pessoas fazem quando olham o Linkerd é:
+
+> Qual é a diferença entre o Linkerd e o Istio?
+
+Basicamente, temos algumas diferenças de foco da plataforma em si e também na arquitetura. Porém, em suma, o Linkerd é uma ferramenta mais focada em performance do que o Istio.
+
+O Istio é mais focado em prover mais ferramentas e funcionalidade e, por isso, é mais complexo do que o Linkerd. Em minha opinião, o uso do Linkerd é muito mais fácil para quem está começando com **Service Mesh** do que o Istio.
+
+## Criando um service mesh
+
+Chegou a hora de sair da teoria e entrar na prática! Vamos colocar a mão na massa e entender como podemos criar um service mesh usando Linkerd.
+
+Para realizar esse hands on eu vou criar um cluster no [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=personal-blog-ludossan), mas você pode escolher realizar em qualquer cluster Kubernetes que você tiver, **inclusive em um cluster já em produção** visto que o Linkerd não é destrutivo e instala suas informações em outro namespace.
+
+> Você também pode utilizar soluções para executar o K8S de forma local com o [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), [Docker](https://www.docker.com/products/docker-desktop) ou [outras opções](https://kubernetes.io/docs/setup/)
+
+Dentro deste cluster vou fazer o deploy da aplicação presente no repositório abaixo
+
+<Bookmark url="https://github.com/Azure-Samples/aks-bootcamp-sample/tree/finished" title="Azure-Samples/aks-bootcamp-sample" description="Demo repository for the AKS Bootcamp course. Contribute to Azure-Samples/aks-bootcamp-sample development by creating an account on GitHub." publisher="Azure-Samples" />
+
+Esta é uma aplicação de demonstração que utiliza um front-end e um backend para comunicação. Você também pode seguir utilizando outra aplicação como, por exemplo, a [aplicação de exemplo do Linkerd](https://linkerd.io/2/getting-started/#step-5-install-the-demo-app).
+
+Vou assumir que o cluster já está criado e que a aplicação já está rodando para podermos pular diretamente para a parte que importa.
+
+## Instalação
+
+Para rodarmos o Linkerd, primeiramente precisamos instalar a linha de comando da ferramenta com o comando:
+
+```sh
+curl -sL https://run.linkerd.io/install | sh
+```
+
+E adicionar no nosso path com o comando:
+
+```sh
+export PATH=$PATH:$HOME/.linkerd2/bin
+```
+
+> Se você usa Mac, então você pode instalar o Linkerd com o Homebrew através do `brew install linkerd`
+
+### Validação
+
+Antes de instalarmos o Linkerd no cluster propriamente dito, vamos realizar uma validação executando o comando:
+
+```sh
+linkerd check --pre
+```
+
+Isso vai garantir que todos os nomes e serviços estão disponíveis para que o Linkerd seja instalado
+
+<Figure src={figureImage5} alt="" caption="Saída com sucesso do comando" />
+
+Então rodamos o comando:
+
+```bash
+linkerd install | kubectl apply -f -
+```
+
+Perceba que este comando, na verdade é uma junção, pois o Linkerd não faz nenhuma instalação no cluster, ele somente gera um output de um arquivo YAML que pode ser usado pelo cluster para criar seus workloads, por isso que damos um pipe para o `kubectl apply -f -`. Experimente rodar somente `linkerd install` e veja os arquivos sendo mostrados na tela.
+
+Depois, vamos rodar o comando a seguir para podermos checar se todo o processo foi executado com sucesso:
+
+```bash
+linkerd check
+```
+
+Se tudo correu bem, você deverá ter uma saída como esta:
+
+<Figure src={figureImage6} alt="" caption="Saída de sucesso do linkerd check" />
+
+Todos os workloads do Linkerd são instalados dentro de um _namespace_ próprio chamado `linkerd`, então você pode buscar todos os recursos que comentamos através do **kubectl** pelo comando:
+
+```sh
+kubectl get all -n linkerd
+```
+
+## Primeiras impressões
+
+Para começarmos a entender como o Linkerd funciona, você pode digitar o comando `linkerd dashboard &` e aguardar alguns segundos para a abertura do painel web.
+
+<Figure src={figureImage7} alt="" caption="Painel web do Linkerd" wide />
+
+Por este painel você será capaz de realizar executar todas as funcionalidades do Linkerd, bem como verificar o estado do seu cluster, ele também pode agir como uma forma de _dashboard_ para o Kubernetes, de certa forma. Basta vermos a seção **Workloads** no menu lateral:
+
+<Figure src={figureImage8} alt="" wide />
+
+Veja que estamos trabalhando no _namespace_ default. Isso pode ser trocado através do menu de seleção.
+
+### Control Plane
+
+Se clicarmos na seção **Control Plane**, iremos ter uma visão geral de todo o nosso **Service Mesh**.
+
+<Figure src={figureImage9} alt="" caption="Painel de visualização do Control Plane" wide />
+
+Veja que este painel nos mostra todo o status do sistema e também a quantidade de componentes que temos instalados.
+
+Mais abaixo, podemos ver a quantidade de namespaces que estão _"meshed",_ ou seja, que estão injetados pelo proxy do Linkerd de forma que estão gerando métricas:
+
+<Figure src={figureImage10} alt="" caption="Perceba que apenas um namespaces está gerando métricas" />
+
+## Adicionando métricas
+
+Nossa aplicação está no namespace `default`, como fazemos para incluí-la no **Service Mesh**? Simples! Vamos executar o seguinte comando:
+
+```bash
+kubectl get deploy -o yaml
+```
+
+Veja que temos todos os arquivos YAML dos nossos deployments, então vamos criar um pipe deste comando para o comando `linkerd inject`:
+
+```bash
+kubectl get deploy -o yaml | linkerd inject -
+```
+
+Agora veja a diferença entre os dois arquivos. O arquivo injetado terá uma _annotation_ no template do pod desta forma:
+
+<Figure src={figureImage11} alt="" caption="Anotação do Linkerd no pod" />
+
+Esta é a única mudança que é feita em seus deployments, ou seja, é muito fácil injetar o Linkerd em serviços que **já estão em produção** sem causar muitos efeitos colaterais.
+
+Vamos aplicar as mudanças através de um outro pipe para o comando `apply`:
+
+```bash
+kubectl get deploy -o yaml | linkerd inject - | kubectl apply -f -
+```
+
+Assim que aplicarmos a mudança poderemos ver uma movimentação no _Control Plane_ de forma que ele estará carregando os nossos pods novamente para incluí-los nas métricas:
+
+<Figure src={figureImage12} alt="" caption="O namespace está entrando no mesh" />
+
+Veja que não temos um dos pods enviando métricas... O pod do MongoDB está fora do Mesh, mas por que?
+
+Pois, neste exemplo, ele é um **StatefulSet** e não um deployment! Então vamos executar o mesmo comando que executamos anteriormente, mas vamos substituir `deploy` por `sts`.
+
+```bash
+kubectl get sts -o yaml | linkerd inject - | kubectl apply -f -
+```
+
+> **Importante**_**:** Para este exemplo estou utilizando uma versão simples do MongoDB dentro do cluster local, você pode utilizar uma versão hosteada por qualquer provedor – como o Mongo Atlas, por exemplo – ou então outras soluções. A aplicação só precisa de um MongoDB para funcionar._
+
+Agora temos todos os detalhes:
+
+![](./image-12.png)
+
+## Ferramentas
+
+O Linkerd nos dá uma série de ferramentas interessantes, vamos conhecer algumas delas.
+
+### Grafana
+
+Clique no nome do _namespace_ na aba Control Plane.
+
+Além de conseguirmos verificar as métricas dentro do painel do Linkerd, também podemos encontrar um dashboard do Grafana ao clicarmos no pequeno ícone laranja no canto direito
+
+<Figure src={figureImage13} alt="" wide />
+
+Vamos abrir o painel para o deployment `porto-backend`:
+
+<Figure src={figureImage14} alt="" caption="Nosso dashboard está vazio" />
+
+Veja que o dashboard não apresenta nenhum dado... Por que? Pois ainda não fizemos nenhuma requisição que possa ser capturada! Vamos entrar na nossa aplicação e criar alguns acessos. Para achar a URL da sua aplicação utilize o comando `kubectl get ing` para buscar os ingresses e assim as URLs.
+
+![](./image-15.png)
+
+Assim que começarmos a fazer alguns acessos podemos ver alguns dados chegando:
+
+![](./image-16.png)
+
+E podemos ver o que está acontecendo nos gráficos do grafana também!
+
+![](./image-17.png)
+
+Temos também métricas de tráfego TCP:
+
+![](./image-18.png)
+
+Além deste dashboard, temos outros dashboards já internos que o próprio Linkerd criou.
+
+### Visão em tempo real
+
+Ao clicarmos no nosso deployment dentro da visão do namespace, podemos ver em tempo real as chamadas que estão sendo feitas.
+
+![](./image-19.png)
+
+Também podemos ver um mapa da aplicação que nos mostra quais são os serviços conectados.
+
+### Top
+
+Se clicarmos no menu `Top` na seção Tools do menu lateral. Vamos poder selecionar um namespace ou recurso para podermos acompanhar em tempo real. Selecione o namespace `default` e faça algumas requisições para a aplicação. Veja que começamos a ter um acompanhamento de métricas:
+
+<Figure src={figureImage15} alt="" wide />
+
+### Tap
+
+Ainda na mesma visualização, veja que temos o ícone de um microscópio, este ícone permite que observemos aquela rota específica para mais detalhes.
+
+Vamos abrir a aba `Tap` no menu lateral. Selecionar o namespace `default` no topo e clicar em `start`. Assim que fizermos algumas requisições, poderemos ver todas elas em tempo real
+
+<Figure src={figureImage16} alt="" wide />
+
+Ao clicarmos na seta esquerda, teremos uma visualização da request em detalhes
+
+![](./image-22.png)
+
+### Grafo de serviços
+
+Na minha opinião, uma das funcionalidades mais legais do Linkerd é a do grafo de serviços. Para podermos representar bem como ela funciona, vamos voltar para a visualização de **namespaces** no menu esquerdo e clicar sobre o namespace `linkerd`
+
+![](./image-23.png)
+
+No topo da tela teremos uma representação dos serviços que estão conversando entre si e quais deles estão enviando requisições. Isto é **muito** útil quando estamos falando de meshes muito grandes.
+
+## Removendo o Linkerd
+
+Para removermos o linkerd de um namespace basta executar o comando
+
+```bash
+kubectl get deploy -o yaml | linkerd uninject - | kubectl apply -f -
+```
+
+Ou seja, da mesma forma que executamos o `inject`, executamos também o `uninject`.
+
+## Conclusão
+
+O Linkerd pode facilitar muito a vida de quem esta desenvolvendo aplicações distribuídas, por ser simples e fácil de instalar, ele tem uma grande vantagem sobre os demais sistemas de Service Mesh e pode provar ser um excelente adendo à sua infraestrutura.
+
+Não se esqueça de se inscrever na newsletter para receber esse conteúdo e também notícias semanais! Curta e compartilhe seus feedbacks nos comentários!
+
+Até mais!

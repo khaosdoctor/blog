@@ -1,0 +1,363 @@
+---
+title: "A nova funcionalidade do TS 5.2: conheça o Using"
+pubDate: 2023-08-03T11:00:11.000Z
+updatedDate: 2026-07-16T15:58:29.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "javascript", "nodejs", "development"]
+description: "O TypeScript 5.2 está implementando uma nova palavra chave chamada using. Mas você sabe para que ela serve?"
+heroImage: "./articles.png"
+draft: false
+visibility: "public"
+seoTitle: "Tudo sobre o \"using\" no TypeScript 5.2 e seus benefícios"
+---
+
+Mais uma vez estamos aqui para as novidades do **[TypeScript](https://hotm.art/yd4IsL)!** Dessa vez vamos falar de uma que não é só uma novidade do TS mas que também vai estar [chegando](https://github.com/tc39/proposal-explicit-resource-management) para o JavaScript logo mais!
+
+Essa é a funcionalidade chamada **explicit resource management**, ou gerenciamento explícito de recursos. Que é mais definida como uma nova keyword: `using`
+
+Em outras linguagens como o C#, o `using` já é uma keyword [bem famosa](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-statement), e ela existe em outras formas, como o `try-with-resources` do [Java](https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html) ou o `with` do [Python](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement), a ideia dessa proposta é poder atrelar o ciclo de vida de um recurso a ele mesmo, sem que a gente precise chamar outras funções como um `finally` para poder se desfazer desse recurso.
+
+## Gerenciamento de recursos
+
+Quando estamos falando de programação de mais baixo nível como C ou C++, gerenciamento de recursos é algo essencial, mas quando estamos em linguagens de mais alto nível, esse tipo de funcionalidade acaba se perdendo bastante já que o compilador ou o engine vai tomar conta disso pra gente.
+
+Mas as vezes é necessário fazer uma "limpeza" em alguns recursos que estamos usando depois de criar ou acabar de utilizar esse recurso. O exemplo mais clássico disso tudo é fechar uma conexão de rede ou de banco de dados. Se tivermos algo como:
+
+```ts
+import connection from 'seu-banco'
+
+export async function fazerQuery (query: string) {
+	const db = connection.start()
+    const result = await db.query(query)
+    connection.close()
+    return result
+}
+```
+
+Se a gente, por algum motivo, precisar fazer um early return, vamos ter que duplicar o código que está liberando o nosso recurso com o `connection.close()`:
+
+```ts
+import connection from 'seu-banco'
+
+export async function fazerQuery (query: string) {
+	const db = connection.start()
+    const result = await db.query(query)
+    if (!result) {
+    	connection.close()
+        return
+    }
+    connection.close()
+    return result
+}
+```
+
+Mas não garantimos se um erro acontecer, então a gente precisa de um `try/catch`, ai é mais fácil jogar tudo isso em um `finally` para ficar mais simples de ler, certo?
+
+```ts
+import connection from 'seu-banco'
+
+export async function fazerQuery (query: string) {
+	try {
+        const db = connection.start()
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    } finally {
+    	connection.close()
+    }
+}
+```
+
+Enquanto isso é uma solução interessante, a gente escreveu uma quantidade considerável de código para poder fechar uma conexão... E é pra isso que a ideia do gerenciamento explícito existe, para tratar esses casos como algo primário.
+
+## Symbol.dispose
+
+Tudo gira em torno de uma propriedade do arquivo chamada `Symbol.dispose`, que é um Símbolo interno de todas as classes.
+
+No caso, vamos imaginar que essa seja a nossa classe de conexão (e que exista uma factory em algum lugar que nos retorna a instância que usamos acima):
+
+```ts
+export class Connection {
+	constructor (options: ConnectionOptions) {
+    	// ...
+    }
+    
+    start () { }
+    close () { }
+}
+```
+
+Para podermos transformar a classe de conexão em uma classe que pode ser recolhida, vamos implementar uma nova propriedade:
+
+```ts
+export class Connection {
+	constructor (options: ConnectionOptions) {
+    	// ...
+    }
+    
+    start () { }
+    close () { }
+    
+    [Symbol.dispose]() {
+    	this.close()
+    }
+}
+```
+
+Se você quiser mais conveniência, o TS já tem uma interface global chamada `Disposable` que você pode implementar para deixar o código mais coeso:
+
+```ts
+export class Connection implements Disposable {
+	constructor (options: ConnectionOptions) {
+    	// ...
+    }
+    
+    start () { }
+    close () { }
+    
+    [Symbol.dispose]() {
+    	this.close()
+    }
+}
+```
+
+E ai agora podemos simplesmente chamar essa funcionalidade para poder limpar o nosso arquivo:
+
+```ts
+import connection from 'seu-banco'
+
+export async function fazerQuery (query: string) {
+	try {
+        const db = connection.start()
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    } finally {
+    	connection[Symbol.dispose]()
+    }
+}
+```
+
+Não ajudou muito não é? A gente só moveu de um lado pro outro, apesar de agora termos um lugar específico para chamar toda a lógica, ainda sim é mais fácil do que ficar chamando os métodos específicos.
+
+## Using
+
+Mas, se a gente quiser passar tudo para um lugar só, podemos tirar vantagem da nova keyword `using`, ela funciona como se fosse um `let` ou `const` mas ao invés de só declarar a variável, ela instrui o engine a chamar `Symbol.dispose` no final do escopo daquela função, então nossa função anterior pode ser reescrita assim:
+
+```ts
+import connection from 'seu-banco'
+
+export async function fazerQuery (query: string) {
+	try {
+        using db = connection.start()
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    }
+}
+```
+
+Agora não temos mais a lógica de gerenciamento de recursos dentro do nosso app, o que torna muito mais fácil gerenciar essas conexões e abstrair a funcionalidade de usuários, especialmente para quem cria libs!
+
+> Se você quiser aprender a usar essa funcionalidade, aproveita e dá uma olhada no meu [treinamento completo de TypeScript](https://hotm.art/yd4IsL)!
+
+Disposals funcionam como uma stack, então eles vão ser chamados da última criação para a primeira. Como esse exemplo da documentação mostra bem:
+
+```ts
+function loggy(id: string): Disposable {
+    console.log(`Creating ${id}`);
+
+    return {
+        [Symbol.dispose]() {
+            console.log(`Disposing ${id}`);
+        }
+    }
+}
+
+function func() {
+    using a = loggy("a");
+    using b = loggy("b");
+    {
+        using c = loggy("c");
+        using d = loggy("d");
+    }
+    using e = loggy("e");
+    return;
+
+    // Unreachable.
+    using f = loggy("f");
+}
+
+func();
+// Creating a
+// Creating b
+// Creating c
+// Creating d
+// Disposing d
+// Disposing c
+// Creating e
+// Disposing e
+// Disposing b
+// Disposing a
+```
+
+Veja que eles são criados na ordem de A até D, mas destruídos de D até A. Inclusive, se você criar um escopo no meio da função, como é o caso de C e D, eles vão ser destruídos primeiro ao saírem do escopo.
+
+### Assincronismo com Symbol.asyncDispose
+
+Além de termos a versão síncrona, também temos a versão assíncrona do dispose. Ela se comporta da mesma forma, porém é uma função assíncrona e precisa ser usada com `await using` ao invés de `using`.
+
+```ts
+async function wait () {
+	await new Promise(resolve => setTimeout(resolve, 500))
+}
+
+function loggy(id: string): AsyncDisposable {
+    console.log(`Creating ${id}`);
+
+    return {
+        async [Symbol.asyncDispose]() {
+            console.log(`Disposing ${id} async`);
+            await wait()
+        }
+    }
+}
+
+function func() {
+    await using a = loggy("a");
+    await using b = loggy("b");
+    {
+        await using c = loggy("c");
+        await using d = loggy("d");
+    }
+    await using e = loggy("e");
+    return;
+
+    // Unreachable.
+    await using f = loggy("f");
+}
+
+func();
+// Creating a
+// Creating b
+// Creating c
+// Creating d
+// Disposing d async
+// Disposing c async
+// Creating e
+// Disposing e async
+// Disposing b async
+// Disposing a async
+```
+
+## Tratamento de erros
+
+O que acontece se a nossa função de dispose tiver um erro? Ou se tivermos um erro durante a função e também na hora de destruir a função? Neste caso temos um novo tipo de erro que é estendido de `Error`, o `SuppressedError`.
+
+Erros do tipo `SuppressedError` tem uma propriedade `suppressed` que contém o último erro que foi gerado e uma outra propriedade `error` para o erro mais recente.
+
+Por exemplo, se tivermos um código como esse:
+
+```ts
+class ErrorA extends Error {
+    name = "ErrorA";
+}
+class ErrorB extends Error {
+    name = "ErrorB";
+}
+
+function foo (id: string) {
+	return {
+    	[Symbol.dispose]() {
+        	throw new ErrorA(`Erro do id ${id}`)
+         }
+	}
+}
+
+function bar () {
+	using f = foo("1")
+    throw new ErrorB("Erro!")
+}
+
+try {
+	bar()
+} catch (e: any) {
+	console.log(e.name, e.message) // SuppressedError An error was suppressed during disposal
+    console.log(e.error.name) // ErrorA
+    console.log(e.error.message) // Erro do id 1
+    console.log(e.suppressed.name) // ErrorB
+    console.log(e.suppressed.message) // Erro!
+}
+```
+
+Então basicamente o erro mais recente vai ser o erro que foi gerado dentro do symbol, enquando o erro suprimido é o erro que foi gerado dentro da função antes do disposal ser chamado.
+
+# DisposableStacks
+
+Como você pode ter percebido, `Symbol.dispose` e a sua versão assíncrona podem ser ótimas soluções para códigos mais complexos, porque já estamos usando uma classe e podemos implementar a funcionalidade, mas quando temos um código simples como esse pode parecer meio demais ter que fazer toda essa lógica.
+
+No nosso caso a gente só quer lembrar de chamar o `close` no final da execução, nada mais. Para isso temos duas novas funcionalidades no TS que são o`DisposableStack` e `AsyncDisposableStack`, que basicamente funcionam como ferramentas para poder executar esses symbols manualmente no final da função.
+
+Então se a gente esquecer a nossa classe e assumir que ela não tem nenhum tipo de lógica para recuperar o recurso, voltando a nossa função original, poderíamos ter escrito ela assim:
+
+```ts
+import connection from 'seu-banco'
+
+export async function fazerQuery (query: string) {
+	try {
+        const db = connection.start()
+        using cleanup = new DisposableStack()
+        cleanup.defer(() => connection.close())
+        
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    }
+}
+```
+
+Perceba que estamos usando uma funcionalidade chamada `defer` que é muito comum em [Golang](https://go.dev/tour/flowcontrol/12). O que ela faz é justamente empurrar a execução desse bloco para o final do escopo atual.
+
+Imagine que ele é uma classe implementada assim (apenas ilustrativo):
+
+```ts
+export class DisposableStack implements Disposable {
+    #stack = []
+    
+    defer (fn: (...args: any) => void) {
+    	this.#stack.push(fn)
+    }
+    
+    [Symbol.dispose]() {
+    	for (const fn of this.#stack) {
+            fn()
+        }
+    }
+}
+```
+
+A ideia é que você pode definir uma stack e chamar o método `defer` várias vezes para adicionar uma ou mais funções na stack de reciclagem.
+
+# Conclusão
+
+Para usar o using nas versões mais novas do TS você precisa mudar algumas opções no `compilerOptions` do `tsconfig`, essas incluem as opções que vão mudar o alvo da compilação para a versão 2022 e adicionar os polyfills necessários, ficando algo assim:
+
+```json
+{
+    "compilerOptions": {
+    	"target": "es2022",
+        "lib": ["es2022", "esnext.disposable", "dom"]
+    }
+}
+```
+
+Você pode ler mais sobre essa nova feature lá no [blog do TS](https://devblogs.microsoft.com/typescript/announcing-typescript-5-2-beta/#using-declarations-and-explicit-resource-management) e também aprender a usar tudo certinho lá no meu treinamento da [Formação TS!](https://hotm.art/yd4IsL).

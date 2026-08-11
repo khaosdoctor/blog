@@ -1,0 +1,842 @@
+---
+title: "Decorators no JavaScript"
+pubDate: 2022-11-04T14:00:14.000Z
+updatedDate: 2026-07-16T16:05:19.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "ecmascript", "development", "typescript"]
+description: "Uma das propostas mais importantes do JavaScript acabou de chegar no estágio 3! Entenda o que são decorators e por que eles não são a única novidade dessa proposta!"
+heroImage: "./Blog-cover-Template.png"
+draft: false
+visibility: "public"
+seoDescription: "Uma das propostas mais importantes do JavaScript está no estágio 3! O que são decorators e por que eles não são a única novidade dessa proposta?"
+---
+
+Decorators são uma das mais antigas [propostas](https://github.com/tc39/proposal-decorators) do JavaScript. Quantas vezes você já não ouviu que "O JavaScript vai ter decorators em breve"? Mas o que são esses decorators e o que eles vão mudar na nossa vida? Hoje ela está em estágio 3, o que significa que o tempo para ela ir ao ar reduz drásticamente, mas ainda sim não temos uma resposta concreta.
+
+Se você não sabe como funciona o JavaScript, nesse vídeo eu explico um pouco mais sobre o processo de lançamento de novas funcionalidades do JavaScript, se você ainda não assistiu, eu recomendo fortemente para poder entender melhor como tudo funciona!
+
+<YouTube id="hDQu3AvvDfg" />
+
+## Decorators
+
+Decorators são o nome curto para as **decorator functions**, que é um padrão de projeto, inclusive. Eles são uma função (ou método) que modificam o comportamento de outra função passada, retornando uma nova função.
+
+Essencialmente você pode implementar decorators em qualquer linguagem, afinal eles são um padrão de projetos. No JavaScript você poderiam implementar um decorator da seguinte forma:
+
+```js
+const decorator = (fn) => {
+  return (...params) => {
+    console.log('antes da função')
+    const resultado = fn.call(this, ...params)
+    console.log('depois da função')
+    return resultado
+  }
+}
+
+const func = (nome) => console.log(`Olá ${nome}`)
+const decorada = decorator(func)
+decorada('Lucas')
+// antes da função
+// Olá Lucas
+// depois da função
+```
+
+Porém, algumas linguagens possuem uma sintaxe especial para chamar decorators, como Python e Java, por exemplo, veja como podemos criar um decorator em Python:
+
+```python
+def decorator(fn):
+    def wrap():
+        print("antes da função")
+        fn()
+        print("depois da função")
+    return wrap
+
+@decorator
+def sayHello():
+    print("hello!")
+
+sayHello()
+
+# antes da função
+# hello!
+# depois da função
+```
+
+Percebe que temos um `@decorator`? Essa é a sintaxe mais utilizada para chamarmos um decorator na função que vem logo em seguida.
+
+A maioria das linguagens permite que decorators sejam aplicados em diversos locais, como classes, métodos, propriedades e etc. No JavaScript esse não foi sempre o caso, a versão anterior da proposta (que estava no estágio 2) dizia que os decorators só poderiam ser aplicados à classes e a nenhum outro tipo de objeto.
+
+Com a nova proposta, os decorators podem ser aplicados nos seguintes tipos de objetos:
+
+-   Classes (como já eram aplicados antes)
+-   Propriedades de classes
+-   Métodos de classes
+-   Acessores de classes
+
+Ou seja, ainda estamos focando na classe, mas não é mais somente na instância da classe, mas sim em tudo que vem dentro dela.
+
+### Usando decorators
+
+Decorators são essencialmente funções, como vimos antes. Todas essas funções vão levar dois parâmetros:
+
+1.  O valor que está sendo decorado, que é o elemento que aquele decorator está aplicado
+2.  Um objeto de contexto, contendo informações sobre o valor decorado
+
+> Tenha em mente que o valor decorado é uma **referência** para o objeto original, ou seja, qualquer mudança nesse valor, vai interferir com o valor original.
+
+O tipo declarado (tirado da proposta) é exatamente esse:
+
+```ts
+type Decorator = (value: Input, context: {
+  kind: string;
+  name: string | symbol;
+  access: {
+    get?(): unknown;
+    set?(value: unknown): void;
+  };
+  private?: boolean;
+  static?: boolean;
+  addInitializer?(initializer: () => void): void;
+}) => Output | void;
+```
+
+Nesse tipo, `Input` e `Output` representam, respectivamente, o objeto que você está decorando e o retorno do decorator, que é uma função. Cada tipo de decorator pode retornar um tipo de função diferente e tem um tipo de input diferente, seja ele um decorator de classe, propriedade ou acessor.
+
+O objeto de contexto também varia de acordo com o valor que você está decorando, então ele pode ou não pode conter alguns dos campos, por exemplo, o campo `access` só existe para acessores.
+
+As demais propriedades tem valores bem fixos, por exemplo:
+
+-   `kind` é o tipo do objeto que você está decorando, essa propriedade existe basicamente para verificar se você está usando o decorator corretamente e buscando as propriedades corretas. Os valores possíveis são: `class`, `method`, `getter`, `setter`, `field` e `accessor`
+-   `name` é o nome do objeto decorado, no caso de elementos privados vai ser a descrição (que é o próprio nome da propriedade)
+-   `access` um objeto que contém duas possíveis chaves `get` e `set` que são funções usadas para acessar o valor decorado. É importante notar que esses valores são os valores finais que são passados para a instância do objeto, e não o valor que foi passado para o decorator
+-   `static` indica se o valor é um elemento estático de uma classe, portanto só se aplica para elementos que podem ser estáticos
+-   `private` indica se o elemento é privado, e tem a mesma regra do `static`
+-   `addInitializer` é uma função extra que permite que você adicione uma lógica de inicialização do objeto decorado, todos os tipos possuem essa funcionalidade e ele opera **por classe** e não **por instância**, ou seja, ele só vai executar em objetos que não tem `kind === 'field'`
+
+### Ordem de aplicação
+
+Assim como todos os elementos que suportam vários tipos de uso, os decorators são aplicados em uma ordem.
+
+Primeiro eles só são aplicados quando todos foram chamados. Depois disso, os decorators são aplicados da menor ordem para a maior ordem, isso significa que primeiramente todos os decorators de métodos e campos são chamados e aplicados e depois os decorators de classe são aplicados e, por fim, todos os decorators de campos estáticos são aplicados.
+
+Além disso, não existem regras especiais quanto a qual tipo de função pode ser usada como um decorator, desde que ela siga a assinatura proposta, qualquer função pode ser aplicada como um decorator.
+
+## Tipos de decorators
+
+Vamos agora passar um por um com os tipos de decorators que temos nessa proposta, começando com a maior ordem e descendo para as ordens menores.
+
+### Class methods
+
+Decorators aplicados em métodos de classe como a seguir:
+
+```js
+class foo {
+    @dec
+    metodo (arg) {}
+}
+```
+
+Esse tipo de decorator segue a seguinte tipagem:
+
+```ts
+type ClassMethodDecorator = (value: Function, context: {
+  kind: "method";
+  name: string | symbol;
+  access: { get(): unknown };
+  static: boolean;
+  private: boolean;
+  addInitializer(initializer: () => void): void;
+}) => Function | void;
+```
+
+Veja que o `kind` vai ser sempre `method` e o acessor vai ter somente o método `get`, uma vez que você não pode dar `set` em um método.
+
+O parâmetro `value` é o método que está sendo decorado, além disso o decorator pode ou não retornar um novo método que vai substituir o método que está sendo decorado, se ele não retornar nada então o método será executado normalmente.
+
+Um exemplo clássico é o decorator de log que mostrei no início do artigo, podemos criar um novo decorator para realizar um log do que está sendo executado pelo método, executar o método em si e depois retornar o resultado:
+
+```js
+function debug(value, { kind, name }) {
+  if (kind === "method") {
+    return function (...args) {
+      console.log(`começando ${name} com os argumentos ${args.join(", ")}`);
+      const ret = value.call(this, ...args);
+      console.log(`fim de ${name}`);
+      return ret;
+    };
+  }
+}
+
+class C {
+  @debug
+  m(arg) {}
+}
+
+new C().m(1);
+// começando m com os argumentos 1
+// fim de m
+```
+
+Veja que neste caso estamos retornando uma função que vai substituir o método na classe original (o protótipo vai ser substituído), se não retornássemos nada, somente o decorator seria executado.
+
+Se quiséssemos fazer isso sem usar os decorators, podemos imaginar que temos a classe e estamos substituindo o método `m` no protótipo diretamente pela chamada com o nosso decorator:
+
+```js
+class C {
+    m(arg) {}
+}
+
+C.prototype.m = debug(C.prototype.m, { kind: 'method', name: 'm' }) ?? C.prototype.m
+```
+
+### Acessores de classe
+
+Os acessores de classes (como `get` e `set`) podem ter duas assinaturas dependendo do tipo de acessor que estamos falando, para `get`:
+
+```ts
+type ClassGetterDecorator = (value: Function, context: {
+  kind: "getter";
+  name: string | symbol;
+  access: { get(): unknown };
+  static: boolean;
+  private: boolean;
+  addInitializer(initializer: () => void): void;
+}) => Function | void;
+```
+
+E para o `set` a diferença é que o `kind` vai ser `setter` e vamos ter um `access` com uma função `set`:
+
+```ts
+type ClassSetterDecorator = (value: Function, context: {
+  kind: "setter";
+  name: string | symbol;
+  access: { set(value: unknown): void };
+  static: boolean;
+  private: boolean;
+  addInitializer(initializer: () => void): void;
+}) => Function | void;
+```
+
+O funcionamento é exatamente igual aos decorators de métodos, porém é importante notar que os decorators de acessores são aplicados **separadamente** para getters e setters ou seja:
+
+```js
+class C {
+  @foo
+  get x() {
+    // ...
+  }
+
+  set x(val) {
+    // ...
+  }
+}
+```
+
+Nessa classe, o decorator está decorando apenas o `get x()` e não o `set x(val)`. Eles são tão iguais que podemos reutilizar a mesma função `debug` que tínhamos anteriormente, só precisamos tratar os novos tipos de `kind`:
+
+```js
+function debug(value, { kind, name }) {
+  if (['method', 'getter', 'setter'].contains(kind)) {
+    return function (...args) {
+      console.log(`começando ${name} com os argumentos ${args.join(", ")}`);
+      const ret = value.call(this, ...args);
+      console.log(`fim de ${name}`);
+      return ret;
+    };
+  }
+}
+
+class C {
+  @debug
+  set x(arg)  {}
+}
+
+new C().x = 1
+// começando x com os argumentos 1
+// fim de x
+```
+
+Da mesma forma, podemos aplicar essa funcionalidade sem o uso de decorators usando `Object.defineProperty`:
+
+```js
+class C {
+  set x(arg) {}
+}
+
+let { set } = Object.getOwnPropertyDescriptor(C.prototype, "x");
+set = debug(set, {
+  kind: "setter",
+  name: "x",
+  static: false,
+  private: false,
+}) ?? set;
+
+Object.defineProperty(C.prototype, "x", { set });
+```
+
+### Propriedades de classe (class fields)
+
+Esse tipo de decorator usa a tipagem completa:
+
+```ts
+type ClassFieldDecorator = (value: undefined, context: {
+  kind: "field";
+  name: string | symbol;
+  access: { get(): unknown, set(value: unknown): void };
+  static: boolean;
+  private: boolean;
+}) => (initialValue: unknown) => unknown | void;
+```
+
+Ele possui tanto os acessores `get` quanto o `set`, além de possuir as propriedades `static` e `private`, porém, diferente dos demais, ele não possui um método `addInitializer` já que propriedades não podem ser inicializadas dessa forma.
+
+Também, diferente dos demais tipos de decorators, como propriedades não tem um valor direto de input, portanto o `value` é sempre `undefined` ou seja, você não recebe a propriedade e nem uma referência dela, ao invés disso você pode retornar uma função que recebe o valor inicial e retorna um novo valor sempre que a propriedade é atribuída.
+
+Para podermos usar a nossa função de debug nesses casos, vamos precisar de uma pequena modificação, já que não podemos retornar uma função nova mas sim um valor inicial.
+
+```js
+function debug (_, {kind, name}) {
+    if (king === 'field') {
+        return function (initialValue) {
+             console.log(`inicializando variável ${name} com valor ${initialValue}`)
+            return initialValue
+        }
+    }
+}
+```
+
+E então podemos usar o nosso campo da seguinte maneira:
+
+```js
+class C {
+    @debug x = 1
+}
+
+new C()
+// Inicializando variável x com valor 1
+```
+
+E podemos implementar esse mesmo comportamento usando uma chamada de inicialização na propriedade:
+
+```js
+const inicializarX = debug(undefined, { kind: 'field', name: 'x' }) ?? (initialValue) => initialValue
+
+class C {
+	x = inicializarX.call(this, 1)
+}
+```
+
+Um dos exemplos interessantes que a própria proposta apresenta é que, como a função de inicialização é chamada com a instância da classe como `this`, então esse tipo de decorator pode ser utilizado para criar relações de inicialização, tipo registrar uma classe filha em uma classe pai como é mostrado no exemplo abaixo:
+
+```js
+const CHILDREN = new WeakMap();
+
+function registerChild(parent, child) {
+  let children = CHILDREN.get(parent);
+
+  if (children === undefined) {
+    children = [];
+    CHILDREN.set(parent, children);
+  }
+
+  children.push(child);
+}
+
+function getChildren(parent) {
+  return CHILDREN.get(parent);
+}
+
+function register() {
+  return function(value) {
+    registerChild(this, value);
+
+    return value;
+  }
+}
+
+class Child {}
+class OtherChild {}
+
+class Parent {
+  @register child1 = new Child();
+  @register child2 = new OtherChild();
+}
+
+let parent = new Parent();
+getChildren(parent); // [Child, OtherChild]
+```
+
+> Claro que você também pode usar uma lista de classes filhas interna da classe pai, por exemplo, para registrar injeção de dependências.
+
+### Classes
+
+O último tipo de decorator é também um dos mais comuns, o decorator de classe. Ele segue uma versão simplificada da interface:
+
+```ts
+type ClassDecorator = (value: Function, context: {
+  kind: "class";
+  name: string | undefined;
+  addInitializer(initializer: () => void): void;
+}) => Function | void;
+```
+
+A grande diferença além do `kind` é que não temos métodos acessores e também não temos as propriedades para privada e estática.
+
+O primeiro parâmetro vai ser sempre a classe que está sendo decorada e ele pode retornar um novo objeto do tipo _callable_, que é uma função, uma classe, um Proxy ou qualquer outra coisa que possa ser invocada.
+
+Um exemplo, é estendermos o construtor de uma classe para que possamos incluir uma chamada para um console sempre que uma nova classe for invocada:
+
+```js
+function debug (value, {kind, name}) {
+    if (kind === 'class') {
+        return class extends value {
+            constructor (...args) {
+                super(...args)
+                console.log(`construindo uma nova instancia de ${name} com os argumentos ${args.join(', ')}`)
+            }
+        }
+    }
+}
+```
+
+E usarmos na nossa classe dessa forma:
+
+```js
+@debug
+class C {}
+
+new C(1)
+// construindo uma nova instancia de C com os argumentos 1
+```
+
+Essencialmente podemos fazer o mesmo da seguinte forma sem decorators:
+
+```js
+class C {}
+
+C = debug(C, {kind: 'class', name: 'C'}) ?? C
+new C(1)
+```
+
+## Auto accessors
+
+Juntamente com a proposta de decorators, esse documento também propõe um outro elemento da sintaxe chamado **auto accessors**. Hoje podemos declarar acessores da seguinte forma:
+
+```js
+class foo {
+    #privado = true
+    
+    get getPrivado () { return this.#privado }
+    set setPrivado (val) { this.#privado = val }
+}
+```
+
+Assim vamos ter uma propriedade `getPrivado` e uma `setPrivado` para poder acessar propriedades privadas dentro de classes,  o que é bem útil quando temos que fazer algum tratamento de dados ou então setar algum tipo de informação que exija algum processamento prévio.
+
+O que a proposta apresenta é a nova keyword `accessor`, que vão fazer as seguintes operações:
+
+1.  Criar uma propriedade privada de mesmo nome dentro da classe
+2.  Criar um acessor `get` e um acessor `set` para essa propriedade com o mesmo nome
+
+No final teremos uma sintaxe como essa:
+
+```js
+class C {
+    acessor x = 1
+}
+
+const c = new C()
+c.x // 1
+c.x = 2
+c.x // 2
+```
+
+Isso é o mesmo do que fazermos:
+
+```js
+class C {
+    #x = 1
+    
+    get x() {
+        return this.#x
+    }
+
+	set (val) {
+        this.#x = val
+    }
+}
+```
+
+Um detalhe é que também podemos ter acessores privados:
+
+```js
+class C {
+    accessor #x = 2
+}
+```
+
+> Ao meu ver, a proposta apresenta os `auto-accessors` como uma forma de contornar o problema de que não podemos setar um decorator automaticamente para um `get` e um `set`, como expliquei antes, então teríamos que chamar duas vezes a mesma função para, essencialmente, a mesma variável.
+
+Os auto-accessors usam uma versão um pouco diferente da interface:
+
+```ts
+type ClassAutoAccessorDecorator = (
+  value: {
+    get: () => unknown;
+    set(value: unknown) => void;
+  },
+  context: {
+    kind: "accessor";
+    name: string | symbol;
+    access: { get(): unknown, set(value: unknown): void };
+    static: boolean;
+    private: boolean;
+    addInitializer(initializer: () => void): void;
+  }
+) => {
+  get?: () => unknown;
+  set?: (value: unknown) => void;
+  init?: (initialValue: unknown) => unknown;
+} | void;
+```
+
+Como você pode ver, o valor que recebemos no primeiro parâmetro é um objeto com os dois acessores da propriedade. O objeto de contexto recebe um `kind` como `accessor`, a propriedade `access` com ambas as funções `get` e `set` e as demais propriedades que estamos vendo nas outras interfaces.
+
+A questão é que, para o primeiro parâmetro, vamos receber o objeto com os dois acessores que **estão definidos no protótipo da classe**, ou seja, é o próprio objeto de acesso que a a classe vai ter. No caso de termos um acessor estático, vamos receber a própria classe.
+
+Esse objeto existe para que o decorator possa criar um _wrap_ em volta deles e retornar um novo `get` e/ou um novo `set`, essencialmente criando um proxy que intercepta as chamadas para qualquer um desses acessores. O que não é possível com propriedades de classe normalmente.
+
+Adicionalmente, quando retornamos o objeto com as propriedades, também podemos retornar uma função `init` que é uma função de inicialização que pode ser utilizada para mudar o valor inicial da variável privada que está setada na classe. Se você retornar o objeto sem qualquer um dos valores, seja `get`, `set` ou `init` o valor original do acessor vai ser usado.
+
+Criando um exemplo com nosso decorator de debug, podemos fazer uma extensão para ele trabalhar com os auto-accessors:
+
+```js
+function debug (target, {kind, name}) {
+  if (kind === 'accessor') {
+    const {get, set} = target
+    return {
+      get() {
+        console.log(`get ${name}`)
+        return get.call(this)
+      },
+      set(val) {
+        console.log(`set ${name} para ${val}`)
+        return set.call(this, val)
+      },
+      init (initialValue) {
+        console.log(`iniciando ${name} com o valor ${initialValue}`)
+        return initialValue
+      }
+    }
+  }
+}
+```
+
+Como você pode perceber, auto-accessors são um pouco mais longos de trabalhar porque você precisa retornar um objeto de funções, mas não é nada muito além do que já fizemos aqui na maioria dos outros casos.
+
+Depois podemos usá-los da seguinte forma:
+
+```js
+class C {
+  @debug accessor x = false
+}
+
+const c = new C()
+// iniciando x com o valor false
+c.x
+// get x
+c.x = true
+// set x para true
+c.x 
+// get x
+```
+
+Se quisermos fazer a mesma coisa sem os decorators, vamos usar uma mistura do que temos nas propriedades e nos acessores que já fizemos antes:
+
+```js
+class C {
+  #x = inicializarX.call(this, 1);
+
+  get x() {
+    return this.#x;
+  }
+
+  set x(val) {
+    this.#x = val;
+  }
+}
+
+let { get: oldGet, set: oldSet } = Object.getOwnPropertyDescriptor(C.prototype, "x");
+
+let {
+  get: newGet = oldGet,
+  set: newSet = oldSet,
+  init: initializeX = (initialValue) => initialValue
+} = logged(
+  { get: oldGet, set: oldSet },
+  {
+    kind: "accessor",
+    name: "x",
+    static: false,
+    private: false,
+  }
+) ?? {};
+
+Object.defineProperty(C.prototype, "x", { get: newGet, set: newSet });
+```
+
+## `addInitializer` e inicialização de contexto
+
+O método `addInitializer` que vimos em algumas das interfaces no objeto de contexto de todos os decorators, exceto o de classe, é um método que pode ser chamado para associar uma função de inicialização com a classe ou o elemento que estamos decorando.
+
+Esse método pode ser usado para rodar qualquer código depois que o valor **já foi setado** permitindo que você possa finalizar a inicialização desse valor. Porém, a ordem de execução desses inicializadores depende do decorator que estamos usando:
+
+-   Para **classes**, os inicializadores rodam **depois** que a classe foi completamente definida, depois de todas as propriedades estáticas serem atribuídas
+-   Para elementos de classe (_class elements_), os inicializadores rodam **durante** a construção, mas **antes** da inicialização das propriedades da classe
+-   Para elementos **estáticos**, os inicializadores rodam também **durante** a inicialização da classe, **antes** dos campos estáticos serem definidos, mas **depois** que todos os elementos de classe foram definidos
+
+Alguns exemplos que a proposta apresenta.
+
+### @customElement
+
+Podemos usar o `addInitializer` para poder decorar uma classe que vai registrar um novo webComponent no browser:
+
+```js
+function customElement (name) {
+    return (value, { addInitializer }) => {
+        addInitializer(function() {
+            customElements.define(name, this)
+        })
+    }
+}
+
+@customElement('elemento')
+class Elemento extends HTMLElement {
+    static get observedAttributes() {
+        return ['attr', 'att']
+    }
+}
+```
+
+Neste exemplo, perceba que podemos "decorar" um decorator fazendo um _wrap_ com uma outra função para que possamos passar parâmetros para ele, nesse caso estamos querendo passar a o nome do elemento para o decorator, então podemos criar uma função que recebe o nome e retorna uma outra função com a mesma assinatura do decorator.
+
+### @bound
+
+Um decorator que é aplicado em um método de uma classe para poder modificar o seu `this` para o `this` daquela classe:
+
+```js
+function bound (value, {name, addInitializer}) {
+    addInitializer(function () {
+        this[name] = this[name].bind(this)
+    })
+}
+
+class C {
+    message = 'oi!'
+
+	@bound
+	m() {
+        console.log(this.message)
+    }
+}
+
+const {m} = new C()
+m() // oi!
+```
+
+> Perceba que, em ambos os casos, estamos usando `function()` dentro de `addInitializer`, isto porque queremos **manter** o `this` daquele escopo como sendo o escopo do decorator, isso é mais evidente nesse exemplo, mas também vale para o `@customElement`
+
+## Acessores de contexto
+
+Um objeto que não utilizamos aqui foi o objeto `access` que vem de dentro dos contextos dos decorators.
+
+Um exemplo muito útil é a criação de um **contâiner de injeção de dependências**. Que é uma ferramenta muito útil para poder criar automaticamente instâncias de classes dependentes para classes que levam essas dependências, dessa forma você não precisa passar todas as dependências como parâmetros.
+
+> Isso já é uma realidade com a biblioteca [TSyringe](http://npm.im/tsyringe) feita pela Microsoft para demonstrar o poder dos decorators no TypeScript.
+
+Essencialmente o que precisamos fazer é ter uma lista global de classes e suas dependências:
+
+```js
+const INJETAVEIS = new WeakMap()
+
+function initContainer() {
+    const injecoes = []
+    
+    function injetavel (Class) {
+        INJETAVEIS.set(Class, injecoes)
+    }
+    
+    function injetar (chave) {
+        return function aplicarDependencia (alvo, contexto) {
+            injecoes.push({ chave, set: context.access.set })
+        }
+    }
+    
+    return { injetavel, injetar }
+}
+```
+
+Essa função vai inicializar a nossa lista global de dependências para uma determinada classe, então o que precisamos fazer é anotar a classe que queremos automatizar com `@injectable` e as dependências dessa classe com `@inject`. Mas antes precisamos de um container que vai ser a nossa instância global que vai ler dessa lista:
+
+```js
+class Container {
+    registro = new Map()
+	
+	registrar (nome, valor) {
+        this.registro.set(nome, valor)
+    }
+
+	buscar (nome) {
+        return this.registry.get(nome)
+    }
+
+	criar (Classe) {
+        const instancia = new Classe()
+        
+        for (const { chave, set } of INJETAVEIS.get(Classe) || []) {
+            set.call(instancia, this.buscar(chave))
+        }
+        
+        return instancia
+    }
+}
+```
+
+Aqui o que estamos fazendo é criando um container que vai registrar as dependências globais, ou seja, todas as classes que instanciamos uma vez, esse registro vai ter o nome que quisermos dar e também a instância da classe que criamos.
+
+Quando definirmos uma nova classe através do container usando `criar`, vamos passar o construtor da classe que queremos criar, depois, vamos buscar todas as classes injetáveis que batem com essa descrição na nossa lista global e vamos chamar o método `set` para setar a uma nova propriedade na classe.
+
+Quando chamamos `set.call(instancia, this.buscar(chave))` estamos dizendo que queremos que a propriedade anotada chame seu acessor `set` com o `this` definido para a nova instância da classe que criamos, com o valor sendo a classe dependente que já instanciamos anteriormente.
+
+Vamos dar um exemplo:
+
+```js
+class Store {}
+
+const { injetavel, injetar } = initContainer()
+
+// A classe C é injetável e pode receber dependências externas
+@injetavel
+class C {
+    // Essa propriedade é a instancia guardada na chave
+    // nomeDaclasse que registramos no container
+    @injetar('nomeDaClasse') store
+}
+
+const container = new Container()
+const store = new Store()
+
+// Registrando a Store no container como uma dependência
+container.register('nomeDaclasse', store)
+
+const c = container.create(C)
+c.store === store // true
+```
+
+Veja que estamos usando `container.create(C)` para criar uma nova classe com as dependências já injetadas, mas isso não é totalmente necessário, como você pode ver [nessa documentação do TSyringe](https://www.npmjs.com/package/tsyringe#autoinjectable) e como já mostrei antes, podemos usar os decorators para substituir completamente o construtor da classe e rodar essa lógica automaticamente para todas as dependências de uma mesma classe.
+
+## Testando você mesmo
+
+Se você quiser rodar qualquer um dos códigos que eu coloquei por aqui, mesmo antes da proposta estar completamente publicada e disponível, isso é possível através de transpiladores como o `babel`.
+
+Para isso, crie uma nova pasta em qualquer lugar e rode `npm init -y` (lembrando que você precisa ter o Node e o NPM instalados), isso vai criar um novo arquivo `package.json`, depois execute o comando `npm i -D @babel/cli @babel/core @babel/plugin-proposal-decorators @babel/preset-env`.
+
+Abra o arquivo `package.json` e, na sessão `scripts`, adicione um novo script `transpile`:
+
+```json
+{
+	"scripts": {
+    	"transpile": "babel src -d dist"
+	}
+}
+```
+
+Esse script vai pegar qualquer código `.js` dentro da pasta `src` e vai transpilar para um novo arquivo na pasta `dist`.
+
+Agora crie um novo arquivo chamado `babel.config.json` com esse conteúdo:
+
+```json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ]
+  ],
+  "plugins": [
+    [
+      "@babel/plugin-proposal-decorators",
+      {
+        "version": "2022-03"
+      }
+    ]
+  ]
+}
+```
+
+Escreva um arquivo de teste com qualquer um dos exemplos, ou então crie seu próprio, como esse:
+
+```js
+@annotation
+class MyClass {
+  @property accessor bool = false
+}
+
+function annotation(...params) {
+  console.log(params)
+}
+
+function property(target, name) {
+  console.log(target, name)
+  return {
+    get() {
+      console.log('get')
+      return target.get.call(this)
+    },
+    set(val) {
+      console.log('set', val)
+      return target.set.call(this, val)
+    }
+  }
+}
+
+function debug(target, { kind, name }) {
+  if (kind === 'accessor') {
+    const { get, set } = target
+    return {
+      get() {
+        console.log(`get ${name}`)
+        return get.call(this)
+      },
+      set(val) {
+        console.log(`set ${name} para ${val}`)
+        return set.call(this, val)
+      },
+      init(initialValue) {
+        console.log(`iniciando ${name} com o valor ${initialValue}`)
+        return initialValue
+      }
+    }
+  }
+}
+
+const a = new MyClass()
+console.log(a.bool)
+a.bool = true
+console.log(a.bool)
+```
+
+Rode `npm run transpile` e depois `node dist/<arquivo>.js` e veja a mágica acontecer!
+
+## Conclusão
+
+Os decorators são um padrão de projeto incrível e possuem um potencial imenso para serem uma das funcionalidades mais interessantes da linguagem e permitirem que façamos muito mais coisas de forma muito simples.
+
+Eu, particularmente, vejo uma grande adoção por ferramentas de monitoramento como NewRelic, NSolid e Datadog para Node.js e até mesmo o JavaScript no browser!
+
+Comenta ai embaixo o que você achou dessa proposta e me marca [lá no Twitter](https://twitter.lsantos.dev) pra eu saber sua opinião!

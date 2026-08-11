@@ -1,0 +1,105 @@
+---
+title: "O que há de novo no JavaScript em 2024"
+pubDate: 2024-07-17T11:00:20.000Z
+updatedDate: 2026-07-16T17:55:01.000Z
+lang: pt
+category: "typescript"
+tags: ["ecmascript", "javascript"]
+description: "Saiba tudo que surgiu de novo na versão mais recente do JavaScript em 2024!"
+heroImage: "./articles--2-.png"
+draft: false
+visibility: "public"
+---
+
+A galera do ECMA262 se reuniu e temos a nova especificação do JavaScript saindo do forno.
+
+A [127ª reunião dos membros do comitê aconteceu dia 26 de Junho de 2024](https://github.com/tc39/ecma262/releases/tag/es2024) e agora a gente tem muita coisa legal pra olhar esse ano! Então bora passar por todas as principais novidades!
+
+## Agrupamento Síncrono em Maps e Objects
+
+Muito parecido com uma [outra proposta que falamos aqui](/array-groupby-stage-3/), agora temos um método novo nos objetos `Map` e `Object`, o `groupBy`. O que ele faz é que ele permite que agrupemos os itens de um array seguindo uma função. Quando usado em um map, ele vai nos dar um map de volta, mas podemos usar em um objeto também.
+
+```js
+Map.groupBy([1,2,3,4,5,6], (v) => v % 2 === 0 ? 'par' : 'impar')
+// Map(2) { 'par' => [2,4,6], 'impar' => [1,3,5] }
+```
+
+Da mesma forma em um objeto:
+
+```js
+Object.groupBy([1,2,3,4,5,6], (v) => v % 2 === 0 ? 'par' : 'impar')
+// { par: [ 1, 3, 5 ], impar: [ 2, 4, 6 ] }
+```
+
+## Promise.withResolvers
+
+Esse é uma outra forma que podemos definir uma Promise de forma que a gente possa resolver fora do escopo da mesma. O método `withResolvers` retorna um objeto com o construtor de uma promise, bem como a função `resolve` e `reject`:
+
+```js
+const { promise, resolve, reject } = Promise.withResolvers()
+
+```
+
+A promise em questão representa algum tipo de trabalho assíncrono, enquanto os dois resolvers são desacoplados da promise por si. Isso é equivalente a algo como:
+
+```js
+let resolve, reject
+const p = new Promise((res, rej) => {
+  resolve = res
+  reject = rej
+})
+```
+
+Então podemos fazer algo como:
+
+```js
+const { promise, resolve, reject } = Promise.withResolvers()
+resolve('resolvido')
+const res = await promise // res = 'resolvido'
+```
+
+No geral, o uso para esse tipo de coisa é bem específico, seria mais quando você quer tomar controle total da promise, ou então chamar os métodos de resolução de fora da promise, por exemplo em streams ou eventos.
+
+[Aqui](https://exploringjs.com/js/book/ch_promises.html#Promise.withResolvers) temos uma explicação interessante sobre esse método com alguns exemplos.
+
+<CourseCTA />
+
+## Flag /v na Regex
+
+A flag `/v` ativa a comparação em sets unicode, por exemplo, emojis que tem mais de um code-point, que antes não podiam ser comparados assim:
+
+```js
+/^\p{Emoji}$/u.test('😵‍💫') // false
+```
+
+Isso não acontece com esse código:
+
+```js
+/^\p{Emoji}$/u.test('🤯') // true
+```
+
+Porque 😵‍💫 tem [três code-points](https://apps.timwhitlock.info/unicode/inspect?s=%F0%9F%98%B5%E2%80%8D%F0%9F%92%AB) (pois é a junção de 😵 e 💫) e 🤯 tem apenas [um](https://apps.timwhitlock.info/unicode/inspect?s=%F0%9F%A4%AF). Mas isso pode ser resolvido com esse código:
+
+```js
+/^\p{RGI_Emoji}$/v.test('😵‍💫') // true
+```
+
+[Esse link](https://exploringjs.com/js/book/ch_regexps.html#regexp-flag-unicode-sets) tem uma extensa lista de opções e explicações sobre o que é o que no mundo do unicode.
+
+## ArrayBuffers e SharedArrayBuffers receberam novidades
+
+A novidade é que, agora, ambos podem ser redimensionados sem precisarem ser recriados:
+
+```js
+const buffer = new ArrayBuffer(2, {maxByteLength: 4})
+const UIArr = new Uint8Array(buffer, 2) // começando na posição 2
+UIArr.length // 0 porque temos duas posições vazias
+
+buffer.resize(4) // preenchemos a posição
+UIArr.length // 2
+```
+
+## Outras mudanças
+
+-   String ganhou dois métodos `isWellFormed` e `toWellFormed` para strings que representam referencias para UTF-16
+-   `Atomics.waitAsync` é um novo método que permite que esperemos de forma assíncrona por uma mudança na memória.

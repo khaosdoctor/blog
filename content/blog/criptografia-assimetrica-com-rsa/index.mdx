@@ -1,0 +1,660 @@
+---
+title: "Criptografia #1 - Criptografia Assimétrica com RSA"
+pubDate: 2024-03-06T11:00:32.000Z
+updatedDate: 2026-07-16T15:52:25.000Z
+lang: pt
+category: "security"
+tags: ["security", "development", "cryptography", "series"]
+series: "Criptografia"
+seriesOrder: 1
+description: "Você sabe como funciona pares de chaves assimétricas que estão à toda nossa volta? Quer aprender a calcular uma chave manualmente? Então esse artigo é pra você!"
+heroImage: "./articles-2.png"
+draft: false
+visibility: "public"
+seoTitle: "Criptografia assimétrica e chaves RSA - Como funcionam?"
+seoDescription: "Nesse artigo vamos aprender profundamente o que é RSA e assimetria criando nossa própria chave RSA manualmente e entendendo todos os conceitos!"
+---
+
+import figureImage1 from './image-1.png'
+import figureImage2 from './image-2.png'
+import figureImage3 from './image-13.png'
+
+## Este artigo é parte de uma série:
+
+-   [Criptografia #0: Conceitos iniciais](/criptografia-essencial/)
+-   [**Criptografia #1: Criptografia Assimétrica com RSA**](/criptografia-assimetrica-com-rsa/) 👈 Você está aqui
+-   [Criptografia #2: Chaves Simétricas](/criptografia-simetrica/)
+-   [Criptografia #3: Entendendo Hashes](/hashes/)
+-   [Criptografia #4: Assinaturas Digitais](/assinaturas-digitais/)
+-   Criptografia #5: Diffie-Helman e mecanismos de troca de chaves
+-   [Criptografia #6: Certificados digitais e HTTPS](/certificados-https/)
+
+---
+
+No primeiro artigo dessa série a gente falou de alguns conceitos básicos sobre criptografia, sabendo desses conceitos, agora vamos entrar em um dos temas mais comuns para devs no geral. A **Criptografia Assimétrica**.
+
+Então aqui eu vou tentar entrar fundo no tema, e a gente vai construir a nossas próprias chaves e implementar o algoritmo de novo! Esse vai ser um artigo longo, mas profundo.
+
+Você pode ouvir falar de _Asymmetric-Key/Public-key Cryptosystems_ que é o guarda-chuva sob o qual existem vários algoritmos como RSA, Diffie-Helman, ElGamal e etc. Esses sistemas tem vários tipos de serviços, mas todos usando sistemas de chaves públicas:
+
+-   Geração de pares de chaves
+-   Encriptação/Decriptação de dados
+-   Assinatura Digial
+-   Mecanismos de trocas de chaves
+
+Então hoje vamos falar sobre o que são esses sistemas, mas principalmente de um algoritmo específico, o RSA.
+
+## Chaves Assimétricas
+
+Criptografia Assimétrica é um dos modelos mais comuns de criptografia que existem em tecnologia, por exemplo, para abrir essa blog você usou HTTPS, que é um protocolo HTTP em cima de outro protocolo de segurança chamado [TLS](https://en.wikipedia.org/wiki/Transport_Layer_Security) (_T_ransport _L_ayer _S_ecurity), este protocolo utiliza criptografia assimétrica.
+
+> [!NOTE] 💡
+> Vamos falar de criptografia simétrica na próxima parte da série
+
+Como o nome já diz, é um modelo de criptografia que não é idêntico dos dois lados, onde os dois lados são **o emissor e o receptor**. Quando estamos falando de criptografia simétrica, por exemplo, ambos o receptor e o emissor da mensagem possuem a mesma chave. Isso não é verdade em criptografia assimétrica.
+
+Nesse sistema criptográfico, sempre vamos ter um componente que só é conhecido pelo dono da chave, esse componente é chamada de **valor privado** e é o valor utilizado para se compor uma **chave privada**. Outro componente presente é o **componente misto**, que é conhecido tanto pelo emissor (o dono da chave) quanto pelo receptor da mensagem, o componente misto é o que vai ser utilizado para fazer a _derivação_ da chave pública a partir da chave privada.
+
+![](./image-5.png)
+
+Opcionalmente esses sistemas também podem possuir um valor público que é utilizado para gerar as **chaves públicas**, privadas, ou ambas (Diffie-Helman, por exemplo, tem um valor público usado para gerar a chave privada).
+
+![](./image-6.png)
+
+A saída de um sistema de criptografia assimétrica é um **par de chaves**, essa palavra soa familiar? Pois é, isso é porque muita coisa que a gente usa tanto na Internet, ou até mesmo fora dela, usa um par de chaves. Por exemplo, suas mensagens no WhatsApp tem a famosa "criptografia ponta a ponta", pois bem, essa criptografia é provavelmente assimétrica, e você é o dono da chave privada.
+
+Mas o que são essas chaves afinal?
+
+<CourseCTA />
+
+### Chaves públicas
+
+São as partes públicas da criptografia assimétrica. A chave pública é quem criptografa as mensagens que só podem ser descriptografadas pela sua contraparte privada. Você vai ver ela sendo chamada de **Pk** para _Public Key_.
+
+Chaves públicas são derivadas das chaves privadas a partir de uma propriedade matemática chamada inversão, portanto as chaves não são iguais (nem entre si) mas conseguem produzir valores que podem ser descriptografados pela chave privada, no entanto, chaves públicas não podem descriptografar dados criptografados por outras chaves públicas, porque elas não são derivadas dessas chaves e sim da chave privada.
+
+![](./image-7.png)
+
+Calcular a chave privada a partir da chave pública é computacionalmente inviável por definição.
+
+Então, resumindo, a chave pública é conhecida por todo mundo e é utilizada para criptografar mensagens. Se você quer mandar uma mensagem para mim, você criptografa a sua mensagem usando a **minha** chave pública.
+
+### Chaves privadas
+
+A chave privada (comumente chamada de **Sk** para _Secret Key_) é uma chave gerada a partir de pelo menos dois componentes privados (no caso do RSA, números primos bem grandes) que só são conhecidos pela pessoa que é dona da chave. Essa premissa garante que:
+
+1.  A chave pertence a uma pessoa, portanto a origem do dado é validada
+2.  Ninguém mais tem acesso à essa chave, portanto é possível utilizá-la como mecanismo de assinatura (que vamos cobrir em outro artigo)
+
+> [!CAUTION] 👀
+> Nessa sessão vamos falar da chave privada como algo geral, mais abaixo vamos falar dela no contexto do algoritmo RSA
+
+Lembre-se: criptografia assimétrica é um **sistema criptográfico** (_cryptosystem)_ que é implementado por vários algoritmos. **Um deles** é o RSA, mas ele não é o único, portanto existem várias implementações de chaves privadas diferentes, mas todas vão ter as mesmas propriedades.
+
+As chaves privadas são utilizadas para **decriptar** dados criptografados pela chave pública, ou então **assinar** dados que possam ser validados pela chave pública. **Não é aconselhável encriptar dados usando a chave privada** porque qualquer chave pública pode decriptar esses dados, por isso que essas chaves são chamadas de **assinantes** (vamos entender o conceito de assinatura nos demais artigos).
+
+![](./image-8.png)
+
+Resumindo, a chave privada é o oposto da pública, ela vai decriptar os dados, então aquela mensagem que você me mandou que foi criptografada com a minha Pk, vai ser descriptografada usando a minha Sk.
+
+A chave privada **deve ser conhecida somente pelo seu dono**, por isso que ela é privada. E, a partir dela, é possível derivar várias chaves públicas, mas como isso é possível?
+
+### O que é criptografar?
+
+Quando falamos de criptografia digital, não estamos mais falando de texto, estamos falando de números. Então "criptografar" algo com uma chave pública, "descriptografar" algo com a chave privada são apenas operações matemáticas que fazemos com uma chave.
+
+![](./image-9.png)
+
+Como ainda não discutimos o que são as chaves, eu vou deixar a explicação mais profunda pra nossa sessão de RSA, mas essa é a ideia, pegar um número, elevar ele a outro número e dividir por ainda mais um número, o resto da divisão é a mensagem criptografada (continue lendo para saber o que são esses números).
+
+## Derivação e inversão
+
+Quando dizemos que uma chave pública pode ser derivada de uma chave privada (já vamos ver como fazer isso), estamos dizendo que tanto a chave pública quanto a **Sk** estão matematicamente conectadas.
+
+![](./image-10.png)
+
+A chave pública é o inverso da chave privada (e, portanto, a privada também é o inverso da pública), e isso significa que algo que é criptografado com uma chave pública pode ser descriptografado pela chave privada.
+
+![](./image-12.png)
+
+Assim como tudo que é criptografado pela chave privada, pode ser descriptografado por q uaisquer chaves públicas. Mas algo que é criptografado por uma chave pública **não** pode ser descriptografado por outra chave pública e isso que torna a criptografia assimétrica tão poderosa.
+
+![](./image-11.png)
+
+No caso de RSA, estamos falando de chaves que estão conectadas a partir de [exponenciação modular](https://en.wikipedia.org/wiki/Modular_exponentiation), e é exatamente esse critério que torna a criptografia assimétrica algo interessante.
+
+### Exponenciação modular
+
+Não vou me estender nesse tópico porque não é o nosso tema (inclusive esse parágrafo é mais uma curiosidade do que obrigatório), mas a exponenciação modular é uma operação de potenciação (exponenciação) sobre um módulo (sim, o resto da divisão de um número por outro como em `a % b`, chamado de [aritmética modular](https://en.wikipedia.org/wiki/Modular_arithmetic), um outro tema pra outra hora).
+
+Exponenciação modular é quando pegamos o resto de algum número _b_ (uma base), elevado a um número _x_ (expoente) e dividido por um inteiro positivo _m_ (o módulo) e isso tudo é representado assim:
+
+$C = b^x\mod\{m\}$
+
+E C é um número que vai ficar sempre entre `0` e `m`. Por exemplo, se a base for 5, o expoente for 2 e o módulo for 3:
+
+$C = b^x\mod\{m\} \newline C = 5^2\mod\{3\} \newline C = 25\mod\{3\} \newline C = 1$
+
+O resultado C é 1 porque `25/3` é `8` com resto de `1`. E a grande vantagem desse sistema todo é que exponenciação modular é muito eficiente para computar, até mesmo para números muito grandes, porém computar o inverso dessa operação (o [logarítmo discreto](https://en.wikipedia.org/wiki/Discrete_logarithm)), ou seja, qual é o `x` quando você tem `b`, `C` e `m` é uma operação difícil, ainda mais se você utilizar números primos.
+
+Usando essa matemática, é possível criar um valor que, como um relógio, vai realizar um _wrap around_, ou seja, quando ele chegar em um determinado número, ele volta a ser 0 (assim como `a % b` em programação vai estar sempre entre `0` e `b-1`)
+
+## Asymmetric Encryption Schemes
+
+Criptografia assimétrica é muito mais complexa e pode chegar a ser até 1000x mais lenta do que algoritmos simétricos (como o AES), por isso algoritmos assimétricos (como o RSA) não são utilizados constantemente, mas sim em conjunto com criptografia simétrica. A junção desses dois sistemas forma diversas técnicas que são chamadas de _esquemas de encriptação assimétrico._
+
+Como esses sistemas conseguem ser utilizados ao mesmo tempo? Um dos esquemas de encriptação é chamado de **KEM (Key Encapsulation Mechanism)** que basicamente consiste em criptografar uma chave com outra chave:
+
+<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Criptografia simétrica e assimétrica em conjunto</span>" />
+
+Aqui a gente está usando uma chave simétrica (muito mais leve) para criptografar um documento e gerar um **DEM Block.** Depois estamos criptografando a chave simétrica que usamos com uma chave pública de um usuário, criando o que é chamado de **KEM Block**, até agora é só uma chave criptografando outra chave.
+
+Depois juntamos os dois e mandamos para o nosso recipiente, dessa forma mesmo se o documento for interceptado, a chave não pode ser recuperada porque ela foi encriptada com a chave pública. O usuário que recebe o arquivo pode decriptar da seguinte forma:
+
+<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Decriptando um DEM Block</span>" />
+
+Pegamos o DEM block, separamos em chave e arquivo, decriptamos a chave simétrica usando a chave privada, obtendo a chave simétrica original, que podemos usar para decriptar o arquivo encriptado.
+
+> O protocolo HTTPS funciona "mais ou menos" assim.
+
+# RSA
+
+Depois de entender muito sobre criptografia assimétrica, vamos finalmente falar de RSA!
+
+RSA significa **Rivest-Shamir-Adleman**, e é um algoritmo de criptografia utilizado para criptografar informações, um dos mais antigos ainda em uso. Criado por Ron Rivest, Adi Shamir e Leonard Adleman em 1977. Como falamos antes, o RSA é um algoritmo relativamente lento, por isso não é utilizado para criptografar grandes volumes de dados, mas sim chaves simétricas.
+
+O RSA gera pares de chaves com tamanhos entre 1024 e 65536 bits que podem encriptar uma mensagem (que é um número inteiro entre 0 e o tamanho da chave), bem como descriptografar usando a chave privada, gerar assinaturas e trocar chaves, embora não seja o principal para este último.
+
+Pontos chave:
+
+-   Uma chave boa geralmente está entre 1024 e 4096 bits
+-   Quando maior a chave (mais bits) mais tempo de computação vai ser necessário
+-   Chaves muito grandes (como 65536 bits) são **muito seguras**, porém muito lentas para uso prático, já que elas podem levar horas para serem geradas
+-   Qualquer chave acima de 3072 bits é considerada segura
+
+Lembre-se que, quando falamos de chaves aqui, estamos falando de números, nada mais. É como se fosse uma senha, só que ela tivesse 1234 dígitos (`2^4096`). Quando estamos "criptografando" algo, estamos aplicando uma operação de exponenciação entre a chave e o valor que queremos criptografar.
+
+<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um número de 4096 bytes</span>" />
+
+As chaves públicas e privadas do RSA derivam de dois números primos que chamamos de `p` e `q`, esses números são os componentes privados do RSA. Desses dois números é que vem a segurança.
+
+Quando estamos utilizando RSA, vamos calcular um número `n`, que é chamado de _módulo_ (tem muitos módulos, então não confunda esse com a operação _modulus_ que a gente falou ali em cima). A questão é que é relativamente fácil encontrar primos, mas é **extremamente difícil** fatorar um número em seus componentes.
+
+Um exemplo simples, quais são e quantas vezes temos que multiplicar dois números primos x e y para chegar no número 216? A fatorização desse número pequeno leva 7 passos:
+
+$216 = 2\times108\newline 108 = 2\times54\newline 216 = 2\times2\times54\newline 54 = 2\times27 \therefore 216 = 2\times2\times2\times27\newline 216=2\times2\times2\times3\times9\newline 216= 2\times2\times2\times3\times3\times3\newline 216=2^3\times3^3$
+
+E esse é um número simples, de 9 bits (`100000000`) e leva todo esse tempo. Agora imagina para um número composto de dois primos muito grandes com mais de 3000 bits.
+
+> [!WARNING] 💡
+> É por isso que muita gente está preocupada com a capacidade de computadores quânticos de quebrar o RSA, porque teoricamente eles poderiam fatorar números de forma muito mais rápida
+
+## Chaves em RSA
+
+As chaves em RSA são calculadas com alguns componentes, já falamos de três deles até aqui mas vou reiterar só para podermos nos lembrar, e agora eu vou deixar vários termos que não são triviais aqui também:
+
+1.  `p` e `q` são os componentes **privados**, eles devem ser dois números primos muito grandes, quanto maiores e mais distantes um do outro melhor.
+2.  `n` é o **módulo**, ele é a multiplicação de `p` por `q`: `n = p*q`. Esse número é **público**.
+3.  `e` que é o **expoente público** que é menor e [coprimo](https://en.wikipedia.org/wiki/Coprime) do totiente de `n` e é maior que 2. Esse número é, geralmente, _65537_ porque é um número de fácil representação hexadecimal (`0x010001`).
+4.  `d` é chamado de **expoente privado** e é composto pelo [multiplicador modular inverso](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) entre `e` e o [totiente de Carmichael](https://en.wikipedia.org/wiki/Carmichael_function).
+
+Essa lista não foi fácil de ler 🤣. Mas vamos quebrar esses passos gerando nossas próprias chaves manualmente. Mas, antes, vamos explicar um conceito que começamos lá atrás.
+
+### O que é criptografar? (em RSA)
+
+A gente sabe que criptografar é uma operação matemática, mas como ela se parece?
+
+Bem, uma chave pública não é só um número, ela é composta de dois números, então você geralmente vai ver uma chave dessa forma:
+
+-   `Pk = {n, e}`
+-   `Sk = {n, d}`
+
+Isso significa que a chave pública é composta do nosso módulo `n` e do expoente público `e`. Um exemplo de uma chave pode ser esse (retirado [desse livro incrível)](https://cryptobook.nakov.com/asymmetric-key-ciphers/the-rsa-cryptosystem-concepts#rsa-public-key-example):
+
+```ini
+n = 0xa709e2f84ac0e21eb0caa018cf7f697f774e96f8115fc2359e9cf60b1dd8d4048d974cdf8422bef6be3c162b04b916f7ea2133f0e3e4e0eee164859bd9c1e0ef0357c142f4f633b4add4aab86c8f8895cd33fbf4e024d9a3ad6be6267570b4a72d2c34354e0139e74ada665a16a2611490debb8e131a6cffc7ef25e74240803dd71a4fcd953c988111b0aa9bbc4c57024fc5e8c4462ad9049c7f1abed859c63455fa6d58b5cc34a3d3206ff74b9e96c336dbacf0cdd18ed0c66796ce00ab07f36b24cbe3342523fd8215a8e77f89e86a08db911f237459388dee642dae7cb2644a03e71ed5c6fa5077cf4090fafa556048b536b879a88f628698f0c7b420c4b7
+e = 0x010001
+```
+
+Enquanto a chave privada é composta do nosso módulo e do expoente privado `d`:
+
+```ini
+n = 0xa709e2f84ac0e21eb0caa018cf7f697f774e96f8115fc2359e9cf60b1dd8d4048d974cdf8422bef6be3c162b04b916f7ea2133f0e3e4e0eee164859bd9c1e0ef0357c142f4f633b4add4aab86c8f8895cd33fbf4e024d9a3ad6be6267570b4a72d2c34354e0139e74ada665a16a2611490debb8e131a6cffc7ef25e74240803dd71a4fcd953c988111b0aa9bbc4c57024fc5e8c4462ad9049c7f1abed859c63455fa6d58b5cc34a3d3206ff74b9e96c336dbacf0cdd18ed0c66796ce00ab07f36b24cbe3342523fd8215a8e77f89e86a08db911f237459388dee642dae7cb2644a03e71ed5c6fa5077cf4090fafa556048b536b879a88f628698f0c7b420c4b7
+d = 0x10f22727e552e2c86ba06d7ed6de28326eef76d0128327cd64c5566368fdc1a9f740ad8dd221419a5550fc8c14b33fa9f058b9fa4044775aaf5c66a999a7da4d4fdb8141c25ee5294ea6a54331d045f25c9a5f7f47960acbae20fa27ab5669c80eaf235a1d0b1c22b8d750a191c0f0c9b3561aaa4934847101343920d84f24334d3af05fede0e355911c7db8b8de3bf435907c855c3d7eeede4f148df830b43dd360b43692239ac10e566f138fb4b30fb1af0603cfcf0cd8adf4349a0d0b93bf89804e7c2e24ca7615e51af66dccfdb71a1204e2107abbee4259f2cac917fafe3b029baf13c4dde7923c47ee3fec248390203a384b9eb773c154540c5196bce1
+```
+
+Então, "criptografar" uma mensagem nada mais é do que aplicar a seguinte formula:
+
+$encriptada = plano^e \mod n$
+
+Ou seja, vamos imaginar que nossa mensagem é `42`:
+
+1.  Elevamos 42 a `e`, vamos supor que `e` é 7
+2.  `42` elevado a 7 é `230 539 333 248`
+3.  Agora dividimos por `n`, digamos que `n` é 3977
+4.  O resultado é `57 968 150,1755091778`, mas não queremos o resultado, queremos o resto! que é `698`, **essa é nossa mensagem criptografada**
+
+Você me manda essa mensagem, eu recebo `698`, agora preciso decriptar a mensagem, para isso posso fazer a mesma operação, só que com meus valores, ao invés de `e` eu uso `d`:
+
+$plano = encriptada^d \mod n$
+
+1.  Elevo 698 a `d`, digamos que `d` seja 343
+2.  Isso vai me dar um número [com 976 dígitos](https://www.wolframalpha.com/input?i=698%5E343)
+3.  Que eu agora vou dividir por `3977` e pegar o resto
+4.  Que vai nos dar a [mensagem 42 de volta](https://www.wolframalpha.com/input?i=%28698%5E343%29+mod+3977)
+
+A escolha desses números não foi arbitrária, existem algumas [regras que precisam ser seguidas](https://en.wikipedia.org/wiki/RSA_\(cryptosystem\)#Key_generation) e um pouco de computação não muito trivial, mas como eu prometi, vamos explorar isso no próximo capítulo.
+
+## Criando chaves
+
+Para gerar um par de chaves real, vamos utilizar TypeScript para poder fazer as operações matemáticas.
+
+### Definindo primos
+
+Inicialmente vamos precisar definir alguns números, primeiro vamos começar com os nossos dois primos. Eles são os mais simples. A única regra é que eles precisam ser grandes e separados, mas, para facilitar nossas contas eu vou usar números primos pequenos, de 12 bits.
+
+Isso significa que podemos criptografar mensagens de até 12 bits, ou seja, números até 4096.
+
+-   Pegamos `p` como `41`
+-   Pegamos `q` como `97`
+
+O próximo passo é definir o módulo, que é a múltiplicação de `q` e `p`, logo:
+
+-   `n` é `p*q` que é `41*97=3977`, agora temos o primeiro valor que você viu no passo 3 lá em cima (tente fatorar 3977 para chegar nos primos dele, quantos passos levou?)
+
+Lembrando que `p` e `q` são privados, não podem ser divulgados, enquanto `n` é público.
+
+Até agora temos isso:
+
+```ts
+const p = 41
+const q = 97
+const n = p*q
+```
+
+### Definindo expoentes
+
+A definição dos expoentes é mais chata. Vamos precisar de um passo intermediário: definir o totiente de `n`.
+
+Isso que pode ser feito através da função de Carmichael (expressado pela letra Lambda _`λ(n)`_) ou pelo [totiente de Euler](https://en.wikipedia.org/wiki/Euler%27s_totient_function) (expressado pela letra Phi `_φ_(n)`) que é consideravelmente mais simples, porém produz `e` e `d` maiores, então os cálculos são mais complicados.
+
+Eu não sou matemático, então não vou complicar as coisas aqui, para resolvermos `_λ(n)_` precisamos achar o menor multiplicador comum entre `p-1` e `q-1`, isso pode ser feito pelo [algoritmo euclidiano](https://en.wikipedia.org/wiki/Euclidean_algorithm):
+
+$\lambda(\{n\}) = \frac\{|(p-1)(q-1)|\}\{mdc((p-1),(q-1))\}$
+
+Onde o `mdc` é o maior divisor comum entre `p-1` e `q-1`, então nossa conta fica:
+
+$\lambda(\{3977\}) = \frac\{|40\times96|\}\{mdc(40,96)\}$
+
+O JS não tem uma função para calcular o MDC, então vamos codar uma bem rápido aqui usando o algoritmo euclidiano, podemos aplicar recursivamente:
+
+```ts
+function mdc (a: number, b: number) {
+  if (b === 0) return a
+  return mdc(Math.abs(b), Math.abs(a)%Math.abs(b))
+}
+```
+
+Mas ela é mais lenta, especialmente para números grandes, então vamos aplicar iterativamente:
+
+```ts
+function mdc(a: number, b: number) {
+  let absA = Math.abs(a)
+  let absB = Math.abs(b)
+
+  while (absB) {
+    ;[absB, absA] = [absA % absB, absB]
+  }
+
+  return absA
+}
+```
+
+Agora podemos calcular _`λ(n)`_, que vai ser:
+
+```ts
+function mdc(a: number, b: number) {
+  let absA = Math.abs(a)
+  let absB = Math.abs(b)
+
+  while (absB) {
+    ;[absB, absA] = [absA % absB, absB]
+  }
+
+  return absA
+}
+
+const p = 41
+const q = 97
+const n = p * q // 3977
+const lambdaN = Math.abs((p-1)*(q-1))/mdc(p - 1, q - 1).mdc // 480
+```
+
+Com esses números podemos calcular `d` e `e`, vamos para `e` primeiro porque `d` depende dele.
+
+`e` precisa ser um número pequeno, mas ele também precisa ser um número que seja maior que 2 e menor que _`λ(n)`_, então não podemos usar 65537 porque nosso `_λ(n)_` é 8, além de que o MDC entre `e` e _`λ(n)`_ deve ser 1, então vamos fazer uma função que calcula isso:
+
+```ts
+function publicExponent (lambdaN: number) {
+  let e = 2
+  while (mdc(e, lambdaN) !== 1 || e < lambdaN) {
+    e++
+  }
+  return e
+}
+```
+
+No nosso caso, `e` vai ser 7, um número pequeno. Então até agora temos isso aqui:
+
+```ts
+function mdc(a: number, b: number) {
+  let absA = Math.abs(a)
+  let absB = Math.abs(b)
+
+  while (absB) {
+    ;[absB, absA] = [absA % absB, absB]
+  }
+
+  return absA
+}
+
+function publicExponent (lambdaN: number) {
+  let e = 2
+  while (mdc(e, lambdaN) !== 1 && e < lambdaN) {
+    e++
+  }
+  return e
+}
+
+const p = 41
+const q = 97
+const n = p * q // 3977
+const lambdaN = Math.abs((p-1)*(q-1))/mdc(p - 1, q - 1) // 480
+const e = publicExponent(lambdaN) // 7
+```
+
+Agora vamos calcular `d`, que deve ser um multiplicativo modular inverso de `e`, ou seja, vamos ter que calcular isso aqui:
+
+$d \equiv e^\{-1\}(\mod(\lambda\{n\}))$
+
+Isso significa que `d` é um número que, quando multiplicado por `e`, tem como resultado um número que é `1 mod(λ(n))`.
+
+Para calcular esse valor, podemos modificar o nosso MDC para usar o [algoritmo estendido](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm), que vai computar não só os dois divisores, mas também dois coeficientes chamados `x` e `y` que satisfazem uma identidade chamada [identidade de Bézout](https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity).
+
+> Essa identidade diz que, para todos os MDCs existem dois números (chamados coeficientes) que podem ser utilizados como multiplicadores de uma função linear `ax + by = mdc(a, b)`, ou seja, o maior divisor comum entre `a` e `b` podem ser expressados como uma função dos próprios parâmetros. Nosso número `d` é um desses coeficientes.
+
+Vamos modificar o código pra refletir isso de acordo com [essa implementação](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#pseudocode):
+
+```ts
+function mdc(a: number, b: number) {
+  let [absA, absB] = [Math.abs(a), Math.abs(b)]
+  let [prevX, x] = [1, 0]
+  let [prevY, y] = [0, 1]
+
+  while (absB) {
+    const q = Math.floor(absA / absB)
+    ;[absB, absA] = [absA % absB, absB]
+    ;[x, prevX] = [prevX - q * x, x]
+    ;[y, prevY] = [prevY - q * y, y]
+  }
+
+  return {
+    mdc: absA,
+    x: prevX,
+    y: prevY
+  }
+}
+```
+
+Para isso vamos modificar os demais códigos também para poder corrigir o retorno da função que agora é um objeto, e já criar a nossa função modular inversa, ficamos com isso no final:
+
+```ts
+function mdc(a: number, b: number) {
+  let [absA, absB] = [Math.abs(a), Math.abs(b)]
+  let [prevX, x] = [1, 0]
+  let [prevY, y] = [0, 1]
+
+  while (absB) {
+    const q = Math.floor(absA / absB)
+    ;[absB, absA] = [absA % absB, absB]
+    ;[x, prevX] = [prevX - q * x, x]
+    ;[y, prevY] = [prevY - q * y, y]
+  }
+
+  return {
+    mdc: absA,
+    x: prevX,
+    y: prevY
+  }
+}
+
+function modInverse(e: number, m: number) {
+  const result = mdc(e, m)
+  if (result.mdc !== 1) {
+    throw new Error('modular inverse does not exist')
+  }
+  return ((result.x % m) + m) % m
+}
+
+function publicExponent(lambdaN: number) {
+  let e = 2
+  while (mdc(e, lambdaN).mdc !== 1 && e < lambdaN) {
+    e++
+  }
+  return e
+}
+
+const p = 41
+const q = 97
+const n = p * q // 3977
+const lambdaN = Math.abs((p-1)*(q-1))/mdc(p - 1, q - 1).mdc // 480
+const e = publicExponent(lambdaN) // 7
+const d = modInverse(e, lambdaN) // 343
+```
+
+Veja que nosso `d` é o nosso `x` da função modular, o que estamos fazendo é obter o resto de `x` por `λ(n)`, depois somamos `λ(n)` para garantir que o resultado é positivo e pegamos o resto por `λ(n)` novamente para manter o valor entre 0 e `λ(n)-1`.
+
+Agora que temos `d`, `e` e `n` não precisamos mais de `p`, `q` ou `λ(n)`. `d` deve ser mantido **privado**.
+
+Vamos fazer uma função para criptografar e descriptografar nossos dados, dado que ela é a mesma, vamos somente trocar os valores passados.
+
+### Criptografando na mão
+
+A função final de criptografia é bem simples:
+
+```ts
+function encrypt(message: number, exponent: number, mod: number) {
+  return (message ** exponent) % mod
+}
+```
+
+E podemos fazer um teste!
+
+```ts
+const message = 42
+const encrypted = encrypt(message, e, n) // 698
+const decrypted = encrypt(encrypted, d, n) // NaN
+```
+
+Opa! O que aconteceu!? Porque estamos tendo um `NaN`? Se voltarmos um pouco no processo, vamos ver que o processo de decriptação é muito mais complexo porque estamos elevando uma mensagem a um `d` grande, então nossa mensagem ultrapassa os 52 bits que o JavaScript pode armazenar na memória. Para isso vamos ter que usar BigInts!
+
+Nossa função de criptografia fica assim, certo?
+
+```ts
+function encrypt(message: number|bigint, exponent: number, mod: number) {
+  return (message**exponent) % BigInt(mod)
+}
+```
+
+Errado! BigInts não suportam o operador `**` porque ele tenta converter para `number` no final, vamos ter que criar nossa própria função de exponenciação, que é bem simples, a gente só precisa iterar pelo número do expoente e multiplicar várias vezes:
+
+```ts
+function bigIntPower(base: number|bigint, exponent: number) {
+  let result = 1n
+  const bigBase = BigInt(base)
+  for (let i = 0; i < exponent; i++) {
+    result *= bigBase
+  }
+  return result
+}
+```
+
+Agora podemos usar dentro da nossa função de criptografia:
+
+```ts
+function encrypt(message: number|bigint, exponent: number, mod: number) {
+  return bigIntPower(message, exponent) % BigInt(mod)
+}
+```
+
+Agora sim!
+
+```ts
+const message = 42
+const encrypted = encrypt(message, e, n) // 698n
+const decrypted = encrypt(encrypted, d, n) // 42n
+```
+
+Para finalizar essa parte, podemos criar um keyset em um objeto bonitinho:
+
+```ts
+type Key = { exp: number, mod: number }
+const publicKey = { exp: e, mod: n }
+const privateKey = { exp: d, mod: n }
+```
+
+E ai modificamos a função de encriptação para aceitar uma chave:
+
+```ts
+function encrypt(message: number|bigint, key: Key) {
+  return bigIntPower(message, key.exp) % BigInt(key.mod)
+}
+```
+
+E ficamos com esse código final (veja no [gist](https://gist.github.com/khaosdoctor/aa2995b56caabf13f086ef6ee44efd6e)):
+
+```ts
+/**
+ * Calcula a potência de um número bigInt
+ * O JS não suporta números inteiros maiores que 2^53-1
+ * e BigInts não podem ser usados com o operador **, por isso
+ * essa função foi criada
+ */
+function bigIntPower(base: number|bigint, exponent: number) {
+  let result = 1n
+  const bigBase = BigInt(base)
+  for (let i = 0; i < exponent; i++) {
+    result *= bigBase
+  }
+  return result
+}
+
+/** 
+ * Calcula o mdc de dois números e os coeficientes de Bézout
+ * usando o algoritmo de Euclides estendido
+ */
+function mdc(a: number, b: number) {
+  let [absA, absB] = [Math.abs(a), Math.abs(b)]
+  let [prevX, x] = [1, 0]
+  let [prevY, y] = [0, 1]
+
+  while (absB) {
+    const q = Math.floor(absA / absB)
+    ;[absB, absA] = [absA % absB, absB]
+    ;[x, prevX] = [prevX - q * x, x]
+    ;[y, prevY] = [prevY - q * y, y]
+  }
+
+  return {
+    mdc: absA,
+    x: prevX,
+    y: prevY
+  }
+}
+
+/**
+ * Calcula o inverso modular de um número
+ */
+function modInverse(e: number, m: number) {
+  const result = mdc(e, m)
+  if (result.mdc !== 1) {
+    throw new Error('modular inverse does not exist')
+  }
+  return ((result.x % m) + m) % m
+}
+
+/**
+ * Calcula o expoente público de uma chave RSA
+ */
+function publicExponent(lambdaN: number) {
+  let e = 2
+  while (mdc(e, lambdaN).mdc !== 1 && e < lambdaN) {
+    e++
+  }
+  return e
+}
+
+/**
+ * Criptografa/Descriptografa uma mensagem usando a chave RSA
+ */
+function encrypt(message: number|bigint, key: Key) {
+  return bigIntPower(message, key.exp) % BigInt(key.mod)
+}
+
+const p = 41 // numero primo p pequeno
+const q = 97 // numero primo q pequeno
+const n = p * q // módulo n = 3977
+const lambdaN = Math.abs((p-1)*(q-1))/mdc(p - 1, q - 1).mdc // totiente de carmichael = 480
+const e = publicExponent(lambdaN) // expoente publico 7
+const d = modInverse(e, lambdaN) // expoente privado 343
+
+// Chaves
+type Key = { exp: number, mod: number }
+const publicKey = { exp: e, mod: n }
+const privateKey = { exp: d, mod: n }
+
+// Exemplo de uso
+const message = 42
+const encrypted = encrypt(message, publicKey) // 698n
+const decrypted = encrypt(encrypted, privateKey) // 42n -> mensagem original
+```
+
+### Variação de Euler
+
+Se você leu até aqui, meus parabéns, não foi fácil! Mas eu queria te mostrar mais uma coisinha só! Lembra que eu comentei que podemos utilizar um totiente de Euler ao invés do totiente de Carmichael, e que ele é bem mais simples?
+
+Bom, na verdade já estamos usando esse totiente. O totiente de Euler (`φ(n)`) é definido como sendo a multiplicação de `p-1` por `q-1`, essa é a nossa função hoje:
+
+```ts
+const lambdaN = Math.abs((p-1)*(q-1))/mdc(p - 1, q - 1).mdc
+```
+
+Matematicamente mais bonitinha:
+
+$\lambda\{n\} = \frac\{|(p-1)*(q-1)|\}\{mdc(p-1, q-1)\}$
+
+Olha ali no numerador, estamos lidando com o φ. Então se removermos a segunda parte (a divisão) não vamos ter nenhuma mudança no resultado:
+
+```ts
+const lambdaN = Math.abs((p-1)*(q-1))
+
+// ... o resto do código aqui
+
+const message = 42
+const encrypted = encrypt(message, publicKey) // 698n
+const decrypted = encrypt(encrypted, privateKey) // 42n -> mensagem original
+```
+
+O que muda então? `φ(n)` é muito maior do que `λ(n)`, enquanto `λ(n)` é 480, `φ(n)` é 3840. Isso vai refletir em performance, lembre-se que estamos fazendo uma iteração por cada valor dentro da função MDC, quanto maior o número, mais iterações temos que fazer, então manter os números menores é melhor!
+
+De qualquer forma, você pode ver a variação [aqui](https://gist.github.com/khaosdoctor/549d1a62e840974e8cd75518d1826273).
+
+## Conclusão
+
+Esse foi um dos maiores posts que eu já fiz, mas acredito que valeu muito a pena, exploramos a fundo o que é o RSA e como ele funciona, criamos duas chaves manualmente e testamos a criptografia manual. E agora?
+
+Para criptografar texto ou qualquer outro valor não numérico, você precisa converter essa mensagem para um número entre 0 e o tamanho da sua chave, no nosso caso usamos uma chave pequena, mas se o valor passar dessa chave, vamos ter um problema de criptografia. Você pode converter qualquer string para um valor binário e usar as mesmas funções!
+
+Os códigos para ambas implementações estão [aqui](https://gist.github.com/khaosdoctor/aa2995b56caabf13f086ef6ee44efd6e) e [aqui](https://gist.github.com/khaosdoctor/549d1a62e840974e8cd75518d1826273) e nos vemos na próxima parada com as chaves simétricas!
+
+Até mais galera!

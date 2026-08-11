@@ -1,0 +1,300 @@
+---
+title: "O que há de novo no TypeScript 4.7"
+pubDate: 2022-06-08T14:27:00.000Z
+updatedDate: 2026-07-16T16:08:55.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "development", "javascript", "nodejs"]
+description: "Fique por dentro das principais novidades da versão 4.7 do TypeScript. Que, entre muitas coisas, inclui a possibilidade de uso de ESModules nativos!"
+heroImage: "./10b88c68-typescript-logo.png"
+heroImageAlt: "Logo do TypeScript"
+draft: false
+visibility: "public"
+seoDescription: "Fique por dentro das principais novidades da versão 4.7 do TypeScript. Que, entre muitas coisas, inclui a possibilidade de uso de ESModules"
+---
+
+O TypeScript 4.7 chegou e, como não podemos deixar de lado, vamos passar pelas principais partes que foram anunciadas pelo time de desenvolvimento.
+
+## ESModules com suporte no Node.js
+
+Já faz um tempo que o Node.js está com suporte para ESM (inclusive [temos artigos aqui no blog](/os-ecmascript-modules-estao-aqui/) sobre isso), porém o TypeScript não estava exatamente acompanhando o que estava acontecendo, principalmente porque foi uma das mudanças mais críticas que aconteceram no ecossistema, já que todo o Node.js foi construído no modelo CommonJS (CJS).
+
+Interoperabilidade entre os dois modos de importação não é só complexo, mas também traz diversos problemas e novos desafios, especialmente nas funcionalidades mais antigas. Apesar do suporte ao ESM já estar no TypeScript como experimental desde o 4.5, ainda não era o momento de lançar ele como funcionalidade completa.
+
+No entanto, a versão 4.7 do TS já trás o suporte mais recente (Node 16) ao ESM através da opção `module` no `tsconfig.json`.
+
+```json
+{
+  "compilerOptions": {
+    "module": "node16"
+  }
+}
+```
+
+### Suporte a `type` e novas extensões
+
+Como já falamos em outros artigos aqui no blog, basicamente, para usarmos ESM em um módulo Node.js, basta que ou chamemos o arquivo pela extensão `.mjs` ou então incluindo a chave `type` no `package.json` com o valor `module`.
+
+Relembrando algumas das regras quando usamos ESM:
+
+-   Podemos usar as keywords `import` e `export`
+-   Temos o tão útil top-level `await`, então não precisamos de uma função `async`
+-   Precisamos usar o nome **completo** dos arquivos incluindo a extensão nas importações
+-   Algumas outras regras menores
+
+A mudança para o lado do TS foi menor, porque já usávamos o "estilo ESM" para importar módulos, mas isso era nativo, quando compilávamos o código para JS no final, a gente acabava com um monte de `require` do mesmo jeito.
+
+O que acontece agora é que o TS vai começar a tratar arquivos `.ts` (e suas variações como `.tsx`) da mesma forma que o Node trataria os arquivos JS, ou seja, o compilador vai procurar o primeiro `package.json` para determinar se aquele arquivo está em um módulo ou não, se sim, os `import` e `export` vão ser deixados no código final, e algumas coisas vão mudar na importação de módulos no geral.
+
+O exemplo clássico é o uso da extensão, então um código comum como esse, que funcionaria normalmente com CJS:
+
+```ts
+export function foo() {}
+
+import { foo } from './foo'
+```
+
+Não funcionaria no ESM porque `./foo` não tem a extensão completa do arquivo, o `import` deveria ser trocado para essa outra forma para poder funcionar em ambos os meios de resolução:
+
+```ts
+import { foo } from './foo.ts'
+```
+
+Além disso, da mesma forma que temos as extensões `.mjs` e `.cjs` para interpretar arquivos JS que são ESM ou CJS, temos agora as extensões `.mts` e `.cts`, que produzirão os arquivos de definição `.d.mts` e `.d.cts`, além de arquivos `.mjs` ou `.cjs` correspondentes de acordo com o arquivo de entrada.
+
+Todas as demais regras de ESM vs CJS continuam sendo aplicadas normalmente.
+
+## Exports, Imports e Auto-referência no package.json
+
+Desde que começamos a ter ESM no Node.js, temos um novo campo no `package.json` que permite um pacote definir diferentes pacotes quando ele é importado via ESM ou CJS, esse campo é o `exports`:
+
+```json
+// package.json
+{
+  "name": "my-package",
+  "type": "module",
+  "exports": {
+    ".": {
+      // entrypoint para ESM
+      "import": "./esm/index.js",
+      // entrypoint para cjs
+      "require": "./commonjs/index.cjs"
+    }
+  },
+  // Fallback para outras versões
+  "main": "./commonjs/index.cjs"
+}
+```
+
+A forma como o TS suporta esses novos campos basicamente se resume a como ele funciona hoje. A ideia é que quando um tipo é inferido a partir de um pacote, o TS vai procurar o campo `main` dentro do `package.json` daquele pacote e dai procurar o arquivo `.d.ts` correspondente a não ser que o pacote especifique uma chave `types`.
+
+Como é de se esperar, no novo modelo, o TS vai buscar o campo `import` dentro da chave `export` de um `package.json` se houver, ou um campo `require` se o arquivo for um arquivo CJS. Você pode definir para cada um deles também, o local onde os tipos estão localizados e onde o Node.js deveria procurar:
+
+```json
+// package.json
+{
+  "name": "my-package",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        // Onde o TS vai procurar tipos
+        "types": "./types/esm/index.d.ts",
+        // Onde o Node.js vai procurar o pacote
+        "default": "./esm/index.js"
+      },
+      "require": {
+        "types": "./types/commonjs/index.d.cts",
+        "default": "./commonjs/index.cjs"
+      }
+    }
+  },
+  // Fall-back pra outras versões do TS
+  "types": "./types/index.d.ts",
+  "main": "./commonjs/index.cjs"
+}
+```
+
+Algo que é digno de nota:
+
+> A chave `types` deve vir sempre primeiro do que o `default` em um objeto `exports`
+
+## Analise de fluxo para elementos de um objeto
+
+Uma melhoria na detecção de tipos em chaves de objeto foi feita no TS 4.7, antigamente um código como esse:
+
+```ts
+const key = Symbol()
+
+const numberOrString = Math.random() < 0.5 ? 42 : 'hello'
+
+const obj = {
+  [key]: numberOrString
+}
+
+if (typeof obj[key] === 'string') {
+  let str = obj[key].toUpperCase()
+}
+```
+
+Não iria encontrar o tipo da chave `obj[key]` automaticamente e continuaria informando que o tipo ainda é `string | number`, hoje é possível detectar que esse tipo agora já é uma `string` por padrão.
+
+A mesma melhoria granular foi aplicada em parâmetros que são objetos de funções como este exemplo:
+
+```ts
+declare function f<T>(arg: { produce: (n: string) => T; consume: (x: T) => void }): void
+
+f({
+  produce: () => 'hello',
+  consume: (x) => x.toLowerCase()
+})
+
+f({
+  produce: (n: string) => n,
+  consume: (x) => x.toLowerCase()
+})
+
+// Erro antes, agora funciona
+f({
+  produce: (n) => n,
+  consume: (x) => x.toLowerCase()
+})
+
+// Erro antes, agora funciona
+f({
+  produce: function () {
+    return 'hello'
+  },
+  consume: (x) => x.toLowerCase()
+})
+
+// Erro antes, agora funciona
+f({
+  produce() {
+    return 'hello'
+  },
+  consume: (x) => x.toLowerCase()
+})
+```
+
+Ou seja, o TS ficou mais inteligente para encontrar tipos de funções e seus retornos dentro de objetos que são, na verdade, parâmetros de outra função.
+
+## Instantiation Expressions
+
+Quando usamos generics em TS, na maioria das vezes as funções ficam extremamete genéricas, como é de se esperar. Porém se a gente quiser especializar elas um pouco, sempre temos que criar um wrapper, por exemplo, essa função retorna um tipo `Box`, que é genérico:
+
+```ts
+interface Box<T> {
+  value: T
+}
+
+function makeBox<T>(value: T) {
+  return { value }
+}
+```
+
+Se a gente quiser criar uma variação dessa função (essencialmente um alias) onde T é explicitamente um tipo `Hammer` ou `Wrench` a gente teria ou que criar uma nova função que recebe `Hammer` como parâmetro e retornar a chamada de `makeBox` com esse parâmetro, dessa forma o TS iria inferir o tipo:
+
+```ts
+function makeHammerBox(hammer: Hammer) {
+  return makeBox(hammer)
+}
+```
+
+Ou fazer um overload de tipos:
+
+```ts
+const makeWrenchBox: (wrench: Wrench) => Box<Wrench> = makeBox
+```
+
+Agora é possível associar o tipo direto a uma variável, ou seja, podemos trocar o generic direto na associação da variável com o tipo que queremos:
+
+```ts
+const makeHammerBox = makeBox<Hammer>
+```
+
+Teria o mesmo efeito dos anteriores. E isso é especialmente útil quando temos tipos genéricos nativos, como o `Map`, `Set` e `Array`:
+
+```ts
+const MapComum = new Map(1, 2) // Assumiria um Map<number, number>
+const ErrorMap = Map<string, Error>
+
+const errorMap = new ErrorMap() // tipo é Map<string, Error>
+```
+
+## `extends` disponível para tipos `infer`
+
+Recentemente eu postei [aqui no blog](/infer-typescript/) um artigo sobre o que é o `infer` no TS. Em suma, ele permite que a gente extraia o tipo de uma variável quando estamos utilizando em uma clausula `extends`, por exemplo, quando queremos pegar o primeiro elemento de uma tupla somente se ele for uma string:
+
+```ts
+type FirstIfString<T> = T extends [infer S, ...unknown[]] ? (S extends string ? S : never) : never
+
+// "hello"
+type B = FirstIfString<['hello', number, number]>
+
+// "hello" | "world"
+type C = FirstIfString<['hello' | 'world', boolean]>
+
+// never
+type D = FirstIfString<[boolean, number, string]>
+```
+
+Agora, ter que fazer dois ternários para esse tipo de verificação é um pouco chato, então para simplificar a ideia, podemos agora usar `extends` juntamente com o `infer` e o tipo ficaria assim:
+
+```ts
+type FirstIfString<T> =
+  T extends [infer S extends string, ...unknown[]]
+    ? S
+    : never
+```
+
+## Variancia de tipos explícita
+
+Agora é possível anotar os tipos de entrada ou saída de uma função com um indicador de variância. A explicação inteira [é bastante complexa](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#optional-variance-annotations-for-type-parameters) e cobre um certo grupo de usos que são até que bem avançados.
+
+Em essencia, a ideia é tentar discernir quando um tipo genérico `T`, por exemplo, é diferente em invocações distintas, por exemplo:
+
+```ts
+interface Animal {
+  animalStuff: any
+}
+
+interface Dog extends Animal {
+  dogStuff: any
+}
+// ...
+type Getter<T> = () => T
+type Setter<T> = (value: T) => void
+```
+
+Nesse caso, se a gente tiver duas instâncias do tipo `Getter`, tentar descobrir se o tipo que a gente mandou para ele ou se o tipo T é indiferenciável um do outro é bastante complicado. Principalmente porque um tipo é extensão de outro, isso significa que de um lado, todos os `Dog` são `Animal` mas nem todo `Animal` é um `Dog`, então a variancia `Dog -> Animal` é verdadeira enquanto `Animal -> Dog` não é.
+
+Agora podemos definir se o tipo é um tipo de entrada ou saída com a anotação `in` e `out`:
+
+```ts
+interface Animal {
+  animalStuff: any
+}
+
+interface Dog extends Animal {
+  dogStuff: any
+}
+// ...
+type Getter<out T> = () => T
+type Setter<in T> = (value: T) => void
+```
+
+Então se tivermos um tipo de saída no mesmo escopo, o TS pode ser bem mais rápido para identificar o tipo, ainda mais em tipos circulares.
+
+> Mas atenção, não é recomendado que você saia por ai anotando todas as suas funções e todos os seus parâmetros com `in` ou `out` já que o TS faz um ótimo trabalho com isso.
+
+## Alterações menores:
+
+-   [Organização de imports baseada em grupos](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#group-aware-organize-imports)
+-   [Go to Source definition](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#go-to-source-definition)
+-   [Resolution mode pode ser customizado](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#resolution-customization-with-modulesuffixes)
+-   [Intellisense para completude de métodos em objetos](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#object-method-snippet-completions)
+
+# Conclusão
+
+É isso ai! Se você quiser saber mais sobre as novidades não só do TS mas também do Node.js não deixe de assinar a [minha newsletter](https://news.lsantos.dev) para receber as melhores notícias e os melhores conteúdos curados de tecnologia direto no seu email!

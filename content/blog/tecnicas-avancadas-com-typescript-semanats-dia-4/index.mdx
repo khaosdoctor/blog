@@ -1,0 +1,219 @@
+---
+title: "Técnicas avançadas com TypeScript - #SemanaTS dia 4"
+pubDate: 2023-04-06T11:00:47.000Z
+updatedDate: 2026-07-16T16:01:51.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript"]
+series: "Semana TS"
+seriesOrder: 4
+description: "Vamos aprender tudo sobre técnicas mais avançadas de TypeScript, desde type narrowing até generics e branded types."
+heroImage: "./Artboard-1.png"
+draft: false
+visibility: "members"
+seoTitle: "Técnicas Avançadas com TypeScript"
+---
+
+Estivemos falando bastante sobre tipos, passamos com algumas boas e más práticas de código usando TypeScript, mas ainda eu sinto que estamos com algo faltando aqui. Esse algo são as técnicas não tão convencionais que você vai ver por ai.
+
+Eu não gosto de chamar de _técnicas avançadas_, mas, na falta de um nome melhor para descrevê-las, vou manter assim. Essas técnicas não são nada de outro mundo, mas são usos muito inteligentes do sistema de tipos para fazer com que ele trabalhe para você mais facilmente. Mas chega de introdução e vamos falar da nossa primeira técnica!
+
+## Satisfies
+
+Essa é uma "técnica" super recente, eu [já falei dela](/ts-satisfies/) aqui no blog antes. Eu não chamaria nem técnica porque ela é um operador novo, porém o uso desse operador é uma técnica bem interessante! Esse é o `satisfies`.
+
+Quando estamos lidando com tipos, um dos problemas que ocorrem frequentemente é que os tipos mais genéricos que são inferidos pelo compilador acabam por passar por cima dos tipos mais específicos que a gente quer, vamos a um exemplo que a gente já usou antes, com os pontos 3D:
+
+![](./image.png)
+
+Veja que a chamada para `toFixed` vai retornar um erro, como deve ser, porque temos que verificar se a propriedade existe, mas podemos associar um valor não existente a uma variável de qualquer forma, no nosso caso o `x`.
+
+> Quero deixar claro que, neste caso específico, associar o `x` a uma variável não faria tanta diferença assim porque o TS vai tipar `ponto.x` como `number | undefined`, ou seja, vamos ter que checar do mesmo jeito.
+
+Isso acontece porque, mesmo que a gente saiba que o nosso objeto só tenha uma das chaves, o TS não consegue inferir isso corretamente porque a única informação que demos para ele foi que nosso objeto pode possuir uma ou duas propriedades. Mas se a gente usar o operador `satisfies` a coisa muda de figura:
+
+![](./image-1.png)
+
+Agora temos a inferência correta, e a tipagem de `ponto` pelo será `{ y: number }`, ou seja, é como se o compilador pegasse o valor da sua variável, fosse até o objeto que você definiu como `satisfies`, olhasse lá, e retornasse pra você somente as propriedades da sua variável que existem naquele objeto.
+
+Outro uso bastante interessante do satisfies é para garantir que propriedades diferentes tenham tipos diferentes a partir de um tipo mais genérico, por exemplo, um objeto misto:
+
+![](./image-3.png)
+
+Veja que não podemos usar o método `toUpperCase()` porque a união de `string | number` não possui esse método, mesmo `nome` sendo uma string, mas se dissermos para o TS que esse objeto mais específico satisfaz uma forma mais genérica, então podemos ter a nossa inferência correta:
+
+![](./image-4.png)
+
+Agora, o tipo de `carro` vai ser `{ nome: string, ano: number, cor: string }` ao invés de um `Record<Props, string|number>` que tipa todos os valores como `string | number`.
+
+> Perceba que, em ambos os exemplos, nós tivemos que tirar a tipagem da variável e passar diretamente para o `satisfies`.
+
+### Inferência profunda com `as const`
+
+Esse caso merece estar separado porque é uma das formas mais legais de usar o `satisfies`. Mas você também pode dizer que um tipo é uma constante, usando `let v = 20 as const`, e o TS vai tipar esse valor como `type v = 20`, um **tipo literal**.
+
+Vamos dizer que temos um objeto de rotas de uma API. Esse objeto tem a seguinte interface:
+
+![](./image-5.png)
+
+Até agora, a inferência de tipos do TS está tipando esse objeto da seguinte forma:
+
+![](./image-7.png)
+
+Se usarmos o `satisfies Rotas` no final do objeto, vamos mudar um pouco essa inferência:
+
+![](./image-8.png)
+
+Veja que os booleanos agora são literais `true` ou `false`. Mas se tivermos uma função como essa:
+
+![](./image-9.png)
+
+Não podemos chamar a nossa rota porque o tipo literal `/` é diferente do tipo mais genérico `string`, para isso vamos usar `as const` no nosso objeto:
+
+![](./image-11.png)
+
+E agora vamos olhar os nossos tipos novamente:
+
+![](./image-10.png)
+
+Veja que eles estão totalmente inferidos como readonly e com os tipos literais, o que permite que a gente passe para a nossa função o valor correto.
+
+## Branded types
+
+Branded types são uma forma de validar determinados tipos de dados contra um determinado padrão, por exemplo, se quisermos validar que um valor monetário é válido, precisamos de duas informações: a moeda e a quantidade dessa moeda.
+
+Mas cada moeda, apesar de ter valores iguais, são completamente diferentes, não podemos pagar 100 reais em algo que vale 100 dólares porque R$100 não é o mesmo que $100. Para isso temos os **branded types**.
+
+Branded são tipos que possuem uma _marca_ (brand) ou _tag_, e podem ser definidos assim:
+
+![](./image-18.png)
+
+A intersecção de dois tipos é um novo tipo contendo ambas as propriedades dos demais tipos. Por padrão (mas não obrigatório), um branded type é a junção de um tipo primitivo com um objeto que contém `__brand` ou `__tag` (com 2 `_`).
+
+> Essa é uma definição da comuniade, você pode chamar o seu objeto da forma que quiser.
+
+Mas perceba que, se você tentar rodar esse código, vamos ter um erro dizendo que não podemos associar `200` a `Dolares`, isto porque nenhum branded type é associável por padrão, eles precisam ser forçados ou verificados.
+
+Vamos falar da verificação mais ainda aqui, mas por hora podemos fazer a seguinte malandragem só para eu poder mostrar para você qual é o real uso deles:
+
+![](./image-19.png)
+
+Agora vamos dizer que tenhamos que converter nossas moedas, para isso vamos criar uma função como essa:
+
+![](./image-20.png)
+
+Agora temos uma função que **só aceita reais** e **só devolve dólares**. Então garantimos que os retornos dessas funções não são os primitivos principais `number` mas sim uma variação deles que não podem ser especificadas diretamente.
+
+Se criarmos um tipo para os reais e chamarmos a função, não vamos ter nenhum erro:
+
+![](./image-21.png)
+
+Esta é a forma de trabalhar com branded types, eles precisam ser recebidos ou como parâmetros já verificados, ou como dados externos que precisam ser verificados e convertidos em um tipo _branded_.
+
+> **Nota:** JAMAIS use o type cast direto (com `as <tipo>`) para criar um branded type, já vamos ver outras formas mais seguras de se fazer isso.
+
+Voltando ao assunto de generics de ontem, você consegue ver uma forma de melhorar o nosso branded type? Podemos usar um generic para criar um tipo `Branded<T,B>`:
+
+![](./image-22.png)
+
+## Type guards e assertion functions
+
+Estas são as duas formas que podemos verificar e criar um type cast de um tipo normal para um branded type como eu falei anteriormente. Enquanto ambas podem ser usadas para a mesma coisa, **assertions functions** e **type guards** são fundamentalmente diferentes.
+
+### Assertion Functions
+
+Assertion functions, como o nome já diz, são funções que se certificam que um valor passado é de um determinado tipo, caso elas não sejam, temos um erro. No TypeScript, assertion functions são definidas com a keyword `asserts <valor> is <tipo>`:
+
+![](./image-24.png)
+
+Este é um exemplo muito útil para demonstrarmos o poder dos branded types em conjunto com as assertion functions. Quando estamos trabalhando com bancos de dados, temos que garantir que um determinado valor seja um UUID e não qualquer string normal, para isso usamos uma assertion function como essa:
+
+![](./image-25.png)
+
+Veja que estamos lançando um erro caso nossa regex não seja válida, isso garante que seja o que for que precisa dessa string depois, ela vai ser um UUID.
+
+> Se você quer saber qual é a regex do UUID que eu cortei por conta de espaço, é essa [aqui](https://ihateregex.io/expr/uuid/): `^_[0__-__9a__-__fA__-__F]_{8}\b-_[0__-__9a__-__fA__-__F]_{4}\b-_[0__-__9a__-__fA__-__F]_{4}\b-_[0__-__9a__-__fA__-__F]_{4}\b-_[0__-__9a__-__fA__-__F]_{12}$`
+
+Assim, podemos usar da seguinte forma:
+
+![](./image-26.png)
+
+### Type Guards
+
+Os type guards são quase que exatamente a mesma coisa das assertion functions, porém ao invés de darem um throw no erro, vão retornar um booleano garantindo que eles são de um determinado tipo, usando a sintaxe `<valor> is <tipo>`:
+
+![](./image-27.png)
+
+Type guards são muito úteis quando você quer validar algum tipo, mas não quer que o app lançe um erro parando a execução, o que é muito útil, por exemplo, se o seu valor pode ser convertido posteriormente para o tipo necessário.
+
+Junto com as assertion functions, os type guards são as formas mais seguras de se garantir que um determinado tipo é de uma determinada "brand", mas claro que você também pode usar funções normais que retornem o valor como `valor as Brand`, dado que você já vai fazer a validação antes do retorno.
+
+## Enums
+
+Enumeradores estão presentes na maioria das linguagens de programação que são estaticamente tipadas desde sempre. Porém eles [ainda não são uma realidade no JavaScript](https://github.com/rbuckton/proposal-enum). O TS implementa o padrão de enumerador, e eles não são considerados uma técnica avançada, mas saber quando usar enums e quando não usar sim.
+
+> Meu ex colega de empresa, Robin Pokorny, tem [um artigo muito bom](https://robinpokorny.com/blog/typescript-enums-i-want-to-actually-use/) sobre isso no blog dele, vou tentar resumir esse ponto com minhas opiniões, mas vale a leitura.
+
+Existem diversas pessoas que são contra e outras a favor do uso de enums, eu particularmente gosto bastante de usá-los, mas temos que concordar que eles possuem desvantagens, principalmente por serem **o único construto do TS que gera um código JavaScript**. Isso mesmo, se você escrever um enum como esse:
+
+![](./image-28.png)
+
+Diferentemente do que o TypeScript faz com o resto dos tipos (a chamada _type erasure_) e os apaga do código final. Esse enum vai ser representado da seguinte forma no código real, de produção:
+
+![](./image-29.png)
+
+Isso acontece porque enums podem ser usados tanto como tipos como quanto valores:
+
+![](./image-30.png)
+
+Na função acima, você pode ver que o parâmetro `a` é do tipo `Animal` e chamamos a função com o valor do enum. E um detalhe importante é que **não podemos usar a string**, ou seja, não poderíamos chamar `setAnimal('Dog')` porque `'Dog'` não é um valor do enum.
+
+> Isso não é um grande problema, mas infelizmente, quando recebemos valores de fora como APIs e etc, temos que fazer um type cast em alguns casos para satisfazer o enum.
+
+Pessoalmente, eu não vejo problema, ainda mais por que não vamos ver esse código ou mexer nele manualmente, mas muitos acreditam que não é uma boa opção. Mas quais são as outras opções?
+
+### Disjoint unions
+
+Uma outra forma de se fazer enums é o uso de disjoint unions, que são uniões de tipos literais:
+
+![](./image-31.png)
+
+Aqui a gente não tem o código do enum, mas também não podemos usar os tipos dele em nenhum lugar , o que faz com que a gente tenha essas strings perdidas no código. Em um sistema grande isso pode ser muito problemático.
+
+> Você até pode "resolver" isso associando cada valor a uma constante e usando as constantes como parâmetros, mas isso não é muito melhor.
+
+### Dicionário de constantes
+
+Outra forma é criar um dicionário:
+
+![](./image-32.png)
+
+Ele deixa a gente usar tanto as strings quanto o valor do dicionário, mas a gente poderia passar qualquer string ali que também funcionaria, o que é péssimo.
+
+Para resolver isso podemos usar um dicionário constante de constantes (complicado), basicamente é adicionar um `as const` no final, isso faz com que o objeto se torne uma disjoint union de strings:
+
+![](./image-33.png)
+
+### Constant enums
+
+Existe outra forma de declarar um enum, que é um enum constante, ou seja, quando você compilar o código, todos os valores que foram usados no enum vão ser colocados de forma literal no código final, ou seja:
+
+![](./image-34.png)
+
+Nesse código, além de não podermos usar os valores como string (porque temos um enum) o JavaScript final fica assim:
+
+![](./image-35.png)
+
+Veja que o enum deixou de existir, tirando o comentário, você nem saberia que é um enum. Isso é ótimo quando você está criando suas próprias aplicações porque existe uma redução notável de memória e aumento de velocidade em projetos grandes, mas [a própria documentação](https://www.typescriptlang.org/docs/handbook/enums.html#const-enums) oficial diz que eles não devem ser compartilhados com outros projetos, como falamos no dia 2 com os arquivos declarativos.
+
+> A única forma de compartilhar const enums é ativando uma configuração chamada [`preserveConstEnums`](https://www.typescriptlang.org/tsconfig#preserveConstEnums) que, essencialmente, faz com que o const enum seja um enum normal.
+
+# Pra você treinar
+
+Bora corrigir os exercícios de ontem? Os tipos Flatten e FlattenDeep podem ser encontrados [aqui](https://www.typescriptlang.org/play?#code/PTAEGUEsFsAcBsCmBnAUAFwJ60aAYvAIbrqIB2APACqiIAepZAJsqIWZgNoC6AfKAF5QNeoxagAFJDIAzRACdQAVQCUPUAH5loAFzDUqEKACMoAPYBXUACZUAYzNlk6NnoLFGFTgHJj3gDSg3tbefIJBIYZgzvLSAOb2js6gAEZuRCTkFDHxPPxCvt4GUaAAIgCi4ACCeACSAPIlALQtrW1tBkYAciikTBjYuO6ZZKWIiLDUtAzk4uyY+cLTYqxSsgrKatygqKCa2qKzq9JyigAKWzt7e1rDjGMTFGf8u9d6Sq96VJ3R6LFkCQcThcdnSHnID0mnGhnByAO4CLCBT8P1AZAs0BSCkSwNATDBI0hFHRmIUi1sJXgkFI8kIkDQQOSiAJ93GUMKgR8IU53gAzAFQNDvAAWAU+ACsoURCMWhVQQA). Já a implementação das classes pode ser encontrada [aqui](https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgGIHsoFs7IN4BQyycUEuAFAJQBcyIArlgEbRHIBu6ANkytXUYs2AXwIEE3OAGdpyAIoM4AEygr0yYFgAO3CFgjg5GbLkLEE6ENLBQGCMJmQUy6kNwCeyKcvSCmrFBU+GLE7KTkAvQB0PjsxGRgDFAgyGAAFsDSAHQ+GgBU+cgATOxi7Fy8BlFCgXHEyInJqRlZuerIhcgAzGUE5ZIycgDCwFAIDNwaWrr6hmDGmDj1jeS+7l7KwHAGtn7RwlDslta29o5Qzq7rno1wwPu10MHmDa05WzsQe8gAvHcPfKlYjlYgRSgveKrJIpZAAWTgGWyAAUAJKdeGI9LZbToADuFHe2TUDwANCUqH0Kjw+M5IQ1oc1nAAWDEIpFotlYnH4wmZHIk9Dk7pUKgAel6IP64kGsmQABUoNsQABzSbTHR6AxGNBLMzHKw2OwOJwuNZWW7MGQQfyHcnXC1eODcGFwW2BF6gkiuOkrBLfJl8tpW6QoIpE52u4JikpU4iVWnUfDIMUx5FK6TLWzKtVSI4NJqwiOuJPh-nZSPJOB9ERAA).
+
+Para o desafio de hoje:
+
+-   Usando as declarações de tipos que vimos antes, estenda os métodos `setTimeout` e `setInterval` nativos do JavaScript para retornar um branded type do tipo `TimeoutID` e `IntervalID`, depois estenda as funções `clearTimeout` e `clearInterval` para aceitar apenas os branded types como parâmetros e não qualquer número.
+
+> Não esquece de deixar o seu feedback sobre a #SemanaTS aqui [nesse formulário](https://forms.gle/6hAqjVmah9uyR4by8)!

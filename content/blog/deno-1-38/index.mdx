@@ -1,0 +1,101 @@
+---
+title: "Suporte a env, mudanças de api e novidades do Deno 1.38"
+pubDate: 2024-01-03T11:00:52.000Z
+updatedDate: 2026-07-16T15:54:48.000Z
+lang: pt
+category: "javascript"
+tags: ["deno", "typescript", "development"]
+description: "Suporte a arquivos .env, test runner no REPL, suporte a unix sockets e muito mais na nova versão do Deno!"
+heroImage: "./articles.png"
+draft: false
+visibility: "public"
+---
+
+Em Novembro o runtime de TypeScript mais amado de todos ganhou mais uma versão! E, como é de costume, vamos cobrir aqui o que a gente pode esperar de novo nessa versão 1.38 do Deno!
+
+## Doc com HTML
+
+O Deno possui um comando muito interessante chamado `deno doc`, que faz basicamente o que você espera, gera uma documentação do módulo que você está lendo.
+
+Até o momento tínhamos algumas opções como gerar a documentação em JSON, ou então gerar apenas a documentação privada do módulo, mas isso não era muito útil especialmente porque a maioria delas era apenas uma forma de printar essa mesma documentação no terminal.
+
+Agora, a versão 1.38 inclui uma opção `--html`, que permite que você gere páginas completas de documentação para seu módulo mesmo que ele não esteja publicado no `deno.land`.
+
+É só rodar:
+
+```bash
+deno doc --html --name "Meu módulo" ./mod.ts
+```
+
+Que vai gerar uma série de arquivos de documentação em HTML que você pode publicar. E você pode fazer isso para QUALQUER módulo e qualquer arquivo do seu projeto.
+
+Esse é o vídeo criado pela equipe do Deno que mostra como isso pode ser feito.
+
+<YouTube id="hQ2wEIUGV-M" />
+
+Além disso, a nova opção `--lint` faz com que o Deno analise seu código em busca de problemas que possam prejudicar a documentação!
+
+## Hot Module Reload
+
+Uma das funcionalidades mais interessantes do Deno é poder utilizar o excelente `--watch` quando estamos executando um código para poder recarregar a nossa aplicação em caso de algum tipo de mudança.
+
+O problema é que, muitas vezes, esse restart da aplicação não acontece da maneira esperada, interrompendo processos no meio da execução, por isso agora temos uma melhoria com a opção `--unstable-html`.
+
+HMR (ou Hot Module Reload) é uma técnica muito utilizada em desenvolvimento (principalmente para frontend) para poder substituir o conteúdo de um arquivo sem precisar reiniciar todo o processo, mantendo estado, memória e tudo que vem junto.
+
+Esse vídeo do time do Deno mostra bem como essa funcionalidade ajuda no desenvolvimento:
+
+<Video src="/videos/deno-1-38/deno-hmr.mp4" poster="https://img.spacergif.org/v1/1440x626/0a/spacer.png" />
+
+Perceba que, à medida que o número do incremento é alterado, a aplicação já pega o resultado e começa a aplicar a nova mudança sem precisar reiniciar a aplicação inteira.
+
+Você também pode passar arquivos específicos para essa flag com:
+
+```bash
+deno run --unstable-hmr=data.ts ./mod.ts
+```
+
+E você também pode ouvir os eventos de atualização do HMR usando um event listener:
+
+```ts
+addEventListener('hmr', (e) => {
+  console.log(e.detail.path)
+})
+```
+
+## Suporte a .env
+
+Como [o Node já fez antes](/dotenv-nodejs/), agora é a vez do Deno ter suporte nativo a arquivos `.env`, isso é inesperado, já que o Deno tem suporte através da standard library para o módulo dotenv, mas agora você pode usar direto da linha de comando.
+
+Imagine que você tenha um arquivo `.env` na sua raiz do projeto, para executar esse arquivo diretamente você pode passar a opção `--env` para o `deno run`:
+
+```bash
+deno run --env main.ts
+```
+
+Você pode especificar o arquivo também:
+
+```bash
+deno run --env=.env.dev mod.ts
+```
+
+## Outras mudanças
+
+-   Você pode usar qualquer package manager (`yarn`, `pnpm`) para baixar módulos do NPM
+-   Atrás da flag `--unstable-bare-nod-builtins` você pode agora usar os módulos do Node sem precisar do prefixo `node:`
+-   Compilacão e transformação mais rápida de JSX
+-   `deno task` agora suporta o comando `head` em todas as plataformas
+-   A extensão do VSCode para o Deno agora suporta as opções padrão para JavaScript e TypeScript do próprio code
+-   A extensão agora tem uma sidebar com todas as tasks do arquivo `deno.json`
+-   Você pode agora usar `Deno.test` no REPL
+-   Você pode usar o using com algumas classes do namespace `Deno` como: `FsFile`, `FsWatcher`, `HttpConn`, `HttpServer`, `Kv` e `Listener`
+
+---
+
+## Momento FTS!
+
+Se você curtiu esse artigo, eu também tenho um curso completo de TypeScript chamado **Formação TypeScript!**
+
+Eu te convido a dar uma olhadinha lá se você quiser aprender mais sobre TypeScript comigo e a nossa incrível comunidade com centenas de alunos e alunas!
+
+<Bookmark url="https://formacaots.com.br" title="Formação TS" description="O primeiro e mais completo curso de TypeScript do Brasil" />
