@@ -1,0 +1,88 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { getCollection, render } from 'astro:content'
+import { Vimeo, YouTube } from 'astro-embed'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Bookmark from '../../components/Bookmark.astro'
+import CourseCTA from '../../components/CourseCTA.astro'
+import Epigraph from '../../components/Epigraph.astro'
+import Figure from '../../components/Figure.astro'
+import HoverPreviews from '../../components/HoverPreviews.astro'
+import LangBanner from '../../components/LangBanner.astro'
+import MarginNote from '../../components/MarginNote.astro'
+import RawEmbed from '../../components/RawEmbed.astro'
+import Sidenote from '../../components/Sidenote.astro'
+import Video from '../../components/Video.astro'
+import { formatDate } from '../../lib/posts'
+
+const mdxComponents = {
+  Bookmark,
+  CourseCTA,
+  Epigraph,
+  Figure,
+  MarginNote,
+  RawEmbed,
+  Sidenote,
+  Video,
+  Vimeo,
+  YouTube,
+}
+
+// English lives under /en/, Portuguese stays unprefixed at the root so every
+// URL Ghost ever published keeps working.
+export const getStaticPaths = (async () => {
+  const now = new Date()
+  const posts = await getCollection(
+    'translated',
+    ({ data }) => data.lang === 'en' && !data.draft && data.pubDate <= now,
+  )
+  return posts.map((post) => ({
+    params: { slug: post.id.replace(/^en\//, '') },
+    props: { post },
+  }))
+}) satisfies GetStaticPaths
+
+const { post } = Astro.props
+const { Content } = await render(post)
+const source = `/${post.data.translationOf}/`
+---
+
+<BaseLayout
+  title={post.data.seoTitle ?? post.data.title}
+  description={post.data.seoDescription ?? post.data.description}
+  lang="en"
+  type="article"
+  publishedAt={post.data.pubDate}
+  updatedAt={post.data.updatedDate}
+  tags={post.data.tags}
+  series={post.data.series}
+  alternates={[
+    { lang: 'pt-BR', href: new URL(source, Astro.site).href },
+    { lang: 'en', href: new URL(Astro.url.pathname, Astro.site).href },
+  ]}
+>
+  <article>
+    <h1>{post.data.title}</h1>
+    <p class="meta">
+      <time datetime={post.data.pubDate.toISOString()}>
+        {formatDate(post.data.pubDate, 'en')}
+      </time>
+      <span aria-hidden="true">·</span>
+      <span>{post.data.category}</span>
+    </p>
+    {post.data.machineTranslated && <LangBanner lang="en" originalHref={source} />}
+    <Content components={mdxComponents} />
+  </article>
+  <HoverPreviews />
+</BaseLayout>
+
+<style>
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-block: -0.5rem 2rem;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+</style>

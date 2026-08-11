@@ -32,4 +32,37 @@ const blog = defineCollection({
   }),
 })
 
-export const collections = { blog }
+/**
+ * Machine translations, written by scripts/translate.ts and committed by CI.
+ * Deliberately a separate collection in a separate folder: Obsidian only ever
+ * opens content/blog, so the writing view shows source-language posts only.
+ */
+const translated = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './content/translated' }),
+  schema: z.object({
+    title: z.string(),
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    lang: z.enum(['pt', 'en']),
+    category: z.string(),
+    tags: z.array(z.string()).default([]),
+    series: z.string().optional(),
+    seriesOrder: z.number().optional(),
+    description: z.string(),
+    heroImage: z.string().optional(),
+    heroImageAlt: z.string().optional(),
+    epigraph: z.string().optional(),
+    epigraphCite: z.string().optional(),
+    draft: z.boolean().default(false),
+    visibility: z.enum(['public', 'members', 'paid']).default('public'),
+    canonicalUrl: z.string().url().optional(),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+    /** False once a human edits the file: their version wins and the banner goes. */
+    machineTranslated: z.boolean().default(true),
+    /** Slug of the source post this was translated from. */
+    translationOf: z.string(),
+  }),
+})
+
+export const collections = { blog, translated }

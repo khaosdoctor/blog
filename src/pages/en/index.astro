@@ -1,0 +1,67 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate } from '../../lib/posts'
+
+const now = new Date()
+const posts = (
+  await getCollection('translated', ({ data }) => data.lang === 'en' && !data.draft && data.pubDate <= now)
+).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+---
+
+<BaseLayout
+  title="Lucas Santos"
+  description="Articles about software development, technology and opinion."
+  lang="en"
+  alternates={[
+    { lang: 'pt-BR', href: new URL('/', Astro.site).href },
+    { lang: 'en', href: new URL('/en/', Astro.site).href },
+  ]}
+>
+  <p class="note">
+    These articles are written in Portuguese and translated automatically. <a href="/">Read the originals</a>.
+  </p>
+  <ul class="posts">
+    {
+      posts.slice(0, 30).map((post) => (
+        <li>
+          <a href={`/en/${post.id.replace(/^en\//, '')}/`}>{post.data.title}</a>
+          <p class="meta">
+            <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, 'en')}</time>
+          </p>
+          <p>{post.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+  {posts.length === 0 && <p>No translated articles yet.</p>}
+</BaseLayout>
+
+<style>
+  .note {
+    margin-block-end: 2.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .posts {
+    padding: 0;
+    list-style: none;
+  }
+
+  .posts li + li {
+    margin-block-start: 2.5rem;
+  }
+
+  .posts > li > a {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .meta {
+    margin-block: 0.2rem;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+</style>

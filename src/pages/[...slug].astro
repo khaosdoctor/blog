@@ -1,6 +1,6 @@
 ---
 import type { GetStaticPaths } from 'astro'
-import { render } from 'astro:content'
+import { getCollection, render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Bookmark from '../components/Bookmark.astro'
@@ -44,12 +44,29 @@ const { post } = Astro.props
 const { Content, remarkPluginFrontmatter } = await render(post)
 const series = await getSeriesNavigation(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
+
+// hreflang only claims a translation that actually exists in this build.
+const translations = await getCollection('translated', ({ data }) => data.translationOf === post.id)
+const self = new URL(Astro.url.pathname, Astro.site).href
+const alternates = [
+  { lang: 'pt-BR', href: self },
+  ...translations.map((entry) => ({
+    lang: entry.data.lang,
+    href: new URL(`/${entry.data.lang}/${post.id}/`, Astro.site).href,
+  })),
+]
 ---
 
 <BaseLayout
   title={post.data.seoTitle ?? post.data.title}
   description={post.data.seoDescription ?? post.data.description}
   lang={post.data.lang}
+  type="article"
+  publishedAt={post.data.pubDate}
+  updatedAt={post.data.updatedDate}
+  tags={post.data.tags}
+  series={post.data.series}
+  alternates={alternates}
 >
   <article>
     <h1>{post.data.title}</h1>

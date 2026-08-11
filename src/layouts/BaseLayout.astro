@@ -2,13 +2,38 @@
 // Self-hosted rather than a CDN link, per the plan: no third-party requests.
 import 'katex/dist/katex.min.css'
 
+import SEO from '../components/SEO.astro'
+import { t, type Locale } from '../i18n/ui'
+
 interface Props {
   title: string
   description: string
   lang?: string
+  type?: 'website' | 'article'
+  publishedAt?: Date
+  updatedAt?: Date
+  image?: string
+  tags?: string[]
+  series?: string
+  alternates?: { lang: string; href: string }[]
 }
 
-const { title, description, lang = 'pt' } = Astro.props
+const {
+  title,
+  description,
+  lang = 'pt',
+  type = 'website',
+  publishedAt,
+  updatedAt,
+  image,
+  tags,
+  series,
+  alternates,
+} = Astro.props
+
+const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
+const canonical = new URL(Astro.url.pathname, Astro.site).href
+const home = locale === 'en' ? '/en/' : '/'
 ---
 
 <!doctype html>
@@ -17,13 +42,33 @@ const { title, description, lang = 'pt' } = Astro.props
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Lucas Santos"
+      href={locale === 'en' ? '/en/rss.xml' : '/rss.xml'}
+    />
+    <SEO
+      title={title}
+      description={description}
+      canonical={canonical}
+      type={type}
+      publishedAt={publishedAt}
+      updatedAt={updatedAt}
+      lang={lang}
+      image={image}
+      tags={tags}
+      series={series}
+      alternates={alternates}
+    />
   </head>
   <body>
     <header>
-      <a href="/" class="home">lsantos.dev</a>
+      <a href={home} class="home">lsantos.dev</a>
+      <nav aria-label={t(locale, 'search')}>
+        <a href={locale === 'en' ? '/en/busca/' : '/busca/'}>{t(locale, 'search')}</a>
+      </nav>
     </header>
     <main>
       <slot />
@@ -31,6 +76,17 @@ const { title, description, lang = 'pt' } = Astro.props
     <footer>
       <p>Lucas Santos</p>
     </footer>
+    <script>
+      // Registers the offline cache. Everything above works without it; this
+      // only makes already-read posts available with no connection.
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {
+            // A failed registration must never break the page.
+          })
+        })
+      }
+    </script>
   </body>
 </html>
 

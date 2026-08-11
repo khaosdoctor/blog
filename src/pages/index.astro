@@ -1,51 +1,62 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { formatDate, getPublishedPosts } from '../lib/posts'
+import PostList from '../components/PostList.astro'
+import { getPublishedPosts } from '../lib/posts'
+import { getCategories } from '../lib/taxonomy'
 
-const posts = await getPublishedPosts()
+const [posts, categories] = await Promise.all([getPublishedPosts(), getCategories()])
+const sections = [...categories.entries()].sort((a, b) => b[1].length - a[1].length)
+const latest = posts.slice(0, 30)
 ---
 
-<BaseLayout title="Lucas Santos" description="Artigos sobre desenvolvimento, tecnologia e opinião.">
-  <ul class="posts">
+<BaseLayout
+  title="Lucas Santos"
+  description="Artigos sobre desenvolvimento, tecnologia e opinião."
+>
+  <nav class="sections" aria-label="Seções">
     {
-      posts.map((post) => (
-        <li>
-          <a href={`/${post.id}/`}>{post.data.title}</a>
-          <p class="meta">
-            <time datetime={post.data.pubDate.toISOString()}>
-              {formatDate(post.data.pubDate, post.data.lang)}
-            </time>
-            <span>·</span>
-            <span>{post.data.category}</span>
-          </p>
-          <p>{post.data.description}</p>
-        </li>
+      sections.map(([category, categoryPosts]) => (
+        <a href={`/${category}/`}>
+          {category} <span class="count">{categoryPosts.length}</span>
+        </a>
       ))
     }
-  </ul>
+  </nav>
+  <PostList posts={latest} />
+  <p class="more">
+    Mostrando os {latest.length} mais recentes de {posts.length}. Use a <a href="/busca/">busca</a> para
+    encontrar o resto.
+  </p>
 </BaseLayout>
 
 <style>
-  .posts {
-    padding: 0;
-    list-style: none;
-  }
-
-  .posts li + li {
-    margin-block-start: 2.5rem;
-  }
-
-  .posts a {
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-
-  .meta {
+  .sections {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    margin-block: 0.2rem;
-    color: var(--muted);
+    margin-block-end: 3rem;
     font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .sections a {
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+
+  .sections a:hover {
+    border-color: var(--accent);
+  }
+
+  .count {
+    color: var(--muted);
+  }
+
+  .more {
+    margin-block-start: 3rem;
+    color: var(--muted);
+    font-size: 0.9rem;
   }
 </style>

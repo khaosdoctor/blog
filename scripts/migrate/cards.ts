@@ -136,6 +136,12 @@ export function addCardRules(turndown: TurndownService, ctx: CardContext): void 
       const src = ctx.resolveAsset(attr(img, 'src'))
       const alt = attr(img, 'alt')
       const caption = q(element, 'figcaption')
+      // An animated GIF was converted to a video during asset resolution.
+      if (src.endsWith('.mp4')) {
+        const videoCaption = caption === null ? alt : caption.textContent?.trim() ?? alt
+        const captionPart = videoCaption.length === 0 ? '' : ` caption="${quote(videoCaption)}"`
+        return `\n\n<Video src="${src}"${captionPart} />\n\n`
+      }
       const wide = element.className.includes('kg-width-wide') || element.className.includes('kg-width-full')
       // No caption and no special width: plain markdown keeps the file readable in Obsidian.
       if (caption === null && !wide) return `\n\n![${alt}](${src})\n\n`
