@@ -84,8 +84,8 @@ const CATEGORY_OF: Record<string, string> = {
   grpc: 'infra',
   cryptography: 'security',
   security: 'security',
-  career: 'carreira',
-  opinion: 'carreira',
+  career: 'career',
+  opinion: 'career',
   '#newsletter': 'newsletter',
   'backlog-newsletter': 'newsletter',
   blog: 'meta',
@@ -614,7 +614,7 @@ function categoryFor(post: Post, postTags: string[]): string {
       const mapped = CATEGORY_OF[tag.toLowerCase()]
       if (mapped !== undefined && mapped !== 'meta' && mapped !== 'newsletter') return mapped
     }
-    return 'carreira'
+    return 'career'
   }
   if (isNewsletterRoundup(postTags)) return 'newsletter'
   if (post.status === 'sent') return 'newsletter'
@@ -908,7 +908,7 @@ writeFileSync(
     ``,
     `Tagged \`backlog-newsletter\`, median 2465 words. These are real posts, so they are published`,
     `and filed under their actual subject rather than under \`newsletter\`. The category comes from`,
-    `each post's own topic tags, defaulting to \`carreira\` for the career and opinion pieces.`,
+    `each post's own topic tags, defaulting to \`career\` for the career and opinion pieces.`,
     `Moving one is a one-line frontmatter edit.`,
     ``,
     ...backlogReview,
