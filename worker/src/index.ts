@@ -35,7 +35,7 @@ async function readManifest(env: Env): Promise<ScheduledPost[]> {
   return body.posts ?? []
 }
 
-function dueNow(posts: ScheduledPost[], now: number): ScheduledPost[] {
+export function dueNow(posts: ScheduledPost[], now: number): ScheduledPost[] {
   return posts.filter((post) => {
     const at = Date.parse(post.pubDate)
     if (Number.isNaN(at)) return false
