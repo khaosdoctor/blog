@@ -1,0 +1,206 @@
+---
+title: "Temporal: a nova forma de se trabalhar com datas em JavaScript"
+pubDate: 2021-09-24T00:49:00.000Z
+updatedDate: 2026-07-16T16:12:18.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "typescript", "development", "ecmascript"]
+description: "Aprenda antes de todo mundo a manipular datas com a nova especificação do JavaScript que vai substituir o Date!"
+heroImage: "./lucas-santos-w5hg0BvtAKU-unsplash.jpg"
+draft: false
+visibility: "public"
+seoTitle: "Esqueça o Date e abrace a nova forma de manipular datas no JavaScript"
+---
+
+Não é novidade que a API de datas do JavaScript precisa de uma alteração urgente. Desde muito tempo, muitos devs reclamam que ela não é muito intuitiva e também não é muito confiável, além disso, a API de datas tem algumas convenções que, digamos, são pouco ortodoxas como, por exemplo, começar os meses do 0 ao invés de 1.
+
+Vamos entender todos os problemas do `Date` e vamos entender também como a nova API `Temporal` promete resolvê-los. Além disso vamos entender o porquê de termos uma nova API para isso ao invés de modificar o que já temos funcionando.
+
+## Os problemas do `Date`
+
+Como Maggie Pint aponta [em seu blog](https://maggiepint.com/2017/04/09/fixing-javascript-date-getting-started/), hoje já é de senso comum que [Brendan Eich](https://twitter.com/BrendanEich) teve 10 dias para escrever o que seria conhecido como JavaScript e inclui-lo no hoje falecido Netscape browser.
+
+Manipulação de datas é uma parte muito importante de qualquer linguagem de programação, nenhuma pode ser lançada (nem mesmo ser considerada completa) sem ter algo para tratar o que temos de mais comum no dia-a-dia, o tempo. Só que implementar todo o domínio de manipulação de datas não é algo trivial – se _hoje_ não é trivial para a gente, que só usa, imagina para quem implementa – então Eich se baseou na instrução "Deve se parecer com Java", que foi dada a ele para construir a linguagem, e copiou a API `java.Util.Date`, que já era ruim, e foi praticamente toda reescrita no Java 1.1, isso 24 anos atrás.
+
+Baseado nisso, Maggie, Matt e Brian, os principais commiters do nosso querido [Moment.js](https://momentjs.com), compilaram uma lista de coisas que o `Date` do JavaScript deixava a desejar:
+
+1.  O `Date` não suporta timezones além do UTC e o horário local do usuário: Não temos como, nativamente, exibir a data de forma prática em múltiplos fusos, o que podemos fazer é calcular manualmente um offset para adicionar ao UTC e assim modificar a data.
+2.  O parser de data é bastante confuso por si só
+3.  O objeto `Date` é mutável, então alguns métodos modificam a referência do objeto original, fazendo uma implementação global falhar
+4.  A implementação do DST (Daylight Saving Time, o horário de verão) é algo que até hoje é meio esotérico na maioria das linguagens, no JS não é diferente
+5.  Tudo que você precisa fazer para fazer contas com datas vai ter fazer chorar por dentro eventualmente. Isto porque a API não possui métodos simples para adicionar dias, ou então para calcular intervalos, você precisa transformar tudo para um timestamp unix e fazer as contas na mão
+6.  Esquecemos que o mundo é um lugar grande, e não temos só um tipo de calendário. O [calendário Gregoriano](https://en.wikipedia.org/wiki/Gregorian_calendar) é o mais comum para o ocidente, no entanto, temos outros calendários que devemos também suportar.
+
+Um pouco mais abaixo neste mesmo post, ela comenta sobre como algumas dessas coisas são "consertáveis" com a adição de métodos ou parâmetros extras. Porém existe um outro fator que temos que levar em consideração quando estamos tratando com JavaScript que provavelmente não temos que pensar em outros casos.
+
+A compatibilidade.
+
+## Web Compatibility
+
+A web é um lugar grande e, por consequencia, o JavaScript se tornou absurdamente grande. Existe uma frase muito famosa que diz:
+
+> Se pode ser feito com JavaScript, vai ser feito com JavaScript
+
+E isso é muito real, porque tudo que era possível e impossível já foi feito pelo menos uma vez em JavaScript. E isso torna as coisas muito mais difíceis, porque um dos principais princípios da Web e um dos quais o TC39 segue a risca é o **_"Don't break the web"_**.
+
+Hoje, em 2021, temos códigos JavaScript de aplicações legadas desde os anos 90 sendo servidas pela web afora, e embora isso possa ser algo louvável, é extremamente preocupante, porque qualquer alteração deve ser pensada com muito cuidado, e APIs antigas, como o Date, não podem ser simplesmente depreciadas.
+
+E o maior problema da Web hoje, e consequentemente do JavaScript, é a imutabilidade. Se formos pensar no modelo DDD, nossos objetos podem ser definidos como entidades cujos estados mudam ao longo do tempo, mas também temos os _value types_, que são apenas definidos pelas suas propriedades e não por seus estados e IDs. Vendo por esse lado, o `Date` é claramente um _value type_, porque apesar de termos um mesmo objeto `Date`, a data `10/04/2021` é claramente diferente de `10/05/2021`. E isso é um problema.
+
+Hoje, o JavaScript trata objetos como o `Date` em forma de referência. Então se fizermos algo assim:
+
+```js
+const d = new Date()
+d.toISOString() // 2021-09-23T21:31:45.820Z
+d.setMonth(11)
+d.toISOString() // 2021-12-23T21:31:45.820Z
+```
+
+E isso pode nos dar muitos problemas porque se tivermos helpers como os que sempre fazemos: `addDate`, `subtractDate` e etc, vamos normalmente levar um parâmetro `Date` e o número de dias, meses ou anos para adicionar ou subtrair, se não clonarmos o objeto em um novo objeto, vamos mutar o objeto original e não seu valor.
+
+Outro problema que também é citado [neste outro artigo da Maggie](https://maggiepint.com/2017/04/11/fixing-javascript-date-web-compatibility-and-reality/) é o que chamamos de _Web Reality issue_, ou seja, um problema que teve sua solução não por conta do que fazia mais sentido, mas sim porque a Web já funcionava daquela determinada forma, e a alteração ia quebrar a Web...
+
+Este é o problema do parsing de uma data no formato ISO8601, vou simplificar a ideia aqui (você pode ler o extrato completo no blog), mas a ideia é que o formato padrão de datas do JS é o ISO8601, ou o nosso famoso `YYYY-MM-DDTHH:mm:ss.sssZ`, ele tem formatos que são _date-only_, então só compreendem a parte de datas, como `YYYY`, `YYYY-MM` e `YYYY-MM-DD`. E a sua contrapartida _time-only_ que só compreendem as variações que contém algo relacionado a tempo.
+
+Porém, existe uma citação que mudou tudo:
+
+> Quando o offset de fuso horário estiver ausente, os formatos date-only são interpretados como UTC, enquanto os formatos completos (date-time) são interpretados como o horário local.
+
+Isso significa que `new Date('2021-04-10')` vai me dar uma data no fuso UTC que seria algo como `2021-04-10T00:00:00.000Z`, porém `new Date('2021-04-10T10:30')` vai me dar uma string ISO8601 na minha hora local. Este problema foi parcialmente resolvido desde 2017, mas ainda sim existem várias discussões sobre o funcionamento do parser.
+
+## Temporal
+
+A [proposta do temporal](https://github.com/tc39/proposal-temporal) é uma das mais antigas propostas em aberto do TC39, e também uma das mais importantes. No momento da publicação deste artigo, ela está no [estágio 3](https://github.com/tc39/proposals#stage-3), o que significa que a maioria dos testes já passou e os browsers estão quase prontos para implementá-la.
+
+A ideia da API é ter um objeto global como um namespace, da mesma forma que o `Math` funciona hoje. Além disso, todos os objetos `Temporal` são completamente imutáveis e todos os valores podem ser representados em valores locais mas podem ser convertidos no calendário gregoriano.
+
+Outras premissas são de que não são contados os segundos bissextos e todos os horários são mostrados em um relógio tradicional de 24h.
+
+Você pode testar o `Temporal` diretamente na [documentação](https://tc39.es/proposal-temporal/docs/cookbook.html) usando o polyfill que já vem incluído no console, basta apertar F12 e entrar na aba `console`, digite `Temporal` e você deve ver o resultado dos objetos.
+
+![](./image.png)
+
+Todos os métodos do `Temporal` vão começar com `Temporal.`, se você verificar no seu console, vai ver que temos cinco tipos de entidades com o temporal:
+
+-   **Instant**: Um _Instant_ é um ponto fixo no tempo, sem levar em conta um calendário ou um local. Portanto não tem conhecimento de valores de tempo, como dias, horas e meses.
+-   **Calendar**: Representa um sistema de calendário.
+-   **PlainDate**: Representa uma data que não está associada a um fuso horário específico. Também temos a variação do `PlainTime` e as variações locais de `PlainMonthYear`, `PlainMonthDay` e etc.
+-   **PlainDateTime**: Mesma coisa da `PlainDate`, mas com horas.
+-   **Duration**: Representa uma extensão de tempo, por exemplo, cinco minutos, geralmente utilizado para fazer operações aritméticas ou conversões entre datas e medir diferenças entre os próprio objetos `Temporal`.
+-   **Now:** É um modificador de todos os tipos que temos antes. Fixando o tempo de referência como sendo o agora.
+-   **TimeZone:** Representa um objeto de fuso horário. Os timezones são muito utilizados para poder converter entre objetos `Instant`e objetos `PlainDateTime`.
+
+A relação entre esses objetos é descrita como sendo hierárquica, então temos o seguinte:
+
+![](./image-2.png)
+
+Veja que o `TimeZone` implementa todos os tipos de objetos abaixo dele, portanto é possível obter qualquer objeto a partir deste, por exemplo, a partir de um TimeZone específico, podemos obter todos os objetos dele em uma data específica:
+
+```js
+const tz = Temporal.TimeZone.from('America/Sao_Paulo')
+tz.getInstantFor('2001-01-01T00:00') // 2001-01-01T02:00:00Z
+tz.getPlainDateTimeFor('2001-01-01T00:00Z') // 2000-12-31T22:00:00
+```
+
+Vamos passar pelos principais métodos e atividades que podemos fazer com o Temporal.
+
+### Buscando a data e hora atual
+
+```js
+const now = Temporal.Now.plainDateTimeISO()
+now.toString() // Retorna no formato ISO, equivalente a Date.now.toISOString()
+```
+
+Se você só quiser a data, use `plainDateISO()`.
+
+### Unix Timestamps
+
+```js
+const ts = Temporal.Now.instant()
+ts.epochMilliseconds // unix em ms
+ts.epochSeconds // unix em segundos
+```
+
+### Interoperabilidade com Date
+
+```js
+const atual = new Date('2003-04-05T12:34:23Z')
+atual.toTemporalInstant() // 2003-04-05T12:34:23Z
+```
+
+### Interoperabilidade com inputs
+
+Podemos setar inputs do tipo `date` usando o próprio `Temporal`, como estes valores aceitam datas no formato ISO, qualquer data setada neles como `value` pode ser obtida pelo Temporal:
+
+```js
+const datePicker = document.getElementById('input')
+const today = Temporal.Now.plainDateISO()
+datePicker.value = today
+```
+
+### Convertendo entre tipos
+
+```js
+const date = Temporal.PlainDate.from('2021-04-10')
+const timeOnDate = date.toPlainDateTime(Temporal.PlainTime.from({ hour: 23 }))
+```
+
+Veja que convertemos um objeto sem hora, para um objeto `PlainDateTime`, enviando um outro objeto `PlainTime` como horas.
+
+### Ordenando `DateTime`
+
+Todos os objetos `Temporal` possuem um método `compare()` que pode ser usado em um `Array.prototype.sort()` como função de comparação. Dito isso, podemos imaginar uma lista de `PlainDateTime`s:
+
+```js
+let a = Temporal.PlainDateTime.from({
+  year: 2020,
+  day: 20,
+  month: 2,
+  hour: 8,
+  minute: 45
+})
+let b = Temporal.PlainDateTime.from({
+  year: 2020,
+  day: 21,
+  month: 2,
+  hour: 13,
+  minute: 10
+})
+let c = Temporal.PlainDateTime.from({
+  year: 2020,
+  day: 20,
+  month: 2,
+  hour: 15,
+  minute: 30
+})
+```
+
+Depois, podemos criar uma função de comparação para mandar nosso array:
+
+```js
+function sortedLocalDates (dateTimes) {
+  return Array.from(dateTimes).sort(Temporal.PlainDateTime.compare)
+}
+```
+
+E então:
+
+```js
+const results = sortedLocalDates([a,b,c])
+// ['2020-02-20T08:45:00', '2020-02-20T15:30:00', '2020-02-21T13:10:00']
+```
+
+### Arredondando tipos
+
+Os tipos de hora do Temporal possuem um método chamado `round`, que arredonda os objetos para o próximo valor cheio de acordo com o tipo de tempo que você procura. Por exemplo, arredondar para a próxima hora cheia:
+
+```js
+const time = Temporal.PlainTime.from('11:12:23.123432123')
+time.round({smallestUnit: 'hour', roundingMode: 'ceil'}) // 12:00:00
+```
+
+## Conclusão
+
+O `Temporal` é a ponta de um iceberg gigantesco que chamamos de "manipulação temporal", existem vários conceitos chave como [ambiguidade](https://tc39.es/proposal-temporal/docs/ambiguity.html) que devem ser levados em consideração quando estamos trabalhando com horas e datas.
+
+A API `Temporal` é a primeira chance de mudarmos a forma como o JavaScript encara as datas e como podemos melhorar nossa forma de trabalhar com elas, este foi um recorte do que é possível fazer e de como isto vai ser feito no futuro, leia a [documentação completa](https://tc39.es/proposal-temporal/docs/) para saber mais.

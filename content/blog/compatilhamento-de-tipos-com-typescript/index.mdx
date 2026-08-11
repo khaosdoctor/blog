@@ -1,0 +1,69 @@
+---
+title: "Compartilhamento de Tipos com TypeScript"
+pubDate: 2022-04-11T14:00:00.000Z
+updatedDate: 2026-07-16T16:09:54.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "development"]
+description: "Um dos maiores problemas que temos em projetos TypeScript é o compartilhamento de tipos entre diversos projetos. Vamos ver algumas técnicas para mitigar isso!"
+heroImage: "./photo-1604187351574-c75ca79f5807-e31679b7.jpg"
+draft: false
+visibility: "public"
+seoDescription: "Um dos maiores problemas que temos em projetos TypeScript é o compartilhamento de tipos entre diversos projetos. Bora aprender a melhorar isso!"
+---
+
+Quando falamos de TypeScript, automaticamente vamos ter dois tipos de reações: A pessoa que adora e quer usar em tudo, como eu, e a pessoa que não gosta por diversos motivos.
+
+Um dos principais motivos que eu já ouvi quando falo sobre TypeScript é que **é contra intuitivo compartilhar tipos entre projetos**. E por "compartilhar" eu digo o seguinte:
+
+Imagine que você tem um projeto separado entre backend em frontend. O backend vai providenciar um serviço quer será a sua API, e você precisa consumir esse serviço no frontend. É imprescindível que você tenha uma forma simples e direta de atualizar automaticamente o payload dos dados sem que você tenha que executar alguma ação.
+
+Para isso existem algumas formas bastante interessantes de trabalharmos com múltiplos repositórios e tipos compartilhados.
+
+## Criar libs externas
+
+Essa é a forma mais comum e provavelmente a mais simples de todas. Podemos criar um outro pacote externo que é geralmente chamado de `shared`. Esse pacote externo seria outro pacote do NPM (seja ele público ou privado), que seria instalado tanto no frontend quando no backend.
+
+A grande vantagem é que bastante simples, se estivermos trabalhando em um projeto que não está em um monorepo, podemos usar essa técnica para poder criar uma biblioteca de tipos que pode ser instalada através de um pacote público ou privado do NPM, ou então até mesmo usando o modelo de `file:` no Node.js.
+
+O problema com esse modelo é que você acabou de criar uma outra dependencia. E essa dependência é de quem? De quem cuida do front ou de quem está cuidando do backend? Além disso, precisaríamos incluir essa dependência no nosso pipeline de publicação, já que vamos precisar dela em todos os casos, e ela vai ter de ser sempre muito bem testada.
+
+Uma outra coisa importante que temos que manter em foco é que só podemos compartilhar a parte que será compartilhada, ou seja, temos que nos ater sempre ao objeto que está sendo transferido, o que é chamado de DTO (Data Transfer Object), que é essencialmente o payload da nossa chamada, e nunca compartilhar regras de negócio.
+
+## O padrão BFF
+
+A segunda forma de podermos trabalhar com tipos compartilhados é o chamado padrão BFF, que significa **Back-enf for Front-end**. A ideia principal dessa implementação não é só uma alteração de tipos, mas sim uma alteração na forma como sua aplicação se comporta, porque agora ao invés de termos um único backend e um único frontend, vamos ter um serviço intermediário entre eles que vai agir como uma interface de dados.
+
+Esse padrão é uma ótima forma de criar uma interface de comunicação entre os dois lados sem ter que essencialmente compartilhar código. Porque você estaria criando somente um mapeador entre os dois serviços e os dois modelos de dados.
+
+As grande vantagem desse modelo é que o backend pode evoluir completamente a parte do frontend, desde que a interface se mantenha a mesma, o front-end poderá receber dados atualizados com pouca ou nenhuma atualização direta do backend.
+
+Isso é excelente para casos onde temos muitos times que trabalham em muitos clientes separados que consomem um ou mais de uma API, dessa forma você não precisa servir o mesmo tipo de dados para todos os clientes e pode ter uma representação inicial no seu backend, mas muitas visualizações desses dados em diferentes frontends.
+
+A maior desvantagem é que estamos adicionando um serviço completo só para sanar o problema de compatibilidade de dados, além disso, é mais uma peça móvel para poder trabalhar e incluir na sua pipeline de publicação.
+
+Na minha experiência vi muitos projetos utilizando esse padrão, inclusive aqui mesmo na Klarna, usamos esse padrão extensivamente para poder dar mais conforto para outros times trabalharem em seus projetos sem que a gente precise manter uma consistencia rígida em cada um deles.
+
+Dessa forma, quando temos alguma transição de versão muito grande no backend, podemos manter a retrocompatibilidade com todos os nossos clientes sem precisar que todos eles atualizem instantaneamente a forma de chamar seus serviços.
+
+## Uso de gRPC
+
+Outra opção seria utilizar uma DTO externa através de gRPC, como eu já expliquei [na minha série sobre gRPC](/guia-grpc-1/) aqui no blog.
+
+O gRPC trabalhando em conjunto com o Protobuf permite que façamos o compartilhamento de tipos da forma mais rígida possível, já que sem esse arquivo de payload, o serviço não funcionaria. Porém, isso implicaria que você precisa implementar uma nova pipeline só para lidar com o protobuf em si e todos os arquivos.
+
+Essa pipeline deveria poder compilar o arquivo gRPC e distribui-lo tanto para o cliente quanto para o servidor. Uma atualização da DTO implicaria em baixar a versão mais nova de todos os arquivos protobuf do servidor e instalar em todos os clientes. O que eu particularmente acho um pouco custoso.
+
+## Implementar GraphQL
+
+A implementação de GraphQL do lado do servidor é uma boa forma de manter os tipos compartilhados, já que podemos inferir o schema da API a partir do que é retornado pela própria API. Além disso podemos incluir campos no schema sem quebrar clientes existentes e alterar outros campos mantendo a retrocompatibilidade com a API.
+
+O problema é que, geralmente, o uso de GraphQL (ou até mesmo do protobuf, por assim dizer) também exige o compartilhamento do schema com outros serviços de backend ou até mesmo outros repositórios, o que leva a gente de volta para a primeira solução.
+
+## Trabalhar com Monorepos
+
+A forma mais fácil e rápida de compartilhar tipos com outros projetos é colocando todos esses projetos no mesmo repositório, dessa forma você poderia criar uma nova pasta de tipos compartilhados sem precisar de nenhuma dependência externa.
+
+O grande problema com monorepos é que, em um projeto muito grande, ele se torna completamente inviável de manter por conta do seu tamanho, sendo necessário que ele seja quebrado em pedaços menores, que essencialmente aumentam a complexidade.
+
+No entanto, existem diversas ferramentas muito bem estabelecidas como o [NPM](https://www.youtube.com/watch?v=vxES6rbrd-U&t=7s) e o [Yarn](https://www.youtube.com/watch?v=vxES6rbrd-U&t=7s) Workspaces que prometem facilitar o uso de monorepos a longo prazo, algumas soluções igualmente úteis, mas mais antigas como o Lerna também facilitam o gerenciamento de monorepos a longo prazo.

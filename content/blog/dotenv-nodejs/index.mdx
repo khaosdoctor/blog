@@ -1,0 +1,92 @@
+---
+title: "Acessando arquivos .env nativamente com Node.js"
+pubDate: 2023-10-09T22:19:59.000Z
+updatedDate: 2026-07-16T15:56:13.000Z
+lang: pt
+category: "javascript"
+tags: ["nodejs", "javascript", "development"]
+description: "Já pensou carregar as suas variáveis de ambiente diretamente no Node.js? A versão 20.6 trás uma novidade incrível!"
+heroImage: "./articles-1.png"
+draft: false
+visibility: "public"
+seoTitle: "Arquivos dotenv (.env) nativos com Node.js"
+---
+
+Começando a semana com uma notícia incrível e uma das novidades mais aguardadas do Node.js em anos, o suporte **nativo** ao uso de arquivos de ambiente, os chamados **dotenvs** ou **env-config**.
+
+## dotenv
+
+Um dos pacotes mais comuns e mais utilizados em toda a comunidade, não só do JavaScript, é o pacote [dotenv](https://npm.im/dotenv). Ele faz algo que é super simples mas ao mesmo tempo essencial: carrega variáveis de ambiente na memória do runtime.
+
+Variáveis de ambiente são variáveis especiais que carregam dados protegidos que não podem ser expostos no código e ficam apenas disponíveis no ambiente na qual elas estão inseridas, por exemplo, uma VM ou uma função serverless.
+
+Eu escrevi bastante sobre elas [nesse artigo](https://imasters.com.br/desenvolvimento/protegendo-seus-dados-utilizando-variaveis-de-ambiente) – inclusive usando a antiga forma de carregar as variáveis, com o `dotenv`, então é até bacana para dar uma olhada em como o Node evoluiu desde lá – mas, essencialmente, variáveis de ambiente são o local ideal para armazenar usuários e senhas de bancos de dados, ou até mesmo secrets de tokens, já que, para acessar e buscar esses dados a aplicação precisa ter acesso à mesma máquina e ao mesmo host, o que é muito mais difícil do que ter acesso somente ao código.
+
+Essas variáveis ficam armazenadas em arquivos que chamamos de `dotenv`, ou `.env`, que são arquivos definidos no formato `INI` ou `bash` dependendo do runtime que você está usando (para o dotenv seria o INI), então um arquivo de ambiente poderia ser assim:
+
+```ini
+SENHA=123
+USUARIO=123
+```
+
+Porém a gente precisava sempre de um módulo para poder carregar essas variáveis, até a chegada do Deno.
+
+### Deno
+
+O Deno mudou bastante a forma que runtimes olham para esses arquivos porque ele permite que você carregue diretamente da sua [standard library](https://deno.land/std@0.203.0/dotenv/mod.ts), ou seja, ao invés de termos que instalar um módulo a parte, podemos usar o que é nativo do runtime:
+
+```ts
+// app.ts
+import { load } from "https://deno.land/std@0.203.0/dotenv/mod.ts";
+
+console.log(await load({export: true})); // { GREETING: "hello world" }
+console.log(Deno.env.get("GREETING")); // hello world
+```
+
+## Node 20
+
+O Node 20.6 traz [uma mudança](https://nodejs.org/en/blog/release/v20.6.0#built-in-env-file-support) fundamental que vai além até do que o Deno já fez, **agora é possível ler arquivos .env direto do runtime**.
+
+Ao invés de termos que fazer:
+
+```js
+require('dotenv').config()
+const {DB_HOST, DB_PORT, DB_USER, DB_PASS} = process.env
+const db = require('alguma-lib-de-banco-de-dados')
+
+db.connect({
+    host: DB_HOST,
+    port: DB_PORT,
+    user: DB_USER,
+    pass: DB_PASS
+})
+```
+
+Podemos simplesmente utilizar o comando `node --env-file=<caminho> index.js` e todas as variáveis presentes no nosso arquivo definido no caminho serão carregadas no nosso `process.env`. Por exemplo, imagine um arquivo `.env` da seguinte forma:
+
+```ini
+DB_PASS=pass
+DB_USER=root
+DB_PORT=5432
+DB_HOST=localhost
+```
+
+Quando executarmos o nosso Node com o comando `node --env-file=.env index.js`, poderemos utilizar a variável `process.env.DB_PASS`, e ela vai ter o valor de `pass`, assim como as demais variáveis que estarão perfeitamente setadas na nossa aplicação para uso.
+
+Mas essa não é a única novidade.
+
+### Node options
+
+O Node.js permite que você crie uma variável de ambiente chamada `NODE_OPTIONS`, ela permite que você defina todas as opções que seriam passadas ao node no comando principal diretamente na variável, ou seja, se quisermos, por exemplo, iniciar o Node com um inspetor (usando a flag `--inspect`) podemos utilizar: `NODE_OPTIONS='--inspect'` e agora todas as execuções de `node index.js`vão ser como se fossem escritas `node --inspect index.js`
+
+Antigamente existia uma forma de deixar essas configurações no `package.json`, mas o suporte a envs muda tudo, agora você pode deixar as opções do Node (exceto, claro, o próprio `--env-file`) em uma variável de ambiente:
+
+```ini
+NODE_OPTIONS='--inspect --loader=tsx'
+```
+
+Como eu mostrei no [meu artigo sobre TSX](/tsx-loader/), podemos carregar arquivos TypeScript nativamente usando um loader, a ainda por cima podemos carregar o nosso arquivo de ambiente direto,  com o comando acima vamos poder rodar `node --env-file=.env index.ts`, por exemplo.
+
+# Conclusão
+
+Essa funcionalidade é gigante! Enquanto tira um pacote da nossa lista de dependências, ela ainda permite deixar o nosso código mais simples e direto, mas lembre-se que ela só está disponível a partir da versão **20.6**.

@@ -1,0 +1,180 @@
+---
+title: "O que esperar do JavaScript em 2023"
+pubDate: 2022-08-27T00:09:44.000Z
+updatedDate: 2026-07-16T16:07:06.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "ecmascript", "development", "typescript"]
+description: "O que o JavaScript reserva para a gente em 2023? Nesse post eu trago as principais propostas que podem vir a se tornar realidade no ano que vem!"
+heroImage: "./Blog-cover-Template2.jpg"
+draft: false
+visibility: "members"
+---
+
+Eu estou sempre colocando as novidades do JavaScript aqui no blog, principalmente as mais comentadas, mas tudo que eu falo já está confirmado para as versões do próprio ano, mas o que a gente pode esperar para o próximo ano do JavaScript?
+
+Primeiro, precisamos entender como o processo do JavaScript acontece. Nesse vídeo eu explico um pouco mais sobre o processo de lançamento de novas funcionalidades do JavaScript, se você ainda não assistiu, eu recomendo fortemente para poder entender melhor como tudo funciona!
+
+<YouTube id="hDQu3AvvDfg" />
+
+Eu selecionei as principais propostas de nível 3 ou superior presentes no repositório do TC39, essas são as propostas que tem a maior chance de serem escolhidas para uma futura versão da linguagem em 2023, mas tudo isso é só uma suposição, todas as propostas – até mesmo as de nível 3 – podem ser removidas caso algo aconteça.
+
+> Vou fazer também artigos separados para algumas dessas propostas pra poder explicar ainda melhor e com mais detalhes (motivações e implementaçã0) cada uma dessas propostas e muitas mais!
+
+Então, como será que vamos ter o JavaScript em 2023?
+
+## JSON Modules e Import Assertions
+
+Essas duas propostas caminham muito juntas, porém são duas propostas independentes. No [ESM](/os-ecmascript-modules-estao-aqui/), não é possíve importar JSON diretamente como a gente faz com o CommonJS, por isso a proposta de [JSON Modules](https://github.com/tc39/proposal-json-modules) cai como uma luva! A ideia é permitir que a gente possa importar arquivos JSON diretamente do arquivo de código.
+
+Já a segunda proposta, os [import assertions](https://github.com/tc39/proposal-import-assertions) permite que você adicione metadados adicionais sobre o tipo de módulo que está sendo importado, para ter uma forma padrão de importarmos arquivos que não são JS:
+
+```js
+import arquivoJson from './meuArquivo.json' assert { type: 'json' }
+import ("outroArquivo.json", { assert: { type: 'json' } })
+```
+
+## Acesso ao source text a partir de métodos JSON
+
+Essa [proposta](https://github.com/tc39/proposal-json-parse-with-source) está aberta desde 2018 no repositório. A ideia é super interessante mas é um nicho bastante específico. O que ela faz é permitir que você passe alguns argumentos a mais para as chamadas funções `reviver` que existem nos métodos `JSON.parse` e `JSON.stringify`.
+
+Essas funções são como funções de mapeamento que recebem as chaves e os valores após a conversão para que eles possam ser filtrados, na proposta, você poderia passar um novo parâmetro chamado `source` para que você possa tratar alguns tipos primitivos para que a conversão para JSON não tenha perdas.
+
+```js
+const muitoGrandeParaNumber = BigInt(Number.MAX_SAFE_INTEGER) + 2n
+const converterParaBigInt = (key, val, { source }) => (typeof val === 'number' && val % 1 === 0 ? BigInt(source) : val)
+const numeroAposConversao = JSON.parse(String(muitoGrandeParaNumber), converterParaBigInt)
+muitoGrandeParaNumber === numeroAposConversao
+```
+
+## Decorators
+
+Essa [proposta](https://github.com/tc39/proposal-decorators) é uma lenda e existe há mais ou menos 5 anos. A ideia é implementar o conceito de _decorators_, que já e um conceito muito presente em algumas linguagens de programação como o Java e também está presente de forma experimental no TypeScript.
+
+A ideia simples do decorator (vou elaborar mais sobre em um artigo próprio) é anotar uma classe ou método para modificar o seu comportamento. Eles podem substituir, dar acesso ou inicializar um valor que está sendo decorado.
+
+A interface padrão do decorator será essa:
+
+```ts
+type Decorator = (value: Input, context: {
+  kind: string;
+  name: string | symbol;
+  access: {
+    get?(): unknown;
+    set?(value: unknown): void;
+  };
+  private?: boolean;
+  static?: boolean;
+  addInitializer?(initializer: () => void): void;
+}) => Output | void;
+```
+
+E uma implementação possível seria, por exemplo, adicionar um console log em todos os argumentos de um método para debug:
+
+```js
+function debug(value, { kind, name }) {
+  if (kind === "method") {
+    return function (...args) {
+      console.log(`chamando '${name}' com os argumentos: ${args.join(", ")}`);
+      const ret = value.call(this, ...args);
+      console.log(`fim de ${name}`);
+      return ret;
+    };
+  }
+}
+
+class Classe {
+  @debug
+  metodo(arg) {}
+}
+
+new Classe().m(1);
+// chamando 'metodo' com os argumentos: 1
+// fim de metodo
+```
+
+Eu, pessoalmente, não acredito que vamos ter suporte a decorators em 2023, mas não custa sonhar.
+
+## Modificação por cópia em arrays
+
+Essa é uma [proposta](https://github.com/tc39/proposal-change-array-by-copy/) que provavelmente será implementada porque ela é bastante direta e relativamente simples. A ideia é implementar as funções `toReversed`, `toSorted`, `with` e `toSpliced` em arrays.
+
+O objetivo é simples, com exceção de `with` as demais funções já existem hoje com os nomes de `reverse`, `sort`, `splice` e `slice` porém elas modificam o array original ao invés de retornar uma cópia, o que é ruim quando estamos trabalhando com muitos objetos:
+
+```js
+require('core-js/proposals/change-array-by-copy')
+const sequencia = [1, 2, 3]
+console.log(sequencia.toReversed()) // => [3, 2, 1]
+console.log(sequencia) // => [1, 2, 3]
+
+const desordenado = new Uint8Array([3, 1, 2])
+console.log(desordenado.toSorted()) // => Uint8Array [1, 2, 3]
+console.log(desordenado) // => Uint8Array [3, 1, 2]
+
+const precisaDeCorrecao = [1, 1, 3]
+console.log(precisaDeCorrecao.with(1, 2)) // => [1, 2, 3]
+console.log(precisaDeCorrecao) // => [1, 1, 3]
+
+const spliced = [1, 2, 3]
+console.log(spliced.toSpliced(1, 1)) // => [1, 3]
+console.log(spliced) // => [1, 2, 3]
+```
+
+## Array Grouping
+
+Essa é outra das [propostas](https://github.com/tc39/proposal-array-grouping) que eu acho que vão entrar para a especificação do ano que vem porque a ideia é bastante simples e já existe há um tempo. Fora que ela está no ar há apenas 14 meses, o que é um tempo recorde para uma proposta sair do nível 0 para o 3.
+
+A ideia dessa proposta é implementar o que já existia em bibliotecas como o LoDash. O famoso `groupBy`, porém aqui você irá passar uma função que irá decidir qual é o agrupamento correto dos itens:
+
+```js
+const array = [1, 2, 3, 4, 5]
+
+const grupo = array.group((num, index, array) => {
+  return num % 2 === 0 ? 'par' : 'impar'
+})
+
+console.log(grupo) // =>  { impar: [1, 3, 5], par: [2, 4] }
+```
+
+## Diga adeus ao Date, olá ao Temporal
+
+Essa é uma [proposta](https://github.com/tc39/proposal-temporal) que não vou ficar tanto tempo explicando, mas essa é a que eu mais espero que aconteça. Eu já escrevi sobre o temporal em outro artigo:
+
+[Esqueça o Date e abrace a nova forma de manipular datas no JavaScript](/temporal-api/)
+
+O objetivo do temporal é criar não só uma modificação, mas uma API completa que vai substituir completamente a API `Date` do JavaScript, que é realmente muito ruim de ser utilizada, por um modelo baseado no `moment.js` (tanto que quem mantinha o moment foram as mesmas pessoas que mantém essa proposta), ou seja, a ideia é implementar o moment nativamente no JavaScript.
+
+Hoje você já pode alcançar uma funcionalidade parecida com a lib [luxon](https://moment.github.io/luxon/#/) que é dos mesmos criadores e é considerada o "campo de teste" para essa nova API.
+
+## Grupos de captura duplicados
+
+Essa é uma ideia simples mas muito astuta, e se tivermos múltiplas formas de se escrever algo e quisermos pegar essas opções usando uma RegExp? Hoje poderíamos fazer algo assim:
+
+```js
+str.match(/(?<ano>[0-9]{4})-[0-9]{2}|[0-9]{2}-(?<ano-fim>[0-9]{4})/)
+```
+
+Mas não seria legal se a gente pudesse dar o mesmo nome para o grupo? Então, essa é a [proposta](https://github.com/tc39/proposal-duplicate-named-capturing-groups)!
+
+Com ela poderíamos dar o mesmo nome a dois grupos de captura desde que eles estejam em diferentes alternativas, que nem vimos no exemplo de cima com o `|`, ou seja, ou é `2022-08` ou é `08-2022`, e ai poderíamos ter isso:
+
+```js
+str.match(/(?<ano>[0-9]{4})-[0-9]{2}|[0-9]{2}-(?<ano>[0-9]{4})/)
+```
+
+## Versão 3 da internacionalização de números
+
+Essa é outra das [propostas](https://github.com/tc39/proposal-intl-numberformat-v3) que eu vou separar em um artigo diferente porque ela é gigantesca e uma das mais antigas, 5 anos e contando!
+
+A proposta é adicionar mais formatos e internacionalização junto a atual biblioteca `Intl`,  as principais mudanças são:
+
+-   O método `formatRange`
+-   Inclusão de um enumerador para agrupamento de números
+-   Melhorias no arredondamento de decimais
+-   Interpretar strings como decimais
+-   Modos de arredondamento
+-   Opções para exibição de sinal
+
+Não vou detalhar tudo por aqui, mas em um artigo separado para poder explicar cada ponto com mais detalhes!
+
+Até mais!

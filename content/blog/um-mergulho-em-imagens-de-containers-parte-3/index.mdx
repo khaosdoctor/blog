@@ -1,0 +1,180 @@
+---
+title: "Um Mergulho em Imagens de Containers - Parte 3"
+pubDate: 2020-08-14T17:34:25.000Z
+updatedDate: 2026-07-16T16:26:37.000Z
+lang: pt
+category: "infra"
+tags: ["docker", "containers", "javascript", "development", "technology", "typescript"]
+series: "Um Mergulho em Imagens de Containers"
+seriesOrder: 3
+description: "Como construir uma imagem rápida, leve e eficiente para a sua aplicação utilizando uma linguagem dinâmica como JavaScript?"
+heroImage: "./photo-1494412519320-aa613dfb7738-c278caa4.jpg"
+draft: false
+visibility: "public"
+---
+
+No [artigo anterior](/um-mergulho-em-imagens-de-containers-parte-2/) falamos como podemos criar uma imagem Docker da melhor maneira para linguagens consideradas estáticas, como o C ou o Go. Neste artigo vamos explorar um pouco mais a criação de imagens utilizando linguagens **dinâmicas**, como o Python ou o JavaScript.
+
+## Adeus Imagens Scratch
+
+Como falamos lá no [primeiro artigo](/um-mergulho-em-imagens-de-containers-parte-1/), temos um tipo de imagem chamada **scratch**, que é uma imagem completamente vazia, realmente so um filesystem vazio. Utilizamos este tipo de imagem para construir nosso container no artigo anterior.
+
+Porém, a péssima notícia é que não podemos utilizar este tipo de imagem para poder criar nossos containers dinâmicos, pois vamos precisar do runtime da linguagem instalado no sistema operacional, então vamos estar utilizando somente as imagens **full**, **slim** e **alpine**.
+
+## Builds de múltiplos estágios
+
+Assim como fizemos no artigo anterior, é possível tirar vantagem de um processo de build de múltiplas fases, ou seja, temos um container que contém todos os recursos e ferramentas de desenvolvimento para construir a nossa aplicação, mas não utilizamos este container para produção, mas sim um outro container que conterá o mínimo possível.
+
+Isto também é válido para linguagens dinâmicas, porém temos algumas modificações que precisamos fazer para que estas builds sejam mais eficientes. Como não vamos ter um único binário para copiar, o ideal seria copiar o diretório todo. Algumas linguagens como o Python possuem um bom relacionamento com este tipo de build porque esta linguagem possui o VirtualEnv, que permite que separemos logicamente os ambientes que estamos trabalhando.
+
+Vamos fazer este teste com uma aplicação simples, uma API em JavaScript que envia emails – o código fonte pode ser visto [aqui](https://github.com/khaosdoctor/zaqar) – Para começar, vamos analisar o `Dockerfile` com a imagem de build:
+
+```Dockerfile
+FROM node:12 AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+```
+
+A imagem do Node:12 pode variar de espaço utilizado, mas a imagem crua possui cerca de 340Mb.  Como você pode observar, as imagens base de linguagens dinâmicas são bem maiores do que imagens de linguagens compiladas porque temos a necessidade do runtime estar junto.
+
+Porém, vamos fazer uma alteração já que as imagens full podem ter muitas vulnerabilidades, vamos mudar para a imagem **slim** que tem aproximadamente **40mb**
+
+```Dockerfile
+FROM node:12-slim AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+```
+
+Podemos deixar ainda melhor se alterarmos a nossa imagem para uma imagem **alpine!**
+
+```Dockerfile
+FROM node:12-alpine AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+```
+
+Agora a imagem de build tem somente 28mb iniciais para serem baixados.
+
+## Imagem de produção
+
+Já criamos o nosso builder, vamos agora criar a nossa imagem de produção. Para isso, vamos utilizar a imagem **alpine** que é bem menor!
+
+```Dockerfile
+# PRODUCTION IMAGE
+
+FROM node:12-alpine
+
+RUN mkdir -p /usr/app
+WORKDIR /usr/app
+
+COPY --from=builder [\
+  "/usr/src/app/package.json", \
+  "/usr/src/app/package-lock.json", \
+  "/usr/app/" \
+  ]
+
+COPY --from=builder "/usr/src/app/dist" "/usr/app/dist"
+COPY ["./scripts/install_renderers.sh", "/usr/app/scripts/"]
+
+RUN npm install --only=prod
+
+EXPOSE 3000
+
+ENTRYPOINT [ "npm", "start" ]
+```
+
+Estamos copiando apenas a pasta de saída do TypeScript para dentro da nossa imagem de produção e estamos apenas instalando as dependências necessárias para uma aplicação de produção com o `npm install --only=prod`.
+
+Da mesma forma estamos expondo as portas necessárias e criando o script de inicialização somente nesta imagem e não na imagem de build, já que ela não vai ser utilizada.
+
+Colocando todas juntas temos:
+
+```Dockerfile
+FROM node:12-slim AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+
+# PRODUCTION IMAGE
+
+FROM node:12-alpine
+
+RUN mkdir -p /usr/app
+WORKDIR /usr/app
+
+COPY --from=builder [\
+  "/usr/src/app/package.json", \
+  "/usr/src/app/package-lock.json", \
+  "/usr/app/" \
+  ]
+
+COPY --from=builder "/usr/src/app/dist" "/usr/app/dist"
+COPY ["./scripts/install_renderers.sh", "/usr/app/scripts/"]
+
+RUN npm install --only=prod
+
+EXPOSE 3000
+
+ENTRYPOINT [ "npm", "start" ]
+```
+
+A imagem final tem aproximadamente **120mb**, mas a imagem alpine do Node tem 28Mb, ou seja, temos aproximadamente 90mb de aplicações e dependências nesta imagem. Se estivéssemos utilizando uma imagem full, este tamanho seria facilmente maior do que 1gb.
+
+## Conclusão
+
+Saber criar as suas imagens é uma habilidade importante, pois com ela podemos reduzir o tamanho e transformar nossa aplicação em algo muito mais conciso e leve que facilite muito mais o download e uso das nossas imagens.
+
+Não se esqueça de se inscrever na newsletter para mais conteúdo exclusivo e notícias semanais! Curta e compartilhe seus feedbacks nos comentários!
+
+Até mais!

@@ -1,0 +1,115 @@
+---
+title: "Usando tipos derivados"
+pubDate: 2024-09-11T11:00:14.000Z
+updatedDate: 2026-07-16T17:51:23.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "javascript"]
+description: "Quando devemos ser mais inteligentes sobre acoplar nossos tipos a outros tipos? Quando é que repetir código vale a pena?"
+heroImage: "./articles.png"
+draft: false
+visibility: "public"
+---
+
+Quando eu converso com alguém sobre TypeScript, uma das coisas que inevitavelmente vem à tona é a pergunta:
+
+> Quando a gente tem que criar um tipo novo ou quando a gente tem que derivar a partir de outro tipo?
+
+Pra quem está na [Formação TS](https://formacaots.com.br), sabe que eu sou muito fã de derivar tipos, escrever em um único lugar e utilizar variações desse tipo em todos os outros lugares. É uma aplicação do princípio do **DRY** (_don´t repeat yourself_) que podemos aplicar tanto para código quanto para tipos. E quando eu digo um tipo derivado eu estou falando coisas desse tipo:
+
+```ts
+interface Person {
+  name: string;
+  id: string;
+}
+
+interface Employee extends Person {
+  salary: number;
+}
+```
+
+Veja que estamos estendendo uma interface para poder criar uma segunda interface, que contém os tipos da primeira, mas não é exatamente igual. E isso acontece não só com interfaces, mas com qualquer outro tipo que dependa de outro tipo, com em union types e intersection types:
+
+```ts
+type Person = { name: string, id: string }
+type Employee = Person & { salary: number }
+
+type Cat = {
+  type: 'cat';
+  meow: () => void;
+}
+
+type Dog = {
+  type: 'dog';
+  woof: () => void;
+}
+
+type Animal = Cat | Dog;
+```
+
+Tipos derivados não podem modificar os tipos originais, mas podem modificar os tipos que são derivados deles, por exemplo, `Employee` não pode modificar `Person`, mas se outro tipo estender `Employee`, então ele pode modificar esse tipo porque se qualquer uma de suas propriedades mudar, o outro tipo será modificado também.
+
+Quando isso acontece a gente diz que o tipo é **acoplado**, porque o tipo derivado depende do tipo original.
+
+<CourseCTA />
+
+## Vale a pena acoplar?
+
+Tipos acoplados, ou derivados, são ótimos quando a gente está tratando do mesmo "domínio", por exemplo, como eu comentei lá no [último artigo sobre enums](/enums-no-typescript/), geralmente quando estamos usando enums, uma opção é criar objetos com [`as const`](/entenda-o-que-e-as-const-no-typescript/) e ai criar a lista de valores como um tipo separado:
+
+```ts
+const envs = {
+  PROD: 'production', 
+  DEV: 'development',
+  TEST: 'test'
+} as const
+
+type Envs = (typeof envs)[keyof typeof envs]
+```
+
+Se a gente não fizesse isso, iríamos ter que duplicar todos os valores desse objeto duas vezes, o que criaria duas fontes de informação que a gente precisaria manter.
+
+Outro caso que é muito interessante derivar tipos é quando estamos lidando com variações de tipos de entrada em uma API, por exemplo, temos um payload para a criação de um usuário:
+
+```ts
+interface User {
+  id: string
+  name: string;
+  age: number;
+}
+
+type UserCreate = Omit<User, 'id'>
+```
+
+Neste caso faz sentido termos uma derivação porque nossa entidade usuário tem um ID sempre quando ele está criado, mas, quando queremos criar um usuário, não precisamos mandar um ID. O mesmo vale para quando vamos atualizar um usuário, não podemos mandar o ID e todos os objetos podem ser opcionais:
+
+```ts
+type UserUpdate = Omit<Partial<User>, 'id'>
+```
+
+Ou seja, faz muito sentido derivar se a gente está tratando da mesa entidade e ambos os tipos são parte de um todo que não faz sentido se são separados. A grande vantagem disso é que você pode modificar o tipo em um lugar e ele vai ser automaticamente propagado para todo o projeto, o que facilita muito na hora de fazer o desenvolvimento, mas essas cadeias de derivação podem ser mais complicadas quando ficam muito longas porque podem ter efeitos indesejados.
+
+## Quando desacoplar faz mais sentido?
+
+Ao contrário do que estamos acostumados, desacoplar tipos faz bastante sentido quando estamos lidando com partes dos dados de um tipo completo, por exemplo, uma função que leva apenas o nome do usuário, ou então apenas o nome e a idade.
+
+```ts
+import type { User } from 'types'
+
+function calculate(age: User['age']) {}
+```
+
+Esse parece um exemplo simples, mas veja que agora todo o arquivo depende desse tipo na pasta types, se ele mudar de lugar, todos os arquivos que dependem dele vão sofrer uma mudança, além de que estamos desacoplando uma única propriedade para um uso que pode não ser de conhecimento do nosso usuário.
+
+> Se você está em dúvida, imagine a seguinte pergunta: "Se eu derivar esse tipo, quando o tipo original mudar, vai soar estranho?"
+
+Se a resposta for sim, desacople o tipo. E o que é "soar estranho", por exemplo, se alterarmos um arquivo de utilitário para calcular a idade de um usuário para exibir em uma tela, não deveríamos ter que modificar o nosso banco de dados para a mesma coisa.
+
+No final é tudo uma questão de observar o trabalho que você vai ter para manter no futuro, talvez a questão certa para se perguntar é:
+
+> Se eu desacoplar, vou ter mais trabalho para manter?
+
+Então a regra base é a seguinte:
+
+-   Se, quando um tipo alterar, o outro **precisa** ser alterado, então acople
+-   Se um tipo derivado gerar mais trabalho para você quando alterado, desacople

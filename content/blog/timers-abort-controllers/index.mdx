@@ -1,0 +1,317 @@
+---
+title: "Entendendo timers/promises e AbortControllers no Node.js"
+pubDate: 2022-03-14T14:00:00.000Z
+updatedDate: 2026-07-16T16:10:41.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "nodejs", "development", "architecture"]
+description: "Saiba tudo sobre as novas formas de cancelar funções assíncronas e declarar intervalos de tempos com promises no Node.js"
+heroImage: "./photo-1605143185650-77944b152643-b2af67aa.jpg"
+draft: false
+visibility: "public"
+---
+
+Uma das mais antigas funcionalidades do javascript é o que chamamos de **timer apis**. e a funcionalidade delas é bastante direta: elas permitem que agendemos uma execução de código para o futuro!
+
+essas apis são bastante conhecidas com os comandos `setTimeout`, `setImmediate` e `setInterval`. e, apesar de serem usadas para agendar a execução de um determinado código, muitas vezes podemos tirar vantagem desse tipo de api para poder transformar operações síncronas em operações assíncronas, evitando bloquear a thread principal e o event loop.
+
+> vamos ter um artigo especial só para tratar de event loop no node.js e todas as nuances que os timers aplicam sobre ele. por enquanto, esse conteúdo já existe na [minha série de artigos sobre o funcionamento interno do node.js](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-3-um-mergulho-no-event-loop-38l9) que vale a pena dar uma olhada.
+
+## Por que vamos falar de timers?
+
+você pode estar se perguntando: "se essas funções são quase tão antigas quanto o javascript em si, por que falar delas justamente agora?".
+
+e isso é um questionamento super válido, visto que essas funcionalidades já são implementadas no node.js por padrão, porém uma das maiores vantagens que temos no node é que agora temos o uso de timers através de uma api de promises, e também o uso de `abortcontrollers` que permitem o cancelamento e um timer muito mais facilmente do que antes! vamos ver tudo isso por aqui!
+
+## Timers com promises
+
+o modelo original de uso dos timers era através de callbacks, e eles ainda continuam sendo os mais utilizados, em parte porque permitem a delegação de um código para ser executado por outra thread sem que esperemos o final da execução do fluxo atual.
+
+um código de exemplo seria algo assim:
+
+```js
+setTimeout(() => {
+  console.log('esse callback vai ser executado em 3 segundos')
+}, 3000)
+
+setImmediate(() => {
+  console.log('esse callback vai ser executado logo depois do início da execução')
+})
+
+console.log('e esse vai ser executado primeiro')
+```
+
+o resultado que teremos será algo assim:
+
+```bash
+e esse vai ser executado primeiro
+esse callback vai ser executado logo depois do início da execução
+esse callback vai ser executado em 3 segundos
+```
+
+o problema é que quando queremos fazer com que um código espere um determinado tempo, o que a gente chama de _sleeper functions_, teríamos que fazer algo assim:
+
+```js
+function foo() {
+  console.log('operação inacabada')
+  setTimeout(() => {
+    console.log('espera 10 segundos para continuar')
+    console.log('continua a operação inacabada')
+  }, 10000)
+}
+```
+
+dada a natureza dos callbacks, a única forma de conseguirmos continuar a execução da função depois de um determinado tempo, seria delegarmos o resto da execução para dentro do callback, de forma que perdemos o controle do fluxo original, a não ser que tenhamos alguma forma de passar um sinal para dentro da função que é o callback.
+
+na prática, isso significa que, quando mais complicada for a função, maior vai ser o callback e, consequentemente, mais complexo vai ser nosso código.
+
+por isso que temos o uso de promises como sendo uma das melhores saídas para esse problema, a forma ideal de se transformar um timer em uma promise é, basicamente, seguindo exatamente a velha fórmula:
+
+```js
+const sleep = (timer) => {
+  return new promise((resolve) => {
+    setTimeout(() => resolve, timer)
+  })
+}
+
+async function start() {
+  console.log('operação')
+  await sleep(3000)
+  console.log('continua a operação')
+}
+```
+
+dessa forma podemos continuar a operação no mesmo fluxo, sem delegar nenhuma execução a uma outra função ou thread, na prática isso torna o código mais legível, embora existam alguns casos onde callbacks podem ser mais rápidos que promises.
+
+mas isso deixou de ser um problema na **[versão 16](https://nodejs.org/api/timers.html#timers-promises-api)** do node.js, a última versão considerada lts, ou seja, a versão mais atual e com mais suporte.
+
+agora, temos nativamente o suporte a timers com apis de promises diretamente através do módulo `timers/promises`.
+
+> lembrando que esse não é o único módulo que possui uma variante `/promises`, o módulo `fs` também tem a sua versão em promises que pode ser importada em `fs/promises`.
+
+o uso é bastante simples e direto, o que fez dessa atualização uma das mais simples e fáceis de serem implementadas, porque a curva de mudança é extremamente baixa.
+
+### setTimeout e setImmediate
+
+para exemplificar, vamos usar os [ecmascript modules](/os-ecmascript-modules-estao-aqui/), que permitem que usemos a keyword `await` no top-level, ou seja, fora de uma função `async` e, portanto, vamos usar o `import` para importar nossos módulos.
+
+```js
+import { setTimeout } from 'timers/promises'
+
+console.log('antes')
+await setTimeout(3000)
+console.log('depois')
+```
+
+a ordem dos parâmetros agora foi invertida, ao invés de termos o callback primeiro e o timer depois, agora temos o timer primeiro e um callback opcional como segundo parâmetro, isso significa que já temos a funcionalidade de "sleep" nativa da função.
+
+se quisermos passar um segundo parâmetro, este será o retorno da nossa função, por exemplo:
+
+```js
+import { setTimeout } from 'timers/promises'
+
+console.log('antes')
+const resultado = await setTimeout(3000, 'timeout')
+console.log('depois')
+console.log(resultado) // timeout
+```
+
+ou até
+
+```js
+import { setTimeout } from 'timers/promises'
+
+console.log('antes')
+console.log(await setTimeout(3000, 'timeout')) // timeout
+console.log('depois')
+```
+
+o mesmo vale para quando temos um `setImmediate`, a diferença é que não vamos ter o parâmetro de tempo:
+
+```js
+import { setImmediate } from 'timers/promises'
+
+console.log('antes')
+console.log(await setImmediate('immediate')) // immediate
+console.log('depois')
+```
+
+### setInterval
+
+A API de intervalos é um pouco diferente principalmente pelo motivo pelo qual ela existe. Quando estamos falando em intervalos de código, geralmente queremos executar uma determinada função a cada determinado tempo.
+
+Portanto, a API `setInterval` sempre – ou pelo menos na maioria das vezes – vai receber uma função como callback que vai executar alguma coisa, por isso, a sua contraparte em promises é um [Async Iterator](https://dev.to/khaosdoctor/entendendo-async-iterators-1opo) que essencialmente são [Generators](https://medium.com/trainingcenter/javascript-entendendo-generators-408cbce9aee) que produzem promises ao invés de valores diretos.
+
+A gente pode imitar um pouco desse comportamento usando a seguinte função que mistura tanto a API de promises do timeout quanto generators e async iterators juntos:
+
+```js
+import { setTimeout } from 'timers/promises'
+
+async function* intervalGenerator(res, timer) {
+  while (true) {
+    setTimeout(timer)
+    await setTimeout(timer)
+    yield Promise.resolve({
+      done: false,
+      value: res
+    })
+  }
+}
+
+for await (const res of intervalGenerator('result', 1000)) {
+  console.log(res.value)
+}
+```
+
+No caso acima, vamos ter o valor `result` sendo printado a cada segundo no console, e a gente pode ver que, no final das contas, tudo acaba sendo derivado do `setTimeout`, porque o `setImmediate` nada mais é do que um `setTimeout` com tempo `0` também.
+
+Mas seria um trabalho absurdo a gente tentar implementar isso tudo manualmente, por isso que já temos a função nativa que retorna exatamente o mesmo resultado:
+
+```js
+import { setInterval } from 'timers/promises'
+
+for await (const result of setInterval(1000, 'result')) {
+  console.log(result)
+}
+```
+
+A unica diferença principal, assim como as demais funções é que temos o parâmetro de tempo como sendo o primeiro e o parâmetro do resultado como sendo o segundo.
+
+## Cancelando timers
+
+Vamos imaginar que a gente tenha um código que está sendo executado em intervalos regulares, por exemplo, para fazer um polling, ou seja, ficar requisitando constantemente uma API em busca de um resultado esperado. Como nesse pequeno exemplo:
+
+```js
+let valorExterno = false
+setInterval(async () => {
+  const response = await fetch('url').then((r) => r.json())
+  if (response.valor < 500) valorExterno = true
+}, 5000)
+```
+
+O problema que enfrentamos aqui é que temos que parar de executar o intervalo depois que encontrarmos o valor que queremos, e a forma tradicional e fazer isso no modelo de callbacks era recebendo uma referência ao timer e ai usando funções como `clearInterval` e `clearTimeout` para poder parar a execução contínua. Essa referência era retornada pelo próprio timer, então faríamos algo assim:
+
+```js
+let valorExterno = false
+let interval = setInterval(async () => {
+  const response = await fetch('url').then((r) => r.json())
+  if (response.valor < 500) {
+    valorExterno = true
+    clearInterval(interval)
+  }
+}, 5000)
+```
+
+É um pouco confusa a ideia de que podemos passar uma referência para o próprio intervalo de forma que ele seja possível de ser cancelado por ele mesmo, mas do ponto de vista do compilador esse código é completamente válido, já que as variáveis são alocadas antes da execução da função, portanto o que o intervalo vai receber é apenas o endereço de memória que conterá uma referência para ele mesmo no futuro.
+
+Durante a nova API usando Promises, não temos como receber um retorno direto da função, porque o retorno do nosso timer vai ser o resultado que esperamos, então como fazer para cancelar a execução de um código sem ter a capacidade de receber a referência daquele intervalo? No caso de um `setInterval` que nos retorna um iterador assíncrono, podemos só fazer um break no código:
+
+```js
+import { setInterval } from 'timers/promises'
+
+function promise() {
+  return Promise.resolve(Math.random())
+}
+
+let valorExterno = false
+for await (const result of setInterval(2000, promise())) {
+  console.log(result)
+  if (result > 0.7) {
+    console.log('Resultado desejado obtido abortando execuções')
+    break
+  }
+}
+```
+
+Já quando temos execuções que não são contínuas, como podemos fazer para abortar o processo no meio? A resposta: **invertendo o controle**.
+
+## Abort Controllers
+
+A ideia é que, ao invés de a função que criou o timer ser a responsável por finalizá-lo, o próprio timer vai receber a função, ou melhor, o **sinal** de finalização que vai ser controlado por um agente exerno, ou seja, vamos mandar uma função para dentro do timer e dizer quando aquela função deve ser executada, mas não vamos mais trabalhar com referências. Essas funções são conhecidas como **Abort Controllers**.
+
+O Abort Controller é um _objeto global_ que representa um sinal de cancelamento ou finalização de uma operação assíncrona. Os Abort Controllers tem somente duas propriedades, a primeira é uma função chamada `abort()`, que serve para iniciar o processo de cancelamento da operação, e a outra é uma instancia de uma classe chamada `AbortSignal`, que é uma classe que representa um sinal de cancelamento em si.
+
+Pode parecer um pouco estranho essa separação de sinal e controle, mas isso vem diretamente de um padrão de projetos muito importante chamado **Observer**. Essencialmente, todo mundo que receber um `AbortController.signal` vai ser cancelado quando a função `abort()` for chamada. E isso é válido para os timers com promises também, que agora recebem um terceiro parâmetro de opções que tem uma propriedade chamada `signal`, que é um `AbortSignal`.
+
+Vamos ver um exemplo, para entendermos melhor, vamos simular uma operação super longa que vai demorar um minuto para ser executada, mas que podemos cancelar no meio caso tenhamos um problema.
+
+```js
+function operacaoLonga(signal) {
+  return new Promise((resolve, reject) => {
+    if (!signal.aborted) signal.onabort = () => reject('Cancelado')
+    setTimeout(resolve, 60000)
+  })
+}
+
+const ac = new AbortController()
+setTimeout(() => ac.abort(), 3500)
+await operacaoLonga(ac.signal).catch((r) => {
+  console.error(r)
+  process.exit(1)
+})
+```
+
+O que está acontecendo aqui é que temos uma função que vai retornar uma promise em 60 segundos, ainda usando o modelo de callbacks dos timers, mas ela vai receber como parâmetro um sinal de cancelamento, então você poderia cancelar ela por fora caso fosse muito lenta. Para isso a gente primeiro verifica se o sinal já foi cancelado com o `signal.aborted` e depois criamos um listener para um evento `abort` que vai ser disparado quando a função `abort()` do `AbortController` for chamada. Esse evento vai somente rejeitar a nossa promise.
+
+E quando chamamos a operação longa, passamos um novo sinal para ela e cancelamos a operação depois de 3.5s de execução. O resultado é uma linha no console dizendo `Cancelado` e o processo termina com um código de erro.
+
+Da mesma forma, a gente pode importar os timers em modelo de promise e usar o `AbortController` para cancelar a operação. Como podemos ver aqui no `setTimeout`:
+
+```js
+import { setTimeout } from 'timers/promises'
+
+const ac = new AbortController()
+
+await setTimeout(3500, ac.abort('Timeout'))
+await setTimeout(60000, 'operação longa', { signal: ac.signal })
+```
+
+Mas perceba que a gente está usando o `setTimeout` várias vezes, e existe uma forma melhor de fazer isso, com o `AbortSignal.timeout`, que basicamente implementa o que fizemos na linha `await setTimeout(3500, ac.abort('Timeout'))`:
+
+```js
+import { setTimeout } from 'timers/promises'
+
+await setTimeout(60000, 'operação longa', { signal: AbortSignal.timeout(3500) })
+```
+
+Esse é um método auxiliar que pode ser usado para muitas coisas, inclusive, podemos limitar a execução da nossa promise no exemplo anterior com esse mesmo código:
+
+```js
+function operacaoLonga(signal) {
+  return new Promise((resolve, reject) => {
+    if (!signal.aborted) signal.onabort = () => reject('Cancelado')
+    setTimeout(resolve, 60000)
+  })
+}
+
+await operacaoLonga(AbortSignal.timeout(3500)).catch((r) => {
+  console.error(r)
+  process.exit(1)
+})
+```
+
+O Erick Wendel tem um vídeo muito bacana sobre o assunto onde ele também explica como podemos implementar o famoso `Promise.race` usando somente essa funcionalidade.
+
+<YouTube id="u8qk9l304K0" />
+
+O `AbortController` e o `AbortSignal` não são apenas feitos par serem usados com timers, mas com todo o tipo de promise no geral. Você pode implementar ele manualmente como fizemos anteriormente, através do evento `abort` pela função `onabort` ou então o método `on` do `EventListener`, ou usar o `AbortSignal.timeout` para limitar a execução da promise a um determinado tempo sem precisar chamar o `abort()` manualmente, o que é particularmente útil em casos onde temos que criar timeouts de execução.
+
+Não se esqueça que todo o sinal do tipo `abort` vai ser tratado como uma exceção, então é importante tratar essas exceções para que seu código possa continuar executando. E você pode capturar o tipo do erro de forma muito específica, porque todas as exceções causadas por `AbortController` e `AbortSignal` tem o nome de `AbortError`:
+
+```js
+import { setTimeout } from 'timers/promises'
+
+try {
+  await setTimeout(60000, 'operação longa', { signal: AbortSignal.timeout(3500) })
+} catch (err) {
+  if (err.name === 'AbortError') {
+    console.error('Programa recebeu sinal para parar a execução: ', err.message)
+  }
+}
+```
+
+## Conclusão
+
+Com o passar das versões do Node.js e também do JavaScript, o uso de sinais de cancelamento para promises e timers vai ser cada vez mais comum, portanto espere ver muito mais códigos que esperam receber algum tipo de sinal de cancelamento em algum dos parâmetros.
+
+E também é uma ótima prática, principalmente para sistemas que precisam realizar tarefas longas ou chamadas externas e assíncronas, que exista uma forma de essa operação ser cancelada. Então você também pode tirar vantagem desse conceito e usar o `AbortController` e o `AbortSignal` para isso.

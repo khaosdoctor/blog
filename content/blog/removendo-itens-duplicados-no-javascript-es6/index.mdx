@@ -1,0 +1,316 @@
+---
+title: "Removendo itens duplicados no JavaScript ES6"
+pubDate: 2021-09-08T12:00:00.000Z
+updatedDate: 2026-07-16T16:12:41.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "performance", "ecmascript", "es2020"]
+description: "Uma das maiores dificuldades de devs ao utilizar Maps e Sets é remover objetos duplicados que não são primitivos, que tal aprender a melhor forma de fazer essa mudança?"
+heroImage: "./photo-1612708065236-a2ccb558e8c0-8728a284.jpg"
+draft: false
+visibility: "public"
+seoDescription: "Uma grande dificuldades ao utilizar Maps e Sets é remover objetos duplicados que não são primitivos, que tal aprender a melhor forma de fazer essa mudança?"
+---
+
+Acho que todo mundo assim como eu, em algum momento já teve que remover itens duplicados de uma lista Array, mas será que a forma que aprendemos é de fato a melhor?
+
+Nesse artigo vou mostrar o meu ponto de vista, a forma que encontrei para remover itens duplicados de uma lista com mais de 1.000.000 de itens no meu dia a dia na [@squidit](https://squidit.com.br/), seja o array de tipos primitivos ou não
+
+## O jeito comum
+
+Acredito que a forma mais comum que conhecemos é aquela que percorremos um Array e verificamos a cada interação se aquele item está ou não no novo array.
+
+```js
+//  loop-itens.js
+/**
+ * @desc Gera um array de tamanho N com números aleatórios, respeitando N
+ * @param {number} length 
+ */
+function generateRandomArray(length) {
+  return Array.from(Array(length), () => parseInt(Math.random() * length));
+}
+
+const randomList = generateRandomArray(1000) // Um array com 1000 números aleatórios
+const uniqueList = [] // Lista de array único
+
+for(const value of randomList) {
+  //  Caso o valor não esteja no uniqueList, adicionamos
+  if (!uniqueList.includes(value)) uniqueList.push(value)
+}
+console.log(`uniqueList has ${uniqueList.length} itens`)
+```
+
+Que gera a seguinte saída:
+
+![Print-Quantidade-Itens-Duplicados](https://i.ibb.co/CBmBvcp/Screenshot-from-2021-09-03-16-38-46.png)
+
+Isso pode até funcionar para uma lista pequena de alguns milhares de itens.
+
+Se utilizarmos o `console.time` e o `console.timeEnd` para verificar quanto tempo essa operação demora, veremos que é super rápido.
+
+```js
+//  Resto do código
+
+console.time('Remove duplicated items') // Adicionamos 
+for(const value of randomList) {
+  //  Verificação do código anterior...
+}
+console.timeEnd('Remove duplicated items')
+```
+
+Gera a seguinte saída:
+
+![Print-Tempo-Para-Remover-Itens-Duplicados](https://i.ibb.co/pQcM365/Screenshot-from-2021-09-03-16-44-36.png)
+
+O que aconteceria se por acaso aumentássemos esse Dataset? para uma lista com 100.000 de itens por exemplo?
+
+```js
+//  Resto do código ... 
+
+// equivale a 10^5, que é o mesmo que 100.000
+const randomList = generateRandomArray(10 ** 5) 
+const uniqueList = [] // Lista que conterá arrays únicos
+
+console.time('Remove duplicated items')
+for(const value of randomList) {
+  //  Caso o valor não esteja no uniqueList, adicionamos
+  if (!uniqueList.includes(value)) uniqueList.push(value)
+}
+console.timeEnd('Remove duplicated items')
+```
+
+Gera a seguinte saída:
+
+![Print-tempo-para-remover-itens-duplicados-com-100k](https://i.ibb.co/KNRP0bH/Screenshot-from-2021-09-03-17-07-45.png)
+
+E se aumentarmos para 200.000 por exemplo, o tempo já aumenta drasticamente
+
+![Print-tempo-para-remover-itens-duplicados-com-200k](https://i.ibb.co/SNzC8Fy/Screenshot-from-2021-09-03-17-11-37.png)
+
+## O problema
+
+Usando o `for` ou [.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) a premissa ainda seria a mesma, que seria:
+
+-   Iterar pelo array.
+-   Verificar se o valor existe no novo array.
+-   Adicionar no array.
+
+Para cada iteração é necessário fazer uma segunda iteração no `uniqueArray` para verificar se existe o valor lá dentro, isso na programação é chamado de `O(n)²`, onde `n` dita o número de operações que serão executadas na sua aplicação. Portanto o número de operações para esse algoritmo cresce de forma exponencial conforme o número de itens.
+
+Vamos exemplificar com o código a seguir:
+
+```js
+// Resto do código
+
+// Itera 10 vezes de 10k em 10k até chegar em 100k
+for (let length = 1; length <= 100000; length += 10000) {
+  // Para cada interação, gera um novo array.
+  const randomList = generateRandomArray(length)
+  const uniqueList = [] // Lista que contera arrays único
+
+  console.log(`List size of ${randomList.length}`)
+  console.time(`Remove ${randomList.length} duplicated items`)
+  for (const value of randomList) {
+    // Caso o valor não esteja no uniqueList, adicionamos
+    if (!uniqueList.includes(value)) uniqueList.push(value)
+  }
+  console.timeEnd(`Remove ${randomList.length} duplicated items`)
+  console.log('---------')
+}
+```
+
+É possível ver o tempo crescente de forma exponencial quando printamos quanto tempo leva para que a operação seja finalizada de acordo com o número de itens
+
+![Print-duracao-tempo-para-remover-itens-duplicadas-de-forma-exponencial](https://i.ibb.co/FDCzsPP/Screenshot-from-2021-09-03-18-48-49.png)
+
+## Usando o Set
+
+No Javascript temos um objeto chamado [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set), ele garante que os valores sejam guardados uma única vez, ou seja, sempre que tentarmos adicionar um valor que está na estrutura, esse valor não sera adicionado.
+
+```js
+const set = new Set();
+
+set.add(1) // [1]
+set.add(2) // [1,2]
+set.add(3) // [1,2,3]
+set.add(2) // [1,2,3]
+
+console.log(set) // Set(3) { 1, 2, 3 }
+```
+
+O set aceita objetos também, porém não vai remover a duplicidade deles porque os objetos, como sabemos, são passados via referência no JavaScript:
+
+```js
+const set = new Set();
+
+set.add({ a: 1, b: 2 }) // Objeto é adicionado [{}]
+set.add({ a: 10, b: 20}) //  [{},{}]
+
+// Por mais que os valores são iguais,
+// o objeto ainda assim é diferente,
+// pois ele está referenciado 
+// em outro endereço de memoria
+set.add({a: 1, b: 2}) //  [{}, {}, {}]
+
+console.log(set) // Set(3) { { a: 1, b: 2 }, { a: 10, b: 20 }, { a: 1, b: 2 } }
+```
+
+## Usando Set para remover duplicidade
+
+Quando usamos a [API Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) para remover itens duplicados de array, percebemos a diferença de tempo usando Set em relação do for.
+
+```js
+/**
+ * @desc Gera um array de tamanho N com números aleatórios, respeitando N
+ * @param {number} length 
+ */
+function generateRandomArray(length) {
+  return Array.from(Array(length), () => parseInt(Math.random() * length));
+}
+
+// Itera 10 vezes de 10k em 10k até chegar em 100k
+for (let length = 1; length <= 100000; length += 10000) {
+  // Para cada iteração, gera um novo array.
+  const randomList = generateRandomArray(length)
+
+  console.log(`List size of ${randomList.length}`)
+  console.time(`Remove ${randomList.length} duplicated items using Set API`)
+  const uniqList = Array.from(new Set(randomList))
+  console.timeEnd(`Remove ${randomList.length} duplicated items using Set API`)
+  console.log('---------')
+}
+```
+
+Gera a seguinte saída:
+
+![Print de tempo para remover itens duplicados usando Set](https://i.ibb.co/HDD8qtG/Screenshot-from-2021-09-03-19-06-35.png)
+
+Isso acontece porque, diferente do loop, precisamos iteirar o array `n` vezes, e em cada iteração a API Set garante que estamos adicionando um único valor, e pelo fato do objeto Set implementar a interface `iterable`, podemos transforma-lo em um `Array`
+
+```js
+Array.from(new Set([1,2,3,4,1,2,3,4])) // Gera [1,2,3,4]
+```
+
+## Duplicidade em uma lista de objetos
+
+No mundo real sabemos que listas não são compostas só do tipo primitivo, como faríamos então para os objetos?
+
+Ao invés de usarmos o [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set), usamos o [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) junto com o método [.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) da API Array, mas pra isso preciso dar um panorama do que é o Map
+
+### Maps
+
+A estrutura do [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) serve como uma estrutura de dados de Chave valor, ou [HashTable](https://www.devmedia.com.br/hashmap-java-trabalhando-com-listas-key-value/29811) que, de forma resumida, é uma lista de dados composta de chave valor, onde para cada item adicionado existe um id or `key` relacionado, sendo possível realizar uma busca rápida apenas usando a `key`, sem a necessidade de percorrer toda a lista para encontrar o item
+
+```js
+const map = new Map()
+
+map.set(1, { a: 1, b: 2, b: 3 }) // Map(1) { 1 => { a: 1, b: 3 } }
+console.log(map)
+
+map.set(2, { a: 10, b: 20, c: 30 }) //  Map(2) { 1 => { a: 1, b: 3 }, 2 => { a: 10, b: 20, c: 30 } }
+console.log(map)
+
+// Sobrescreve o objeto na chave 1.
+map.set(1, { a: 100 }) // Map(2) { 1 => { a: 100 }, 2 => { a: 10, b: 20, c: 30 } }
+
+map.get(1)  // { a: 100 }
+map.get(2)  // { a: 10, b: 20, c: 30 }
+map.get(3)  // undefined, pois na chave 3 não existe nada
+```
+
+E claro, o valor da chave não precisa ser necessariamente um valor numérico, pode ser qualquer tipo de dado:
+
+```js
+const map = new Map()
+
+map.set('samsung', ['S10', 'S20']) // Map(1) { 'samsung' => [ 'S10', 'S20' ] }
+
+map.set('outro valor', [2, 3, 4, 5]) // Map(2) { 'samsung' => [ 'S10', 'S20' ], 'outro valor' => [ 2, 3, 4, 5 ] }
+```
+
+## Usando Map para remover itens duplicados
+
+Agora tendo uma ideia de como usar o `Map` podemos tirar vantagem do [.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) para gerar um array único a partir de uma lista com duplicidades.
+
+Primeiro vamos criar uma função que gera uma lista com o mesmo objeto, variando apenas o id de cada item.
+
+```js
+/**
+ * @desc Gera uma lista com o mesmo objeto,
+ * onde o id sera aleatório
+ * @param {number} length 
+ */
+function generateRandomObjectList(length) {
+  const defaultObject = {
+    name: 'Guilherme',
+    developer: true
+  }
+  return Array.from(Array(length), () => {
+    const randomId = parseInt(Math.random() * length)
+    return {
+      ...defaultObject,
+      id: randomId
+    }
+  });
+}
+```
+
+Agora vamos criar um objeto `Map` a partir do array gerado,  
+onde o id do `Map` sera o id do usuario, assim removemos IDs duplicados da lista:
+
+```js
+const listObjectWithRandomId = generateRandomObjectList(10 ** 5) // 100k
+const objectMap = listObjectWithRandomId.reduce((map, object) => {
+  map.set(object.id, object);
+  return map
+}, new Map())
+```
+
+Como o `Map` também um objeto iterável, basta usar a função [Array.from](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from):
+
+```js
+const uniqList = Array.from(objectMap, ([_, value]) => value)
+```
+
+O código todo ficaria assim:
+
+```js
+/**
+ * @desc Gera uma lista com o mesmo objeto,
+ * onde o id sera randômico
+ * @param {number} length 
+ */
+function generateRandomObjectList(length) {
+  const defaultObject = {
+    name: 'Guilherme',
+    developer: true
+  }
+  return Array.from(Array(length), () => {
+    const randomId = parseInt(Math.random() * length)
+    return {
+      ...defaultObject,
+      id: randomId
+    }
+  });
+}
+
+const listObjectWithRandomId = generateRandomObjectList(10 ** 5) // 100k
+
+console.time('uniq List usando Map') // Pra contabilizar o tempo da operação
+const objectMap = listObjectWithRandomId.reduce((map, object) => {
+  map.set(object.id, object);
+  return map
+}, new Map())
+
+const uniqList = Array.from(objectMap, ([_, value]) => value)
+console.timeEnd('uniq List usando Map')
+console.log(`Lista duplicada: ${listObjectWithRandomId.length}`)
+console.log(`Lista duplicada: ${uniqList.length}`)
+
+```
+
+![Print do tempo para remover itens duplicados usando Map](https://i.ibb.co/vXvp5mL/Screenshot-from-2021-09-03-19-42-32.png)
+
+## Conclusão
+
+Por mais que libs como o [lodash](https://lodash.com/) tenham funções para remover itens duplicados, importar uma lib inteira para resolver um problema que pode ser resolvido em algumas linhas de código de forma nativa acaba sendo não necessário.

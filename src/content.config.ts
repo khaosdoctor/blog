@@ -3,8 +3,13 @@ import { defineCollection, z } from 'astro:content'
 
 // The folder Obsidian opens directly. Generated translations will land in a
 // separate build-managed folder later, kept out of the writing view.
+//
+// One post is one folder: content/blog/<slug>/index.md(x) plus its images, so a
+// post and its assets live together and image paths are just ./image.png.
+// Matching only `index` files also means a stray note Obsidian creates with
+// Ctrl+N is not a post, instead of failing the build on a missing title.
 const blog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './content/blog' }),
+  loader: glob({ pattern: '**/index.{md,mdx}', base: './content/blog' }),
   schema: z.object({
     title: z.string(),
     // A future pubDate means scheduled: the build hides it until its time.
@@ -38,7 +43,7 @@ const blog = defineCollection({
  * opens content/blog, so the writing view shows source-language posts only.
  */
 const translated = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './content/translated' }),
+  loader: glob({ pattern: '**/index.{md,mdx}', base: './content/translated' }),
   schema: z.object({
     title: z.string(),
     pubDate: z.coerce.date(),

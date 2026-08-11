@@ -1,0 +1,73 @@
+---
+title: "Onde usar ANY no TypeScript"
+pubDate: 2024-08-07T11:00:19.000Z
+updatedDate: 2026-07-16T17:54:12.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "javascript"]
+description: "Que o \"any\" é um padrão ruim de uso já sabemos, mas saiba alguns casos de uso onde o any é a nossa única opção!"
+heroImage: "./articles-3.png"
+draft: false
+visibility: "public"
+---
+
+Quem estava nas minhas lives lá da **Formação TypeScript** (ou já fez o treinamento) sabe que eu sou extremamente contra `any` no código. Principalmente porque o `any` se tornou uma válvula de escape, sempre que queremos desligar o TypeScript podemos só usar `any` no nosso código e tudo se resolve. Muita gente já me perguntou: "Ué, então por que o TypeScript tem `any` se não pode usar?"
+
+A realidade é que o `any` é um tipo extremamente importante. Primeiro porque ele é o único tipo que pode ser associado a qualquer tipo sem que esse tipo seja restringido a um tipo mais específico, além disso ele é o tipo mais aberto de todos e aceita todas as coisas, ou seja, o `any` está em todo lugar.
+
+Enquanto na maioria dos casos é muito ruim usar `any`, existem alguns casos interessantes onde, na verdade, o `any` é a nossa única opção correta.
+
+## Permitindo inferência de tipos
+
+O primeiro exemplo é justamente o que eu comentei ali em cima. Quando usamos `any`, não estamos fixando um tipo específico e estamos permitindo que o TS faça a inferência desse tipo. O jeito que o TypeScript resolve tipagens é sempre da mais aberta para a mais fechada, ou seja, o `any` é como inicializar uma variável numérica como "infinito".
+
+Um exemplo clássico disso (que você vai encontrar em muitos lugares) é o `ReturnType`, um utility type que existe no TypeScript nativamente e basicamente o que ele faz é pegar o tipo do retorno de uma função. Vamos tentar recriar esse tipo:
+
+```ts
+type ReturnType<T extends (...args: unknown[]) => unknown> = T extends (...args: unknown[]) => infer Retorno ? Retorno : never
+```
+
+<CourseCTA />
+
+Basicamente, estamos dizendo que queremos um tipo, esse tipo leva um genérico que vai ser uma função, a gente realmente não se importa com o que existe nos parâmetros ou no retorno da função, então para não ter que usar `any` vamos usar `unknown`. Dessa forma nosso tipo fica mais seguro, certo? Mas e se a gente fizer isso aqui:
+
+```ts
+const foo = (i: string) => i
+type retorno = ReturnType<typeof foo>
+```
+
+Vamos ter um erro interessante:
+
+```
+ype '(i: string) => string' does not satisfy the constraint '(...args: unknown[]) => unknown'.
+  Types of parameters 'i' and 'args' are incompatible.
+    Type 'unknown' is not assignable to type 'string'.
+```
+
+Isso porque quando usamos `unknown` estamos automaticamente dizendo para o TypeScript que a gente não sabe o que tem ali, então o TS vai **forçar** que a gente faça um casting disso manualmente, o que a gente quer é que o TS faça a inferência sozinho. Então para isso temos que dizer que "não nos importamos com o que está ali" e o TS vai sempre tentar trazer o tipo mais específico possível.
+
+Se mudarmos a nossa declaração de tipo para:
+
+```ts
+type ReturnType<T extends (...args: any[]) => any> = T extends (...args: any[]) => infer Retorno ? Retorno : never
+```
+
+Nosso erro some e o nosso tipo `retorno` vai ser `string`.
+
+## Valores externos
+
+Uma outra opção é quando estamos tratando com valores que são verdadeiramente externos. Esse é um valor válido para usar `any`, mas sempre temos que lembrar que é necessário que a gente faça a tipagem desses tipos depois. Por exemplo:
+
+```ts
+const dadoExterno: any = algumaChamadaDeAPI()
+// processamento aqui
+const dadoInterno: SeuTipo = dadoConfirmado
+```
+
+O uso do `any` nesse caso é somente quando a gente está obtendo o dado, através de um `JSON.parse` ou qualquer outra chamada, mas é **extremamente importante** que a gente não mantenha o `any` depois, se tivermos que fazer qualquer processamento, é importante que a gente faça o casting desse tipo para outro tipo bem mais específico.
+
+## Migração de base
+
+Um dos casos de uso mais importantes é quando estamos fazendo a migração de JavaScript para TypeScript em uma base de código antiga. Para isso é comum que a gente comece fazendo a migração usando `any` no código antigo e, aos poucos, vai passando esses `any` para tipos específicos.
+
+Esse é provavelmente o caso mais ok para o uso de `any` em qualquer aplicação.

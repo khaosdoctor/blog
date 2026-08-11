@@ -1,0 +1,185 @@
+---
+title: "Tudo sobre os novos métodos de arrays em JavaScript"
+pubDate: 2022-09-22T13:00:15.000Z
+updatedDate: 2026-07-16T16:06:29.000Z
+lang: pt
+category: "javascript"
+tags: ["javascript", "ecmascript", "development", "nodejs"]
+description: "Uma das promessas do ECMAScript é a inclusão de novos métodos nos arrays, nesse artigo vamos passar por todos eles e dar um caso de uso para cada um, assim você não vai ficar de fora!"
+heroImage: "./Blog-cover-Template-1.png"
+draft: false
+visibility: "public"
+seoDescription: "Saiba tudo sobre os novos métodos incluídos nos arrays nas próximas versões do ECMAScript! Entenda cada um com um caso de uso!"
+---
+
+Mais uma vez vamos trocar uma ideia sobre as principais novidades do JavaScript! Dessa vez vamos falar de uma das [propostas](https://github.com/tc39/proposal-change-array-by-copy) mais legais da atualidade. Hoje ela está em estágio 3, o que significa que ela logo mais vai estar no ar!
+
+Se você não sabe como funciona o JavaScript, nesse vídeo eu explico um pouco mais sobre o processo de lançamento de novas funcionalidades do JavaScript, se você ainda não assistiu, eu recomendo fortemente para poder entender melhor como tudo funciona!
+
+<YouTube id="hDQu3AvvDfg" />
+
+## O problema
+
+Como muita gente já descobriu da pior forma, arrays e objetos no JavaScript são passados por referência porque eles são criados e armazenados na Heap (que eu não vou explicar aqui mas [esse artigo](https://fjolt.com/article/javascript-by-reference-by-value) te dá uma boa ideia). Por isso, eles são criados apenas uma vez e passados para as funções como um ponteiro para o objeto original.
+
+Então quando fazemos alguma operação sobre eles, por exemplo, inverter um array com `reverse()`, vamos sempre alterar o array original:
+
+```js
+const arr = [1,2,3]
+arr.reverse()
+console.log(arr) // [3,2,1]
+```
+
+E isso é a causa de muitos e muitos problemas na maioria dos sistemas. Com o tempo, aprendemos a utilizar o método de clonagem de objetos para poder criar uma cópia desse array e fazer a alteração, por exemplo:
+
+```js
+const arr = [1,2,3]
+const reversed = [...arr].reverse()
+console.log(arr) // [1,2,3]
+console.log(reversed) // [3,2,1]
+```
+
+Quando usamos o spread operator `[...` o que estamos fazendo é clonar o array elemento a elemento e aplicando o método `reverse` nesse novo array que recebemos.
+
+E isso é verdade para vários outros métodos como o `splice` e `sort`. Por que a gente não muda isso?
+
+## A proposta
+
+A ideia dessa proposta é adicionar outros 4 novos métodos para arrays:
+
+-   `Array.prototype.toReversed() -> Array`
+-   `Array.prototype.toSorted(compareFn) -> Array`
+-   `Array.prototype.toSpliced(start, deleteCount, ...items) -> Array`
+-   `Array.prototype.with(index, value) -> Array`
+
+Essas funções dispensam muitas explicações, mas vou passar uma ideia básica sobre elas para você entender o que está acontecendo. A parte importante aqui é que **todas as funções são não destrutívas**, ou seja, elas não tocam no objeto original, todas vão retornar um novo array com as modificações.
+
+### `toReversed`
+
+Faz a mesma coisa que o nosso segundo exemplo, ou seja, vai inverter um array e devolver a cópia invertida desse array, sem modificar a original.
+
+```js
+let x = [ 1, 2, 3 ];
+let y = x.toReversed();
+
+// [ 1, 2, 3 ], [ 3, 2, 1 ]
+console.log(x, y);
+```
+
+### `toSorted`
+
+Da mesma forma que a anterior e a contraparte `sort`, essa função vai ordenar um array seguindo uma função de ordenação sem modificar o array original, por padrão, a função de ordenação pega o array e o ordena numéricamente dessa forma:
+
+```js
+let x = [ 5, 3, 4, 2, 1 ];
+let y = x.toSorted(); // [ 1, 2, 3, 4, 5 ]
+```
+
+Mas, assim como o `sort` ela aceita uma função de ordenação que segue uma assinatura `(a, b) => number` onde se:
+
+-   O retorno for `>0`, `a` vai vir depois de `b`
+-   O retorno for `<0`, `a` vai vir antes de `b`
+-   O retorno for `0`, não faz nenhuma alteração
+
+> Você pode achar essa documentação no [site da MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+
+```js
+let x = [
+    { value: 0 },
+    { value: 4 },
+    { value: 2 },
+    { value: 3 }
+];
+
+// y vai ser:
+// [
+//    { value: 0 },
+//    { value: 2 },
+//    { value: 3 },
+//    { value: 4 }
+// ]
+let y = x.toSorted((a, b) => {
+    return a.value - b.value
+});
+```
+
+### `toSpliced`
+
+O método `splice` não é o mesmo que o método `slice`, enquanto o `slice` retorna um subset do array original **em um novo array**, o `splice` altera o conteúdo do array em três formas:
+
+-   Adicionando itens em qualquer parte do array
+-   Removendo itens em qualquer parte do array
+-   Substituindo um item por outro item em qualquer parte do array
+
+O problema é que ele também fazia isso no array recebido, já essa versão retorna uma nova cópia.
+
+A função mantém a mesma assinatura, apenas com o novo retorno: `(start, deleteCount, ...items) => Array`, onde:
+
+-   `start` e a posição para iniciar a contagem, ou onde o ponteiro vai começar
+-   `deleteCount` é a quantidade de items para remover a partir de `start`
+-   `...items` é um parâmetro opcional que, se passado, vai dizer o novo valor da posição `start` depois de remover todos os items de `deleteCount`
+
+```js
+let x = [ "Cachorro", "Gato", "Zebra", "Morcego", "Tigre", "Leão" ];
+
+// y é [ "Cachorro", "Cobra", "Morcego", "Tigre", "Leão" ]
+let y = x.toSpliced(1, 2, "Cobra");
+
+// z é [ "Cachorro, "Tigre", "Leão" ]
+let z = x.toSpliced(1, 3);
+```
+
+> Inclusive esse exemplo mostra muito bem porque essas funções são boas. Se a gente modificasse o array no próprio array original, teríamos que recriar `x` todas as vezes
+
+### `with`
+
+Essa é uma nova função que simplifica um pouco o uso do splice quando temos que modificar apenas um elemento do array, originalmente se quisermos modificar esse array:
+
+```js
+let x = [ "Cachorro", "Gato", "Zebra", "Morcego", "Tigre", "Leão" ];
+```
+
+Para mostrar "Cobra" no lugar de "Gato", teríamos que fazer isso no `splice`:
+
+```js
+let y = x.toSpliced(1, 1, "Cobra");
+```
+
+Já com o `with` podemos fazer isso:
+
+```js
+// [ 'Cachorro', 'Cobra', 'Zebra', 'Morcego', 'Tigre', 'Leão' ]
+x.with(1, "Cobra")
+```
+
+Essencialmente estamos dizendo: "Pegue o array X, na posição 1 e mostre **com** esse outro valor".
+
+## Suporte
+
+O suporte não está implementado em todos os browsers ainda, porém você pode utilizar os [polyfills](https://github.com/tc39/proposal-change-array-by-copy/blob/main/polyfill.js) disponíveis no TC39 para poder implementar essa funcionalidade. Se você estiver utilizando Node, você pode utilizar o [`core-js`](https://github.com/zloirock/core-js#change-array-by-copy) para testar, seu código ficaria mais ou menos assim:
+
+```js
+require('core-js/proposals/change-array-by-copy')
+
+const sequencia = [1, 2, 3]
+console.log(sequencia.toReversed()) // => [3, 2, 1]
+console.log(sequencia) // => [1, 2, 3]
+
+const desordenado = new Uint8Array([3, 1, 2])
+console.log(desordenado.toSorted()) // => Uint8Array [1, 2, 3]
+console.log(desordenado) // => Uint8Array [3, 1, 2]
+
+const precisaDeCorrecao = [1, 1, 3]
+console.log(precisaDeCorrecao.with(1, 2)) // => [1, 2, 3]
+console.log(precisaDeCorrecao) // => [1, 1, 3]
+
+const spliced = [1, 2, 3]
+console.log(spliced.toSpliced(1, 1)) // => [1, 3]
+console.log(spliced) // => [1, 2, 3]
+
+let x = [ "Cachorro", "Gato", "Zebra", "Morcego", "Tigre", "Leão" ];
+console.log(x.toSpliced(1,1,"Cobra"))
+console.log(x.with(1, "Cobra"))
+```
+
+É esperado que essa funcionalidade saia na próxima versão do ECMAScript, junto com várias funcionalidades super legais que eu mandei no conteúdo exclusívo da minha newsletter [aqui](/o-futuro-do-js/).

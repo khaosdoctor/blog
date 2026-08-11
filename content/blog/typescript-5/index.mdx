@@ -1,0 +1,481 @@
+---
+title: "O que há de novo no TypeScript 5.0 Beta"
+pubDate: 2023-02-02T11:11:51.000Z
+updatedDate: 2026-07-16T16:03:46.000Z
+lang: pt
+category: "typescript"
+tags: ["typescript", "development", "ecmascript", "javascript", "nodejs"]
+description: "O TypeScript 5.0 beta saiu! Chegou a hora de descobrir o que existe de mais novo na nova versão do superset que todos amam!"
+heroImage: "./articles-1.png"
+draft: false
+visibility: "public"
+seoTitle: "Novidades do TypeScript 5.0 Beta"
+---
+
+Mais um dia e mais uma versão do nosso amado superset de JavaScript está no ar! No dia 26 de Janeiro de 2023, [a Microsoft liberou a versão beta do TS 5.0](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/), e essa versão conta com algumas das mais interessantes e mais importantes features já lançadas no TypeScript por um tempo! Bora descobrir quais são!
+
+## Instalando o beta
+
+Antes de tudo, se você quiser testar quaisquer funcionalidades do TS na versão 5.0 beta, não se esqueça de instalar o pacote do npm com a tag `@beta`, desta forma:
+
+```bash
+npm install typescript@beta
+```
+
+Depois veja [esse tutorial](https://code.visualstudio.com/Docs/languages/typescript#_using-newer-typescript-versions) para poder setar a versão do seu VSCode para a versão mais nova do TypeScript.
+
+## Decorators estão finalmente estáveis
+
+Por muitos anos, o TS usava uma implementação própria dos [decorators](/javascript-decorators/), uma proposta que já comentamos aqui no blog, com a promoção dessa proposta para o estágio 3 no TC39, agora é possível usar os decorators sem precisar setar a flag `--experimentalDecorators` ou a opção de mesmo nome no `tsconfig.json`.
+
+Para explicarmos o que é um decorator em sumário, imagine que temos uma classe assim:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+}
+
+const p = new Person("Ray");
+p.greet();
+```
+
+E queremos logar o que acontece dentro da função greet para propósitos de debug. No geral a proposta mais comum é encher o código de `console.log` dessa forma:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    greet() {
+        console.log("LOG: Entering method.");
+
+        console.log(`Hello, my name is ${this.name}.`);
+
+        console.log("LOG: Exiting method.")
+    }
+}
+```
+
+É bem comum fazer isso em quase todo o lugar, porém imagine se a gente precisasse disso para todos os métodos... Ia ser bastante complicado. E então os decorators aparecem.
+
+Decorators são uma **meta-funcionalidade** de várias linguagens que permite que você modifique comportamentos padrões de funções e classes de acordo com uma anotação no formato `@nome` , um decorator é uma função comum, porém com uma assinatura específica:
+
+```ts
+function debug (originalMethod: any, _context: any) {
+	return function (this: any, ...args: any[]) {
+    	console.log(`[DEBUG] Entering method`)
+        const result = originalMethod.call(this, ...args)
+        console.log(`[DEBUG] Exiting method`)
+        return result
+    }
+}
+```
+
+Pense nele como uma função que retorna um método substituto que vai ser utilizado no lugar do método original. Vamos sempre retornar uma função que leva dois parâmetros, um `this` e o `args`, que são o escopo e os argumentos da função original.
+
+> Uma nota importante: arrow functions não podem ter um parâmetro `this` porque o escopo dessas funções será léxico e não lógico, ou seja, o compilador vai associar o `this` automaticamente.
+
+Já a função superior vai ter dois outros parâmetros, o `originalMethod` que é a função do método original passada por referência, e um contexto que é um objeto com várias informações sobre o método decorado, como nome, etc.
+
+Com isso, podemos modificar o nosso método original para conter a seguinte anotação:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    @debug
+    greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+}
+
+const p = new Person("Ray");
+p.greet();
+
+// Output:
+//
+//   [DEBUG] Entering method.
+//   Hello, my name is Ray.
+//   [DEBUG] Exiting method.
+```
+
+E podemos fazer a mesma coisa para qualquer outra função, isso faz dos decorators uma das propostas mais poderosas que existem no TypeScript até agora.
+
+Mas, como você deve ter percebido, temos um argumento não utilizado na função original, o `context`, esse objeto contém várias informações sobre o método que foi chamado e o TS tem um tipo específico para ele, o `ClassMethodDecoratorContext`, então vamos tipar o nosso decorator da forma correta:
+
+```ts
+function debug (originalMethod: any, context: ClassMethodDecoratorContext) {
+	const methodName = String(context.name)
+	return function (this: any, ...args: any[]) {
+    	console.log(`[DEBUG] Entering method ${methodName}`)
+        const result = originalMethod.call(this, ...args)
+        console.log(`[DEBUG] Exiting method ${methodName}`)
+        return result
+    }
+}
+```
+
+Veja que, além de logar que entramos e saímos do método, vamos também logar o nome do método. Mas isso não é tudo, o contexto também tem uma função chamada `addInitializer` que já comentamos [no artigo sobre decorators](/javascript-decorators/). Esse método é uma forma de criarmos um hook no início do construtor (ou no próprio bloco de inicialização estática de uma classe). Um exemplo clássico do JS:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+        this.greet = this.greet.bind(this);
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+}
+```
+
+Uma outra forma de escrever esse código é inicializar o método `greet` como uma arrow function:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    greet = () => {
+        console.log(`Hello, my name is ${this.name}.`);
+    };
+}
+```
+
+Esse padrão é muito utilizado quando queremos ter certeza que o `this` não vai ser re-associado com a função quando chamarmos `greet` fora de contexto. E isso pode ser feito através do `addInitializer` para chamar esse método `bind` para nós em todos os casos:
+
+```ts
+function bound(originalMethod: any, context: ClassMethodDecoratorContext) {
+    const methodName = context.name;
+    if (context.private) {
+        throw new Error(`'bound' cannot decorate private properties like ${methodName as string}.`);
+    }
+    context.addInitializer(function () {
+        this[methodName] = this[methodName].bind(this);
+    });
+}
+```
+
+Perceba que, nesse decorator, não estamos retornando um método substituto, isso significa que vamos deixar o método original do jeito que ele está e só vamos criar o bind do `this` para o método `greet`, e podemos usar mais de um decorator no mesmo método sem problemas:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    @bound
+    @debug
+    greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+}
+
+const p = new Person("Ray");
+const greet = p.greet;
+
+greet();
+```
+
+Como você pode ver, os dois decorators foram estacados um sobe o outro, é importante notar isso porque eles rodam em order reversa, ou seja, `@bound` vai decorar o que for retornado de `@debug` e assim por diante.
+
+> Pense que eles são aplicados de baixo para cima.
+
+Outra nota, se você preferir, é possível colocar eles na mesma linha também:
+
+```ts
+    @bound @loggedMethod greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+```
+
+Para deixar ainda mais interessante, podemos criar um wrapper de um decorator, fazendo com que ela seja uma factory de decorators, por exemplo, se quisermos mudar o prefixo da nossa mensagem de log:
+
+```ts
+function addLog (prefix = '[DEBUG]') {
+    return function debug (originalMethod: any, _context: any) {
+    	const methodName = String(context.name)
+        return function (this: any, ...args: any[]) {
+            console.log(`${prefix} Entering method ${methodName}`)
+            const result = originalMethod.call(this, ...args)
+            console.log(`${prefix} Exiting method ${methodName}`)
+            return result
+        }
+    }
+}
+```
+
+Então podemos usar esse decorator como uma função:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    @addLog("")
+    greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+}
+
+const p = new Person("Ray");
+p.greet();
+
+// Output:
+//
+//   Entering method 'greet'.
+//   Hello, my name is Ray.
+//   Exiting method 'greet'.
+```
+
+Decorators podem ser utilizados em mais do que métodos, podemos adicionar esses decorators em propriedades, getters, setters e até mesmo classes.
+
+### E o `--experimentalDecorators`
+
+O time do TS diz que a flag `experimentalDecorators` vai continuar existindo por enquanto, e que não há planos de remove-la da linguagem no futuro próximo. Essa flag era super importante antes dessa proposta e era a única forma que tínhamos de usar decorators.
+
+Usar os decorators sem a flag vai ser totalmente válido como código TypeScript ou JS normal, porém, a proposta do TC39 (essa proposta) não é compatível com a outra flag `emitDecoratorMetadata` que permitia que você adicionasse decorators em parâmetros, mas existe uma adição à proposta original do TC39 que propõe a adição em parâmetros também.
+
+### Tipando decorators
+
+Nos exemplos anteriores, fizemos a tipagem dos decorators `debug`, `addLog` e `bound` de forma que eles ficassem bem simples e didáticos, mas o ideal é realizar a tipagem de cada parte do decorator para um tipo bastante estrito.
+
+Se formos pegar o nosso exemplo do `debug`:
+
+```ts
+function debug (originalMethod: any, context: ClassMethodDecoratorContext) {
+	const methodName = String(context.name)
+	return function (this: any, ...args: any[]) {
+    	console.log(`[DEBUG] Entering method ${methodName}`)
+        const result = originalMethod.call(this, ...args)
+        console.log(`[DEBUG] Exiting method ${methodName}`)
+        return result
+    }
+}
+```
+
+Temos aqui dois parâmetros super importantes que temos que tipar, o primeiro é o método original, que é uma função, ele pode ser definido como um tipo dessa assinatura:
+
+```ts
+type OriginalMethod<This, Args extends any[], Return> = (this: This, ...args: Args) => Return
+```
+
+Veja que estamos separando a entrada e a saída, com os genéricos `Return`, `This` e `Args`, dessa forma podemos passar exatamente quais são os valores que vamos mandar para a função.
+
+Depois podemos tipar o nosso decorator da seguinte forma:
+
+```ts
+
+type OriginalMethod<
+	This, 
+    Args extends any[], 
+    Return
+> = (this: This, ...args: Args) => Return
+    
+function debug<This, Args extends any[], Return> (
+  originalMethod: OriginalMethod<This, Args, Return>,
+  context: ClassMethodDecoratorContext<This, OriginalMethod<This, Args, Return>>
+) {
+  const methodName = String(context.name)
+  return function (this: This, ...args: Args): Return {
+    console.log(`[DEBUG] Entering method ${methodName}`)
+    const result = originalMethod.call(this, ...args)
+    console.log(`[DEBUG] Exiting method ${methodName}`)
+    return result
+  }
+}
+```
+
+E essa é a forma que tipamos corretamente qualquer decorator.
+
+## Tipo const para parâmetros de tipos
+
+Um uso bastante comum de tipos do TS é para obter valores definidos para uma lista ou um primitivo, por exemplo, quando temos uma função do tipo abaixo:
+
+```ts
+const routerFactory = <T>(routes: T[]) => ({
+  reRoute(original:T, newRoute: T) {
+    return newRoute
+  }
+})
+```
+
+O tipo que vamos receber dessa função quando chamarmos vai ser que `T` é uma `string` portanto vamos receber um array de strings e devolver uma string. Mas só podemos adicionar um redirect nas nossas rotas que já existem, então podemos criar um array e passar essas rotas para a função:
+
+```ts
+const routerFactory = <T>(routes: T[]) => ({
+  reRoute(original:T, newRoute: T) {
+    return newRoute
+  }
+})
+
+const router = routerFactory([
+  '/',
+  '/about',
+  '/contact',
+  '/blog',
+  '/blog/:id',
+])
+```
+
+Mas ainda sim, podemos chamar nossa função com qualquer string, porque o tipo ainda está sendo resolvido para `string`. Isso significa que podemos passar qualquer coisa:
+
+```ts
+router.reRoute('lkjkljklj', 'lkjlkjlkjlkj') // funciona
+```
+
+Uma saída seria usar o modificador `as const` mas para isso a nossa função precisaria aceitar um objeto de opções com as rotas e também temos que lembrar de fazer isso todas as vezes que formos instanciar essa funcionalidade. Porém, no 5.0, podemos adicionar uma anotação de tipos chamado `const` :
+
+```ts
+const routerFactory = <const T>(routes: T[]) => ({
+  reRoute(original:T, newRoute: T) {
+    return newRoute
+  }
+})
+
+const router = routerFactory([
+  '/',
+  '/about',
+  '/contact',
+  '/blog',
+  '/blog/:id',
+])
+```
+
+Agora nosso `routes` será tipado como uma união de todas as strings do array `("/"|"/about"|"/contact"|"/blog"|"/blog/:id")[]` de forma que as strings internas precisam ser membros desse array para serem válidas.
+
+Porém tenha em mente que você pode estar pensando em fazer algo assim:
+
+```ts
+const availableRoutes = [
+  '/',
+  '/about',
+  '/contact',
+  '/blog',
+  '/blog/:id',
+]
+
+const routerFactory = <const T>(routes: T[]) => ({
+  reRoute(original:T, newRoute: T) {
+    return newRoute
+  }
+})
+
+const router = routerFactory(availableRoutes)
+```
+
+Neste caso, `availableRoutes` vai ser inferido como um array de strings. Portanto a inferência do `const` não vai fazer diferença aqui, para esse código funcionar como o anterior, temos que adicionar `as const` no array inicialmente:
+
+```ts
+const availableRoutes = [
+  '/',
+  '/about',
+  '/contact',
+  '/blog',
+  '/blog/:id',
+] as const
+```
+
+Mas também vamos ter que fazer uma modificação na nossa função, já que agora o nosso array não é mais um array de strings, mas um union type, dessa forma ele está sendo tipado como um subtipo de `readonly string[]`, portanto temos que dizer isso para a factory:
+
+```ts
+const availableRoutes = [
+  '/',
+  '/about',
+  '/contact',
+  '/blog',
+  '/blog/:id',
+] as const 
+
+const routerFactory = <const T extends readonly string[]>(routes: T) => ({
+  reRoute(original:T, newRoute: T) {
+    return newRoute
+  }
+})
+
+const router = routerFactory(availableRoutes)
+```
+
+Mas agora vamos ter um problema se quisermos chamar `reRoute` porque T vai ser o array em si, e não as strings individuais desse array, para isso vamos precisar descer um nível abaixo e tipar também `reRoute` como um genérico U que vai ser uma das strings de T:
+
+```ts
+const availableRoutes = [
+  '/',
+  '/about',
+  '/contact',
+  '/blog',
+  '/blog/:id',
+] as const 
+
+const routerFactory = <const T extends readonly string[]>(routes: T) => ({
+  reRoute<const U extends T[number]>(original:U, newRoute: U) {
+    return newRoute
+  }
+})
+
+const router = routerFactory(availableRoutes)
+```
+
+Agora teremos o mesmo resultado se chamarmos a função, ou seja, precisamos passar duas strings que estejam dentro do array de rotas disponíveis enviado inicialmente.
+
+## Todos os enums são unions
+
+Quando começamos a usar enums no TS, eles não era nada mais do que uma lista direta de números, cada número associado em nossos corações a uma label, mas para o TypeScript eles eram todos números, isso significa que um enum desse tipo:
+
+```ts
+enum E {
+    Foo = 10,
+    Bar = 20,
+}
+```
+
+Não veria diferença em receber qualquer um dos valores (foo ou bar) dentro de uma função, desde que o tipo do parâmetro fosse `E`:
+
+```ts
+function takeValue(e: E) {}
+
+takeValue(E.Foo); // funciona
+takeValue(123);   // erro!
+```
+
+No TS 2.0 foram incluídos os enums como strings, esses permitem que façamos uma gama de manipulações de tipos e possamos filtrar, excluir, pegar um subset e várias outras operações para diminuir a quantidade de tipos aceitados como eu faço, por exemplo, [no meu código da enigma](https://github.com/khaosdoctor/enigmajs/blob/main/src/types.ts#L6).
+
+Isso significava que todos os enums que fossem strings eram tratados como um union de todas as strings de seus membros, e não como apenas `number`, porém quando tínhamos enums que eram iniciados por funções ou valores não computáveis em tempo de desenvolvimento, o TS ignorava a nova implementação e ia para a implementação antiga, perdendo as vantagens dos tipos:
+
+```ts
+enum E {
+    Blah = Math.random()
+}
+```
+
+Na nova versão do TS, o compilador está bem mais inteligente e já consegue inferir todos os tipos de qualquer enum como um union type!
+
+## Outras mudanças
+
+-   A chave `extends` dentro do `tsconfig.json` agora suporta múltiplos arquivos de configurações permitindo estender configs de vários lugares
+-   Valor `bundler` é agora uma opção para o `moduleResolution` no `tsconfig.json` que modela a forma como bundlers como webpack funcionam para resolver módulos.
+-   Novas flags customizadas para configurar como cada tipo de import funciona
+-   Suporte para `export type * as foo from 'pacote.ts'`
+-   Suporte para [satisfies](/ts-satisfies/) e [`@overload`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#overload-support-in-jsdoc) no JSDoc
+-   [Melhorias](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#speed-memory-and-package-size-optimizations) de performance entre 80 e 90% e redução do tamanho do pacote em 58% (o TS ficou menor e mais rápido, MUITO mais rápido)
+
+Veja a [documentação oficial](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta) no site do TS para uma lista mais completa com mudanças menores e até mais!
