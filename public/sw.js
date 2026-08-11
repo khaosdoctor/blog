@@ -8,7 +8,12 @@
  * name changes whenever their content does, and everything else falls through
  * to the network untouched.
  */
-const VERSION = 'v1'
+// The release version, handed over by the registration URL (/sw.js?v=1.2.3) so
+// this file stays a plain static asset with no build step. A new release changes
+// the script URL, which is what makes the browser install a new worker at all,
+// and changes every cache name, so `activate` drops the previous release's
+// entries instead of letting them pile up on a reader's disk forever.
+const VERSION = new URL(self.location.href).searchParams.get('v') ?? 'dev'
 const PAGES = `pages-${VERSION}`
 const ASSETS = `assets-${VERSION}`
 const OFFLINE_URL = '/offline/'

@@ -4,6 +4,9 @@
 import 'katex/dist/katex.min.css'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
+// Baked in at build time. release-please bumps this from conventional commits,
+// so the footer always names the release the deployed site was built from.
+import { version } from '../../package.json'
 
 interface Props {
   title: string
@@ -80,6 +83,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     </main>
     <footer>
       <p>Lucas Santos</p>
+      <p class="version">Version: {version}</p>
     </footer>
     {
       analyticsToken && (
@@ -90,12 +94,16 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
         />
       )
     }
-    <script>
+    <script is:inline define:vars={{ version }}>
       // Registers the offline cache. Everything above works without it; this
       // only makes already-read posts available with no connection.
+      //
+      // The version in the URL is what triggers an update: browsers install a
+      // new worker only when the script URL or its bytes change, and sw.js
+      // reads it back to name its caches per release.
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {
+          navigator.serviceWorker.register('/sw.js?v=' + version).catch(() => {
             // A failed registration must never break the page.
           })
         })
@@ -181,6 +189,11 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     border-block-start: 1px solid var(--rule);
     color: var(--muted);
     font-size: 0.85rem;
+  }
+
+  footer .version {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
   }
 
   h1,
