@@ -23,6 +23,10 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+# Obsidian's own vault config. workspace.json rewrites itself every time a pane
+# moves, so tracking it means a dirty tree after simply reading a post.
+.obsidian/
+
 # migration working artifacts (inventory, review lists, the Ghost export)
 .migration/
 # open questions and decisions for Lucas, not part of the site
