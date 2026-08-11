@@ -49,11 +49,20 @@ for (const slug of expected) {
 const GHOST_CLASS = /\bkg-[a-z-]+\b/
 const LEAKED_TAG = /&#60;(?:Figure|Video|Bookmark|CourseCTA|RawEmbed|Sidenote|MarginNote|YouTube|Vimeo)\b/
 
+/**
+ * The Ghost install this content came from was compromised: every post had a
+ * script appended that fetched remote JavaScript and ran it with new Function().
+ * The migration does not read the field that held it, but "does not" is worth
+ * enforcing rather than believing, because the export is attacker-touched data.
+ */
+const REMOTE_LOADER = /new Function\s*\(|gist\.githubusercontent|eval\s*\(\s*await/
+
 for (const page of pages) {
   const html = readFileSync(page, 'utf8')
   if (GHOST_CLASS.test(html)) failures.push({ check: 'leftover Ghost class', detail: page })
   if (LEAKED_TAG.test(html)) failures.push({ check: 'unrendered component tag', detail: page })
   if (html.includes('__GHOST_URL__')) failures.push({ check: 'unresolved Ghost URL', detail: page })
+  if (REMOTE_LOADER.test(html)) failures.push({ check: 'remote script loader in output', detail: page })
 }
 
 // 4. The feeds, the sitemap and the scheduler manifest all exist and parse.
