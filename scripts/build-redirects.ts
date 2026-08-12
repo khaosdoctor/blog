@@ -1,16 +1,4 @@
-/**
- * Generates src/data/redirects.ts, the list the build turns into stub pages.
- *
- *   node scripts/build-redirects.ts
- *
- * Post URLs are NOT in here: every slug is preserved exactly, so they need no
- * redirect at all. What moved is Ghost's taxonomy, plus the URLs of newsletter
- * issues that no longer exist as posts.
- *
- * Output is committed rather than generated at build time, because two of the
- * inputs (the review lists in .migration/) are local working artifacts that CI
- * never sees. Re-run this whenever content moves.
- */
+// Regenerates src/data/redirects.ts. Run when content moves.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 

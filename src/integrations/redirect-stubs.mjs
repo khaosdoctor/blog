@@ -1,19 +1,5 @@
-/**
- * Writes a stub page for every entry in src/data/redirects.ts.
- *
- * Static hosting has no server, so there is no way to answer an old URL with a
- * real 301: GitHub Pages has no redirect config, no _redirects file, nothing.
- * A stub is the working substitute, a meta-refresh, a canonical pointing at the
- * target, and a visible link for anyone whose browser ignores the refresh.
- * Google treats meta-refresh as a redirect and passes the ranking through.
- *
- * An integration rather than a route, because the stubs live at paths
- * a second catch-all route would fight [...slug].astro over, and because they
- * must stay out of the sitemap, a redirect is not a page worth indexing.
- *
- * The build fails if a target does not exist in the output. A redirect into a
- * 404 is worse than no redirect: it wastes crawl budget and strands the reader.
- */
+// Meta-refresh stubs for every moved URL: static hosting cannot issue a 301.
+// See docs/architecture.md.
 import { mkdir, readdir, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'

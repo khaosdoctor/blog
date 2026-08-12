@@ -31,6 +31,8 @@ interface Props {
   series?: string
   noindex?: boolean
   alternates?: Alternate[]
+  /** Markdown twin of this page, for readers that are not browsers. */
+  markdown?: string
   /** The section this page belongs to, so the breadcrumb has a middle step. */
   section?: { name: string; url: string }
 }
@@ -49,6 +51,7 @@ const {
   noindex = false,
   alternates = [],
   section,
+  markdown,
 } = Astro.props
 
 const absoluteImage = image ? new URL(image, canonical).href : undefined
@@ -89,6 +92,7 @@ const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 <meta name="author" content={AUTHOR_NAME} />
 <meta name="robots" content={robots} />
 <link rel="canonical" href={canonical} />
+{markdown && <link rel="alternate" type="text/markdown" href={markdown} />}
 
 {alternates.map((alt) => <link rel="alternate" hreflang={alt.lang} href={alt.href} />)}
 {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault.href} />}

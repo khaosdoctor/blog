@@ -1,13 +1,4 @@
-/**
- * Offline reading.
- *
- * Hand-written instead of @vite-pwa/astro, which caps its peer range
- * at Astro 5 and refuses to install on Astro 7. This is the whole feature: HTML
- * is network-first so a reader always gets the current version of a post when
- * online and a cached one when not, hashed assets are cache-first because their
- * name changes whenever their content does, and everything else falls through
- * to the network untouched.
- */
+// Offline reading. HTML network-first, hashed assets cache-first.
 // The release version, handed over by the registration URL (/sw.js?v=1.2.3) so
 // this file stays a plain static asset with no build step. A new release changes
 // the script URL, which is what makes the browser install a new worker at all,

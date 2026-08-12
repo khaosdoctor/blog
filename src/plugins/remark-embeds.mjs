@@ -1,20 +1,5 @@
-/**
- * A bare URL on its own line becomes the right thing, decided by host:
- *
- *   https://www.youtube.com/watch?v=abc123   -> <YouTube id="abc123" />
- *   https://vimeo.com/476516779              -> <Vimeo id="476516779" />
- *   https://example.com/some-article         -> <Bookmark ... /> if we have
- *                                               metadata for it, else untouched
- *
- * Written this way so posts contain no embed syntax to remember: paste a link on
- * its own line and it upgrades itself. Obsidian shows a plain link, which is the
- * correct fallback everywhere the plugin does not run.
- *
- * Bookmark metadata comes from content/bookmarks.json, captured out of Ghost's
- * own cached card data during migration. A URL that is not in there stays a
- * plain link rather than triggering a build-time fetch, the build makes no
- * network requests at all, which is what keeps it deterministic and offline.
- */
+// A bare URL or `![](url)` on its own line becomes an embed, decided by host.
+// See docs/architecture.md.
 import { readFileSync } from 'node:fs'
 
 /** Read once per process, not per file. */
