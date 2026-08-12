@@ -3,8 +3,8 @@
  *
  * Every post is written in one language (`lang` in its frontmatter). This script
  * translates the ones that changed into the other locale and writes them to
- * content/translated/<locale>/, which is NOT opened in Obsidian: the writing
- * view only ever shows source-language files.
+ * content/translated/<locale>/<slug>/index.mdx, which is NOT opened in Obsidian:
+ * the writing view only ever shows source-language files.
  *
  *   node scripts/translate.ts [--locale en] [--only slug] [--all] [--dry-run]
  *
@@ -12,19 +12,41 @@
  * generated file by hand makes it a human override: the script detects that and
  * never overwrites it.
  *
- * Needs ANTHROPIC_API_KEY. It refuses to run without one rather than silently
- * producing nothing.
+ * The model is configured by environment, so switching to a smaller or local model is a
+ * matter of exporting different variables:
+ *
+ *   TRANSLATE_PROVIDER    anthropic (default) | openai-compatible
+ *   TRANSLATE_MODEL       default claude-opus-5
+ *   TRANSLATE_BASE_URL    required by openai-compatible, e.g.
+ *                         https://api.groq.com/openai/v1,
+ *                         https://openrouter.ai/api/v1,
+ *                         http://localhost:11434/v1
+ *   TRANSLATE_MAX_TOKENS  default 64000, lower it for models with a smaller cap
+ *   TRANSLATE_API_KEY     falls back to ANTHROPIC_API_KEY
+ *
+ * It refuses to run without a key rather than silently producing nothing. A local
+ * Ollama is the exception: it needs no key, so openai-compatible allows none.
  */
 import Anthropic from '@anthropic-ai/sdk'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 
 const SOURCE_DIR = 'content/blog'
 const OUTPUT_ROOT = 'content/translated'
 const CACHE_FILE = join(OUTPUT_ROOT, '.translation-cache.json')
-const MODEL = 'claude-opus-5'
+
+const PROVIDERS = ['anthropic', 'openai-compatible'] as const
+type Provider = (typeof PROVIDERS)[number]
+
+const PROVIDER = (process.env.TRANSLATE_PROVIDER ?? 'anthropic') as Provider
+const MODEL = process.env.TRANSLATE_MODEL ?? 'claude-opus-5'
+const BASE_URL = (process.env.TRANSLATE_BASE_URL ?? '').replace(/\/$/, '')
+const MAX_TOKENS = Number(process.env.TRANSLATE_MAX_TOKENS ?? 64000)
+// The specific variable wins: an ANTHROPIC_API_KEY left over in the shell should
+// not be sent to Groq or OpenRouter.
+const API_KEY = process.env.TRANSLATE_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? ''
 
 type Locale = 'pt' | 'en'
 
@@ -42,6 +64,14 @@ type CacheEntry = {
 }
 
 type Cache = Record<string, CacheEntry>
+
+type Completion = {
+  text: string
+  /** Set when the model declined the post; it is skipped instead of written. */
+  refusal: string | null
+  /** Token counts, already formatted for the log line. */
+  usage: string
+}
 
 function parseArgs() {
   const argv = process.argv.slice(2)
@@ -65,6 +95,12 @@ function hash(value: string): string {
 function readCache(): Cache {
   if (!existsSync(CACHE_FILE)) return {}
   return JSON.parse(readFileSync(CACHE_FILE, 'utf8')) as Cache
+}
+
+/** One post is one folder, so the file to read is the index inside it. */
+function sourceFile(slug: string): string | null {
+  const candidates = [join(SOURCE_DIR, slug, 'index.mdx'), join(SOURCE_DIR, slug, 'index.md')]
+  return candidates.find((file) => existsSync(file)) ?? null
 }
 
 /** Frontmatter stays machine-readable, so split it off and translate only prose. */
@@ -116,6 +152,92 @@ Here is the post body:
 ${body}`
 }
 
+async function completeWithAnthropic(system: string, user: string): Promise<Completion> {
+  const client = new Anthropic({ apiKey: API_KEY })
+  // Streaming: a long post plus thinking can run well past the non-streaming
+  // HTTP timeout.
+  const stream = client.messages.stream({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: user }],
+  })
+
+  const message = await stream.finalMessage()
+  const used = message.usage
+  return {
+    text: message.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map((block) => block.text)
+      .join(''),
+    refusal:
+      message.stop_reason === 'refusal'
+        ? (message.stop_details?.category ?? 'no category')
+        : message.stop_reason === 'max_tokens'
+          ? 'output hit max_tokens and is truncated'
+          : null,
+    usage: `${used.input_tokens} in, ${used.output_tokens} out, ${used.cache_read_input_tokens ?? 0} cached`,
+  }
+}
+
+type ChatCompletion = {
+  choices?: { message?: { content?: string; refusal?: string | null }; finish_reason?: string }[]
+  usage?: { prompt_tokens?: number; completion_tokens?: number }
+}
+
+/** Groq, OpenRouter and Ollama all serve this same shape, so one path covers all three. */
+async function completeWithOpenAICompatible(system: string, user: string): Promise<Completion> {
+  const response = await fetch(`${BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      ...(API_KEY.length === 0 ? {} : { authorization: `Bearer ${API_KEY}` }),
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user },
+      ],
+    }),
+  })
+
+  if (!response.ok) throw new Error(`${BASE_URL} returned ${response.status}: ${await response.text()}`)
+
+  const data = (await response.json()) as ChatCompletion
+  const choice = data.choices?.[0]
+  if (choice === undefined) throw new Error(`${BASE_URL} returned no choices`)
+
+  // A truncated translation is treated as a refusal so it is skipped rather than
+  // written and cached as finished. The body marker appears near the start of the
+  // response, so the existing validity check cannot see a cut-off tail.
+  const refused =
+    choice.message?.refusal ??
+    (choice.finish_reason === 'content_filter'
+      ? 'content_filter'
+      : choice.finish_reason === 'length'
+        ? 'output hit the token limit and is truncated'
+        : null)
+  const used = data.usage
+  return {
+    text: choice.message?.content ?? '',
+    refusal: refused,
+    usage: `${used?.prompt_tokens ?? 0} in, ${used?.completion_tokens ?? 0} out`,
+  }
+}
+
+function complete(system: string, user: string): Promise<Completion> {
+  switch (PROVIDER) {
+    case 'anthropic':
+      return completeWithAnthropic(system, user)
+    case 'openai-compatible':
+      return completeWithOpenAICompatible(system, user)
+    default:
+      throw new Error(`unreachable provider: ${PROVIDER satisfies never}`)
+  }
+}
+
 function parseResponse(text: string): { fields: Map<string, string>; body: string } {
   const bodyIndex = text.indexOf('<<<BODY>>>')
   const fieldsBlock = text.slice(text.indexOf('<<<FRONTMATTER>>>') + '<<<FRONTMATTER>>>'.length, bodyIndex)
@@ -151,30 +273,41 @@ function rebuildFrontmatter(original: string, translated: Map<string, string>, l
 }
 
 const args = parseArgs()
-const apiKey = process.env.ANTHROPIC_API_KEY
 
-if (apiKey === undefined || apiKey.length === 0) {
-  console.error('ANTHROPIC_API_KEY is not set. Refusing to run so the build does not silently skip translations.')
+if (!PROVIDERS.includes(PROVIDER)) {
+  console.error(`TRANSLATE_PROVIDER must be one of ${PROVIDERS.join(', ')}, got "${PROVIDER}".`)
   process.exit(1)
 }
 
-const client = new Anthropic()
+if (PROVIDER === 'anthropic' && API_KEY.length === 0) {
+  console.error(
+    'Neither TRANSLATE_API_KEY nor ANTHROPIC_API_KEY is set. Refusing to run so the build does not silently skip translations.',
+  )
+  process.exit(1)
+}
+
+if (PROVIDER === 'openai-compatible' && BASE_URL.length === 0) {
+  console.error('TRANSLATE_BASE_URL is not set. Point it at the /v1 root of the OpenAI-compatible endpoint.')
+  process.exit(1)
+}
+
 const outputDir = join(OUTPUT_ROOT, args.locale)
 mkdirSync(outputDir, { recursive: true })
 
 const cache = readCache()
-const sources = readdirSync(SOURCE_DIR)
-  .filter((name) => name.endsWith('.mdx') || name.endsWith('.md'))
-  .filter((name) => args.only === null || name.startsWith(`${args.only}.`))
+const sources = readdirSync(SOURCE_DIR, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .filter((slug) => args.only === null || slug === args.only)
+  .map((slug) => ({ slug, file: sourceFile(slug) }))
+  .filter((post): post is { slug: string; file: string } => post.file !== null)
 
 const changed: { slug: string; file: string; raw: string; sourceHash: string }[] = []
 const overrides: string[] = []
 
-for (const name of sources) {
-  const file = join(SOURCE_DIR, name)
-  const raw = readFileSync(file, 'utf8')
+for (const post of sources) {
+  const raw = readFileSync(post.file, 'utf8')
   const { frontmatter } = splitFrontmatter(raw)
-  const slug = name.replace(/\.mdx?$/, '')
   const sourceLang = (frontmatterValue(frontmatter, 'lang') ?? 'pt') as Locale
 
   // A post already written in the target language needs no translation.
@@ -182,23 +315,23 @@ for (const name of sources) {
   if (frontmatterValue(frontmatter, 'draft') === 'true') continue
 
   const sourceHash = hash(raw)
-  const entry = cache[slug]
-  const target = join(outputDir, `${slug}.mdx`)
+  const entry = cache[post.slug]
+  const target = join(outputDir, post.slug, 'index.mdx')
 
   if (entry !== undefined && existsSync(target)) {
     const currentOutputHash = hash(readFileSync(target, 'utf8'))
     // Someone edited the generated file: their version wins, forever.
     if (currentOutputHash !== entry.outputHash) {
-      overrides.push(slug)
+      overrides.push(post.slug)
       continue
     }
     if (entry.sourceHash === sourceHash && !args.all) continue
   }
 
-  changed.push({ slug, file, raw, sourceHash })
+  changed.push({ slug: post.slug, file: post.file, raw, sourceHash })
 }
 
-console.log(`${sources.length} source posts, ${changed.length} to translate into ${args.locale}`)
+console.log(`${sources.length} source posts, ${changed.length} to translate into ${args.locale} with ${MODEL}`)
 if (overrides.length > 0) console.log(`skipping ${overrides.length} hand-edited translations: ${overrides.join(', ')}`)
 if (args.dryRun) {
   console.log(changed.map((post) => post.slug).join('\n'))
@@ -216,33 +349,19 @@ for (const post of changed) {
     fields.set(key, value)
   }
 
-  // Streaming: a long post plus thinking can run well past the non-streaming
-  // HTTP timeout.
-  const stream = client.messages.stream({
-    model: MODEL,
-    max_tokens: 64000,
-    system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-    messages: [{ role: 'user', content: buildUserPrompt(body, fields, sourceLang, args.locale) }],
-  })
+  const completion = await complete(SYSTEM_PROMPT, buildUserPrompt(body, fields, sourceLang, args.locale))
 
-  const message = await stream.finalMessage()
-
-  if (message.stop_reason === 'refusal') {
-    console.error(`refused: ${post.slug} (${message.stop_details?.category ?? 'no category'}), skipped`)
+  if (completion.refusal !== null) {
+    console.error(`refused: ${post.slug} (${completion.refusal}), skipped`)
     continue
   }
 
-  const text = message.content
-    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-    .map((block) => block.text)
-    .join('')
-
-  if (!text.includes('<<<BODY>>>')) {
+  if (!completion.text.includes('<<<BODY>>>')) {
     console.error(`unparseable response for ${post.slug}, skipped`)
     continue
   }
 
-  const parsed = parseResponse(text)
+  const parsed = parseResponse(completion.text)
 
   // The model is untrusted output, not reviewed migration content: run it through
   // the same denylist captions get before it's allowed anywhere near set:html.
@@ -253,7 +372,8 @@ for (const post of changed) {
   }
 
   const output = `---\n${rebuildFrontmatter(frontmatter, parsed.fields, args.locale, post.slug)}\n---\n\n${parsed.body}\n`
-  const target = join(outputDir, `${post.slug}.mdx`)
+  const target = join(outputDir, post.slug, 'index.mdx')
+  mkdirSync(dirname(target), { recursive: true })
   writeFileSync(target, output)
 
   cache[post.slug] = {
@@ -263,10 +383,7 @@ for (const post of changed) {
   }
   writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2))
 
-  const used = message.usage
-  console.log(
-    `${post.slug} -> ${args.locale} (${used.input_tokens} in, ${used.output_tokens} out, ${used.cache_read_input_tokens ?? 0} cached)`,
-  )
+  console.log(`${post.slug} -> ${args.locale} (${completion.usage})`)
 }
 
 console.log('done')

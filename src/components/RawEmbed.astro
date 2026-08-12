@@ -37,6 +37,13 @@ function patchFrameAttrs(source: string, frameTitle: string): string {
       /<(iframe|embed)(?![^>]*\breferrerpolicy=)([^>]*)>/gi,
       '<$1$2 referrerpolicy="strict-origin-when-cross-origin">',
     )
+    // Without a sandbox the framed third party can navigate the reader's tab
+    // away from the article. allow-same-origin is deliberately absent, and
+    // top-navigation is denied by default once sandbox is present.
+    .replace(
+      /<(iframe)(?![^>]*\bsandbox=)([^>]*)>/gi,
+      '<$1$2 sandbox="allow-scripts allow-popups allow-presentation">',
+    )
 }
 ---
 

@@ -14,9 +14,10 @@ on:
       - 'content/blog/**'
   workflow_dispatch:
 
+# The model-driven step gets read-only. Only the last step, which is our own
+# code, gets write, so a compromised action cannot commit to main by itself.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: translate
@@ -26,7 +27,7 @@ jobs:
   translate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 2
@@ -43,7 +44,7 @@ jobs:
 
       - name: Translate changed posts
         if: steps.auth.outputs.present == 'true'
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@239e3a730883eeb5c53db12b0fc9573b3024b126 # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
@@ -58,8 +59,15 @@ jobs:
               A human edited it and their version wins.
             - Do not touch anything outside content/translated.
 
+      - name: Reject unsafe markup before committing
+        if: steps.auth.outputs.present == 'true'
+        run: node scripts/check-translations.ts
+
       - name: Open a PR with the translations
         if: steps.auth.outputs.present == 'true'
+        permissions:
+          contents: write
+          pull-requests: write
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
