@@ -20,7 +20,10 @@ const blog = defineCollection({
     // THE SECTION, exactly one per post. Tags stay separate and many.
     category: z.string(),
     tags: z.array(z.string()).default([]),
+    // A short slug you can remember, e.g. `grpc`. It is also the series URL.
     series: z.string().optional(),
+    // The display title. Write it on the first part only.
+    seriesName: z.string().optional(),
     seriesOrder: z.number().optional(),
     // Doubles as the hover-preview excerpt and the meta description.
     description: z.string(),
@@ -31,6 +34,8 @@ const blog = defineCollection({
     draft: z.boolean().default(true),
     // Preserved from Ghost; everything renders public for now.
     visibility: z.enum(['public', 'members', 'paid']).default('public'),
+    /** Thin or placeholder pages: keep the URL working, keep it out of search. */
+    noindex: z.boolean().default(false),
     canonicalUrl: z.string().url().optional(),
     seoTitle: z.string().optional(),
     seoDescription: z.string().optional(),

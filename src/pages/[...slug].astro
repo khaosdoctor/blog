@@ -10,6 +10,7 @@ import HoverPreviews from '../components/HoverPreviews.astro'
 import MarginNote from '../components/MarginNote.astro'
 import MissingImage from '../components/MissingImage.astro'
 import RawEmbed from '../components/RawEmbed.astro'
+import SeriesToc from '../components/SeriesToc.astro'
 import Sidenote from '../components/Sidenote.astro'
 import Tweet from '../components/Tweet.astro'
 import Video from '../components/Video.astro'
@@ -89,6 +90,7 @@ const alternates = [
   alternates={alternates}
   section={{ name: post.data.category, url: `/${post.data.category}/` }}
   markdown={new URL(`${Astro.url.pathname}index.md`, Astro.site).href}
+  noindex={post.data.noindex}
 >
   <article>
     <h1>{post.data.title}</h1>
@@ -108,10 +110,13 @@ const alternates = [
       }
     </p>
     {
+      post.data.series && <SeriesToc series={post.data.series} current={post.id} locale={post.data.lang} />
+    }
+    {
       series !== null && (
         <p class="series">
           Parte {series.index} de {series.total} da série{' '}
-          <a href={`/series/${slugify(series.name)}/`}>{series.name}</a>
+          <a href={`/series/${series.name}/`}>{series.title}</a>
         </p>
       )
     }

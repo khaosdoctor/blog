@@ -20,6 +20,7 @@ interface Props {
   series?: string
   alternates?: { lang: string; href: string }[]
   markdown?: string
+  noindex?: boolean
   /** Passed through to the breadcrumb so it reads Home > section > post. */
   section?: { name: string; url: string }
 }
@@ -37,6 +38,7 @@ const {
   alternates,
   section,
   markdown,
+  noindex,
 } = Astro.props
 
 const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
@@ -79,6 +81,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
       alternates={alternates}
       section={section}
       markdown={markdown}
+      noindex={noindex}
     />
   </head>
   <body>

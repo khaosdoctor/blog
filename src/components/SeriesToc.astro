@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content'
+import { t, type Locale } from '../i18n/ui'
+import { seriesTitle } from '../lib/taxonomy'
+
+interface Props {
+  series: string
+  current: string
+  locale: Locale
+}
+
+const { series, current, locale } = Astro.props
+
+// Drafts are included on purpose: an unwritten part still belongs in the map of
+// the series, it just is not a link.
+const parts = (await getCollection('blog', ({ data }) => data.series === series)).sort(
+  (a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0),
+)
+const title = seriesTitle(series, parts)
+---
+
+{
+  parts.length > 1 && (
+    <nav class="series-toc" aria-label={t(locale, 'series')}>
+      <p class="heading">
+        <a href={`/series/${series}/`}>{title}</a> &middot; {t(locale, 'seriesContents', parts.length)}
+      </p>
+      <ol>
+        {parts.map((part) => (
+          <li class:list={{ current: part.id === current, unwritten: part.data.draft }}>
+            {part.id === current ? (
+              <>
+                <strong>{part.data.title}</strong> <span class="marker">({t(locale, 'youAreHere')})</span>
+              </>
+            ) : part.data.draft ? (
+              <>
+                {part.data.title} <span class="marker">({t(locale, 'notWrittenYet')})</span>
+              </>
+            ) : (
+              <a href={`/${part.id}/`}>{part.data.title}</a>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<style>
+  .series-toc {
+    margin-block: 2rem;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  .heading {
+    margin: 0 0 0.5rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  ol {
+    margin: 0;
+    padding-inline-start: 1.2rem;
+  }
+
+  li + li {
+    margin-block-start: 0.25rem;
+  }
+
+  .unwritten {
+    color: var(--muted);
+  }
+
+  .marker {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+</style>

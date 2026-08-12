@@ -27,6 +27,19 @@ export async function getTags(): Promise<Map<string, Post[]>> {
 
 export type Series = { name: string; posts: Post[] }
 
+/**
+ * The display title of a series: the first `seriesName` found among its parts,
+ * in order. Write it once on the first post, every other part only carries the
+ * slug, and the slug is the fallback if none of them set it.
+ */
+export function seriesTitle(slug: string, members: Post[]): string {
+  for (const member of members) {
+    const name = member.data.seriesName?.trim()
+    if (name) return name
+  }
+  return slug
+}
+
 /** Groups already-fetched posts by series, ordered by seriesOrder (not date). */
 export function buildSeriesMap(posts: Post[]): Map<string, Post[]> {
   const bySeries = new Map<string, Post[]>()
@@ -60,7 +73,10 @@ export function getSeriesNavigation(
   post: Post,
   seriesMap: Map<string, Post[]>,
 ): {
+  /** The slug, which is also the URL. */
   name: string
+  /** Derived from the first part's title. */
+  title: string
   index: number
   total: number
   previous: Post | null
@@ -73,6 +89,7 @@ export function getSeriesNavigation(
   if (index === -1) return null
   return {
     name: post.data.series,
+    title: seriesTitle(post.data.series, members),
     index: index + 1,
     total: members.length,
     previous: index > 0 ? members[index - 1] : null,
