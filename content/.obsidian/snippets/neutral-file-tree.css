@@ -1,0 +1,93 @@
+/* Neutralize theme file explorer coloring while keeping plugin icons. */
+.workspace-leaf-content[data-type="file-explorer"] {
+  --nav-indentation-guide-color: var(--background-modifier-border) !important;
+  --nav-indentation-guide-width: 1px !important;
+  --text-folder-file-icon: var(--text-muted);
+  --folder-color: var(--text-muted);
+  --mfti-row-hover-background: rgba(128, 128, 128, 0.12);
+  --mfti-row-active-background: rgba(128, 128, 128, 0.18);
+  --tab-color: var(--text-muted);
+}
+
+.workspace-leaf-content[data-type="file-explorer"] .nav-files-container > div > .tree-item.nav-folder {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  filter: none !important;
+  margin: 0 !important;
+  --tab-color: var(--text-muted) !important;
+}
+
+.workspace-leaf-content[data-type="file-explorer"] .nav-folder-title,
+.workspace-leaf-content[data-type="file-explorer"] .nav-file-title,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-self.is-clickable.nav-folder-title,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-self.is-clickable.nav-file-title {
+  background-color: transparent !important;
+  border-radius: 3px !important;
+  color: var(--nav-item-color) !important;
+  filter: none !important;
+  text-decoration: none !important;
+}
+
+.workspace-leaf-content[data-type="file-explorer"] .nav-folder,
+.workspace-leaf-content[data-type="file-explorer"] .nav-folder:hover,
+.workspace-leaf-content[data-type="file-explorer"] .nav-folder-children,
+.workspace-leaf-content[data-type="file-explorer"] .nav-folder-children:hover,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-children,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-children:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.workspace-leaf-content[data-type="file-explorer"] .nav-folder-title:hover,
+.workspace-leaf-content[data-type="file-explorer"] .nav-file-title:hover,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-self.is-clickable.nav-folder-title:hover,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-self.is-clickable.nav-file-title:hover {
+  color: var(--nav-item-color-hover) !important;
+  background-color: var(--mfti-row-hover-background) !important;
+}
+
+.workspace-leaf-content[data-type="file-explorer"] .nav-file-title.is-active,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-self.is-clickable.nav-file-title.is-active {
+  color: var(--nav-item-color-active) !important;
+  background-color: var(--mfti-row-active-background) !important;
+}
+
+.workspace-leaf-content[data-type="file-explorer"] .nav-folder-children,
+.workspace-leaf-content[data-type="file-explorer"] .tree-item-children {
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-folder-children,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .tree-item-children {
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-folder-title::before,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-folder-title::after,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-file-title::before,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-file-title::after,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-folder-title-content::before,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-folder-title-content::after,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-file-title-content::before,
+body.material-file-tree-theme-enabled .workspace-leaf-content[data-type="file-explorer"] .nav-file-title-content::after {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  content: none !important;
+  display: none !important;
+  filter: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+.workspace-leaf-content[data-type="file-explorer"] .nav-files-container > div > .tree-item.nav-folder > .nav-folder-title::before,
+.workspace-leaf-content[data-type="file-explorer"] .nav-files-container > div > .tree-item.nav-folder > .tree-item-self.nav-folder-title::before {
+  content: none !important;
+  display: none !important;
+}

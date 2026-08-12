@@ -1,0 +1,21 @@
+{
+  "command_timeout": 5,
+  "templates_folder": "internal/templates",
+  "templates_pairs": [["", ""]],
+  "trigger_on_file_creation": false,
+  "auto_jump_to_cursor": true,
+  "enable_system_commands": false,
+  "shell_path": "",
+  "user_scripts_folder": "internal/scripts",
+  "enable_folder_templates": true,
+  "folder_templates": [
+    {
+      "folder": "blog",
+      "template": "internal/templates/new-post.md"
+    }
+  ],
+  "syntax_highlighting": true,
+  "syntax_highlighting_mobile": false,
+  "enabled_templates_hotkeys": ["internal/templates/new-post.md"],
+  "startup_templates": []
+}

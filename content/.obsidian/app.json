@@ -1,0 +1,12 @@
+{
+  "newFileLocation": "folder",
+  "newFileFolderPath": "blog",
+  "attachmentFolderPath": "./",
+  "alwaysUpdateLinks": true,
+  "showUnsupportedFiles": true,
+  "deleteUnlinkedAttachments": "always",
+  "uriCallbacks": true,
+  "showLineNumber": true,
+  "propertiesInDocument": "visible",
+  "vimMode": true
+}

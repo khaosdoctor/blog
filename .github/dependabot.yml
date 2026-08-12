@@ -1,0 +1,25 @@
+version: 2
+
+# Actions are pinned to commit SHAs, which means nothing updates on its own.
+# This turns each update into a reviewable PR so pinning does not mean going
+# stale, especially for the two third-party actions that hold write credentials.
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore'
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore'
+    groups:
+      astro:
+        patterns:
+          - 'astro'
+          - '@astrojs/*'
+          - 'astro-*'

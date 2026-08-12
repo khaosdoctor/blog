@@ -40,6 +40,35 @@ export function toOgLocale(lang: string): string {
   return OG_LOCALES[lang] ?? lang
 }
 
+/**
+ * Sections that have a card in `public/og/`. A section missing from this list
+ * gets the default card, so writing a post in a brand new section never points
+ * a share at a PNG nobody drew.
+ */
+export const OG_SECTION_CARDS = [
+  'career',
+  'infra',
+  'javascript',
+  'meta',
+  'newsletter',
+  'security',
+  'typescript',
+]
+
+export const OG_CARD_WIDTH = 1200
+export const OG_CARD_HEIGHT = 630
+
+/**
+ * Root-relative path of the card to share when a page has no image of its own.
+ * Takes the section URL (`/infra/`) rather than its display name, because that
+ * is the string the filename is built from.
+ */
+export function sectionOgImage(sectionUrl?: string): string {
+  const section = sectionUrl?.replace(/^\/+|\/+$/g, '')
+  if (section && OG_SECTION_CARDS.includes(section)) return `/og/${section}.png`
+  return '/og/default.png'
+}
+
 export type PageType = 'website' | 'article'
 
 export interface BreadcrumbItem {

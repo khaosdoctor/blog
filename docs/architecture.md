@@ -23,6 +23,20 @@ Frontmatter is validated by `src/content.config.ts`. `draft` defaults to `true`,
 
 Components that stay components: `Video`, `RawEmbed`, `MissingImage`. Six uses between them, and none has a markdown spelling worth inventing.
 
+### Series
+
+Three frontmatter fields, and only one of them goes on every part:
+
+```yaml
+series: grpc                              # short slug, also the URL
+seriesOrder: 1                            # position
+seriesName: "O guia completo do gRPC"     # first part only
+```
+
+The table of contents is generated from those and rendered on every part, dev.to style. Parts that are still drafts appear in the list as plain text marked "not written yet", which is why the crypto series links resolve even though five of its seven parts have never been written.
+
+The slug is what you type and what you have to remember, so keep it short. The title is looked up from the first part that sets `seriesName`, falling back to the slug, so renaming a series means editing one file.
+
 ### Why the build never fetches anything
 
 Bookmark cards and tweets render from metadata captured out of Ghost, in `content/bookmarks.json`. `astro-embed`'s LinkPreview refetches every bookmarked URL at build time and dies on sites without OG tags; Twitter's oEmbed needs a live call. A build that depends on somebody else's uptime is a build that fails for reasons you cannot fix. Anything needing the network happens in an explicit script instead.

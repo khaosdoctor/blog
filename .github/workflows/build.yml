@@ -25,11 +25,11 @@ jobs:
     steps:
       # Full history and tags: the footer version counts posts published since
       # the last release tag, which a shallow checkout cannot see.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -46,7 +46,7 @@ jobs:
       - name: Check migrated output
         run: node scripts/check-output.ts
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: dist
 

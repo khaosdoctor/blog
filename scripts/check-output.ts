@@ -56,13 +56,43 @@ for (const slug of expected) {
 const GHOST_CLASS = /\bkg-[a-z-]+\b/
 const LEAKED_TAG = /&#60;(?:Figure|Video|Bookmark|CourseCTA|RawEmbed|Sidenote|MarginNote|YouTube|Vimeo)\b/
 
-/**
- * The Ghost install this content came from was compromised: every post had a
- * script appended that fetched remote JavaScript and ran it with new Function().
- * The migration does not read the field that held it, but "does not" is worth
- * enforcing rather than believing, because the export is attacker-touched data.
- */
 const REMOTE_LOADER = /new Function\s*\(|gist\.githubusercontent|eval\s*\(\s*await/
+
+/**
+ * Every host this site is allowed to load or execute code from. The previous
+ * Ghost site served an injected script for a month without anyone noticing, so
+ * the question this answers is "did anything new appear", not "does it look
+ * like last time". Adding a host here should be a deliberate, reviewed act.
+ */
+const ALLOWED_SCRIPT_HOSTS = new Set([
+  'platform.twitter.com',
+  'static.cloudflareinsights.com',
+  // The YouTube and Vimeo facades only contact these once a reader clicks play.
+  'www.youtube.com',
+  'www.youtube-nocookie.com',
+  'i.ytimg.com',
+  'player.vimeo.com',
+  'vumbnail.com',
+  'i.vimeocdn.com',
+  'f.vimeocdn.com',
+  'fresnel.vimeocdn.com',
+  // astro-embed's YouTube facade preconnects to Google's ad network. Nothing
+  // executes until a reader presses play, but the contact is real and it is not
+  // a choice this site made. Removing it means replacing that component.
+  'www.google.com',
+  'googleads.g.doubleclick.net',
+  'static.doubleclick.net',
+])
+const ALLOWED_FRAME_HOSTS = new Set(['cdn.embedly.com', 'www.youtube-nocookie.com', 'www.youtube.com', 'player.vimeo.com'])
+
+function hostOf(url: string): string | null {
+  if (url.startsWith('/') && !url.startsWith('//')) return null
+  try {
+    return new URL(url, 'https://blog.lsantos.dev').hostname
+  } catch {
+    return null
+  }
+}
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8')
@@ -70,6 +100,35 @@ for (const page of pages) {
   if (LEAKED_TAG.test(html)) failures.push({ check: 'unrendered component tag', detail: page })
   if (html.includes('__GHOST_URL__')) failures.push({ check: 'unresolved Ghost URL', detail: page })
   if (REMOTE_LOADER.test(html)) failures.push({ check: 'remote script loader in output', detail: page })
+
+  for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {
+    const host = hostOf(match[1])
+    if (host !== null && !ALLOWED_SCRIPT_HOSTS.has(host)) {
+      failures.push({ check: 'script from an unapproved host', detail: `${host} in ${page}` })
+    }
+  }
+
+  for (const match of html.matchAll(/<iframe[^>]+src="([^"]+)"/g)) {
+    const host = hostOf(match[1])
+    if (host !== null && !ALLOWED_FRAME_HOSTS.has(host)) {
+      failures.push({ check: 'iframe from an unapproved host', detail: `${host} in ${page}` })
+    }
+  }
+
+  // Inline code that builds a script element pointing somewhere else. This is
+  // how the injected loader worked, and how the Twitter widget legitimately
+  // loads, so the host still has to be on the list. Scoped to script bodies:
+  // posts link to .js files on GitHub as prose all the time.
+  for (const block of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
+    // JSON-LD and other data blocks are not executable and are full of URLs.
+    if (/type\s*=\s*"(?!module|text\/javascript)/.test(block[1])) continue
+    for (const match of block[2].matchAll(/["'`](https?:\/\/[^"'`\s]+)["'`]/g)) {
+      const host = hostOf(match[1])
+      if (host !== null && !ALLOWED_SCRIPT_HOSTS.has(host)) {
+        failures.push({ check: 'remote URL in inline script', detail: `${match[1]} in ${page}` })
+      }
+    }
+  }
 }
 
 // 4. The feeds, the sitemap and the scheduler manifest all exist and parse.

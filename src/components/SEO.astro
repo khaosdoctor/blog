@@ -6,6 +6,9 @@ import {
   buildPersonJsonLd,
   buildPrimaryJsonLd,
   DEFAULT_LOCALE,
+  OG_CARD_HEIGHT,
+  OG_CARD_WIDTH,
+  sectionOgImage,
   SITE_NAME,
   toJsonLdScript,
   toOgLocale,
@@ -27,6 +30,8 @@ interface Props {
   lang: string
   /** Absolute or root-relative path; resolved against `canonical` for og:image/twitter:image (both require absolute URLs). */
   image?: string
+  /** Describes `image`. Defaults to the page title. */
+  imageAlt?: string
   tags?: string[]
   series?: string
   noindex?: boolean
@@ -46,6 +51,7 @@ const {
   updatedAt,
   lang,
   image,
+  imageAlt,
   tags,
   series,
   noindex = false,
@@ -54,7 +60,10 @@ const {
   markdown,
 } = Astro.props
 
-const absoluteImage = image ? new URL(image, canonical).href : undefined
+// A page with no image of its own shares as a bare link on most networks, so
+// it gets the card of its section instead.
+const card = image ?? sectionOgImage(section?.url)
+const absoluteImage = new URL(card, canonical).href
 
 const jsonLd = buildPrimaryJsonLd(type, {
   title,
@@ -103,7 +112,19 @@ const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 <meta property="og:url" content={canonical} />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:locale" content={toOgLocale(lang)} />
-{absoluteImage && <meta property="og:image" content={absoluteImage} />}
+<meta property="og:image" content={absoluteImage} />
+<meta property="og:image:alt" content={imageAlt ?? title} />
+{
+  /* Dimensions are only declared for our own cards, which are drawn at this
+     size. A hero image can be anything, and a wrong hint renders worse than
+     no hint. */
+  !image && (
+    <>
+      <meta property="og:image:width" content={String(OG_CARD_WIDTH)} />
+      <meta property="og:image:height" content={String(OG_CARD_HEIGHT)} />
+    </>
+  )
+}
 {
   type === 'article' && (
     <>
@@ -120,7 +141,7 @@ const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 <meta name="twitter:description" content={description} />
 <meta name="twitter:site" content={AUTHOR_TWITTER_HANDLE} />
 <meta name="twitter:creator" content={AUTHOR_TWITTER_HANDLE} />
-{absoluteImage && <meta name="twitter:image" content={absoluteImage} />}
+<meta name="twitter:image" content={absoluteImage} />
 
 <script type="application/ld+json" set:html={toJsonLdScript(jsonLd)} />
 <script type="application/ld+json" set:html={toJsonLdScript(breadcrumbJsonLd)} />
