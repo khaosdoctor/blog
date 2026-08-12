@@ -1,19 +1,8 @@
 import { execFileSync } from 'node:child_process'
 import { version as packageVersion } from '../../package.json'
 
-/**
- * The version string in the footer: `1.2.3-14`, where 14 is the number of posts
- * published since that release was cut. Publishing a post moves the counter;
- * cutting a release moves the semver and resets the counter to zero, at which
- * point the suffix is dropped and it reads `1.2.3`.
- *
- * Both halves are derived, never stored: the semver comes from package.json,
- * which the release workflow bumps, and the count comes from git history. There
- * is no counter file to forget to update.
- *
- * Build-time only. This runs in Node during the build and the result is baked
- * into the HTML; nothing here reaches the browser.
- */
+// Footer version: semver from the last tag plus posts published since.
+// See docs/architecture.md.
 function git(...args: string[]): string {
   return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
 }

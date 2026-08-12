@@ -1,22 +1,5 @@
-/**
- * Turns a lone markdown image into a real <figure>, using the image's title as
- * the caption:
- *
- *   ![alt text](./screenshot.png "the caption")
- *
- * The point is that posts stay plain markdown that Obsidian renders natively,
- * instead of carrying a <Figure> component plus an import for every image.
- *
- * This runs on mdast and keeps the `image` node itself in place, wrapped rather
- * than replaced. Astro resolves relative image paths through astro:assets later
- * in the pipeline, so leaving the node intact is what preserves optimisation and
- * srcset, replacing it with raw HTML or a plain string src drops both silently.
- *
- * The image stays inside a paragraph because mdast images are phrasing content
- * and the MDX compiler expects flow children here; `figure > p` is zeroed out in
- * BaseLayout so it costs nothing visually. `figure`/`figcaption` are lowercase,
- * so MDX treats them as plain HTML and needs no component in scope.
- */
+// A lone markdown image becomes a figure, its title becomes the caption.
+// The image node is kept intact so astro:assets still produces srcset.
 
 import { readFileSync } from 'node:fs'
 

@@ -1,22 +1,5 @@
 ---
-/**
- * A real embedded tweet, built as progressive enhancement rather than a fetch.
- *
- * The markup is exactly what Twitter's widget script looks for: a
- * `blockquote.twitter-tweet` whose last anchor points at the status URL. On
- * load, widgets.js replaces it with the live embed. Until then, and forever,
- * if the script is blocked, the tweet is deleted, or X breaks embeds for
- * logged-out readers again, the reader sees the tweet text Ghost cached when
- * the card was created, which is what <slot /> holds.
- *
- * No build-time fetch. astro-embed's Tweet component calls Twitter's
- * oEmbed for every tweet at build, which makes the build non-deterministic,
- * network-dependent, and prone to failing on someone else's outage. The text is
- * already in the repo, so it renders from there.
- *
- * data-dnt stops X using the impression for personalisation. It does not stop
- * the request: these pages do talk to X.
- */
+/** Progressive enhancement: widgets.js upgrades the cached quote, which stays if it cannot. */
 interface Props {
   url: string
 }

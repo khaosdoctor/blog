@@ -1,19 +1,4 @@
-/**
- * Renders the PNG icons the web manifest promises, from the same SVG the
- * favicon uses.
- *
- *   node scripts/build-icons.ts
- *
- * Committed rather than generated during the build: they change only when the
- * logo does, and a build should not depend on a rasteriser being present.
- *
- * Maskable icons need the artwork inside a safe circle, since Android crops to
- * whatever shape the launcher uses. The mark is padded well inside the canvas so
- * nothing is clipped.
- *
- * The mark bleeds off all four edges by design, so the padded versions show it
- * whole while the favicon keeps the original tight crop.
- */
+// Regenerates public/icons from the favicon. Run when the mark changes.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'

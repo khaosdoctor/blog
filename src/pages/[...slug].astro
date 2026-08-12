@@ -88,6 +88,7 @@ const alternates = [
   series={post.data.series}
   alternates={alternates}
   section={{ name: post.data.category, url: `/${post.data.category}/` }}
+  markdown={new URL(`${Astro.url.pathname}index.md`, Astro.site).href}
 >
   <article>
     <h1>{post.data.title}</h1>
