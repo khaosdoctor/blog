@@ -1,0 +1,40 @@
+---
+/**
+ * A Speaker Deck deck, from `![](https://speakerdeck.com/player/<id>)`.
+ * Written by remark-embeds, so posts stay plain markdown.
+ *
+ * No facade here, unlike the video embeds: a deck is the content of the section
+ * it sits in, and there is no thumbnail endpoint to build a preview from.
+ */
+interface Props {
+  id: string
+}
+
+const { id } = Astro.props
+---
+
+<figure class="deck">
+  <iframe
+    src={`https://speakerdeck.com/player/${id}`}
+    title="Slides"
+    loading="lazy"
+    referrerpolicy="strict-origin-when-cross-origin"
+    sandbox="allow-scripts allow-popups allow-presentation"
+    allowfullscreen
+  ></iframe>
+</figure>
+
+<style>
+  .deck {
+    margin-block: 2rem;
+    margin-inline: 0;
+  }
+
+  .deck iframe {
+    /* Speaker Deck renders 16:10, not 16:9. */
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+</style>

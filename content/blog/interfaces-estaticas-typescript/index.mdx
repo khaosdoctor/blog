@@ -54,7 +54,7 @@ A gente precisa chamar o método direto do construtor da classe:
 const p = Person.fromObject(etc)
 ```
 
-# O problema
+## O problema
 
 Métodos estáticos são muito comuns em linguagens fortemente tipadas, porque você tem uma clara separação entre o momento estático da classe e o momento "dinâmico".
 
@@ -130,7 +130,7 @@ class DB {
 
 Então estamos em uma escolha, ou a gente prioriza a instância ou a gente prioriza o construtor...
 
-# A solução
+## A solução
 
 Felizmente, temos uma solução para esse problema, ela não é muito bonita, mas existem algumas ideias no repositório do TypeScript (como [essa](https://github.com/microsoft/TypeScript/issues/33892) e [essa](https://github.com/microsoft/TypeScript/issues/34516)) que vem [desde 2017](https://github.com/microsoft/TypeScript/issues/13462) que estão analisando a possibilidade de adicionar definições estáticas à interfaces.
 

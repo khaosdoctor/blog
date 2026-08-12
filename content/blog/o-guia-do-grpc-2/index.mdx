@@ -20,7 +20,7 @@ Chegamos à **segunda parte da nossa série** sobre o que é o gRPC e como podem
 
 Nesta parte da série, vamos mergulhar nas implementações de como o gRPC funciona para **JavaScript**. Vamos então dar uma passada rápida pela nossa agenda de hoje.
 
-# Agenda
+## Agenda
 
 -   Quais são as ferramentas existentes para gRPC no JavaScript hoje em dia
 -   Como funciona o modelo cliente/servidor e os modelos disponíveis que podemos usar
@@ -28,7 +28,7 @@ Nesta parte da série, vamos mergulhar nas implementações de como o gRPC funci
 -   Vantagens e desvantagens dos modelos estáticos e dinâmicos
 -   Hora do código!
 
-# As ferramentas que trabalhamos
+## As ferramentas que trabalhamos
 
 Como dito por Russel Brown em sua [incrível série "The Weird World of gRPC Tooling for Node.js"](https://medium.com/expedia-group-tech/the-weird-world-of-grpc-tooling-for-node-js-part-1-40a442966876), a documentação do protobuf **especialmente para JavaScript** ainda não é totalmente bem documentada, e isso é um tema recorrente. Todo o protobuf foi feito com foco em trabalhar com várias linguagens de mais baixo nível como Go e C++. Para estas linguagens, a documentação é muito boa, porém quando chegamos no JavaScript e TypeScript, começamos a ver um problema de documentação onde ela ou não está totalmente completa ou então não existe de forma nenhuma.
 
@@ -68,7 +68,7 @@ Para o nosso caso, o ideal é utilizarmos a [implementação como um pacote do N
 
 Atualmente, o pacote do NPM para o gRPC é o mais utilizado para criar clientes gRPC, embora, atualmente, muitas pessoas estejam migrando para o [`grpc-js`](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js), uma implementação feita completamente em JS do client do gRPC.
 
-# O modelo cliente servidor no gRPC
+## O modelo cliente servidor no gRPC
 
 O modelo cliente e servidor que temos no gRPC não é nada mais do que uma comunicação HTTP/2 padrão, a diferença são os headers que estamos enviando. Como expliquei na primeira parte da série, toda a comunicação via gRPC é, na verdade, uma chamada HTTP/2 com um payload binário encodado em base64.
 
@@ -90,7 +90,7 @@ Dentro do repositório do código, temos um arquivo [`request.bin`](https://gith
 
 Podemos ver que estamos mandando uma string com o valor "2" como payload, que é o primeiro índice.
 
-# Proto files
+## Proto files
 
 Vamos colocar a mão na massa e desenvolver o nosso primeiro arquivo `.proto` que vai descrever como toda a nossa API vai funcionar.
 
@@ -316,7 +316,7 @@ O que vamos fazer é a **geração dinâmica**, neste modelo não temos que, man
 
 Os problemas são facilmente resolvidos com um sistema de gerenciamento de pacotes como o NPM, porém mais simples. Além disso, ou próprio Buf, que citamos anteriormente, já está trabalhando para trazer esta funcionalidade ao protobuf.
 
-# Servidor
+## Servidor
 
 Para começarmos a criar o servidor, vamos instalar os pacotes necessários do gRPC, começando pelo próprio `grpc` e o `proto-loader` com o comando `npm i grpc @grpc/proto-loader`.
 
@@ -446,7 +446,7 @@ server.start()
 console.log('Listening')
 ```
 
-# Client
+## Client
 
 O client não é muito diferente, as primeiras linhas são exatamente as mesmas do servidor, afinal estamos carregando o mesmo arquivo de definição. Vamos codá-lo na mesma pasta `src` em um arquivo `client.js`:
 
@@ -575,7 +575,7 @@ client.listAsync({}).then(console.log)
 
 Como saída, vamos ter nosso objeto `Note`.
 
-# Conclusão
+## Conclusão
 
 Chegamos ao fim do nosso segundo artigo da série, aqui discutimos um pouco sobre como podemos criar nosso serviço gRPC usando JavaScript, descobrimos como podemos transformar ele em algo assíncrono e também entendemos melhor os conceitos e ferramentas por trás do desenvolvimento de uma aplicação gRPC utilizando JavaScript.
 

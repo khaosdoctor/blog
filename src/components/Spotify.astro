@@ -1,0 +1,43 @@
+---
+/**
+ * A Spotify episode, track, album, playlist or show, from
+ * `![](https://open.spotify.com/episode/<id>)`. Written by remark-embeds.
+ *
+ * Spotify's own compact player is already short, so there is no facade: the
+ * iframe is lazy and contacts nothing until it scrolls into view.
+ */
+interface Props {
+  kind: string
+  id: string
+}
+
+const { kind, id } = Astro.props
+
+// A track is one row tall; everything else gets the player with artwork.
+const height = kind === 'track' ? 152 : 232
+---
+
+<figure class="spotify">
+  <iframe
+    src={`https://open.spotify.com/embed/${kind}/${id}`}
+    title="Spotify"
+    height={height}
+    loading="lazy"
+    referrerpolicy="strict-origin-when-cross-origin"
+    sandbox="allow-scripts allow-popups allow-presentation"
+    allow="encrypted-media; clipboard-write; picture-in-picture"
+  ></iframe>
+</figure>
+
+<style>
+  .spotify {
+    margin-block: 2rem;
+    margin-inline: 0;
+  }
+
+  .spotify iframe {
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+  }
+</style>

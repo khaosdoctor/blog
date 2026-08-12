@@ -53,7 +53,21 @@ A tweet is a blockquote with the status link as its last line, so the quote surv
 > — ![via Twitter](https://twitter.com/user/status/123)
 ```
 
+Slides and podcast episodes work the same way:
+
+```markdown
+![](https://speakerdeck.com/player/e21b68c7db134ade9b2dad81246a3e53)
+![](https://open.spotify.com/episode/1kXjNnp8qKpHRipeAriVDw)
+```
+
+Spotify also takes a `track`, `album`, `playlist` or `show` URL. For a Speaker Deck the URL has to be the
+`/player/<id>` one, which is what the "embed" button on the deck gives you.
+
 Any other URL alone on a line becomes a bookmark card if `bookmarks.json` has metadata for it, otherwise it stays a plain link.
+
+**A new embed host needs two lines changed**, or it is blocked without a word: `frame-src` in the CSP meta tag in
+`src/layouts/BaseLayout.astro`, and `ALLOWED_FRAME_HOSTS` in `scripts/check-output.ts`. The build fails if a frame
+appears from a host that is not in the second one.
 
 An `.mp4` you host yourself needs the component, because it takes a poster frame:
 

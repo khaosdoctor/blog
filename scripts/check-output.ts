@@ -83,7 +83,20 @@ const ALLOWED_SCRIPT_HOSTS = new Set([
   'googleads.g.doubleclick.net',
   'static.doubleclick.net',
 ])
-const ALLOWED_FRAME_HOSTS = new Set(['cdn.embedly.com', 'www.youtube-nocookie.com', 'www.youtube.com', 'player.vimeo.com'])
+/**
+ * Frames a post is allowed to carry. Keep this in step with `frame-src` in the
+ * CSP meta tag in BaseLayout.astro: a host in one and not the other means either
+ * a silently blocked embed or an unguarded one.
+ */
+const ALLOWED_FRAME_HOSTS = new Set([
+  'cdn.embedly.com',
+  'www.youtube-nocookie.com',
+  'www.youtube.com',
+  'player.vimeo.com',
+  // Slides and podcast episodes, embedded from the posts that reference them.
+  'speakerdeck.com',
+  'open.spotify.com',
+])
 
 function hostOf(url: string): string | null {
   if (url.startsWith('/') && !url.startsWith('//')) return null

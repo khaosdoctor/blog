@@ -24,7 +24,7 @@ Já fiz algumas palestras antes sobre o assunto, como você pode ver no vídeo a
 
 Porém, o gRPC não é uma tecnologia muito nova, ele já está aqui há algum tempo e já vem sendo utilizado em larga escala em projetos muito grandes como o Docker e o Kubernetes, então decidi montar esta série de artigos para explicar de uma vez por todas o que é o gRPC e como você consegue criar suas aplicações JavaScript e TypeScript com ele de forma simples e fácil!
 
-# Roadmap
+## Roadmap
 
 Antes de começarmos com a informação em si, vamos entender o que iremos ver ao longo desta jornada. Dividi este guia em três partes, nesta primeira parte vamos passar pela história do gRPC, entender as ideias por trás da construção desta tecnologia, problemas, vantagens e muito mais.
 
@@ -32,7 +32,7 @@ Já na segunda parte, vamos por mais a mão na massa e construir nossa aplicaç�
 
 Por fim, na terceira parte vamos modificar a aplicação e melhorá-la para usar TypeScript ao invés de JavaScript. Desta forma vamos ter a inferência nativa de tipos da nossa API e como podemos nos comunicar com todas as camadas de forma correta.
 
-# História
+## História
 
 O gRPC foi criado pela Google como um projeto de código aberto em 2015 como uma melhoria em uma arquitetura de comunicação chamada de RPC (Remote Procedure Call).
 
@@ -124,7 +124,7 @@ client.find(Math.floor(Math.random() * 2 + 1).toString(), (err, note) => {
 
 Veja que, basicamente as nossas chamadas são como se estivéssemos chamando um método de um objeto `client` local, e este método vai ser convertido em uma chamada de rede e enviado para o servidor, que irá receber a chamada e converter novamente em um objeto local e devolver a resposta.
 
-# Arquitetura
+## Arquitetura
 
 Arquiteturas RPC são muito parecidas. A ideia base é que temos sempre um servidor e um cliente, do lado do servidor temos uma camada que é chamada de **skeleton**, que é essencialmente um decriptador de uma chamada de rede para uma chamada de função, este é o responsável por chamar a função do lado do servidor.
 
@@ -142,7 +142,7 @@ O gRPC tem um funcionamento muito próximo do diagrama que acabamos de ver, a di
 
 Como você pode ver, o funcionamento é basicamente o mesmo, temos um cliente que converte as chamadas feitas localmente em chamadas de rede binárias com o protobuf e as envia pela rede até o servidor gRPC que as decodifica e responde para o cliente.
 
-# HTTP/2
+## HTTP/2
 
 O HTTP/2 já é utilizado faz algum tempo e vem se tornando a principal forma de comunicação na web desde 2015.
 
@@ -170,7 +170,7 @@ Se os headers foram alterados, somente os headers alterados são enviados, e os 
 
 Como você pode ver, somente o `path` dessa requisição mudou, portanto só ele será enviado.
 
-# Protocol Buffers
+## Protocol Buffers
 
 Os protocol buffers (ou só **protobuf**), são um método de serialização e desserialização de dados que funciona através de uma linguagem de definição de interfaces (IDL).
 
@@ -294,7 +294,7 @@ Veja que temos um encoding igual ao que analizamos antes, uma tabela dos valores
 
 Utilizar o protobuf como camada de contratos é muito útil, por exemplo, para padronizar as mensagens enviadas entre serviços de mensageria e entre microsserviços. Como estes serviços podem receber qualquer tipo de entrada, o protobuf acaba criando uma forma de garantir que todas as entradas sejam válidas.
 
-# Vantagens do gRPC
+## Vantagens do gRPC
 
 Como pudemos ver, o gRPC tem várias vantagens sobre o modelo ReST tradicional:
 
@@ -305,7 +305,7 @@ Como pudemos ver, o gRPC tem várias vantagens sobre o modelo ReST tradicional:
 5.  Implementação relativamente fácil depois do desenvolvimento inicial
 6.  Excelente para trabalhos entre times que não vão se encontrar, principalmente para definir contratos de projetos open source.
 
-# Problemas
+## Problemas
 
 Assim como toda a tecnologia, o gRPC não é uma bala de prata e não resolve todos os problemas, temos alguns defeitos:
 
@@ -316,7 +316,7 @@ Assim como toda a tecnologia, o gRPC não é uma bala de prata e não resolve to
 5.  Por conta de não ser muito conhecido, a documentação é esparsa
 6.  A arquitetura de um sistema usando gRPC pode se tornar um pouco mais complexa
 
-# Casos de uso
+## Casos de uso
 
 Independente dos problemas e de tudo que a tecnologia tem para oferecer, temos uma série de casos de uso bem famosos no mundo open source que utiliza o gRPC como meio de comunicação.
 
@@ -336,6 +336,6 @@ Um dos projetos da CNCF no qual sou um contribuidor, o [HTTP add on para o KEDA]
 
 O principal runtime de containers da atualidade, o containerd é o projeto que dá vida ao Docker e ao Kubernetes atualmente. Ele também possui uma interface gRPC para comunicação com serviços externos.
 
-# Conclusão
+## Conclusão
 
 Nesta primeira parte mergulhamos um pouco sobre como funciona e o que é o gRPC e seus componentes, nas próximas partes deste guia vamos construir algumas aplicações e mostrar o ecossistema de ferramentas que existe para esta tecnologia sensacional.

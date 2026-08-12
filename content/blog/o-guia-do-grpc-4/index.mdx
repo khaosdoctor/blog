@@ -16,7 +16,7 @@ visibility: "public"
 
 Nos artigos anteriores desta série aprendemos o que é gRPC, como ele funciona e como podemos utilizar esse protocolo para trafegar dados entre sistemas com diferentes tecnologias e linguagens. Porém tudo isso foi feito usando somente os modelos mais simples de definição do protobuf, ou seja, estávamos enviando uma requisição simples e recebendo uma resposta simples em um modelo cliente/servidor.
 
-# Streaming
+## Streaming
 
 Além das que são chamadas _Unary Calls_, temos também _Streaming calls_, que nada mais são do que respostas e requisições realizadas por meio de uma stream de dados assíncrona. Temos três tipos de streaming calls no gRPC:
 
@@ -87,7 +87,7 @@ service NoteService {
 }
 ```
 
-# O que são streams
+## O que são streams
 
 Se você ainda não conhece o conceito de streams, não se preocupe, eu fiz uma série de artigos no iMasters somente sobre isso:
 
@@ -105,7 +105,7 @@ Nesta palestra eu mostrei visualmente o que isso significa:
 
 Por esse motivo, streams são muito utilizadas com arquivos e dados de grande porte, porque elas podem suportar uma quantidade imensa de informação usando pouquíssimos recursos.
 
-# Streams e gRPC
+## Streams e gRPC
 
 Como é tão simples de utilizar streams no gRPC, já era de se esperar que o suporte a elas no protocolo fosse muito bom. E isso é, de fato o que acontece, o suporte a streams no gRPC um dos melhores existentes e integram com quase todas as linguagens suportadas.
 
@@ -256,7 +256,7 @@ A stream também tem outro evento chamado `end`, que é executado quando a strea
 noteStream.on('end', () => {})
 ```
 
-# Clientside streaming
+## Clientside streaming
 
 Para completarmos o artigo e não deixarmos nada para trás. No caso de utilizarmos um modelo como:
 
@@ -305,7 +305,7 @@ call.end()
 
 A função interna do `find` só será executada após o método `end()` ser chamado.
 
-# Duplex streams
+## Duplex streams
 
 Para duplex streams (ou _bidirectional streams_), basta implementarmos, tanto do lado do servidor quanto do cliente, o parâmetro `call`. Este parâmetro é uma stream bidirecional que contém tanto o método `on` quanto o `write`.
 
