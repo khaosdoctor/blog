@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss'
 import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
+import { t } from '../../i18n/ui'
 
 /** The English feed. The Portuguese one stays at /rss.xml, where it always was. */
 export const GET: APIRoute = async (context) => {
@@ -11,7 +12,7 @@ export const GET: APIRoute = async (context) => {
 
   return rss({
     title: 'Lucas Santos',
-    description: 'Articles about software development, technology and opinion.',
+    description: t('en', 'homeDescription'),
     site: context.site ?? 'https://blog.lsantos.dev',
     trailingSlash: true,
     items: posts.map((post) => ({

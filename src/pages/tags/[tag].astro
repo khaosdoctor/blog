@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
 import { getTags, slugify } from '../../lib/taxonomy'
+import { t } from '../../i18n/ui'
 
 export const getStaticPaths = (async () => {
   const tags = await getTags()
@@ -15,8 +16,8 @@ export const getStaticPaths = (async () => {
 const { tag, posts } = Astro.props
 ---
 
-<BaseLayout title={`${tag} | Lucas Santos`} description={`Artigos marcados com ${tag}.`}>
-  <p class="kicker">Tag</p>
+<BaseLayout title={`${tag} | Lucas Santos`} description={t('pt', 'tagDescription', tag)}>
+  <p class="kicker">{t('pt', 'tag')}</p>
   <h1>{tag}</h1>
   <PostList posts={posts} />
 </BaseLayout>

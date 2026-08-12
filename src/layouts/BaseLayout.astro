@@ -59,7 +59,9 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- iOS ignores the manifest and looks for this one specifically. -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    {/* One manifest per locale, so an install prompt describes the site in the
+        language the reader is actually on. */}
+    <link rel="manifest" href={locale === 'en' ? '/en/manifest.webmanifest' : '/manifest.webmanifest'} />
     <meta name="theme-color" content="#fffdf9" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
     {/* GitHub Pages cannot set headers, so this is the only way to cap what an

@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss'
 import type { APIRoute } from 'astro'
 import { getPublishedPosts } from '../lib/posts'
+import { t } from '../i18n/ui'
 
 /**
  * The Portuguese feed at the same path Ghost used, so existing subscribers keep
@@ -10,7 +11,7 @@ export const GET: APIRoute = async (context) => {
   const posts = await getPublishedPosts()
   return rss({
     title: 'Lucas Santos',
-    description: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
+    description: t('pt', 'homeDescription'),
     site: context.site ?? 'https://blog.lsantos.dev',
     trailingSlash: true,
     stylesheet: false,

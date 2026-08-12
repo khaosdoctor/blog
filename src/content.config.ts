@@ -39,7 +39,7 @@ const blog = defineCollection({
       visibility: z.enum(['public', 'members', 'paid']).default('public'),
       /** Thin or placeholder pages: keep the URL working, keep it out of search. */
       noindex: z.boolean().default(false),
-      canonicalUrl: z.string().url().optional(),
+      canonicalUrl: z.url().optional(),
       seoTitle: z.string().optional(),
       seoDescription: z.string().optional(),
     }),
@@ -68,7 +68,7 @@ const translated = defineCollection({
     epigraphCite: z.string().optional(),
     draft: z.boolean().default(false),
     visibility: z.enum(['public', 'members', 'paid']).default('public'),
-    canonicalUrl: z.string().url().optional(),
+    canonicalUrl: z.url().optional(),
     seoTitle: z.string().optional(),
     seoDescription: z.string().optional(),
     /** False once a human edits the file: their version wins and the banner goes. */
