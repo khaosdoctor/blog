@@ -65,9 +65,9 @@ Spotify also takes a `track`, `album`, `playlist` or `show` URL. For a Speaker D
 
 Any other URL alone on a line becomes a bookmark card if `bookmarks.json` has metadata for it, otherwise it stays a plain link.
 
-**A new embed host needs two lines changed**, or it is blocked without a word: `frame-src` in the CSP meta tag in
-`src/layouts/BaseLayout.astro`, and `ALLOWED_FRAME_HOSTS` in `scripts/check-output.ts`. The build fails if a frame
-appears from a host that is not in the second one.
+**A new embed host needs one line**, in `src/lib/embed-hosts.ts`. The CSP and the build guard are both generated from
+that file, so they cannot disagree. Embed something from a host that is not listed and the build fails, naming the
+host and that file.
 
 An `.mp4` you host yourself needs the component, because it takes a poster frame:
 
