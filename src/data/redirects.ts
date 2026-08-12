@@ -574,8 +574,8 @@ export const redirects: Redirect[] = [
   },
   {
     "from": "/tag/opinion/",
-    "to": "/tags/opinion/",
-    "note": "tag archive"
+    "to": "/opinion/",
+    "note": "tag became a section"
   },
   {
     "from": "/tag/performance/",
