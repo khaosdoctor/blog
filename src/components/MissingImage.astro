@@ -1,4 +1,6 @@
 ---
+import { localeFromPath, t } from '../i18n/ui'
+
 /** Keeps the caption and the original URL when a remote host stops serving an image. */
 interface Props {
   src: string
@@ -7,18 +9,20 @@ interface Props {
 }
 
 const { src, alt, caption } = Astro.props
+// MDX calls this without props, so the URL is what tells us the language.
+const locale = localeFromPath(Astro.url.pathname)
 const host = (() => {
   try {
     return new URL(src).hostname.replace(/^www\./, '')
   } catch {
-    return 'a host that no longer serves it'
+    return t(locale, 'imageGoneUnknownHost')
   }
 })()
 ---
 
 <figure class="missing">
-  <div class="frame" role="img" aria-label={alt || `Imagem indisponível, hospedada em ${host}`}>
-    <p class="label">Esta imagem não existe mais</p>
+  <div class="frame" role="img" aria-label={alt || t(locale, 'imageGoneAlt', host)}>
+    <p class="label">{t(locale, 'imageGone')}</p>
     <p class="host">{host}</p>
   </div>
   {caption && <figcaption>{caption}</figcaption>}

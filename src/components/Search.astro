@@ -25,6 +25,9 @@ const { action = '/search/', locale = 'pt' } = Astro.props
       placeholder={t(locale, 'searchPlaceholder')}
       autocomplete="off"
       data-no-index-message={t(locale, 'searchNoIndex')}
+      data-searching={t(locale, 'searching')}
+      data-no-results={t(locale, 'noResultsFor')}
+      data-more-results={t(locale, 'moreResults')}
     />
     <button type="submit">{t(locale, 'search')}</button>
   </div>
@@ -47,6 +50,13 @@ const { action = '/search/', locale = 'pt' } = Astro.props
   interface PagefindModule {
     init?: () => Promise<void>
     search: (query: string) => Promise<{ results: PagefindResult[] }>
+  }
+
+  // Localised on the server and read back from the input's data attributes, so
+  // this script carries no translation strings of its own. %s / %d in a template
+  // is the placeholder, matching the t() helper the markup above uses.
+  function label(input: HTMLInputElement, name: 'searching' | 'noResults' | 'moreResults', value = ''): string {
+    return (input.dataset[name] ?? '').replace(/%[ds]/, value)
   }
 
   // Cap how many results get rendered: an unqualified term (e.g. "de") can
@@ -82,7 +92,12 @@ const { action = '/search/', locale = 'pt' } = Astro.props
     window.history.replaceState({}, '', url)
   }
 
-  async function renderResults(pagefind: PagefindModule, target: HTMLElement, query: string): Promise<void> {
+  async function renderResults(
+    pagefind: PagefindModule,
+    target: HTMLElement,
+    input: HTMLInputElement,
+    query: string,
+  ): Promise<void> {
     const generation = ++searchGeneration
 
     if (!query) {
@@ -90,12 +105,12 @@ const { action = '/search/', locale = 'pt' } = Astro.props
       return
     }
 
-    showMessage(target, 'Buscando...')
+    showMessage(target, label(input, 'searching'))
     const { results } = await pagefind.search(query)
     if (generation !== searchGeneration) return // a newer search has already started
 
     if (results.length === 0) {
-      showMessage(target, `Nenhum resultado para "${query}".`)
+      showMessage(target, label(input, 'noResults', query))
       return
     }
 
@@ -124,7 +139,7 @@ const { action = '/search/', locale = 'pt' } = Astro.props
     if (results.length > MAX_RESULTS) {
       const more = document.createElement('p')
       more.className = 'search-results-more'
-      more.textContent = `E mais ${results.length - MAX_RESULTS} resultado(s).`
+      more.textContent = label(input, 'moreResults', String(results.length - MAX_RESULTS))
       target.append(more)
     }
   }
@@ -143,7 +158,7 @@ const { action = '/search/', locale = 'pt' } = Astro.props
     // truth for "read the initial query on load".
     const queryFromUrl = new URLSearchParams(window.location.search).get('q')
     if (queryFromUrl !== null) input.value = queryFromUrl
-    if (input.value.trim()) showMessage(resultsEl, 'Buscando...')
+    if (input.value.trim()) showMessage(resultsEl, label(input, 'searching'))
 
     const pagefind = await loadPagefind()
     if (!pagefind) {
@@ -159,11 +174,11 @@ const { action = '/search/', locale = 'pt' } = Astro.props
       event.preventDefault()
       const query = input.value.trim()
       updateUrl(query)
-      void renderResults(pagefind, resultsEl, query)
+      void renderResults(pagefind, resultsEl, input, query)
     })
 
     const initial = input.value.trim()
-    if (initial) void renderResults(pagefind, resultsEl, initial)
+    if (initial) void renderResults(pagefind, resultsEl, input, initial)
   }
 
   void main()

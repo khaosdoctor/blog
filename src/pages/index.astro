@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import PostList from '../components/PostList.astro'
 import { getPublishedPosts } from '../lib/posts'
 import { getCategories } from '../lib/taxonomy'
+import { t } from '../i18n/ui'
 
 const [posts, categories] = await Promise.all([getPublishedPosts(), getCategories()])
 const sections = [...categories.entries()].sort((a, b) => b[1].length - a[1].length)
@@ -11,14 +12,14 @@ const latest = posts.slice(0, 30)
 
 <BaseLayout
   title="Lucas Santos"
-  description="Artigos sobre desenvolvimento, tecnologia e opinião."
+  description={t('pt', 'homeDescription')}
   alternates={[
     { lang: 'pt-BR', href: new URL('/', Astro.site).href },
     { lang: 'en', href: new URL('/en/', Astro.site).href },
   ]}
 >
   <h1 class="visually-hidden">Lucas Santos</h1>
-  <nav class="sections" aria-label="Seções">
+  <nav class="sections" aria-label={t('pt', 'sections')}>
     {
       sections.map(([category, categoryPosts]) => (
         <a href={`/${category}/`}>
@@ -29,8 +30,9 @@ const latest = posts.slice(0, 30)
   </nav>
   <PostList posts={latest} />
   <p class="more">
-    Mostrando os {latest.length} mais recentes de {posts.length}. Use a <a href="/search/">busca</a> para
-    encontrar o resto.
+    {t('pt', 'showingLatest', latest.length, posts.length)}
+    {' '}
+    <a href="/search/">{t('pt', 'searchLabel')}</a>.
   </p>
 </BaseLayout>
 

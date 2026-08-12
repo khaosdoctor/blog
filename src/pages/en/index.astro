@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../lib/posts'
+import { t } from '../../i18n/ui'
 
 const now = new Date()
 const posts = (
@@ -11,7 +12,7 @@ const posts = (
 
 <BaseLayout
   title="Lucas Santos"
-  description="Articles about software development, technology and opinion."
+  description={t('en', 'homeDescription')}
   lang="en"
   alternates={[
     { lang: 'pt-BR', href: new URL('/', Astro.site).href },
@@ -20,7 +21,7 @@ const posts = (
 >
   <h1 class="visually-hidden">Lucas Santos</h1>
   <p class="note">
-    These articles are written in Portuguese and translated automatically. <a href="/">Read the originals</a>.
+    {t('en', 'translatedIndexNotice')} <a href="/">{t('en', 'readOriginals')}</a>.
   </p>
   <ul class="posts">
     {
@@ -35,7 +36,7 @@ const posts = (
       ))
     }
   </ul>
-  {posts.length === 0 && <p>No translated articles yet.</p>}
+  {posts.length === 0 && <p>{t('en', 'noTranslatedPosts')}</p>}
 </BaseLayout>
 
 <style>

@@ -1,12 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { t } from '../i18n/ui'
 ---
 
-<BaseLayout title="Sem conexão | Lucas Santos" description="Você está sem conexão.">
-  <h1>Sem conexão</h1>
+{/* The service worker serves this single page for any uncached URL in either
+    language, so like the 404 it carries both. */}
+<BaseLayout title={`${t('pt', 'offlineTitle')} | Lucas Santos`} description={t('pt', 'offlineDescription')}>
+  <h1>{t('pt', 'offlineTitle')}</h1>
+  <p>{t('pt', 'offlineBody')}</p>
+  <p lang="en">{t('en', 'offlineBody')}</p>
   <p>
-    Esta página não está no cache do seu navegador e você está offline no momento. Os posts que você já
-    abriu continuam disponíveis.
+    <a href="/">{t('pt', 'backHome')}</a>
+    {' / '}
+    <a href="/en/" hreflang="en">{t('en', 'backHome')}</a>
   </p>
-  <p><a href="/">Voltar para a home</a></p>
 </BaseLayout>
