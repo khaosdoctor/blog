@@ -13,9 +13,19 @@ interface Props {
 const { locale } = Astro.props
 ---
 
-{/* Hidden until the reader actually pins something, so the choice only shows
-    up once it means anything. hover-previews.ts unhides it. */}
-<p class="hp-settings" hidden>
+{/* Cards are built in the browser, so their labels cannot come from t()
+    directly. They ride along on this element instead, which the script reads
+    once. Hidden until the reader actually pins something, so the checkbox only
+    shows up once the choice means anything. */}
+<p
+  class="hp-settings"
+  hidden
+  data-loading={t(locale, 'previewLoading')}
+  data-close={t(locale, 'previewClose')}
+  data-pin={t(locale, 'previewPin')}
+  data-unpin={t(locale, 'previewUnpin')}
+  data-drag={t(locale, 'previewDrag')}
+>
   <label>
     <input type="checkbox" id="hp-persist" />
     {t(locale, 'keepPreviews')}

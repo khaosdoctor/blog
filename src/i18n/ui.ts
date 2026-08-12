@@ -25,6 +25,11 @@ type UIKey =
   | 'tags'
   | 'skipToContent'
   | 'keepPreviews'
+  | 'previewLoading'
+  | 'previewClose'
+  | 'previewPin'
+  | 'previewUnpin'
+  | 'previewDrag'
 
 const ui: Record<Locale, Record<UIKey, string>> = {
   pt: {
@@ -54,6 +59,11 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     tags: 'Tags',
     skipToContent: 'Pular para o conteúdo',
     keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
+    previewLoading: 'Carregando…',
+    previewClose: 'Fechar prévia',
+    previewPin: 'Fixar esta prévia',
+    previewUnpin: 'Soltar esta prévia',
+    previewDrag: 'arraste para mover',
   },
   en: {
     tagline: 'A blog about JavaScript, TypeScript, web and tooling',
@@ -82,6 +92,11 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     tags: 'Tags',
     skipToContent: 'Skip to content',
     keepPreviews: 'Keep pinned previews after closing the tab',
+    previewLoading: 'Loading…',
+    previewClose: 'Close preview',
+    previewPin: 'Pin this preview',
+    previewUnpin: 'Unpin this preview',
+    previewDrag: 'drag to move',
   },
 }
 
