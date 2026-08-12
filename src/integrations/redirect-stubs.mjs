@@ -3,13 +3,13 @@
  *
  * Static hosting has no server, so there is no way to answer an old URL with a
  * real 301: GitHub Pages has no redirect config, no _redirects file, nothing.
- * A stub is the working substitute — a meta-refresh, a canonical pointing at the
+ * A stub is the working substitute, a meta-refresh, a canonical pointing at the
  * target, and a visible link for anyone whose browser ignores the refresh.
  * Google treats meta-refresh as a redirect and passes the ranking through.
  *
- * ponytail: an integration rather than a route, because the stubs live at paths
+ * An integration rather than a route, because the stubs live at paths
  * a second catch-all route would fight [...slug].astro over, and because they
- * must stay out of the sitemap — a redirect is not a page worth indexing.
+ * must stay out of the sitemap, a redirect is not a page worth indexing.
  *
  * The build fails if a target does not exist in the output. A redirect into a
  * 404 is worse than no redirect: it wastes crawl budget and strands the reader.
@@ -61,7 +61,7 @@ async function listFiles(dir, base = dir) {
 
 export function redirectStubs() {
   // build:done is not given the resolved config, and the canonical has to be an
-  // absolute URL on the real domain — the output directory URL is a file://
+  // absolute URL on the real domain, the output directory URL is a file://
   // path and produces a canonical no crawler can follow.
   let site
 

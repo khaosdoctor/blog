@@ -19,6 +19,8 @@ interface Props {
   tags?: string[]
   series?: string
   alternates?: { lang: string; href: string }[]
+  /** Passed through to the breadcrumb so it reads Home > section > post. */
+  section?: { name: string; url: string }
 }
 
 const {
@@ -32,6 +34,7 @@ const {
   tags,
   series,
   alternates,
+  section,
 } = Astro.props
 
 const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
@@ -49,7 +52,11 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- iOS ignores the manifest and looks for this one specifically. -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#fffdf9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -68,6 +75,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
       tags={tags}
       series={series}
       alternates={alternates}
+      section={section}
     />
   </head>
   <body>
@@ -75,7 +83,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <header>
       <a href={home} class="home">lsantos.dev</a>
       <nav aria-label={t(locale, 'search')}>
-        <a href={locale === 'en' ? '/en/busca/' : '/busca/'}>{t(locale, 'search')}</a>
+        <a href={locale === 'en' ? '/en/search/' : '/search/'}>{t(locale, 'search')}</a>
       </nav>
     </header>
     <main id="main-content">
@@ -117,8 +125,8 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 </html>
 
 <style is:global>
-  /* ponytail: theming is native light-dark() + color-scheme, no toggle and no
-     JS yet. A manual toggle needs a stored preference — add it with the real
+  /* Theming is native light-dark() + color-scheme, no toggle and no
+     JS yet. A manual toggle needs a stored preference, add it with the real
      design in Phase 1. */
   :root {
     color-scheme: light dark;
@@ -225,7 +233,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     margin-inline: 0;
   }
 
-  /* The image sits in a paragraph because mdast images are phrasing content. */
+  /* The image is wrapped in a paragraph because mdast images are phrasing content. */
   figure > p {
     margin: 0;
   }

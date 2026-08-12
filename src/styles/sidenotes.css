@@ -8,13 +8,13 @@
  *     <span class="note-text">…inline content…</span>
  *   </span>
  *
- * `.note-text` is real inline content in the paragraph flow — never moved,
- * never duplicated — so it always reads correctly with CSS off (RSS readers,
+ * `.note-text` is real inline content in the paragraph flow, never moved,
+ * never duplicated, so it always reads correctly with CSS off (RSS readers,
  * text browsers, view-source). Everything below is progressive decoration on
  * top of that plain-text baseline:
  *
  *   - mobile-first base: the note is a tap/click-to-reveal popover, toggled
- *     by a checkbox (the "checkbox hack" — zero JS, and deliberately not
+ *     by a checkbox (the "checkbox hack", zero JS, and deliberately not
  *     <details>, which the spec asked to avoid).
  *   - wide screens (see WIDE below): the popover mechanics switch off and
  *     the note text floats into the right margin, Tufte-style, always
@@ -22,12 +22,12 @@
  *   - print: the note is inlined next to its marker as a parenthetical.
  *
  * Body content rule: notes are INLINE ONLY (text, strong/em, a, code). Never
- * put headings or block elements inside a Sidenote/MarginNote — the block
+ * put headings or block elements inside a Sidenote/MarginNote, the block
  * neutraliser near the bottom of this file is a safety net for stray markup,
  * not a license to use block content on purpose.
  */
 
-/* ponytail: a media query can only see viewport width, not the rendered px
+/* A media query can only see viewport width, not the rendered px
    width of a `ch`-based column, so "enough margin room" is an approximation:
    90rem (1440px) comfortably clears a 68ch serif column (~40-44rem) plus a
    13rem note and a 2rem gap on the right, with slack to spare. The same
@@ -38,7 +38,7 @@
   display: inline;
 }
 
-/* Visually hidden but focusable/toggleable — the real control behind the
+/* Visually hidden but focusable/toggleable, the real control behind the
    click. Stays this way at every width; only its relevance changes. */
 .note-toggle {
   position: absolute;
@@ -68,8 +68,8 @@
 
 /* The numbered reference mark. Counter lives on <main> (the post content
    region in BaseLayout.astro) rather than <body>, so it works with zero JS,
-   resets fresh on every page, and doesn't clobber any future body-level
-   counter a later component might add — counter-reset declarations replace
+   resets fresh on every page, and doesn't overwrite any future body-level
+   counter a later component might add, counter-reset declarations replace
    rather than merge. */
 main {
   counter-reset: sidenote;
@@ -88,7 +88,7 @@ main {
   color: var(--accent);
 }
 
-/* MarginNote has no number — just a small tap target so the popover is
+/* MarginNote has no number, just a small tap target so the popover is
    discoverable when there is no margin to put the text in. */
 .marginnote .note-marker::after {
   content: '•';
@@ -98,8 +98,8 @@ main {
 
 /* Popover baseline (narrow / no margin room): visually hidden until the
    checkbox is checked, then a small card near the marker.
-   Deliberately NOT `display: none` — that would remove the note from the
-   accessibility tree entirely, leaving screen reader users with an
+   Deliberately NOT `display: none`, that would remove the note from the
+   accessibility tree completely, leaving screen reader users with an
    unlabelled checkbox and no way to know what it reveals. The same
    visually-hidden clip technique used on `.note-toggle` above keeps the
    note text in the accessibility tree (read inline, in place, like the
@@ -164,7 +164,7 @@ main {
   border: 0;
 }
 
-/* Wide screens: margin room exists, so skip the popover entirely and float
+/* Wide screens: margin room exists, so skip the popover completely and float
    the note text into the right margin, always visible, Tufte-style. */
 @media (min-width: 90rem) {
   .note-toggle {

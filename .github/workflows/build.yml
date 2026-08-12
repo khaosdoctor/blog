@@ -50,7 +50,7 @@ jobs:
         with:
           path: dist
 
-  # ponytail: no deploy job yet — the repo is private and Pages isn't enabled,
+  # No deploy job yet, the repo is private and Pages isn't enabled,
   # so actions/deploy-pages@v4 would only ever fail. Add it back at DNS cutover:
   #
   #   deploy:

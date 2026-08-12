@@ -5,7 +5,7 @@ import PostList from '../../components/PostList.astro'
 import { getPublishedPosts } from '../../lib/posts'
 import { getCategories } from '../../lib/taxonomy'
 
-// Section landing pages live at /{category}/, the same shape as a post URL.
+// Section index pages live at /{category}/, the same shape as a post URL.
 // Astro gives this dynamic route priority over the [...slug] rest route, so the
 // only real hazard is a category named exactly like a post: fail the build
 // instead of silently shadowing an article.

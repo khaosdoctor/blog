@@ -83,9 +83,9 @@ function remember(href: string, meta: Meta | null): Meta | null {
 }
 
 /**
- * A card for a link to another site. The page itself cannot be read — CORS
+ * A card for a link to another site. The page itself cannot be read, CORS
  * stops that, and no proxy is worth putting a third party between the reader
- * and every link — so this uses the metadata Ghost cached for its bookmark
+ * and every link, so this uses the metadata Ghost cached for its bookmark
  * cards, and falls back to the link's own text plus the hostname.
  */
 async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
@@ -324,8 +324,8 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
 
 /**
  * Rebuilds the cards that were pinned on the previous page, at the coordinates
- * they were left at. They are not anchored to a link here — the link they came
- * from usually does not exist on this page — so place() is skipped and the
+ * they were left at. They are not anchored to a link here, the link they came
+ * from usually does not exist on this page, so place() is skipped and the
  * stored position is used as-is.
  */
 async function restorePinned(): Promise<void> {
@@ -358,7 +358,7 @@ async function restorePinned(): Promise<void> {
 function attach(link: HTMLAnchorElement): void {
   if (!previewable(link)) return
 
-  // Advertise the disclosure relationship up front; show()/closeCard() flip
+  // Advertise the disclosure relationship up front; show()/closeCard() change
   // this to 'true' and set aria-controls once a card actually exists.
   link.setAttribute('aria-expanded', 'false')
 

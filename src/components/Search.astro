@@ -1,5 +1,5 @@
 ---
-// Real <form> first: a plain GET to /busca/?q=... works with JS off, with
+// Real <form> first: a plain GET to /search/?q=... works with JS off, with
 // Pagefind not installed yet, and in dev where /pagefind/pagefind.js 404s.
 // The script below only enhances that baseline in place, it never replaces it.
 // The input starts empty; the client script below fills it from
@@ -9,7 +9,7 @@ interface Props {
   action?: string
 }
 
-const { action = '/busca/' } = Astro.props
+const { action = '/search/' } = Astro.props
 ---
 
 <form action={action} method="get" role="search" aria-label="Buscar no blog" data-search-form>
@@ -28,7 +28,7 @@ const { action = '/busca/' } = Astro.props
 </noscript>
 
 <script>
-  // ponytail: Pagefind ships its own ranked index + snippet extraction, we only
+  // Pagefind ships its own ranked index + snippet extraction, we only
   // glue its JS API to our own markup so results keep the site's styling
   // instead of Pagefind's default UI CSS. Import is dynamic + try/caught: the
   // bundle at /pagefind/pagefind.js only exists after the owner adds the
@@ -48,7 +48,7 @@ const { action = '/busca/' } = Astro.props
   const MAX_RESULTS = 20
 
   // Bumped on every search; a stale async response checks it before writing
-  // to the DOM so a slow earlier query can't clobber a faster later one.
+  // to the DOM so a slow earlier query can't overwrite a faster later one.
   let searchGeneration = 0
 
   async function loadPagefind(): Promise<PagefindModule | null> {

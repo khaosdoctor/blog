@@ -8,7 +8,7 @@ const recent = (await getPublishedPosts()).slice(0, 5)
 <BaseLayout title="Página não encontrada | Lucas Santos" description="Esta página não existe.">
   <h1>404</h1>
   <p>Esta página não existe. Talvez o link esteja errado, ou o post tenha mudado de nome.</p>
-  <p>Você pode <a href="/busca/">buscar</a> pelo que procurava, ou ler algo recente:</p>
+  <p>Você pode <a href="/search/">buscar</a> pelo que procurava, ou ler algo recente:</p>
   <ul>
     {recent.map((post) => <li><a href={`/${post.id}/`}>{post.data.title}</a></li>)}
   </ul>

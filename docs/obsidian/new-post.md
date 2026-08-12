@@ -19,7 +19,7 @@ draft: true
 // else (series, seriesOrder, heroImage, epigraph, updatedDate) is optional and
 // documented in the README.
 //
-// Publishing: flip draft to false and push. A pubDate in the future means
+// Publishing: set draft to false and push. A pubDate in the future means
 // scheduled, and the post goes live on its own at that exact minute.
 //
 // Categories in use today: typescript, javascript, infra, security, carreira,

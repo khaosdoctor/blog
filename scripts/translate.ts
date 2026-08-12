@@ -228,7 +228,7 @@ for (const post of changed) {
   const message = await stream.finalMessage()
 
   if (message.stop_reason === 'refusal') {
-    console.error(`refused: ${post.slug} (${message.stop_details?.category ?? 'no category'}) — skipped`)
+    console.error(`refused: ${post.slug} (${message.stop_details?.category ?? 'no category'}), skipped`)
     continue
   }
 
@@ -238,7 +238,7 @@ for (const post of changed) {
     .join('')
 
   if (!text.includes('<<<BODY>>>')) {
-    console.error(`unparseable response for ${post.slug} — skipped`)
+    console.error(`unparseable response for ${post.slug}, skipped`)
     continue
   }
 
@@ -248,7 +248,7 @@ for (const post of changed) {
   // the same denylist captions get before it's allowed anywhere near set:html.
   const unsafeField = [...parsed.fields].find(([, value]) => sanitizeCaption(value) !== value)
   if (unsafeField !== undefined || sanitizeCaption(parsed.body) !== parsed.body) {
-    console.error(`unsafe HTML in translated output for ${post.slug} (field: ${unsafeField?.[0] ?? 'body'}) — skipped`)
+    console.error(`unsafe HTML in translated output for ${post.slug} (field: ${unsafeField?.[0] ?? 'body'}), skipped`)
     continue
   }
 

@@ -7,7 +7,7 @@ name: Release
 #    (or refreshes) a "chore(main): release x.y.z" PR carrying the new version
 #    and a changelog.
 # 2. Merge that PR. The push trigger below matches only that merge commit, so
-#    the tag and the GitHub release land without you clicking again.
+#    the tag and the GitHub release are created without you clicking again.
 #
 # Which commits move the version: feat -> minor, fix -> patch, a `!` or a
 # BREAKING CHANGE footer -> major. Use `content:` for writing, which
@@ -15,7 +15,7 @@ name: Release
 #
 # Between releases the footer shows the semver plus a count of posts published
 # since it, derived from git history by src/lib/version.ts, so that counter
-# resets on its own when a new tag lands.
+# resets on its own when a new tag is created.
 
 on:
   workflow_dispatch:

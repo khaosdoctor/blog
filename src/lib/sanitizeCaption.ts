@@ -1,5 +1,5 @@
-// ponytail: captions come from migrated Ghost content and are trusted-author
-// HTML (credit links, the odd <span style>), not user input — so a small
+// Captions come from migrated Ghost content and are trusted-author
+// HTML (credit links, the odd <span style>), not user input, so a small
 // denylist is enough here, no DOMPurify-class dependency needed. Strips the
 // tags/attributes/URI schemes that could execute script; everything else
 // (links, spans, formatting) passes through untouched.
