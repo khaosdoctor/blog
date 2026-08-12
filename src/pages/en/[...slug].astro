@@ -76,7 +76,7 @@ const source = `/${post.data.translationOf}/`
     {post.data.machineTranslated && <LangBanner lang="en" originalHref={source} />}
     <Content components={mdxComponents} />
   </article>
-  <HoverPreviews />
+  <HoverPreviews locale="en" />
 </BaseLayout>
 
 <style>

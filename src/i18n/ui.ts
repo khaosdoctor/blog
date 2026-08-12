@@ -24,6 +24,7 @@ type UIKey =
   | 'categories'
   | 'tags'
   | 'skipToContent'
+  | 'keepPreviews'
 
 const ui: Record<Locale, Record<UIKey, string>> = {
   pt: {
@@ -52,6 +53,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     categories: 'Categorias',
     tags: 'Tags',
     skipToContent: 'Pular para o conteúdo',
+    keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
   },
   en: {
     tagline: 'A blog about JavaScript, TypeScript, web and tooling',
@@ -79,6 +81,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     categories: 'Categories',
     tags: 'Tags',
     skipToContent: 'Skip to content',
+    keepPreviews: 'Keep pinned previews after closing the tab',
   },
 }
 

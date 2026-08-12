@@ -2,6 +2,20 @@
    targets DOM nodes created at runtime by hover-previews.ts, so this stays a
    plain global stylesheet instead of an Astro scoped <style>. */
 
+.hp-settings {
+  margin-block-start: 2.5rem;
+  color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8rem;
+}
+
+.hp-settings label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+}
+
 .hp-card {
   position: fixed;
   z-index: 2147483000;

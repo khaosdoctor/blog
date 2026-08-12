@@ -31,6 +31,8 @@ const LONG_PRESS_DELAY = 500
 const DRAG_THRESHOLD = 6
 
 const STORAGE_KEY = 'hp-pinned'
+/** Reader opted into keeping the pinned set past the end of the session. */
+const PERSIST_KEY = 'hp-persist'
 
 const cache = new Map<string, Meta | null>()
 const inflight = new Map<string, AbortController>()
@@ -161,11 +163,32 @@ function place(card: HTMLElement, anchor: HTMLElement): void {
 /**
  * Pinned cards are the reader's own working set: links they deliberately kept
  * open while reading. Navigating to another post used to throw all of it away,
- * so the set is mirrored into sessionStorage and restored on the next page.
+ * so the set is mirrored into storage and restored on the next page.
  *
- * sessionStorage rather than localStorage: this is one reading session's
- * scratch space, and it should not still be there next week.
+ * sessionStorage by default: this is one reading session's scratch space and it
+ * should not still be there next week. A reader who disagrees can tick the
+ * checkbox, which moves the same data to localStorage. The preference itself
+ * always lives in localStorage, since a session-scoped one could never be read
+ * back on the visit it was meant to affect.
  */
+function persistent(): boolean {
+  try {
+    return localStorage.getItem(PERSIST_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function store(): Storage | null {
+  try {
+    return persistent() ? localStorage : sessionStorage
+  } catch {
+    // Private mode, storage disabled: previews still work, they just do not
+    // survive navigation.
+    return null
+  }
+}
+
 function savePinned(): void {
   try {
     const state: StoredCard[] = pinned.map((card) => ({
@@ -173,11 +196,23 @@ function savePinned(): void {
       left: parseFloat(card.style.left) || 0,
       top: parseFloat(card.style.top) || 0,
     }))
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    store()?.setItem(STORAGE_KEY, JSON.stringify(state))
   } catch {
-    // Private mode, storage full, storage disabled: previews still work, they
-    // just do not survive navigation.
+    // Storage full or otherwise refused: same as above, nothing breaks.
   }
+  showSettings()
+}
+
+/**
+ * The checkbox is pointless before anything is pinned, so it stays hidden until
+ * the first card is kept, and stays visible afterwards for as long as the
+ * preference is on (that is when a reader would go looking to turn it off).
+ */
+function showSettings(): void {
+  const box = document.querySelector('.hp-settings')
+  if (box === null) return
+  const relevant = pinned.length > 0 || persistent()
+  box.toggleAttribute('hidden', !relevant)
 }
 
 function closeCard(card: PopoverHTMLElement): void {
@@ -331,7 +366,7 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
 async function restorePinned(): Promise<void> {
   let stored: StoredCard[]
   try {
-    stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? '[]') as StoredCard[]
+    stored = JSON.parse(store()?.getItem(STORAGE_KEY) ?? '[]') as StoredCard[]
   } catch {
     return
   }
@@ -401,6 +436,26 @@ function attach(link: HTMLAnchorElement): void {
   })
 }
 
+function bindPersistToggle(): void {
+  const box = document.querySelector<HTMLInputElement>('#hp-persist')
+  if (box === null) return
+  box.checked = persistent()
+
+  box.addEventListener('change', () => {
+    // Whichever store the set was in has to be emptied, or the old copy would
+    // come back the next time the preference is switched again.
+    try {
+      sessionStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(STORAGE_KEY)
+      if (box.checked) localStorage.setItem(PERSIST_KEY, '1')
+      else localStorage.removeItem(PERSIST_KEY)
+    } catch {
+      return
+    }
+    savePinned()
+  })
+}
+
 function init(): void {
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return
@@ -411,6 +466,8 @@ function init(): void {
   const links = document.querySelectorAll<HTMLAnchorElement>('article a[href]')
   for (const link of links) attach(link)
 
+  bindPersistToggle()
+  showSettings()
   void restorePinned()
 }
 
