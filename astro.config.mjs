@@ -12,6 +12,7 @@ import { lastModified } from './src/lib/post-dates.mjs'
 import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
 import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
+import { remarkWikilinks } from './src/plugins/remark-wikilinks.mjs'
 
 // https://astro.build/config
 export default defineConfig({
@@ -54,7 +55,11 @@ export default defineConfig({
     // remarkEmbeds must run before remarkFigures: an image and a bare link are
     // both "the only thing in a paragraph", and once a figure is wrapped the
     // link check would have to look one level deeper for no benefit.
-    remarkPlugins: [remarkReadingTime, remarkMath, remarkEmbeds, remarkFigures],
+    //
+    // remarkWikilinks runs last: it turns [[slug]] into an ordinary link, and
+    // running after the embed check keeps a wikilink alone in a paragraph from
+    // being mistaken for something to embed.
+    remarkPlugins: [remarkReadingTime, remarkMath, remarkEmbeds, remarkFigures, remarkWikilinks],
     rehypePlugins: [rehypeCallouts, rehypeKatex],
   },
   image: {
