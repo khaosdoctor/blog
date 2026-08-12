@@ -135,7 +135,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
       'Esta página não está no cache do seu navegador e você está offline no momento. Os posts que você já abriu continuam disponíveis.',
     backHome: 'Voltar para a home',
     appName: 'Lucas Santos',
-    appShortName: 'lsantos.dev',
+    appShortName: 'Blog Lucas Santos',
     appDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
   },
   en: {
@@ -205,7 +205,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
       'This page is not in your browser cache and you are currently offline. Posts you have already opened are still available.',
     backHome: 'Back to the home page',
     appName: 'Lucas Santos',
-    appShortName: 'lsantos.dev',
+    appShortName: 'Blog Lucas Santos',
     appDescription: 'Articles about software development, technology and opinion.',
   },
 }
