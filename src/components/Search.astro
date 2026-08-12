@@ -60,8 +60,12 @@ const { action = '/search/', locale = 'pt' } = Astro.props
 
   async function loadPagefind(): Promise<PagefindModule | null> {
     try {
-      // @vite-ignore -- generated into dist/ post-build, never a source module
-      return await import(/* @vite-ignore */ '/pagefind/pagefind.js')
+      // Pagefind writes this file into dist/ after the build, so it is not a
+      // source module: the specifier goes through a variable to keep both Vite
+      // and the typechecker from trying to resolve something that only exists
+      // in the built output.
+      const module = '/pagefind/pagefind.js'
+      return (await import(/* @vite-ignore */ module)) as PagefindModule
     } catch {
       return null
     }

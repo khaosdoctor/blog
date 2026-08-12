@@ -50,6 +50,10 @@ jobs:
       # one Astro actually needs (esbuild).
       - run: npm ci
 
+      # The build strips types without checking them, so a wrong i18n key or a
+      # wrong prop ships silently as the string "undefined" in the page.
+      - run: npm run check
+
       # `npm run build` = astro build + pagefind index.
       - run: npm run build
 

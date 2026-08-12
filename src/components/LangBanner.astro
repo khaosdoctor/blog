@@ -18,7 +18,9 @@ suggestFixUrl.searchParams.set('title', `Translation: ${Astro.url.pathname}`)
 suggestFixUrl.searchParams.set('body', 'Suggest a translation fix for this page')
 ---
 
-<div class="lang-banner" role="doc-notice">
+{/* `note` rather than DPUB's `doc-notice`: same meaning to a screen reader here,
+    and it is in the ARIA role set every browser and checker knows. */}
+<div class="lang-banner" role="note">
   <p>
     {t(lang, 'machineTranslated')}
     {' '}
