@@ -23,13 +23,11 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# Obsidian vault config is tracked so the writing setup is reproducible, except
-# the parts that rewrite themselves constantly.
-content/.obsidian/workspace.json
-content/.obsidian/workspace-mobile.json
-content/.obsidian/vault-stats.json
-content/.obsidian/plugins/*/data.json.bak
-content/.obsidian/plugins/recent-files-obsidian/data.json
+# Obsidian vault config. Obsidian Sync already carries it across machines, and
+# most of these files rewrite themselves on every session, so tracking them here
+# only manufactures conflicts. The setup they hold is written down in
+# content/WRITING.md and the README instead, which is what makes it reproducible.
+content/.obsidian/
 
 # migration working artifacts (inventory, review lists, the Ghost export)
 .migration/
