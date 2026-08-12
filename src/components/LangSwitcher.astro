@@ -1,0 +1,62 @@
+---
+import type { Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+  /** The hreflang pairs the page already builds, when it has any. */
+  alternates?: { lang: string; href: string }[]
+}
+
+const { locale, alternates = [] } = Astro.props
+
+const LOCALES: { code: Locale; label: string; name: string; home: string }[] = [
+  { code: 'pt', label: 'PT', name: 'Português', home: '/' },
+  { code: 'en', label: 'EN', name: 'English', home: '/en/' },
+]
+
+// A translated page links to its counterpart. Everything else links to the
+// other locale's home, which beats linking at a page that does not exist.
+function hrefFor(code: Locale): string {
+  const match = alternates.find((alt) => alt.lang.toLowerCase().startsWith(code))
+  if (match !== undefined) return new URL(match.href, Astro.site).pathname
+  return LOCALES.find((entry) => entry.code === code)?.home ?? '/'
+}
+---
+
+<nav class="lang" aria-label="Language">
+  {
+    LOCALES.map((entry) =>
+      entry.code === locale ? (
+        <span aria-current="true" title={entry.name}>{entry.label}</span>
+      ) : (
+        <a href={hrefFor(entry.code)} hreflang={entry.code} title={entry.name}>
+          {entry.label}
+        </a>
+      ),
+    )
+  }
+</nav>
+
+<style>
+  .lang {
+    display: flex;
+    gap: 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+  }
+
+  .lang span {
+    color: var(--fg);
+  }
+
+  .lang a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .lang a:hover,
+  .lang a:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+</style>

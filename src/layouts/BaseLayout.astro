@@ -2,6 +2,7 @@
 // Self-hosted rather than a CDN link, per the plan: no third-party requests.
 // Without this the one post with LaTeX renders its formulas as raw $...$ text.
 import 'katex/dist/katex.min.css'
+import LangSwitcher from '../components/LangSwitcher.astro'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
 // Baked in at build time: the semver the release workflow last tagged, plus a
@@ -98,6 +99,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
       <nav aria-label={t(locale, 'search')}>
         <a href={locale === 'en' ? '/en/search/' : '/search/'}>{t(locale, 'search')}</a>
       </nav>
+      <LangSwitcher locale={locale} alternates={alternates} />
     </header>
     <main id="main-content">
       <slot />
@@ -177,7 +179,14 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 
   header {
     display: flex;
+    align-items: center;
+    gap: 1rem;
     padding-block: 2rem 3rem;
+  }
+
+  /* Pushes search and the language switcher to the right of the wordmark. */
+  header nav:first-of-type {
+    margin-inline-start: auto;
   }
 
   .skip-link {
