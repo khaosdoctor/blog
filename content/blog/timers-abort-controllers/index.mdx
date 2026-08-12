@@ -291,7 +291,7 @@ await operacaoLonga(AbortSignal.timeout(3500)).catch((r) => {
 
 O Erick Wendel tem um vídeo muito bacana sobre o assunto onde ele também explica como podemos implementar o famoso `Promise.race` usando somente essa funcionalidade.
 
-https://www.youtube.com/watch?v=u8qk9l304K0
+![](https://www.youtube.com/watch?v=u8qk9l304K0)
 
 O `AbortController` e o `AbortSignal` não são apenas feitos par serem usados com timers, mas com todo o tipo de promise no geral. Você pode implementar ele manualmente como fizemos anteriormente, através do evento `abort` pela função `onabort` ou então o método `on` do `EventListener`, ou usar o `AbortSignal.timeout` para limitar a execução da promise a um determinado tempo sem precisar chamar o `abort()` manualmente, o que é particularmente útil em casos onde temos que criar timeouts de execução.
 

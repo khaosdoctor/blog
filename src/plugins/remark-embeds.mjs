@@ -45,20 +45,33 @@ function vimeoId(url) {
   return id !== undefined && /^\d+$/.test(id) ? id : null
 }
 
-/**
- * A paragraph counts as a bare link when its only content is one link whose
- * visible text is the URL itself. A link with real link text is prose and is
- * left alone.
- */
-function bareLink(node) {
+/** The one meaningful child of a paragraph, or null if there is more than one. */
+function soleChild(node) {
   if (node.type !== 'paragraph') return null
   const meaningful = node.children.filter(
     (child) => !(child.type === 'text' && child.value.trim() === ''),
   )
-  if (meaningful.length !== 1) return null
-  const [only] = meaningful
+  return meaningful.length === 1 ? meaningful[0] : null
+}
+
+/**
+ * The URL of a paragraph that is nothing but one embeddable reference.
+ *
+ * Two spellings are accepted, because both are useful in different places.
+ * `![](url)` is what Obsidian renders as a live embed while writing, so posts
+ * show the actual video or tweet in the editor; a bare `url` on its own line is
+ * what you get from pasting, and still upgrades on the site. Either way the
+ * markdown stays readable everywhere, which is the point.
+ */
+function embeddableUrl(node) {
+  const only = soleChild(node)
+  if (only === null) return null
+
+  if (only.type === 'image') return only.url
+
   if (only.type !== 'link') return null
   if (only.children.length !== 1 || only.children[0].type !== 'text') return null
+  // A link with real link text is prose, not an embed.
   const text = only.children[0].value.trim()
   if (text !== only.url && text !== only.url.replace(/\/$/, '')) return null
   return only.url
@@ -90,14 +103,16 @@ function tweetQuote(node) {
   const last = node.children[node.children.length - 1]
   if (last.type !== 'paragraph') return null
 
+  // The attribution is written either as a link or, so Obsidian renders the
+  // live tweet while editing, as an image.
   let href = null
-  const walkLinks = (parent) => {
+  const walkRefs = (parent) => {
     for (const child of parent.children ?? []) {
-      if (child.type === 'link') href = statusUrl(child.url) ?? href
-      walkLinks(child)
+      if (child.type === 'link' || child.type === 'image') href = statusUrl(child.url) ?? href
+      walkRefs(child)
     }
   }
-  walkLinks(last)
+  walkRefs(last)
   if (href === null) return null
 
   return { href, children: node.children.slice(0, -1) }
@@ -151,7 +166,7 @@ export function remarkEmbeds() {
           continue
         }
 
-        const href = bareLink(parent.children[index])
+        const href = embeddableUrl(parent.children[index])
         if (href === null) {
           walk(parent.children[index])
           continue
