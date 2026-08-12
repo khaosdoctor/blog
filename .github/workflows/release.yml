@@ -1,20 +1,24 @@
 name: Release
 
-# Conventional releases. release-please reads the commits on main, keeps a
-# "chore(main): release x.y.z" PR up to date with the next version and the
-# changelog, and tags the release when that PR is merged. The version it writes
-# into package.json is what the site footer shows and what names the service
-# worker's caches.
+# Manual. Nothing here fires because a post was published.
 #
-# ponytail: release-please over semantic-release because it batches. Publishing
-# a post should not cut a release; merging the release PR should. Nothing is
-# published to npm — the package is private and there is no publish step.
+# 1. When you want a release, run this workflow from the Actions tab.
+#    release-please reads the conventional commits since the last tag and opens
+#    (or refreshes) a "chore(main): release x.y.z" PR carrying the new version
+#    and a changelog.
+# 2. Merge that PR. The push trigger below matches only that merge commit, so
+#    the tag and the GitHub release land without you clicking again.
 #
-# Commit types that move the version: feat (minor), fix (minor->patch), and any
-# commit with a `!` or BREAKING CHANGE (major). Use `content:` for writing, which
-# release-please ignores, so 200 posts do not inflate the version.
+# Which commits move the version: feat -> minor, fix -> patch, a `!` or a
+# BREAKING CHANGE footer -> major. Use `content:` for writing, which
+# release-please ignores, so posts never inflate the number.
+#
+# Between releases the footer shows the semver plus a count of posts published
+# since it, derived from git history by src/lib/version.ts, so that counter
+# resets on its own when a new tag lands.
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
@@ -22,9 +26,18 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    # On a manual run, always. On a push, only for the release PR merge, so an
+    # ordinary push never opens a release PR on its own.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.head_commit.message, 'chore(main): release')
     steps:
       - uses: googleapis/release-please-action@v4
         with:
