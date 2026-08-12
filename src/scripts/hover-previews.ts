@@ -17,9 +17,12 @@ interface StoredCard {
   top: number
 }
 
+/**
+ * The popover methods are in the DOM types as required, but a browser without
+ * the API does not have them, which is why every call site uses `?.()`. Only
+ * the link back to the anchor needs declaring.
+ */
 interface PopoverHTMLElement extends HTMLElement {
-  showPopover?: () => void
-  hidePopover?: () => void
   hpLink?: HTMLAnchorElement
 }
 

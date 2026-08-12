@@ -1,5 +1,8 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  // The worker is a separate deploy target with its own runtime globals
+  // (ExportedHandler, the `cf` fetch option). It builds through wrangler, not
+  // through Astro, so it is checked by `npm run check:worker` instead.
+  "exclude": ["dist", "worker"]
 }
