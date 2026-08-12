@@ -7,6 +7,7 @@ import mermaid from 'astro-mermaid'
 import rehypeCallouts from 'rehype-callouts'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
+import { redirectStubs } from './src/integrations/redirect-stubs.mjs'
 import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
 import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
@@ -30,6 +31,9 @@ export default defineConfig({
     mdx(),
     // The search page and the offline fallback are chrome, not content.
     sitemap({ filter: (page) => !page.includes('/busca/') && !page.includes('/offline/') }),
+    // Runs after everything else: it inspects the finished output and only
+    // writes a stub where no real page claimed the path.
+    redirectStubs(),
   ],
   markdown: {
     // Posts are plain markdown even though the files are .mdx: these two plugins
