@@ -1,16 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Search from '../components/Search.astro'
+import { t } from '../i18n/ui'
 ---
 
 <BaseLayout
-  title="Busca, Lucas Santos"
-  description="Buscar artigos no blog de Lucas Santos."
+  title={`${t('pt', 'searchTitle')} | Lucas Santos`}
+  description={t('pt', 'searchDescription')}
   alternates={[
     { lang: 'pt-BR', href: new URL('/search/', Astro.site).href },
     { lang: 'en', href: new URL('/en/search/', Astro.site).href },
   ]}
 >
-  <h1>Busca</h1>
+  <h1>{t('pt', 'searchTitle')}</h1>
   <Search />
 </BaseLayout>

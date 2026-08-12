@@ -107,7 +107,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <footer>
       <p>Lucas Santos</p>
       <p class="version">
-        <a href={commitUrl} rel="noopener">Version: {version}</a>
+        <a href={commitUrl} rel="noopener">{t(locale, 'version')}: {version}</a>
       </p>
     </footer>
     {

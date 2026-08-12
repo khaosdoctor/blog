@@ -1,14 +1,24 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { t } from '../i18n/ui'
 import { getPublishedPosts } from '../lib/posts'
 
 const recent = (await getPublishedPosts()).slice(0, 5)
 ---
 
-<BaseLayout title="Página não encontrada | Lucas Santos" description="Esta página não existe.">
+{/* One 404 answers for the whole host, /en/ paths included, and a static page
+    cannot know which language the reader wanted. So it says it in both rather
+    than guessing, Portuguese first. */}
+<BaseLayout title={`${t('pt', 'notFoundTitle')} | Lucas Santos`} description={t('pt', 'notFoundBody')}>
   <h1>404</h1>
-  <p>Esta página não existe. Talvez o link esteja errado, ou o post tenha mudado de nome.</p>
-  <p>Você pode <a href="/search/">buscar</a> pelo que procurava, ou ler algo recente:</p>
+  <p>{t('pt', 'notFoundBody')}</p>
+  <p lang="en">{t('en', 'notFoundBody')}</p>
+  <p>
+    <a href="/search/">{t('pt', 'searchLabel')}</a>
+    {' / '}
+    <a href="/en/search/" hreflang="en">{t('en', 'searchLabel')}</a>
+  </p>
+  <p>{t('pt', 'notFoundRecent')}</p>
   <ul>
     {recent.map((post) => <li><a href={`/${post.id}/`}>{post.data.title}</a></li>)}
   </ul>
