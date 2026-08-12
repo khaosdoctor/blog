@@ -29,6 +29,11 @@ pnpm-debug.log*
 
 # migration working artifacts (inventory, review lists, the Ghost export)
 .migration/
+# The Ghost importer itself. Kept on disk while the content settles, untracked
+# because it is a one-shot: the posts are the source of truth now and there is
+# no second migration coming.
+scripts/migrate/
+scripts/analyze-export.ts
 # open questions and decisions for Lucas, not part of the site
 QUESTIONS.md
 
