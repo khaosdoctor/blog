@@ -2,7 +2,7 @@
   "command_timeout": 5,
   "templates_folder": "internal/templates",
   "templates_pairs": [["", ""]],
-  "trigger_on_file_creation": false,
+  "trigger_on_file_creation": true,
   "auto_jump_to_cursor": true,
   "enable_system_commands": false,
   "shell_path": "",
@@ -16,6 +16,16 @@
   ],
   "syntax_highlighting": true,
   "syntax_highlighting_mobile": false,
-  "enabled_templates_hotkeys": ["internal/templates/new-post.md"],
+  "enabled_templates_hotkeys": [
+    "internal/templates/new-post.md",
+    "internal/templates/snippets/figure.md",
+    "internal/templates/snippets/embed.md",
+    "internal/templates/snippets/tweet.md",
+    "internal/templates/snippets/callout.md",
+    "internal/templates/snippets/sidenote.md",
+    "internal/templates/snippets/video.md",
+    "internal/templates/snippets/code.md",
+    "internal/templates/snippets/series.md"
+  ],
   "startup_templates": []
 }
