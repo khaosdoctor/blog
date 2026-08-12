@@ -18,6 +18,25 @@
  * so MDX treats them as plain HTML and needs no component in scope.
  */
 
+import { readFileSync } from 'node:fs'
+
+/**
+ * Remote images whose host stopped serving them. They stay in the markdown so
+ * the caption and the surrounding sentence survive; only the rendering changes.
+ */
+let deadImages = null
+
+function isDead(url) {
+  if (deadImages === null) {
+    try {
+      deadImages = new Set(JSON.parse(readFileSync('content/dead-images.json', 'utf8')).urls ?? [])
+    } catch {
+      deadImages = new Set()
+    }
+  }
+  return deadImages.has(url)
+}
+
 /** An image is "lone" when it is the only meaningful thing in its paragraph. */
 function loneImage(node) {
   if (node.type !== 'paragraph') return null
@@ -28,14 +47,25 @@ function loneImage(node) {
   return meaningful[0].type === 'image' ? meaningful[0] : null
 }
 
-function jsx(name, children) {
-  return { type: 'mdxJsxFlowElement', name, attributes: [], children }
+function jsx(name, children, attributes = []) {
+  return { type: 'mdxJsxFlowElement', name, attributes, children }
+}
+
+function attribute(name, value) {
+  return { type: 'mdxJsxAttribute', name, value }
 }
 
 function figureFor(image) {
   const caption = typeof image.title === 'string' ? image.title.trim() : ''
   // Otherwise the caption renders as a browser tooltip as well.
   image.title = null
+
+  if (isDead(image.url)) {
+    const attributes = [attribute('src', image.url)]
+    if (image.alt) attributes.push(attribute('alt', image.alt))
+    if (caption !== '') attributes.push(attribute('caption', caption))
+    return jsx('MissingImage', [], attributes)
+  }
 
   const children = [{ type: 'paragraph', children: [image] }]
   if (caption !== '') children.push(jsx('figcaption', [{ type: 'text', value: caption }]))

@@ -1,0 +1,66 @@
+---
+/**
+ * Stands in for an image whose host stopped serving it.
+ *
+ * The alternative is a broken-image icon and a caption describing something the
+ * reader cannot see. This says plainly that the image is gone and keeps the
+ * caption, so the sentence around it still makes sense, and keeps the original
+ * URL in the markup so the loss stays traceable.
+ */
+interface Props {
+  src: string
+  alt?: string
+  caption?: string
+}
+
+const { src, alt, caption } = Astro.props
+const host = (() => {
+  try {
+    return new URL(src).hostname.replace(/^www\./, '')
+  } catch {
+    return 'a host that no longer serves it'
+  }
+})()
+---
+
+<figure class="missing">
+  <div class="frame" role="img" aria-label={alt || `Imagem indisponível, hospedada em ${host}`}>
+    <p class="label">Esta imagem não existe mais</p>
+    <p class="host">{host}</p>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+  <!-- original: {src} -->
+</figure>
+
+<style>
+  .missing {
+    margin-block: 2rem;
+    margin-inline: 0;
+  }
+
+  .frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-height: 8rem;
+    padding: 1.5rem;
+    border: 1px dashed var(--rule);
+    border-radius: 4px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .label {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .host {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+</style>
