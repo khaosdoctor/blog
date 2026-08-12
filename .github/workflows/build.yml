@@ -34,6 +34,18 @@ jobs:
           node-version: 24
           cache: npm
 
+      # Astro's content and image caches. Image work dominates this build, 1400
+      # webp derivatives, so a hit is the difference between seconds and minutes.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            node_modules/.astro
+            .astro
+          key: astro-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/blog/**') }}
+          restore-keys: |
+            astro-${{ hashFiles('package-lock.json') }}-
+            astro-
+
       # npm 11 blocks install scripts by default; package.json allowlists the
       # one Astro actually needs (esbuild).
       - run: npm ci
