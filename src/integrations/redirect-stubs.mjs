@@ -5,6 +5,11 @@ import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { redirects } from '../data/redirects.ts'
 
+// Portuguese only, by construction rather than by oversight: every redirect in
+// src/data/redirects.ts points at a PT URL, since they all come from the Ghost
+// site that predates the English tree. A reader sees this page for a few
+// milliseconds before the refresh fires. If an /en/ redirect ever appears, pick
+// the copy from the target path here.
 function page(target, site) {
   const absolute = new URL(target, site).href
   return `<!doctype html>
