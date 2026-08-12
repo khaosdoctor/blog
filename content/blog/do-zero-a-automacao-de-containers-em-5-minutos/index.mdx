@@ -23,13 +23,13 @@ Similar a outros provedores de CI como o Travis ou o Circle, o GitHub também po
 
 O projeto que vamos utilizar para automatizar será o [meu repositório publico de backend](https://github.com/khaosdoctor/site-backend):
 
-![](https://miro.medium.com/v2/resize:fit:700/0*H2hIsW4sxqkQ0-ck)
+![](./0-h2hisw4sxqkq0-ck-23eed9.png)
 
 Veja que o repositório é super simples, não contém muitos arquivos, apenas um `docker-compose.yml` para testes locais e o nosso arquivo `yml` do `mongoke` que será o schema GraphQL.
 
 No topo da página, ao lado de settings, temos o botão `Actions`, será lá que vamos configurar a nossa automação!
 
-![](https://miro.medium.com/v2/resize:fit:700/0*tmZFH1SNxaXB4AjI)
+![](./0-tmzfh1snxaxb4aji-b6ce13.png)
 
 O GitHub já possui uma série de workflows prontos, porém, infelizmente, ainda não temos nenhum para o que queremos fazer. Mas o que queremos fazer? Para deixar tudo mais claro, vamos listar todas as etapas do processo:
 
@@ -46,7 +46,7 @@ Alguns detalhes que temos que perceber:
 
 Primeiramente vamos tratar das nossas dependências, a dependência mais fácil de ser resolvida é criar a URL do MongoDB como um secret. Para isso vamos até a nossa aba `Settings` e clicamos em `Secrets`. Basta adicionar um novo secret clicando no link `Add new Secret` e preencher um nome e o conteúdo do mesmo. No caso estamos adicionando a URI do MongoDB, então vamos chamar este secret de `MONGODB_URI`
 
-![](https://miro.medium.com/v2/resize:fit:700/0*tDihPBBGIwg-3U2-)
+![](./0-tdihpbbgiwg-3u2-5c517d.png)
 
 ## Permitindo ações na Azure
 
@@ -66,107 +66,107 @@ Este comando deve dar uma resposta em JSON do tipo:
 
 Copie toda essa resposta e crie um novo secret no GitHub chamado `AZURE_CREDENTIALS`:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*Oq5QyAMOR7AC7i1Q)
+![](./0-oq5qyamor7ac7i1q-057f23.png)
 
 Agora devemos ter dois secrets criados:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*q-RIyElRwFa3zXTU)
+![](./0-q-riyelrwfa3zxtu-cde0bd.png)
 
 ## Criando um workflow
 
 Para criarmos o nosso primeiro workflow, basta voltarmos para o painel `Actions` ao lado de `Settings` e clicar no botão `Set up this workflow`:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*diYWMxG2TpJ82Sm1)
+![](./0-diywmxg2tpj82sm1-a23185.png)
 
 Esta ação deve levar para uma nova tela com um modelo inicial do código:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*v0JNCLX9rAi2SaRx)
+![](./0-v0jnclx9rai2sarx-7a0528.png)
 
 Perceba que as GitHub Actions nada mais são do que um arquivo YAML que ficam em uma pasta `<seu repo>/.github/workflows` e este será o nome do workflow, portanto é importante que ele seja bastante descritivo. Vamos dar o nome do nosso de `publish-prod.yml`:
 
-![](https://miro.medium.com/v2/resize:fit:537/0*i8B-FwSTTrZuKtlV)
+![](./0-i8b-fwsttrzuktlv-7920bd.png)
 
 O conteúdo que temos é o seguinte:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*zExvrp9-LVopTWg5oYZmcQ.png)
+![](./1-zexvrp9-lvoptwg5oyzmcq-0d266a.png)
 
 Primeiro, vamos setar um nome para nosso workflow, este será o nome que aparecerá na UI do GitHub, então podemos deixar um pouco mais bonito:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*Jc3jshv1vu5YrAVs8ZHofQ.png)
+![](./1-jc3jshv1vu5yravs8zhofq-c72694.png)
 
 Agora vamos definir em qual tipo de ação queremos que ele rode. Como queremos que ele rode em qualquer push ou PR no branch `master`, não vamos fazer nenhuma alteração, mas se precisássemos alterar esta ação, teríamos que mudar a chave `on`. Para verificar quais são as ações disponíveis, basta clicar no editor e apertar `ENTER` que um _intellisense_ será mostrado:
 
-![](https://miro.medium.com/v2/resize:fit:290/0*bxe5Hg2B5h7kiL7s)
+![](./0-bxe5hg2b5h7kil7s-024031.png)
 
 > _Veja que temos várias ações possíveis, para detalhar melhor, veja [_a documentação oficial_](https://help.github.com/en/actions/reference/events-that-trigger-workflows#webhook-events)_
 
 Então vamos criar uma seção para compartilhar variáveis de ambiente e conteúdos que vamos usar na parte mais a frente do nosso script, por exemplo, o nome do container e também o nome do resource group. Para isso criamos um bloco `env`:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*c-TtD9itKom4CReF-j8i6g.png)
+![](./1-c-ttd9itkom4cref-j8i6g-f4c3aa.png)
 
 Agora vamos, de fato, criar a máquina e o que chamamos de `runner`, que é quem vai rodar o nosso código de testes e de publicação. Todo o workflow é composto de um ou mais jobs que podem ser executados sequencialmente ou em paralelo. No nosso caso não temos que fazer muita coisa, apenas conectar e fazer o deploy. Portando vamos modificar a seção `jobs`:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*D2e42TJpQIis6nKobJBM8w.png)
+![](./1-d2e42tjpqiis6nkobjbm8w-2c2146.png)
 
 Iremos rodar nosso job em uma imagem do Ubuntu, veja as demais opções [na documentação](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on). Depois disso vamos configurar os nossos `steps`, um step é uma sequencia de tarefas que serão executadas como partes de um `job`, ou seja, aqui será o lugar onde vamos executar o nosso login e o nosso deploy!
 
 Para isso vamos modificar a chave `steps` e vamos remover todo o conteúdo, então vamos utilizar os steps pré prontos da Azure para poder fazer o login! Podemos pesquisar na caixa de texto lateral por `Azure/login`:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*4bBSYavjQ9JDtefl)
+![](./0-4bbsyavjq9jdtefl-b2ce5c.png)
 
 Ao clicar no nome do step, vamos ter um tutorial de como usá-lo, neste caso é bastante simples, basta copiarmos o seguinte código para dentro do nosso step:
 
-![](https://miro.medium.com/v2/resize:fit:446/1*fXK7Z3X6sywzaANHPrjx2A.png)
+![](./1-fxk7z3x6sywzaanhprjx2a-48c5c5.png)
 
 E será aqui que vamos setar o nosso primeiro secret, precisamos do `AZURE_CREDENTIALS` que criamos anteriormente para poder prover as credenciais de acesso para o login. Para usar um secret basta colocá-lo entre chaves duplas como em: `${{ secrets.AZURE_CREDENTIALS }}`.
 
 Nosso arquivo está assim:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*dGzjWLVNondqNe0LielzuQ.png)
+![](./1-dgzjwlvnondqne0lielzuq-4b3b72.png)
 
 Vamos criar um segundo step que vamos chamar de `Deploy ACI`, que será aonde vamos executar o nosso comando do Azure CLI. Para isso vamos utilizar outro step com o comando `run` que vai conter a linha que vamos executar em nosso CLI. Em nosso a caso, já com as variáveis substituídas, será esta:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*YIcLMWWZALr7IO2Ws26ClA.png)
+![](./1-yiclmwwzalr7io2ws26cla-cd19ca.png)
 
 Vamos observar bem a última parte onde criamos a variável `MONGOKE_CONFIG_URL`, esta variável sozinha não vai ser suficiente, temos que concatená-la com o valor do SHA do commit para não sofrermos com o cache. Para concatenarmos variáveis, temos que trabalhar somente no nível de steps, pois expressões não são permitidas a níveis de jobs ou do workflow como um todo. Vamos então criar um outro step e chamá-lo de `Create URL`.
 
 Neste step, vamos executar uma [**Workflow Command**](https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#using-workflow-commands-to-access-toolkit-functions), que são comandos nativos do GitHub Actions, que podem ser acessados com a sintaxe `::comando`. No nosso caso vamos usar o comando `set-env`, que serve para criar uma nova variável de ambiente, a sintaxe é a seguinte: `::set-env name=<nome>::<valor>` e ai poderemos utilizar as expressões de concatenação:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*wWgcaTtCATvy1NJwauG-cA.png)
+![](./1-wwgcattcatvy1njwaug-ca-7677fb.png)
 
 Veja que estamos concatenando `${{ env.MONGOKE_CONFIG_URL }}` com `?v=` e pegando os seis primeiros digitos de uma [variável nativa de ambiente](https://help.github.com/pt/actions/configuring-and-managing-workflows/using-environment-variables) chamada `GITHUB_SHA`. Vamos adicionar este step após o login:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*6NT5gNCwS6FEm5tEaNkfqw.png)
+![](./1-6nt5gncws6fem5teankfqw-a7f49f.png)
 
 Agora vamos para o último passo, onde vamos executar o nosso comando, com uma pequena alteração, ao invés de utilizar a variável `MONGOKE_CONFIG_URL`, vamos trocar para a nossa nova variável `MONGOKE_URL`:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*qqSANiai1089JDWGBh3O8Q.png)
+![](./1-qqsaniai1089jdwgbh3o8q-f28781.png)
 
 Nosso arquivo final será assim:
 
-![](https://miro.medium.com/v2/resize:fit:700/1*UrbN1mgPw9gYrP-XNJVBWg.png)
+![](./1-urbn1mgpw9gyrp-xnjvbwg-896711.png)
 
 Agora podemos clicar no botão `Start Commit` e esperar o nosso action ser executado:
 
-![](https://miro.medium.com/v2/resize:fit:427/0*hctS-h0CJzc1EjO2)
+![](./0-hcts-h0cjzc1ejo2-910dc3.png)
 
 ## Acompanhando o workflow
 
 Podemos acompanhar o nosso workflow na aba `Actions`:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*wb7qZMr5Ajrjx__0)
+![](./0-wb7qzmr5ajrjx-0-a35a35.png)
 
 Lembrando que **workflows não executados nenhuma vez não vão aparecer na lista**. Basta clicarmos no nome do workflow para podermos ver o que aconteceu:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*mB8OsipEyxiwF3Bg)
+![](./0-mb8osipeyxiwf3bg-34033b.png)
 
 Agora podemos observar no portal da Azure que nosso container foi atualizado:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*5UcnCdFkuZaJQmzL)
+![](./0-5ucncdfkuzajqmzl-0199fd.png)
 
 E que também nossas URLs estão corretas:
 
-![](https://miro.medium.com/v2/resize:fit:700/0*sH4PNq2JApgDUMwd)
+![](./0-sh4pnq2japgdumwd-af035e.png)
 
 ## Conclusão
 
