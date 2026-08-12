@@ -1,10 +1,26 @@
 ---
 // Drop this once anywhere in the page (BaseLayout is the natural spot). It
-// takes no props: at runtime it scans <article a href> and attaches hover /
-// long-press preview cards. With JS disabled every link stays a plain,
-// fully working <a href>, this only ever adds behaviour on top.
+// takes no props beyond the locale: at runtime it scans <article a href> and
+// attaches hover / long-press preview cards. With JS disabled every link stays
+// a plain, fully working <a href>, this only ever adds behaviour on top.
+import { t, type Locale } from '../i18n/ui'
 import '../styles/hover-previews.css'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
 ---
+
+{/* Hidden until the reader actually pins something, so the choice only shows
+    up once it means anything. hover-previews.ts unhides it. */}
+<p class="hp-settings" hidden>
+  <label>
+    <input type="checkbox" id="hp-persist" />
+    {t(locale, 'keepPreviews')}
+  </label>
+</p>
 
 <script>
   import '../scripts/hover-previews'
