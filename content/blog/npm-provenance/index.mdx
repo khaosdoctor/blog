@@ -10,9 +10,6 @@ heroImage: "./articles.png"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image.png'
-
 Quando estamos falando de desenvolvimento web, um dos maiores problemas que enfrentamos é a segurança. Ainda mais quando estamos falando de desenvolvimento Node.js com pacotes distribuídos através do NPM.
 
 Uma das maiores fontes de ataques à sistemas empresariais vem através de pacotes externos que são instalados sem o devido cuidado. Isso já foi [testado algumas vezes](https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610) e ainda continua sendo um problema.
@@ -35,7 +32,7 @@ Para isso, eles estão usando algumas soluções da [Sigstore](https://www.sigst
 
 E essa é a grande sacada, porque para cada publicação do pacote, é gerado um par de chaves que é usado para assinar o certificado, essas chaves são jogadas fora e substituídas por um certificado de validade. Ninguém mais pode assinar o código, mas todo mundo que tiver o certificado público pode validar que ela foi gerada por uma fonte confiável, ou seja, ninguém tem uma chave.
 
-<Figure src={figureImage1} priority alt="" caption="Imagem representando o fluxo dessas operações (Fonte: NPM)" />
+![](./image.png "Imagem representando o fluxo dessas operações (Fonte: NPM)")
 
 A segunda parte desse processo é a verificação, que é feita em um serviço chamado Rekor, que é um log de transações públicas, basicamente todos os provenances vão parar lá e são totalmente públicos para todos verem. Então você pode baixar o log que contém todo o ambiente do CI/CD assinado e verificar se é verdadeiro com o comando:
 

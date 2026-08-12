@@ -11,11 +11,6 @@ draft: false
 visibility: "public"
 seoDescription: "O Kubernetes é uma abordagem muito mais cara do que o normal para a maioria das aplicações. Como você consegue otimizar seus custos de forma eficiente?"
 ---
-
-import figureImage1 from './image-17.png'
-import figureImage2 from './image-18.png'
-import figureImage3 from './image-19.png'
-
 Desde os primórdios da computação distribuída e da chegada da cloud, todas as pessoas já tiveram que lidar, de alguma forma, com otimização de custos. Seja esta otimização em forma de redução de uso de espaço, ou até mesmo em redução de tráfego de rede!
 
 Uma das ferramentas mais caras quando falamos em computação distribuída é o **[Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan)**. Isto é um pouco óbvio por dois motivos bastante simples:
@@ -35,7 +30,7 @@ Cada cloud tem seu modelo de cobrança individual, aqui vamos trabalhar somente 
 
 > Se você usa outro provedor cloud, busque no site do fornecedor o preço e as opções de cobrança para cada serviço oferecido. No entanto, as opções de otimização que vou mostrar por aqui servem para todas as clouds, claro, com algumas mudanças na linha de comando.
 
-<Figure src={figureImage1} priority alt="" caption="Descrição das formas de cobrança para o AKS" />
+![](./image-17.png "Descrição das formas de cobrança para o AKS")
 
 Como podemos ver, no caso do [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan), a cobrança é feita somente pelos recursos utilizados, sendo que o o gerenciamento do cluster como um todo não possui nenhuma cobrança extra. Isso quer dizer que, em uma arquitetura [Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) padrão, o que chamamos de **Control Plane**, ou o plano de controle onde todos os recursos de sistema são criados, não é cobrado. Ao invés disso, todos os demais recursos que o [Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) usa para poder funcionar são.
 
@@ -49,11 +44,11 @@ No geral, criar um cluster [Kubernetes](https://docs.microsoft.com/azure/aks/?WT
 
 No caso do [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan), quando criamos um cluster, selecionamos o que é chamado de **Resource Group**. Neste resource group, a Azure irá criar um recurso de controle chamado **Kubernetes Service**, como podemos ver a seguir:
 
-<Figure src={figureImage2} alt="" caption="Criamos um demo-cluster em um resource group" />
+![](./image-18.png "Criamos um demo-cluster em um resource group")
 
 Porém, aonde estão todos os recursos cobrados que falei no início do parágrafo? Para isto, por conta de gerenciamento interno, a Azure cria um outro resource group que começa com o nome `MC_<resource-group>-<cluster>_<região>`. E nele serão colocados todos os recursos cobrados:
 
-<Figure src={figureImage3} alt="" caption="Recursos cobrados por um cluster" />
+![](./image-19.png "Recursos cobrados por um cluster")
 
 Veja que temos oito recursos diferentes, porém podemos ser cobrados por mais que isto porque o que é chamado de `Virtual Machine Scale Set` é, na verdade, uma lista de [VMs](https://azure.microsoft.com/services/virtual-machines/?WT.mc_id=blog-personal-ludossan) que podem ser escaladas de acordo com o precisamos.
 

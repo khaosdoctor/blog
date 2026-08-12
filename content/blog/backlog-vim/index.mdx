@@ -11,20 +11,6 @@ draft: false
 visibility: "public"
 seoTitle: "Tudo que eu aprendi sobre Vim em 6 meses de uso contínuo"
 ---
-
-import figureImage1 from './gloom-contrast-9021c959.png'
-import figureImage2 from './image.png'
-import figureImage3 from './image-1.png'
-import figureImage4 from './image-2.png'
-import figureImage5 from './image-3.png'
-import figureImage6 from './image-6.png'
-import figureImage7 from './image-7.png'
-import figureImage8 from './image-4.png'
-import figureImage9 from './image-5.png'
-import figureImage10 from './image-9.png'
-import figureImage11 from './image-11.png'
-import figureImage12 from './image-12.png'
-
 Há mais ou menos 6 meses eu resolvi que era hora de deixar de lado o preciosismo e largar meu editor de longa data (VSCode) e começar a usar esse tão famoso **Vim**. Quando terminei de configurar e estava satisfeito com meu progresso inicial, escrevi [esse artigo](/instalando-e-configurando-o-neovim/). Nele, eu documentei grande parte da minha jornada através da instalação e das primeiras impressões com o Vim, mas eu não quis me estender muito sobre o uso porque eu não tinha usado o editor por tempo o suficiente para ter opiniões (e nem estatísticas) sobre o uso dele.
 
 Agora é diferente. Depois de 6 meses usando **somente** o Neovim como meu editor principal (na real, como o único editor) eu quero destrinchar tudo que eu aprendi, o que eu ganhei, o que eu perdi, o que eu mais gostei e o que eu achei estranho nessa nova experiência.
@@ -57,7 +43,7 @@ Eu uso o VSCode desde muito provavelmente o lançamento, lembro de ter usado a v
 
 Desde que eu comecei em desenvolvimento eu já conhecia o `vi` e outros editores como o `nano` para quando eu precisava fazer um SSH em alguma máquina, ou então configurar algum servidor, mas eu nunca me importei em aprender **de verdade** como o Vi/Vim funcionava até meados de 2016 em um PHPExperience em São Paulo.
 
-<Figure src={figureImage1} priority alt="GitHub - rainglow/atom: 320+ color themes for Atom." caption="<span style=&quot;white-space: pre-wrap;&quot;>Screenshot do falecido Atom, o precursor do VSCode</span>" />
+![GitHub - rainglow/atom: 320+ color themes for Atom.](./gloom-contrast-9021c959.png "Screenshot do falecido Atom, o precursor do VSCode")
 
 Nesse dia o [Augusto Pascutti](https://github.com/augustohp) fez uma palestra chamada _"Por que Vim?"_, mostrando os vários pontos interessantes de usar o editor. Macros, movimentações, configuração aberta e muito mais. Desde esse dia eu mantive o Vim no radar (com uma curiosidade absurda) mas, sempre que eu tentava começar, a curva de aprendizado era muito alta e eu desistia porque demorava muito tempo.
 
@@ -87,31 +73,31 @@ Quando o primeiro empecilho acabou, o segundo era o pior de todos: **lembrar das
 
 Essa é, sem duvida, a parte mais complicada de tudo que eu tive que fazer para usar o Vim. As principais teclas que todo mundo conhece (`hjkl`) são bem simples, a maioria dos comandos básicos como trocar de modo (com `i`, `v`), substituir (`c`, `C`, `r` e `R`) e as modificações de linhas com `O`, `dd`, `D`, etc também são bem intuitivos.
 
-<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Nvim rodando um projeto com Deno</span>" />
+![](./image.png "Nvim rodando um projeto com Deno")
 
 O problema é quando você tem que interagir com o resto que não é texto, por exemplo, a lista de arquivos, abrir o gerenciador do Git (com o LazyGit) e interagir com popups que aparecem na tela, como as completions do intellisense e os quick peaks que mostram as hints de tipo no TypeScript. Não porque elas são ruins, mas porque em cada novo painel, as teclas mudam.
 
 Por exemplo, o Telescope (equivalente ao `ctrl+p` do VSCode) tem um campo de busca, então as teclas padrão de movimentação não funcionam (porque elas estão digitando no input de texto), ao invés disso a combinação é `ctrl-p` para subir e `ctrl+n` para descer (para `previous` e `next`). Além disso ele tem uma pequena preview do lado direito que você pode movimentar não com `ctrl+hjkl`, mas com `ctrl+dfku`...
 
-<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Telescope.nvim no modo de inserção</span>" />
+![](./image-1.png "Telescope.nvim no modo de inserção")
 
 Mas isso é apenas no modo de inserção, quando trocamos para o modo normal, as teclas de movimentação voltam ao padrão, mas as da preview não...
 
-<Figure src={figureImage4} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Telescope.nvim no modo normal</span>" />
+![](./image-2.png "Telescope.nvim no modo normal")
 
 Além disso, o equivalente ao "Find All" do VSCode, é uma mistura de `ripgrep` com `fzf` que busca em todos os arquivos via regex e é uma das ferramentas mais poderosas do Nvim, mas não tem uma seleção de modos... Então para mover os resultados sem usar as setas (que estão mais longe no teclado), temos que usar o que? O que seria intuitivo: `ctrl+hjkl`...
 
-<Figure src={figureImage5} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Captura de tela do ripgrep</span>" />
+![](./image-3.png "Captura de tela do ripgrep")
 
 Porém, por incrível que pareça, você usa tanto essas ferramentas (especialmente o telescope) que essas combinações meio que ficam gravadas na sua cabeça. No final do primeiro mês eu já estava 100% confortável com a UI do Vim, inclusive movendo o cursor pelas janelas e tudo mais.
 
 No final, as teclas não são tanto um problema porque o próprio LazyVim tem um comando para buscar todas as teclas, o `<leader>sk`:
 
-<Figure src={figureImage6} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Se você perdeu alguma tecla, pode buscar aqui</span>" />
+![](./image-6.png "Se você perdeu alguma tecla, pode buscar aqui")
 
 Além disso o pacote `whichkey` mostra todas as combinações possíveis de uma tecla pressionada:
 
-<Figure src={figureImage7} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Exemplo de teclas possíveis com &lt;leader&gt; pressionado</span>" />
+![](./image-7.png "Exemplo de teclas possíveis com &lt;leader> pressionado")
 
 Isso torna toda a experiência muito boa e aquém de um VSCode, se você quer explorar o editor, basta passar pelas teclas.
 
@@ -121,7 +107,7 @@ Outra coisa que vale a pena pontuar é que, durante o primeiro mês (e até hoje
 
 Enquanto a configuração é extremamente permissiva e você pode virtualmente fazer qualquer coisa, ela também é extremamente complexa de entender. A documentação é basicamente inexistente, o LSP de Lua tenta fazer o melhor para extrair as funções e mostrar o que você pode usar, mas a maioria das funções do Vim não são conhecidas, o autocompletion é bem ruim e no geral você se vê procurando coisas na Internet mais do que qualquer coisa.
 
-<Figure src={figureImage8} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Overrides para o Neotree</span>" />
+![](./image-4.png "Overrides para o Neotree")
 
 A configuração do hierárquica é hieráquica, então as configurações iniciais vão ser sobrescritas por uma configuração posterior, portanto a ordem como os plugins e configurações são carregados importa. E isso é uma droga porque não existe um autocompletion bonitinho para o que você pode colocar ali, é sempre um jogo de testes.
 
@@ -133,7 +119,7 @@ O maior problema que eu tive foi configurar os LSPs. As configurações padrão 
 
 > LSPs são [Language Server Protocols](https://en.wikipedia.org/wiki/Language_Server_Protocol), um protocolo criado pela Microsoft para introduzir a capacidade de um editor se conectar a um serviço que tem a inteligência da linguagem de forma separada, independente do editor, para dar coisas como completions, intellisense e etc de forma distribuída.
 
-<Figure src={figureImage9} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Função para distinguir Deno de Node</span>" />
+![](./image-5.png "Função para distinguir Deno de Node")
 
 Até agora eu só falei coisas ruins, ou coisas que gostei menos do que os demais, será que o Vim é bom assim mesmo?
 
@@ -223,7 +209,7 @@ controller.run(new URN<'application'>(args.params.applicationId))
 
 Eu quero remover todas as `new URN...` e deixar apenas a chamada para o `args.params.application`, eu posso usar a substituição `%s/(new URN<'application'>\(([a-zA-Z\.]*)\))/\1` para poder trocar tudo de uma vez:
 
-<Figure src={figureImage10} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Replace inline com regex</span>" />
+![](./image-9.png "Replace inline com regex")
 
 O comando em si parece bem complexo, mas vamos quebrar pra ficar mais fácil. Aqui eu estou:
 
@@ -242,11 +228,11 @@ Além dessas pequenas demonstrações, eu também notei algumas coisas sobre Vim
 -   Aprender a lidar com buffers e janelas é essencial, saber o que é um buffer, o que é uma janela, o que é um painel e essas coisas
 -   O Vim possui um conjunto de registradores que você pode acessar com `"` no Lazy ou com `:reg` , esses registradores são poderosos porque permitem que você, por exemplo, copie multiplos textos de uma vez com `"<numero do reg>y` e cole de vários também com `"<numero>p`, o lazy tem uma lista bem legal de registradores
 
-<Figure src={figureImage11} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Registradores no LazyVim</span>" />
+![](./image-11.png "Registradores no LazyVim")
 
 -   Além de registradores o Lazy mantém uma lista de bookmarks (ou só `marks`) que permitem que você salve um local no código e volte para lá instantâneamente, em qualquer buffer, isso é muito útil para se mover entre duas localizações rápidamente com `''`, mas você pode criar uma marca com `m<letra>` e depois ir até ela com `'<letra>`
 
-<Figure src={figureImage12} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Lista de marcas automáticas</span>" />
+![](./image-12.png "Lista de marcas automáticas")
 
 -   O Vim tem um terminal integrado com `:term` mas o Lazy tem um terminal em uma aba embaixo assim como o VSCode que permite você usar os comandos do Vim normalmente, mas eu achei um pouco mais fácil usar uma outra aba do mesmo terminal principalmente porque isso pode causar lag no editor.
 

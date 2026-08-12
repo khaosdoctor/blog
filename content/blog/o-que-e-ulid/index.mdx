@@ -10,7 +10,6 @@ heroImage: "./ulid-l.png"
 draft: false
 visibility: "public"
 ---
-
 Em desenvolvimento, a capacidade de gerar IDs únicos sempre foi algo necessário, especialmente quando estamos lidando com grandes volumes de dados. Com o tempo a gente começou a ter outro problema: não dá pra gente gerar somente IDs sequenciais. Eles têm vários problemas, um deles é o fato de eles serem previsíveis e suscetíveis a ataques externos.
 
 Então a gente criou vários outros tipos de IDs. Um exemplo deles é o [Snowflake](https://en.wikipedia.org/wiki/Snowflake_ID), que é o tipo de ID usado pelo Twitter para poder criar IDs que fossem únicos em computação distribuída (que tem um outro agravante de poder gerar o mesmo ID em dois lugares diferentes sem que um saiba do outro). Mas o que pegou mesmo foi o protocolo dos UUIDs ou _Universal Unique IDentifiers_.

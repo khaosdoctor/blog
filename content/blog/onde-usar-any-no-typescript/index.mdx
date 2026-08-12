@@ -10,7 +10,6 @@ heroImage: "./articles-3.png"
 draft: false
 visibility: "public"
 ---
-
 Quem estava nas minhas lives lá da **Formação TypeScript** (ou já fez o treinamento) sabe que eu sou extremamente contra `any` no código. Principalmente porque o `any` se tornou uma válvula de escape, sempre que queremos desligar o TypeScript podemos só usar `any` no nosso código e tudo se resolve. Muita gente já me perguntou: "Ué, então por que o TypeScript tem `any` se não pode usar?"
 
 A realidade é que o `any` é um tipo extremamente importante. Primeiro porque ele é o único tipo que pode ser associado a qualquer tipo sem que esse tipo seja restringido a um tipo mais específico, além disso ele é o tipo mais aberto de todos e aceita todas as coisas, ou seja, o `any` está em todo lugar.
@@ -26,8 +25,6 @@ Um exemplo clássico disso (que você vai encontrar em muitos lugares) é o `Ret
 ```ts
 type ReturnType<T extends (...args: unknown[]) => unknown> = T extends (...args: unknown[]) => infer Retorno ? Retorno : never
 ```
-
-<CourseCTA />
 
 Basicamente, estamos dizendo que queremos um tipo, esse tipo leva um genérico que vai ser uma função, a gente realmente não se importa com o que existe nos parâmetros ou no retorno da função, então para não ter que usar `any` vamos usar `unknown`. Dessa forma nosso tipo fica mais seguro, certo? Mas e se a gente fizer isso aqui:
 

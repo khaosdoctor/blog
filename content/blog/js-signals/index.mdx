@@ -10,7 +10,6 @@ heroImage: "./articles_l.png"
 draft: false
 visibility: "public"
 ---
-
 Em 2023 um membro do TC39 chamado [Rob Eisenberg](https://github.com/EisenbergEffect) comentou que ele queria criar um padrão comum para os _signals_ e isso realmente se transformou em uma [proposta](https://github.com/tc39/proposal-signals) lá no TC39!
 
 Mas antes de tudo, o que são signals? O que eles fazem? Qual é a ideia principal? Vamos entender tudo aqui agora!
@@ -46,8 +45,6 @@ counter.get() // 1
 ```
 
 Além desse tipo de estado, podemos ter um _sink_, ou seja, um valor que depende desse estado original, portanto o `counter` está agindo como _source_. Um exemplo clássico é termos estados computados, para saber se o valor dentro do counter é par, por exemplo.
-
-<CourseCTA />
 
 No React teríamos que criar algum tipo de memoização:
 

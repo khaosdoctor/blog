@@ -213,6 +213,33 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     height: auto;
   }
 
+  /* Figures come from markdown now (remark-figures wraps a lone image and turns
+     its title into the caption), so they need global styles rather than the
+     scoped ones a component would carry. */
+  figure {
+    margin-block: 2rem;
+    margin-inline: 0;
+  }
+
+  /* The image sits in a paragraph because mdast images are phrasing content. */
+  figure > p {
+    margin: 0;
+  }
+
+  figure img {
+    display: block;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  figcaption {
+    margin-block-start: 0.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
   pre {
     padding: 1rem;
     overflow-x: auto;

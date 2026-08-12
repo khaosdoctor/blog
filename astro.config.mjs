@@ -7,6 +7,8 @@ import mermaid from 'astro-mermaid'
 import rehypeCallouts from 'rehype-callouts'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
+import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
+import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
 
 // https://astro.build/config
@@ -30,7 +32,14 @@ export default defineConfig({
     sitemap({ filter: (page) => !page.includes('/busca/') && !page.includes('/offline/') }),
   ],
   markdown: {
-    remarkPlugins: [remarkReadingTime, remarkMath],
+    // Posts are plain markdown even though the files are .mdx: these two plugins
+    // are what turn that markdown into components, so nothing in content/ needs
+    // an import or a tag and Obsidian renders every post natively.
+    //
+    // remarkEmbeds must run before remarkFigures: an image and a bare link are
+    // both "the only thing in a paragraph", and once a figure is wrapped the
+    // link check would have to look one level deeper for no benefit.
+    remarkPlugins: [remarkReadingTime, remarkMath, remarkEmbeds, remarkFigures],
     rehypePlugins: [rehypeCallouts, rehypeKatex],
   },
   image: {

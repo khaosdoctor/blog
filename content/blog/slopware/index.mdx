@@ -11,11 +11,6 @@ draft: false
 visibility: "public"
 seoTitle: "O fim do código bem feito. Conheça o \"Slopware\""
 ---
-
-import figureImage1 from './image-5.png'
-import figureImage2 from './image-6.png'
-import figureImage3 from './image-8.png'
-
 No [último Backlog](/o-que-aconteceu-com-devs/) eu abordei um tema que estava me incomodando bastante nos últimos meses: o fato de que devs hoje estão ficando cada vez mais preguiçosos e delegando cada vez mais tarefas para a IA. Desde então tivemos o advento disso aqui, que eu estou nomeando agora como **Slopware**:
 
 > ✨ [https://t.co/6TyHKajGaJ](https://t.co/6TyHKajGaJ) has now gone from $0 to $1 million ARR in just 17 days! 💸 Revenue update: $87,000 MRR (which is $1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: [https://t.co/uc1J8Ia7QZ](https://t.co/uc1J8Ia7QZ) 📊 Stats update: 320,000 people have now flown in the… [https://t.co/scrq1lSJOT](https://t.co/scrq1lSJOT) [pic.twitter.com/NCc50FOgJa](https://t.co/NCc50FOgJa) — @levelsio (@levelsio) [March 11, 2025](https://twitter.com/levelsio/status/1899596115210891751?ref_src=twsrc%5Etfw)
@@ -72,13 +67,13 @@ Eu não consigo nem começar a descrever o quão contra esse tipo de coisa eu so
 
 E, para completar, temos esse vídeo fantástico da _Y Combinator_ dizendo por que _vibe coding_ é o futuro:
 
-<YouTube id="IACHfKmZMr8" />
+https://www.youtube.com/watch?v=IACHfKmZMr8
 
 O mais interessante é que esse vídeo é tão estranho, de tantas formas... Os comentários resumem muito melhor do que qualquer coisa que eu possa falar aqui:
 
-<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;100x mais rápido? O que vocês estão construindo? To-do lists?&quot;</span>" />
+![](./image-5.png '"100x mais rápido? O que vocês estão construindo? To-do lists?"')
 
-<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;Vibe coding é o futuro até você precisar fazer 'vibe debugging'&quot;</span>" />
+![](./image-6.png "\"Vibe coding é o futuro até você precisar fazer 'vibe debugging'\"")
 
 O próprio Garry Tan diz que uma das coisas que ficou clara nas pesquisas é que: _“Vibe coding é muito difícil de debugar”_. Eu imagino por quê… Talvez porque você não entende absolutamente nada do que está escrito ali? Ou talvez porque _debugar_ seja 90% de ser um programador?
 
@@ -90,7 +85,7 @@ No entanto, no minuto 17, Diana Hu fala algo que faz sentido e com o qual eu rea
 
 Enquanto o vídeo da Y Combinator é estranho, mas mostra uma perspectiva do lado que quer ganhar mais dinheiro com menos trabalho, outra perspectiva interessante foi dada pelo Maximilian Schwartzmüller no canal dele:
 
-<YouTube id="VQFvugpxNJE" />
+https://www.youtube.com/watch?v=VQFvugpxNJE
 
 E essa eu quero cobrir com mais detalhes.
 
@@ -104,7 +99,7 @@ O próprio Andrej menciona isso no tweet original. Então, não—_vibe coding_ 
 
 Voltando ao caso do simulador de voo, [nesse mesmo vídeo](https://youtu.be/VQFvugpxNJE?si=0vfYqCuB_7R7G2Dn&t=335), ele mostra o jogo rodando em produção, com milhares de pessoas acessando. Aos cinco minutos, também revela que o código estava vulnerável a **XSS (Cross-Site Scripting)**.
 
-<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>&quot;É tudo bonito até alguém 'vibe code' seu app de banco&quot;</span>" />
+![](./image-8.png "\"É tudo bonito até alguém 'vibe code' seu app de banco\"")
 
 O problema não é deixar de codar ou fingir que está codando. O problema é pedir para uma IA escrever o código, não entender o que está acontecendo, publicar o código sem questionar e, ainda assim, ignorar o mínimo de segurança. Isso coloca não apenas a sua empresa, mas milhares de outras pessoas em risco, tudo porque você se considera um “10x engineer”.
 
@@ -133,13 +128,13 @@ Eu postei [esse tweet](https://x.com/_StaticVoid/status/1899831757995733333) fal
 
 O Igor depois me deu a ideia de tentar gerar com IA, e isso não tinha passado pela minha cabeça, quem sabe poderia dar certo. Mas eu estava completamente errado. Eu testei quatro geradores diferentes: [Lovable](https://lovable.dev), [V0](https://v0.dev) (que tem uma funcionalidade de copiar de um screenshot), [Bolt](https://bolt.new) e [Cerebras](https://cerebrascoder.com). Isso foi o que eu consegui:
 
-<Figure src="https://pbs.twimg.com/media/Gl3kc20WgAAzzdL?format=png&name=900x900" alt="Image" caption="<span style=&quot;white-space: pre-wrap;&quot;>Lovable</span>" />
+![Image](https://pbs.twimg.com/media/Gl3kc20WgAAzzdL?format=png&name=900x900 "Lovable")
 
-<Figure src="https://pbs.twimg.com/media/Gl3lYDdWYAA2yyb?format=png&name=small" alt="Image" caption="<span style=&quot;white-space: pre-wrap;&quot;>Bolt</span>" />
+![Image](https://pbs.twimg.com/media/Gl3lYDdWYAA2yyb?format=png&name=small "Bolt")
 
-<Figure src="https://pbs.twimg.com/media/Gl3m99RWIAAgZTz?format=png&name=small" alt="Image" caption="<span style=&quot;white-space: pre-wrap;&quot;>V0</span>" />
+![Image](https://pbs.twimg.com/media/Gl3m99RWIAAgZTz?format=png&name=small "V0")
 
-<Figure src="https://pbs.twimg.com/media/Gl3n2Y6XMAAqJu9?format=png&name=small" alt="Image" caption="<span style=&quot;white-space: pre-wrap;&quot;>Cerebras</span>" />
+![Image](https://pbs.twimg.com/media/Gl3n2Y6XMAAqJu9?format=png&name=small "Cerebras")
 
 Não é exatamente o que eu queria quando eu fiz um prompt como: "Copie exatamente esse componente". Mesmo depois de 35 minutos de ping-pong com a IA. Então eu acho que eu não vou estar "vibe coding" num futuro próximo.
 
@@ -167,7 +162,7 @@ Eu vejo a IA de forma positiva quando aplicada a algo útil. Exemplos disso est�
 
 Eu sigo uma newsletter chamada "The Honest Broker". Nela, o autor Ted Gioia [publicou um post muito interessante](https://www.honest-broker.com/p/the-new-aesthetics-of-slop) sobre o novo "movimento artístico" chamado de _slop_. Que é a ideia de que aquelas imagens absurdas geradas por IA podem se tornar um movimento real... Por exemplo:
 
-<Figure src="https://substackcdn.com/image/fetch/w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F30b6fe35-caa7-4a1e-bb4c-d35de5d52c35_512x512.webp" alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Isso é considerado um slop</span>" />
+![](https://substackcdn.com/image/fetch/w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F30b6fe35-caa7-4a1e-bb4c-d35de5d52c35_512x512.webp "Isso é considerado um slop")
 
 Quanto pior, melhor; quanto mais absurdo, melhor; quanto mais estranho, mais as pessoas vão comprar. E, se você lembrar do início desta newsletter, isso descreve exatamente o que o nosso game é: algo absurdo, mal feito, mas que as pessoas adoram por um motivo ainda mais absurdo — o desejo de **não ficar de fora**. É como uma espécie de fenômeno social, onde o status de “estar dentro” se torna mais importante do que a qualidade real do produto. E é isso que nos leva ao conceito que estou apresentando nesta edição: **Slopware**.
 

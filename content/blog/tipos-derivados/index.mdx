@@ -10,7 +10,6 @@ heroImage: "./articles.png"
 draft: false
 visibility: "public"
 ---
-
 Quando eu converso com alguém sobre TypeScript, uma das coisas que inevitavelmente vem à tona é a pergunta:
 
 > Quando a gente tem que criar um tipo novo ou quando a gente tem que derivar a partir de outro tipo?
@@ -50,8 +49,6 @@ type Animal = Cat | Dog;
 Tipos derivados não podem modificar os tipos originais, mas podem modificar os tipos que são derivados deles, por exemplo, `Employee` não pode modificar `Person`, mas se outro tipo estender `Employee`, então ele pode modificar esse tipo porque se qualquer uma de suas propriedades mudar, o outro tipo será modificado também.
 
 Quando isso acontece a gente diz que o tipo é **acoplado**, porque o tipo derivado depende do tipo original.
-
-<CourseCTA />
 
 ## Vale a pena acoplar?
 

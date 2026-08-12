@@ -10,13 +10,6 @@ heroImage: "./build-a-docker-swarm-cluster-on-azure-1-638.jpg"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image-9.png'
-import figureImage2 from './image-10.png'
-import figureImage3 from './image-11.png'
-import figureImage4 from './image-12.png'
-import figureImage5 from './image-13.png'
-
 Se você já utiliza Docker então, provavelmente, já executou um container em sua máquina. Porém, já imaginou como seria se você pudesse executar diretamente um container em uma infraestrutura cloud sem precisar fazer nada novo?
 
 No mês passado o time do Docker [anunciou](https://www.docker.com/blog/running-a-container-in-aci-with-docker-desktop-edge/) que as novas versões do Docker para desktop (chamadas de versões _Edge_) estariam ganhando o suporte **nativo** aos **[Azure Container Instances](https://azure.microsoft.com/services/container-instances/?WT.mc_id=personal-blog-ludossan)**, ou seja, poderíamos rodar containers da nossa máquina diretamente para um ambiente cloud sem precisar baixar nenhuma imagem localmente!
@@ -27,7 +20,7 @@ Os [Azure Container Instances](https://azure.microsoft.com/services/container-in
 
 Já cheguei a utilizar o [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) quando realizamos uma talk para o #CodeInQuarentena. No vídeo abaixo você pode ver o vídeo onde criamos uma API completa utilizando Mongoke e [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan)
 
-<YouTube id="wsDC5tXR7QA" caption="Vídeo do Code In Quarentena sobre como fazer um deploy no ACI" />
+https://www.youtube.com/watch?v=wsDC5tXR7QA
 
 Essencialmente, o [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) é uma forma de você rodar sua aplicação como um container online. Dessa forma a única coisa que você precisa ter é uma [conta na Azure](https://azure.microsoft.com/free/search?WT.mc_id=personal-blog-ludossan) e uma aplicação que já esteja dentro de um container. O melhor é que isso é tudo cobrado pelo **segundo** de uso, então você realmente não para por computação ociosa. O que é excelente para aplicações que precisam ser criadas e destruídas rapidamente.
 
@@ -45,11 +38,11 @@ O Docker Edge é uma versão experimental do Docker que recebe todas as atualiza
 
 Uma vez que o Docker estiver instalado, você deverá ver esta tela:
 
-<Figure src={figureImage1} priority alt="" caption="Imagem mostrando a página principal de preferências do Docker Edge" />
+![](./image-9.png "Imagem mostrando a página principal de preferências do Docker Edge")
 
 Veja na aba `Command Line` se você possui a opção `Enable Cloud Experience` ativada:
 
-<Figure src={figureImage2} alt="" caption="Imagem mostrando a opção &quot;Enable Cloud Experience&quot; ativa nas ferramentas do Docker" />
+![](./image-10.png 'Imagem mostrando a opção "Enable Cloud Experience" ativa nas ferramentas do Docker')
 
 Com isto você já tem a integração ativa, agora o que precisamos fazer é criar um contexto!
 
@@ -89,11 +82,11 @@ Para conseguirmos buscar o caminho que devemos acessar para vermos a nossa API o
 
 Veja que tenho que acessar o IP `13.86.141.148` para poder ver o resultado da API no browser, vamos lá!
 
-<Figure src={figureImage3} alt="" caption="Imagem mostrando o browser acessando o IP anterior e o resultado da API com a frase &quot;Hello World&quot;" />
+![](./image-11.png 'Imagem mostrando o browser acessando o IP anterior e o resultado da API com a frase "Hello World"')
 
 Veja que, se acessarmos o portal da Azure, vamos ter o nosso recurso criado como se tivéssemos criado manualmente!
 
-<Figure src={figureImage4} alt="" caption="Imagem do portal da Azure com o nosso recurso &quot;node-api&quot; criado" />
+![](./image-12.png 'Imagem do portal da Azure com o nosso recurso "node-api" criado')
 
 Para removermos, basta executar o comando `docker rm <nome>`, veja que não é possível executar o comando `docker stop` porque este tipo de integração não permite que paremos o container remotamente. Se digitarmos `docker rm node-api` vamos ter o nosso ACI removido da azure e o nosso container parado!
 
@@ -124,7 +117,7 @@ Fazemos o mesmo processo. Porém, ao invés de rodar o comando `docker run` vamo
 
 Depois podemos utilizar o comando `docker ps` normalmente para pegar o IP público e ver o site no ar:
 
-<Figure src={figureImage5} alt="" caption="Site da DockerCon no ar utilizando a integração com ACI" />
+![](./image-13.png "Site da DockerCon no ar utilizando a integração com ACI")
 
 ### Limitações
 
