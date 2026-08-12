@@ -5,6 +5,7 @@ import 'katex/dist/katex.min.css'
 import LangSwitcher from '../components/LangSwitcher.astro'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
+import { contentSecurityPolicy } from '../lib/embed-hosts'
 // Baked in at build time: the semver the release workflow last tagged, plus a
 // count of posts published since. See src/lib/version.ts.
 import { commitShort, commitUrl, siteVersion as version } from '../lib/version'
@@ -66,11 +67,9 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
     {/* GitHub Pages cannot set headers, so this is the only way to cap what an
         injected script could reach. The old Ghost site had nothing like it, and
-        one injected tag was enough to run whatever the attacker wanted. */}
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://platform.twitter.com https://static.cloudflareinsights.com https://www.youtube.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://static.cloudflareinsights.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://platform.twitter.com https://cdn.embedly.com https://speakerdeck.com https://open.spotify.com; object-src 'none'; base-uri 'self'; form-action 'self'"
-    />
+        one injected tag was enough to run whatever the attacker wanted. Built
+        from src/lib/embed-hosts.ts, which the output guard reads too. */}
+    <meta http-equiv="Content-Security-Policy" content={contentSecurityPolicy()} />
     <link
       rel="alternate"
       type="application/rss+xml"

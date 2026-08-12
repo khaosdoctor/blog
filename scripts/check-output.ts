@@ -8,6 +8,7 @@
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
 
 const DIST = 'dist'
 const CONTENT = 'content/blog'
@@ -59,44 +60,17 @@ const LEAKED_TAG = /&#60;(?:Figure|Video|Bookmark|CourseCTA|RawEmbed|Sidenote|Ma
 const REMOTE_LOADER = /new Function\s*\(|gist\.githubusercontent|eval\s*\(\s*await/
 
 /**
- * Every host this site is allowed to load or execute code from. The previous
- * Ghost site served an injected script for a month without anyone noticing, so
- * the question this answers is "did anything new appear", not "does it look
- * like last time". Adding a host here should be a deliberate, reviewed act.
+ * Both lists come from src/lib/embed-hosts.ts, the same registry the CSP meta tag
+ * is built from, so a host can never be approved by one and blocked by the other.
+ * The previous Ghost site served an injected script for a month without anyone
+ * noticing, so the question these answer is "did anything new appear", not "does
+ * it look like last time".
  */
-const ALLOWED_SCRIPT_HOSTS = new Set([
-  'platform.twitter.com',
-  'static.cloudflareinsights.com',
-  // The YouTube and Vimeo facades only contact these once a reader clicks play.
-  'www.youtube.com',
-  'www.youtube-nocookie.com',
-  'i.ytimg.com',
-  'player.vimeo.com',
-  'vumbnail.com',
-  'i.vimeocdn.com',
-  'f.vimeocdn.com',
-  'fresnel.vimeocdn.com',
-  // astro-embed's YouTube facade preconnects to Google's ad network. Nothing
-  // executes until a reader presses play, but the contact is real and it is not
-  // a choice this site made. Removing it means replacing that component.
-  'www.google.com',
-  'googleads.g.doubleclick.net',
-  'static.doubleclick.net',
-])
-/**
- * Frames a post is allowed to carry. Keep this in step with `frame-src` in the
- * CSP meta tag in BaseLayout.astro: a host in one and not the other means either
- * a silently blocked embed or an unguarded one.
- */
-const ALLOWED_FRAME_HOSTS = new Set([
-  'cdn.embedly.com',
-  'www.youtube-nocookie.com',
-  'www.youtube.com',
-  'player.vimeo.com',
-  // Slides and podcast episodes, embedded from the posts that reference them.
-  'speakerdeck.com',
-  'open.spotify.com',
-])
+const ALLOWED_SCRIPT_HOSTS = new Set(SCRIPT_HOSTS)
+const ALLOWED_FRAME_HOSTS = new Set(FRAME_HOSTS)
+/** A URL may be *named* by more hosts than may execute: thumbnails, preconnects. */
+const ALLOWED_MENTIONS = new Set(MENTIONABLE_HOSTS)
+const REGISTRY = 'src/lib/embed-hosts.ts'
 
 function hostOf(url: string): string | null {
   if (url.startsWith('/') && !url.startsWith('//')) return null
@@ -117,14 +91,20 @@ for (const page of pages) {
   for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {
     const host = hostOf(match[1])
     if (host !== null && !ALLOWED_SCRIPT_HOSTS.has(host)) {
-      failures.push({ check: 'script from an unapproved host', detail: `${host} in ${page}` })
+      failures.push({
+        check: 'script from an unapproved host',
+        detail: `${host} in ${page}. If this is yours, add it to ${REGISTRY}`,
+      })
     }
   }
 
   for (const match of html.matchAll(/<iframe[^>]+src="([^"]+)"/g)) {
     const host = hostOf(match[1])
     if (host !== null && !ALLOWED_FRAME_HOSTS.has(host)) {
-      failures.push({ check: 'iframe from an unapproved host', detail: `${host} in ${page}` })
+      failures.push({
+        check: 'iframe from an unapproved host',
+        detail: `${host} in ${page}. If this is yours, add it to ${REGISTRY} as a frame host`,
+      })
     }
   }
 
@@ -137,8 +117,11 @@ for (const page of pages) {
     if (/type\s*=\s*"(?!module|text\/javascript)/.test(block[1])) continue
     for (const match of block[2].matchAll(/["'`](https?:\/\/[^"'`\s]+)["'`]/g)) {
       const host = hostOf(match[1])
-      if (host !== null && !ALLOWED_SCRIPT_HOSTS.has(host)) {
-        failures.push({ check: 'remote URL in inline script', detail: `${match[1]} in ${page}` })
+      if (host !== null && !ALLOWED_MENTIONS.has(host)) {
+        failures.push({
+          check: 'remote URL in inline script',
+          detail: `${match[1]} in ${page}. If this is yours, add it to ${REGISTRY}`,
+        })
       }
     }
   }
