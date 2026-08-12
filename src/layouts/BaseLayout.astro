@@ -276,6 +276,13 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     text-align: center;
   }
 
+  /* Marks a wikilink whose target is still a draft. Same treatment as the
+     series table of contents, which carries its own scoped copy. */
+  .draft-note {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
   pre {
     padding: 1rem;
     overflow-x: auto;

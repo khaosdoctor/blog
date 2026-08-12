@@ -127,6 +127,28 @@ Or inline anywhere in the body:
 <Epigraph cite="Who said it">The quote.</Epigraph>
 ```
 
+## Linking to another post
+
+Write a wikilink. Obsidian autocompletes it and the graph view picks it up, and the site turns it into an
+ordinary link.
+
+```markdown
+[[error-cause]]
+[[error-cause|read the one about error.cause]]
+[[error-cause#Conclusão]]
+```
+
+The target is the post's folder name. Without a label the link takes the target post's own title. An anchor
+matches the heading text, accents included.
+
+- **A wikilink to a post that does not exist fails the build**, naming the file and the missing folder. That is
+  deliberate: a typo cannot reach the site.
+- **A wikilink to a draft still links**, followed by a muted `(not written yet)`, the same treatment the series
+  table of contents gives an unwritten part.
+- **Code is never touched.** `[['a', 'b']]` in a snippet or inline code stays exactly that.
+- **Wikilinks work between posts only.** They cannot point at a note elsewhere in a vault, because that note has
+  no URL here.
+
 ## Footnotes
 
 ```markdown
