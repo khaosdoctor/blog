@@ -10,7 +10,10 @@ import { defineCollection, z } from 'astro:content'
 // Ctrl+N is not a post, instead of failing the build on a missing title.
 const blog = defineCollection({
   loader: glob({ pattern: '**/index.{md,mdx}', base: './content/blog' }),
-  schema: z.object({
+  // image() resolves the relative path to a real built asset, which is what
+  // makes heroImage usable as og:image. A wrong path now fails the build.
+  schema: ({ image }) =>
+    z.object({
     title: z.string(),
     // A future pubDate means scheduled: the build hides it until its time.
     pubDate: z.coerce.date(),
@@ -27,19 +30,19 @@ const blog = defineCollection({
     seriesOrder: z.number().optional(),
     // Doubles as the hover-preview excerpt and the meta description.
     description: z.string(),
-    heroImage: z.string().optional(),
-    heroImageAlt: z.string().optional(),
-    epigraph: z.string().optional(),
-    epigraphCite: z.string().optional(),
-    draft: z.boolean().default(true),
-    // Preserved from Ghost; everything renders public for now.
-    visibility: z.enum(['public', 'members', 'paid']).default('public'),
-    /** Thin or placeholder pages: keep the URL working, keep it out of search. */
-    noindex: z.boolean().default(false),
-    canonicalUrl: z.string().url().optional(),
-    seoTitle: z.string().optional(),
-    seoDescription: z.string().optional(),
-  }),
+      heroImage: image().optional(),
+      heroImageAlt: z.string().optional(),
+      epigraph: z.string().optional(),
+      epigraphCite: z.string().optional(),
+      draft: z.boolean().default(true),
+      // Preserved from Ghost; everything renders public for now.
+      visibility: z.enum(['public', 'members', 'paid']).default('public'),
+      /** Thin or placeholder pages: keep the URL working, keep it out of search. */
+      noindex: z.boolean().default(false),
+      canonicalUrl: z.string().url().optional(),
+      seoTitle: z.string().optional(),
+      seoDescription: z.string().optional(),
+    }),
 })
 
 /**

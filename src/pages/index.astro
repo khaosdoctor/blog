@@ -12,6 +12,10 @@ const latest = posts.slice(0, 30)
 <BaseLayout
   title="Lucas Santos"
   description="Artigos sobre desenvolvimento, tecnologia e opinião."
+  alternates={[
+    { lang: 'pt-BR', href: new URL('/', Astro.site).href },
+    { lang: 'en', href: new URL('/en/', Astro.site).href },
+  ]}
 >
   <h1 class="visually-hidden">Lucas Santos</h1>
   <nav class="sections" aria-label="Seções">

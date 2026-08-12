@@ -5,26 +5,33 @@
 // The input starts empty; the client script below fills it from
 // window.location.search on load, the only place a real query string exists
 // on a static build.
+import { t, type Locale } from '../i18n/ui'
+
 interface Props {
   action?: string
+  locale?: Locale
 }
 
-const { action = '/search/' } = Astro.props
+const { action = '/search/', locale = 'pt' } = Astro.props
 ---
 
-<form action={action} method="get" role="search" aria-label="Buscar no blog" data-search-form>
-  <label for="search-q">Buscar no blog</label>
+<form action={action} method="get" role="search" aria-label={t(locale, 'searchLabel')} data-search-form>
+  <label for="search-q">{t(locale, 'searchLabel')}</label>
   <div class="row">
-    <input id="search-q" type="search" name="q" placeholder="ex: deno, astro, observabilidade" autocomplete="off" />
-    <button type="submit">Buscar</button>
+    <input
+      id="search-q"
+      type="search"
+      name="q"
+      placeholder={t(locale, 'searchPlaceholder')}
+      autocomplete="off"
+      data-no-index-message={t(locale, 'searchNoIndex')}
+    />
+    <button type="submit">{t(locale, 'search')}</button>
   </div>
 </form>
 <div id="search-results" class="search-results" aria-live="polite" aria-atomic="false"></div>
 <noscript>
-  <p class="search-noscript">
-    A busca completa depende de JavaScript. Sem ele, o formulário acima ainda funciona: ele recarrega esta página com
-    sua consulta salva na URL.
-  </p>
+  <p class="search-noscript">{t(locale, 'searchNoJs')}</p>
 </noscript>
 
 <script>
@@ -136,7 +143,9 @@ const { action = '/search/' } = Astro.props
 
     const pagefind = await loadPagefind()
     if (!pagefind) {
-      if (input.value.trim()) showMessage(resultsEl, 'O índice de busca ainda não foi gerado neste ambiente (rode o build). Envie o formulário para navegar normalmente.')
+      // Localised server-side and read back here, so this script stays free of
+      // translation strings.
+      if (input.value.trim()) showMessage(resultsEl, input.dataset.noIndexMessage ?? '')
       return
     }
 
