@@ -1,9 +1,4 @@
 {
-  "note": "Remote images whose host stopped serving them. Listed here instead of edited out of the posts, so the caption and the sentence around it survive and the loss stays visible. remark-figures renders <MissingImage /> for anything in `urls`.",
-  "urls": [
-    "https://pbs.twimg.com/media/Gl3kc20WgAAzzdL?format=png&name=900x900",
-    "https://pbs.twimg.com/media/Gl3lYDdWYAA2yyb?format=png&name=small",
-    "https://pbs.twimg.com/media/Gl3m99RWIAAgZTz?format=png&name=small",
-    "https://pbs.twimg.com/media/Gl3n2Y6XMAAqJu9?format=png&name=small"
-  ]
+  "note": "Remote images whose host stopped serving them. Listed here instead of edited out of the posts, so the caption and the sentence around it survive and the loss stays visible. remark-figures renders <MissingImage /> for anything in `urls`. Empty right now: the four pbs.twimg.com images that used to be listed here were never dead, the migration's download failed on the HTML-escaped URL and the record was wrong. They are local files in content/blog/slopware/ now. Verify with curl before adding a URL here.",
+  "urls": []
 }
