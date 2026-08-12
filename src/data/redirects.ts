@@ -548,11 +548,6 @@ export const redirects: Redirect[] = [
     "note": "tag archive"
   },
   {
-    "from": "/tag/newsletter/",
-    "to": "/",
-    "note": "section has no published posts yet"
-  },
-  {
     "from": "/tag/nodejs/",
     "to": "/tags/nodejs/",
     "note": "tag archive"
