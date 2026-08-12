@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "vendor": "node scripts/vendor-media.ts",
+    "prebuild": "node scripts/vendor-media.ts",
     "build": "astro build",
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",

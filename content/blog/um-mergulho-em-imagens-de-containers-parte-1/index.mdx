@@ -56,7 +56,7 @@ Para deixar a escolha diretamente a quem lê, não vou dizer se um sistema opera
 
 ### Imagens Full
 
-![departure from Euromax terminal, 400 meters long](https://images.unsplash.com/photo-1593967504874-a551dc10271c?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ "Foto de um navio carregado de containers Andrey Sharpilo / Unsplash")
+![departure from Euromax terminal, 400 meters long](./photo-1593967504874-a551dc10271c-5a5109.jpg "Foto de um navio carregado de containers Andrey Sharpilo / Unsplash")
 
 As imagens `full` (ou completas), são imagens que contém toda a extensão de um sistema operacional, por exemplo, uma imagem `debian-full` é uma imagem que possui a distribuição Debian do Linux por completo, com todos os pacotes e módulos carregados.
 
@@ -72,7 +72,7 @@ Como você pode ver, a própria imagem tem vulnerabilidades que você está "her
 
 ### Imagens Slim
 
-![](https://images.unsplash.com/photo-1540302469547-9cfb64e6523d?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ 'Foto de uma etiqueta escrito "the slim" Mat Reding / Unsplash')
+![](./photo-1540302469547-9cfb64e6523d-4a5694.jpg 'Foto de uma etiqueta escrito "the slim" Mat Reding / Unsplash')
 
 Uma imagem _slim_ é uma imagem um pouco menor. Toda a imagem _slim_ só possui os pacotes necessários para que o sistema operacional funcione, é esperado que você instale todos os pacotes extras para que sua aplicação possa funcionar. Atualmente, só o Debian possui uma imagem _slim_.
 
@@ -92,7 +92,7 @@ Veja que, se pegarmos a arquitetura `amd64`, que é a mais comum para processado
 
 ### Imagens Alpine Linux
 
-![](https://images.unsplash.com/photo-1532956694725-6f7f052fb7c7?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ "Foto dos Alpes por Benni Asal / Unsplash")
+![](./photo-1532956694725-6f7f052fb7c7-60b35b.jpg "Foto dos Alpes por Benni Asal / Unsplash")
 
 As imagens Alpine Linux são o tipo de imagem mais otimizada possível. Este tipo de OS foi construído do zero para ser um sistema operacional já nativo de containers. A principal diferença entre esse tipo de imagem para uma imagem tradicional é que esse sistema não utiliza a `glibc`. O Alpine depende de uma outra biblioteca chamada `musl libc`. Além disso, por padrão, o Alpine só vem com os pacotes base instalados, ou seja, qualquer outra coisa que sua aplicação precisar, você vai ter que instalar manualmente.
 
@@ -108,7 +108,7 @@ Os contras de se trabalhar com uma imagem Alpine é que é um sistema completame
 
 ## Imagens Scratch
 
-![](https://images.unsplash.com/photo-1556888335-23631cd2801a?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ "Foto de um papel preto sem nada escrito com um lápis branco em cima por Kelly Sikkema / Unsplash")
+![](./photo-1556888335-23631cd2801a-3dd589.jpg "Foto de um papel preto sem nada escrito com um lápis branco em cima por Kelly Sikkema / Unsplash")
 
 Por último, vamos dar uma olhada nas imagens do tipo `scratch`. Quando usamos `scratch` como imagem base, estamos dizendo ao [Docker](https://docs.microsoft.com/dotnet/architecture/microservices/container-docker-introduction/docker-defined?WT.mc_id=blog-personal-ludossan) que queremos que o próximo comando no nosso `Dockerfile` seja a primeira camada do nosso sistema de arquivos dentro dessa imagem.
 

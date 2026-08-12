@@ -141,6 +141,19 @@ Or inline anywhere in the body:
 <Epigraph cite="Who said it">The quote.</Epigraph>
 ```
 
+## Images from somewhere else
+
+Paste the remote URL and forget about it. `npm run build` runs `scripts/vendor-media.ts` first, which downloads any
+remote image, video or audio a post references into the post's own folder and rewrites the reference to `./thefile.png`.
+It applies to `heroImage` too.
+
+That means a post depends on nobody else's server once it has been built once. Commit the downloaded file along with
+the post.
+
+If a download fails the build carries on, the post keeps the remote URL, and the file is listed in
+`.migration/unreachable-media.md` with a link to the post, so it can be chased by hand later. Nothing breaks because a
+host is down.
+
 ## Linking to another post
 
 Write a wikilink. Obsidian autocompletes it and the graph view picks it up, and the site turns it into an

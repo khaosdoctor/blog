@@ -41,7 +41,7 @@ console.log(`uniqueList has ${uniqueList.length} itens`)
 
 Que gera a seguinte saída:
 
-![Print-Quantidade-Itens-Duplicados](https://i.ibb.co/CBmBvcp/Screenshot-from-2021-09-03-16-38-46.png)
+![Print-Quantidade-Itens-Duplicados](./screenshot-from-2021-09-03-16-38-46-d75d7f.png)
 
 Isso pode até funcionar para uma lista pequena de alguns milhares de itens.
 
@@ -59,7 +59,7 @@ console.timeEnd('Remove duplicated items')
 
 Gera a seguinte saída:
 
-![Print-Tempo-Para-Remover-Itens-Duplicados](https://i.ibb.co/pQcM365/Screenshot-from-2021-09-03-16-44-36.png)
+![Print-Tempo-Para-Remover-Itens-Duplicados](./screenshot-from-2021-09-03-16-44-36-cca1b6.png)
 
 O que aconteceria se por acaso aumentássemos esse Dataset? para uma lista com 100.000 de itens por exemplo?
 
@@ -80,11 +80,11 @@ console.timeEnd('Remove duplicated items')
 
 Gera a seguinte saída:
 
-![Print-tempo-para-remover-itens-duplicados-com-100k](https://i.ibb.co/KNRP0bH/Screenshot-from-2021-09-03-17-07-45.png)
+![Print-tempo-para-remover-itens-duplicados-com-100k](./screenshot-from-2021-09-03-17-07-45-827e74.png)
 
 E se aumentarmos para 200.000 por exemplo, o tempo já aumenta drasticamente
 
-![Print-tempo-para-remover-itens-duplicados-com-200k](https://i.ibb.co/SNzC8Fy/Screenshot-from-2021-09-03-17-11-37.png)
+![Print-tempo-para-remover-itens-duplicados-com-200k](./screenshot-from-2021-09-03-17-11-37-270264.png)
 
 ## O problema
 
@@ -120,7 +120,7 @@ for (let length = 1; length <= 100000; length += 10000) {
 
 É possível ver o tempo crescente de forma exponencial quando printamos quanto tempo leva para que a operação seja finalizada de acordo com o número de itens
 
-![Print-duracao-tempo-para-remover-itens-duplicadas-de-forma-exponencial](https://i.ibb.co/FDCzsPP/Screenshot-from-2021-09-03-18-48-49.png)
+![Print-duracao-tempo-para-remover-itens-duplicadas-de-forma-exponencial](./screenshot-from-2021-09-03-18-48-49-c66b41.png)
 
 ## Usando o Set
 
@@ -182,7 +182,7 @@ for (let length = 1; length <= 100000; length += 10000) {
 
 Gera a seguinte saída:
 
-![Print de tempo para remover itens duplicados usando Set](https://i.ibb.co/HDD8qtG/Screenshot-from-2021-09-03-19-06-35.png)
+![Print de tempo para remover itens duplicados usando Set](./screenshot-from-2021-09-03-19-06-35-d7a110.png)
 
 Isso acontece porque, diferente do loop, precisamos iteirar o array `n` vezes, e em cada iteração a API Set garante que estamos adicionando um único valor, e pelo fato do objeto Set implementar a interface `iterable`, podemos transforma-lo em um `Array`
 
@@ -308,7 +308,7 @@ console.log(`Lista duplicada: ${uniqList.length}`)
 
 ```
 
-![Print do tempo para remover itens duplicados usando Map](https://i.ibb.co/vXvp5mL/Screenshot-from-2021-09-03-19-42-32.png)
+![Print do tempo para remover itens duplicados usando Map](./screenshot-from-2021-09-03-19-42-32-2f478c.png)
 
 ## Conclusão
 
