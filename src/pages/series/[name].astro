@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../lib/posts'
 import { getSeries, seriesTitle } from '../../lib/taxonomy'
+import { t } from '../../i18n/ui'
 
 export const getStaticPaths = (async () => {
   const series = await getSeries()
@@ -14,8 +15,8 @@ export const getStaticPaths = (async () => {
 const { name, posts } = Astro.props
 ---
 
-<BaseLayout title={`${name} | Lucas Santos`} description={`Todos os artigos da série ${name}.`}>
-  <p class="kicker">Série</p>
+<BaseLayout title={`${name} | Lucas Santos`} description={t('pt', 'seriesDescription', name)}>
+  <p class="kicker">{t('pt', 'series')}</p>
   <h1>{name}</h1>
   <ol class="parts">
     {

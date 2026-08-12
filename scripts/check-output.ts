@@ -151,8 +151,8 @@ if (files.includes(manifestPath)) {
 
 // 4b. The manifest promised three icons that did not exist, so installing the
 // app failed on a missing file. Every icon it names must be in the output.
-const manifestFile = join(DIST, 'manifest.webmanifest')
-if (files.includes(manifestFile)) {
+// One manifest per locale now, so every one of them gets checked.
+for (const manifestFile of files.filter((file) => file.endsWith('.webmanifest'))) {
   try {
     const manifest = JSON.parse(readFileSync(manifestFile, 'utf8')) as { icons?: { src: string }[] }
     for (const icon of manifest.icons ?? []) {
@@ -160,7 +160,7 @@ if (files.includes(manifestFile)) {
       if (!files.includes(path)) failures.push({ check: 'missing manifest icon', detail: icon.src })
     }
   } catch (error) {
-    failures.push({ check: 'manifest.webmanifest', detail: `unparseable: ${(error as Error).message}` })
+    failures.push({ check: manifestFile, detail: `unparseable: ${(error as Error).message}` })
   }
 }
 

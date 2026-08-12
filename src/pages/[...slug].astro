@@ -16,6 +16,7 @@ import Tweet from '../components/Tweet.astro'
 import Video from '../components/Video.astro'
 import { formatDate, getPublishedPosts } from '../lib/posts'
 import { buildSeriesMap, getSeriesNavigation, slugify } from '../lib/taxonomy'
+import { t } from '../i18n/ui'
 
 /**
  * Injected into every post so migrated MDX can use these tags with no import
@@ -116,7 +117,7 @@ const alternates = [
     {
       series !== null && (
         <p class="series">
-          Parte {series.index} de {series.total} da série{' '}
+          {t('pt', 'partOfSeriesNamed', series.index, series.total)}{' '}
           <a href={`/series/${series.name}/`}>{series.title}</a>
         </p>
       )
@@ -143,7 +144,7 @@ const alternates = [
     }
     {
       series !== null && (
-        <nav class="series-nav" aria-label="Navegação da série">
+        <nav class="series-nav" aria-label={t('pt', 'seriesNav')}>
           {series.previous !== null && (
             <a href={`/${series.previous.id}/`} rel="prev">
               ← {series.previous.data.title}

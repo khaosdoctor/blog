@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
 import { getPublishedPosts } from '../../lib/posts'
 import { getCategories } from '../../lib/taxonomy'
+import { t } from '../../i18n/ui'
 
 // Section index pages live at /{category}/, the same shape as a post URL.
 // Astro gives this dynamic route priority over the [...slug] rest route, so the
@@ -30,10 +31,12 @@ const { category, posts } = Astro.props
 
 <BaseLayout
   title={`${category} | Lucas Santos`}
-  description={`Todos os artigos da seção ${category}.`}
+  description={t('pt', 'sectionDescription', category)}
 >
   <h1>{category}</h1>
-  <p class="count">{posts.length} {posts.length === 1 ? 'artigo' : 'artigos'}</p>
+  <p class="count">
+    {posts.length} {t('pt', posts.length === 1 ? 'article' : 'articles')}
+  </p>
   <PostList posts={posts} />
 </BaseLayout>
 
