@@ -1,63 +1,141 @@
 /**
- * Emits the redirect list for Cloudflare Bulk Redirects.
+ * Generates src/data/redirects.ts, the list the build turns into stub pages.
+ *
+ *   node scripts/build-redirects.ts
  *
  * Post URLs are NOT in here: every slug is preserved exactly, so they need no
- * redirect at all. Only Ghost's taxonomy paths moved, plus the handful of
- * routes Ghost served that no longer exist.
+ * redirect at all. What moved is Ghost's taxonomy, plus the URLs of newsletter
+ * issues that no longer exist as posts.
  *
- *   node scripts/build-redirects.ts > .migration/redirects.csv
+ * Output is committed rather than generated at build time, because two of the
+ * inputs (the review lists in .migration/) are local working artifacts that CI
+ * never sees. Re-run this whenever content moves.
  */
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const SITE = 'https://blog.lsantos.dev'
 const SOURCE_DIR = 'content/blog'
+const OUT = 'src/data/redirects.ts'
+
+// The newsletter section has no published posts yet, so /newsletter/ is not a
+// page. Sending 48 URLs to a 404 is worse than sending them home, and sending
+// them home is a soft-404 signal to Google either way.
+//
+// ponytail: flip this to '/newsletter/' the moment the triage publishes any
+// roundup. checkTargets below fails the build if this points at nothing.
+const NEWSLETTER_TARGET = '/'
 
 function slugify(value: string): string {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 }
 
+/** Slugs listed as `- [ ] \`slug\`` or `- \`slug\`` in a review file. */
+function slugsFrom(file: string): string[] {
+  const path = join('.migration', file)
+  if (!existsSync(path)) {
+    console.warn(`warning: ${path} is missing, its redirects will not be generated`)
+    return []
+  }
+  return [...readFileSync(path, 'utf8').matchAll(/^- (?:\[ \] )?`([^`]+)`/gm)].map((match) => match[1])
+}
+
 const tags = new Set<string>()
 const categories = new Set<string>()
+/** Only sections with a published post get a page, so only those are valid targets. */
+const liveCategories = new Set<string>()
+const liveSlugs = new Set<string>()
 
-for (const name of readdirSync(SOURCE_DIR)) {
-  if (!name.endsWith('.mdx') && !name.endsWith('.md')) continue
-  const raw = readFileSync(join(SOURCE_DIR, name), 'utf8')
+for (const entry of readdirSync(SOURCE_DIR, { withFileTypes: true })) {
+  if (!entry.isDirectory()) continue
+  const file = ['index.mdx', 'index.md'].map((name) => join(SOURCE_DIR, entry.name, name)).find(existsSync)
+  if (file === undefined) continue
+  const raw = readFileSync(file, 'utf8')
   const frontmatter = /^---\n([\s\S]*?)\n---/.exec(raw)?.[1] ?? ''
+  const published = /^draft:\s*false/m.test(frontmatter)
+  if (published) liveSlugs.add(entry.name)
   const category = /^category:\s*"?([^"\n]+)"?/m.exec(frontmatter)?.[1]
-  if (category !== undefined) categories.add(category.trim())
+  if (category !== undefined) {
+    const name = category.trim().replace(/"$/, '')
+    categories.add(name)
+    if (published) liveCategories.add(name)
+  }
+  // Tag pages are generated from published posts too, so a tag that only ever
+  // appears on drafts has no page to point at either.
+  if (!published) continue
   const tagLine = /^tags:\s*\[(.*)\]/m.exec(frontmatter)?.[1] ?? ''
   for (const match of tagLine.matchAll(/"([^"]+)"/g)) tags.add(match[1])
 }
 
-const rows: [string, string, number][] = []
+const rows: { from: string; to: string; note: string }[] = []
 
 // Ghost served tag archives at /tag/<slug>/; the new site uses /tags/<slug>/.
 for (const tag of [...tags].sort()) {
-  rows.push([`${SITE}/tag/${slugify(tag)}/`, `${SITE}/tags/${slugify(tag)}/`, 301])
+  rows.push({ from: `/tag/${slugify(tag)}/`, to: `/tags/${slugify(tag)}/`, note: 'tag archive' })
 }
-// A tag that became a section now lives at the section landing page.
+// A tag that became a section goes to the section instead. Pushed after the tag
+// rules so the dedupe below keeps this one. A section whose posts are all drafts
+// (newsletter, today) has no page, so its old tag archive goes home instead of
+// into a 404.
 for (const category of [...categories].sort()) {
-  rows.push([`${SITE}/tag/${slugify(category)}/`, `${SITE}/${category}/`, 301])
+  const live = liveCategories.has(category)
+  rows.push({
+    from: `/tag/${slugify(category)}/`,
+    to: live ? `/${category}/` : NEWSLETTER_TARGET,
+    note: live ? 'tag became a section' : 'section has no published posts yet',
+  })
 }
 
-// Ghost chrome that has no equivalent here.
-rows.push([`${SITE}/ghost/`, `${SITE}/`, 302])
-rows.push([`${SITE}/rss/`, `${SITE}/rss.xml`, 301])
-rows.push([`${SITE}/feed/`, `${SITE}/rss.xml`, 301])
-rows.push([`${SITE}/sitemap.xml`, `${SITE}/sitemap-index.xml`, 301])
-
-// Later entries win in Bulk Redirects, so dedupe on the source URL keeping the
-// last one: a tag that is also a section should land on the section.
-const bySource = new Map<string, [string, string, number]>()
-for (const row of rows) bySource.set(row[0], row)
-
-console.log('source,target,status')
-for (const [source, target, status] of bySource.values()) {
-  console.log(`${source},${target},${status}`)
+// Ghost chrome with no equivalent here.
+rows.push({ from: '/rss/', to: '/rss.xml', note: 'Ghost feed path' })
+rows.push({ from: '/feed/', to: '/rss.xml', note: 'Ghost feed path' })
+for (const name of ['sitemap.xml', 'sitemap-posts.xml', 'sitemap-pages.xml', 'sitemap-tags.xml', 'sitemap-authors.xml']) {
+  rows.push({ from: `/${name}`, to: '/sitemap-index.xml', note: 'Ghost sitemap' })
 }
+for (const author of ['lucas-santos', 'khaosdoctor']) {
+  rows.push({ from: `/author/${author}/`, to: '/', note: 'Ghost author archive' })
+}
+
+/**
+ * Newsletter issues that resolve on Ghost today but are not posts here: the
+ * ls-news and Notícias Semanais issues were removed outright, and the remaining
+ * roundups are drafts, which build no page. Email-only sends are deliberately
+ * absent — Ghost never gave them a web page, so there is nothing to preserve.
+ */
+for (const slug of new Set([...slugsFrom('review-newsletter-roundups.md'), ...slugsFrom('dropped-newsletter-issues.md')])) {
+  if (liveSlugs.has(slug)) continue // published after all: it has its own page
+  rows.push({ from: `/${slug}/`, to: NEWSLETTER_TARGET, note: 'newsletter issue' })
+}
+
+// Later entries win, so a tag that is also a section lands on the section.
+const bySource = new Map<string, (typeof rows)[number]>()
+for (const row of rows) bySource.set(row.from, row)
+const final = [...bySource.values()].sort((a, b) => a.from.localeCompare(b.from))
+
+writeFileSync(
+  OUT,
+  `// GENERATED by scripts/build-redirects.ts — do not edit by hand.
+//
+// Every entry becomes a stub page at build: a meta-refresh with a canonical
+// pointing at the target and a visible link, since static hosting cannot issue
+// a real 301. Google treats meta-refresh as a redirect and passes the ranking.
+export interface Redirect {
+  /** Path Ghost served, always with a trailing slash unless it is a file. */
+  from: string
+  to: string
+  /** Why it exists, so a future reader can tell which rules are still needed. */
+  note: string
+}
+
+export const redirects: Redirect[] = ${JSON.stringify(final, null, 2)}
+`,
+)
+
+const counts = new Map<string, number>()
+for (const row of final) counts.set(row.note, (counts.get(row.note) ?? 0) + 1)
+console.log(`wrote ${OUT} with ${final.length} rules`)
+for (const [note, count] of [...counts].sort((a, b) => b[1] - a[1])) console.log(`  ${count} ${note}`)
