@@ -34,6 +34,13 @@ const STORAGE_KEY = 'hp-pinned'
 /** Reader opted into keeping the pinned set past the end of the session. */
 const PERSIST_KEY = 'hp-persist'
 
+// Labels for the runtime-built cards, from data attributes on .hp-settings (see
+// HoverPreviews.astro). The fallbacks only matter if that element is missing.
+const strings = {
+  ...{ loading: 'Carregando…', close: 'Fechar prévia', pin: 'Fixar', unpin: 'Soltar', drag: 'arraste para mover' },
+  ...(document.querySelector<HTMLElement>('.hp-settings')?.dataset ?? {}),
+}
+
 const cache = new Map<string, Meta | null>()
 const inflight = new Map<string, AbortController>()
 const pinned: PopoverHTMLElement[] = []
@@ -228,12 +235,32 @@ function closeCard(card: PopoverHTMLElement): void {
   card.hpLink?.removeAttribute('aria-controls')
 }
 
+function markPinned(card: PopoverHTMLElement, on: boolean): void {
+  card.classList.toggle('hp-pinned', on)
+  const button = card.querySelector('.hp-pin')
+  button?.setAttribute('aria-pressed', String(on))
+  button?.setAttribute('aria-label', on ? strings.unpin : strings.pin)
+}
+
 function pinCard(card: PopoverHTMLElement): void {
   if (pinned.includes(card)) return
   const oldest = pinned[0]
   if (pinned.length >= CARD_MAX && oldest) closeCard(oldest)
   pinned.push(card)
-  card.classList.add('hp-pinned')
+  markPinned(card, true)
+  savePinned()
+}
+
+/**
+ * Unpinning leaves the card open rather than closing it: the reader asked for it
+ * to stop being sticky, not to go away. It closes on its own the next time the
+ * pointer leaves.
+ */
+function unpinCard(card: PopoverHTMLElement): void {
+  const idx = pinned.indexOf(card)
+  if (idx < 0) return
+  pinned.splice(idx, 1)
+  markPinned(card, false)
   savePinned()
 }
 
@@ -247,7 +274,7 @@ function scheduleClose(): void {
 
 function startDrag(event: PointerEvent, card: PopoverHTMLElement): void {
   const target = event.target as HTMLElement
-  if (target.closest('.hp-close, .hp-title')) return
+  if (target.closest('.hp-close, .hp-pin, .hp-title')) return
   // Touch stays a native scroll gesture inside the card (see touch-action:
   // pan-y in the stylesheet) rather than a drag: the two gestures overlap
   // on the same axis and dragging isn't essential on touch.
@@ -298,9 +325,23 @@ function buildCard(href: string): PopoverHTMLElement {
   const close = document.createElement('button')
   close.type = 'button'
   close.className = 'hp-close'
-  close.setAttribute('aria-label', 'Fechar prévia')
+  close.setAttribute('aria-label', strings.close)
   close.textContent = '×'
   close.addEventListener('click', () => closeCard(card))
+
+  // Dragging pins too, so this is the discoverable way to get the same result,
+  // and its pressed state is what tells the reader a card is being kept.
+  const pin = document.createElement('button')
+  pin.type = 'button'
+  pin.className = 'hp-pin'
+  pin.setAttribute('aria-pressed', 'false')
+  pin.setAttribute('aria-label', strings.pin)
+  pin.innerHTML =
+    '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9.5 1.2 14.8 6.5l-1.1 1.1-1.3-.4-2.6 2.6.5 2.4a1 1 0 0 1-.3.9l-.6.6-3-3-3.2 3.2-.7-.7L5.5 10l-3-3 .6-.6a1 1 0 0 1 .9-.3l2.4.5 2.6-2.6-.4-1.3z"/></svg>'
+  pin.addEventListener('click', () => {
+    if (pinned.includes(card)) unpinCard(card)
+    else pinCard(card)
+  })
 
   const title = document.createElement('a')
   title.id = `${card.id}-title`
@@ -314,7 +355,13 @@ function buildCard(href: string): PopoverHTMLElement {
   const host = document.createElement('span')
   host.className = 'hp-host'
 
-  card.append(close, title, desc, host)
+  // Dragging is not obvious from a card that looks static, and it is the only
+  // gesture here with no other affordance. Hidden on touch, where drag is off.
+  const hint = document.createElement('span')
+  hint.className = 'hp-hint'
+  hint.textContent = strings.drag
+
+  card.append(pin, close, title, desc, host, hint)
   card.addEventListener('pointerdown', (event) => startDrag(event, card))
   card.addEventListener('pointerenter', () => clearTimeout(closeTimer))
   card.addEventListener('pointerleave', scheduleClose)
@@ -339,7 +386,7 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
 
   const title = card.querySelector('.hp-title') as HTMLAnchorElement
   const desc = card.querySelector('.hp-desc') as HTMLParagraphElement
-  title.textContent = 'Carregando…'
+  title.textContent = strings.loading
 
   card.style.visibility = 'hidden'
   card.showPopover?.()
@@ -378,7 +425,7 @@ async function restorePinned(): Promise<void> {
     card.style.left = `${entry.left}px`
     card.style.top = `${entry.top}px`
     pinned.push(card)
-    card.classList.add('hp-pinned')
+    markPinned(card, true)
     card.showPopover?.()
     requestAnimationFrame(() => card.classList.add('hp-open'))
 
