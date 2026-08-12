@@ -12,9 +12,6 @@ visibility: "public"
 seoTitle: "Utilizando Two-Factor Authentication com SSH"
 seoDescription: "Usar só senhas ou chaves não é mais seguro. Precisamos levar a segurança um passo a diante com autenticação de dois fatores em nossos servidores."
 ---
-
-import figureImage1 from './Screen-Shot-2020-11-05-at-18.26.59.png'
-
 Já estamos muito acostumados com SSH para logarmos em máquinas virtuais, como fizemos no nosso [post onde criamos uma VPN](/criando-uma-vpn/). Porém, sabemos que o SSH aceita diversos níveis de segurança quando se trata de acesso local.
 
 O primeiro nível de segurança – e o mais fraco – é uma senha alfanumérica, este é o meio mais fraco porque a comunicação entre o seu computador e o servidor, mesmo sendo pelo protocolo do SSH, ainda transmite sua senha em texto plano, um ataque bem direcionado poderia capturar a sua senha e utilizá-la, se você não estiver utilizando nenhum túnel.
@@ -112,7 +109,7 @@ Vamos digitar `n`, ela permite que  utilizemos o mesmo token anterior até algu
 
 No final, você terá uma imagem parecida com esta:
 
-<Figure src={figureImage1} priority alt="" caption="Resultado da criação de um autenticador" />
+![](./Screen-Shot-2020-11-05-at-18.26.59.png "Resultado da criação de um autenticador")
 
 Basta apontar um aplicativo de TFA como o Authy, 1Password ou até mesmo o Google Authenticator para o QR Code para poder cadastrar a nova senha, ou então utilizar a Secret Key para poder gerar a mesma em aplicativos que não possuem leitura de QR Codes.
 

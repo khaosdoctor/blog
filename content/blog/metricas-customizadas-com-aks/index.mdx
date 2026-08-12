@@ -12,14 +12,6 @@ visibility: "public"
 seoTitle: "Métricas customizadas com AKS e Azure Monitor"
 seoDescription: "Monitoramento é muito importante para aplicações distribuídas. Aprenda a criar e monitorar suas aplicações com métricas customizadas para o Azure Monitor."
 ---
-
-import figureImage1 from './image-18.png'
-import figureImage2 from './image-17.png'
-import figureImage3 from './image-19.png'
-import figureImage4 from './image-20.png'
-import figureImage5 from './image-22.png'
-import figureImage6 from './image-27.png'
-
 Quando trabalhamos com microsserviços, sempre ouvimos falar que o **monitoramento** e a **observabilidade** são métricas chave para que possamos ter sucesso em manter nosso ecossistema coeso, funcional e não ficarmos loucos com o que está acontecendo. Falamos isto no [podcast #FalaDev que participei junto de vários convidados](/podcast-faladev-vamos-falar-de-microsservicos/).
 
 Afinal, em sistemas distribuídos, a complexidade não está na unidade, mas sim em como essas unidades interagem umas com as outras. E, se não soubermos o que está acontecendo no nosso ecossistema, não podemos diagnosticar, entender e muito menos responder a incidentes em tempo hábil.
@@ -36,7 +28,7 @@ A ideia deste artigo é entender um pouco mais do Azure Monitor primeiro, depois
 
 Conforme este [artigo incrível](https://trstringer.com/native-azure-logging-aks/) do Thomas Stringer diz, o Azure Monitor é uma solução que inclui várias facetas, uma delas é a visualização de dados que é obtida através da captura de métricas pelo que chamamos de `agent`.
 
-<Figure src={figureImage1} priority alt="" caption="Diagrama de funcionamento do Azure Monitor (Fonte: Microsoft Docs)" />
+![](./image-18.png "Diagrama de funcionamento do Azure Monitor (Fonte: Microsoft Docs)")
 
 Um `agent` é um pequeno serviço que roda dentro do nosso cluster como um `daemonset`, ou seja, um serviço que cria um pod em cada nó do nosso cluster para poder capturar as métricas de recursos de máquina, como CPU, RAM e etc.
 
@@ -44,11 +36,11 @@ Um `agent` é um pequeno serviço que roda dentro do nosso cluster como um `daem
 
 Uma vez que o recurso está habilitado, o DaemonSet chamado `omsagent` é instalado no cluster e um deployment chamado `omsagent-rs` é criado em cada um dos nós do cluster. Este deployment é o responsável por agregar métricas e enviá-las ao que chamamos de [Log Analytics workspace](https://docs.microsoft.com/azure/azure-monitor/learn/quick-create-workspace?WT.mc_id=containers-12310-ludossan), ou seja, o local onde todas as nossas métricas vão ficar armazenadas para podermos lê-las.
 
-<Figure src={figureImage2} alt="" caption="Fluxo de métricas do Azure Monitor (Fonte: Thomas Stringer)" />
+![](./image-17.png "Fluxo de métricas do Azure Monitor (Fonte: Thomas Stringer)")
 
 Uma vez que temos todos os serviços rodando, vamos ser capazes de obter as métricas do nosso cluster acessando ou o próprio painel da Azure, ou então uma ferramenta chamada [Azure Data Explorer](https://dataexplorer.azure.com).
 
-<Figure src={figureImage3} alt="" caption="Tela do Azure Monitor for Containers" />
+![](./image-19.png "Tela do Azure Monitor for Containers")
 
 ## Monitorando um cluster
 
@@ -159,7 +151,7 @@ Acesse o endereço após alguns instantes para ver o pod sendo executado. Nesta 
 
 Vamos utilizar o comando `scale` do kubectl para poder escalar os pods e ver que temos monitoramento constante:
 
-<Figure src={figureImage4} alt="" caption="Numero de pods pendentes e executando" />
+![](./image-20.png "Numero de pods pendentes e executando")
 
 Se rodarmos um teste de stress, veremos que teremos um aumento gradativo do uso de memória e CPU:
 
@@ -167,7 +159,7 @@ Se rodarmos um teste de stress, veremos que teremos um aumento gradativo do uso 
 
 Além disso temos diversos `workbooks` que são dashboards já prontos que nos permitem ver alguns dados:
 
-<Figure src={figureImage5} alt="" caption="Workbook de deployments" />
+![](./image-22.png "Workbook de deployments")
 
 Podemos também obter os logs dos nossos containers através do menu `logs` no canto esquerdo do painel:
 
@@ -206,7 +198,7 @@ Atualmente, o [Prometheus](https://prometheus.io/) é o líder de mercado quando
 
 Os exporters buscam as métricas das APIs e aplicações e as formatam para que sejam consumidas pelo Prometheus de forma correta, por isso eles geralmente são executados dentro do mesmo pod, em outro container, acessando a aplicação localmente. Como esta imagem do blog do Thomas Stringer nos mostra:
 
-<Figure src={figureImage6} alt="" caption="Diagrama de funcionamento de um exporter (Fonte: Thomas Stringer)" />
+![](./image-27.png "Diagrama de funcionamento de um exporter (Fonte: Thomas Stringer)")
 
 ### Exporters
 

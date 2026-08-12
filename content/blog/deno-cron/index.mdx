@@ -10,9 +10,6 @@ heroImage: "./articles-2.png"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image-1.png'
-
 Continuando com as nossas novidades sobre Deno, dessa vez eu quero trazer algo que eu pessoalmente já precisei várias vezes mas nunca encontrei uma solução, cronjobs!
 
 Cronjobs são processos que rodam repetitivamente em um intervalo pré-determinado. A ideia é bem simples, e eles são largamente utilizados para várias coisas, por exemplo, agendamentos de ações que devem acontecer em um determinado horário como postagens de redes sociais, ou então até mesmo processamento de cartões de crédito, eles são os famosos **batch jobs**.
@@ -57,7 +54,7 @@ No segundo parâmetro usamos uma sintaxe igual a do crontab (que você pode pega
 
 Localmente esse cron vai se comportar como se fosse um `setInterval`, porém no Deno Deploy ele vai ter a sua própria aba, como essa que eu criei no [playground do deno](https://dash.deno.com/playground/good-gecko-26):
 
-<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Veja a aba Cron</span>" />
+![](./image-1.png "Veja a aba Cron")
 
 Se abrirmos a aba Cron no topo, vamos ver todas as execuções do Cronjob, bem como os logs na aba de logs:
 
@@ -104,4 +101,3 @@ Se você curtiu esse artigo, eu também tenho um curso completo de TypeScript ch
 
 Eu te convido a dar uma olhadinha lá se você quiser aprender mais sobre TypeScript comigo e a nossa incrível comunidade com centenas de alunos e alunas!
 
-<Bookmark url="https://formacaots.com.br" title="Formação TS" description="O primeiro e mais completo curso de TypeScript do Brasil" />

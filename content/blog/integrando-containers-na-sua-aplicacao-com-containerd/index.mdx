@@ -10,12 +10,6 @@ heroImage: "./external-content.duckduckgo-2.jpg"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image-7.png'
-import figureImage2 from './image-5.png'
-import figureImage3 from './image-8.png'
-import figureImage4 from './image-15.png'
-
 Como já falamos no [artigo anterior](/oci-cri-docker-ecossistema-de-containers/), o Kubernetes recentemente marcou o Docker como depreciado, ou seja, não poderemos mais usar a integração com o Docker diretamente de dentro de um Pod a não ser que instalemos ele manualmente.
 
 Neste mesmo artigo falei sobre o que isso significa para o ecossistema e apresentei a [Open Container Initiative (OCI)](https://opencontainers.org/), que é a responsável por criar o padrão que seguimos para que os runtimes de containers possam executar o mesmo tipo de imagem. Todas as imagens compatíveis com o OCI poderão ser executadas por qualquer runtime também compatível, isso abre portas para a criação de diferentes runtimes.
@@ -26,7 +20,7 @@ Agora, vamos entender como podemos utilizar o [ContainerD](https://containerd.io
 
 Assim como o CRI-O, Docker Engine e o RKT, o ContainerD é um runtime de containers, ou seja, ele é a ferramenta que gerencia todo o ciclo de vida de um container, desde o download de imagem até a criação das interfaces de rede, supervisão e armazenamento.
 
-<Figure src={figureImage1} priority alt="" caption="Overview do ecossistema do ContainerD (Fonte: ContainerD)" />
+![](./image-7.png "Overview do ecossistema do ContainerD (Fonte: ContainerD)")
 
 Isso significa que podemos pegar qualquer imagem que seja compatível com a especificação da OCI e rodar usando o ContainerD. Então se é tudo compatível, por que não usamos o Docker direto?
 
@@ -42,7 +36,7 @@ Antes de podermos executar a nossa imagem usando o ContainerD, vamos ter que pre
 
 No meu caso, estou usando um Mac, se você estiver em qualquer outro ambiente que não seja Linux (como o Windows), você precisará de uma máquina virtual – ou você pode usar o [WSL2](https://www.omgubuntu.co.uk/how-to-install-wsl2-on-windows-10) no Windows. Eu decidi ir pela primeira opção e criei uma máquina virtual usando o [VirtualBox](https://www.virtualbox.org/) e a [imagem netboot do Ubuntu 18.4](http://cdimage.ubuntu.com/netboot/bionic/) (só porque ela é mais leve e mais rápida de baixar).
 
-<Figure src={figureImage2} alt="" caption="Rodei uma pequena VM usando Linux em meu computador" />
+![](./image-5.png "Rodei uma pequena VM usando Linux em meu computador")
 
 > **Nota:** Se você quiser instalar o Ubuntu usando a mesma imagem que eu utilizei, selecione sua arquitetura de sistema (x86, amd64, arm, etc.) no link acima e baixe o arquivo chamado `mini.iso`. A partir daí, execute a imagem no VirtualBox.
 
@@ -105,7 +99,7 @@ go get github.com/opencontainers/runc
 
 Após um tempo, verifique se há um binário chamado `runc` na pasta `$GOPATH/bin`. Tente executar o comando `runc --version` para ter uma saída parecida com esta:
 
-<Figure src={figureImage3} alt="" caption="runc instalado e pronto para ser executado" />
+![](./image-8.png "runc instalado e pronto para ser executado")
 
 Caso contrário, gere o binário você mesmo indo até a pasta de download com `cd $GOPATH/src/github.com/opencontainers/runc` e executando o comando `make && sudo make install`.
 
@@ -662,7 +656,7 @@ Estamos esperando 10 segundos (pode aumentar este tempo se for necessário) para
 
 Podemos agora executar nosso container normalmente, primeiro podemos usar o `go build ./main.go` e depois `sudo ./main.go` para poder executar o comando e rodar os containers:
 
-<Figure src={figureImage4} alt="" caption="Fluxo de execução completo" />
+![](./image-15.png "Fluxo de execução completo")
 
 Se tentarmos acessar a API pelo browser dentro dos 10 segundos vamos obter o mesmo resultado que tivemos anteriormente:
 

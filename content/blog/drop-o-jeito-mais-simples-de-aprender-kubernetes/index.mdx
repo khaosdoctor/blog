@@ -10,11 +10,6 @@ heroImage: "./photo-1558234336-b5379131bf43-4dce418a.jpg"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image.png'
-import figureImage2 from './image-1.png'
-import figureImage3 from './image-2.png'
-
 > **NOVIDADE!**  
 > Este é o primeiro artigo de um novo tipo de conteúdo que estou chamando de [_drop_](/tags/drop/)_. Drops são pequenos textos (com até 5 minutos de leitura) que mostram aspectos interessantes de algum assunto. No geral, serão pequenos tutoriais ou dicas interessantes._  
 >   
@@ -78,17 +73,17 @@ Agora que temos o cluster rodando localmente, você pode usar o gerenciador de r
 
 Vamos obter a lista de pods do meu cluster usando a api com a request `GET http://localhost:8001/api/v1/namespaces/default/pods`:
 
-<Figure src={figureImage1} priority alt="" caption="Gerenciador Insomnia mostrando a saída da request para obter os pods do Kubernetes" />
+![](./image.png "Gerenciador Insomnia mostrando a saída da request para obter os pods do Kubernetes")
 
 Alguns recursos, como os deployments, não estão no que chamamos de "core API" do Kubernetes. A core API é quando não precisamos especificar nada no campo `apiVersion` do recurso, como nos Pods, que é `apiVersion: v1`, isso significa que podemos acessar com `/api/v1`.
 
 Os deployments fazem parte de `apps/v1`, para isso temos um novo recurso base chamado `apis`, então podemos obter a lista de deployments com `http://localhost:8001/apis/apps/v1/namespaces/default/deployments`:
 
-<Figure src={figureImage2} alt="" caption="Insomnia com a resposta para a lista de deployments do kubernetes" />
+![](./image-1.png "Insomnia com a resposta para a lista de deployments do kubernetes")
 
 O mesmo vale para os ingresses que estão em `networking.k8s.io/v1beta1` (ou em `v1` dependendo da versão do seu cluster). Desta forma o endereço é `http://localhost:8001/apis/networking.k8s.io/v1/namespaces/default/ingresses`
 
-<Figure src={figureImage3} alt="" caption="Insomnia mostrando a saída da requisição para a lista de ingresses" />
+![](./image-2.png "Insomnia mostrando a saída da requisição para a lista de ingresses")
 
 > Quando estamos tratando com o namespace `default`, que é o padrão, podemos omitir completamente a parte `/namespaces/default`, ficando somente `http://localhost:8001/api/v1/pods`.
 
@@ -104,12 +99,12 @@ I0506 15:28:38.796623    6011 round_trippers.go:445] GET https://dominio.subdomi
 
 E aqui está uma lista de livros sensacionais sobre Kubernetes que você pode utilizar para aprender mais!
 
-<Bookmark url="https://www.amazon.com.br/gp/product/B07X2MQL1Q/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B07X2MQL1Q&linkId=c7a24400879d4b0f6d8a253d384c82f3" title="Kubernetes: Tudo sobre orquestração de contêineres eBook: Santos, Lucas: Amazon.com.br: Loja Kindle" description="Kubernetes: Tudo sobre orquestração de contêineres eBook: Santos, Lucas: Amazon.com.br: Loja Kindle" publisher="Lucas Santos" />
+https://www.amazon.com.br/gp/product/B07X2MQL1Q/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B07X2MQL1Q&linkId=c7a24400879d4b0f6d8a253d384c82f3
 
-<Bookmark url="https://www.amazon.com.br/gp/product/B08455LHMY/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B08455LHMY&linkId=d14f51aed9a0a71eb8c2e832a51b5f71" title="Kubernetes Básico: Mergulhe no futuro da infraestrutura eBook: Burns, Brendan, Beda, Joe, Hightower, Kelsey: Amazon.com.br: Loja Kindle" description="Kubernetes Básico: Mergulhe no futuro da infraestrutura eBook: Burns, Brendan, Beda, Joe, Hightower, Kelsey: Amazon.com.br: Loja Kindle" publisher="Brendan Burns" />
+https://www.amazon.com.br/gp/product/B08455LHMY/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B08455LHMY&linkId=d14f51aed9a0a71eb8c2e832a51b5f71
 
-<Bookmark url="https://www.amazon.com.br/gp/product/8575227785/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=8575227785&linkId=b39929203ebd04959db95912ff457c26" title="DevOps Nativo de Nuvem com Kubernetes: Como Construir, Implantar e Escalar Aplicações Modernas na Nuvem | Amazon.com.br" description="Compre online DevOps Nativo de Nuvem com Kubernetes: Como Construir, Implantar e Escalar Aplicações Modernas na Nuvem, de Arundel, John, Domingus, Justin na Amazon. Frete GRÁTIS em milhares de produtos com o Amazon Prime. Encontre diversos livros escritos por Arundel, John, Domingus, Justin com ótim…" publisher="John Arundel" />
+https://www.amazon.com.br/gp/product/8575227785/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=8575227785&linkId=b39929203ebd04959db95912ff457c26
 
-<Bookmark url="https://www.amazon.com.br/gp/product/B088Q38BCR/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B088Q38BCR&linkId=2d0a398b3f5b0c6a290ab240b8af0736" title="KUBERNETES: A Simple Guide to Master Kubernetes for Beginners and Advanced Users (2020 Edition) (English Edition) - eBooks em Inglês na Amazon.com.br" description="Compre KUBERNETES: A Simple Guide to Master Kubernetes for Beginners and Advanced Users (2020 Edition) (English Edition) de Docker, Brian na Amazon.com.br. Confira também os eBooks mais vendidos, lançamentos e livros digitais exclusivos." publisher="Brian Docker" />
+https://www.amazon.com.br/gp/product/B088Q38BCR/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B088Q38BCR&linkId=2d0a398b3f5b0c6a290ab240b8af0736
 
-<Bookmark url="https://www.amazon.com.br/gp/product/B08T21NW4Z/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B08T21NW4Z&linkId=80120ba132817865bb9b7c36e81033b3" title="Quick Start Kubernetes (English Edition) eBook: Poulton, Nigel: Amazon.com.br: Loja Kindle" description="Quick Start Kubernetes (English Edition) eBook: Poulton, Nigel: Amazon.com.br: Loja Kindle" publisher="Nigel Poulton" />
+https://www.amazon.com.br/gp/product/B08T21NW4Z/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=lsantosdev0e-20&creative=9325&linkCode=as2&creativeASIN=B08T21NW4Z&linkId=80120ba132817865bb9b7c36e81033b3

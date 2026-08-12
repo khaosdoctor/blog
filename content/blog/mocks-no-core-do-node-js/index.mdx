@@ -11,11 +11,6 @@ draft: false
 visibility: "public"
 seoTitle: "Implementando Date Mocks no Node Test Runner: Uma História"
 ---
-
-import figureImage1 from './image.png'
-import figureImage2 from './image-8.png'
-import figureImage3 from './image-7.png'
-
 Há um pouco mais de um ano, eu tive o grande prazer de trabalhar no [core do Node.js](https://github.com/nodejs/node/pull/48638), e foi uma das experiências mais interessantes que eu já tive (então se você tá usando Node hoje, tem código meu ai!), tanto que agora estou voltando a trabalhar e ajudar a comunidade a crescer em volta dele também, porém, o que eu quero te contar aqui é como funcionam os [Date mocks](/node-test-runner-mocks/) dentro do [Node Test Runner](/comecando-com-o-node-js-test-runner/), parte a parte!
 
 O objetivo desse artigo é tanto documentar o que foi feito nesta funcionalidade, mas também mostrar como não é tão complexo entender o código open source que temos por ai, e que você também pode contribuir para o projeto que mais curte.
@@ -53,7 +48,7 @@ Graças à natureza dinâmica do JavaScript, isso não é tão complexo, mas eu 
 
 Para a gente entender mais como funcionam os mocks, a gente precisa voltar um pouco para algumas PRs anteriores. O trabalho na minha PR começou com uma dica de um grande amigo, [Erick Wendel](https://github.com/ErickWendel), que tinha feito uma [PR](https://github.com/nodejs/node/pull/47775) alguns meses antes implementando os mocks para os timers (`setTimeout`, `setInterval` e etc).
 
-<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>a PR original do Erick</span>" />
+![](./image.png "a PR original do Erick")
 
 Quando eu comecei a usar o test runner nos meus projetos, logo eu já tive um grande problema: por mais que a gente pudesse fazer mocks de timers, eu não conseguia fazer mocks de datas! Ou seja, eu não podia resetar o relógio do meu teste e controlar como eu queria que ele se comportasse... Algo precisava ser feito.
 
@@ -99,8 +94,6 @@ MockTimers.enable() // começa com a época 0
 ```
 
 Com a API inicial decidida, vem a questão principal: **Como eu consigo mockar uma das principais APIs da linguagem sem quebrar nada?**
-
-<CourseCTA />
 
 ## O código
 
@@ -771,11 +764,11 @@ runAll() { // L728
 
 Essa foi a final da implementação dos timers, mas o trabalho não acabou. Como o artigo está longo eu não vou postar muito mais sobre isso. Os testes para essa funcionalidade foram outro tempo a parte, no total devo ter gasto pelo menos 13 horas nesse projeto, além de uns 3 meses em comentários, resoluções e tudo mais. No final, essa funcionalidade foi implementada na versão 21.2 do Node (tem até um [post](/node-21-2/) explicando como usar).
 
-<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Dá pra ver que eu estava bem feliz</span>" />
+![](./image-8.png "Dá pra ver que eu estava bem feliz")
 
 Além disso, se você olhar no histórico da PR, vai ver que eu passei dias lutando com o CI do GitHub porque existiam os chamado _flaky tests_, que foram corrigidos pelo Yagiz um tempo depois.
 
-<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Eu estava ficando maluco já</span>" />
+![](./image-7.png "Eu estava ficando maluco já")
 
 Esses flaky tests estavam impedindo que minha aplicação tivesse sinal verde, mas os erros não tinham nada a ver com o código que eu mudei. Por isso que é tão importante que contribuidores como nós possamos ajudar com a cobertura de testes e verificação do processo.
 

@@ -11,7 +11,6 @@ draft: false
 visibility: "public"
 seoTitle: "Você sabe o que são parallel assignments no JavaScript?"
 ---
-
 Hoje pra mais um artigo curtinho aqui, vou te mostrar uma funcionalidade que você provavelmente não sabia que existia no JavaScript. Os **parallel assignments**.
 
 Muitas linguagens tem o conceito de parallel assignments implementado, mas o que é isso?
@@ -36,8 +35,6 @@ function fibonacci(terms: number) {
 Se você observar bem, dentro do nosso laço `for` a gente tem uma variável temporária, que só serve para armazenar o valor de `a+b` e, depois, a variável `a` assume o valor de `b` e `b` se torna a soma das duas.
 
 Mas e se eu te disser que é possível fazer esse for inteiro em uma linha só?
-
-<CourseCTA />
 
 A gente pode usar a sintaxe `[a, b] = [v1, v2]` onde `a` e `b` são as variáveis que queremos trocar, e `v1` e `v2` são os valores que queremos dar para elas respectivamente. Isso é possível **mesmo se as variáveis sejam referências a si mesmas**, como é o nosso caso onde `b` vai ser `a+b`.
 

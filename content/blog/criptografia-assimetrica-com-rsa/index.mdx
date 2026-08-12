@@ -14,11 +14,6 @@ visibility: "public"
 seoTitle: "Criptografia assimétrica e chaves RSA - Como funcionam?"
 seoDescription: "Nesse artigo vamos aprender profundamente o que é RSA e assimetria criando nossa própria chave RSA manualmente e entendendo todos os conceitos!"
 ---
-
-import figureImage1 from './image-1.png'
-import figureImage2 from './image-2.png'
-import figureImage3 from './image-13.png'
-
 ## Este artigo é parte de uma série:
 
 -   [Criptografia #0: Conceitos iniciais](/criptografia-essencial/)
@@ -64,8 +59,6 @@ Opcionalmente esses sistemas também podem possuir um valor público que é util
 A saída de um sistema de criptografia assimétrica é um **par de chaves**, essa palavra soa familiar? Pois é, isso é porque muita coisa que a gente usa tanto na Internet, ou até mesmo fora dela, usa um par de chaves. Por exemplo, suas mensagens no WhatsApp tem a famosa "criptografia ponta a ponta", pois bem, essa criptografia é provavelmente assimétrica, e você é o dono da chave privada.
 
 Mas o que são essas chaves afinal?
-
-<CourseCTA />
 
 ### Chaves públicas
 
@@ -145,13 +138,13 @@ Criptografia assimétrica é muito mais complexa e pode chegar a ser até 1000x 
 
 Como esses sistemas conseguem ser utilizados ao mesmo tempo? Um dos esquemas de encriptação é chamado de **KEM (Key Encapsulation Mechanism)** que basicamente consiste em criptografar uma chave com outra chave:
 
-<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Criptografia simétrica e assimétrica em conjunto</span>" />
+![](./image-1.png "Criptografia simétrica e assimétrica em conjunto")
 
 Aqui a gente está usando uma chave simétrica (muito mais leve) para criptografar um documento e gerar um **DEM Block.** Depois estamos criptografando a chave simétrica que usamos com uma chave pública de um usuário, criando o que é chamado de **KEM Block**, até agora é só uma chave criptografando outra chave.
 
 Depois juntamos os dois e mandamos para o nosso recipiente, dessa forma mesmo se o documento for interceptado, a chave não pode ser recuperada porque ela foi encriptada com a chave pública. O usuário que recebe o arquivo pode decriptar da seguinte forma:
 
-<Figure src={figureImage2} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Decriptando um DEM Block</span>" />
+![](./image-2.png "Decriptando um DEM Block")
 
 Pegamos o DEM block, separamos em chave e arquivo, decriptamos a chave simétrica usando a chave privada, obtendo a chave simétrica original, que podemos usar para decriptar o arquivo encriptado.
 
@@ -174,7 +167,7 @@ Pontos chave:
 
 Lembre-se que, quando falamos de chaves aqui, estamos falando de números, nada mais. É como se fosse uma senha, só que ela tivesse 1234 dígitos (`2^4096`). Quando estamos "criptografando" algo, estamos aplicando uma operação de exponenciação entre a chave e o valor que queremos criptografar.
 
-<Figure src={figureImage3} alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Um número de 4096 bytes</span>" />
+![](./image-13.png "Um número de 4096 bytes")
 
 As chaves públicas e privadas do RSA derivam de dois números primos que chamamos de `p` e `q`, esses números são os componentes privados do RSA. Desses dois números é que vem a segurança.
 

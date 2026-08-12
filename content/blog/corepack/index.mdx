@@ -10,7 +10,6 @@ heroImage: "./articles-1.png"
 draft: false
 visibility: "public"
 ---
-
 Se você está acompanhando a [polêmica](https://socket.dev/blog/node-community-debates-enabling-corepack-unbundling-npm) ao redor do ambiente Node.js e NPM em 2024, você provavelmente já deve saber sobre o que eu vou falar. Mas hoje, quero mostrar pra você o que é o **Corepack**, a ferramenta que promete acabar com a guerra entre os gerenciadores de pacotes do Node!
 
 Mas primeiro, um pouco de história!
@@ -23,17 +22,15 @@ Existem teorias dizendo que o criador do NPM, Isaac Schlueter, forçou a adoçã
 
 Por muitos anos, o NPM foi o único local onde você podia publicar e baixar pacotes para o Node.js, isso não é mais verdade desde que tivemos o advento de outros como Yarn e PNPM – que eu inclusive fiz um vídeo para cobrir:
 
-<YouTube id="vxES6rbrd-U" />
+https://www.youtube.com/watch?v=vxES6rbrd-U
 
 Então o NPM foi incluso no Node mesmo antes de ele se tornar uma corporação lucrativa [comprada pelo GitHub em 2020](https://github.blog/2020-03-16-npm-is-joining-github/) e, quando o GitHub foi comprado pela Microsoft, incluída no catálogo deles também.
 
 O que se tirou disso é que, desde 2009, o NPM tem a maior fatia do mercado de managers, não que isso signifique alguma coisa prática, porém, tendo praticamente o monopólio de como os pacotes são baixados e utilizados, o NPM praticamente ditava como os pacotes precisavam ser criados, inclusive muitas das funcionalidades do Node foram criadas com ele em mente como, por exemplo, o fato de que qualquer pacote que não tenha um prefixo vai, automaticamente, ter o gerenciador setado para o NPM.
 
-<CourseCTA />
-
 Esse acoplamento próximo do Node permitiu que o NPM ganhasse uma vantagem quase impeditiva para qualquer outro package manager florescer, basicamente muita gente viu isso como uma forma de eliminação de concorrência, como essa talk da CJ Silverio (ex CTO do NPM) mostra:
 
-<YouTube id="MO8hZlgK5zc" />
+https://www.youtube.com/watch?v=MO8hZlgK5zc
 
 Mas e agora? Como ficam os demais gerenciadores? O fato é que, quando o NPM se tornou quase inutilizável devido à demora de instalação de pacotes, outras pessoas se moveram para criar outros gerenciadores, como o Yarn e o pnpm. A partir daí começou a guerra dos gerenciadores de pacotes. Uma guerra que, assim como a dos browsers, tinha e tem um monopólio grande de um sistema já estabelecido.
 

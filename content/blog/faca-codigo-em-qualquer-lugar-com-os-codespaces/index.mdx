@@ -10,15 +10,6 @@ heroImage: "./photo-1564325724739-bae0bd08762c-13178554.jpg"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image.png'
-import figureImage2 from './image-1.png'
-import figureImage3 from './image-2.png'
-import figureImage4 from './image-3.png'
-import figureImage5 from './image-4.png'
-import figureImage6 from './image-5.png'
-import figureImage7 from './image-6.png'
-
 O sonho de qualquer pessoa que trabalha com tecnologia é estar sempre com o seu melhor amigo, o seu computador. Existem diversas soluções que transformam pequenos dispositivos como [Raspberry Pis](https://www.raspberrypi.org/) em computadores completos, outras soluções criam pequenos computadores de bolso que podem ser acessados a todo o momento.
 
 Existem vários motivos para alguém precisar – ou apenas gostar – de estar com um computador ao seu lado o tempo todo. Muitas vezes a pessoa prefere ter uma ferramenta super poderosa sempre a mão para eventuais problemas ou até mesmo desenvolver aquela ideia que teve no meio da rua. Em outros casos mais especiais, a pessoa pode ser uma das mantenedoras de projetos críticos e precisa estar sempre disposta a resolver eventuais problemas, isto tira a liberdade de locomoção, possuir um dispositivo destes faz com que a pessoa possa ganhar sua mobilidade de volta.
@@ -27,7 +18,7 @@ Podemos ter as melhores máquinas portáteis, porém nenhum computador se iguala
 
 ## Codespaces
 
-<Figure src={figureImage1} priority alt="" caption="Tela de abertura do site do GitHub Codespaces" wide />
+![](./image.png "Tela de abertura do site do GitHub Codespaces")
 
 Recentemente o GitHub em seu evento [Satellite 2020](https://github.blog/2020-05-06-new-from-satellite-2020-github-codespaces-github-discussions-securing-code-in-private-repositories-and-more/#codespaces) o lançamento de uma nova funcionalidade na plataforma, os [Codespaces](https://github.com/features/codespaces). No momento, ela está disponível somente mediante a requisição de acesso antecipado pelo site. Porém, você pode ser um dos que recebeu acesso recentemente e poderá acessar essa incrível facilidade!
 
@@ -39,7 +30,7 @@ Isso já havia sido feito antes com o [Code Server](https://github.com/cdr/code-
 
 A grande vantagem que o GitHub Codespaces (GH Codespaces ou GHC) trouxe é que ele é integrado diretamente ao GitHub, ou seja, você pode abrir **qualquer** repositório que você tenha permissão de escrita em um editor pronto na web! Veja um exemplo do meu repositório [GotQL](https://github.com/khaosdoctor/gotql):
 
-<Figure src={figureImage2} alt="" caption="Tela de clonagem de um repositório do GitHub mostrando o botão &quot;Open with Codespaces&quot;" />
+![](./image-1.png 'Tela de clonagem de um repositório do GitHub mostrando o botão "Open with Codespaces"')
 
 E tudo isso é **grátis**, tanto para repositórios pagos quanto para privados.
 
@@ -55,17 +46,17 @@ Dessa forma podemos ter um container que contém todas as ferramentas necessári
 
 ## Visual Studio Codespaces
 
-<Figure src={figureImage3} alt="" caption="Tela de abertura do Visual Studio Codespaces" wide />
+![](./image-2.png "Tela de abertura do Visual Studio Codespaces")
 
 Antes de mergulharmos no GitHub Codespaces, vou mostrar como podemos utilizar os [VS Codespaces](https://online.visualstudio.com/?WT.mc_id=personal-blog-ludossan) para criar um ambiente de desenvolvimento remoto, para que possamos entender com o que estamos lidando
 
 Depois de fazer o login e criar sua instância do VSC, vamos criar um novo codespace:
 
-<Figure src={figureImage4} alt="" caption="Botão de criação para um Visual Studio Codespace" />
+![](./image-3.png "Botão de criação para um Visual Studio Codespace")
 
 E, após clicarmos no botão "Create Codespace", as coisas começam a ficar interessantes, pois começamos a ter uma série de opções sensacionais que podem ser ativadas:
 
-<Figure src={figureImage5} alt="" caption="Tela de opções do Visual Studio Codespaces" />
+![](./image-4.png "Tela de opções do Visual Studio Codespaces")
 
 A primeira opção é bem simples, temos que dar um nome para nosso codespace, será o nome que vamos identificar essa máquina, então precisa ser um nome bem descritivo.
 
@@ -75,13 +66,13 @@ A partir daí temos a configuração das nossas VMs, então podemos escolher o q
 
 E então entramos na parte mais legal! Podemos definir o que são chamados de _dotfiles_, que são os arquivos de configuração do nosso shell. Dessa forma, nós podemos ter um repositório separado de dotfiles – como [eu tenho](https://github.com/khaosdoctor/.dotfiles) – e um script para instalar estes dotfiles na nossa máquina online, ou seja, podemos replicar exatamente o que temos no nosso computador local em uma interface web!
 
-<Figure src={figureImage6} alt="" caption="Visual Studio Codespace online" />
+![](./image-5.png "Visual Studio Codespace online")
 
 ## GitHub Codespaces
 
 Com o GHC é exatamente a mesma coisa! A única ação diferente que você terá de fazer será entrar em um repositório – como o [GotQL](https://github.com/khaosdoctor/gotql) – clicar no botão verde que seria o "clonar". Então clicar em "open with codespace":
 
-<Figure src={figureImage7} alt="" caption="Abrindo um novo repositório com codespace" />
+![](./image-6.png "Abrindo um novo repositório com codespace")
 
 Todos os usuários beta tem direito a 2 codespaces gratuitos. Ou seja, você pode manter até 2 máquinas de desenvolvimento sem pagar absolutamente nada. Depois, você precisará remover as antigas para criar novas. No exemplo do GotQL, temos a opção de abrir com o Codespaces, esta ação já vai criar um ambiente **pronto** para desenvolvimento, com todas as dependências instaladas
 

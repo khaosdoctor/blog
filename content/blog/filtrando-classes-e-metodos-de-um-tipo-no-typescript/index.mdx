@@ -10,7 +10,6 @@ heroImage: "./articles-7.png"
 draft: false
 visibility: "public"
 ---
-
 Nesse post bem curtinho eu quero apresentar um problema que sempre temos quando estamos lidando com TypeScript: **como a gente pode listar todas as propriedades de uma classe**?
 
 Vamos supor que você queira fazer uma função de filtro, e essa função receba uma classe e permita que você filtre por todas as propriedades dessa classe, naturalmente um tipo que pode resolver o problema é esse aqui:
@@ -65,8 +64,6 @@ No final, esse mapped type deveria criar um tipo desse formato se usássemos com
 ```
 
 > Vamos chamar esse tipo de `ObjetoMapa`, só para a gente ter uma referência nos próximos passos.
-
-<CourseCTA />
 
 Agora, pegamos o objeto mapa (que é um objeto, lembre-se disso), e transformamos em uma união de chaves:
 

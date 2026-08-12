@@ -10,9 +10,6 @@ heroImage: "./articles-1.png"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image.png'
-
 O dia 4 de dezembro de 1995 é um dia muito especial. Não só porque é o ano que eu nasci, mas também porque foi o lançamento da linguagem que, hoje, todo mundo ama odiar! O **JavaScript**.
 
 Como todo mundo que me acompanha sabe, eu sou um grande fã de JavaScript e TypeScript, e gosto ainda mais de mostrar qual é a história dessa linguagem, não só porque a linguagem evoluiu muito e tem um dos arcos de superação mais incríveis da computação, mas também porque a história dessa linguagem é muito interessante. Então pra essa edição do backlog eu quero trazer, em comemoração dos 29 anos de JavaScript:
@@ -57,11 +54,11 @@ A história do JS começa com a história da Web. Desenvolvida entre 1989-1991 p
 
 Um dos maiores motivos pelo qual a Web era muito fechada nesta comunidade era porque o seu uso era bastante complicado, baseado em protocolos de texto e não era muito intuitivo. Isso mudou quando **Marc Andreessen** e **Eric Bina** criaram o **Mosaic** em 1992 enquanto trabalhavam na **NCSA**.
 
-<Figure src="https://t.ctcdn.com.br/1pajPRs7UtQ1bef8Tkj6lI1kCvY=/900x675/smart/i329497.jpeg" alt="Mosaic | A história do navegador que revolucionou a internet - Canaltech" caption="<span style=&quot;white-space: pre-wrap;&quot;>Mosaic, o primeiro browser do mundo</span>" />
+![Mosaic | A história do navegador que revolucionou a internet - Canaltech](https://t.ctcdn.com.br/1pajPRs7UtQ1bef8Tkj6lI1kCvY=/900x675/smart/i329497.jpeg "Mosaic, o primeiro browser do mundo")
 
 O Mosaic foi o primeiro Web Browser do mundo, essencialmente o que criou a categoria de "Browsers" que a gente tem hoje. Ele quem popularizou o conceito da Web fora da comunidade de cientistas do CERN. Claramente, depois que o Mosaic ganhou fama e notoriedade, muita gente se perguntava se era possível fazer disso algo comercial, na maioria tentando licenciar o próprio Mosaic ou então criando variações dele. Até que um cara chamado Jim Clark, que fundou a Silicon Graphics (uma empresa extremamente importante de hardware) conseguiu um investimento e recrutou os dois estudantes, Marc e Eric, para fundar uma empresa chamada **Netscape Communications Corporation (NCC)** em 1994.
 
-<Figure src="https://www.internethistorypodcast.com/wp-content/uploads/2014/01/marc-andreessen-and-jim-clark-the-founders-of-netscape.jpg" alt="On The 20th Anniversary – An Oral History of Netscape's Founding | Internet  History Podcast" caption="<span style=&quot;white-space: pre-wrap;&quot;>Eric e Marc (da esquerda pra direita)</span>" />
+![On The 20th Anniversary – An Oral History of Netscape's Founding | Internet History Podcast](https://www.internethistorypodcast.com/wp-content/uploads/2014/01/marc-andreessen-and-jim-clark-the-founders-of-netscape.jpg "Eric e Marc (da esquerda pra direita)")
 
 A ideia da NCC era substituir o Mosaic pelo Netscape, uma versão mais robusta e fácil de utilizar. No final de 1994 e início de 1995, o _Netscape Navigator_ já era o browser mais utilizado de todos. E o que isso tem a ver com JavaScript? Tudo!
 
@@ -73,7 +70,7 @@ Existia um interesse considerável da indústria em criar uma linguagem de scrip
 
 Em 1995, Brendan Eich foi recrutado para ser um dos programadores da NCC. Já tendo trabalhado em grandes empresas como a própria Silicon Graphics e MicroUnity, em ambas implementando linguagens específicas para suportar funções definidas, então ele já tinha o conhecimento necessário para criar uma outra linguagem que seria a "cola" entre o HTML e o resto dos sistemas.
 
-<Figure src="https://cdn.facesofopensource.com/wp-content/uploads/2017/07/23193713/brendaneich25607.web_.jpg" alt="Brendan Eich by Peter Adams." caption="<span style=&quot;white-space: pre-wrap;&quot;>Brendan Eich</span>" />
+![Brendan Eich by Peter Adams.](https://cdn.facesofopensource.com/wp-content/uploads/2017/07/23193713/brendaneich25607.web_.jpg "Brendan Eich")
 
 Originalmente, ele foi contratado para "implementar o Scheme no browser". (Scheme era uma linguagem funcional, um dialeto do LISP, usada principalmente em áreas acadêmicas) porém, quando ele chegou lá, se deparou com um produto muito mais complicado do que esperava, além de que havia um outro perigo no ar, e ele chamava **Microsoft.**
 
@@ -85,7 +82,7 @@ A ideia era ter uma aplicação que iria servir conteúdo dinâmico, audio e ví
 
 Mas, com a popularização rápida da Web, a Microsoft viu esse projeto ser esquecido e mudou de foco para as tecnologias voltadas para essa nova "Web" que todo mundo estava falando. Em 1994, ela tentou comprar a NCC, mas foi recusada pelo valor ser baixo demais. Com isso, os fundadores da NCC já esperavam uma retaliação na forma do famoso [Embrace Extend Extinguish](https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish), onde a Microsoft pretenderia adotar o padrão, estender com suas tecnologias e depois matar o padrão em favor ao seu. Com isso, a Microsoft começou o desenvolvimento do que seria chamado de **Internet Explorer**.
 
-<Figure src="https://winworldpc.com/res/img/screenshots/fa7f6d40d7bc337984906b36ee146d47cc0f8f71fcae7ce181d7f7720b118a83.png" alt="WinWorld: Internet Explorer 1" caption="<span style=&quot;white-space: pre-wrap;&quot;>Internet Explorer na primeira versão</span>" />
+![WinWorld: Internet Explorer 1](https://winworldpc.com/res/img/screenshots/fa7f6d40d7bc337984906b36ee146d47cc0f8f71fcae7ce181d7f7720b118a83.png "Internet Explorer na primeira versão")
 
 Com isso, a Netscape precisava correr com a implementação de uma linguagem de scripting, porque a Microsoft chegaria com tudo. As candidatas cotadas eram: Perl, Python, TCL e até mesmo o Visual Basic da Microsoft, além do Scheme. Porém tudo mudou quando o Java chegou.
 
@@ -101,7 +98,7 @@ Agora com tudo decidido, todas as demais linguagens foram descartadas por intere
 
 A Microsoft tinha a faca e o queijo na mão, eles tinham o VBA que já era uma linguagem de scripting usada no Excel, tinham o conhecimento de como criar um browser e como criar uma linguagem, já tinham mercado, só faltava o produto. Então, Bill Joy (olha ele aparecendo de novo), o fundador da Sun sugeriu que a saída seria implementar uma "pequena linguagem" que faria par com o Java e complementaria a funcionalidade.
 
-<Figure src="https://dri.es/files/images/blog/james-gosling.jpg" alt="James Gosling | Dries Buytaert" caption="<span style=&quot;white-space: pre-wrap;&quot;>James Gosling, o criador do Java</span>" />
+![James Gosling | Dries Buytaert](https://dri.es/files/images/blog/james-gosling.jpg "James Gosling, o criador do Java")
 
 As principais dúvidas que surgiam na Netscape eram se o Java em si já não era uma linguagem que poderia ser integrada, algo que claramente não era possível já que, para criar um programa em Java, você precisava
 
@@ -118,7 +115,7 @@ O Java estava para ser lançado, então o tempo era importante nesse contexto. P
 
 Tecnicamente, o Mocha continha um lexer escrito a mão e um parser recursivo. Esse parser emitia [bytecodes](https://dev.to/_staticvoid/node-js-por-baixo-dos-panos-8-entendendo-bytecodes-jib), algo que era necessário para que o servidor do Netscape (chamado de LiveWire) pudesse entender as instruções. O resultado final era uma linguagem simples e muito lenta, mas factível.
 
-<Figure src="https://blog.rfox.eu/en/Programming/Series_about_Self/Environment_and_the_programming_language_Self_part_two_language/dict6.png" alt="Environment and the programming language Self (part two; language)" caption="<span style=&quot;white-space: pre-wrap;&quot;>O ambiente da linguagem Self</span>" />
+![Environment and the programming language Self (part two; language)](https://blog.rfox.eu/en/Programming/Series_about_Self/Environment_and_the_programming_language_Self_part_two_language/dict6.png "O ambiente da linguagem Self")
 
 Foi aqui que a maioria das escolhas que [todo mundo adora odiar](https://x.com/_StaticVoid/status/1510709606569414663) foram feitas. Como a linguagem tinha que parecer com Java, tudo que era mais parecido com VB foi removido, mas ao mesmo tempo "parecer com Java" fazia com que ela "parece que funcionava como Java", o que não era verdade.
 
@@ -141,7 +138,7 @@ A apresentação do Mocha foi um sucesso e todos estavam otimistas com o lançam
 
 O JavaScript foi lançado no dia 4 de dezembro (após mais ou menos 7 meses de desenvolvimento) em uma conferência de imprensa como sendo uma "linguagem de scripting com objetos" que seria usada para escrever scripts que iriam "modificar dinamicamente as propriedades e objetos Java" e serviria como um complemento ao Java na Web.
 
-<Figure src={figureImage1} priority alt="" caption="<span style=&quot;white-space: pre-wrap;&quot;>Figura 2 do paper demonstrando um console para o Mocha</span>" />
+![](./image.png "Figura 2 do paper demonstrando um console para o Mocha")
 
 Antes de o JavaScript ser chamado de JavaScript, ele foi aberto ao público em um beta aberto do Netscape 2 sob o nome de LiveScript (por conta do LiveWire) em Setembro de 95, e 1 mês depois transformado em JavaScript para criar uma marca forte entre o Java e a Netscape.
 
@@ -161,7 +158,7 @@ Foi ai que Carl Cargill, um especialista em especificações trabalhando para Ne
 
 Eu tenho um vídeo explicando como o TC39 funciona se você estiver interessado!
 
-<YouTube id="hDQu3AvvDfg" />
+https://www.youtube.com/watch?v=hDQu3AvvDfg
 
 O resto dessa história é bastante conhecida, mas existem muitos detalhes interessantes que, infelizmente, vão ficar de fora desse texto. Mas, a partir daí, o JavaScript teve várias evoluções desde a primeira especificação, mas o que fez do JS a linguagem mais conhecida foi a chegada do Node em 2009 que transformou o ecossistema da Web e fez com que o JavaScript tivesse uma adoção astronômica, incluindo novas especificações e evoluções da linguagem que transformaram o JavaScript no que a gente conhece hoje.
 

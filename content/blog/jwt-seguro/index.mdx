@@ -12,7 +12,6 @@ draft: false
 visibility: "public"
 seoTitle: "Você está usando JWT errado! Usando tokens de forma segura"
 ---
-
 Segurança na Web é uma preocupação que deveria ser de todas as pessoas, principalmente as que estão atrás de projetos de desenvolvimento de software. Para devs, é muito mais preocupante criar sistemas que não seguem regras de segurança, pois qualquer tipo de ação maliciosa pode escalar muito rápido.
 
 Se você já leu meus conteúdos, sabe que eu sou um grande fã do padrão da RFC7519, o famoso [JWT](https://jwt.io), tanto é que há um bom tempo eu cheguei a [escrever um artigo](https://medium.com/trainingcenter/jwt-usando-tokens-para-comunicação-eficiente-cf0551c0dd99) sobre como tudo funciona e explicar todos os detalhes da implementação de um token desse tipo.
@@ -21,7 +20,7 @@ O problema é que essa implementação é inerentemente **insegura**, e eu vou t
 
 > O código usado nesse exemplo pode ser encontrado [no meu GitHub](https://github.com/khaosdoctor/secure-jwt-tokens)
 
-<Bookmark url="https://github.com/khaosdoctor/secure-jwt-tokens" title="GitHub - khaosdoctor/secure-jwt-tokens: Simple repository to show how to store JWT tokens in a secure way" description="Simple repository to show how to store JWT tokens in a secure way - GitHub - khaosdoctor/secure-jwt-tokens: Simple repository to show how to store JWT tokens in a secure way" publisher="khaosdoctor" />
+https://github.com/khaosdoctor/secure-jwt-tokens
 
 ## O problema
 
@@ -29,7 +28,7 @@ Durante todo o período que os tokens JWT existem, eles já foram alvos de [dive
 
 > Se você ainda não sabe o que é um ataque XSS, deixo esse vídeo que fiz em parceria com o Código Fonte TV
 
-<YouTube id="2LYPyUk-L0k" />
+https://www.youtube.com/watch?v=2LYPyUk-L0k
 
 Na maioria das aplicações, quando recebemos um token JWT do servidor, por via de regra pensamos:
 
@@ -138,7 +137,7 @@ Além disso, podemos criar um hash do nosso refresh token e armazenar esse hash 
 
 Para implementarmos uma solução desse tipo vamos simular um app que realiza buscas de usuário, vamos ter alguns usuários em um banco de dados local e vamos usar dois tokens diferentes para poder realizar a autenticação. O código deste repositório está no meu GitHub:
 
-<Bookmark url="https://github.com/khaosdoctor/secure-jwt-tokens" title="GitHub - khaosdoctor/secure-jwt-tokens: Simple repository to show how to store JWT tokens in a secure way" description="Simple repository to show how to store JWT tokens in a secure way - GitHub - khaosdoctor/secure-jwt-tokens: Simple repository to show how to store JWT tokens in a secure way" publisher="khaosdoctor" />
+https://github.com/khaosdoctor/secure-jwt-tokens
 
 ### Backend
 

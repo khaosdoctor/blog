@@ -10,9 +10,6 @@ heroImage: "./microsoft-releases-typescript-2-0-and-other-javascript-news-508599
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './XLsqvHe-ca302083.gif'
-
 No dia 20 de Agosto de 2020, o TypeScript anunciou a sua mais nova versão, a 4.0! Então, neste artigo, me preparei para apresentar para vocês as últimas mudanças e novidades da versão!
 
 Apesar de ser uma **major version** as alterações que foram introduzidas nesse release não são muito substanciais e, pode se acalmar, não temos nenhuma breaking change :D
@@ -35,7 +32,7 @@ function tupla (args_0: string, args_1: number) {}
 
 Que é essencialmente a mesma coisa, porém, na hora de fazermos o código, o nosso _intellisense_ – que é uma das grandes vantagens do uso do TypeScript, no geral – vai nos dar uma nomenclatura que não ajuda ninguém, como podemos ver no gif abaixo
 
-<Figure src={figureImage1} priority alt="" caption="Nomenclatura como args_0 e args_1" />
+![](./XLsqvHe-ca302083.gif "Nomenclatura como args_0 e args_1")
 
 Agora, com a versão 4.0, podemos incluir nomes nas nossas tuplas para que elas sejam nomeadas durante o intellisense:
 
@@ -45,7 +42,7 @@ function tupla (...args: [nome: string, idade: number]) {}
 
 E ai conseguimos um resultado como o seguinte:
 
-<Figure src="https://media.giphy.com/media/Q7q0aUipoxpGEAHS6o/giphy.gif" alt="" caption="Conseguimos ver a nomenclatura de cada parâmetro" />
+![](https://media.giphy.com/media/Q7q0aUipoxpGEAHS6o/giphy.gif "Conseguimos ver a nomenclatura de cada parâmetro")
 
 É importante notar que: Se você está nomeando qualquer elemento de uma tupla, você **precisa** nomear os dois. Caso contrário você terá um erro:
 

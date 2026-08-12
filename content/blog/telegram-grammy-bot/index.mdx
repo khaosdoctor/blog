@@ -11,9 +11,6 @@ draft: false
 visibility: "public"
 seoDescription: "Você já tentou criar um bot para o Telegram e ficou confuso sobre com tudo funcionava? Não fique mais! Com o GrammY tudo é muito mais fácil."
 ---
-
-import figureImage1 from './image.png'
-
 Quando falamos de aplicações modernas, invariavelmente acabamos caindo nos tão famosos bots. O uso de bots para automatizar tarefas ou até mesmo facilitar a comunicação com APIs está cada vez mais comum, e uma das plataformas onde os bots estão cada vez mais comuns é o [Telegram](https://telegram.org/).
 
 Eu, pessoalmente, não me aventurei muito no mundo dos bots até recentemente, mas nessa aventura descobri uma ferramenta sensacional para facilitar (e até mesmo revolucionar) a forma como você cria bots para o Telegram, essa ferramenta é o [GrammY](https://grammy.dev/).
@@ -108,11 +105,11 @@ O [GrammY](https://grammy.dev/) é uma biblioteca feita exclusivamente para cria
 
 Se você quiser dar uma olhada no modelo tradicional de criação de bots, veja esse ponto do repositório deste bot que vamos criar:
 
-<Bookmark url="https://github.com/khaosdoctor/telegram-gh-bot/tree/af0f3b1f71d7687eebc3537bf7e22cfb14d2a411" title="GitHub - khaosdoctor/telegram-gh-bot at af0f3b1f71d7687eebc3537bf7e22cfb14d2a411" description="First telegram bot without frameworks for study. Contribute to khaosdoctor/telegram-gh-bot development by creating an account on GitHub." publisher="khaosdoctor" />
+https://github.com/khaosdoctor/telegram-gh-bot/tree/af0f3b1f71d7687eebc3537bf7e22cfb14d2a411
 
 E compare com a versão final que vamos fazer nesse artigo:
 
-<Bookmark url="https://github.com/khaosdoctor/telegram-gh-bot/tree/main" title="GitHub - khaosdoctor/telegram-gh-bot: First telegram bot without frameworks for study" description="First telegram bot without frameworks for study. Contribute to khaosdoctor/telegram-gh-bot development by creating an account on GitHub." publisher="khaosdoctor" />
+https://github.com/khaosdoctor/telegram-gh-bot/tree/main
 
 ### Deno
 
@@ -537,7 +534,7 @@ Para testarmos localmente podemos iniciar o nosso bot com `denon run -A ./src/mo
 
 Agora é só ir até o Telegram e realizar requisições usando o @ do seu bot:
 
-<Figure src={figureImage1} priority alt="" caption="Você pode tentar esse comando ai mesmo!" />
+![](./image.png "Você pode tentar esse comando ai mesmo!")
 
 Porém, esse método exige que tenhamos que sempre ter uma URL para setar o nosso webhook, o que pode ser um problema, porque essa URL pode mudar. Com isso, para testar localmente, uma das melhores formas é utilizar uma arquitetura de long pooling, que vai periodicamente checar por novos eventos no Telegram.
 

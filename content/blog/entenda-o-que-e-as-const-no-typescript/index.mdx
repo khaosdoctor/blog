@@ -11,10 +11,9 @@ draft: false
 visibility: "public"
 seoTitle: "O que significa 'as const' no TypeScript?"
 ---
-
 Esse artigo é um complemento ao meu vídeo com o mesmo tema! Veja ele aqui:
 
-<YouTube id="CTGqhST9Fjc" />
+https://www.youtube.com/watch?v=CTGqhST9Fjc
 
 Se você está codando em TypeScript, provavelmente já se deparou com um tipo muito estranho, o famoso `const as const`, algo assim:
 
@@ -58,8 +57,6 @@ sum(...args)
 ```
 
 Neste caso, `args` agora é tipado como `readonly [1, 2]`, ou seja, não podemos modificar o array, e ele tem exatamente dois elementos, 1 e 2. Portanto podemos passar para a função porque dizemos para o TS que ele sempre vai ter dois elementos.
-
-<CourseCTA />
 
 O mesmo é válido para objetos, se passarmos um objeto qualquer como este:
 

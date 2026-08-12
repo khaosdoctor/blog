@@ -10,14 +10,6 @@ heroImage: "./photo-1545987796-200677ee1011-4fe94fa4.jpg"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image-8.png'
-import figureImage2 from './image-10.png'
-import figureImage3 from './image-12.png'
-import figureImage4 from './image-14.png'
-import figureImage5 from './image-13.png'
-import figureImage6 from './image-15.png'
-
 Desde que o Docker foi lançado – e até mesmo antes disso – pessoas desenvolvedoras se preocupam em como vão desacoplar suas aplicações das suas configurações e também da sua infraestrutura, de forma que elas possam ser facilmente migradas e possam facilmente se comunicar umas com as outras.
 
 O advento do Kubernetes facilitou muito a implementação de melhores camadas de serviços, principalmente quando falamos de serviços distribuídos utilizando a [arquitetura de microsserviços](https://medium.com/trainingcenter/microservi%C3%A7os-dos-grandes-mon%C3%B3litos-%C3%A0s-pequenas-rotas-adb70303b6a3).
@@ -28,7 +20,7 @@ O grande problema é que, mesmo com todas essas facilidades, ainda enfrentamos m
 
 Quando estudamos microsserviços, vemos que o **ideal** é que tenhamos aplicações individuais que se comunicam com seus próprios bancos de dados e são independentes o suficiente a ponto de não precisarem de nenhuma outra aplicação externa para funcionarem.
 
-<Figure src={figureImage1} priority alt="" caption="A representação de um microsserviço versus um monólito (Fowler, 2015)" />
+![](./image-8.png "A representação de um microsserviço versus um monólito (Fowler, 2015)")
 
 Além disso sempre estamos ouvindo frases como esta:
 
@@ -62,7 +54,7 @@ Porém, quando falamos de abstrações, não estamos falando apenas de algo pass
 
 Estes pontos são os principais problemas que temos em arquiteturas distribuídas, perguntas do tipo "como posso monitorar todos os meus serviços de forma completa?", "como posso saber o número de requisições que estou recebendo?" geralmente exigem a existência de um recurso compartilhado, o **API Gateway**, que é um recurso muito comum em arquiteturas distribuídas como um ponto de entrada e controle para toda a malha de serviços por trás.
 
-<Figure src={figureImage2} alt="" wide />
+![](./image-10.png)
 
 Em geral, chamar **Service Mesh** de camada está um pouco errado, porque ela não é uma camada no topo dos demais serviços, mas sim uma rede embutida diretamente na estrutura das aplicações.
 
@@ -80,7 +72,7 @@ Por se tratar de um novo padrão que permeia **todo** o ecossistema de serviços
 
 Por padrão, todas as aplicações dentro de um service mesh são chamadas de **serviços**, cada uma delas é uma **instância** de um serviço.
 
-<Figure src={figureImage3} alt="" caption="Especificação de um pod do Kubernetes" />
+![](./image-12.png "Especificação de um pod do Kubernetes")
 
 Basicamente todo serviço é uma cópia em execução de algum microsserviço, algumas vezes essa instância é um único container, outras vezes pode ser uma aplicação constituída de mais de um container, que é o conceito de Pod que temos no Kubernetes.
 
@@ -98,7 +90,7 @@ Este é o grande trunfo porque um sidecar é basicamente uma implementação dis
 
 O **Data Plane** é o responsável pelo tráfego de rede entre as instâncias, isso é chamado de "Tráfego Leste-Oeste", como podemos ver na imagem anterior, este tipo de tráfego é aquele que está se movendo horizontalmente dentro da mesma rede. Ou seja, o data plane é o próprio sidecar.
 
-<Figure src={figureImage4} alt="" caption="Explicação de um tráfego norte-sul para um leste-oeste" wide />
+![](./image-14.png "Explicação de um tráfego norte-sul para um leste-oeste")
 
 O tráfego Norte-Sul, como mostrado na imagem acima, é a comunicação entre diferentes redes, ou seja, a comunicação interna para uma rede externa é um tipo de tráfego N-S, enquanto um serviço se comunicando com outro dentro do mesmo cluster é um exemplo de tráfego L-O.
 
@@ -106,11 +98,11 @@ O tráfego Norte-Sul, como mostrado na imagem acima, é a comunicação entre di
 
 O plano de controle, ou Control Plane, é somente utilizado pelas pessoas operando o service mesh, ou seja, é o plano que contém as ferramentas de controle para a malha de serviços.
 
-<Figure src={figureImage5} alt="" caption="Visão geral da arquitetura de um Service Mesh" />
+![](./image-13.png "Visão geral da arquitetura de um Service Mesh")
 
 Esta camada inclui, na maioria dos casos, uma API de comunicação com o Service Mesh e também pode incluir um CLI e/ou uma interface visual para controle da aplicação, com podemos ver na imagem abaixo.
 
-<Figure src={figureImage6} alt="" caption="Imagem do dashboard do Linkerd" />
+![](./image-15.png "Imagem do dashboard do Linkerd")
 
 ## Como um service mesh pode melhorar a comunicação de serviços
 

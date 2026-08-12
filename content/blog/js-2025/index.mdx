@@ -10,14 +10,13 @@ heroImage: "./articles--1--1.png"
 draft: false
 visibility: "public"
 ---
-
 Todo ano o comitê que cuida do ECMAScript, conhecido como TC39, se reúne para discutir as principais mudanças e também para progredir, aprovar ou reprovar [propostas](https://github.com/tc39/proposals) existentes.
 
 Nesse artigo eu vou mostrar o que aconteceu na reunião deste ano que foi na Finlândia (aqui pertinho), as propostas que foram discutidas, mas eu também quero dar uma passada por algumas outras propostas que existem no repositório e fazer a minha aposta do que eu acho que vai acabar sendo realidade na próxima versão da especificação!
 
 Antes de tudo, se você não tem ideia do que eu estou falando, eu fiz um vídeo completo há uns anos explicando exatamente como todo esse processo funciona, inclusive a história por trás do JavaScript e dos nomes ECMA e TC39:
 
-<YouTube id="hDQu3AvvDfg" />
+https://www.youtube.com/watch?v=hDQu3AvvDfg
 
 ## [Lazy Module Initialization](https://github.com/tc39/proposal-defer-import-eval)
 
@@ -45,8 +44,6 @@ Nesse exemplo, o módulo `b` vai ser carregado primeiro e somente quando o `c.va
 
 > [!CAUTION] ⚠️
 > É importante lembrar que top-level-await não pode ser executado no que a gente chama de __deferred initialization__ porque a execução do módulo que tem o top-level-await não tem como saber se o módulo que ele está usando vai responder agora ou depois, ou seja, se tiver top-level-await, não dá pra usar `import defer`
-
-<CourseCTA />
 
 ## [Error.isError](https://github.com/tc39/proposal-is-error)
 

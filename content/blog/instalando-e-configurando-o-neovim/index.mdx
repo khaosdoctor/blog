@@ -11,11 +11,6 @@ draft: false
 visibility: "public"
 seoTitle: "Como instalar e configurar o Neovim com LazyVim"
 ---
-
-import figureImage1 from './image-7.png'
-import figureImage2 from './image-8.png'
-import figureImage3 from './image-5.png'
-
 Eu sempre gostei do Vim, mas esse editor é mundialmente conhecido por ser uma das peças de software mais complexas de aprender já criadas, até ganhando a fama de ser o lugar que você entra e nunca mais sai.
 
 ![A meme-worthy compilation of images from a group called "People who managed  to exit vim" : r/vim](https://i.redd.it/m9eh2jw08qm61.jpg)
@@ -54,8 +49,6 @@ Neovim é um fork do Vim original feito por um Brasileiro chamado [Thiago Arruda
 Dentre as muitas novidades do Neovim, o suporte nativo a [Lua](https://en.wikipedia.org/wiki/Lua_\(programming_language\)) é uma das principais, o que significa que você pode escrever plugins e ferramentas de forma muito mais simples do que usando C ou VimL que, apesar de boas, são complicadas. Além de ter processamento assíncrono e ter o suporte nativo a [LSP](https://en.wikipedia.org/wiki/Language_Server_Protocol)s (Language Server Protocol) que permitem a comunicação em tempo real do que você está escrevendo e um servidor em background que vai analisar o seu código (assim que a gente consegue auto completions, intellisense e análise de erros).
 
 A partir daí o NVim ganhou cada vez mais suporte da comunidade e um aporte de algumas empresas através do OpenCollective e agora é um projeto open source completamente auto sustentável e mantido por alguns devs em tempo integral. E vai ser ele que vamos modificar hoje.
-
-<CourseCTA />
 
 ## Pré requisitos
 
@@ -196,7 +189,7 @@ Você pode navegar por ela com HJKL, J e K vão descer e subir, H e L navegam pa
 
 Abra o vim na pasta `~/.config/nvim`, vamos começar dali. Selecione o arquivo `lua/config/lazy.lua`. Esse é o principal arquivo de configuração do lazy, mas a gente quase nunca vai mexer nele.
 
-<Figure src={figureImage1} priority alt="" wide />
+![](./image-7.png)
 
 Aperte `<C-l>` ou `<Ctrl>+l` para voltar ao Neotree, agora abra o arquivo `options.lua`, veja que temos duas abas no topo, esses são os buffers, cada buffer é um arquivo em memória, e é importante dizer que não são abas!
 
@@ -215,7 +208,7 @@ Feche esse buffer com `<leader>bd`.
 
 O Telescope é outro plugin feito para buscar arquivos. Vamos abrir outro arquivo com ele, aperte `<leader>ff` para abrir a janela do Telescope:
 
-<Figure src={figureImage2} alt="" wide />
+![](./image-8.png)
 
 Aqui você pode digitar direto para buscar o arquivo, navegar com as setas ou com `<C-n>` e `<C-p>`, você também pode abrir a lista de atalhos com `<C-?>`. Abra outro arquivo com ele.
 
@@ -536,7 +529,7 @@ O que é ótimo para telas pequenas, já que eu não preciso saber o nome comple
 
 Eu não vou listar todos os meus plugins aqui, porque seriam muitos, mas vou deixar os meus dotfiles diretamente na pasta do meu Lazy para que você possa ver o que está acontecendo, eu optei por deixar os plugins divididos por tipo e por função, e não por grupo como parece ser o jeito que a comunidade gosta de fazer. Eu acho muito mais fácil dar manutenção quando eu sei o que o plugin faz ao invés de ter um arquivo com vários plugins dentro agrupado por funcionalidade.
 
-<Bookmark url="https://github.com/khaosdoctor/dotfiles/tree/ba88235f73d88a5a3e0db981e2efbc433c5fee4c/general/nvim/.config/nvim" title="dotfiles/general/nvim/.config/nvim at ba88235f73d88a5a3e0db981e2efbc433c5fee4c · khaosdoctor/dotfiles" description="My dotFiles. Contribute to khaosdoctor/dotfiles development by creating an account on GitHub." publisher="khaosdoctor" />
+https://github.com/khaosdoctor/dotfiles/tree/ba88235f73d88a5a3e0db981e2efbc433c5fee4c/general/nvim/.config/nvim
 
 Para que a gente possa ter a funcionalidade que eu prometi, deixando o seu nvim igual o meu (pelo menos na aparência), vamos precisar de alguns plugins, o primeiro deles é o meu esquema de cores.
 
@@ -670,7 +663,7 @@ Acima de tudo é sua escolha, então não é algo que você precise pensar demai
 
 Para ter o dashboard customizado com um logo diferente, e até mesmo opções diferentes, o Lazy usa um projeto chamado Alpha.nvim, que é um gerador de dashboards, essencialmente o que eu fiz foi copiar a configuração original do do LazyVim que está nesse repositório:
 
-<Bookmark url="https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/extras/ui/alpha.lua" title="LazyVim/lua/lazyvim/plugins/extras/ui/alpha.lua at main · LazyVim/LazyVim" description="Neovim config for the lazy. Contribute to LazyVim/LazyVim development by creating an account on GitHub." publisher="LazyVim" />
+https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/plugins/extras/ui/alpha.lua
 
 E modificar o logo. Todo o resto eu deixei igual porque eu acho que as opções são bem pertinentes e me ajudam bastante, para gerar o logo eu procurei um gerador de ASCII art, este [aqui](https://patorjk.com/software/taag/#p=display&f=ANSI%20Regular&t=lsantos.dev) foi exatamente o que eu usei. Ele tem várias opções de fontes e letras e ai é uma questão de você ser criativo. Para substituir o logo basta remover o logo do Lazy e colar o seu próprio logo, lembrando que seu terminal deve suportar os caracteres ANSI se você escolheu essa fonte:
 
@@ -680,11 +673,11 @@ E modificar o logo. Todo o resto eu deixei igual porque eu acho que as opções 
 
 O Lualine é um plugin muito legal que adiciona várias coisas interessantes na parte de baixo do seu editor, como o branch do git, a pasta que você está, número de erros e avisos, caminho, último comando, e outras coisas. Além disso é totalmente customizável e você pode adicionar o que você quiser nela. No meu caso essa é a configuração:
 
-<Figure src={figureImage3} alt="" wide />
+![](./image-5.png)
 
 Para não adicionar um arquivo super longo por aqui, vou deixar o link para o repositório na revisão atual:
 
-<Bookmark url="https://github.com/khaosdoctor/dotfiles/blob/4532db19eca517ccc6205fa22826aa8854d88d20/general/nvim/.config/nvim/lua/plugins/lualine.lua" title="dotfiles/general/nvim/.config/nvim/lua/plugins/lualine.lua at 4532db19eca517ccc6205fa22826aa8854d88d20 · khaosdoctor/dotfiles" description="My dotFiles. Contribute to khaosdoctor/dotfiles development by creating an account on GitHub." publisher="khaosdoctor" />
+https://github.com/khaosdoctor/dotfiles/blob/4532db19eca517ccc6205fa22826aa8854d88d20/general/nvim/.config/nvim/lua/plugins/lualine.lua
 
 # Conclusão
 

@@ -13,14 +13,6 @@ draft: false
 visibility: "public"
 seoDescription: "Nesta série de artigos falo tudo sobre o gRPC. Começamos com a história e vamos até implementações mais elaboradas usando esta incrível tecnologia!"
 ---
-
-import figureImage1 from './image-6.png'
-import figureImage2 from './image-5.png'
-import figureImage3 from './image-9.png'
-import figureImage4 from './image-10.png'
-import figureImage5 from './image-11.png'
-import figureImage6 from './image-8.png'
-
 ## Este artigo é parte de uma série
 
 1.  **[O guia completo do gRPC parte 1: O que é gRPC?](/guia-grpc-1/)**
@@ -34,7 +26,7 @@ Quem me segue há algum tempo sabe que eu sou um grande fã de falar sobre novas
 
 Já fiz algumas palestras antes sobre o assunto, como você pode ver no vídeo a seguir (não deixe de ver os [slides](https://speakerdeck.com/khaosdoctor/grpc-with-node-dot-js) no [meu SpeakerDeck](https://speakerdeck.com/khaosdoctor)) e este é um tema bastante recorrente para mim porque, pelo menos aqui no Brasil, a maioria das pessoas **não sabe o que é ou nunca utilizou gRPC em nenhum projeto**.
 
-<YouTube id="5RVRbDHFhNw" caption="Meu vídeo sobre gRPC apresentado pelo HackBuddy" />
+https://www.youtube.com/watch?v=5RVRbDHFhNw
 
 Porém, o gRPC não é uma tecnologia muito nova, ele já está aqui há algum tempo e já vem sendo utilizado em larga escala em projetos muito grandes como o Docker e o Kubernetes, então decidi montar esta série de artigos para explicar de uma vez por todas o que é o gRPC e como você consegue criar suas aplicações JavaScript e TypeScript com ele de forma simples e fácil!
 
@@ -148,11 +140,11 @@ Enquanto isso, do lado do cliente, temos uma chamada de rede feita por um **stub
 
 Este é o diagrama de funcionamento de uma chamada RPC comum.
 
-<Figure src={figureImage1} priority alt="" caption="Diagrama de funcionamento do RPC" />
+![](./image-6.png "Diagrama de funcionamento do RPC")
 
 O gRPC tem um funcionamento muito próximo do diagrama que acabamos de ver, a diferença é que temos uma camada extra que é o framework gRPC interpretando as chamadas codificadas com a IDL do protobuf:
 
-<Figure src={figureImage2} alt="" caption="Diagrama de um serviço gRPC" />
+![](./image-5.png "Diagrama de um serviço gRPC")
 
 Como você pode ver, o funcionamento é basicamente o mesmo, temos um cliente que converte as chamadas feitas localmente em chamadas de rede binárias com o protobuf e as envia pela rede até o servidor gRPC que as decodifica e responde para o cliente.
 
@@ -160,7 +152,7 @@ Como você pode ver, o funcionamento é basicamente o mesmo, temos um cliente qu
 
 O HTTP/2 já é utilizado faz algum tempo e vem se tornando a principal forma de comunicação na web desde 2015.
 
-<Figure src={figureImage3} alt="" caption="História do HTTP ao longo das décadas" />
+![](./image-9.png "História do HTTP ao longo das décadas")
 
 Entre as muitas vantagens do HTTP/2 (que também foi criado pela Google), está o fato de que ele é muito mais rápido do que o HTTP/1.1 por conta de vários fatores que vamos entender.
 
@@ -170,7 +162,7 @@ Tradicionalmente, o HTTP não pode enviar mais de uma requisição por vez para 
 
 No HTTP/2 temos o que é chamado de multiplexação, que consiste em poder justamente receber várias respostas e enviar várias chamadas em uma mesma conexão. Isto só é possível por conta da criação de um novo frame no pacote HTTP chamado de **Binary Framing**. Este frame essencialmente separa as duas partes (headers e payload) da mensagem em dois frames separados, porém contidos na mesma mensagem dentro de um encoding específico.
 
-<Figure src={figureImage4} alt="" caption="Binary framing em ação" />
+![](./image-10.png "Binary framing em ação")
 
 ## Compressão de headers
 
@@ -180,7 +172,7 @@ Inicialmente tudo na chamada é comprimido, inclusive os headers, isso ajuda na 
 
 Se os headers foram alterados, somente os headers alterados são enviados, e os que não foram alterados recebem um índice para o valor anterior do header, evitando que headers sejam enviados repetidamente.
 
-<Figure src={figureImage5} alt="" caption="Compressão de headers em funcionamento" />
+![](./image-11.png "Compressão de headers em funcionamento")
 
 Como você pode ver, somente o `path` dessa requisição mudou, portanto só ele será enviado.
 
@@ -230,7 +222,7 @@ Isso vai criar um arquivo binário com o nome `name.bin`, se abrirmos o arquivo 
 
 Temos 9 bytes representados aqui, contra os 24 do JSON, e isso é o suficiente para poder entender a mensagem, por exemplo, o que temos aqui é o seguinte:
 
-<Figure src={figureImage6} alt="" caption="Diagrama do encoding do protobuf" />
+![](./image-8.png "Diagrama do encoding do protobuf")
 
 -   O primeiro byte `0A`, diz o índice e o tipo da mensagem. `0A` em decimal é 10, ou seja, `0000 1010` em binário, de acordo com [a especificação de encoding do protobuf](https://developers.google.com/protocol-buffers/docs/encoding), os últimos três bits são reservados para o tipo e o MSB (primeiro bit da esquerda) pode ser descartado, então reagrupando os bits temos `0001 010`, portanto nosso tipo é `010`, que é 2 em binário, [o numero que representa uma](https://developers.google.com/protocol-buffers/docs/encoding#strings) **[string](https://developers.google.com/protocol-buffers/docs/encoding#strings)** [no protobuf](https://developers.google.com/protocol-buffers/docs/encoding#strings). Já no primeiro byte `0001` temos o índice do campo, que é 1, como definimos na nossa mensagem.
 -   O byte seguinte `05` nos diz o tamanho desta string, que é de 5 bytes porque "Lucas" tem 5 letras.

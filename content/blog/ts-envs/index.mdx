@@ -10,7 +10,6 @@ heroImage: "./articles-2.png"
 draft: false
 visibility: "public"
 ---
-
 Um problema extremamente comum que enfrentamos com TypeScript é a tipagem de arquivos externos, o principal desses problemas é quando temos que tipar coisas que vem do sistema onde estamos executando a aplicação, por exemplo, o **process.env**.
 
 Eu já vi várias técnicas para tipar e até mesmo converter esses valores, mas a grande maioria delas tem falhas fundamentais, vou apresentar algumas aqui e quais são as que eu prefiro utilizar.
@@ -43,8 +42,6 @@ foo(process.env.UMA_STRING) // erro
 ## As soluções
 
 Vamos à algumas soluções possíveis, vou deixar algumas opções aqui e comentar sobre elas no final de cada sessão.
-
-<CourseCTA />
 
 ### Type Augmentation
 

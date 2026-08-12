@@ -10,18 +10,11 @@ heroImage: "./photo-1500313749317-0105e4b72ec1-7c8ef1f0.jpg"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image-33.png'
-import figureImage2 from './image-45.png'
-import figureImage3 from './image-37.png'
-import figureImage4 from './image-40.png'
-import figureImage5 from './image-44.png'
-
 Há algum tempo atrás, o GitHub anunciou que estavam criando os **GitHub Packages**. Esta era mais uma ferramenta desta incrível rede para que a vida dos desenvolvedores e desenvolvedoras ficasse ainda mais fácil.
 
 Você pode acessar os packages através do seu próprio perfil, e lá você vai ver uma série de opções, desde pacotes do NPM até, mais recentemente, imagens do **Docker**!.
 
-<Figure src={figureImage1} priority alt="" caption="Acesse seu perfil para poder ver seus pacotes" />
+![](./image-33.png "Acesse seu perfil para poder ver seus pacotes")
 
 Isso mesmo! Agora, além do Docker Hub, você também pode armazenar suas imagens diretamente no GitHub, mas o que isso muda?
 
@@ -63,7 +56,7 @@ docker login docker.pkg.github.com -u <usuario do github>
 
 É importante que o token tenha as permissões de escrita e leitura de packages
 
-<Figure src={figureImage2} alt="" caption="Tenha certeza que as permissões estão corretas" />
+![](./image-45.png "Tenha certeza que as permissões estão corretas")
 
 3\. Utilize este token gerado como senha para logar
 
@@ -89,7 +82,7 @@ Depois, vamos na aba `actions` dentro do repositório:
 
 Clicaremos em new workflow (no meu caso, porque eu já tinha um workflow existente), quando formos direcionados para a tela onde seremos apresentados com os mais diversos workflows, vamos clicar no link abaixo do título que diz _"Set up a workflow yourself"_.
 
-<Figure src={figureImage3} alt="" caption="Não vamos trabalhar com templates" />
+![](./image-37.png "Não vamos trabalhar com templates")
 
 Lá vamos ter um pequeno documento padrão com algumas linhas, vamos fazer uma alteração para que tenhamos a nossa action sendo executada somente em pushes para a branch master e também em tags que comecem com `v`, assim podemos ter `v1.0.0` e assim por diante.
 
@@ -124,7 +117,7 @@ Agora, vamos no menu do lado direito e iremos procurar a action da própria Dock
 
 Iremos copiar o código clicando no botão de cópia do lado direito:
 
-<Figure src={figureImage4} alt="" caption="Copiando o código de uso" />
+![](./image-40.png "Copiando o código de uso")
 
 E vamos colar logo abaixo da nossa action anterior, dentro de `steps`, depois vamos apagar algumas das linhas que estão colocadas como parâmetros, porque não vamos utilizar todos eles.
 
@@ -179,7 +172,7 @@ Depois estamos passando pelos parâmetros que queremos setar:
 
 Depois de terminarmos, vamos dar um nome ao nosso arquivo e então salvá-lo. A partir daí uma nova build irá rodar e vamos ter uma nova imagem no nosso repositório:
 
-<Figure src={figureImage5} alt="" caption="A nova imagem no nosso repositório, pronta para ser baixada" />
+![](./image-44.png "A nova imagem no nosso repositório, pronta para ser baixada")
 
 Você pode checar a página deste pacote individual [nesta URL](https://github.com/khaosdoctor/zaqar/packages/404513)
 

@@ -11,17 +11,13 @@ draft: false
 visibility: "public"
 seoTitle: "O que são Module Expressions no JavaScript"
 ---
-
-import figureImage1 from './image-1.png'
-import figureImage2 from './image-2.png'
-
 A gente cresceu ouvindo como devs que o JavaScript é uma linguagem _single-threaded_, ou seja, a gente só tem um único processo e não podemos sair dele. Isso se provou errado de alguns anos para cá quando novas APIs como os [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) e [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) foram criados.
 
 Além disso, todas as extensões do JavaScript foram consideradas como _single-threaded_, quantas vezes você já ouviu alguém falar que o Node.js é single-threaded? E isso também não é verdade, embora o conjunto de APIs e a infraestrutura por trás do Node não sejam as mesmas da Web.
 
 Agora estamos dando um passo à frente com essa ideia com a proposta de **[Module Expressions](https://github.com/tc39/proposal-module-expressions)** que chegou no estágio 3! Se você não sabe como funciona o JavaScript, nesse vídeo eu explico um pouco mais sobre o processo de lançamento de novas funcionalidades do JavaScript, se você ainda não assistiu, eu recomendo fortemente para poder entender melhor como tudo funciona!
 
-<YouTube id="hDQu3AvvDfg" />
+https://www.youtube.com/watch?v=hDQu3AvvDfg
 
 ## O problema
 
@@ -33,7 +29,7 @@ Algumas bibliotecas que implementam padrões de execução multi-thread, como o 
 
 Uma vez que o código está do outro lado, é necessário fazer um `eval` desse código para poder obter o resultado. Mas isso traz alguns problemas, principalmente, como você pode imaginar, de segurança através das [CSPs (Content Security Policies)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) que já são complexas naturalmente e acabam ficando ainda mais complicadas com mais de uma thread.
 
-<Figure src={figureImage1} priority alt="" caption="O código é passado de uma thread a outra através de string ou BLOB" />
+![](./image-1.png "O código é passado de uma thread a outra através de string ou BLOB")
 
 Além desse problema, temos outro que é ainda maior: **O código perde o contexto de execução**. Isso significa que um código como esse do exemplo da proposta:
 
@@ -74,7 +70,7 @@ assert(await import(mod) === moduleExports);
 
 A grande sacada é que, ao invés de termos que enviar o conteúdo via string, podemos enviar um módulo que vai sofrer uma atribuição do outro lado como um objeto de um módulo, e não através de uma string. E é isso, não existe muito mais o que falar.
 
-<Figure src={figureImage2} alt="" caption="Agora o módulo não troca de tipo e nem perde contexto" />
+![](./image-2.png "Agora o módulo não troca de tipo e nem perde contexto")
 
 Alguns pormenores que temos sempre que lembrar é que esse tipo de objeto só pode ser importado através de **dynamic imports**, quando usamos `import()` e não através dos `import` statements que temos no topo do arquivo porque não podemos usar uma string pra acessar o conteúdo desse módulo, já que ele está sendo criado em runtime.
 

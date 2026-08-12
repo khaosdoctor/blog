@@ -12,14 +12,6 @@ heroImage: "./photo-1465844880937-7c02addc633b-8bcd18ec.jpg"
 draft: false
 visibility: "public"
 ---
-
-import figureImage1 from './image-1.png'
-import figureImage2 from './image-2.png'
-import figureImage3 from './image-5.png'
-import figureImage4 from './image-6.png'
-import figureImage5 from './image-7.png'
-import figureImage6 from './image-8.png'
-
 Recentemente li uma série de artigos do [Scott Coulton](https://itnext.io/@scott.coulton?source=post_page-----44b45e47a1f7----------------------)[^1][^2][^3] no Medium sobre como escolher as imagens base para seus containers. Decidi então escrever estes artigos para que outras pessoas também possam entender como escolher melhor como começar a criar seus containers usando Docker da melhor forma possível!
 
 [^1]: [I Chose You Container Image - Part 1](https://itnext.io/i-cho-cho-chose-you-container-image-part-1-fa6671d9ae1f)
@@ -63,7 +55,7 @@ Para deixar a escolha diretamente a quem lê, não vou dizer se um sistema opera
 
 ### Imagens Full
 
-<Figure src="https://images.unsplash.com/photo-1593967504874-a551dc10271c?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ" alt="departure from Euromax terminal, 400 meters long" caption="Foto de um navio carregado de containers <a href=&quot;https://unsplash.com/@asharpilo?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Andrey Sharpilo</a> / <a href=&quot;https://unsplash.com/?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Unsplash</a>" />
+![departure from Euromax terminal, 400 meters long](https://images.unsplash.com/photo-1593967504874-a551dc10271c?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ "Foto de um navio carregado de containers Andrey Sharpilo / Unsplash")
 
 As imagens `full` (ou completas), são imagens que contém toda a extensão de um sistema operacional, por exemplo, uma imagem `debian-full` é uma imagem que possui a distribuição Debian do Linux por completo, com todos os pacotes e módulos carregados.
 
@@ -73,49 +65,49 @@ Um dos grandes problemas de imagens `full` é que, por terem muitos pacotes inst
 
 O próprio Docker Hub possui uma [ferramenta de análise de vulnerabilidades](https://docs.docker.com/docker-hub/official_images/#official-image-vulnerability-scanning) que pode ser utilizada diretamente do site, através da aba `Tags`. Como mostra a imagem a seguir.
 
-<Figure src={figureImage1} priority alt="" caption="Detecção de vulnerabilidades do Docker Hub" />
+![](./image-1.png "Detecção de vulnerabilidades do Docker Hub")
 
 Como você pode ver, a própria imagem tem vulnerabilidades que você está "herdando" antes mesmo de fazer qualquer _deploy_ do seu código.
 
 ### Imagens Slim
 
-<Figure src="https://images.unsplash.com/photo-1540302469547-9cfb64e6523d?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ" alt="" caption="Foto de uma etiqueta escrito &quot;the slim&quot; <a href=&quot;https://unsplash.com/@matreding?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Mat Reding</a> / <a href=&quot;https://unsplash.com/?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Unsplash</a>" />
+![](https://images.unsplash.com/photo-1540302469547-9cfb64e6523d?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ 'Foto de uma etiqueta escrito "the slim" Mat Reding / Unsplash')
 
 Uma imagem _slim_ é uma imagem um pouco menor. Toda a imagem _slim_ só possui os pacotes necessários para que o sistema operacional funcione, é esperado que você instale todos os pacotes extras para que sua aplicação possa funcionar. Atualmente, só o Debian possui uma imagem _slim_.
 
 Um dos benefícios diretos do uso de imagens _slim_ é que, por ter menos pacotes, você tem menos dependências que podem estar sujeitas a vulnerabilidades. Veja um exemplo.‌
 
-<Figure src={figureImage2} alt="" caption="Vulnerabilidades de uma imagem slim" />
+![](./image-2.png "Vulnerabilidades de uma imagem slim")
 
 Outro ganho interessante é que, justamente por serem mais "limpas", imagens _slim_ são muito menores em tamanho do que uma imagem _full_. Em casos mais extremos, **uma imagem** _**slim**_ **pode ser até 50% menor do que uma imagem** _**full.**_ Veja o exemplo da comparação do `debian:buster` com o `debian:buster-slim`.
 
-<Figure src={figureImage3} alt="" caption="Tamanho da imagem slim do Debian Buster" />
+![](./image-5.png "Tamanho da imagem slim do Debian Buster")
 
 Agora veja o tamanho da imagem completa
 
-<Figure src={figureImage4} alt="" caption="Tamanho da imagem full do Debian Buster" />
+![](./image-6.png "Tamanho da imagem full do Debian Buster")
 
 Veja que, se pegarmos a arquitetura `amd64`, que é a mais comum para processadores de 64 bits, e compararmos as versões full com **48.06MB** contra os **25.84MB** da mesma imagem, só que na versão slim. Isso é uma redução de **47%** no tamanho da imagem. Tudo isso só removendo pacotes não utilizados.
 
 ### Imagens Alpine Linux
 
-<Figure src="https://images.unsplash.com/photo-1532956694725-6f7f052fb7c7?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ" alt="" caption="Foto dos Alpes por <a href=&quot;https://unsplash.com/@benni_as?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Benni Asal</a> / <a href=&quot;https://unsplash.com/?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Unsplash</a>" />
+![](https://images.unsplash.com/photo-1532956694725-6f7f052fb7c7?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ "Foto dos Alpes por Benni Asal / Unsplash")
 
 As imagens Alpine Linux são o tipo de imagem mais otimizada possível. Este tipo de OS foi construído do zero para ser um sistema operacional já nativo de containers. A principal diferença entre esse tipo de imagem para uma imagem tradicional é que esse sistema não utiliza a `glibc`. O Alpine depende de uma outra biblioteca chamada `musl libc`. Além disso, por padrão, o Alpine só vem com os pacotes base instalados, ou seja, qualquer outra coisa que sua aplicação precisar, você vai ter que instalar manualmente.
 
 Isso pode parecer um pouco complicado, mas veja como reduzimos a quantidade de vulnerabilidades só por reduzir os pacotes. Perceba que não há nenhuma vulnerabilidade crítica.
 
-<Figure src={figureImage5} alt="" caption="Vulnerabilidades de uma imagem Alpine" />
+![](./image-7.png "Vulnerabilidades de uma imagem Alpine")
 
 Além disso, uma imagem `alpine` tem menos de **6MB** de tamanho **total.** No caso das imagens mais novas, esse tamanho pode chegar a pouco mais de **2MB.** Isso é uma redução de mais **95%** no tamanho geral da imagem.
 
-<Figure src={figureImage6} alt="" caption="Tamanho de uma imagem Alpine Linux" />
+![](./image-8.png "Tamanho de uma imagem Alpine Linux")
 
 Os contras de se trabalhar com uma imagem Alpine é que é um sistema completamente diferente, você terá de aprender a lidar com seu package manager nativo, como ele não usa as bibliotecas padrões do Linux, provavelmente a grande maioria dos sistemas precisarão ser recompilados utilizando as ferramentas do Alpine.
 
 ## Imagens Scratch
 
-<Figure src="https://images.unsplash.com/photo-1556888335-23631cd2801a?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ" alt="" caption="Foto de um papel preto sem nada escrito com um lápis branco em cima por <a href=&quot;https://unsplash.com/@kellysikkema?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Kelly Sikkema</a> / <a href=&quot;https://unsplash.com/?utm_source=ghost&amp;utm_medium=referral&amp;utm_campaign=api-credit&quot;>Unsplash</a>" />
+![](https://images.unsplash.com/photo-1556888335-23631cd2801a?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=2000&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ "Foto de um papel preto sem nada escrito com um lápis branco em cima por Kelly Sikkema / Unsplash")
 
 Por último, vamos dar uma olhada nas imagens do tipo `scratch`. Quando usamos `scratch` como imagem base, estamos dizendo ao [Docker](https://docs.microsoft.com/dotnet/architecture/microservices/container-docker-introduction/docker-defined?WT.mc_id=blog-personal-ludossan) que queremos que o próximo comando no nosso `Dockerfile` seja a primeira camada do nosso sistema de arquivos dentro dessa imagem.
 
