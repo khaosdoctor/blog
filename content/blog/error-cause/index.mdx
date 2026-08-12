@@ -167,7 +167,7 @@ Podemos extrapolar esse modelo para criar o que chamamos de `errorMappers`, que 
 
 Quando estamos lidando com um erro de cada vez, está tudo certo, o problema é quando temos que encadear esses erros, e agora?
 
-# Contexto e encadeamento
+## Contexto e encadeamento
 
 Uma palavra que eu trouxe no início do artigo foi **contexto**, mas a gente não chegou a falar muito sobre ele ainda, e agora é o momento de dizer que **a parte mais importante em um erro é o seu contexto**.
 
@@ -336,7 +336,7 @@ Vamos ter a seguinte saída, caso tenhamos um erro nas nossas APIs:
 
 Veja que temos muito mais contexto e muito mais ideia do que aconteceu em todas as partes do erro, e não só o que está acontecendo nos últimos erros. Isso é particularmente útil quando estamos usando **microsserviços**, já que podemos ter um erro em qualquer parte de uma cadeia de chamadas, cada um desses erros deveria retornar uma causa, de forma que podemos encadear todos os erros que aconteceram e entender exatamente aonde o erro aconteceu.
 
-# Conclusão
+## Conclusão
 
 Tratamento de erros em qualquer linguagem não é algo simples, e o mais difícil é conseguir a **consistência** necessária para fazer com que todos os erros retornem da mesma forma, por isso que bibliotecas padronizadas de erros como o [Boom](https://github.com/hapijs/boom) são tão importantes.
 

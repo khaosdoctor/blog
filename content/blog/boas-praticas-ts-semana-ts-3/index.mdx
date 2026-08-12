@@ -97,7 +97,7 @@ E poderíamos deixar ela ainda mais genérica usando generics:
 
 ![](./image-66.png)
 
-#### Types vs Interfaces
+### Types vs Interfaces
 
 Outra pergunta que eu recebi mais de uma vez em diversos locais é: "Qual é a diferença de tipos e interfaces?". Vou dar vários exemplos aqui e você pode ver todos eles [nesse link do TS Playground](https://www.typescriptlang.org/play?ssl=44&ssc=81&pln=28&pc=1#code/PTAEBUEsAcHsGdRwCYFMC2p6oE6gK7wCGyCoaoAZrDukaAMawB2AVvswC71OaRe5KRBqngAofp0HDUoAMJEcOWAEkBOISNABvMaFDLkReAC5QAJjEBfMWM4BPaLIVLY4R7IC8OvQdhHTC2tbJmZ4TkYARjMXZXcnUG9tPwCzcxtQ8MZzGMVlNSkNGUSdFOM0jJYshgBmXNd4r2zQEAJMThhYUABL0GN4WAZIAEOAN1QAGz62+klpEVtWgFEADykwgGOu0ch6NAYJxSIOllB0XABzfgusAGeepAR4AFvxqYxQOaKRcS-NZ0gOAY+AmXV0+hwREgsDMzHw6AARrhgn9inJAcDQT59MhdudOMpYfCkThgmJMhEhkCQTD5BiaSVkpDoWZIgAach41AE2nmUA2MStADyZ1E6C6zC2Dzg8Beb0YsHanXEDgS6OpoKgcEZBihtLhiNw-LsHjpGrcnR1uKI+MJoANJONgrAAEFEWQUB9sHhROtcaREHAcN0lTKCMQ+OpsAwAOdS3igABkoGdoFkqJ+4Zt02gREOo0hjAAFkRxmm1qhmMhfup-qAAAqiAb0cH2xWoMzhHDXXyQIxoImG0kCjOyF0TDhdVAVquIRuy2At3x5ydmAn4VC+aDKShNmhmIQTbC95Cdgk9yphCKN5B28eTnXMdtmADkN+UL45fZIHYs5g5K5PmuOAbhy26wLuC44AeebYF+p6gC+kTmDUyE1C+TrLKAHRhp6mC+pWaB4BQo4qqa9Y7nueDePOzZJqUgG0oecFIJRUHARuxoUqALrMEQZgURBVGPs+iG8UQn6fP2v7mAAbABE5AVQsGoGBbEDNB2EgbIArCgYqC8IRJBdL0hCKJ8tYyIGRzYcq5CyLACKsNyHo0AAjhuqZCoguDKIgJGWZm8BSnQkCIEimBoJQ-B9ggEiBbIACywjCGCvijIuMFHpu+jGOUoAAAxkqqzg0PgrD0Ek6WZVpnn6E+nD4DgSnrjlfTEIElgChM3JnClTBmMlDCpTqGX8cp2UAR1ZgFcaPWUmVFUxItlWlGNHGqW2jXNbSrVTfl6TkitJR0MNTBiKdI3eEwIEVYsYAFPMohprZuH+F6RqQOg0A9ecXDGYGNCgLA+AEsYjCHLKojxYUdbgN2RDMBcNKPd8sitgixi-g6yK5RM23jTjpK5TgqDjQAFAAlIkAB89rEsiAoHP0EAI0jDJfT9GCVpwiDw7s7OgqjdathSIEMJwQPk6TxnMBM9igJj2CDiSHIy6QcsK3mBMq7g1PaDYJNk6AVPYvo+nbcwJucEWYUAHRK7IABU2G2-Adva01RCU8Alj6DYAolaAACK+AkJCpBal0VX6IcpC68TfQy2YpueHTRNkszsoh2Ht7GZ832-TziCh+HxlR2bYv4BLUvqyw8ugHH+oMzg+uG0nxum62ELck1Vs2-bTegC7fvGrpYD1jQIZYO2AgWbDVmPGg+HhIRRpZ9g4hEAiXbCJSkOIAAYjQdBm9vu8Sx3RBUwnADcZKjmamKwC6O9g5f05+kfJ9LjiXI8gnXwzJm5DkzlUSkMR6SglfhfCIMcr5d18D3S2iFJQmTaPaAAX+cD8vgrBsl8NaW0vICEQj1KyawQA).
 
@@ -201,7 +201,7 @@ Podemos usar várias outras técnicas pra deixar a função completamente TypeSa
 
 ![](./image-80.png)
 
-# Configuração
+## Configuração
 
 Além das boas práticas de código, existem também as boas práticas de configuração, ou seja, configurar o compilador do TS de forma que ele consiga dar pra você o melhor da inferência de tipos sem deixar que você caia em ciladas.
 
@@ -238,7 +238,7 @@ Tenha em mente que essa é uma opção bastante severa, especialmente se você e
 -   `noFallthroughCasesInSwitch`: Força o uso de `break` em `switch / case` para evitar que um `case` passe para o próximo
 -   `noUncheckedIndexedAccess`: Qualquer objeto que for acessado pelo índice (exemplo: `obj['indice']`) vai ter seu valor inferido como `<valor> | undefined` porque ele pode ser vazio e precisará ser checado.
 
-# Pra você treinar
+## Pra você treinar
 
 Antes de mandar o próximo desafio, vamos corrigir o desafio anterior! Onde tínhamos que tipar [esse arquivo](https://gist.github.com/khaosdoctor/9e9a30d5053974f7221be7e06ec19ffc). Você pode encontrar a resposta [aqui](https://gist.github.com/khaosdoctor/c38e01c1da0aaee69ce1c7bb5ed66b47)!
 
