@@ -4,7 +4,6 @@ import { getCollection, render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Bookmark from '../../components/Bookmark.astro'
-import CourseCTA from '../../components/CourseCTA.astro'
 import Epigraph from '../../components/Epigraph.astro'
 import Figure from '../../components/Figure.astro'
 import HoverPreviews from '../../components/HoverPreviews.astro'
@@ -12,17 +11,18 @@ import LangBanner from '../../components/LangBanner.astro'
 import MarginNote from '../../components/MarginNote.astro'
 import RawEmbed from '../../components/RawEmbed.astro'
 import Sidenote from '../../components/Sidenote.astro'
+import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
 import { formatDate } from '../../lib/posts'
 
 const mdxComponents = {
   Bookmark,
-  CourseCTA,
   Epigraph,
   Figure,
   MarginNote,
   RawEmbed,
   Sidenote,
+  Tweet,
   Video,
   Vimeo,
   YouTube,

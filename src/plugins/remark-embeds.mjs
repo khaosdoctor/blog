@@ -68,6 +68,41 @@ function attribute(name, value) {
   return { type: 'mdxJsxAttribute', name, value }
 }
 
+function statusUrl(href) {
+  try {
+    const url = new URL(href)
+    if (!/(^|\.)(twitter\.com|x\.com)$/.test(url.hostname)) return null
+    return /\/status(es)?\/\d+/.test(url.pathname) ? href : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * The migration rendered every Ghost tweet card as a blockquote whose last line
+ * is the attribution link. That blockquote becomes the <Tweet> fallback, and its
+ * status URL is what widgets.js needs to find the live tweet — so the quote is
+ * kept and the attribution paragraph is dropped, since the component renders its
+ * own link.
+ */
+function tweetQuote(node) {
+  if (node.type !== 'blockquote' || node.children.length === 0) return null
+  const last = node.children[node.children.length - 1]
+  if (last.type !== 'paragraph') return null
+
+  let href = null
+  const walkLinks = (parent) => {
+    for (const child of parent.children ?? []) {
+      if (child.type === 'link') href = statusUrl(child.url) ?? href
+      walkLinks(child)
+    }
+  }
+  walkLinks(last)
+  if (href === null) return null
+
+  return { href, children: node.children.slice(0, -1) }
+}
+
 function component(name, attributes) {
   return { type: 'mdxJsxFlowElement', name, attributes, children: [] }
 }
@@ -86,6 +121,10 @@ function embedFor(href) {
   const vimeo = vimeoId(url)
   if (vimeo !== null) return component('Vimeo', [attribute('id', vimeo)])
 
+  // A bare status URL in a new post: no cached text to fall back to, so the
+  // widget either expands it or the reader gets the link.
+  if (statusUrl(href) !== null) return component('Tweet', [attribute('url', href)])
+
   const meta = bookmarkMetadata()[href] ?? bookmarkMetadata()[href.replace(/\/$/, '')]
   if (meta === undefined) return null
 
@@ -101,6 +140,17 @@ export function remarkEmbeds() {
     const walk = (parent) => {
       if (!Array.isArray(parent.children)) return
       for (let index = 0; index < parent.children.length; index += 1) {
+        const quoted = tweetQuote(parent.children[index])
+        if (quoted !== null) {
+          parent.children[index] = {
+            type: 'mdxJsxFlowElement',
+            name: 'Tweet',
+            attributes: [attribute('url', quoted.href)],
+            children: quoted.children,
+          }
+          continue
+        }
+
         const href = bareLink(parent.children[index])
         if (href === null) {
           walk(parent.children[index])
