@@ -1,37 +1,6 @@
 {
   "choices": [
     {
-      "id": "6ce968ed-bc39-46da-b4e2-dd0176e1d90c",
-      "name": "New post",
-      "type": "Template",
-      "command": true,
-      "templatePath": "internal/templates/new-post.md",
-      "fileNameFormat": {
-        "enabled": true,
-        "format": "untitled-{{DATE:YYYYMMDDHHmmss}}"
-      },
-      "discoverExistingNotesBeforeCreate": false,
-      "folder": {
-        "enabled": true,
-        "folders": ["blog"],
-        "chooseWhenCreatingNote": false,
-        "createInSameFolderAsActiveFile": false,
-        "chooseFromSubfolders": false
-      },
-      "appendLink": false,
-      "copyLinkToClipboard": false,
-      "openFile": true,
-      "fileOpening": {
-        "location": "tab",
-        "direction": "vertical",
-        "mode": "default",
-        "focus": true
-      },
-      "fileExistsBehavior": {
-        "kind": "prompt"
-      }
-    },
-    {
       "id": "2f5b604a-921c-4474-90d6-9a44e8a29ca8",
       "name": "Post idea",
       "type": "Capture",
