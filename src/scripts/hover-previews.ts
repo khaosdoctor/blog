@@ -6,6 +6,15 @@
 interface Meta {
   title: string
   description: string
+  /** Shown for links to other sites, so it is obvious you are leaving. */
+  host?: string
+}
+
+/** What a pinned card needs to come back on the next page. */
+interface StoredCard {
+  href: string
+  left: number
+  top: number
 }
 
 interface PopoverHTMLElement extends HTMLElement {
@@ -21,9 +30,21 @@ const CLOSE_DELAY = 150
 const LONG_PRESS_DELAY = 500
 const DRAG_THRESHOLD = 6
 
+const STORAGE_KEY = 'hp-pinned'
+
 const cache = new Map<string, Meta | null>()
 const inflight = new Map<string, AbortController>()
 const pinned: PopoverHTMLElement[] = []
+
+/** Bookmark metadata for external links, loaded once and shared by every card. */
+let externalMeta: Promise<Record<string, { title?: string; description?: string; publisher?: string }>> | null = null
+
+function loadExternalMeta(): NonNullable<typeof externalMeta> {
+  externalMeta ??= fetch('/link-metadata.json')
+    .then((res) => (res.ok ? res.json() : {}))
+    .catch(() => ({}))
+  return externalMeta
+}
 
 const canPopover = 'popover' in HTMLElement.prototype
 
@@ -38,8 +59,17 @@ function samePath(a: URL, b: URL): boolean {
 
 function previewable(link: HTMLAnchorElement): boolean {
   if (!link.href || link.closest('.hp-card')) return false
-  const url = new URL(link.href)
-  if (url.origin !== location.origin) return false
+  let url: URL
+  try {
+    url = new URL(link.href)
+  } catch {
+    return false
+  }
+  // mailto:, tel: and friends have nothing to preview.
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
+  // Every other site gets a card too, built from cached metadata or, failing
+  // that, the link's own text and hostname.
+  if (url.origin !== location.origin) return true
   return !samePath(url, new URL(location.href))
 }
 
@@ -52,9 +82,31 @@ function remember(href: string, meta: Meta | null): Meta | null {
   return meta
 }
 
-async function getMeta(href: string): Promise<Meta | null> {
+/**
+ * A card for a link to another site. The page itself cannot be read — CORS
+ * stops that, and no proxy is worth putting a third party between the reader
+ * and every link — so this uses the metadata Ghost cached for its bookmark
+ * cards, and falls back to the link's own text plus the hostname.
+ */
+async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
+  const url = new URL(href)
+  const host = url.hostname.replace(/^www\./, '')
+  const known = (await loadExternalMeta())[href] ?? (await loadExternalMeta())[href.replace(/\/$/, '')]
+
+  return {
+    title: known?.title?.trim() || linkText.trim() || host,
+    description: known?.description?.trim() || '',
+    host: known?.publisher?.trim() || host,
+  }
+}
+
+async function getMeta(href: string, linkText: string): Promise<Meta | null> {
   const cached = cache.get(href)
   if (cached !== undefined) return cached
+
+  if (new URL(href).origin !== location.origin) {
+    return remember(href, await getExternalMeta(href, linkText))
+  }
 
   inflight.get(href)?.abort()
   const controller = new AbortController()
@@ -106,11 +158,36 @@ function place(card: HTMLElement, anchor: HTMLElement): void {
   card.style.left = `${left}px`
 }
 
+/**
+ * Pinned cards are the reader's own working set: links they deliberately kept
+ * open while reading. Navigating to another post used to throw all of it away,
+ * so the set is mirrored into sessionStorage and restored on the next page.
+ *
+ * sessionStorage rather than localStorage: this is one reading session's
+ * scratch space, and it should not still be there next week.
+ */
+function savePinned(): void {
+  try {
+    const state: StoredCard[] = pinned.map((card) => ({
+      href: (card.querySelector('.hp-title') as HTMLAnchorElement).href,
+      left: parseFloat(card.style.left) || 0,
+      top: parseFloat(card.style.top) || 0,
+    }))
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    // Private mode, storage full, storage disabled: previews still work, they
+    // just do not survive navigation.
+  }
+}
+
 function closeCard(card: PopoverHTMLElement): void {
   card.hidePopover?.()
   card.remove()
   const idx = pinned.indexOf(card)
-  if (idx >= 0) pinned.splice(idx, 1)
+  if (idx >= 0) {
+    pinned.splice(idx, 1)
+    savePinned()
+  }
   if (current?.card === card) current = null
   card.hpLink?.setAttribute('aria-expanded', 'false')
   card.hpLink?.removeAttribute('aria-controls')
@@ -122,6 +199,7 @@ function pinCard(card: PopoverHTMLElement): void {
   if (pinned.length >= CARD_MAX && oldest) closeCard(oldest)
   pinned.push(card)
   card.classList.add('hp-pinned')
+  savePinned()
 }
 
 function scheduleClose(): void {
@@ -162,6 +240,8 @@ function startDrag(event: PointerEvent, card: PopoverHTMLElement): void {
     removeEventListener('pointermove', move)
     removeEventListener('pointerup', up)
     removeEventListener('pointercancel', up)
+    // Remember where the reader put it, not just that it was open.
+    if (dragging) savePinned()
   }
 
   addEventListener('pointermove', move)
@@ -196,7 +276,10 @@ function buildCard(href: string): PopoverHTMLElement {
   const desc = document.createElement('p')
   desc.className = 'hp-desc'
 
-  card.append(close, title, desc)
+  const host = document.createElement('span')
+  host.className = 'hp-host'
+
+  card.append(close, title, desc, host)
   card.addEventListener('pointerdown', (event) => startDrag(event, card))
   card.addEventListener('pointerenter', () => clearTimeout(closeTimer))
   card.addEventListener('pointerleave', scheduleClose)
@@ -229,12 +312,47 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
   card.style.visibility = ''
   requestAnimationFrame(() => card.classList.add('hp-open'))
 
-  const meta = await getMeta(href)
+  const meta = await getMeta(href, link.textContent ?? '')
   if (current?.card !== card && !pinned.includes(card)) return
 
   title.textContent = meta?.title ?? link.textContent ?? href
   desc.textContent = meta?.description ?? ''
+  const host = card.querySelector('.hp-host') as HTMLSpanElement
+  host.textContent = meta?.host ?? ''
   place(card, link)
+}
+
+/**
+ * Rebuilds the cards that were pinned on the previous page, at the coordinates
+ * they were left at. They are not anchored to a link here — the link they came
+ * from usually does not exist on this page — so place() is skipped and the
+ * stored position is used as-is.
+ */
+async function restorePinned(): Promise<void> {
+  let stored: StoredCard[]
+  try {
+    stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? '[]') as StoredCard[]
+  } catch {
+    return
+  }
+  if (!Array.isArray(stored) || stored.length === 0) return
+
+  for (const entry of stored.slice(0, CARD_MAX)) {
+    if (typeof entry?.href !== 'string') continue
+    const card = buildCard(entry.href)
+    card.style.left = `${entry.left}px`
+    card.style.top = `${entry.top}px`
+    pinned.push(card)
+    card.classList.add('hp-pinned')
+    card.showPopover?.()
+    requestAnimationFrame(() => card.classList.add('hp-open'))
+
+    const meta = await getMeta(entry.href, '')
+    ;(card.querySelector('.hp-title') as HTMLAnchorElement).textContent = meta?.title ?? entry.href
+    ;(card.querySelector('.hp-desc') as HTMLParagraphElement).textContent = meta?.description ?? ''
+    ;(card.querySelector('.hp-host') as HTMLSpanElement).textContent = meta?.host ?? ''
+  }
+  savePinned()
 }
 
 function attach(link: HTMLAnchorElement): void {
@@ -292,6 +410,8 @@ function init(): void {
 
   const links = document.querySelectorAll<HTMLAnchorElement>('article a[href]')
   for (const link of links) attach(link)
+
+  void restorePinned()
 }
 
 if (document.readyState === 'loading') {

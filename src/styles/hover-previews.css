@@ -78,6 +78,20 @@
   color: var(--muted);
 }
 
+/* Only set for links to other sites, so its presence is the signal that
+   following this one leaves the blog. */
+.hp-host {
+  display: block;
+  margin-block-start: 0.5rem;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.7rem;
+}
+
+.hp-host:empty {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hp-card {
     transition: none;
