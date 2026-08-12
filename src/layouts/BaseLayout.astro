@@ -4,9 +4,9 @@
 import 'katex/dist/katex.min.css'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
-// Baked in at build time. release-please bumps this from conventional commits,
-// so the footer always names the release the deployed site was built from.
-import { version } from '../../package.json'
+// Baked in at build time: the semver the release workflow last tagged, plus a
+// count of posts published since. See src/lib/version.ts.
+import { commitShort, commitUrl, siteVersion as version } from '../lib/version'
 
 interface Props {
   title: string
@@ -83,7 +83,9 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     </main>
     <footer>
       <p>Lucas Santos</p>
-      <p class="version">Version: {version}</p>
+      <p class="version">
+        <a href={commitUrl} rel="noopener">Version: {version}</a>
+      </p>
     </footer>
     {
       analyticsToken && (
@@ -94,16 +96,18 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
         />
       )
     }
-    <script is:inline define:vars={{ version }}>
+    <script is:inline define:vars={{ commitShort }}>
       // Registers the offline cache. Everything above works without it; this
       // only makes already-read posts available with no connection.
       //
-      // The version in the URL is what triggers an update: browsers install a
+      // The commit in the URL is what triggers an update: browsers install a
       // new worker only when the script URL or its bytes change, and sw.js
-      // reads it back to name its caches per release.
+      // reads it back to name its caches. Keyed on the commit rather than the
+      // release, so every deploy retires the previous deploy's caches instead
+      // of only those from before the last version bump.
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=' + version).catch(() => {
+          navigator.serviceWorker.register('/sw.js?v=' + commitShort).catch(() => {
             // A failed registration must never break the page.
           })
         })
