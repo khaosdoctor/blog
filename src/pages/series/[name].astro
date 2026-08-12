@@ -2,13 +2,13 @@
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../lib/posts'
-import { getSeries, slugify } from '../../lib/taxonomy'
+import { getSeries, seriesTitle } from '../../lib/taxonomy'
 
 export const getStaticPaths = (async () => {
   const series = await getSeries()
   return [...series.entries()]
     .filter(([, posts]) => posts.length > 1)
-    .map(([name, posts]) => ({ params: { name: slugify(name) }, props: { name, posts } }))
+    .map(([slug, posts]) => ({ params: { name: slug }, props: { name: seriesTitle(slug, posts), posts } }))
 }) satisfies GetStaticPaths
 
 const { name, posts } = Astro.props

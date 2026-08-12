@@ -13,6 +13,9 @@ type UIKey =
   | 'noResults'
   | 'series'
   | 'partOfSeries'
+  | 'seriesContents'
+  | 'youAreHere'
+  | 'notWrittenYet'
   | 'allPosts'
   | 'categories'
   | 'tags'
@@ -32,6 +35,9 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     noResults: 'Nenhum resultado encontrado',
     series: 'Série',
     partOfSeries: 'Parte %d de %d',
+    seriesContents: 'Esta série tem %d partes:',
+    youAreHere: 'você está aqui',
+    notWrittenYet: 'ainda não escrito',
     allPosts: 'Todos os posts',
     categories: 'Categorias',
     tags: 'Tags',
@@ -50,6 +56,9 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     noResults: 'No results found',
     series: 'Series',
     partOfSeries: 'Part %d of %d',
+    seriesContents: 'This series has %d parts:',
+    youAreHere: 'you are here',
+    notWrittenYet: 'not written yet',
     allPosts: 'All posts',
     categories: 'Categories',
     tags: 'Tags',
