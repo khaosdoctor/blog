@@ -58,6 +58,7 @@ const source = `/${post.data.translationOf}/`
   updatedAt={post.data.updatedDate}
   tags={post.data.tags}
   series={post.data.series}
+  section={{ name: post.data.category, url: `/${post.data.category}/` }}
   alternates={[
     { lang: 'pt-BR', href: new URL(source, Astro.site).href },
     { lang: 'en', href: new URL(Astro.url.pathname, Astro.site).href },

@@ -73,7 +73,7 @@ for (const page of pages) {
 }
 
 // 4. The feeds, the sitemap and the scheduler manifest all exist and parse.
-for (const required of ['rss.xml', 'sitemap-index.xml', 'scheduled.json', '404.html']) {
+for (const required of ['rss.xml', 'sitemap-index.xml', 'scheduled.json', '404.html', 'robots.txt']) {
   if (!files.includes(join(DIST, required))) {
     failures.push({ check: 'missing artifact', detail: required })
   }
@@ -90,6 +90,21 @@ if (files.includes(manifestPath)) {
   }
 }
 
+// 4b. The manifest promised three icons that did not exist, so installing the
+// app failed on a missing file. Every icon it names must be in the output.
+const manifestFile = join(DIST, 'manifest.webmanifest')
+if (files.includes(manifestFile)) {
+  try {
+    const manifest = JSON.parse(readFileSync(manifestFile, 'utf8')) as { icons?: { src: string }[] }
+    for (const icon of manifest.icons ?? []) {
+      const path = join(DIST, icon.src.replace(/^\//, ''))
+      if (!files.includes(path)) failures.push({ check: 'missing manifest icon', detail: icon.src })
+    }
+  } catch (error) {
+    failures.push({ check: 'manifest.webmanifest', detail: `unparseable: ${(error as Error).message}` })
+  }
+}
+
 // 5. Every colocated image the posts reference actually made it into the build.
 const missingImages = new Set<string>()
 for (const page of pages) {
@@ -103,7 +118,7 @@ for (const image of missingImages) failures.push({ check: 'missing built image',
 
 // 6. Pagefind ran. Not fatal on its own, but the search page is dead without it.
 if (!files.some((file) => file.startsWith(join(DIST, 'pagefind')))) {
-  warnings.push('no pagefind index in dist/ — search will fall back to the plain form')
+  warnings.push('no pagefind index in dist/, search will fall back to the plain form')
 }
 
 // 7. Nothing enormous slipped into the output.

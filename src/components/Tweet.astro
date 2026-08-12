@@ -4,12 +4,12 @@
  *
  * The markup is exactly what Twitter's widget script looks for: a
  * `blockquote.twitter-tweet` whose last anchor points at the status URL. On
- * load, widgets.js replaces it with the live embed. Until then — and forever,
+ * load, widgets.js replaces it with the live embed. Until then, and forever,
  * if the script is blocked, the tweet is deleted, or X breaks embeds for
- * logged-out readers again — the reader sees the tweet text Ghost cached when
+ * logged-out readers again, the reader sees the tweet text Ghost cached when
  * the card was created, which is what <slot /> holds.
  *
- * ponytail: no build-time fetch. astro-embed's Tweet component calls Twitter's
+ * No build-time fetch. astro-embed's Tweet component calls Twitter's
  * oEmbed for every tweet at build, which makes the build non-deterministic,
  * network-dependent, and prone to failing on someone else's outage. The text is
  * already in the repo, so it renders from there.
@@ -42,7 +42,7 @@ const { url } = Astro.props
 
 <style>
   /* Styles the fallback only: once widgets.js runs it replaces this element
-     entirely with an iframe of its own. */
+     completely with an iframe of its own. */
   .twitter-tweet {
     margin-block: 2rem;
     margin-inline: 0;

@@ -87,6 +87,7 @@ const alternates = [
   tags={post.data.tags}
   series={post.data.series}
   alternates={alternates}
+  section={{ name: post.data.category, url: `/${post.data.category}/` }}
 >
   <article>
     <h1>{post.data.title}</h1>

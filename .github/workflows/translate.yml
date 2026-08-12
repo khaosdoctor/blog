@@ -1,7 +1,7 @@
 name: Translate
 
 # Translates posts that changed into English and opens a PR with the result.
-# Model output is untrusted, so it lands on a branch for review/merge rather
+# Model output is untrusted, so it goes to a branch for review/merge rather
 # than going straight to main.
 #
 # Needs the ANTHROPIC_API_KEY repo secret. Without it the job exits cleanly

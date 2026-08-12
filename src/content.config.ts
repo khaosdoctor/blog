@@ -1,7 +1,7 @@
 import { glob } from 'astro/loaders'
 import { defineCollection, z } from 'astro:content'
 
-// The folder Obsidian opens directly. Generated translations will land in a
+// The folder Obsidian opens directly. Generated translations go in a
 // separate build-managed folder later, kept out of the writing view.
 //
 // One post is one folder: content/blog/<slug>/index.md(x) plus its images, so a
@@ -17,7 +17,7 @@ const blog = defineCollection({
     updatedDate: z.coerce.date().optional(),
     // The language this article was WRITTEN in; the other one is generated.
     lang: z.enum(['pt', 'en']).default('pt'),
-    // THE SECTION — exactly one per post. Tags stay separate and many.
+    // THE SECTION, exactly one per post. Tags stay separate and many.
     category: z.string(),
     tags: z.array(z.string()).default([]),
     series: z.string().optional(),

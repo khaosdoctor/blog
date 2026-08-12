@@ -7,9 +7,9 @@ interface Props {
 
 const { html, title, caption } = Astro.props
 
-// ponytail: `html` is trusted, developer-reviewed migration content pulled from the
+// `html` is trusted, developer-reviewed migration content pulled from the
 // author's own Ghost export (build-time only, never live user input). We still refuse
-// the two cheapest attack surfaces rather than fully sanitizing: some legitimate
+// the two simplest attack surfaces rather than fully sanitizing: some legitimate
 // widgets from the migration (Twitter/Instagram) genuinely need their own <script>,
 // which is exactly what this component exists to pass through, so a full sanitizer
 // would break the use case it's built for. Fail the build loudly instead of shipping

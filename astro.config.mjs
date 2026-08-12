@@ -8,6 +8,7 @@ import rehypeCallouts from 'rehype-callouts'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import { redirectStubs } from './src/integrations/redirect-stubs.mjs'
+import { lastModified } from './src/lib/post-dates.mjs'
 import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
 import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
@@ -30,7 +31,17 @@ export default defineConfig({
     }),
     mdx(),
     // The search page and the offline fallback are chrome, not content.
-    sitemap({ filter: (page) => !page.includes('/busca/') && !page.includes('/offline/') }),
+    //
+    // lastmod is not emitted by default, so every URL looked equally fresh and a
+    // 2019 post competed for crawl budget with one published today. serialize
+    // fills it in from the post dates collected during the build.
+    sitemap({
+      filter: (page) => !page.includes('/search/') && !page.includes('/offline/'),
+      serialize: (item) => {
+        const modified = lastModified.get(new URL(item.url).pathname)
+        return modified === undefined ? item : { ...item, lastmod: modified }
+      },
+    }),
     // Runs after everything else: it inspects the finished output and only
     // writes a stub where no real page claimed the path.
     redirectStubs(),

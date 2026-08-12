@@ -12,7 +12,7 @@
  *
  * Bookmark metadata comes from content/bookmarks.json, captured out of Ghost's
  * own cached card data during migration. A URL that is not in there stays a
- * plain link rather than triggering a build-time fetch — the build makes no
+ * plain link rather than triggering a build-time fetch, the build makes no
  * network requests at all, which is what keeps it deterministic and offline.
  */
 import { readFileSync } from 'node:fs'
@@ -94,7 +94,7 @@ function statusUrl(href) {
 /**
  * The migration rendered every Ghost tweet card as a blockquote whose last line
  * is the attribution link. That blockquote becomes the <Tweet> fallback, and its
- * status URL is what widgets.js needs to find the live tweet — so the quote is
+ * status URL is what widgets.js needs to find the live tweet, so the quote is
  * kept and the attribution paragraph is dropped, since the component renders its
  * own link.
  */

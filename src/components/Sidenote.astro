@@ -3,22 +3,21 @@
  * <Sidenote>inline text</Sidenote>
  *
  * A numbered note anchored to the exact word it follows. Called from
- * migrated MDX content without an import — it is injected globally via the
+ * migrated MDX content without an import, it is injected globally via the
  * `components` prop, so its public shape (tag name, slot content) must not
  * change.
  *
- * - Numbering is a CSS counter on <body> (see src/styles/sidenotes.css) —
- *   no client JS, works even if this is the only Sidenote on the page.
+ * - Numbering is a CSS counter on <body> (see src/styles/sidenotes.css), *   no client JS, works even if this is the only Sidenote on the page.
  * - On wide viewports the note text floats into the right margin, always
  *   visible. On narrow viewports it collapses to a tap/click-to-reveal
  *   popover, toggled by a checkbox (zero JS either way).
  * - Slot content MUST be inline only: text, <strong>, <em>, <a>, <code>.
- *   Never headings or block elements — this renders inside a <span>, and a
+ *   Never headings or block elements, this renders inside a <span>, and a
  *   popover card is not a place for a blockquote.
  */
 import '../styles/sidenotes.css'
 
-// ponytail: crypto.randomUUID() runs at build time (this is a static site),
+// Crypto.randomUUID() runs at build time (this is a static site),
 // so each instance gets a stable id for its checkbox/label pair and for the
 // CSS anchor-positioning enhancement, with no client script involved.
 const id = `sn-${crypto.randomUUID()}`

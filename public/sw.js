@@ -1,7 +1,7 @@
 /**
  * Offline reading.
  *
- * ponytail: hand-written instead of @vite-pwa/astro, which caps its peer range
+ * Hand-written instead of @vite-pwa/astro, which caps its peer range
  * at Astro 5 and refuses to install on Astro 7. This is the whole feature: HTML
  * is network-first so a reader always gets the current version of a post when
  * online and a cached one when not, hashed assets are cache-first because their

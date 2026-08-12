@@ -3,7 +3,7 @@
  * <MarginNote>inline text</MarginNote>
  *
  * Same mechanics as <Sidenote> (src/components/Sidenote.astro) but
- * unnumbered: no counter mark sits in the text flow, the note just sits in
+ * unnumbered: no counter mark appears in the text flow, the note just rests in
  * the margin. Called from migrated MDX content without an import.
  *
  * - On wide viewports the note text floats into the right margin, unmarked,
@@ -15,7 +15,7 @@
  */
 import '../styles/sidenotes.css'
 
-// ponytail: build-time id (this is a static site) — same reasoning as
+// Build-time id (this is a static site), same reasoning as
 // Sidenote.astro.
 const id = `mn-${crypto.randomUUID()}`
 ---

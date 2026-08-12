@@ -8,6 +8,27 @@ export const AUTHOR_GITHUB = 'https://github.com/khaosdoctor'
 export const AUTHOR_TWITTER_HANDLE = '@khaosdoctor'
 export const DEFAULT_LOCALE = 'pt'
 
+/**
+ * Profiles that are unambiguously the same person, for schema.org `sameAs`.
+ * This is how a search engine ties the byline on 169 posts to one entity rather
+ * than to a name that happens to recur.
+ */
+export const AUTHOR_PROFILES = [
+  AUTHOR_GITHUB,
+  'https://x.com/khaosdoctor',
+  'https://www.linkedin.com/in/khaosdoctor/',
+]
+
+export function buildPersonJsonLd(url: string): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: AUTHOR_NAME,
+    url,
+    sameAs: AUTHOR_PROFILES,
+  }
+}
+
 // og:locale wants underscore-joined locale tags (pt_BR), not BCP-47 (pt-BR).
 // Extend this map if more languages show up; unknown langs pass through as-is.
 const OG_LOCALES: Record<string, string> = {
@@ -52,7 +73,7 @@ export function buildArticleJsonLd(input: JsonLdInput): Record<string, unknown> 
     ...(publishedAt ? { datePublished: publishedAt.toISOString() } : {}),
     ...(updatedAt ? { dateModified: updatedAt.toISOString() } : {}),
     ...(tags && tags.length > 0 ? { keywords: tags.join(', ') } : {}),
-    // ponytail: series only gets a name here, no @id — this component has no
+    // Series only gets a name here, no @id, this component has no
     // series URL to point at. Wire a real series page in when one exists.
     ...(series ? { isPartOf: { '@type': 'CreativeWorkSeries', name: series } } : {}),
     author: { '@type': 'Person', name: AUTHOR_NAME, url: AUTHOR_GITHUB },

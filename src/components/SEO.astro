@@ -3,6 +3,7 @@ import {
   AUTHOR_NAME,
   AUTHOR_TWITTER_HANDLE,
   buildBreadcrumbJsonLd,
+  buildPersonJsonLd,
   buildPrimaryJsonLd,
   DEFAULT_LOCALE,
   SITE_NAME,
@@ -30,6 +31,8 @@ interface Props {
   series?: string
   noindex?: boolean
   alternates?: Alternate[]
+  /** The section this page belongs to, so the breadcrumb has a middle step. */
+  section?: { name: string; url: string }
 }
 
 const {
@@ -45,6 +48,7 @@ const {
   series,
   noindex = false,
   alternates = [],
+  section,
 } = Astro.props
 
 const absoluteImage = image ? new URL(image, canonical).href : undefined
@@ -65,14 +69,16 @@ const jsonLd = buildPrimaryJsonLd(type, {
 // so the domain has exactly one source of truth.
 const homeUrl = Astro.site ? new URL('/', Astro.site).href : '/'
 
-// ponytail: breadcrumb is just Home -> current page. A category/series crumb
-// would need a URL for that intermediate page, which this component isn't
-// given — add it once section index pages exist.
+// Home -> section -> post. The middle step is what produces the breadcrumb line
+// under a result in Google instead of a bare URL, and it only appears on pages
+// that are actually in a section.
 const breadcrumbItems: BreadcrumbItem[] = [
   { name: SITE_NAME, url: homeUrl },
+  ...(section ? [{ name: section.name, url: new URL(section.url, canonical).href }] : []),
   { name: title, url: canonical },
 ]
 const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems)
+const personJsonLd = buildPersonJsonLd(homeUrl)
 
 const xDefault = alternates.find((alt) => alt.lang === DEFAULT_LOCALE) ?? alternates[0]
 const robots = noindex ? 'noindex,nofollow' : 'index,follow'
@@ -114,3 +120,4 @@ const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 
 <script type="application/ld+json" set:html={toJsonLdScript(jsonLd)} />
 <script type="application/ld+json" set:html={toJsonLdScript(breadcrumbJsonLd)} />
+<script type="application/ld+json" set:html={toJsonLdScript(personJsonLd)} />
