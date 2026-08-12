@@ -30,6 +30,20 @@ function vimeoId(url) {
   return id !== undefined && /^\d+$/.test(id) ? id : null
 }
 
+/** Both the deck page and the player URL Ghost used carry the id. */
+function speakerDeckId(url) {
+  if (!/^(www\.)?speakerdeck\.com$/.test(url.hostname)) return null
+  const id = url.pathname.match(/\/player\/(\w+)/)?.[1]
+  return id ?? null
+}
+
+/** Episode, track, album or playlist: the embed URL only differs by that word. */
+function spotifyEmbed(url) {
+  if (url.hostname !== 'open.spotify.com') return null
+  const match = url.pathname.match(/^\/(?:embed\/)?(episode|track|album|playlist|show)\/(\w+)/)
+  return match === null ? null : { kind: match[1], id: match[2] }
+}
+
 /** The one meaningful child of a paragraph, or null if there is more than one. */
 function soleChild(node) {
   if (node.type !== 'paragraph') return null
@@ -124,6 +138,14 @@ function embedFor(href) {
   // A bare status URL in a new post: no cached text to fall back to, so the
   // widget either expands it or the reader gets the link.
   if (statusUrl(href) !== null) return component('Tweet', [attribute('url', href)])
+
+  const deck = speakerDeckId(url)
+  if (deck !== null) return component('SpeakerDeck', [attribute('id', deck)])
+
+  const spotify = spotifyEmbed(url)
+  if (spotify !== null) {
+    return component('Spotify', [attribute('kind', spotify.kind), attribute('id', spotify.id)])
+  }
 
   const meta = bookmarkMetadata()[href] ?? bookmarkMetadata()[href.replace(/\/$/, '')]
   if (meta === undefined) return null

@@ -39,7 +39,7 @@ Atualmente este é o estado do ambiente:
 -   **Node v16:** Atualmente é a versão LTS até Outubro de 2022, depois entra em manutenção até Abril de 2024, quando será abandonado.
 -   **Node v18:** É a versão _Current_ até Outubro de 2022 quando se torna a próxima LTS até Abril de 2025.
 
-# Global Fetch disponível por padrão
+## Global Fetch disponível por padrão
 
 Na versão 17 do Node, foi anunciado que a API `fetch`, já presente na maioria dos browsers para JavaScript, chegaria também ao Node. De forma que a gente não iria mais precisar de pacotes externos como o famoso `axios` e `got` para poder fazer requisições HTTP de uma forma mais fácil, sem precisar o client HTTP nativo do Node – que é, digamos... Um pouco complexo.
 
@@ -67,7 +67,7 @@ Além do `fetch`, outras variáveis globais foram adicionadas: `Headers`, `Reque
 -   Um novo tipo de `Buffer` experimental, o [`Blob`](https://nodejs.org/api/buffer.html#class-blob), foi também colocado nas APIs globais
 -   Para uma adição nas `worker_threads`, o [`BroadcastChannel`](https://nodejs.org/api/worker_threads.html#class-broadcastchannel-extends-eventtarget) agora também é uma API global exposta
 
-# Test runner nativo
+## Test runner nativo
 
 Uma das APIs mais legais que eu, pessoalmente, estava esperando há anos, é o suporte a rodar testes nativamente. Isso mesmo, sem mais `mocha`, `jest`, `ava` e outros.
 
@@ -113,7 +113,7 @@ Atualmente o objeto de opções aceita três tipos de chaves:
 
 O test runner ainda está em caráter experimental e rodando atrás de flags, mas isso deve ser alterado nas próximas versões.
 
-# O prefixo `node:`
+## O prefixo `node:`
 
 Vamos fazer um contorno para explicar uma funcionalidade que não é necessariamente algo que veio com o Node 18 propriamente dito, porém foi uma alteração importante que cria um precedente que pode ser seguido no futuro para todos os demais módulos.
 
@@ -131,7 +131,7 @@ Por outro lado, isso cria dois problemas, o primeiro deles é que temos ai uma i
 
 Além disso, um problema de segurança acaba surgindo: o **typosquatting**, quando alguém cria um módulo no NPM com o mesmo nome ou um nome muito parecido com um pacote original – algo como chamar `express` de `expres` no NPM – para que devs desavisados possam baixar o pacote malicioso ao invés do pacote original. Esses problemas não são do time do Node, até porque o NPM já possui algumas travas de segurança contra isso, mas de qualquer forma, é algo que vale a pena ser mencionado.
 
-# Userland snapshots
+## Userland snapshots
 
 Algo super interessante que surgiu na versão 18 é o uso de snapshots para build time do runtime do Node. Isso é algo bastante interessante para quem tem muitos times de desenvolvimento e precisa sincronizar e até mesmo melhorar a performance em um produto entre times.
 

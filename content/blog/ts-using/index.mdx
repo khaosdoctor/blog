@@ -298,7 +298,7 @@ try {
 
 Então basicamente o erro mais recente vai ser o erro que foi gerado dentro do symbol, enquando o erro suprimido é o erro que foi gerado dentro da função antes do disposal ser chamado.
 
-# DisposableStacks
+## DisposableStacks
 
 Como você pode ter percebido, `Symbol.dispose` e a sua versão assíncrona podem ser ótimas soluções para códigos mais complexos, porque já estamos usando uma classe e podemos implementar a funcionalidade, mas quando temos um código simples como esse pode parecer meio demais ter que fazer toda essa lógica.
 
@@ -346,7 +346,7 @@ export class DisposableStack implements Disposable {
 
 A ideia é que você pode definir uma stack e chamar o método `defer` várias vezes para adicionar uma ou mais funções na stack de reciclagem.
 
-# Conclusão
+## Conclusão
 
 Para usar o using nas versões mais novas do TS você precisa mudar algumas opções no `compilerOptions` do `tsconfig`, essas incluem as opções que vão mudar o alvo da compilação para a versão 2022 e adicionar os polyfills necessários, ficando algo assim:
 

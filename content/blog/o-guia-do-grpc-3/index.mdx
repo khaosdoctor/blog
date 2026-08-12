@@ -19,7 +19,7 @@ No nosso [artigo anterior do guia](/o-guia-do-grpc-2/) vimos como podemos integr
 
 Para este artigo vamos converter a nossa [API gRPC de notas](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample) para utilizar TypeScript. Mas primeiro, vamos entender o que significa "converter para TypeScript" e o que queremos dizer quando fazemos isso usando gRPC, ainda mais quando usamos gRPC com JavaScript.
 
-# O que é converter?
+## O que é converter?
 
 Como já mencionei [na primeira parte deste guia](/guia-grpc-1/), o gRPC, apesar de ser uma tecnologia estabelecida, não tem uma documentação e nem um conjunto de ferramentas muito boa para algumas linguagens, infelizmente uma dessas linguagens é o [JavaScript](https://docs.microsoft.com/javascript/?WT.mc_id=opensource-0000-ludossan)...
 
@@ -33,7 +33,7 @@ Infelizmente o problema que temos volta-se novamente às ferramentas que temos p
 
 As diferenças entre estes pacotes vão além de serem somente um uma variação do outro, ou então terem menos coisas juntas. A realidade é que o pacote `grpc` é mais bem implementado porque está conosco há muito mais tempo, enquanto, por exemplo, o pacote `@grpc/grpc-js` não possui algumas implementações, como a `grpc.Server.bind()`.
 
-# Trabalhando com as diferenças
+## Trabalhando com as diferenças
 
 Já sabemos que estes pacotes possuem diferenças, mas é possível trabalhar com elas? Sim, é totalmente possível mas temos que tomar cuidado com alguns pormenores que não estão muito bem documentados e são, em grande parte, o motivo pelo qual estou montando este guia. Nosso ecossistema de JavaScript para gRPC é extremamente disperso e esparso em diversos níveis, o que torna a implementação na linguagem muito complicada para quem está começando.
 
@@ -65,7 +65,7 @@ Conseguiu perceber o problema que temos aqui? Apesar de muito boa, essa bibliote
 
 Então, apesar de o `protobuf.js` gerar tipos válidos, ele é muito melhor para quando estamos fazendo um client do que quando estamos realizando a criação de um server, já que ele provê muito mais ferramental para mensagens do que para inferência dos tipos internos do servidor. Mas ele também pode ser utilizado como [gerador de tipos em tempo de execução](https://github.com/protobufjs/protobuf.js#using-decorators) com decorators.
 
-# O que queremos
+## O que queremos
 
 Vamos pensar um pouco, temos um arquivo de definição completo que é o seguinte:
 
@@ -172,7 +172,7 @@ Então nossas respostas não seriam mais `ServerUnaryCall` e nem `sendUnaryData`
 
 Vamos aprender mais sobre streaming com gRPC nas próximas partes deste guia.
 
-# Mãos a obra
+## Mãos a obra
 
 Agora que já entendemos os pormenores dos tipos do TS e como eles, na verdade, são apenas índices de um grande objeto, vamos partir para nossa implementação.
 
@@ -333,7 +333,7 @@ var NotesService = exports.NotesService = {
 
 Compare essa variável com o tipo `ServiceDefinition` que temos no `grpc-js`. Eles são os mesmos, ou seja, podemos criar um servidor diretamente a partir desse construtor. Logo abaixo temos uma chamada ao `grpc.makeGenericClientConstructor` que é um método que gera um client genérico de chamadas para o gRPC que podemos usar sem precisar de uma instancia do nosso arquivo `.proto`, vamos falar mais sobre ele nas próximas edições.
 
-# Criando o servidor
+## Criando o servidor
 
 Vamos passar agora para a parte interessante, onde criamos nosso servidor. Crie uma pasta `src` e um arquivo `server.ts` dentro desta pasta.
 
@@ -607,7 +607,7 @@ Muito melhor, não? Note que precisamos utilizar o `.bind(server)` porque o mét
 
 Agora, se rodarmos `npm run start:server` teremos nosso servidor rodando na porta `50052`. Falta criarmos o client, mas perceba que o fluxo de trabalho e entendimento do código ficou muito melhor do que antes.
 
-# Criando o client
+## Criando o client
 
 A criação do client é quase que completamente automática porque temos o nosso `genericClientConstructor` já chamado com o tipo de servidor que precisamos em `NotesService`, crie um novo arquivo em `src` chamado `client.ts` e ele dispensa muitas explicações:
 
@@ -637,7 +637,7 @@ O client já está praticamente instanciado com todos os métodos, mas lembre-se
 
 Rode `npm run client` e veja a mágica acontecer!
 
-# Conclusão
+## Conclusão
 
 Como pudermos ver, temos uma grande facilidade em transformar tudo em TypeScript, porém precisamos primeiro entender o que queremos e entender as limitações das ferramentas, o que pode ser provar um grande problema já que elas acabam não se conversando muito.
 
