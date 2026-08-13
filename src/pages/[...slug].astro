@@ -4,8 +4,8 @@ import { render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Bookmark from '../components/Bookmark.astro'
-import Epigraph from '../components/Epigraph.astro'
 import HoverPreviews from '../components/HoverPreviews.astro'
+import HtmlLab from '../components/HtmlLab.astro'
 import MarginNote from '../components/MarginNote.astro'
 import MissingImage from '../components/MissingImage.astro'
 import RawEmbed from '../components/RawEmbed.astro'
@@ -33,7 +33,7 @@ import { t } from '../i18n/ui'
  */
 const mdxComponents = {
   Bookmark,
-  Epigraph,
+  HtmlLab,
   MarginNote,
   MissingImage,
   RawEmbed,
@@ -125,15 +125,9 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
         </p>
       )
     }
-    {
-      post.data.epigraph && (
-        <blockquote class="epigraph">
-          <p>{post.data.epigraph}</p>
-          {post.data.epigraphCite && <cite>{post.data.epigraphCite}</cite>}
-        </blockquote>
-      )
-    }
-    <Content components={mdxComponents} />
+    <div class="prose">
+      <Content components={mdxComponents} />
+    </div>
     {
       post.data.tags.length > 0 && (
         <ul class="tags">
@@ -173,20 +167,6 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
     color: var(--muted);
     font-family: ui-monospace, SFMono-Regular, monospace;
     font-size: 0.8rem;
-  }
-
-  .epigraph {
-    margin-inline: 0;
-    padding-inline-start: 1.2rem;
-    border-inline-start: 2px solid var(--rule);
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  .epigraph cite {
-    display: block;
-    font-size: 0.85rem;
-    font-style: normal;
   }
 
   .series {

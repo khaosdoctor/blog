@@ -133,26 +133,19 @@ export function remarkWikilinks() {
         // language: an English page linking a post nobody has translated yet shows
         // the Portuguese title, which is what the reader will find on arrival.
         const text = (label ?? post.title).trim()
+        // Wikipedia's convention for a page that does not exist yet: the link is a
+        // different colour and nothing else. The note it used to carry in the text
+        // moves to the title attribute, so a reader who cannot see the colour still
+        // gets told, on hover and through a screen reader, without the sentence
+        // being interrupted by a parenthesis.
+        const lang = locale in NOT_WRITTEN_YET ? locale : 'pt'
         children.push({
           type: 'link',
           url: `${post.url}${anchor(fragment)}`,
+          title: post.draft ? NOT_WRITTEN_YET[lang] : null,
+          data: post.draft ? { hProperties: { className: ['link-unwritten'] } } : undefined,
           children: [{ type: 'text', value: text }],
         })
-
-        // The link still works, it just says so: a draft has no page until it is
-        // published. Marked in the language of the post doing the linking.
-        if (post.draft) {
-          const lang = locale in NOT_WRITTEN_YET ? locale : 'pt'
-          children.push(
-            { type: 'text', value: ' ' },
-            {
-              type: 'mdxJsxTextElement',
-              name: 'span',
-              attributes: [{ type: 'mdxJsxAttribute', name: 'class', value: 'draft-note' }],
-              children: [{ type: 'text', value: `(${NOT_WRITTEN_YET[lang]})` }],
-            },
-          )
-        }
       }
 
       if (cursor < node.value.length) {

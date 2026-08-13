@@ -1,0 +1,66 @@
+/*
+ * A section break, not a full-width line. A short bar centred in the column,
+ * fading out at both ends, with a glow behind it.
+ *
+ * The footnotes section reuses these same tokens for its own separator, so the
+ * two never drift apart. See src/styles/footnotes.css.
+ */
+.prose hr {
+  inline-size: var(--rule-length);
+  block-size: var(--rule-weight);
+  margin-block: 3rem;
+  margin-inline: auto;
+  border: 0;
+  background: linear-gradient(to right, transparent, var(--rule-core), transparent);
+  box-shadow: 0 0 var(--rule-glow-blur) var(--rule-glow);
+}
+
+/*
+ * Lengths to choose from, rendered one under another on the lab page. The winner
+ * becomes --rule-length in theme.css and the rest of this block goes.
+ */
+[data-v='rule-30'] hr {
+  inline-size: 30px;
+}
+
+[data-v='rule-60'] hr {
+  inline-size: 60px;
+}
+
+[data-v='rule-100'] hr {
+  inline-size: 100px;
+}
+
+[data-v='rule-150'] hr {
+  inline-size: 150px;
+}
+
+[data-v='rule-200'] hr {
+  inline-size: 200px;
+}
+
+[data-v='rule-250'] hr {
+  inline-size: 250px;
+}
+
+/* Same length, different weight and glow strength, for the one that wins. */
+[data-v='rule-thin'] hr {
+  block-size: 1px;
+  box-shadow: 0 0 3px var(--rule-glow);
+}
+
+[data-v='rule-thick'] hr {
+  block-size: 4px;
+  box-shadow: 0 0 12px var(--rule-glow);
+}
+
+[data-v='rule-dotted'] hr {
+  block-size: 3px;
+  background: repeating-linear-gradient(
+      to right,
+      var(--rule-core) 0 3px,
+      transparent 3px 7px
+    )
+    center / 100% 100% no-repeat;
+  mask: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+}

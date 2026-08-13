@@ -9,37 +9,92 @@
  * them has no OG tags, and output that changes depending on the network. Ghost
  * already captured this metadata when the card was created, and the migration
  * carries it over, so the build stays offline and deterministic.
+ *
+ * `image` follows the same rule: nothing here ever fetches one. It only shows
+ * up once something upstream (content/bookmarks.json plus a vendor-media.ts
+ * pass that does not exist yet) vendors a local copy and threads it through
+ * remark-embeds as a prop. Until then, every card falls back to a drawn
+ * placeholder rather than an empty gap in the layout.
  */
 interface Props {
   url: string
   title?: string
   description?: string
   publisher?: string
+  image?: string
 }
 
-const { url, title, description, publisher } = Astro.props
+const { url, title, description, publisher, image } = Astro.props
 const host = publisher ?? new URL(url).host.replace(/^www\./, '')
 ---
 
 <a class="bookmark" href={url} rel="noopener noreferrer nofollow">
-  <span class="title">{title ?? url}</span>
-  {description && <span class="description">{description}</span>}
-  <span class="host">{host}</span>
+  <span class="thumb">
+    {
+      image ? (
+        <img src={image} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <svg class="thumb-fallback" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
+          <rect x="2" y="2" width="12" height="10" />
+          <rect x="2" y="12" width="4" height="2" />
+          <rect x="10" y="12" width="4" height="2" />
+          <rect x="2" y="14" width="2" height="2" />
+          <rect x="12" y="14" width="2" height="2" />
+        </svg>
+      )
+    }
+  </span>
+  <span class="body">
+    <span class="title">{title ?? url}</span>
+    {description && <span class="description">{description}</span>}
+    <span class="host">{host}</span>
+  </span>
 </a>
 
 <style>
   .bookmark {
-    display: block;
+    display: flex;
+    container-type: inline-size;
     margin-block: 1.5rem;
-    padding: 0.9rem 1.1rem;
-    border: 1px solid var(--rule);
-    border-radius: 6px;
+    border: var(--border) solid var(--rule);
+    border-inline-start-width: var(--border-card-edge);
+    border-radius: var(--radius);
     color: inherit;
     text-decoration: none;
+    overflow: hidden;
   }
 
   .bookmark:hover {
     border-color: var(--accent);
+  }
+
+  .thumb {
+    display: flex;
+    flex: 0 0 6.5rem;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    border-inline-end: var(--border) solid var(--rule);
+    background: var(--rule);
+  }
+
+  .thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb-fallback {
+    width: 40%;
+    height: 40%;
+    fill: var(--muted);
+  }
+
+  .body {
+    display: block;
+    min-width: 0;
+    padding: 0.9rem 1.1rem;
   }
 
   .title {
@@ -66,5 +121,21 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     color: var(--muted);
     font-family: ui-monospace, SFMono-Regular, monospace;
     font-size: 0.75rem;
+  }
+
+  /* Reacts to the card's own width, not the viewport, so it degrades the
+     same way regardless of what else shares the reading column. */
+  @container (max-width: 420px) {
+    .bookmark {
+      flex-direction: column;
+    }
+
+    .thumb {
+      flex-basis: auto;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-inline-end: 0;
+      border-block-end: var(--border) solid var(--rule);
+    }
   }
 </style>

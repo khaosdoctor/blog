@@ -94,7 +94,10 @@ export function contentSecurityPolicy(): string {
     "img-src 'self' data: https:",
     "font-src 'self'",
     `connect-src 'self' ${https(CONNECT_HOSTS)}`,
-    `frame-src ${https(FRAME_HOSTS)}`,
+    // 'self' is here for the lab pages in public/labs/: a self-contained HTML
+    // demo runs in an iframe of this same origin, which is what keeps its scripts
+    // and styles from touching the post around it.
+    `frame-src 'self' ${https(FRAME_HOSTS)}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

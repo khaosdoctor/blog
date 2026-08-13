@@ -70,7 +70,9 @@ function samePath(a: URL, b: URL): boolean {
 }
 
 function previewable(link: HTMLAnchorElement): boolean {
-  if (!link.href || link.closest('.hp-card')) return false
+  // A bookmark card is already the preview: title, description and host, in a
+  // card. Showing a hover card on top of one shows the same thing twice.
+  if (!link.href || link.closest('.hp-card') || link.closest('.bookmark')) return false
   let url: URL
   try {
     url = new URL(link.href)
@@ -113,11 +115,17 @@ async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
 }
 
 async function getMeta(href: string, linkText: string): Promise<Meta | null> {
-  const cached = cache.get(href)
+  // A cross-site card falls back to the link's own text when nothing is known
+  // about the target, so two links to the same URL with different words are two
+  // different cards. Keyed on the href alone, the second link showed the first
+  // one's text. Same-origin cards come from the fetched page and are shared.
+  const external = new URL(href).origin !== location.origin
+  const key = external ? `${href}\n${linkText}` : href
+  const cached = cache.get(key)
   if (cached !== undefined) return cached
 
-  if (new URL(href).origin !== location.origin) {
-    return remember(href, await getExternalMeta(href, linkText))
+  if (external) {
+    return remember(key, await getExternalMeta(href, linkText))
   }
 
   inflight.get(href)?.abort()

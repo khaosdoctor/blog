@@ -1,0 +1,49 @@
+/*
+ * Where a link goes, shown rather than guessed: an out-of-the-box arrow when it
+ * leaves the site, a hooked arrow when it stays. Inline SVG masks, so the icon
+ * takes the link's own colour, costs no request and needs no JS.
+ */
+.prose {
+  --icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M17 13v6H5V7h6'/%3E%3Cpath d='M14 4h6v6'/%3E%3Cpath d='M20 4l-8 8'/%3E%3C/svg%3E");
+  --icon-internal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 6v5a3 3 0 0 0 3 3h11'/%3E%3Cpath d='M15 10l4 4-4 4'/%3E%3C/svg%3E");
+}
+
+.prose a::after {
+  content: '';
+  display: inline-block;
+  inline-size: 0.7em;
+  block-size: 0.7em;
+  margin-inline-start: 0.22em;
+  background-color: currentColor;
+  mask: var(--icon-internal) center / contain no-repeat;
+}
+
+/* Anything not on this site. The host list is a design question, see docs/design.md. */
+.prose a[href^='http']:not([href*='lsantos.dev'])::after {
+  mask-image: var(--icon-external);
+}
+
+/*
+ * Links that are already marked as what they are, or that are not text: a
+ * footnote reference, the arrow back from a footnote, a heading's own anchor, a
+ * bookmark card, and any link wrapping an image.
+ */
+.prose a:is([data-footnote-ref], [data-footnote-backref], .heading-anchor, .bookmark)::after,
+.prose a:has(img)::after,
+.prose figure a::after {
+  content: none;
+}
+
+/*
+ * A wikilink to a post that is still a draft. Wikipedia's red link, in a red that
+ * survives both themes, with the localised "not written yet" marker beside it
+ * doing the work colour cannot.
+ */
+.prose a.link-unwritten {
+  color: var(--link-unwritten);
+}
+
+.prose .draft-note {
+  color: var(--muted);
+  font-size: 0.8em;
+}

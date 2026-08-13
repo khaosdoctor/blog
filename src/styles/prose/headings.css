@@ -1,0 +1,53 @@
+/* Headings: a rule that fades, a glow on the top two levels, and an anchor link. */
+
+/*
+ * A rule that fades out instead of a border that stops dead, on the top three
+ * levels only. h4 and deeper are rare here and get nothing, on purpose.
+ */
+article :is(h1, h2, h3)::after {
+  content: '';
+  display: block;
+  block-size: 1px;
+  margin-block-start: 0.3em;
+  background: linear-gradient(to right, var(--heading-rule), transparent);
+}
+
+/* h1 only. On an h2 it read as a blur rather than a glow. */
+article h1 {
+  text-shadow: 0 0 var(--heading-glow-blur) var(--heading-glow);
+}
+
+/*
+ * Hovering a heading tints the whole line, not just the # at the end: the target
+ * is the heading, so the heading is what lights up. The negative inline margin
+ * cancels the padding so no text moves when the tint appears.
+ */
+article :is(h1, h2, h3, h4, h5, h6):hover {
+  margin-inline: -0.4em;
+  padding-inline: 0.4em;
+  background: var(--heading-hover-bg);
+}
+
+/*
+ * The anchor link rehype-heading-anchors injects. Hidden until the heading is
+ * hovered, but always visible on keyboard focus, otherwise it is unreachable
+ * without a mouse.
+ */
+.heading-anchor {
+  margin-inline-start: 0.35em;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+}
+
+:is(h1, h2, h3, h4, h5, h6):hover > .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 1;
+}
+
+.heading-anchor:hover {
+  color: var(--accent);
+}

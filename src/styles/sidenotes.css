@@ -8,6 +8,23 @@
  *     <span class="note-text">…inline content…</span>
  *   </span>
  *
+ * Both components additionally carry an id (`sidenote-N` / `marginnote-N`)
+ * on the outer span and a `.note-copy-link` permalink icon inside
+ * `.note-text` itself (top-right corner, revealed on hover/focus, never
+ * sitting in the running text). The text either component refers to is not
+ * wrapped in anything, it is whatever plain prose sits right before the tag,
+ * so the hover/focus highlight for it is a Range painted by
+ * src/components/FootnoteSidenotes.astro (see the `::highlight()` rule
+ * below), not an element this file can select.
+ *
+ * Following a link to a note's own anchor (`#sidenote-3`) only rings its
+ * marker (`:target`, below); it never forces the popover open. It used to,
+ * and there was no way to close it again short of leaving the page, since
+ * `:target` persists until the URL hash changes, so the note was reachable
+ * but permanently stuck open over whatever the page had at that scroll
+ * position. Read as: no CSS state on this page may leave a panel the reader
+ * cannot dismiss.
+ *
  * `.note-text` is real inline content in the paragraph flow, never moved,
  * never duplicated, so it always reads correctly with CSS off (RSS readers,
  * text browsers, view-source). Everything below is progressive decoration on
@@ -33,9 +50,91 @@
    13rem note and a 2rem gap on the right, with slack to spare. The same
    90rem threshold is hardcoded in the two @media blocks below. */
 
+:root {
+  /* The run of text a note is attached to, tinted on hover/focus so a
+     reader can see exactly what it is bound to before opening it. */
+  --note-highlight: light-dark(
+    color-mix(in oklab, var(--accent) 22%, transparent),
+    color-mix(in oklab, var(--accent) 30%, transparent)
+  );
+
+  /* "White border" in this codebase means the foreground colour, so it
+     inverts correctly in both themes; see --fg in theme.css. */
+  --note-border-width: var(--border-card-edge);
+
+  /* The permalink icon inside .note-text (below): a plain chain-link glyph,
+     same technique as src/styles/prose/links.css (an inline SVG as a mask,
+     so it takes currentColor and costs no request). */
+  --note-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'/%3E%3Cpath d='M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'/%3E%3C/svg%3E");
+}
+
 .note {
   position: relative;
   display: inline;
+}
+
+/*
+ * The text a note refers to is not wrapped in anything (it is whatever
+ * plain prose sits right before the tag, see Sidenote.astro/MarginNote.astro),
+ * so there is no element for a plain :hover rule to reach: no markup change
+ * reaches it either, without giving every note a second, author-written
+ * wrapper around a "just the words this refers to" span, which is a bigger
+ * surface than either needs. src/components/FootnoteSidenotes.astro finds
+ * that text as a Range on hover/focus, via the CSS Custom Highlight API, and
+ * this is the paint step: no wrapper element is created, so this applies to
+ * whatever text the script puts in the highlight, nothing more specific to
+ * scope it to. A browser without the API just never populates the
+ * highlight, so this rule never matches, and the note works exactly as
+ * before, minus the tint.
+ */
+::highlight(note-bound) {
+  background-color: var(--note-highlight);
+}
+
+/*
+ * The permalink icon: not in the running text (a `#` mid-sentence was the
+ * previous approach and is gone), instead a small control inside the note's
+ * own box, top-right corner, shown only while the note is being read.
+ * `.note-text` is the positioning context: it is `position: absolute` in
+ * the popover states already, and made `position: relative` in the wide
+ * float below for the same reason.
+ */
+.note-copy-link {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.15rem;
+  width: 0.9em;
+  height: 0.9em;
+  padding: 0.2rem;
+  color: var(--muted);
+  opacity: 0;
+  transition:
+    opacity var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+
+.note-copy-link::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  mask: var(--note-icon-link) center / contain no-repeat;
+}
+
+.note-copy-link:hover,
+.note-copy-link:focus-visible {
+  color: var(--accent);
+}
+
+/* Hover/focus anywhere on the note reveals it, not just hovering the icon
+   itself: a reader should not have to find a 0.9em target to discover it is
+   there. :focus-visible on the link covers reaching it by keyboard even
+   when nothing else in the note has focus yet. */
+.note:hover .note-copy-link,
+.note:focus-within .note-copy-link,
+.note-copy-link:focus-visible {
+  opacity: 1;
 }
 
 /* Visually hidden but focusable/toggleable, the real control behind the
@@ -131,8 +230,8 @@ main {
   clip-path: none;
   white-space: normal;
   background: var(--bg);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
+  border-inline-start: var(--note-border-width) solid var(--fg);
+  border-radius: var(--radius);
   box-shadow: 0 2px 10px rgb(0 0 0 / 0.18);
   font-size: 0.85rem;
   line-height: 1.45;
@@ -141,11 +240,25 @@ main {
   text-wrap: pretty;
 }
 
+/*
+ * Following a link to a note's own anchor rings its marker, nothing more:
+ * it does not force the popover open. It used to (via `:target .note-text`,
+ * matching the rule right above this one), and there was no way to close it
+ * again, since :target persists until the URL hash changes, leaving the
+ * reader stuck with a panel over the page they cannot dismiss. The reader
+ * still gets to see which note the link pointed at, and still gets to open
+ * it themselves; nothing here can get stuck.
+ */
+.note:target .note-marker {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* Progressive enhancement: where CSS anchor positioning exists, let the
    popover anchor to its marker instead of the parent-relative guess above,
    so it can't drift on wrapped lines. `anchor-name`/`position-anchor` are set
-   per-instance via inline style in the components (a build-time random id,
-   no client JS). Harmless no-op everywhere else. */
+   per-instance via inline style in the components (a build-time id, no
+   client JS). Harmless no-op everywhere else. */
 @supports (position-anchor: --a) {
   .note-toggle:checked ~ .note-text {
     position: fixed;
@@ -177,7 +290,11 @@ main {
 
   .note-text {
     display: inline;
-    position: static;
+    /* relative, not static: .note-copy-link is an absolutely-positioned
+       child, and needs this box as its containing block to sit at this
+       note's own top-right corner instead of the nearest positioned
+       ancestor up the tree. */
+    position: relative;
     float: right;
     clear: right;
     width: 13rem;
@@ -185,13 +302,13 @@ main {
     margin-right: -15rem;
     margin-top: 0.15rem;
     margin-bottom: 0.4rem;
-    padding: 0;
+    padding: 0 0 0 0.6rem;
     overflow: visible;
     clip: auto;
     clip-path: none;
     white-space: normal;
     background: transparent;
-    border: 0;
+    border-inline-start: var(--note-border-width) solid var(--fg);
     box-shadow: none;
     font-size: 0.82rem;
     line-height: 1.5;
@@ -207,7 +324,8 @@ main {
 
 @media print {
   .note-toggle,
-  .marginnote .note-marker {
+  .marginnote .note-marker,
+  .note-copy-link {
     display: none;
   }
 

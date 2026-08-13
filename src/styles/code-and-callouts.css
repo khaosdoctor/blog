@@ -1,0 +1,169 @@
+/*
+ * Callouts (rehype-callouts, obsidian theme) and code blocks
+ * (astro-expressive-code). Both plugins ship their own stylesheets with
+ * rounded corners and blue neutrals, which fight the ASCII/ANSI direction, so
+ * this file overrides them rather than starting from scratch.
+ *
+ * astro-expressive-code injects its stylesheet inline, later in the document
+ * than this one, so a plain specificity tie would let its rules win. Every
+ * expressive-code selector below carries one more class than the rule it
+ * overrides (usually the `.prose` ancestor, which is real: code blocks always
+ * render inside it) so the override holds regardless of load order. Where a
+ * value is a custom property the plugin only sets on `:root` (the marker
+ * colours, the corner radius), redeclaring it on `.expressive-code` wins
+ * through inheritance instead: the plugin never sets that property again
+ * between `:root` and the element that reads it, so the nearest ancestor
+ * declaration is the one that applies.
+ *
+ * Local tokens below are candidates for theme.css if the owner wants them
+ * available outside this file; see the report for which ones.
+ */
+
+:root {
+  /* How much the callout's own colour washes into its title band. */
+  --cc-callout-tint: 14%;
+
+  /* Highlighter marker: a translucent wash over the code background, not a
+   * solid fill, so the underlying syntax colours still show through. Faint on
+   * purpose: at 40% the yellow buried the code it was meant to point at. */
+  --cc-marker-fill: 13%;
+  --cc-marker-edge: 35%;
+
+  /* The code tab's decorative close cross. Inline SVG mask, so it takes the
+   * tab's own text colour, the same technique as the link and checkbox icons
+   * in prose.css. */
+  --cc-tab-close-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='square'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------- callouts */
+
+/*
+ * Obsidian's own theme colours every type through `--rc-color-light` /
+ * `--rc-color-dark` on `[data-callout="type"]`, switched by a `.dark` class
+ * this site never adds (theming here is native `light-dark()`). Reading both
+ * variables through `light-dark()` directly makes every one of the theme's
+ * ~26 types work in both colour schemes without a single type named here.
+ *
+ * Quote is excluded: another pass owns its look.
+ */
+.callout:not([data-callout='quote']) {
+  --callout-color: light-dark(
+    var(--rc-color-light, var(--rc-color-default, #888)),
+    var(--rc-color-dark, var(--rc-color-default, #888))
+  );
+
+  padding: 0;
+  border: var(--border) solid var(--callout-color);
+  /* The left edge carries the type, so it gets the weight. */
+  border-inline-start-width: var(--border-card-edge);
+  border-radius: var(--radius);
+  background: none;
+  /* The obsidian theme uses this to fake transparency over a light-or-dark
+   * page background via a `.dark` class. Our background is already correct
+   * for the scheme, so the blend mode has nothing left to do. */
+  mix-blend-mode: normal;
+}
+
+/*
+ * Obsidian's palette collides for the types this blog uses most: warning and
+ * caution are both orange, tip and important are both cyan, so four callouts
+ * read as two. Warning keeps the orange it already had; the other three are
+ * reassigned to what they actually mean here.
+ */
+.callout:is([data-callout='tip'], [data-callout='hint']) {
+  --callout-color: var(--brand-green);
+}
+
+.callout:is([data-callout='caution'], [data-callout='important']) {
+  --callout-color: var(--brand-red);
+}
+
+/* The title band: a tint of the callout's colour, separated from the body by
+ * a border in the same colour. Fixes the icon and text colour for dark mode
+ * as a side effect, since the upstream rule only ever used the light value. */
+.callout:not([data-callout='quote']) > .callout-title {
+  margin: 0;
+  padding: 0.5em 0.75em;
+  border-block-end: var(--border) solid var(--callout-color);
+  background: color-mix(in oklab, var(--callout-color) var(--cc-callout-tint), transparent);
+  color: var(--callout-color);
+}
+
+.callout:not([data-callout='quote']) > .callout-title > .callout-title-text {
+  font-weight: 700;
+}
+
+.callout:not([data-callout='quote']) > .callout-content {
+  padding: 0.75em 1em;
+}
+
+/* ------------------------------------------------------------- code blocks */
+
+.expressive-code {
+  /* Flattens every radius astro-expressive-code computes from these two
+   * tokens (the block, the terminal window, the editor tab) without touching
+   * astro.config.mjs, which this file does not own. */
+  --ec-brdRad: 0;
+  --ec-frm-edTabBrdRad: 0;
+
+  /* Highlighted (`mark`) lines: a yellow wash, not the default blue. Only
+   * the neutral marker changes; `ins` and `del` stay green and red because
+   * they mean added and removed. */
+  --ec-tm-markBg: color-mix(in oklab, var(--brand-yellow) var(--cc-marker-fill), transparent);
+  --ec-tm-markBrdCol: color-mix(in oklab, var(--brand-yellow) var(--cc-marker-edge), transparent);
+}
+
+/* Belt and suspenders on the radius: the tokens above only zero out the
+ * calc() chains astro-expressive-code builds from them, which still leave a
+ * fraction of a pixel from the added border width. These force the visible
+ * corners to exactly 0. */
+.prose .expressive-code .frame,
+.prose .expressive-code .frame .header,
+.prose .expressive-code pre {
+  border-radius: 0;
+}
+
+/*
+ * A filename on the first line of a code block (e.g. `// src/thing.ts`) is
+ * already detected natively by the frames plugin, which promotes it to the
+ * frame's title and deletes the comment line; nothing here does that
+ * extraction. This only restyles the resulting `.frame.has-title` header so
+ * it reads as an IDE tab: square, flush with the top-left corner of the
+ * block, its own background distinct from the code below it.
+ */
+.prose .expressive-code .frame.has-title:not(.is-terminal) .header {
+  border-radius: 0;
+  background: var(--rule);
+}
+
+.prose .expressive-code .frame.has-title:not(.is-terminal) .title {
+  position: relative;
+  border-radius: 0;
+  background: var(--rule);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding-inline-end: calc(var(--ec-uiPadInl) + 1.4em);
+}
+
+/*
+ * A decorative close cross, the way an IDE tab shows one. It does nothing:
+ * no button, no focus stop, `pointer-events: none`, and a pseudo-element is
+ * never exposed to assistive tech in the first place.
+ */
+.prose .expressive-code .frame.has-title:not(.is-terminal) .title::after {
+  content: '';
+  position: absolute;
+  inset: 0 0.6em 0 auto;
+  margin-block: auto;
+  inline-size: 0.7em;
+  block-size: 0.7em;
+  border: none;
+  background-color: var(--muted);
+  opacity: 0.85;
+  pointer-events: none;
+  mask: var(--cc-tab-close-icon) center / contain no-repeat;
+  -webkit-mask: var(--cc-tab-close-icon) center / contain no-repeat;
+}

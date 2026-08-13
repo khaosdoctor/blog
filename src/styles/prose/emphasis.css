@@ -1,0 +1,21 @@
+/* Bold and italic, which the old blog treated as colour rather than weight. */
+
+/* Bold is a highlighter chip, the way the old blog had it. */
+.prose strong {
+  padding: 0.05em 0.25em;
+  border-radius: var(--radius);
+  background: var(--em-bold-bg);
+  color: var(--em-bold-fg);
+}
+
+/* A heading is already loud, and a callout title is already the title. */
+.prose :is(h1, h2, h3, h4, h5, h6) strong,
+.prose .callout-title strong {
+  padding: 0;
+  background: none;
+}
+
+.prose em {
+  color: var(--em-italic-fg);
+  font-weight: var(--em-italic-weight);
+}

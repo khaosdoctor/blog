@@ -1,0 +1,41 @@
+---
+// Delegated click handler for the copy-as-text button that
+// src/plugins/rehype-math-copy.mjs injects into every display equation. One
+// listener for the whole page, the same shape as the heading-anchor toast
+// handler in BaseLayout, reusing its exact .toast confirmation so the site
+// has one copy-confirmation pattern, not two.
+//
+// The ASCII rendering already sits in data-ascii by build time, written by
+// the rehype plugin from the LaTeX KaTeX leaves behind in its own markup:
+// nothing here parses LaTeX.
+import { t, type Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+---
+
+<script is:inline define:vars={{ copiedLabel: t(locale, 'linkCopied') }}>
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('button[data-math-copy]')
+    if (button === null) return
+
+    try {
+      await navigator.clipboard.writeText(button.dataset.ascii ?? '')
+    } catch {
+      // Insecure origin, or no clipboard permission. Nothing else on the
+      // page depended on this working, so say nothing.
+      return
+    }
+
+    document.querySelector('.toast')?.remove()
+    const toast = document.createElement('div')
+    toast.className = 'toast'
+    toast.setAttribute('role', 'status')
+    toast.textContent = copiedLabel
+    document.body.append(toast)
+    setTimeout(() => toast.remove(), 2000)
+  })
+</script>

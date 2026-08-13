@@ -1,0 +1,25 @@
+/* Every cell ruled, a tinted bold header, and room around the text. */
+
+.prose table {
+  inline-size: 100%;
+  margin-block: 1.75rem;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+
+.prose :is(th, td) {
+  padding: var(--table-cell-pad);
+  border: var(--border) solid var(--table-edge);
+  text-align: start;
+  vertical-align: top;
+}
+
+.prose th {
+  background: var(--table-head-bg);
+  font-weight: 700;
+}
+
+/* A table wider than the column scrolls itself rather than the page. */
+.prose .table-scroll {
+  overflow-x: auto;
+}

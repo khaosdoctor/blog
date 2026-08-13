@@ -1,0 +1,376 @@
+/*
+ * Quotes. The only quote-shaped thing on the site now that epigraphs are
+ * going away: every quote is a card, in two markup shapes.
+ *
+ * `> [!quote] Author Name` + body is an Obsidian callout, run through
+ * rehype-callouts (theme: obsidian, see astro.config.mjs). Its actual output
+ * is `div.callout[data-callout="quote"] > .callout-title (icon, text) +
+ * .callout-content`, confirmed against this repo's own build output (a
+ * `blockquote` wrapper was the assumption at the start of this file's brief,
+ * but the installed plugin and its current options emit a `div`). Both
+ * selectors are kept below: the `blockquote.callout[...]` form for the
+ * contract this file was written against, and the tag-less `.callout[...]`
+ * form that actually matches, so this keeps working unchanged if the
+ * container tag is ever reconfigured to `blockquote`.
+ *
+ * A plain `>` blockquote with no callout gets the same card minus the author
+ * row: no `.callout-title` exists to show. `.twitter-tweet` and `.epigraph`
+ * are excluded because they are also bare `<blockquote>`s produced by other
+ * parts of the site (the Ghost tweet-card migration, and the epigraph
+ * component mid-removal); neither is a quote.
+ *
+ * The author arrives as the callout's TITLE (its first child) and has to
+ * render at the BOTTOM of the card. Solved with flex-order, no markup
+ * change: the container becomes a column flex box, the title gets `order:
+ * 2`, the content `order: 1`.
+ *
+ * Five treatments: the default (what every quote on the site gets today)
+ * plus `quote-a` through `quote-e`, selected on the lab page with
+ * `[data-v="quote-x"]`. Each variant only reassigns the tokens below and
+ * switches off the effects it does not want; the structural rules (card
+ * shape, flex reorder, drop cap mechanics) are written once and apply to
+ * all six.
+ */
+
+:root {
+  --qc-pad: 1.5rem 1.75rem;
+  --qc-radius: 0;
+  --qc-gap: 0.6rem;
+  --qc-glyph-size: 7rem;
+  --qc-indent: 2rem;
+  --qc-dropcap-size: 2.75em;
+
+  /*
+   * Default: barely a background, a vivid border. A solid purple card made the
+   * fill and the border the same colour, so the card had no edge at all, and it
+   * needed inverted text to stay readable. The tint is now just a glimpse and
+   * the normal foreground colour stays, which also keeps contrast at the page
+   * default rather than something that has to be computed.
+   */
+  --qc-bg: light-dark(
+    color-mix(in oklab, var(--brand-purple) 6%, var(--bg)),
+    color-mix(in oklab, var(--brand-purple) 10%, var(--bg))
+  );
+  --qc-fg: var(--fg);
+  --qc-muted-fg: var(--muted);
+  --qc-border: light-dark(
+    var(--brand-purple),
+    color-mix(in oklab, var(--brand-purple) 75%, white)
+  );
+  --qc-dropcap-fg: var(--qc-border);
+  /* Loud enough to read as a watermark against a nearly-white card, quiet
+   * enough that the text sitting on top of it is unaffected. */
+  --qc-glyph: light-dark(
+    color-mix(in oklab, var(--brand-purple) 18%, transparent),
+    color-mix(in oklab, var(--brand-purple) 32%, transparent)
+  );
+}
+
+/* ---------------------------------------------------------- card shape */
+
+.prose blockquote.callout[data-callout='quote'],
+.prose .callout[data-callout='quote'],
+.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: var(--qc-gap);
+  /* Indented from the left, flush to the right edge of the column: a quote reads
+   * as set apart from the paragraph before it without losing width. */
+  margin-block: 1.75rem;
+  margin-inline: var(--qc-indent) 0;
+  padding: var(--qc-pad);
+  overflow: hidden;
+  border: var(--border) solid var(--qc-border);
+  /* Every card on this site carries a thick left edge in its own border colour. */
+  border-inline-start-width: var(--border-card-edge);
+  border-radius: var(--qc-radius);
+  /* The obsidian theme's own .callout sets mix-blend-mode so light/dark
+   * variants can share one colour; it also blends an opaque background
+   * against the page behind it, which would quietly shift every colour
+   * computed below. Not wanted here, all the colours are already picked per
+   * theme. */
+  mix-blend-mode: normal;
+  background: var(--qc-bg);
+  color: var(--qc-fg);
+}
+
+.prose .callout[data-callout='quote'] > *,
+.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------------------------------- author, bottom row */
+
+.prose .callout[data-callout='quote'] .callout-title-icon {
+  display: none;
+}
+
+.prose .callout[data-callout='quote'] > .callout-title {
+  order: 2;
+  margin: 0;
+  padding-block-start: 0.5rem;
+  border-block-start: var(--border) solid var(--qc-border);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-style: normal;
+  font-weight: 400;
+  color: var(--qc-muted-fg);
+}
+
+.prose .callout[data-callout='quote'] .callout-title-text::before {
+  content: '\00bb  '; /* the ANSI-prompt » rather than an em dash */
+}
+
+.prose .callout[data-callout='quote'] > .callout-content {
+  order: 1;
+}
+
+/* -------------------------------------------------------------- body */
+
+.prose .callout[data-callout='quote'] .callout-content,
+.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
+  font-style: italic;
+}
+
+/* ------------------------------------------------------- watermark glyph */
+
+.prose .callout[data-callout='quote']::before,
+.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before {
+  content: '\201c';
+  position: absolute;
+  z-index: 0;
+  inset-block-start: -0.35em;
+  inset-inline-start: 0.05em;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: normal;
+  font-size: var(--qc-glyph-size);
+  line-height: 1;
+  color: var(--qc-glyph);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------- drop cap */
+
+.prose .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter {
+  float: inline-start;
+  margin-inline-end: 0.1em;
+  font-family: var(--font-display);
+  font-size: var(--qc-dropcap-size);
+  font-style: normal;
+  line-height: 0.82;
+  color: var(--qc-dropcap-fg);
+}
+
+/* ==================================================================
+ * Variant A: solid purple, both themes, white text. No watermark, no
+ * drop cap: the flat colour is the whole statement. Contrast of white on
+ * --brand-purple is 6.07:1, comfortably over the 4.5:1 floor.
+ * ================================================================== */
+
+[data-v='quote-a'] {
+  --qc-bg: var(--brand-purple);
+  --qc-fg: #ffffff;
+  --qc-muted-fg: color-mix(in oklab, #ffffff 75%, transparent);
+  --qc-border: color-mix(in oklab, black 25%, var(--brand-purple));
+}
+
+[data-v='quote-a'] .callout[data-callout='quote']::before,
+[data-v='quote-a'] blockquote:not(.callout):not(.twitter-tweet)::before {
+  content: none;
+}
+
+[data-v='quote-a'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-a'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
+  float: none;
+  margin-inline-end: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+/* ==================================================================
+ * Variant B: a faded tint that keeps the normal text colour, both themes.
+ * Drop cap and italic stay; no watermark. The tint is a light mix (13.8:1
+ * in light theme, 11.6:1 in dark against the normal foreground), so no
+ * inversion is needed here.
+ * ================================================================== */
+
+[data-v='quote-b'] {
+  --qc-bg: light-dark(
+    color-mix(in oklab, var(--brand-purple) 14%, var(--bg)),
+    color-mix(in oklab, var(--brand-purple) 24%, var(--bg))
+  );
+  --qc-fg: var(--fg);
+  --qc-muted-fg: var(--muted);
+  --qc-border: light-dark(
+    color-mix(in oklab, var(--brand-purple) 45%, transparent),
+    color-mix(in oklab, var(--brand-purple) 55%, transparent)
+  );
+  --qc-dropcap-fg: color-mix(in oklab, var(--brand-purple) 70%, var(--fg));
+}
+
+[data-v='quote-b'] .callout[data-callout='quote']::before,
+[data-v='quote-b'] blockquote:not(.callout):not(.twitter-tweet)::before {
+  content: none;
+}
+
+/* ==================================================================
+ * Variant C: box-drawing / ANSI frame. No fill (the page background shows
+ * through), the border is a double rule rather than a solid line, body
+ * copy goes upright mono instead of italic. No watermark, no drop cap: the
+ * frame itself is the effect.
+ * ================================================================== */
+
+[data-v='quote-c'] {
+  --qc-bg: transparent;
+  --qc-fg: var(--fg);
+  --qc-muted-fg: light-dark(
+    color-mix(in oklab, var(--brand-purple) 65%, var(--fg)),
+    color-mix(in oklab, var(--brand-purple) 55%, var(--fg))
+  );
+  --qc-border: light-dark(
+    color-mix(in oklab, var(--brand-purple) 55%, var(--fg)),
+    color-mix(in oklab, var(--brand-purple) 60%, var(--fg))
+  );
+}
+
+[data-v='quote-c'] .callout[data-callout='quote'],
+[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet) {
+  border: 3px double var(--qc-border);
+  padding: 1.25rem 1.5rem;
+}
+
+[data-v='quote-c'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet) {
+  font-style: normal;
+  font-family: var(--font-mono);
+}
+
+[data-v='quote-c'] .callout[data-callout='quote'] > .callout-title {
+  border-block-start-style: dotted;
+}
+
+[data-v='quote-c'] .callout[data-callout='quote']::before,
+[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet)::before {
+  content: none;
+}
+
+[data-v='quote-c'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
+  float: none;
+  margin-inline-end: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+/* ==================================================================
+ * Variant D: a terminal window. Deliberately not theme-aware, a terminal
+ * is always dark chrome. Three square "traffic light" dots (never round,
+ * this site has no rounded corners), a `$ ` prompt in front of the author,
+ * no italic, no drop cap, no watermark.
+ * ================================================================== */
+
+[data-v='quote-d'] {
+  --qc-bg: #0b0c0e;
+  --qc-fg: #e7e9ec;
+  --qc-muted-fg: var(--brand-green);
+  --qc-border: #1c1e22;
+}
+
+[data-v='quote-d'] .callout[data-callout='quote'],
+[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet) {
+  padding-block-start: 2.4rem;
+  font-family: var(--font-mono);
+}
+
+[data-v='quote-d'] .callout[data-callout='quote']::after,
+[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet)::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 0.9rem;
+  inset-inline-start: 1.1rem;
+  inline-size: 8px;
+  block-size: 8px;
+  background: var(--brand-red);
+  box-shadow:
+    16px 0 0 var(--brand-yellow),
+    32px 0 0 var(--brand-green);
+}
+
+[data-v='quote-d'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet) {
+  font-style: normal;
+}
+
+[data-v='quote-d'] .callout[data-callout='quote'] > .callout-title {
+  border-block-start-style: dashed;
+}
+
+[data-v='quote-d'] .callout[data-callout='quote'] .callout-title-text::before {
+  content: '$ ';
+}
+
+[data-v='quote-d'] .callout[data-callout='quote']::before,
+[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet)::before {
+  content: none;
+}
+
+[data-v='quote-d'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
+  float: none;
+  margin-inline-end: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+/* ==================================================================
+ * Variant E: a quiet flourish, the closest thing left to what an epigraph
+ * was for, an opening line rather than a boxed callout. No card fill, no
+ * author row (hidden outright, even if the markup carries one), no
+ * watermark, no drop cap. Just a rule on the inline-start edge and italic.
+ * ================================================================== */
+
+[data-v='quote-e'] {
+  --qc-bg: transparent;
+  --qc-fg: var(--muted);
+  --qc-border: light-dark(
+    color-mix(in oklab, var(--brand-purple) 45%, transparent),
+    color-mix(in oklab, var(--brand-purple) 60%, transparent)
+  );
+}
+
+[data-v='quote-e'] .callout[data-callout='quote'],
+[data-v='quote-e'] blockquote:not(.callout):not(.twitter-tweet) {
+  border: 0;
+  border-inline-start: 2px solid var(--qc-border);
+  padding: 0 0 0 1.2rem;
+}
+
+[data-v='quote-e'] .callout[data-callout='quote'] > .callout-title {
+  display: none;
+}
+
+[data-v='quote-e'] .callout[data-callout='quote']::before,
+[data-v='quote-e'] blockquote:not(.callout):not(.twitter-tweet)::before {
+  content: none;
+}
+
+[data-v='quote-e'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-e'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
+  float: none;
+  margin-inline-end: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}

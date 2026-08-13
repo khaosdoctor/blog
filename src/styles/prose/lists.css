@@ -1,0 +1,79 @@
+/* Bullets, numbers and task boxes. */
+
+/*
+ * Arrows, then hollow arrows, then bullets, then hollow bullets. ::marker takes
+ * content and font properties, so this needs no extra element and keeps the
+ * list semantics intact.
+ */
+.prose ul > li::marker {
+  content: '▸  ';
+  color: var(--fg);
+}
+
+.prose ul ul > li::marker {
+  content: '▹  ';
+}
+
+.prose ul ul ul > li::marker {
+  content: '•  ';
+}
+
+.prose ul ul ul ul > li::marker {
+  content: '◦  ';
+}
+
+/* A number is a label, not prose: bigger and bold so it reads as one. */
+.prose ol > li::marker {
+  font-family: var(--font-mono);
+  font-size: 1.15em;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+/*
+ * Task lists. The checkbox markdown produces is disabled and cannot be styled
+ * reliably across engines, so it stays for semantics and the box is drawn on the
+ * list item: a hollow square, square corners, and a green tick when checked.
+ * The bullet goes away, as it would otherwise sit next to the box.
+ */
+.prose ul.contains-task-list {
+  padding-inline-start: 0.2em;
+}
+
+.prose li.task-list-item {
+  position: relative;
+  padding-inline-start: 1.7em;
+  list-style: none;
+}
+
+.prose li.task-list-item::marker {
+  content: '';
+}
+
+.prose li.task-list-item input[type='checkbox'] {
+  position: absolute;
+  opacity: 0;
+}
+
+.prose li.task-list-item::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0.35em;
+  inline-size: 0.9em;
+  block-size: 0.9em;
+  border: 2px solid var(--check-edge);
+  background: var(--check-box);
+}
+
+.prose li.task-list-item:has(input:checked)::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0.05em;
+  inset-block-start: 0.3em;
+  inline-size: 1em;
+  block-size: 1em;
+  background-color: var(--check-tick);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6' fill='none' stroke='black' stroke-width='3.5' stroke-linecap='square'/%3E%3C/svg%3E")
+    center / 90% no-repeat;
+}

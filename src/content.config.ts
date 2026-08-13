@@ -54,8 +54,6 @@ const blog = defineCollection({
       description: z.string(),
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
-      epigraph: z.string().optional(),
-      epigraphCite: z.string().optional(),
       draft: z.boolean().default(true),
       // Preserved from Ghost; everything renders public for now.
       visibility: z.enum(['public', 'members', 'paid']).default('public'),
