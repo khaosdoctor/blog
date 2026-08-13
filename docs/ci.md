@@ -23,10 +23,18 @@ flowchart TD
   B --> G["node scripts/check-output.ts"]
   G --> A["upload-pages-artifact"]
   A -.->|"commented out until cutover"| D["deploy-pages"]
+  A --> S["job: seo-audit<br/>continue-on-error: true"]
 ```
 
 `fetch-depth: 0` is required: the footer version counts posts published since the last release tag, which a shallow
 clone cannot see.
+
+**seo-audit** runs after `build`, against the artifact `build` already produced (extracted from `artifact.tar`, not
+rebuilt). It audits `dist/` with Lighthouse ([treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action),
+config in `lighthouserc.json`) and checks links with [lychee](https://github.com/lycheeverse/lychee-action), internal
+and external, `--root-dir dist` mapping the site's root-relative hrefs back to local files so no server has to run.
+`continue-on-error: true` on the job means neither tool can ever fail the workflow or block a deploy: both reports are
+advisory, one as a job summary (lychee) and one as an artifact plus a temporary public link (Lighthouse).
 
 **Concurrency.** The group depends on the event, so a pull request can only ever cancel its own earlier runs:
 

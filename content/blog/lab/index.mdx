@@ -5,8 +5,6 @@ lang: "pt"
 category: "meta"
 tags: ["meta", "escrita"]
 description: "Uma página de bancada com todos os recursos de escrita do site: cada bloco mostra primeiro o código que você digita e logo abaixo o resultado renderizado."
-epigraph: "Se você não consegue ver funcionando, você não sabe se funciona."
-epigraphCite: "A regra desta página"
 draft: false
 noindex: true
 ---
@@ -19,7 +17,7 @@ A linha de `import` no topo é a única exceção: ela existe porque a ilha inte
 
 ## Frontmatter
 
-O frontmatter é o cabeçalho YAML que define título, data, seção e tudo mais. Os campos `epigraph` e `epigraphCite` renderizam a citação que aparece acima do título desta página, antes do texto começar.
+O frontmatter é o cabeçalho YAML que define título, data, seção e tudo mais.
 
 ```yaml
 ---
@@ -29,14 +27,12 @@ lang: "pt"
 category: "meta"
 tags: ["meta", "escrita"]
 description: "Uma página de bancada com todos os recursos de escrita do site."
-epigraph: "Se você não consegue ver funcionando, você não sabe se funciona."
-epigraphCite: "A regra desta página"
 draft: false
 noindex: true
 ---
 ```
 
-O resultado está no topo da página: o título, a linha de data e seção, e o epígrafe em itálico logo abaixo. O `noindex: true` mantém esta página fora dos mecanismos de busca, que é exatamente o que uma bancada precisa.
+O resultado está no topo da página: o título e a linha de data e seção. O `noindex: true` mantém esta página fora dos mecanismos de busca e do sitemap, que é exatamente o que uma bancada precisa.
 
 ## Títulos
 
@@ -74,7 +70,7 @@ Um [link comum](https://blog.lsantos.dev) e um [link com título](https://blog.l
 
 ## Citação
 
-Uma citação em bloco para trechos de outra pessoa ou de outro documento. Para epígrafes existe um componente próprio, mostrado mais abaixo.
+Uma citação em bloco para trechos de outra pessoa ou de outro documento. Com autor, é um callout `[!quote]`, mostrado mais abaixo.
 
 ```markdown
 > Toda abstração vaza, a questão é apenas quando.
@@ -150,6 +146,84 @@ Uma separação visual entre duas partes do texto que não merecem um título no
 
 ---
 
+### Escolha o tamanho da régua
+
+Cada bloco abaixo é a mesma `---`, com um comprimento diferente. O vencedor virá `--rule-length` em `theme.css` e o resto deste bloco sai.
+
+<div data-v="rule-30">
+
+**30px**
+
+---
+
+</div>
+
+<div data-v="rule-60">
+
+**60px**
+
+---
+
+</div>
+
+<div data-v="rule-100">
+
+**100px**
+
+---
+
+</div>
+
+<div data-v="rule-150">
+
+**150px (padrão atual)**
+
+---
+
+</div>
+
+<div data-v="rule-200">
+
+**200px**
+
+---
+
+</div>
+
+<div data-v="rule-250">
+
+**250px**
+
+---
+
+</div>
+
+E o mesmo comprimento com pesos e brilhos diferentes:
+
+<div data-v="rule-thin">
+
+**1px, brilho fraco**
+
+---
+
+</div>
+
+<div data-v="rule-thick">
+
+**4px, brilho forte**
+
+---
+
+</div>
+
+<div data-v="rule-dotted">
+
+**pontilhada**
+
+---
+
+</div>
+
 ## Notas de rodapé
 
 Uma nota de rodapé para a fonte de uma afirmação, ou para um detalhe que interromperia a frase. Ela vira um link para o pé da página, com um link de volta.
@@ -164,7 +238,7 @@ Uma afirmação que precisa de fonte.[^1]
 
 ## Callouts
 
-A mesma sintaxe do Obsidian, então o que você vê enquanto escreve é o que vai para o site. São cinco tipos: `NOTE`, `TIP`, `WARNING`, `CAUTION` e `IMPORTANT`.
+A mesma sintaxe do Obsidian, então o que você vê enquanto escreve é o que vai para o site. Os cinco mais usados estão abaixo, e todo o vocabulário do Obsidian funciona: `question`, `example`, `success`, `failure`, `danger`, `bug`, `abstract`, `todo`, `quote` e o resto.
 
 ```markdown
 > [!NOTE]
@@ -438,15 +512,74 @@ Outra frase.<MarginNote>Igual, mas sem número.</MarginNote>
 
 Toda abstração vaza.<Sidenote>Uma nota numerada, que fica na margem em telas largas e vira um popover em telas estreitas, sem JavaScript nos dois casos. Aceita **negrito**, `código` e [links](https://blog.lsantos.dev).</Sidenote> E esta segunda frase carrega uma nota sem número.<MarginNote>Igual à de cima, mas sem a marca numerada no meio do texto.</MarginNote>
 
-## Epígrafe no meio do texto
+## Citação com autor
 
-Além do par de campos no frontmatter, que renderiza acima do título, existe o componente para colocar uma citação em qualquer ponto do corpo.
+Epígrafe deixou de existir: era a mesma coisa que uma citação com outro nome. Uma citação com autor é um callout do Obsidian cujo título é o autor, que é exatamente como você já escreve no vault.
 
-```mdx
-<Epigraph cite="Quem disse">A citação.</Epigraph>
+```markdown
+> [!quote] Phil Karlton
+> Só existem dois problemas difíceis em computação: invalidação de cache e dar nome às coisas.
 ```
 
-<Epigraph cite="Phil Karlton">Só existem dois problemas difíceis em computação: invalidação de cache e dar nome às coisas.</Epigraph>
+> [!quote] Phil Karlton
+> Só existem dois problemas difíceis em computação: invalidação de cache e dar nome às coisas.
+
+Sem autor, é uma citação comum, e o cartão vem sem a linha de autoria.
+
+```markdown
+> Toda abstração vaza, mais cedo ou mais tarde.
+```
+
+> Toda abstração vaza, mais cedo ou mais tarde.
+
+### Escolha o tratamento da citação
+
+Cinco alternativas ao cartão padrão acima, cada uma usando uma combinação diferente de fundo, moldura, marca d'água, capitular e itálico. A escolhida vira o padrão e as outras saem.
+
+<div data-v="quote-a">
+
+**A — roxo sólido, texto branco, só itálico**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-b">
+
+**B — roxo bem diluído, texto normal, capitular**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-c">
+
+**C — moldura dupla ANSI, sem fundo, monoespaçada**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-d">
+
+**D — janela de terminal**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-e">
+
+**E — abertura discreta, sem cartão e sem autoria**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
 
 ## Links para outros posts
 
