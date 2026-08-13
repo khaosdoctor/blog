@@ -1,0 +1,212 @@
+---
+title: "Simple Multi-Node Data Replication with HarperDB Pub/Sub"
+pubDate: 2022-10-21T11:10:15.000Z
+lang: "en"
+slug: "simple-multi-node-data-replication-with-harperdb-pubsub"
+category: "infra"
+tags: ["harperdb", "databases", "javascript", "pubsub"]
+description: "In the previous articles I wrote about HarperDB, we explored Kubernetes and Helm. Now it's time to understand another cool feature: multi-node replication with pub/sub."
+draft: false
+machineTranslated: false
+---
+_Photo by <a href="https://unsplash.com/@trommelkopf?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Steve Harvey</a> on <a href="https://unsplash.com/s/photos/broadcast?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>_
+
+In the previous articles that I've written about HarperDB, we've explored the realms of [Kubernetes](https://medium.com/@khaosdoctor/using-harperdb-with-kubernetes-e796ea606e99), and [Helm](https://faun.pub/running-harperdb-in-kubernetes-in-one-command-8c87e2788eb6). Now it's time to step back a little and try to understand another cool feature that it offers in this short and straight-to-the-point article.
+
+Let's imagine we work for a company that provides business intelligence on productive processes for big factories across the world and you're launching a new product; Intelligent factories! To do that, the factories would be equipped with the most varied types of sensors that monitor several of the machines' key properties, like pressure, temperature, and weight put on it. 
+
+The problem is that all this data needs to be sent back to the company's main servers so we can apply our machine learning models and big data analysis on top of them. And they've asked you to provide a nice architecture to make it happen. The process has a few rules:
+
+* The sensors send data at a very fast rate, so sending them as you receive would not be wise as it would clutter the network, making data streaming a sub optimal solution.
+* The data should be stored in a database at the company in raw format.
+* The sensors will keep sending data even in case of a network failure. You need to sync that data with the company's servers as soon as the network returns.
+* The company must be able to send configurations to the sensors installed in the customers from the HQ, without the need for a local visit.
+
+How can you perform all these tasks with the minimum amount of effort and using the best technology? Enters **HarperDB clusters**.
+
+## Clusters
+
+When we say clusters, the base idea that comes to us is something like Kubernetes, right? A bunch of virtual machines that behave as a single, big one. However, HarperDB takes this idea a step further. Since we're talking about a database, the concept of "work as one" boils down to having the same data in all instances eventually, and this is, in fact, the concept of a cluster of databases.
+
+However, in other DBs, all the data will be replicated across the whole cluster no matter what, they'll be identical eventually, then why can't you choose which data you want to sync?
+
+When you cluster two or more instances of a HarperDB database together, they'll ask you which data you wish to share, this is called a **subscription**. So, basically, what HarperDB has is a very robust and fancy implementation of a publish/subscribe model that works at the table level and has a fault-tolerant mechanism that allows it to lose the connection at any given time and automatically re-synchronize the data once it's back up.
+
+### How do clusters work?
+
+
+I won't extend myself in this part as HarperDB has a [very nice documentation about it](https://harperdb.io/docs/clustering/), but the idea is that each database composes a **node** in the cluster, and the whole group of nodes in a cluster and their configurations is called a **topology**.
+
+To send and receive data, the nodes rely on **channels**, which are named as `schema:table`, each channel represents a connection between two nodes, sending or receiving data from a specific table. Channels have two options, they can either be **publishers**, **subscribers**, or both.
+
+A **publishing** channel will post all the changes of that specific table to any other nodes that are **subscribing to it**, let's see an example. If I wanted to publish all the changes from the schema named _dev_ on the table _dog_ from the first node to the second one, I could create a **publish channel** called `dev:dog`.
+
+![alt_text](https://lh4.googleusercontent.com/CApUg_V_dBAz-HcXG6x-XIi2EMZ_-vrNJz63TaLpg7BZ7VzeBup0p4jnNThQWN3OWNpSuiKu3_zg5-GNtDiBc8DHbgpPV6r45JMxirH57nj8dmpz22cYmf47Fxtpr3b9vwwRmkhrkoHc9OA14AyLk8v8YPMSDVp6oMtyMfXiosGibLIOpZcgCRq3ZLL68cavAuc1AQ)
+
+On the other hand, I could express it differently, I could say that I want to listen to all the changes in the _dog_ table in node 1, so I can **subscribe to it**:
+
+![alt_text](https://lh6.googleusercontent.com/xV1QYqR-P0x4uc9q5GrOd-GoZLDF7oNGdZjlxGBbl10buIc8vIQrT2tVMDuMnUKwuXjIJiDU5qn-8ceICHDHxt4ZgOtnwmoVrRlyjlKWuYF2EA1HZkrSuijesI-0GXLUl0QMTDrN15l7hLSj8cPB10bvtC5HcxPIZRqQd6WeNU75-fsPb19mFZzBobwOuXQEyFnmbA)
+
+When you create a subscription in any node, any changes to that particular table will be synced to the other tables, any new data on `dev:dog` will be published to the other node, as well as any updates or removals. If the table doesn't exist in one of the nodes, it'll also be created, however, **destructive operations like `drop` won't be propagated.**
+
+### Creating a cluster
+
+So, you decide to create a proof of concept to see if your idea to use HarperDB's clusters will work. Since HarperDB has a Docker image with clustering available, we'll start by creating a Docker Compose file.
+
+The idea is to simulate two instances of a HarperDB node and connect them both into a cluster. For this we'll create two services in your Docker Compose, the first will be the one representing the sensor:
+
+
+```yaml
+services:
+harper-edge:
+image: harperdb/harperdb
+container_name: harper-edge
+ports:
+- "9900:9925"
+- "9901:9926"
+- "62000:62344"
+    environment:
+    - HDB_ADMIN_USERNAME=admin
+      - HDB_ADMIN_PASSWORD=admin
+      - CLUSTERING=true
+      - CLUSTERING_USER=cluster
+      - CLUSTERING_PASSWORD=cluster
+      - CLUSTERING_PORT=62344
+      - NODE_NAME=harper-edge
+```
+
+
+We'll open ports 9925, 9926 and 62344, but since we'll spin up another service in the same computer, we cannot just use the same ports, so we'll map them to 9900, 9901, and 6200 respectively. We'll enable clustering in the environment variables, then we'll set the cluster port to 62344 as we set in the port manifest. Lastly, we'll name the node as _harper-edge_.
+
+For the second instance that will represent the company's server, we'll copy the first part and just change the names and ports, the final file will be like this:
+
+
+```yaml
+services:
+  harper-edge:
+    image: harperdb/harperdb
+    container_name: harper-edge
+    ports:
+      - "9900:9925"
+      - "9901:9926"
+      - "62000:62344"
+    environment:
+      - HDB_ADMIN_USERNAME=admin
+      - HDB_ADMIN_PASSWORD=admin
+      - CLUSTERING=true
+      - CLUSTERING_USER=cluster
+      - CLUSTERING_PASSWORD=cluster
+      - CLUSTERING_PORT=62344
+      - NODE_NAME=harper-edge
+
+  harper-host:
+    image: harperdb/harperdb
+    container_name: harper-host
+    ports:
+      - "9902:9925"
+      - "9903:9926"
+      - "62001:62344"
+    environment:
+      - HDB_ADMIN_USERNAME=admin
+      - HDB_ADMIN_PASSWORD=admin
+      - CLUSTERING=true
+      - CLUSTERING_USER=cluster
+      - CLUSTERING_PASSWORD=cluster
+      - CLUSTERING_PORT=62344
+      - NODE_NAME=harper-host
+```
+
+
+We are just summing 1 in the ports so they don't conflict, and also changing the name of the node. The important part here is that the cluster user and password **must be the same in both services**.
+
+Let's spin that up with `docker compose up`, you should see the result of two HarperDB instances being run. Now let's go to the [HarperDB Studio](https://studio.harperdb.io/) and register them. Just create your account, organization, and click on register a new user-managed instance. This should be the data we have:
+
+![alt_text](https://lh4.googleusercontent.com/k1ucCSICKJrd0ackVrygjUD7mg84M2-PXveVLT_VR7GjUDMKl2ji-pPuvPVm2D8OFf7bzd40SlzaeUrYJXYJgQCfxKGiJEITyWoyKsVbN9b7kI-8EXrIgmNIwoL3yqlDUpEjTGJ5cd4KvNcp1Yi7p69UPo7wdEmmdJWcqdQluF9AjDwnsgz661R7F3q2p7oonyYoaA)
+
+Select the free instance and accept the terms, we should be ready to go:
+
+![alt_text](https://lh3.googleusercontent.com/rjJ9LcUAJk1ROfpgVx9V4wvKBP_TUbZn9sH_rURvC02cP6ApdsGDM09OHWMZV5Xre7CrEVGLw6C9fpr_REOQK6jQnnsahXwmlw-7KgehB0oGaAmNqezkrNw2QTnQs_-aB8OB7E5alMj2RzfJ0X-RJOOpEV1cxpoTsZ6UYmSeJU28BxHZVObnxS2j4xmiMjcJqjN-Ww)
+
+Let's do the same for the other one:
+
+![alt_text](https://lh6.googleusercontent.com/oRSFJMZQSYOVzkDKOlpJ5GOYRfFKDV6Ienk_RfF7HdS9VutVNRPRx3jImZ-FLD7zRNso2emFIAFBI6sBFCd9sYFTeUOStBcjBRx5XSk5g6-uYF62EiaxP1oDULfos5TfJY0uBcCTsrL8J8FU6HfiwTTGxOUJivaxAb-u0j4UWWn1jx_E3s-kuBwpcd8h8zfmFXnq7A)
+
+What will change will only be the port number, which is now 9902.
+
+### Connecting the nodes
+
+We won't create any tables on any of the instances. Instead, let's jump into our studio and go to the "Cluster" tab on any of those instances:
+
+![alt_text](https://lh3.googleusercontent.com/RciYxqORHWncBEzeaHxSIXaJnRqt-ukbdAjdQQtYe5em5umV8JwVRlOAYdO24hk-LwbNTsclWGITHtB1qE8qg0A_pMhomIdLqFaGAKU5xklSeg2n38jf_eg9mwr-eP_D1mFh7KrouZjGAKE3gzdA08HdX23TiaOIMJ8V8ZRz2x1wDJqYPsDHyfkJMevqjC2gYi2WYA)
+ 
+
+As you can see, we have our other node listed, but when we try to connect we get an error:
+
+![alt_text](https://lh3.googleusercontent.com/rWsWN4YkFi78e5CFsUAuoeEym2j9-oXEEB1J3uBuV61WWmLvc2tzcr5sbf_73TOluANk-Riaij7AFVg_hKv1l3p6bx-JpVgIbW-7X_8C3FdBrGR-Z-e4ENe801wcfCCyckIaPRfEf9mvLRHAWb6jNHzVABD59EbQoUJ3Ef5a9Og0vvwVvn6zs7sfvIFbMcgvMrq9qg)
+
+Since we're using Docker, the instance is not available through the HarperDB studio to be connected to the other node in the cluster, in this case, we'll need to take the matters into our own hands, literally.
+
+HarperDB has an API that allows you to manually create a connection between two nodes. On any request tool you have – like Postman, Insomnia, or any other – use the URL: `http://localhost:9902` in a POST request. You can use any of the hosts to do what we're about to do, but to keep the idea of the project, let's connect to the host one representing the company's database.
+
+In the auth section, we'll use a basic HTTP auth, the username and password are the ones we defined in the compose file, in this case both of them are `admin`. Now we'll create a JSON body that looks like this:
+
+```json
+{
+  "operation": "add_node",
+  "name": "harper-edge",
+  "host": "harper-edge",
+  "port": 62344,
+  "subscriptions": [] 
+}
+```
+
+So, from the company's database, we want to **publish** configurations and **subscribe** to sensor data, let's tell the node that with two objects inside the `subscriptions` key:
+
+
+```json
+{
+  "operation": "add_node",
+  "name": "harper-edge",
+  "host": "harper-edge",
+  "port": 62344,
+  "subscriptions": [
+    {
+      "channel": "default:sensor_data",
+      "subscribe": true,
+      "publish": false
+    },
+        {
+      "channel": "default:configs",
+      "subscribe": false,
+      "publish": true
+    }
+  ] 
+}
+```
+
+Now, we go back to our studio and log on to the **harper-host** instance. We'll create our schema called `default` and a table called `configs`. 
+
+![alt_text](https://lh5.googleusercontent.com/PxuVCYtj2phl68GK3xbZcWHvZz1cYXvRC-S_jBEhw5vwGjFPUQQq4cVBLFQHk3coGdgBap5eX6nlCbnpB-1dsqvSVzRcAAqirI92UTjAX3JXHwzGhexrck7bSVhpmaFXypuv9BaJXkAFnAz21ckdVBOvSAQO4nwVP3bmogh3x7PAW-KoCz7smnLDSQYvrMidkP5Txg)
+
+Now, let's add a simple data to that table by clicking the `+` button on the top right:
+
+![alt_text](https://lh5.googleusercontent.com/GF3pjB0hMIg41i1oP_R2Ej9H6Qlk_GyoJFxQC028U6O2XJ79aKYAJtyD9mGQ4bK7YdB_QYtPythmeWPYXeyqlCraNx5-52v27bxOOdhWx2ouqsRLfwSgTxOMyhSDz6t_ju6omQIFJK9xZiOLDUXbjJTinacfSw_Qe4r1B9SzjgxQVeQYmkUgp4RKpIgykC3Pp6FWOw)
+
+After saving, let’s switch to the `harper-edge` instance, and look! We now have a configs table and inside that table we have the same item we just added:
+
+![alt_text](https://lh3.googleusercontent.com/rPEomAdtt3jj97lKe6LtHfB0sQxNZ0OToWWOGQB1qKoTBsEWUpBMVZoyS4-IZJ2ZCV5GHFtjpJMexY28GvA_aN3985lzlJoVzZAT788DnZFVEr9A56gZEDio9x54Lz-1TsONTVuIfjBARr_fdfw1e04e0E9YffTqxSh1xJt-dE6uqiP6iS0gwFpHZcThJRLx0gEqwA)
+
+Let's do the same on the `harper-edge` instance, and add a table called `sensor_data` with a hash of `id`, then add some data on it:
+
+![alt_text](https://lh3.googleusercontent.com/XkkxFRcSeUm4UjiOu8BNhapKZZwMTTrgjgrLxqMHc1I5FVn4D28Y-TgPgW5zMqaS-cd1KqxtXZpq1fTRZ8xuEDIutSEIuVmafB0SJ1tj8sZ6kpLr_w9XZVpbMfZ3yFy1FfU9P_T_LY9snIxQGFA_ouRxv66DH-ZDTXpa0R7CiluiCaCRYe7JYis1hDuC4thWlS2jJw)
+
+And if we switch back to the host, we'll also have the same data over there:
+
+![alt_text](https://lh6.googleusercontent.com/BlYOGunoeObp35jJUqmFSB7BNFr1WH3LWP1gq8F1jpTClJxAZipldULq9ldu94T5hoqu__vmduzXaarIy6IcEWmbrhmXOztzqo7H1NgW28cgBNINeHAYPWQcubJ6PnMWBrE7VXGxM2dbjHE7qbJnsFo8JRrlNKNqcC0DTplm_5N8HVC_8tNwNd4-rF1DD_Ml1DXpyw)
+
+This is valid even if we delete the data on one of the sides, in this case the data on the other end will also be deleted.
+
+## Conclusion
+
+
+This was the first glimpse of this amazing feature. Stay tuned for the next tutorials on how we can use Harper's pub/sub to make it work in our favor in other real-world examples.

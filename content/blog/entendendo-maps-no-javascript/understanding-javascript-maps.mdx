@@ -1,0 +1,350 @@
+---
+title: "Understanding JavaScript Maps"
+pubDate: 2024-01-13T20:42:28.000Z
+lang: "en"
+slug: "understanding-javascript-maps"
+category: "javascript"
+tags: ["javascript", "development", "ecmascript"]
+description: "Since the dawn of humanity, we have tried to relate things in key and value objects. Let's talk about how JavaScript solves this with Maps."
+draft: false
+machineTranslated: false
+---
+Since the dawn of humanity, we have tried to relate things in key and value objects, for example, a party guest list, class attendance lists, counting practically anything and so on.
+
+![La Pascaline, the world's first mechanical calculator](./0-ixtsota2lx56bcxz-5e2294.jpg)
+
+La Pascaline, the world's first mechanical calculator
+
+When the first [programmable machines](https://pt.wikipedia.org/wiki/Pascalina) appeared back in the day with mechanical calculators, a new problem was created: how can we transpose lists of keys and values into a computational structure that is both easily manipulated and secure?
+
+And so *Hash Maps* came up.
+
+## And then the maps were made.
+
+If you're used to working with Java, you've probably heard of or even used a hash map. They are the most common implementations of iterable objects containing keys and values or, as they're also called, *dictionaries* (C# people go nuts).
+
+![](./0-8nsksebopweuomeg-f15e12.png)
+
+In strongly typed languages (such as Java and C#), we have to specify the types of both the key and the value we are going to store (see `<int, string>`), but how do we do this in Javascript? A language so dynamic that even programmers can't handle it?
+
+Well, the answer to that is quite simple: we don't. As Javascript already has key and value objects naturally (much like Python and PHP), we don't need to do any special handling, so this creates an easily iterable structure, but what about security?
+
+A very common use for Javascript maps is when we map *string* keys to an arbitrary value, as below:
+
+```js
+let kennel = {}
+
+function add (name, meta) {
+  kennel[name] = meta
+}
+
+function get (name) {
+  return kennel[name]
+}
+
+add('Heckle', { color: 'Black', breed: 'Dobermann' })
+add('Jeckle', { color: 'White', breed: 'Pitbull'})
+```
+
+We're going to create a list of dogs, obviously, but we have a bit of a problem with this project design:
+
+- **Security**: Imagine that one of the keys is called `__proto__` or `toString`  or anything inside `Object.prototype`  then we're going to have a big problem, as I already said in my [article about prototypes (in Portuguese)](https://medium.com/trainingcenter/heran%C3%A7a-e-prot%C3%B3tipos-no-javascript-2c1e60e005a2), it's never a good idea to mess with them directly. Besides, we're creating practically unpredictable behavior in our code.
+- The iterations over these items will be quite verbose with `Object.keys(kennel).forEach`, unless you implement an [iterator](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495), which is also a little verbose.
+- The keys are limited to simple *strings* so it's complicated to create other keys of other types that aren't *strings* or are just references.
+
+### The first solution
+
+To solve the first security problem, we simply add a prefix at the beginning of the key, which makes it different from anything native:
+
+```js
+let kennel = {}
+function add (name, meta) {
+  kennel[`map:${name}`] = meta
+}
+function get (name) {
+  return kennel[`map:${name}`]
+}
+
+add('Heckle', { color: 'Black', breed: 'Dobermann' })
+add('Jeckle', { color: 'White', breed: 'Pitbull'})
+```
+
+But luckily, ES6 came along to solve the problems we had in ES5.
+
+## Maps in ES6
+
+With the advent of ES6 we have a specific structure for dealing with maps. It's called, amazingly, `Map`. Let's see how it would look if we converted our previous code to this new structure:
+
+```js
+let map = new Map()
+map.set('Heckle', { color: 'Black', breed: 'Dobermann' })
+map.set('Jeckle', { color: 'White', breed: 'Pitbull' })
+```
+
+Much simpler, right?
+
+The main difference here is that we can use **anything** as a key. We are no longer limited to primitive types, but can also use functions, objects, dates, anything.
+
+```js
+let map = new Map()
+map.set(new Date(), function foo () {})
+map.set(() => 'key', { foo: 'bar' })
+map.set(Symbol('items'), [1,2])
+```
+
+Obviously, many of these things don't make practical sense, but they are possible models to use.
+
+The other significant change is that `Map` is [iterable](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495) and produces a collection of values more or less of the type `[ ['key', 'value'], ['key', 'value'] ]`  .
+
+```js
+let map = new Map([
+  [new Date(), function foo () {}],
+  [() => 'key', { foo: 'bar' }],
+  [Symbol('items'), [1,2]]
+])
+```
+
+That's another way to initialize a Map
+
+The above is the same as using `map.set` for each value we insert. It's kind of dumb to add the items one by one when we can just include an **entire iterable** in our direct `map` . Which gives us the *spread operator* as a side effect:
+
+```js
+let map = new Map()
+map.set('f', 'o')
+map.set('o', 'b')
+map.set('a', 'r')
+	
+console.log([...map]) // [ ['f', 'o'], ['o', 'b'], ['a', 'r'] ]
+```
+
+And since we have the power of the iterator in our hands, we can mix everything up: destructuring, `for ... of` , template literals and so on:
+
+```js
+let map = new Map()
+map.set('f', 'o')
+map.set('o', 'b')
+map.set('a', 'r')
+
+for (let [key, value] of map) {
+  console.log(`${key}: ${value}`)
+  // 'f: o'
+  // 'o: b'
+  // 'a: r'
+}
+```
+
+And now that we know a bit about hash maps, we can talk about something that might not have been clear at first. Despite having an implementation of an addition API, all keys are unique, which means that if we keep writing to a key, it will only overwrite its own value:
+
+```
+let map = new Map()
+map.set('a', 'a')
+map.set('a', 'b')
+map.set('a', 'c')
+console.log([...map]) // [ ['a', 'c'] ]
+```
+
+### The case of NaN
+
+This case is important to highlight. I think we all know that `NaN` is a very strange Javascript monster that behaves in some very... exotic ways...
+
+"Naturally", an expression like `NaN !== NaN` will give `true` as a product, that is, `NaN` is not equal to `NaN`, and this usually causes this reaction in programmers:
+
+![](./1-f2swyzpnn1ung3qk-2om-w-e30cd7.gif)
+
+But! In our Map, if we define a key as being `NaN` , its value will be `NaN` , that is, it will resolve itself:
+
+```js
+console.log(NaN === NaN) // false
+let map = new Map()
+map.set(NaN, 'foo')
+map.set(NaN, 'bar')
+console.log([...map]) // [[NaN, 'bar']]
+```
+
+And this is the presentation of a bizarre *corner case* that happens when we use Maps.
+
+## Maps and DOM
+
+In ES5 we had a big problem when we needed to associate a DOM element with an API. The standard approach was to create extensive code like the one below, which simply returns an API object with various methods that manipulate DOM elements, allowing us to include or remove them from the Cache and get an API object for the element if it exists:
+
+```js
+let cache = []
+function put(el, api) {
+  cache.push({ el: el, api: api })
+}
+
+function find(el) {
+  for (i = 0; i < cache.length; i++) {
+    if (cache[i].el === el) {
+      return cache[i].api
+    }
+  }
+}
+
+function destroy(el) {
+  for (i = 0; i < cache.length; i++) {
+    if (cache[i].el === el) {
+      cache.splice(i, 1)
+      return
+    }
+  }
+}
+
+function thing(el) {
+  let api = find(el)
+  if (api) {
+    return api
+  }
+
+  api = {
+    method: method,
+    method2: method2,
+    method3: method3,
+    destroy: destroy.bind(null, el)
+  }
+  put(el, api)
+  return api
+}
+```
+
+In ES6, we have the great advantage of being able to index DOM elements as a key, so we can simply add the method relating to it in a value as a function.
+
+```js
+let cache = new Map()
+
+function put(el, api) {
+  cache.set(el, api)
+}
+
+function find(el) {
+  return cache.get(el)
+}
+
+function destroy(el) {
+  cache.delete(el)
+}
+
+function thing(el) {
+  let api = find(el)
+  if (api) {
+    return api
+  }
+
+  api = {
+    method: method,
+    method2: method2,
+    method3: method3,
+    destroy: destroy.bind(null, el)
+  }
+
+  put(el, api)
+  return api
+}
+
+```
+
+The gain here is not only in reading, but also in performance. Note that all the methods (or most of them) now only have one line of code, which means we can leave them *inline* without any problems, saving request space in a front-end application.
+
+## Other things with Maps
+
+### Symbols
+
+`Maps` are collections of data, the famous *collections* that haunt every algorithm student in college. This means that it's easy to search within them whether a key exists or not. We have the exotic case of `NaN`  that I mentioned above, but apart from that all `Symbol` objects are treated differently, so you'll need to use them by value:
+
+```js
+let map = new Map([[NaN, 1], [Symbol(), 2], ['foo', 'bar']])
+
+console.log(map.has(NaN)) // true
+console.log(map.has(Symbol())) // false
+console.log(map.has('foo')) // true
+console.log(map.has('bar')) // false
+```
+
+See what happened? `Symbol`  is always a single object that returns a reference, so as long as you keep the reference that `Symbol`  gave you, everything is fine.
+
+```js
+let sym = Symbol()
+let map = new Map([[NaN, 1], [sym, 2], ['foo', 'bar']])
+
+console.log(map.has(sym)) // true
+```
+
+### Key-Cast
+
+Unlike our initial model where we only had *string* keys, *maps* allow any type of information and do not perform any conversion of these types, we may be used to turning everything into a *string*, but remember that this is no longer necessary.
+
+```js
+let map = new Map([[1, 'a']])
+
+console.log(map.has(1)) //true
+console.log(map.has('1')) //false
+```
+
+### Clear
+
+We can clear a `Map` without losing the reference to it, because it is a collection, as already mentioned.
+
+```js
+let map = new Map([[1, 2], [3, 4], [5, 6]])
+map.clear()
+console.log(map.has(1)) // false
+console.log([...map]) // []
+```
+
+### Entries and Iterators
+
+If you've read [my article on iterators](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495), you'll have recognized `Map` as a model for implementing this protocol. 
+
+So this means that you can iterate through its `.entries()`, but if we're using `Map` as an *iterable*, this will already be done anyway, so you don't need to iterate explicitly, see that `map[Symbol.iterator] === map.entries` will return `true`.
+
+Just like `.entries()`, `Map` has two other methods that you can take advantage of, `.keys()` and `.values()`. So, basically they are self explanatory...
+
+```js
+let map = new Map([[1, 2], [3, 4], [5, 6]])
+
+console.log([...map.keys()]) // [1, 3, 5]
+console.log([...map.values()]) // [2, 4, 6]
+```
+
+### Size
+
+`Map` also comes standard with a read-only property called `.size`  which gives you, at any time, the number of pairs in the hash map. It behaves basically the same as `Array.prototype.length`.
+
+```js
+let map = new Map([[1, 2], [3, 4], [5, 6]])
+
+console.log(map.size) // 3
+
+map.delete(3)
+console.log(map.size) // 2
+
+map.clear()
+console.log(map.size) // 0
+```
+
+### Sorting
+
+A second-to-last thing worth mentioning is that the pairs in a `Map` are iterated in **insertion order** and not in random order as was the case with `Object.keys`. 
+
+It's such that we used `for ... in` to iterate over an object's properties in a completely arbitrary way.
+
+### Loop
+
+Finally, we have the well-known `forEach()` method, which basically does what the analogous `Array` method does. 
+
+Remember that we don't have keys as strings here.
+
+```js
+let map = new Map([[NaN, 1], [Symbol(), 2], ['foo', 'bar']])
+map.forEach((value, key) => console.log(key, value))
+//NaN 1
+//Symbol() 2
+//'foo' 'bar'
+```
+
+# Conclusion
+Maps have really come to the rescue when it comes to collections of keys and values or data dictionaries that we have to manipulate in a very complicated way in ES5, but we need to be careful and also, above all, get to know the structure we are working with so that we don't fall end up having a key object that we don't understand.
+
+Be sure to follow more of my content on my [blog](https://blog.lsantos.dev)!
+
+I hope you enjoyed it, visit [this article](https://ponyfoo.com/articles/es6-maps-in-depth) to find out more, I got a lot of content out of it and a lot of examples too :)
