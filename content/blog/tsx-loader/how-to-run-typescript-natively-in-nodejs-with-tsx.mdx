@@ -22,6 +22,8 @@ Both of these packages are loaders, they receive the files that will be loaded b
 
 > You can see more about this functionality in the [official documentation](https://nodejs.org/api/module.html#transpilation), including using the transpiling example itself.
 
+A loader can then choose which file it's going to work with, in our case `.ts`, and perform an action on it. In this case, that action is transpiling it to JavaScript and sending it to Node to evaluate the code.
+
 ### TSX
 
 [TSX](https://npm.im/tsx) is the newest and most improved version of our `ts-node`, using [ESBuild](https://esbuild.github.io) to transpile TS files to JS very quickly.
@@ -66,3 +68,13 @@ NODE_OPTIONS='--loader=tsx' node --env-file=.env index.ts
 Try running this command around in your projects to make development easier!
 
 > **Important:** Loading TS files directly from disk and compiling with loaders is much slower than transpiling first and passing the JavaScript files directly, so it is recommended that you only do this for development environments.
+
+## Update Oct-2023
+
+As of Node version 20.6, the `--loader` option has been [deprecated](https://nodejs.org/api/cli.html#--experimental-loadermodule), now the option we need to pass is `--import`:
+
+```bash
+NODE_OPTIONS='--import tsx' node --env-file=.env index.ts
+```
+
+Read more about the new API in the [official documentation](https://nodejs.org/api/module.html#enabling).
