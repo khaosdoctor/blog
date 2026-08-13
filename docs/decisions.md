@@ -5,6 +5,18 @@ Dated, newest first. What was decided, why, and what the alternative was. Anythi
 
 ## 2026-08-13, overnight
 
+### Two commits are unsigned and nothing is pushed past 31b80ef
+
+The 1Password agent locked partway through the night, so `git` could neither sign nor authenticate over SSH:
+`1Password: failed to fill whole buffer`, then a push rejected for access rights. Every commit up to `31b80ef` is
+signed and on the remote. `06bae5d` onward exist locally and unsigned, since losing the work was the worse option.
+
+Unlock 1Password, then either `git push` as is, or re-sign first:
+
+```
+git rebase --exec 'git commit --amend --no-edit -S' 31b80ef
+```
+
 ### Clutter audit: what I applied and what I rejected
 
 An Opus critic reviewed the whole repo under a "delete first" stance. Its two largest recommendations are rejected,
