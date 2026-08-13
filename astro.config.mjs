@@ -1,6 +1,7 @@
 // @ts-check
 import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
+import vue from '@astrojs/vue'
 import { defineConfig } from 'astro/config'
 import expressiveCode from 'astro-expressive-code'
 import mermaid from 'astro-mermaid'
@@ -8,7 +9,7 @@ import rehypeCallouts from 'rehype-callouts'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import { redirectStubs } from './src/integrations/redirect-stubs.mjs'
-import { lastModified } from './src/lib/post-dates.mjs'
+import { lastModified, noindexPaths } from './src/lib/post-dates.mjs'
 import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
 import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
@@ -25,19 +26,28 @@ export default defineConfig({
     // diagram render as a plain code block. Mermaid's own script only loads on
     // pages that actually contain a diagram.
     mermaid({ theme: 'default', autoTheme: true }),
+    // Vue is here for interactive demos inside a post, which is the only thing
+    // on this site that needs a framework. A post that uses none ships no Vue:
+    // an island only loads where it is actually placed.
+    vue(),
     // expressiveCode must precede mdx: it replaces the default Shiki setup.
     expressiveCode({
       themes: ['github-light', 'github-dark'],
       styleOverrides: { borderRadius: '4px', codeFontSize: '0.85rem' },
     }),
     mdx(),
-    // The search page and the offline fallback are chrome, not content.
+    // The search page and the offline fallback are chrome, not content. A post
+    // with `noindex: true` is dropped too, otherwise the sitemap would advertise
+    // a page whose own meta tag tells crawlers to stay away.
     //
     // lastmod is not emitted by default, so every URL looked equally fresh and a
     // 2019 post competed for crawl budget with one published today. serialize
     // fills it in from the post dates collected during the build.
     sitemap({
-      filter: (page) => !page.includes('/search/') && !page.includes('/offline/'),
+      filter: (page) =>
+        !page.includes('/search/') &&
+        !page.includes('/offline/') &&
+        !noindexPaths.has(new URL(page).pathname),
       serialize: (item) => {
         const modified = lastModified.get(new URL(item.url).pathname)
         return modified === undefined ? item : { ...item, lastmod: modified }
