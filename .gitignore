@@ -23,6 +23,9 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+# per-machine Claude Code tool permissions, not a project setting
+.claude/settings.local.json
+
 # Obsidian vault config. Obsidian Sync already carries it across machines, and
 # most of these files rewrite themselves on every session, so tracking them here
 # only manufactures conflicts. The setup they hold is written down in
