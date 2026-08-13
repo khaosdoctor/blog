@@ -36,7 +36,26 @@ export default defineConfig({
     vue(),
     // expressiveCode must precede mdx: it replaces the default Shiki setup.
     expressiveCode({
-      themes: ['github-light', 'github-dark'],
+      // github-light/github-dark keep the current look; monokai and
+      // solarized-dark are the picker's other two options (see
+      // CodeTheme.astro). Solarized was designed around the 16-color ANSI
+      // terminal palette, and monokai is the saturated, high-contrast look
+      // most terminal-retro editor themes borrow from, so both fit the
+      // ASCII/ANSI direction in theme.css better than the average Shiki theme.
+      themes: ['github-light', 'github-dark', 'monokai', 'solarized-dark'],
+      // Four themes turn this default off (it only defaults on for exactly one
+      // light and one dark theme), but a reader who has not picked anything
+      // yet still needs the same light/dark split as before, so it is turned
+      // back on explicitly. With github-light listed first and github-dark
+      // second, the generated media query is still exactly the old
+      // light-follows-system, dark-follows-system pair.
+      useDarkModeMediaQuery: true,
+      // The default selector is `[data-theme='name']`; this site has no other
+      // use of `data-theme`, but `data-code-theme` says what it is for and
+      // keeps the attribute unambiguous if a site-wide theme switch is ever
+      // added later. Set on <html> by CodeTheme.astro; unset, the media query
+      // above decides, so a reader who never opens the picker sees no change.
+      themeCssSelector: (theme) => `[data-code-theme='${theme.name}']`,
       styleOverrides: { borderRadius: '4px', codeFontSize: '0.85rem' },
       // Fence labels written years ago that Shiki has no grammar for, so those
       // blocks silently lost their highlighting. Aliases rather than edits across

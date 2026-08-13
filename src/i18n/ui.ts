@@ -31,6 +31,9 @@ type UIKey =
   | 'linkCopied'
   | 'footnotes'
   | 'openInNewTab'
+  | 'showSource'
+  | 'codeTheme'
+  | 'codeThemeAuto'
   | 'notWrittenYet'
   | 'allPosts'
   | 'categories'
@@ -104,6 +107,9 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     linkCopied: 'link copiado',
     footnotes: 'Notas de rodapé',
     openInNewTab: 'abrir em uma aba',
+    showSource: 'ver o código',
+    codeTheme: 'Tema do código',
+    codeThemeAuto: 'Automático (segue o sistema)',
     notWrittenYet: 'ainda não escrito',
     allPosts: 'Todos os posts',
     categories: 'Categorias',
@@ -177,6 +183,9 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     linkCopied: 'link copied',
     footnotes: 'Footnotes',
     openInNewTab: 'open in a tab',
+    showSource: 'show the source',
+    codeTheme: 'Code theme',
+    codeThemeAuto: 'Automatic (matches your system)',
     notWrittenYet: 'not written yet',
     allPosts: 'All posts',
     categories: 'Categories',

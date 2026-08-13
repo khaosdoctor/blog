@@ -1,0 +1,84 @@
+---
+import { localeFromPath, t } from '../i18n/ui'
+
+/**
+ * An interactive demo with its own source one click away.
+ *
+ * Wraps whatever island a post drops in the slot, and takes that component's
+ * source as a string so the reader can see what they are running:
+ *
+ *   import Counter from './components/Counter.vue'
+ *   import source from './components/Counter.vue?raw'
+ *
+ *   <LabDemo source={source} name="Counter.vue">
+ *     <Counter client:visible />
+ *   </LabDemo>
+ *
+ * `<details>` rather than a button and a script: it is a disclosure widget, which
+ * is exactly what the element is for, so this costs no JavaScript and works with
+ * a keyboard for free.
+ */
+interface Props {
+  /** The component's own source, imported with Vite's `?raw`. */
+  source: string
+  /** Filename, shown on the toggle so it is obvious whose source this is. */
+  name: string
+}
+
+const { source, name } = Astro.props
+const locale = localeFromPath(Astro.url.pathname)
+---
+
+<figure class="lab-demo">
+  <div class="stage">
+    <slot />
+  </div>
+  <details>
+    <summary>{t(locale, 'showSource')} <code>{name}</code></summary>
+    <pre><code>{source.trim()}</code></pre>
+  </details>
+</figure>
+
+<style>
+  .lab-demo {
+    margin-block: 2rem;
+    margin-inline: 0;
+    border: var(--border) double var(--rule);
+    border-inline-start: var(--border-card-edge) solid var(--rule);
+    border-radius: var(--radius);
+  }
+
+  .stage {
+    padding: 1.25rem;
+  }
+
+  details {
+    border-block-start: var(--border) solid var(--rule);
+  }
+
+  summary {
+    padding: 0.4rem 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  summary:hover {
+    color: var(--accent);
+  }
+
+  summary code {
+    text-transform: none;
+  }
+
+  details pre {
+    margin: 0;
+    border: 0;
+    border-block-start: var(--border) solid var(--rule);
+    border-radius: 0;
+    font-size: 0.78rem;
+  }
+</style>

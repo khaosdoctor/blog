@@ -1,17 +1,25 @@
 /**
  * Astro's GFM footnotes put the footnote body once, at the foot of the post,
  * and the reader has to jump there and back to read it. This plugin does not
- * move or remove that list (it must stay reachable at its own anchor), it
- * copies each footnote body into an `<aside class="footnote-aside">` right
- * after the paragraph that references it, so src/styles/footnotes.css can
- * float it into the margin on a wide viewport. Below that breakpoint the
- * reference's own hover-preview card (src/scripts/hover-previews.ts) covers
- * the same note, so the aside stays hidden there.
+ * move or remove that list (it must stay reachable at its own anchor, and is
+ * the only copy a reader with CSS off or an RSS reader ever sees), it copies
+ * each footnote body into an `<aside class="footnote-aside">` right after the
+ * paragraph that references it, so src/styles/footnotes.css can float it into
+ * the margin on a wide viewport. Below that breakpoint the reference's own
+ * hover-preview card (src/scripts/hover-previews.ts) covers the same note,
+ * so the aside stays hidden there too, reading straight out of the (now
+ * visually hidden, see footnotes.css) section at the foot of the page.
+ *
+ * The section at the foot of the page is `display: none` in
+ * src/styles/footnotes.css now: the margin copy is the only one a sighted
+ * reader ever sees, so it is also the one this plugin leaves reachable to
+ * assistive tech. `display: none` drops the foot-of-page section out of the
+ * accessibility tree the same way it drops out of layout, so there is no
+ * double announcement to guard against there; this copy carries no
+ * `aria-hidden` of its own, which is what makes it the one a screen reader
+ * does meet.
  *
  * The copy is build-time only, no client fetch, and works with JS disabled.
- * It is also why the copy carries `aria-hidden="true"`: the accessible
- * footnote is the one at the foot of the page, and a screen reader should
- * never meet the same text twice.
  *
  * It also relabels the section's own `<h2>`: GFM hardcodes the English word
  * "Footnotes" in every locale.
@@ -152,18 +160,53 @@ function buildAside(ref, definitions) {
   // carries no id of its own, so the aside still gets something unique.
   const refId = typeof ref.properties?.id === 'string' ? ref.properties.id : href.slice(1)
 
+  const clonedBody = cloneFootnoteBody(body)
+  // The reference number is already known at build time (it is the text GFM
+  // put inside the <a data-footnote-ref> itself), so it is written here as
+  // real text rather than a CSS counter, which has no way to guarantee it
+  // matches the reference's own numbering. Same bracket shape the reference
+  // renders (see the sup ::before/::after in footnotes.css).
+  const number = textContent(ref).trim()
+  if (number) prependText(clonedBody, `[${number}] `)
+
   return {
     type: 'element',
     tagName: 'aside',
-    properties: { className: ['footnote-aside'], id: `${refId}-margin`, 'aria-hidden': 'true' },
-    children: cloneFootnoteBody(body),
+    properties: { className: ['footnote-aside'], id: `${refId}-margin` },
+    children: clonedBody,
   }
+}
+
+/** Flattens an element's text content, the way `ref` (an `<a
+ * data-footnote-ref>` whose only child is the counter GFM assigned it, see
+ * mdast-util-to-hast's footnote-reference handler) needs to be read as a
+ * plain string. */
+function textContent(node) {
+  if (node.type === 'text') return node.value
+  if (!Array.isArray(node.children)) return ''
+  return node.children.map(textContent).join('')
+}
+
+/** Prepends text to the first text node found down the leftmost branch of
+ * `nodes`, in place. That is always the first thing a reader would see, so
+ * this is where the `[1] ` prefix goes regardless of how deep the footnote
+ * body's first bit of text lives (a bare paragraph, or something wrapping it
+ * like `<em>`). A no-op if the branch bottoms out without hitting text (an
+ * image as the very first thing in a footnote, for instance). */
+function prependText(nodes, prefix) {
+  const first = nodes[0]
+  if (!first) return
+  if (first.type === 'text') {
+    first.value = prefix + first.value
+    return
+  }
+  if (first.type === 'element' && Array.isArray(first.children)) prependText(first.children, prefix)
 }
 
 /** Deep-clones the footnote body, drops the backref arrow (meaningless in
  * the margin) and the whitespace it leaves behind, and drops every `id`
- * (a straight copy would duplicate one, an accessibility-tree ghost since
- * the clone is aria-hidden but still a DOM validity problem). */
+ * (a straight copy would duplicate one, which is invalid regardless of
+ * whether the clone is hidden from assistive tech). */
 function cloneFootnoteBody(nodes) {
   return dropBackref(nodes.map(cloneNode))
 }

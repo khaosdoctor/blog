@@ -2,8 +2,8 @@
 /**
  * <FootnoteSidenotes /> — the pieces of this feature CSS cannot do alone.
  *
- * Two independent, feature-detected behaviours, neither depending on the
- * other working:
+ * Three independent, feature-detected behaviours, none depending on the
+ * others working:
  *
  * 1. Hovering or focusing a Sidenote or MarginNote (src/components/Sidenote.astro,
  *    src/components/MarginNote.astro) should highlight the text it is attached
@@ -37,6 +37,22 @@
  *    reuses the exact `.toast` confirmation and 2-second removal both of
  *    those already use, so the site still has exactly one copy-confirmation
  *    pattern rather than a second one growing here.
+ *
+ * 3. The mirror of (1): hovering the bound text should grow the note it
+ *    belongs to (`.note-grow`, src/styles/sidenotes.css), so the reader can
+ *    tell which one it is from either direction. That text is still not
+ *    wrapped in anything, which is exactly what made (1) need the Highlight
+ *    API instead of a plain CSS selector; here there is not even an element
+ *    for `mouseover` to bubble from, since a bare text node fires no events
+ *    of its own. So this hit-tests the pointer's screen position instead:
+ *    `document.caretPositionFromPoint`/`caretRangeFromPoint` (whichever the
+ *    browser has) returns the exact text node under the cursor, and a note's
+ *    bound text is always that node's `previousSibling` from the note's own
+ *    side (see boundRange above), so checking the other direction, whether
+ *    the text node's `nextSibling` is a `.note`, finds the note to grow.
+ *    Feature-detected (bails out at the top if neither API exists) and
+ *    wrapped, same as (1): a note that never grows is a cosmetic loss, not a
+ *    broken page.
  */
 import { localeFromPath, t } from '../i18n/ui'
 
@@ -112,6 +128,63 @@ const locale = localeFromPath(Astro.url.pathname)
       document.addEventListener('focusout', hide)
     } catch (_error) {
       // A highlight that never shows is a cosmetic loss, not a broken page.
+    }
+  })()
+</script>
+
+<script is:inline>
+  ;(function () {
+    try {
+      // Whichever of the two the browser has: Firefox ships
+      // caretPositionFromPoint, Chromium (as of this writing) only
+      // caretRangeFromPoint. Neither existing is a plain no-op, not an
+      // error, same as the highlight block above.
+      var textNodeAt
+      if (typeof document.caretPositionFromPoint === 'function') {
+        textNodeAt = function (x, y) {
+          var pos = document.caretPositionFromPoint(x, y)
+          return pos ? pos.offsetNode : null
+        }
+      } else if (typeof document.caretRangeFromPoint === 'function') {
+        textNodeAt = function (x, y) {
+          var range = document.caretRangeFromPoint(x, y)
+          return range ? range.startContainer : null
+        }
+      } else {
+        return
+      }
+
+      var GROWN = 'note-grow'
+      var grown = null
+
+      // The inverse of boundRange above: given the text node under the
+      // pointer, its own note (if it has one) is whatever immediately
+      // follows it in the same parent.
+      function noteAfter(node) {
+        if (!node || node.nodeType !== Node.TEXT_NODE) return null
+        var next = node.nextSibling
+        if (!next || next.nodeType !== Node.ELEMENT_NODE || !next.classList) return null
+        return next.classList.contains('note') ? next : null
+      }
+
+      function setGrown(note) {
+        if (note === grown) return
+        if (grown) grown.classList.remove(GROWN)
+        grown = note
+        if (grown) grown.classList.add(GROWN)
+      }
+
+      document.addEventListener('mousemove', function (event) {
+        setGrown(noteAfter(textNodeAt(event.clientX, event.clientY)))
+      })
+      // relatedTarget is null when the pointer leaves the window outright,
+      // the one case mousemove stops firing without another element to
+      // report hitting.
+      document.addEventListener('mouseout', function (event) {
+        if (!event.relatedTarget) setGrown(null)
+      })
+    } catch (_error) {
+      // A note that never grows is a cosmetic loss, not a broken page.
     }
   })()
 </script>

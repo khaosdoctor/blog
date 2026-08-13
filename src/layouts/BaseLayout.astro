@@ -24,6 +24,7 @@ import '../styles/math.css'
 // Quote and epigraph treatments the lab page shows side by side. This file is a
 // menu, not a decision: the chosen variant moves into prose.css and the rest go.
 import '../styles/variants/quotes.css'
+import CodeTheme from '../components/CodeTheme.astro'
 import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
 import LangSwitcher from '../components/LangSwitcher.astro'
 import MathCopy from '../components/MathCopy.astro'
@@ -81,6 +82,19 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* Ahead of every stylesheet on purpose: the reader's chosen code theme has
+        to be on <html> before the first paint, or every page flashes the
+        system-default theme first. Nothing stored means no attribute, and the
+        prefers-color-scheme media query in expressive-code's own CSS decides,
+        which is exactly the behaviour before there was a picker. */}
+    <script is:inline>
+      try {
+        const stored = localStorage.getItem('code-theme')
+        if (stored !== null && stored !== 'auto') document.documentElement.setAttribute('data-code-theme', stored)
+      } catch {
+        // Private mode, or storage disabled. The media query still applies.
+      }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- iOS ignores the manifest and looks for this one specifically. -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -137,6 +151,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     </footer>
     <MathCopy locale={locale} />
     <FootnoteSidenotes />
+    <CodeTheme locale={locale} />
     {
       analyticsToken && (
         <script

@@ -112,9 +112,9 @@
    */
   --rule-length: 150px;
   --rule-weight: 1px;
-  --rule-core: color-mix(in oklab, var(--fg) 80%, transparent);
-  --rule-dot: 3px;
-  --rule-gap: 4px;
+  --rule-core: var(--fg);
+  --rule-dot: 2px;
+  --rule-gap: 8px;
 
   /* Tables: every cell ruled, header tinted and bold, room around the text. */
   --table-edge: light-dark(#1a1c20, #e6e4e0);
