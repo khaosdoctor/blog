@@ -104,3 +104,26 @@ pairing. One collection, one schema. Images are `./image.png` for both languages
 Every colour, font stack, size and duration now lives in `src/styles/theme.css`. Two font stacks on purpose:
 `--font-display` is where an 8-bit face goes, `--font-body` stays readable for a 3000 word article. See
 `docs/design.md`.
+
+### Callouts had no stylesheet
+
+`rehype-callouts` emits the markup and the inline icons but ships its themes as opt-in CSS files, which nothing
+imported. All five callout types rendered as plain paragraphs with a stray title line, in every post, since the day the
+plugin went in. `BaseLayout.astro` now imports `rehype-callouts/theme/github`, the plugin's own default, which is the
+theme the emitted class names already match. The ASCII redesign replaces that stylesheet; the callout syntax in posts
+does not change.
+
+Found by building the lab page, which is the argument for having it.
+
+### Astro 7 deprecation: markdown.remarkPlugins, deliberately not migrated yet
+
+Every build prints: `markdown.remarkPlugins`, `markdown.rehypePlugins` and `markdown.remarkRehype` are deprecated in
+favour of `unified({...})` from `@astrojs/markdown-remark`. The whole content pipeline rides on those two arrays.
+
+Not migrated, because `astro-mermaid` appends its own rehype plugin to `markdown.rehypePlugins` from inside its
+integration hook (its build log says so: "Existing rehype plugins"). Moving our side to `unified()` risks that plugin
+landing in an array nothing reads any more, which fails as a diagram silently rendering as a code block rather than as
+an error. The deprecated form still works in 7.x.
+
+Do it when `astro-mermaid` supports `unified()`, or when Astro 8 forces it. The check afterwards is the lab page: it has
+a mermaid diagram and nine LaTeX formulas, so a broken pipeline is visible in one screenshot.

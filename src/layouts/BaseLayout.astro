@@ -2,6 +2,11 @@
 // Self-hosted rather than a CDN link, per the plan: no third-party requests.
 // Without this the one post with LaTeX renders its formulas as raw $...$ text.
 import 'katex/dist/katex.min.css'
+// rehype-callouts emits the markup and the icons but ships its themes as opt-in
+// stylesheets, so without this line every > [!note] rendered as plain text with
+// a stray title. github is the plugin's own default theme, which is what the
+// markup already matches; the ASCII redesign replaces this file, not the syntax.
+import 'rehype-callouts/theme/github'
 // Every colour, font stack, size and duration the site uses. Nothing below
 // should hardcode one.
 import '../styles/theme.css'

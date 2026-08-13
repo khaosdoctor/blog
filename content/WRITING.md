@@ -4,6 +4,8 @@ Everything below works in `.mdx`. Almost all of it is plain markdown that Obsidi
 
 Snippets for the component-shaped ones are in `internal/templates/snippets/`. Run them from the command palette (Templater: Insert template) or bind the ones you use to a hotkey.
 
+Every feature on this page is also demonstrated live at `/lab/` (`content/blog/lab/index.mdx`), source first and rendered result right below it. That page is `noindex`, so it never shows up in search or in the sitemap. When something here reads ambiguously, open the lab page instead.
+
 ## Frontmatter
 
 ```yaml
@@ -171,6 +173,8 @@ the post.
 If a download fails the build carries on, the post keeps the remote URL, and the file is listed in
 `.migration/unreachable-media.md` with a link to the post, so it can be chased by hand later. Nothing breaks because a
 host is down.
+
+A URL inside a code fence is left alone, so an example image reference in a snippet is never downloaded or rewritten.
 
 ## Linking to another post
 
