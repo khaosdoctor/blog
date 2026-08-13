@@ -112,11 +112,11 @@ Não vou me estender nesse tópico porque não é o nosso tema (inclusive esse p
 
 Exponenciação modular é quando pegamos o resto de algum número _b_ (uma base), elevado a um número _x_ (expoente) e dividido por um inteiro positivo _m_ (o módulo) e isso tudo é representado assim:
 
-$C = b^x\mod\{m\}$
+$C = b^x\mod{m}$
 
 E C é um número que vai ficar sempre entre `0` e `m`. Por exemplo, se a base for 5, o expoente for 2 e o módulo for 3:
 
-$C = b^x\mod\{m\} \newline C = 5^2\mod\{3\} \newline C = 25\mod\{3\} \newline C = 1$
+$C = b^x\mod{m} \newline C = 5^2\mod{3} \newline C = 25\mod{3} \newline C = 1$
 
 O resultado C é 1 porque `25/3` é `8` com resto de `1`. E a grande vantagem desse sistema todo é que exponenciação modular é muito eficiente para computar, até mesmo para números muito grandes, porém computar o inverso dessa operação (o [logarítmo discreto](https://en.wikipedia.org/wiki/Discrete_logarithm)), ou seja, qual é o `x` quando você tem `b`, `C` e `m` é uma operação difícil, ainda mais se você utilizar números primos.
 
@@ -263,11 +263,11 @@ Isso que pode ser feito através da função de Carmichael (expressado pela letr
 
 Eu não sou matemático, então não vou complicar as coisas aqui, para resolvermos `_λ(n)_` precisamos achar o menor multiplicador comum entre `p-1` e `q-1`, isso pode ser feito pelo [algoritmo euclidiano](https://en.wikipedia.org/wiki/Euclidean_algorithm):
 
-$\lambda(\{n\}) = \frac\{|(p-1)(q-1)|\}\{mdc((p-1),(q-1))\}$
+$\lambda({n}) = \frac{|(p-1)(q-1)|}{mdc((p-1),(q-1))}$
 
 Onde o `mdc` é o maior divisor comum entre `p-1` e `q-1`, então nossa conta fica:
 
-$\lambda(\{3977\}) = \frac\{|40\times96|\}\{mdc(40,96)\}$
+$\lambda({3977}) = \frac{|40\times96|}{mdc(40,96)}$
 
 O JS não tem uma função para calcular o MDC, então vamos codar uma bem rápido aqui usando o algoritmo euclidiano, podemos aplicar recursivamente:
 
@@ -358,7 +358,7 @@ const e = publicExponent(lambdaN) // 7
 
 Agora vamos calcular `d`, que deve ser um multiplicativo modular inverso de `e`, ou seja, vamos ter que calcular isso aqui:
 
-$d \equiv e^\{-1\}(\mod(\lambda\{n\}))$
+$d \equiv e^{-1}(\mod(\lambda{n}))$
 
 Isso significa que `d` é um número que, quando multiplicado por `e`, tem como resultado um número que é `1 mod(λ(n))`.
 
@@ -614,7 +614,7 @@ const lambdaN = Math.abs((p-1)*(q-1))/mdc(p - 1, q - 1).mdc
 
 Matematicamente mais bonitinha:
 
-$\lambda\{n\} = \frac\{|(p-1)*(q-1)|\}\{mdc(p-1, q-1)\}$
+$\lambda{n} = \frac{|(p-1)*(q-1)|}{mdc(p-1, q-1)}$
 
 Olha ali no numerador, estamos lidando com o φ. Então se removermos a segunda parte (a divisão) não vamos ter nenhuma mudança no resultado:
 

@@ -111,11 +111,11 @@ I won't extend myself on this topic, since it's not our main theme (this paragra
 
 Modular exponentiation is when we take the remainder of some number _b_ (a base), raised to a number _x_ (exponent), divided by a positive integer _m_ (the modulus), and all of this is represented like this:
 
-$C = b^x\mod\{m\}$
+$C = b^x\mod{m}$
 
 And C is a number that will always sit between `0` and `m`. For example, if the base is 5, the exponent is 2, and the modulus is 3:
 
-$C = b^x\mod\{m\} \newline C = 5^2\mod\{3\} \newline C = 25\mod\{3\} \newline C = 1$
+$C = b^x\mod{m} \newline C = 5^2\mod{3} \newline C = 25\mod{3} \newline C = 1$
 
 The result C is 1 because `25/3` is `8` with a remainder of `1`. And the great advantage of this whole system is that modular exponentiation is very efficient to compute, even for very large numbers, but computing the inverse of this operation (the [discrete logarithm](https://en.wikipedia.org/wiki/Discrete_logarithm)), meaning finding `x` when you have `b`, `C`, and `m`, is a hard operation, especially if you use prime numbers.
 
@@ -262,11 +262,11 @@ This can be done through the Carmichael function (expressed by the letter Lambda
 
 I'm not a mathematician, so I won't overcomplicate things here. To solve `_λ(n)_` we need to find the least common multiple between `p-1` and `q-1`, which can be done using the [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm):
 
-$\lambda(\{n\}) = \frac\{|(p-1)(q-1)|\}\{mdc((p-1),(q-1))\}$
+$\lambda({n}) = \frac{|(p-1)(q-1)|}{mdc((p-1),(q-1))}$
 
 Where `mdc` is the greatest common divisor between `p-1` and `q-1`, so our math becomes:
 
-$\lambda(\{3977\}) = \frac\{|40\times96|\}\{mdc(40,96)\}$
+$\lambda({3977}) = \frac{|40\times96|}{mdc(40,96)}$
 
 JS doesn't have a built-in function to calculate the GCD, so let's code one quickly using the Euclidean algorithm. We can apply it recursively:
 
@@ -357,7 +357,7 @@ const e = publicExponent(lambdaN) // 7
 
 Now let's calculate `d`, which needs to be a modular multiplicative inverse of `e`. In other words, we need to calculate this:
 
-$d \equiv e^\{-1\}(\mod(\lambda\{n\}))$
+$d \equiv e^{-1}(\mod(\lambda{n}))$
 
 That means `d` is a number that, when multiplied by `e`, gives us a result that's `1 mod(λ(n))`.
 
@@ -613,7 +613,7 @@ const lambdaN = Math.abs((p-1)*(q-1))/mdc(p - 1, q - 1).mdc
 
 Written a bit more nicely as math:
 
-$\lambda\{n\} = \frac\{|(p-1)*(q-1)|\}\{mdc(p-1, q-1)\}$
+$\lambda{n} = \frac{|(p-1)*(q-1)|}{mdc(p-1, q-1)}$
 
 Look at the numerator there, that's φ right there. So if we remove the second part (the division), we won't see any change in the result:
 
