@@ -4,6 +4,9 @@ import { join } from 'node:path'
 // The same function the tag route uses, so a generated redirect can never point
 // at a slug the site spells differently.
 import { slugify } from '../src/lib/slugify.ts'
+import { count, heading, ok } from './lib/cli.ts'
+
+heading('build-redirects: regenerating src/data/redirects.ts')
 
 const SOURCE_DIR = 'content/blog'
 const OUT = 'src/data/redirects.ts'
@@ -176,5 +179,5 @@ export const redirects: Redirect[] = ${JSON.stringify(final, null, 2)}
 
 const counts = new Map<string, number>()
 for (const row of final) counts.set(row.note, (counts.get(row.note) ?? 0) + 1)
-console.log(`wrote ${OUT} with ${final.length} rules`)
-for (const [note, count] of [...counts].sort((a, b) => b[1] - a[1])) console.log(`  ${count} ${note}`)
+ok(`wrote ${OUT} with ${count(final.length, 'rule', 'rules')}`)
+for (const [note, n] of [...counts].sort((a, b) => b[1] - a[1])) console.log(`  ${count(n, 'rule', 'rules')} ${note}`)

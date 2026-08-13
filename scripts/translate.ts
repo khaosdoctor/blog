@@ -41,6 +41,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
+import { bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 // Sits directly in content/blog, not one level down inside a post folder like
@@ -330,20 +331,20 @@ function buildFrontmatter(original: string, fields: Map<string, string>, locale:
 
 const args = parseArgs()
 
+heading('translate: translating changed posts')
+
 if (!PROVIDERS.includes(PROVIDER)) {
-  console.error(`TRANSLATE_PROVIDER must be one of ${PROVIDERS.join(', ')}, got "${PROVIDER}".`)
+  fail(`TRANSLATE_PROVIDER must be one of ${PROVIDERS.join(', ')}, got "${PROVIDER}".`)
   process.exit(1)
 }
 
 if (PROVIDER === 'anthropic' && API_KEY.length === 0) {
-  console.error(
-    'Neither TRANSLATE_API_KEY nor ANTHROPIC_API_KEY is set. Refusing to run so the build does not silently skip translations.',
-  )
+  fail('Neither TRANSLATE_API_KEY nor ANTHROPIC_API_KEY is set. Refusing to run so the build does not silently skip translations.')
   process.exit(1)
 }
 
 if (PROVIDER === 'openai-compatible' && BASE_URL.length === 0) {
-  console.error('TRANSLATE_BASE_URL is not set. Point it at the /v1 root of the OpenAI-compatible endpoint.')
+  fail('TRANSLATE_BASE_URL is not set. Point it at the /v1 root of the OpenAI-compatible endpoint.')
   process.exit(1)
 }
 
@@ -385,12 +386,19 @@ for (const post of sources) {
   changed.push({ slug: post.slug, file: post.file, raw, sourceHash, existingSlug: existing?.slug ?? null })
 }
 
-console.log(`${sources.length} source posts, ${changed.length} to translate into ${args.locale} with ${MODEL}`)
-if (overrides.length > 0) console.log(`skipping ${overrides.length} hand-edited translations: ${overrides.join(', ')}`)
+console.log(
+  `${count(sources.length, 'source post', 'source posts')}, ${count(changed.length, 'post', 'posts')} to translate into ${args.locale} with ${MODEL}`,
+)
+if (overrides.length > 0) {
+  warn(`skipping ${count(overrides.length, 'hand-edited translation', 'hand-edited translations')}: ${overrides.join(', ')}`)
+}
 if (args.dryRun) {
   console.log(changed.map((post) => post.slug).join('\n'))
   process.exit(0)
 }
+
+let translated = 0
+let skipped = 0
 
 for (const post of changed) {
   const { frontmatter, body } = splitFrontmatter(post.raw)
@@ -406,12 +414,14 @@ for (const post of changed) {
   const completion = await complete(SYSTEM_PROMPT, buildUserPrompt(body, fields, sourceLang, args.locale))
 
   if (completion.refusal !== null) {
-    console.error(`refused: ${post.slug} (${completion.refusal}), skipped`)
+    warn(`refused: ${post.slug} (${completion.refusal}), skipped`)
+    skipped += 1
     continue
   }
 
   if (!completion.text.includes('<<<BODY>>>')) {
-    console.error(`unparseable response for ${post.slug}, skipped`)
+    warn(`unparseable response for ${post.slug}, skipped`)
+    skipped += 1
     continue
   }
 
@@ -421,7 +431,8 @@ for (const post of changed) {
   // the same denylist captions get before it's allowed anywhere near set:html.
   const unsafeField = [...parsed.fields].find(([, value]) => sanitizeCaption(value) !== value)
   if (unsafeField !== undefined || sanitizeCaption(parsed.body) !== parsed.body) {
-    console.error(`unsafe HTML in translated output for ${post.slug} (field: ${unsafeField?.[0] ?? 'body'}), skipped`)
+    warn(`unsafe HTML in translated output for ${post.slug} (field: ${unsafeField?.[0] ?? 'body'}), skipped`)
+    skipped += 1
     continue
   }
 
@@ -440,7 +451,10 @@ for (const post of changed) {
   }
   writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2))
 
-  console.log(`${post.slug} -> ${args.locale} (${completion.usage})`)
+  translated += 1
+  console.log(`  ${bold(post.slug)} ${dim('->')} ${args.locale} (${completion.usage})`)
 }
 
-console.log('done')
+if (changed.length === 0) ok('nothing to translate (no-op)')
+else if (skipped === 0) ok(`translated ${count(translated, 'post', 'posts')}`)
+else warn(`translated ${count(translated, 'post', 'posts')}, skipped ${count(skipped, 'post', 'posts')}`)
