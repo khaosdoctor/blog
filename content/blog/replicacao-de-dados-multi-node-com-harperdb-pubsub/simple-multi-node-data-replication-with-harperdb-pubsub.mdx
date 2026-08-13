@@ -41,11 +41,11 @@ To send and receive data, the nodes rely on **channels**, which are named as `sc
 
 A **publishing** channel will post all the changes of that specific table to any other nodes that are **subscribing to it**, let's see an example. If I wanted to publish all the changes from the schema named _dev_ on the table _dog_ from the first node to the second one, I could create a **publish channel** called `dev:dog`.
 
-![alt_text](https://lh4.googleusercontent.com/CApUg_V_dBAz-HcXG6x-XIi2EMZ_-vrNJz63TaLpg7BZ7VzeBup0p4jnNThQWN3OWNpSuiKu3_zg5-GNtDiBc8DHbgpPV6r45JMxirH57nj8dmpz22cYmf47Fxtpr3b9vwwRmkhrkoHc9OA14AyLk8v8YPMSDVp6oMtyMfXiosGibLIOpZcgCRq3ZLL68cavAuc1AQ)
+![alt_text](./0-fblaas6fidxr7aox-2cb5dc.png)
 
 On the other hand, I could express it differently, I could say that I want to listen to all the changes in the _dog_ table in node 1, so I can **subscribe to it**:
 
-![alt_text](https://lh6.googleusercontent.com/xV1QYqR-P0x4uc9q5GrOd-GoZLDF7oNGdZjlxGBbl10buIc8vIQrT2tVMDuMnUKwuXjIJiDU5qn-8ceICHDHxt4ZgOtnwmoVrRlyjlKWuYF2EA1HZkrSuijesI-0GXLUl0QMTDrN15l7hLSj8cPB10bvtC5HcxPIZRqQd6WeNU75-fsPb19mFZzBobwOuXQEyFnmbA)
+![alt_text](./0-2laf8g8hdh1kysxd-2b3e37.png)
 
 When you create a subscription in any node, any changes to that particular table will be synced to the other tables, any new data on `dev:dog` will be published to the other node, as well as any updates or removals. If the table doesn't exist in one of the nodes, it'll also be created, however, **destructive operations like `drop` won't be propagated.**
 
@@ -121,7 +121,7 @@ We are just summing 1 in the ports so they don't conflict, and also changing the
 
 Let's spin that up with `docker compose up`, you should see the result of two HarperDB instances being run. Now let's go to the [HarperDB Studio](https://studio.harperdb.io/) and register them. Just create your account, organization, and click on register a new user-managed instance. This should be the data we have:
 
-![alt_text](https://lh4.googleusercontent.com/k1ucCSICKJrd0ackVrygjUD7mg84M2-PXveVLT_VR7GjUDMKl2ji-pPuvPVm2D8OFf7bzd40SlzaeUrYJXYJgQCfxKGiJEITyWoyKsVbN9b7kI-8EXrIgmNIwoL3yqlDUpEjTGJ5cd4KvNcp1Yi7p69UPo7wdEmmdJWcqdQluF9AjDwnsgz661R7F3q2p7oonyYoaA)
+![alt_text](./0-rpzum03zzbjudjz3-0edc1f.png)
 
 Select the free instance and accept the terms, we should be ready to go:
 
@@ -129,7 +129,7 @@ Select the free instance and accept the terms, we should be ready to go:
 
 Let's do the same for the other one:
 
-![alt_text](https://lh6.googleusercontent.com/oRSFJMZQSYOVzkDKOlpJ5GOYRfFKDV6Ienk_RfF7HdS9VutVNRPRx3jImZ-FLD7zRNso2emFIAFBI6sBFCd9sYFTeUOStBcjBRx5XSk5g6-uYF62EiaxP1oDULfos5TfJY0uBcCTsrL8J8FU6HfiwTTGxOUJivaxAb-u0j4UWWn1jx_E3s-kuBwpcd8h8zfmFXnq7A)
+![alt_text](./0-mf4h4ryoq8al3h1e-022db2.png)
 
 What will change will only be the port number, which is now 9902.
 
@@ -137,12 +137,12 @@ What will change will only be the port number, which is now 9902.
 
 We won't create any tables on any of the instances. Instead, let's jump into our studio and go to the "Cluster" tab on any of those instances:
 
-![alt_text](https://lh3.googleusercontent.com/RciYxqORHWncBEzeaHxSIXaJnRqt-ukbdAjdQQtYe5em5umV8JwVRlOAYdO24hk-LwbNTsclWGITHtB1qE8qg0A_pMhomIdLqFaGAKU5xklSeg2n38jf_eg9mwr-eP_D1mFh7KrouZjGAKE3gzdA08HdX23TiaOIMJ8V8ZRz2x1wDJqYPsDHyfkJMevqjC2gYi2WYA)
+![alt_text](./0-ajyow-xv-sqk2gn-5ff554.png)
  
 
 As you can see, we have our other node listed, but when we try to connect we get an error:
 
-![alt_text](https://lh3.googleusercontent.com/rWsWN4YkFi78e5CFsUAuoeEym2j9-oXEEB1J3uBuV61WWmLvc2tzcr5sbf_73TOluANk-Riaij7AFVg_hKv1l3p6bx-JpVgIbW-7X_8C3FdBrGR-Z-e4ENe801wcfCCyckIaPRfEf9mvLRHAWb6jNHzVABD59EbQoUJ3Ef5a9Og0vvwVvn6zs7sfvIFbMcgvMrq9qg)
+![alt_text](./0-vtn4nfc6a46tk6t2-f8a160.png)
 
 Since we're using Docker, the instance is not available through the HarperDB studio to be connected to the other node in the cluster, in this case, we'll need to take the matters into our own hands, literally.
 
@@ -186,23 +186,23 @@ So, from the company's database, we want to **publish** configurations and **sub
 
 Now, we go back to our studio and log on to the **harper-host** instance. We'll create our schema called `default` and a table called `configs`. 
 
-![alt_text](https://lh5.googleusercontent.com/PxuVCYtj2phl68GK3xbZcWHvZz1cYXvRC-S_jBEhw5vwGjFPUQQq4cVBLFQHk3coGdgBap5eX6nlCbnpB-1dsqvSVzRcAAqirI92UTjAX3JXHwzGhexrck7bSVhpmaFXypuv9BaJXkAFnAz21ckdVBOvSAQO4nwVP3bmogh3x7PAW-KoCz7smnLDSQYvrMidkP5Txg)
+![alt_text](./0-synycfccqhcip3js-5751dc.png)
 
 Now, let's add a simple data to that table by clicking the `+` button on the top right:
 
-![alt_text](https://lh5.googleusercontent.com/GF3pjB0hMIg41i1oP_R2Ej9H6Qlk_GyoJFxQC028U6O2XJ79aKYAJtyD9mGQ4bK7YdB_QYtPythmeWPYXeyqlCraNx5-52v27bxOOdhWx2ouqsRLfwSgTxOMyhSDz6t_ju6omQIFJK9xZiOLDUXbjJTinacfSw_Qe4r1B9SzjgxQVeQYmkUgp4RKpIgykC3Pp6FWOw)
+![alt_text](./0-mw8gafekauiesofe-f5f266.png)
 
 After saving, let’s switch to the `harper-edge` instance, and look! We now have a configs table and inside that table we have the same item we just added:
 
-![alt_text](https://lh3.googleusercontent.com/rPEomAdtt3jj97lKe6LtHfB0sQxNZ0OToWWOGQB1qKoTBsEWUpBMVZoyS4-IZJ2ZCV5GHFtjpJMexY28GvA_aN3985lzlJoVzZAT788DnZFVEr9A56gZEDio9x54Lz-1TsONTVuIfjBARr_fdfw1e04e0E9YffTqxSh1xJt-dE6uqiP6iS0gwFpHZcThJRLx0gEqwA)
+![alt_text](./0-dywexodnpd3fvlp6-e83013.png)
 
 Let's do the same on the `harper-edge` instance, and add a table called `sensor_data` with a hash of `id`, then add some data on it:
 
-![alt_text](https://lh3.googleusercontent.com/XkkxFRcSeUm4UjiOu8BNhapKZZwMTTrgjgrLxqMHc1I5FVn4D28Y-TgPgW5zMqaS-cd1KqxtXZpq1fTRZ8xuEDIutSEIuVmafB0SJ1tj8sZ6kpLr_w9XZVpbMfZ3yFy1FfU9P_T_LY9snIxQGFA_ouRxv66DH-ZDTXpa0R7CiluiCaCRYe7JYis1hDuC4thWlS2jJw)
+![alt_text](./0-8il6d7irwthcbzeq-8c1044.png)
 
 And if we switch back to the host, we'll also have the same data over there:
 
-![alt_text](https://lh6.googleusercontent.com/BlYOGunoeObp35jJUqmFSB7BNFr1WH3LWP1gq8F1jpTClJxAZipldULq9ldu94T5hoqu__vmduzXaarIy6IcEWmbrhmXOztzqo7H1NgW28cgBNINeHAYPWQcubJ6PnMWBrE7VXGxM2dbjHE7qbJnsFo8JRrlNKNqcC0DTplm_5N8HVC_8tNwNd4-rF1DD_Ml1DXpyw)
+![alt_text](./0-kc-rwv-eqdegnspp-06857f.png)
 
 This is valid even if we delete the data on one of the sides, in this case the data on the other end will also be deleted.
 

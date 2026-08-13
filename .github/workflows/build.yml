@@ -68,6 +68,53 @@ jobs:
         with:
           path: dist
 
+  # Advisory only, never a release blocker: a broken link in one of 191
+  # migrated posts or a Lighthouse regression is worth knowing about, not
+  # worth stopping a deploy over. continue-on-error keeps this job's outcome
+  # from affecting the workflow conclusion no matter what it finds, and it
+  # runs off the artifact `build` already produced instead of building again.
+  seo-audit:
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    # Narrower than the workflow default: reading the artifact this run just
+    # produced needs `actions: read`, which an explicit top-level permissions
+    # block otherwise zeroes out, and this job has no business with pages
+    # or id-token.
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      # Only lighthouserc.json is needed from the repo; the pages artifact
+      # below is the actual site under test.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: github-pages
+
+      # upload-pages-artifact tars the site root into artifact.tar, not a
+      # `dist/` folder, so it has to be extracted back into one.
+      - run: mkdir dist && tar -xf artifact.tar -C dist
+
+      - name: Lighthouse
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      # --root-dir maps root-relative hrefs (the site uses only those) back to
+      # dist/, so internal links resolve without a running server. External
+      # links are checked too since a lot of the 191 migrated posts still
+      # point at six-year-old URLs.
+      - name: Check links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
+        with:
+          args: --no-progress --root-dir dist --exclude-mail 'dist/**/*.html'
+          fail: false
+          jobSummary: true
+
   # No deploy job yet, the repo is private and Pages isn't enabled,
   # so actions/deploy-pages@v4 would only ever fail. Add it back at DNS cutover:
   #

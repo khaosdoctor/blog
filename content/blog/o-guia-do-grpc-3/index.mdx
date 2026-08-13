@@ -57,7 +57,7 @@ pbjs.load('notes.proto', (err, root) => {
 
 Como você pode perceber, temos um modelo de reflexão, ou seja, temos que fazer um lookup dentro do nosso arquivo `.proto`, mas é possível também gerar arquivos de forma estática, assim teremos classes prontas para isso. Adicionalmente, o `protobuf.js` inclui também o conceito de `verify`, de forma que podemos verificar as mensagens para saber se elas estão corretas, seguindo um fluxo como este:
 
-![](https://camo.githubusercontent.com/9f57f423e30cbe6a433ac11c365f379ec8eff41074aeaeab24db3bcd2e299256/68747470733a2f2f70726f746f6275666a732e6769746875622e696f2f70726f746f6275662e6a732f746f6f6c7365742e737667)
+![](./toolset-a94729.svg)
 
 E, além de tudo isso, ela também gera definições para TypeScript, já que o `grpc` e o `@grpc/grpc-js` possuem tipagem estática junto com seus pacotes. Assim podemos realizar basicamente as mesmas funcionalidades porém com nossos tipos definidos.
 

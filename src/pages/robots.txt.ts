@@ -1,13 +1,17 @@
 import type { APIRoute } from 'astro'
+import { noindexPaths } from '../lib/post-dates.mjs'
+
+// Chrome, not content: these never carry a `noindex` frontmatter field, so
+// they can't come from noindexPaths and have to stay listed by hand.
+const CHROME_PATHS = ['/search/', '/en/search/', '/offline/']
 
 export const GET: APIRoute = ({ site }) => {
   const sitemap = new URL('sitemap-index.xml', site).href
+  const disallow = [...CHROME_PATHS, ...noindexPaths].sort()
 
   const body = `User-agent: *
 Allow: /
-Disallow: /search/
-Disallow: /en/search/
-Disallow: /offline/
+${disallow.map((path) => `Disallow: ${path}`).join('\n')}
 
 Sitemap: ${sitemap}
 `

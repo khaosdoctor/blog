@@ -39,11 +39,11 @@ Pra mandar e receber dados, os nodes dependem de **canais**, que são nomeados c
 
 Um canal **publisher** vai postar todas as mudanças daquela tabela específica pra qualquer outro node que estiver **inscrito nele**. Vamos ver um exemplo: se eu quisesse publicar todas as mudanças do schema chamado _dev_ na tabela _dog_ do primeiro node pro segundo, eu poderia criar um **canal de publicação** chamado `dev:dog`.
 
-![alt_text](https://lh4.googleusercontent.com/CApUg_V_dBAz-HcXG6x-XIi2EMZ_-vrNJz63TaLpg7BZ7VzeBup0p4jnNThQWN3OWNpSuiKu3_zg5-GNtDiBc8DHbgpPV6r45JMxirH57nj8dmpz22cYmf47Fxtpr3b9vwwRmkhrkoHc9OA14AyLk8v8YPMSDVp6oMtyMfXiosGibLIOpZcgCRq3ZLL68cavAuc1AQ)
+![alt_text](./0-fblaas6fidxr7aox-2cb5dc.png)
 
 Por outro lado, eu poderia expressar isso de forma diferente, poderia dizer que quero escutar todas as mudanças na tabela _dog_ do node 1, então eu posso **me inscrever nele**:
 
-![alt_text](https://lh6.googleusercontent.com/xV1QYqR-P0x4uc9q5GrOd-GoZLDF7oNGdZjlxGBbl10buIc8vIQrT2tVMDuMnUKwuXjIJiDU5qn-8ceICHDHxt4ZgOtnwmoVrRlyjlKWuYF2EA1HZkrSuijesI-0GXLUl0QMTDrN15l7hLSj8cPB10bvtC5HcxPIZRqQd6WeNU75-fsPb19mFZzBobwOuXQEyFnmbA)
+![alt_text](./0-2laf8g8hdh1kysxd-2b3e37.png)
 
 Quando você cria uma subscription em qualquer node, qualquer mudança naquela tabela específica vai ser sincronizada com as outras tabelas. Qualquer dado novo em `dev:dog` vai ser publicado pro outro node, assim como qualquer atualização ou remoção. Se a tabela não existir em um dos nodes, ela também vai ser criada. Porém, **operações destrutivas como `drop` não são propagadas**.
 
@@ -115,7 +115,7 @@ Estamos só somando 1 nas portas pra elas não conflitarem, e também mudando o 
 
 Vamos subir isso com `docker compose up`, você deve ver o resultado de duas instâncias do HarperDB rodando. Agora vamos até o [HarperDB Studio](https://studio.harperdb.io/) e registrar elas. Só criar sua conta, organização, e clicar em registrar uma nova instância gerenciada pelo usuário. Esses devem ser os dados que temos:
 
-![alt_text](https://lh4.googleusercontent.com/k1ucCSICKJrd0ackVrygjUD7mg84M2-PXveVLT_VR7GjUDMKl2ji-pPuvPVm2D8OFf7bzd40SlzaeUrYJXYJgQCfxKGiJEITyWoyKsVbN9b7kI-8EXrIgmNIwoL3yqlDUpEjTGJ5cd4KvNcp1Yi7p69UPo7wdEmmdJWcqdQluF9AjDwnsgz661R7F3q2p7oonyYoaA)
+![alt_text](./0-rpzum03zzbjudjz3-0edc1f.png)
 
 Selecione a instância gratuita e aceite os termos, já devemos estar prontos:
 
@@ -123,7 +123,7 @@ Selecione a instância gratuita e aceite os termos, já devemos estar prontos:
 
 Vamos fazer o mesmo pra outra:
 
-![alt_text](https://lh6.googleusercontent.com/oRSFJMZQSYOVzkDKOlpJ5GOYRfFKDV6Ienk_RfF7HdS9VutVNRPRx3jImZ-FLD7zRNso2emFIAFBI6sBFCd9sYFTeUOStBcjBRx5XSk5g6-uYF62EiaxP1oDULfos5TfJY0uBcCTsrL8J8FU6HfiwTTGxOUJivaxAb-u0j4UWWn1jx_E3s-kuBwpcd8h8zfmFXnq7A)
+![alt_text](./0-mf4h4ryoq8al3h1e-022db2.png)
 
 O que vai mudar é só o número da porta, que agora é 9902.
 
@@ -131,11 +131,11 @@ O que vai mudar é só o número da porta, que agora é 9902.
 
 A gente não vai criar nenhuma tabela em nenhuma das instâncias. Em vez disso, vamos até o nosso studio e ir na aba "Cluster" de qualquer uma das instâncias:
 
-![alt_text](https://lh3.googleusercontent.com/RciYxqORHWncBEzeaHxSIXaJnRqt-ukbdAjdQQtYe5em5umV8JwVRlOAYdO24hk-LwbNTsclWGITHtB1qE8qg0A_pMhomIdLqFaGAKU5xklSeg2n38jf_eg9mwr-eP_D1mFh7KrouZjGAKE3gzdA08HdX23TiaOIMJ8V8ZRz2x1wDJqYPsDHyfkJMevqjC2gYi2WYA)
+![alt_text](./0-ajyow-xv-sqk2gn-5ff554.png)
 
 Como você pode ver, temos o nosso outro node listado, mas quando tentamos conectar, recebemos um erro:
 
-![alt_text](https://lh3.googleusercontent.com/rWsWN4YkFi78e5CFsUAuoeEym2j9-oXEEB1J3uBuV61WWmLvc2tzcr5sbf_73TOluANk-Riaij7AFVg_hKv1l3p6bx-JpVgIbW-7X_8C3FdBrGR-Z-e4ENe801wcfCCyckIaPRfEf9mvLRHAWb6jNHzVABD59EbQoUJ3Ef5a9Og0vvwVvn6zs7sfvIFbMcgvMrq9qg)
+![alt_text](./0-vtn4nfc6a46tk6t2-f8a160.png)
 
 Como estamos usando Docker, a instância não fica disponível através do HarperDB Studio pra ser conectada ao outro node no cluster. Nesse caso, vamos precisar botar a mão na massa, literalmente.
 
@@ -178,23 +178,23 @@ Então, do banco de dados da empresa, queremos **publicar** configurações e **
 
 Agora, voltamos pro nosso studio e entramos na instância **harper-host**. Vamos criar nosso schema chamado `default` e uma tabela chamada `configs`.
 
-![alt_text](https://lh5.googleusercontent.com/PxuVCYtj2phl68GK3xbZcWHvZz1cYXvRC-S_jBEhw5vwGjFPUQQq4cVBLFQHk3coGdgBap5eX6nlCbnpB-1dsqvSVzRcAAqirI92UTjAX3JXHwzGhexrck7bSVhpmaFXypuv9BaJXkAFnAz21ckdVBOvSAQO4nwVP3bmogh3x7PAW-KoCz7smnLDSQYvrMidkP5Txg)
+![alt_text](./0-synycfccqhcip3js-5751dc.png)
 
 Agora, vamos adicionar um dado simples nessa tabela clicando no botão `+` no canto superior direito:
 
-![alt_text](https://lh5.googleusercontent.com/GF3pjB0hMIg41i1oP_R2Ej9H6Qlk_GyoJFxQC028U6O2XJ79aKYAJtyD9mGQ4bK7YdB_QYtPythmeWPYXeyqlCraNx5-52v27bxOOdhWx2ouqsRLfwSgTxOMyhSDz6t_ju6omQIFJK9xZiOLDUXbjJTinacfSw_Qe4r1B9SzjgxQVeQYmkUgp4RKpIgykC3Pp6FWOw)
+![alt_text](./0-mw8gafekauiesofe-f5f266.png)
 
 Depois de salvar, vamos trocar pra instância `harper-edge`, e olha só! Agora temos uma tabela configs e dentro dela temos o mesmo item que acabamos de adicionar:
 
-![alt_text](https://lh3.googleusercontent.com/rPEomAdtt3jj97lKe6LtHfB0sQxNZ0OToWWOGQB1qKoTBsEWUpBMVZoyS4-IZJ2ZCV5GHFtjpJMexY28GvA_aN3985lzlJoVzZAT788DnZFVEr9A56gZEDio9x54Lz-1TsONTVuIfjBARr_fdfw1e04e0E9YffTqxSh1xJt-dE6uqiP6iS0gwFpHZcThJRLx0gEqwA)
+![alt_text](./0-dywexodnpd3fvlp6-e83013.png)
 
 Vamos fazer o mesmo na instância `harper-edge`, e adicionar uma tabela chamada `sensor_data` com hash de `id`, e depois adicionar alguns dados nela:
 
-![alt_text](https://lh3.googleusercontent.com/XkkxFRcSeUm4UjiOu8BNhapKZZwMTTrgjgrLxqMHc1I5FVn4D28Y-TgPgW5zMqaS-cd1KqxtXZpq1fTRZ8xuEDIutSEIuVmafB0SJ1tj8sZ6kpLr_w9XZVpbMfZ3yFy1FfU9P_T_LY9snIxQGFA_ouRxv66DH-ZDTXpa0R7CiluiCaCRYe7JYis1hDuC4thWlS2jJw)
+![alt_text](./0-8il6d7irwthcbzeq-8c1044.png)
 
 E se voltarmos pro host, também vamos ter os mesmos dados lá:
 
-![alt_text](https://lh6.googleusercontent.com/BlYOGunoeObp35jJUqmFSB7BNFr1WH3LWP1gq8F1jpTClJxAZipldULq9ldu94T5hoqu__vmduzXaarIy6IcEWmbrhmXOztzqo7H1NgW28cgBNINeHAYPWQcubJ6PnMWBrE7VXGxM2dbjHE7qbJnsFo8JRrlNKNqcC0DTplm_5N8HVC_8tNwNd4-rF1DD_Ml1DXpyw)
+![alt_text](./0-kc-rwv-eqdegnspp-06857f.png)
 
 Isso vale mesmo se a gente apagar os dados de um dos lados, nesse caso os dados do outro lado também vão ser apagados.
 
