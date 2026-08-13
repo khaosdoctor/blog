@@ -59,28 +59,27 @@
    * stylesheet. See the Lab feedback section of docs/design.md.
    */
 
-  /* Bold is a highlighter chip, the way the old blog had it. */
-  --em-bold-bg: light-dark(
-    color-mix(in oklab, var(--brand-yellow) 32%, transparent),
-    color-mix(in oklab, var(--brand-yellow) 24%, transparent)
-  );
-  --em-bold-fg: var(--fg);
-  /* Italic reads as italic on its own; this makes it unmissable. */
-  --em-italic-fg: light-dark(
-    color-mix(in oklab, var(--brand-blue) 80%, var(--fg)),
-    color-mix(in oklab, var(--brand-blue) 45%, var(--fg))
-  );
+  /*
+   * Bold is a highlighter chip, the way the old blog had it. Solid, not a wash:
+   * a tint of the yellow read as a smudge rather than a marker. The text on it is
+   * dark in both themes, because the chip itself is the same yellow in both and
+   * dark-on-yellow is the only legible pairing.
+   */
+  --em-bold-bg: var(--brand-yellow);
+  --em-bold-fg: #1a1c20;
+  /*
+   * Italic is the same yellow as bold, as text rather than a wash. The brand
+   * yellow is unreadable as text on a near-white page, so light mode drops to a
+   * dark amber of the same hue: #8a6400 against #fffdf9 is 4.9:1.
+   */
+  --em-italic-fg: light-dark(#8a6400, var(--brand-yellow));
   --em-italic-weight: 500;
 
   /* Wikipedia's red link: a post linked before it was written. */
   --link-unwritten: light-dark(#a4232e, #ff8b93);
 
-  /* Headings: a rule that fades out, a glow behind h1, a tint on hover. */
+  /* Headings: a rule that fades out, and a glow behind h1. */
   --heading-rule: var(--rule);
-  --heading-hover-bg: light-dark(
-    color-mix(in oklab, var(--accent) 8%, transparent),
-    color-mix(in oklab, var(--accent) 14%, transparent)
-  );
   --heading-glow: light-dark(
     color-mix(in oklab, var(--brand-green) 35%, transparent),
     color-mix(in oklab, var(--brand-green) 45%, transparent)
@@ -106,15 +105,16 @@
   --check-edge: var(--fg);
   --check-tick: var(--brand-green);
 
-  /* A section break: a short glowing bar, not a full-width line. */
+  /*
+   * A section break: a short dotted bar, no glow. 150px at 1px, in the
+   * foreground colour at 80% alpha. The lab page carries a colour and alpha
+   * matrix; whichever wins becomes --rule-core here and the matrix goes.
+   */
   --rule-length: 150px;
-  --rule-weight: 2px;
-  --rule-core: light-dark(#1a1c20, #ffffff);
-  --rule-glow: light-dark(
-    color-mix(in oklab, var(--brand-green) 30%, transparent),
-    color-mix(in oklab, var(--brand-green) 50%, transparent)
-  );
-  --rule-glow-blur: 6px;
+  --rule-weight: 1px;
+  --rule-core: color-mix(in oklab, var(--fg) 80%, transparent);
+  --rule-dot: 3px;
+  --rule-gap: 4px;
 
   /* Tables: every cell ruled, header tinted and bold, room around the text. */
   --table-edge: light-dark(#1a1c20, #e6e4e0);

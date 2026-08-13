@@ -5,25 +5,31 @@
  *   <span class="note sidenote|marginnote">
  *     <input class="note-toggle" type="checkbox" id="…" />
  *     <label class="note-marker" for="…"></label>
- *     <span class="note-text">…inline content…</span>
+ *     <span class="note-text">…inline content…<button class="note-copy-link">…</button></span>
  *   </span>
  *
  * Both components additionally carry an id (`sidenote-N` / `marginnote-N`)
- * on the outer span and a `.note-copy-link` permalink icon inside
- * `.note-text` itself (top-right corner, revealed on hover/focus, never
- * sitting in the running text). The text either component refers to is not
- * wrapped in anything, it is whatever plain prose sits right before the tag,
- * so the hover/focus highlight for it is a Range painted by
+ * on the outer span and a `.note-copy-link` permalink control inside
+ * `.note-text` itself, revealed on hover/focus, never sitting in the running
+ * text: top-right for a sidenote, top-left for a margin note. It is a
+ * `<button>`, not a link: clicking it copies that note's anchor URL and does
+ * not navigate, handled by FootnoteSidenotes.astro's own click listener
+ * (deliberately not BaseLayout's delegated `a[data-copy-link]` handler,
+ * which exists to let the browser follow the link, the opposite of what this
+ * control should do). The text either component refers to is not wrapped in
+ * anything, it is whatever plain prose sits right before the tag, so the
+ * hover/focus highlight for it is a Range painted by
  * src/components/FootnoteSidenotes.astro (see the `::highlight()` rule
  * below), not an element this file can select.
  *
- * Following a link to a note's own anchor (`#sidenote-3`) only rings its
- * marker (`:target`, below); it never forces the popover open. It used to,
- * and there was no way to close it again short of leaving the page, since
- * `:target` persists until the URL hash changes, so the note was reachable
- * but permanently stuck open over whatever the page had at that scroll
- * position. Read as: no CSS state on this page may leave a panel the reader
- * cannot dismiss.
+ * The reference number itself carries no state of its own: no outline, no
+ * ring, on hover, focus or `:target`. A `:target` ring used to live here
+ * (round 1) so following a link to a note's own anchor would show which one
+ * it pointed at; the owner's round 2 read was that the number should carry
+ * nothing special at all, so it is gone and not replaced. The only focus
+ * ring left in this file sits on the real interactive control, the hidden
+ * checkbox (`.note-toggle:focus-visible`, below), never on the marker glyph
+ * itself.
  *
  * `.note-text` is real inline content in the paragraph flow, never moved,
  * never duplicated, so it always reads correctly with CSS off (RSS readers,
@@ -52,15 +58,30 @@
 
 :root {
   /* The run of text a note is attached to, tinted on hover/focus so a
-     reader can see exactly what it is bound to before opening it. */
+     reader can see exactly what it is bound to before opening it. Same
+     colour and fade the bold treatment uses (--em-bold-bg is the brand
+     yellow solid; a highlight painted behind running text needs the faded
+     version instead, a solid chip would fight the text sitting on it), so
+     hovering a note and hovering bold text read as the same colour
+     language. Kept the same 22%/30% fade this token used with --accent
+     before: --brand-yellow and that blue sit at almost the same perceived
+     lightness, so the fade that was already legible in both themes carries
+     over unchanged, only the hue moves. */
   --note-highlight: light-dark(
-    color-mix(in oklab, var(--accent) 22%, transparent),
-    color-mix(in oklab, var(--accent) 30%, transparent)
+    color-mix(in oklab, var(--brand-yellow) 22%, transparent),
+    color-mix(in oklab, var(--brand-yellow) 30%, transparent)
   );
 
   /* "White border" in this codebase means the foreground colour, so it
      inverts correctly in both themes; see --fg in theme.css. */
   --note-border-width: var(--border-card-edge);
+  /* The thin sides of a sidenote's double-ANSI frame (see the house-style
+     double border near the bottom of this file). `border-style: double`
+     needs at least 3px to draw as two visible lines with a gap between them;
+     under that a browser collapses it to what reads as a single solid line.
+     Confirmed against a build (dist/_astro), matches the 3px double already
+     used for the quote-c variant in src/styles/variants/quotes.css. */
+  --note-border-thin: 3px;
 
   /* The permalink icon inside .note-text (below): a plain chain-link glyph,
      same technique as src/styles/prose/links.css (an inline SVG as a mask,
@@ -92,25 +113,42 @@
 }
 
 /*
- * The permalink icon: not in the running text (a `#` mid-sentence was the
- * previous approach and is gone), instead a small control inside the note's
- * own box, top-right corner, shown only while the note is being read.
- * `.note-text` is the positioning context: it is `position: absolute` in
- * the popover states already, and made `position: relative` in the wide
- * float below for the same reason.
+ * The permalink control: not in the running text (a `#` mid-sentence was the
+ * previous approach and is gone), instead a small button inside the note's
+ * own box, shown only while the note is being read: top-right for a
+ * sidenote, top-left for a margin note (below). A real `<button>`, not the
+ * previous `<a>`, sized for an actual pointer (a comfortably clickable icon
+ * plus a >=24px total target, the 0.9em icon-only version this replaces was
+ * "very bad because it's very small" in the owner's own words) and reset
+ * back to plain chrome since browsers style buttons with their own border,
+ * background and radius by default. `.note-text` is the positioning
+ * context: it is `position: absolute` in the popover states already, and
+ * made `position: relative` in the wide float below for the same reason.
  */
 .note-copy-link {
   position: absolute;
-  top: -0.15rem;
-  right: -0.15rem;
-  width: 0.9em;
-  height: 0.9em;
+  top: 0.1rem;
+  width: 1.5rem;
+  height: 1.5rem;
   padding: 0.2rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--muted);
+  appearance: none;
+  cursor: pointer;
   opacity: 0;
   transition:
     opacity var(--duration) var(--ease),
     color var(--duration) var(--ease);
+}
+
+.sidenote .note-copy-link {
+  right: 0.1rem;
+}
+
+.marginnote .note-copy-link {
+  left: 0.1rem;
 }
 
 .note-copy-link::before {
@@ -241,17 +279,19 @@ main {
 }
 
 /*
- * Following a link to a note's own anchor rings its marker, nothing more:
- * it does not force the popover open. It used to (via `:target .note-text`,
- * matching the rule right above this one), and there was no way to close it
- * again, since :target persists until the URL hash changes, leaving the
- * reader stuck with a panel over the page they cannot dismiss. The reader
- * still gets to see which note the link pointed at, and still gets to open
- * it themselves; nothing here can get stuck.
+ * The double-ANSI border is the house style for card-shaped things now (see
+ * src/styles/variants/quotes.css's quote-c variant and code-and-callouts.css),
+ * and a sidenote is the numbered, bordered one of the two note types: the
+ * thick solid left edge above stays exactly as it is, the other three sides
+ * get a thin double rule. MarginNote does not get this: the owner called it
+ * "perfectly fine the way it is" in the same round of feedback that asked
+ * for this, and it carries no thin sides to begin with, so there is nothing
+ * here for it to apply to.
  */
-.note:target .note-marker {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.sidenote .note-toggle:checked ~ .note-text {
+  border-block-start: var(--note-border-thin) double var(--fg);
+  border-inline-end: var(--note-border-thin) double var(--fg);
+  border-block-end: var(--note-border-thin) double var(--fg);
 }
 
 /* Progressive enhancement: where CSS anchor positioning exists, let the
@@ -292,8 +332,8 @@ main {
     display: inline;
     /* relative, not static: .note-copy-link is an absolutely-positioned
        child, and needs this box as its containing block to sit at this
-       note's own top-right corner instead of the nearest positioned
-       ancestor up the tree. */
+       note's own top corner instead of the nearest positioned ancestor up
+       the tree. */
     position: relative;
     float: right;
     clear: right;
@@ -313,6 +353,18 @@ main {
     font-size: 0.82rem;
     line-height: 1.5;
     color: var(--muted);
+  }
+
+  /* Same double-ANSI frame as the narrow popover above, kept in sync: the
+     thick left edge stays as it is, the other three sides get the thin
+     double rule, sidenote only. A little padding is added on those three
+     sides so the floated text does not run into its own frame; the left
+     side already had padding for the thick edge. */
+  .sidenote .note-text {
+    padding: 0.35rem 0.5rem 0.4rem 0.6rem;
+    border-block-start: var(--note-border-thin) double var(--fg);
+    border-inline-end: var(--note-border-thin) double var(--fg);
+    border-block-end: var(--note-border-thin) double var(--fg);
   }
 }
 

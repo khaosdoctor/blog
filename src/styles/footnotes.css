@@ -9,8 +9,8 @@
  *     underlined number, so it reads as a citation and is never mistaken
  *     for src/components/Sidenote.astro's bordered, unbracketed marker.
  *   - the aside itself: floated into the right margin on a wide viewport,
- *     collapsed to a hover/focus-revealed panel pinned to the bottom of the
- *     viewport on a narrow one.
+ *     hidden below it, where the reference's own hover-preview card
+ *     (src/scripts/hover-previews.ts) already covers the same note.
  */
 
 :root {
@@ -24,21 +24,39 @@
 /* --------------------------------------------------------------- section */
 
 /*
- * The same section break as `.prose hr` (see the "rule" heading in
- * prose.css): a short bar, fading out at both ends, with a glow behind it.
- * Reuses that rule's own tokens rather than new ones, so the two treatments
- * cannot drift apart. A `::before`, not a border, because a border cannot
- * fade or glow.
+ * The same section break as `.prose hr` (see src/styles/prose/rules.css): a
+ * short dotted bar fading out at both ends. Reuses that rule's own tokens
+ * rather than new ones, so the two treatments cannot drift apart. A `::before`,
+ * not a border, because a border cannot be dotted to a chosen rhythm or faded.
  */
 .prose section[data-footnotes]::before {
   content: '';
   display: block;
   inline-size: var(--rule-length);
-  block-size: 2px;
+  block-size: var(--rule-weight);
   margin-block: 3rem;
   margin-inline: auto;
-  background: linear-gradient(to right, transparent, var(--rule-core), transparent);
-  box-shadow: 0 0 var(--rule-glow-blur) var(--rule-glow);
+  background: repeating-linear-gradient(
+    to right,
+    var(--rule-core) 0 var(--rule-dot),
+    transparent var(--rule-dot) calc(var(--rule-dot) + var(--rule-gap))
+  );
+  mask: linear-gradient(to right, transparent, black 35%, black 65%, transparent);
+}
+
+/*
+ * The notes themselves are a different register from the body: smaller and
+ * quieter, the way a footnote is set in print, but not so small that reading one
+ * is work. The heading GFM emits above them is visually hidden (see the .sr-only
+ * rule in BaseLayout), so this block is all a reader sees.
+ */
+.prose section[data-footnotes] {
+  color: var(--muted);
+  font-size: var(--text-small);
+}
+
+.prose section[data-footnotes] p {
+  margin-block: 0.4rem;
 }
 
 /* ------------------------------------------------------------- reference */
@@ -74,33 +92,17 @@
 /* ------------------------------------------------------------------ aside */
 
 /*
- * Narrow baseline: a fixed panel pinned to the bottom of the viewport,
- * hidden until the reference is hovered or focused. Already aria-hidden (see
- * the plugin), so there is no accessibility reason to keep it in the layout
- * while hidden the way sidenotes.css's popover does for its "before it's
- * toggled" state; opacity/visibility is enough here.
+ * Below the wide breakpoint there is no margin to float the note into, and
+ * the reference now raises the same hover-preview card every other link
+ * does (src/scripts/hover-previews.ts), filled from this same text. A
+ * second, CSS-only hover panel here used to fire on the same pointer-enter
+ * as that card, one instantly (CSS :hover), the other after the card's
+ * usual delay, both showing the same note. Dropped rather than kept as a
+ * redundant second popup, so the aside stays out of the layout until the
+ * wide breakpoint below turns it into a margin note.
  */
 .footnote-aside {
-  position: fixed;
-  inset-inline: 0;
-  inset-block-end: 0;
-  z-index: 20;
-  max-height: 40vh;
-  margin: 0;
-  padding: 0.75rem 1rem;
-  overflow-y: auto;
-  background: var(--bg);
-  border-block-start: var(--border) solid var(--rule);
-  font-size: var(--text-small);
-  line-height: var(--leading-tight);
-  color: var(--fg);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(0.4rem);
-  transition:
-    opacity var(--duration) var(--ease),
-    transform var(--duration) var(--ease),
-    visibility 0s linear var(--duration);
+  display: none;
 }
 
 .footnote-aside p {
@@ -111,45 +113,22 @@
   margin-block-start: 0.5rem;
 }
 
-/*
- * Chained two deep: two footnotes in the same paragraph is already rare on
- * this site, and there is no sibling combinator for "every same-class
- * sibling up to the next paragraph" that would reach a third without also
- * matching asides belonging to a later, unrelated paragraph.
- */
-p:has(sup:hover, sup:focus-within) + .footnote-aside,
-p:has(sup:hover, sup:focus-within) + .footnote-aside + .footnote-aside {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-  transition-delay: 0s;
-}
-
 /* Wide: margin room exists (see the comment in sidenotes.css for the same
-   math against its own, wider box), so the panel above turns off and the
-   note floats beside its paragraph instead. */
+   math against its own, wider box), so the note floats beside its paragraph.
+   Not hover-triggered, so it does not compete with the card above: this one
+   is a permanent margin note, that one an on-demand popup. */
 @media (min-width: 70rem) {
   .footnote-aside {
-    position: static;
+    display: block;
     float: right;
     clear: right;
-    z-index: auto;
     width: var(--footnote-aside-width);
-    max-height: none;
     margin-top: 0.15rem;
     margin-bottom: 0.4rem;
     margin-left: var(--footnote-aside-gap);
     margin-right: calc(-1 * (var(--footnote-aside-width) + var(--footnote-aside-gap)));
-    padding: 0;
-    overflow: visible;
-    background: transparent;
-    border-block-start: 0;
     font-size: 0.82rem;
     line-height: 1.5;
     color: var(--muted);
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    transition: none;
   }
 }

@@ -146,79 +146,111 @@ Uma separação visual entre duas partes do texto que não merecem um título no
 
 ---
 
-### Escolha o tamanho da régua
+### Escolha a cor e a densidade da régua
 
-Cada bloco abaixo é a mesma `---`, com um comprimento diferente. O vencedor virá `--rule-length` em `theme.css` e o resto deste bloco sai.
+A régua agora tem 150px, 1px de espessura, pontilhada, sem brilho, e desaparece nas duas pontas. O que falta escolher é a cor. Cada bloco abaixo é a mesma `---` com um valor diferente; o vencedor virá `--rule-core` em `theme.css` e o resto deste bloco sai.
 
-<div data-v="rule-30">
+<div data-v="rule-fg-80">
 
-**30px**
-
----
-
-</div>
-
-<div data-v="rule-60">
-
-**60px**
+**texto a 80% (padrão atual)**
 
 ---
 
 </div>
 
-<div data-v="rule-100">
+<div data-v="rule-fg-60">
 
-**100px**
-
----
-
-</div>
-
-<div data-v="rule-150">
-
-**150px (padrão atual)**
+**texto a 60%**
 
 ---
 
 </div>
 
-<div data-v="rule-200">
+<div data-v="rule-fg-40">
 
-**200px**
-
----
-
-</div>
-
-<div data-v="rule-250">
-
-**250px**
+**texto a 40%**
 
 ---
 
 </div>
 
-E o mesmo comprimento com pesos e brilhos diferentes:
+<div data-v="rule-fg-100">
 
-<div data-v="rule-thin">
-
-**1px, brilho fraco**
+**texto a 100%**
 
 ---
 
 </div>
 
-<div data-v="rule-thick">
+<div data-v="rule-muted">
 
-**4px, brilho forte**
+**cor de texto secundário**
 
 ---
 
 </div>
 
-<div data-v="rule-dotted">
+<div data-v="rule-green">
 
-**pontilhada**
+**verde da marca a 80%**
+
+---
+
+</div>
+
+<div data-v="rule-red">
+
+**vermelho da marca a 80%**
+
+---
+
+</div>
+
+<div data-v="rule-yellow">
+
+**amarelo da marca a 80%**
+
+---
+
+</div>
+
+<div data-v="rule-blue">
+
+**azul da marca a 80%**
+
+---
+
+</div>
+
+<div data-v="rule-purple">
+
+**roxo a 80%**
+
+---
+
+</div>
+
+E a mesma cor com outro ritmo de pontos, mais a versão sólida:
+
+<div data-v="rule-tight">
+
+**pontos juntos**
+
+---
+
+</div>
+
+<div data-v="rule-loose">
+
+**pontos espaçados**
+
+---
+
+</div>
+
+<div data-v="rule-solid">
+
+**sólida, sem pontos**
 
 ---
 
@@ -308,6 +340,50 @@ export function soma(a: number, b: number): number {
   if (Number.isNaN(a) || Number.isNaN(b)) throw new TypeError('argumento inválido')
   return a + b
 }
+```
+
+### O nome do arquivo vindo do primeiro comentário
+
+Você não precisa escrever `title`. Se a primeira linha do bloco for um comentário que parece um caminho de arquivo, ela vira a aba e sai do código. Se não parecer, nada acontece: o comentário fica onde está.
+
+````markdown
+```ts
+// src/soma.ts
+export const soma = (a: number, b: number) => a + b
+```
+````
+
+```ts
+// src/soma.ts
+export const soma = (a: number, b: number) => a + b
+```
+
+Um shebang é um comentário na primeira linha e **não** é um nome de arquivo, então continua sendo código:
+
+````markdown
+```bash
+#!/usr/bin/env bash
+echo "continua no código"
+```
+````
+
+```bash
+#!/usr/bin/env bash
+echo "continua no código"
+```
+
+E um comentário comum também fica:
+
+````markdown
+```ts
+// isto é só uma observação, não um arquivo
+export const dois = 2
+```
+````
+
+```ts
+// isto é só uma observação, não um arquivo
+export const dois = 2
 ```
 
 ### Com linhas inseridas e removidas
@@ -532,49 +608,76 @@ Sem autor, é uma citação comum, e o cartão vem sem a linha de autoria.
 
 > Toda abstração vaza, mais cedo ou mais tarde.
 
-### Escolha o tratamento da citação
+### Escolha como a régua do autor é desenhada
 
-Cinco alternativas ao cartão padrão acima, cada uma usando uma combinação diferente de fundo, moldura, marca d'água, capitular e itálico. A escolhida vira o padrão e as outras saem.
+O tratamento escolhido é a moldura dupla ANSI: sem preenchimento, corpo monoespaçado, moldura viva. O que falta decidir é a régua que separa a citação do autor. As oito variações abaixo são idênticas em tudo, menos nisso.
 
-<div data-v="quote-a">
+<div data-v="quote-dotted-both">
 
-**A — roxo sólido, texto branco, só itálico**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-b">
-
-**B — roxo bem diluído, texto normal, capitular**
+**pontilhada, apagando nas duas pontas**
 
 > [!quote] Alan Kay
 > A melhor forma de prever o futuro é inventá-lo.
 
 </div>
 
-<div data-v="quote-c">
+<div data-v="quote-dotted-right">
 
-**C — moldura dupla ANSI, sem fundo, monoespaçada**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-d">
-
-**D — janela de terminal**
+**pontilhada, apagando só à direita**
 
 > [!quote] Alan Kay
 > A melhor forma de prever o futuro é inventá-lo.
 
 </div>
 
-<div data-v="quote-e">
+<div data-v="quote-dotted-left">
 
-**E — abertura discreta, sem cartão e sem autoria**
+**pontilhada, apagando só à esquerda**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-dotted-none">
+
+**pontilhada, sem apagar**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-solid-both">
+
+**sólida, apagando nas duas pontas**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-solid-right">
+
+**sólida, apagando só à direita**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-solid-left">
+
+**sólida, apagando só à esquerda**
+
+> [!quote] Alan Kay
+> A melhor forma de prever o futuro é inventá-lo.
+
+</div>
+
+<div data-v="quote-solid-none">
+
+**sólida, sem apagar**
 
 > [!quote] Alan Kay
 > A melhor forma de prever o futuro é inventá-lo.

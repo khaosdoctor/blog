@@ -4,8 +4,9 @@
  * move or remove that list (it must stay reachable at its own anchor), it
  * copies each footnote body into an `<aside class="footnote-aside">` right
  * after the paragraph that references it, so src/styles/footnotes.css can
- * float it into the margin on a wide viewport or reveal it on hover/focus on
- * a narrow one. See that file for the two layouts.
+ * float it into the margin on a wide viewport. Below that breakpoint the
+ * reference's own hover-preview card (src/scripts/hover-previews.ts) covers
+ * the same note, so the aside stays hidden there.
  *
  * The copy is build-time only, no client fetch, and works with JS disabled.
  * It is also why the copy carries `aria-hidden="true"`: the accessible

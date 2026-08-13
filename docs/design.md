@@ -138,6 +138,121 @@ open question left for him.
   several combinations side by side so he can cut what's too much, and the variant he picks is what gets
   promoted into the default stylesheet.
 
+## Lab feedback, round 2
+
+Second pass over `/lab/`, after the first round shipped. Not implemented yet, listed in his order. Anything here
+overrides the round 1 note above it.
+
+**Headings**
+
+- Hover shows only the `#`, on the **left** of the heading, fading in. Nothing else.
+- No background tint on hover. Remove it.
+
+**Side notes and margin notes**
+
+- Hovering the note highlights the **background of the text it is bound to**, not just the reference number.
+- While hovering, a second `#` appears: **top left** for a margin note, **top right** for a side note. It links to
+  that note's own anchor.
+
+**Horizontal rule**
+
+- 150px is the right length.
+- No glow at all. Remove it.
+- 1px, dotted.
+- Fainter, around 80% alpha.
+- Render the lab variants in several colours and several alpha levels so the colour can be picked.
+
+**Footnotes**
+
+- Hovering a footnote reference shows the footnote in a popover, with **exactly** the behaviour the link hover
+  previews already have. Same component, not a second implementation.
+- No "Footnotes" block heading at the bottom. Just the notes.
+- The notes at the bottom render small, the way a footnote should, but still comfortably readable: small enough to
+  read as a different register from the body, not smaller.
+
+**Emphasis**
+
+- Bold: solid background colour, not a faded one.
+- Italic: the treatment is right, but use the same yellow the bold uses. Watch light mode, where that yellow will not
+  read, and switch to something legible there, probably blue.
+
+**Quotes**
+
+- The card background is still too present. Either fainter again, or a darker shade of purple.
+
+**Code blocks**
+
+- A filename tab appears only when the first line is a comment **that looks like a filename**. If there is no comment,
+  or the comment is not a filename, no tab. A shebang in a bash block is the example of a first-line comment that must
+  not become a tab.
+- Question: can the syntax highlighting theme be changed, and better, can the reader choose between a few?
+
+**LaTeX**
+
+- The copy button works, but Greek letters come out as their names (`lambda`). They should come out as the letters
+  themselves, using whatever ASCII or Unicode representation reads correctly when pasted.
+
+**Side notes and margin notes, continued**
+
+- Side notes (the numbered ones) get a full border: the thick solid left edge stays as it is, and the other three sides
+  get a thin border.
+- Margin notes are right as they are.
+- The copy-link control is far too small in both. Use a normal-sized link icon, clickable. Clicking it copies the
+  anchor URL, it does **not** navigate there.
+- A blue outline is stuck around the reference number and will not go away (screenshot). That is the `:target` ring
+  added in round 1. The numbers must carry no special treatment at all: remove it.
+- The hover highlight over the bound text uses the **faded yellow from the bold treatment**, not blue.
+
+**Quotes, continued**
+
+- With an author: the rule dividing the quote from the author line fades out at **both** ends.
+- Both forms, with and without an author, are still missing the `"` watermark: upper left, roughly 48px, white at
+  about 30% alpha, behind the text.
+- The double-ANSI treatment is the one he likes: monospaced body, dotted rule. Build a test matrix of it:
+  - dotted, faded at both ends
+  - dotted, faded on the right only
+  - dotted, faded on the left only
+  - dotted, no fade
+  - and the same four again with a solid rule instead of dotted.
+
+**The double-ANSI border becomes the house style**
+
+- Apply the same double-ANSI border to callouts, side notes and margin notes.
+- In every case the left border stays thicker than the others, and stays solid, exactly as it is now.
+
+**Unwritten links**
+
+- The superscript marker on a link to a post that does not exist yet is **still rendering**. It must not.
+
+**Footnotes at the foot of the post**
+
+- The heading is gone, but the notes themselves are still full body size. Make them smaller and fainter than the body,
+  while staying comfortably readable.
+
+**Interactive components**
+
+- Each interactive island gets a small "code" button beside it. Clicking it reveals that component's own source.
+- Add a second interactive example to `/lab/` that is a plain HTML page and nothing else, alongside the Vue one.
+
+**Process**
+
+- Every change from now on bumps the version, so each change is traceable. See `src/lib/version.ts` and the release
+  workflow for how the version is currently derived.
+
+**Images: settled, no change**
+
+Obsidian does support the title form after all. So what shipped stays: the caption is the markdown title when there is
+one, otherwise the alt text, and the alt attribute is always the alt text. Both channels exist, both render in Obsidian.
+
+**Answers given on the round 2 questions**
+
+- Italic: yellow *text*, `#f5b200` in dark, dropping to an amber that passes 4.5:1 on a near-white page in light. One
+  colour family, no blue.
+- Versioning: the patch number comes from the commit count since the last tag, computed at build time. No manual bump,
+  no tag per change. Minor and major tags stay hand-cut when something meaningful ships.
+- Code theme: a reader-facing picker with a handful of themes, remembered in `localStorage`, sharing whatever settings
+  surface the pinned-preview toggle ends up in.
+
 ## Open decisions
 
 - Display face, and whether body copy goes mono too.

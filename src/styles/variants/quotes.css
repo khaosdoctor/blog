@@ -24,32 +24,43 @@
  * change: the container becomes a column flex box, the title gets `order:
  * 2`, the content `order: 1`.
  *
- * Five treatments: the default (what every quote on the site gets today)
- * plus `quote-a` through `quote-e`, selected on the lab page with
- * `[data-v="quote-x"]`. Each variant only reassigns the tokens below and
- * switches off the effects it does not want; the structural rules (card
- * shape, flex reorder, drop cap mechanics) are written once and apply to
- * all six.
+ * House style, round 2: every card carries a double-rule border (top, right,
+ * bottom) except the left edge, which stays the thick solid bar it always
+ * was. `border-style: double` renders as a single line under 3px, hence
+ * --qc-border-width below.
+ *
+ * The default (an author card, or a plain blockquote) plus eight variants,
+ * selected on the lab page with `[data-v="quote-x"]`. All eight are the
+ * double-ANSI look (transparent fill, monospace body, no drop cap, no
+ * watermark) and differ only in how the rule above the author line is
+ * drawn: dotted or solid, faded at both ends, one end, or not at all. That
+ * rule is built the same way as the fading `hr` in prose/rules.css, a
+ * background pattern plus a mask, just spanning the card instead of a
+ * centred short bar.
  */
 
 :root {
   --qc-pad: 1.5rem 1.75rem;
   --qc-radius: 0;
   --qc-gap: 0.6rem;
-  --qc-glyph-size: 7rem;
   --qc-indent: 2rem;
   --qc-dropcap-size: 2.75em;
+
+  /* Double-rule border, house style. 3px is the floor for two lines to
+   * render at all; 4px splits cleanly into line-gap-line instead of
+   * rounding down to a single visible line in some browsers. */
+  --qc-border-width: 4px;
 
   /*
    * Default: barely a background, a vivid border. A solid purple card made the
    * fill and the border the same colour, so the card had no edge at all, and it
-   * needed inverted text to stay readable. The tint is now just a glimpse and
-   * the normal foreground colour stays, which also keeps contrast at the page
-   * default rather than something that has to be computed.
+   * needed inverted text to stay readable. Round 2: still read as too present
+   * at 6%/10%, taken fainter again rather than swapped for a darker purple,
+   * which would have reintroduced that same fill-meets-border problem.
    */
   --qc-bg: light-dark(
-    color-mix(in oklab, var(--brand-purple) 6%, var(--bg)),
-    color-mix(in oklab, var(--brand-purple) 10%, var(--bg))
+    color-mix(in oklab, var(--brand-purple) 4%, var(--bg)),
+    color-mix(in oklab, var(--brand-purple) 7%, var(--bg))
   );
   --qc-fg: var(--fg);
   --qc-muted-fg: var(--muted);
@@ -58,12 +69,32 @@
     color-mix(in oklab, var(--brand-purple) 75%, white)
   );
   --qc-dropcap-fg: var(--qc-border);
-  /* Loud enough to read as a watermark against a nearly-white card, quiet
-   * enough that the text sitting on top of it is unaffected. */
+
+  /* Watermark glyph: a `"` behind the text, upper left, ~48px. White at 30%
+   * alpha reads on the dark card; the same alpha in white would vanish on
+   * the near-white light card, so light theme gets black at a comparable
+   * alpha instead, same visual weight, both comfortably clear the 4.5:1
+   * floor against the card underneath. */
+  --qc-glyph-size: 48px;
+  --qc-glyph-inset: 0.05em;
   --qc-glyph: light-dark(
-    color-mix(in oklab, var(--brand-purple) 18%, transparent),
-    color-mix(in oklab, var(--brand-purple) 32%, transparent)
+    color-mix(in oklab, black 15%, transparent),
+    color-mix(in oklab, white 30%, transparent)
   );
+
+  /* The rule above the author line: a background pattern (solid colour or a
+   * dotted repeat) cut by a mask that decides where it fades. Default card
+   * fades at both ends; the eight variants below swap --qc-rule-image and
+   * --qc-rule-mask only. */
+  --qc-rule-weight: 2px;
+  --qc-rule-solid: var(--qc-border);
+  --qc-rule-dotted: repeating-linear-gradient(to right, var(--qc-border) 0 2px, transparent 2px 5px)
+    center / 100% 100% no-repeat;
+  --qc-rule-mask-both: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+  --qc-rule-mask-right: linear-gradient(to right, black 70%, transparent);
+  --qc-rule-mask-left: linear-gradient(to right, transparent, black 30%);
+  --qc-rule-image: var(--qc-rule-solid);
+  --qc-rule-mask: var(--qc-rule-mask-both);
 }
 
 /* ---------------------------------------------------------- card shape */
@@ -82,8 +113,12 @@
   margin-inline: var(--qc-indent) 0;
   padding: var(--qc-pad);
   overflow: hidden;
-  border: var(--border) solid var(--qc-border);
-  /* Every card on this site carries a thick left edge in its own border colour. */
+  /* Double top/right/bottom, solid thick left: the house-style frame every
+   * card on this site carries, just with a two-line rule instead of one. */
+  border-style: double;
+  border-color: var(--qc-border);
+  border-width: var(--qc-border-width);
+  border-inline-start-style: solid;
   border-inline-start-width: var(--border-card-edge);
   border-radius: var(--qc-radius);
   /* The obsidian theme's own .callout sets mix-blend-mode so light/dark
@@ -109,15 +144,27 @@
 }
 
 .prose .callout[data-callout='quote'] > .callout-title {
+  position: relative;
   order: 2;
   margin: 0;
-  padding-block-start: 0.5rem;
-  border-block-start: var(--border) solid var(--qc-border);
+  padding-block-start: calc(0.5rem + var(--qc-rule-weight));
   font-family: var(--font-mono);
   font-size: var(--text-small);
   font-style: normal;
   font-weight: 400;
   color: var(--qc-muted-fg);
+}
+
+/* The divider between the body and the author line: a background pattern
+ * clipped by a mask, so it can fade, which a plain border cannot do. */
+.prose .callout[data-callout='quote'] > .callout-title::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: var(--qc-rule-weight);
+  background: var(--qc-rule-image);
+  mask: var(--qc-rule-mask);
 }
 
 .prose .callout[data-callout='quote'] .callout-title-text::before {
@@ -142,8 +189,12 @@
   content: '\201c';
   position: absolute;
   z-index: 0;
-  inset-block-start: -0.35em;
-  inset-inline-start: 0.05em;
+  /* Anything negative here pushes the glyph above the card's own padding
+   * edge, which is exactly what overflow: hidden on the card clips away;
+   * that is why the previous 7rem glyph at -0.35em never showed. Keeping
+   * the inset non-negative keeps it inside the clipped region. */
+  inset-block-start: var(--qc-glyph-inset);
+  inset-inline-start: var(--qc-glyph-inset);
   font-family: Georgia, 'Times New Roman', serif;
   font-style: normal;
   font-size: var(--qc-glyph-size);
@@ -166,67 +217,19 @@
 }
 
 /* ==================================================================
- * Variant A: solid purple, both themes, white text. No watermark, no
- * drop cap: the flat colour is the whole statement. Contrast of white on
- * --brand-purple is 6.07:1, comfortably over the 4.5:1 floor.
+ * The double-ANSI matrix: one look (transparent fill, monospace body, no
+ * drop cap, no watermark, the vivid frame colour), the rule above the
+ * author line is the only thing that changes across the eight.
  * ================================================================== */
 
-[data-v='quote-a'] {
-  --qc-bg: var(--brand-purple);
-  --qc-fg: #ffffff;
-  --qc-muted-fg: color-mix(in oklab, #ffffff 75%, transparent);
-  --qc-border: color-mix(in oklab, black 25%, var(--brand-purple));
-}
-
-[data-v='quote-a'] .callout[data-callout='quote']::before,
-[data-v='quote-a'] blockquote:not(.callout):not(.twitter-tweet)::before {
-  content: none;
-}
-
-[data-v='quote-a'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-a'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
-  float: none;
-  margin-inline-end: 0;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: inherit;
-}
-
-/* ==================================================================
- * Variant B: a faded tint that keeps the normal text colour, both themes.
- * Drop cap and italic stay; no watermark. The tint is a light mix (13.8:1
- * in light theme, 11.6:1 in dark against the normal foreground), so no
- * inversion is needed here.
- * ================================================================== */
-
-[data-v='quote-b'] {
-  --qc-bg: light-dark(
-    color-mix(in oklab, var(--brand-purple) 14%, var(--bg)),
-    color-mix(in oklab, var(--brand-purple) 24%, var(--bg))
-  );
-  --qc-fg: var(--fg);
-  --qc-muted-fg: var(--muted);
-  --qc-border: light-dark(
-    color-mix(in oklab, var(--brand-purple) 45%, transparent),
-    color-mix(in oklab, var(--brand-purple) 55%, transparent)
-  );
-  --qc-dropcap-fg: color-mix(in oklab, var(--brand-purple) 70%, var(--fg));
-}
-
-[data-v='quote-b'] .callout[data-callout='quote']::before,
-[data-v='quote-b'] blockquote:not(.callout):not(.twitter-tweet)::before {
-  content: none;
-}
-
-/* ==================================================================
- * Variant C: box-drawing / ANSI frame. No fill (the page background shows
- * through), the border is a double rule rather than a solid line, body
- * copy goes upright mono instead of italic. No watermark, no drop cap: the
- * frame itself is the effect.
- * ================================================================== */
-
-[data-v='quote-c'] {
+[data-v='quote-dotted-both'],
+[data-v='quote-dotted-right'],
+[data-v='quote-dotted-left'],
+[data-v='quote-dotted-none'],
+[data-v='quote-solid-both'],
+[data-v='quote-solid-right'],
+[data-v='quote-solid-left'],
+[data-v='quote-solid-none'] {
   --qc-bg: transparent;
   --qc-fg: var(--fg);
   --qc-muted-fg: light-dark(
@@ -239,29 +242,80 @@
   );
 }
 
-[data-v='quote-c'] .callout[data-callout='quote'],
-[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet) {
-  border: 3px double var(--qc-border);
+[data-v='quote-dotted-both'] .callout[data-callout='quote'],
+[data-v='quote-dotted-right'] .callout[data-callout='quote'],
+[data-v='quote-dotted-left'] .callout[data-callout='quote'],
+[data-v='quote-dotted-none'] .callout[data-callout='quote'],
+[data-v='quote-solid-both'] .callout[data-callout='quote'],
+[data-v='quote-solid-right'] .callout[data-callout='quote'],
+[data-v='quote-solid-left'] .callout[data-callout='quote'],
+[data-v='quote-solid-none'] .callout[data-callout='quote'],
+[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
   padding: 1.25rem 1.5rem;
 }
 
-[data-v='quote-c'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet) {
+[data-v='quote-dotted-both'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-dotted-right'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-dotted-left'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-dotted-none'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-solid-both'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-solid-right'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-solid-left'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-solid-none'] .callout[data-callout='quote'] .callout-content,
+[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
+[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
   font-style: normal;
   font-family: var(--font-mono);
 }
 
-[data-v='quote-c'] .callout[data-callout='quote'] > .callout-title {
-  border-block-start-style: dotted;
-}
-
-[data-v='quote-c'] .callout[data-callout='quote']::before,
-[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet)::before {
+[data-v='quote-dotted-both'] .callout[data-callout='quote']::before,
+[data-v='quote-dotted-right'] .callout[data-callout='quote']::before,
+[data-v='quote-dotted-left'] .callout[data-callout='quote']::before,
+[data-v='quote-dotted-none'] .callout[data-callout='quote']::before,
+[data-v='quote-solid-both'] .callout[data-callout='quote']::before,
+[data-v='quote-solid-right'] .callout[data-callout='quote']::before,
+[data-v='quote-solid-left'] .callout[data-callout='quote']::before,
+[data-v='quote-solid-none'] .callout[data-callout='quote']::before,
+[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
+[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
+[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
+[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
+[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
+[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
+[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
+[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before {
   content: none;
 }
 
-[data-v='quote-c'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-c'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
+[data-v='quote-dotted-both'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-dotted-right'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-dotted-left'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-dotted-none'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-solid-both'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-solid-right'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-solid-left'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-solid-none'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
+[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
+[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
+[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
+[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
+[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
+[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
+[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
+[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter {
   float: none;
   margin-inline-end: 0;
   font-family: inherit;
@@ -270,107 +324,44 @@
   color: inherit;
 }
 
-/* ==================================================================
- * Variant D: a terminal window. Deliberately not theme-aware, a terminal
- * is always dark chrome. Three square "traffic light" dots (never round,
- * this site has no rounded corners), a `$ ` prompt in front of the author,
- * no italic, no drop cap, no watermark.
- * ================================================================== */
+/* The one axis of the matrix: line style crossed with fade position. */
 
-[data-v='quote-d'] {
-  --qc-bg: #0b0c0e;
-  --qc-fg: #e7e9ec;
-  --qc-muted-fg: var(--brand-green);
-  --qc-border: #1c1e22;
+[data-v='quote-dotted-both'] {
+  --qc-rule-image: var(--qc-rule-dotted);
+  --qc-rule-mask: var(--qc-rule-mask-both);
 }
 
-[data-v='quote-d'] .callout[data-callout='quote'],
-[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet) {
-  padding-block-start: 2.4rem;
-  font-family: var(--font-mono);
+[data-v='quote-dotted-right'] {
+  --qc-rule-image: var(--qc-rule-dotted);
+  --qc-rule-mask: var(--qc-rule-mask-right);
 }
 
-[data-v='quote-d'] .callout[data-callout='quote']::after,
-[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet)::after {
-  content: '';
-  position: absolute;
-  z-index: 2;
-  inset-block-start: 0.9rem;
-  inset-inline-start: 1.1rem;
-  inline-size: 8px;
-  block-size: 8px;
-  background: var(--brand-red);
-  box-shadow:
-    16px 0 0 var(--brand-yellow),
-    32px 0 0 var(--brand-green);
+[data-v='quote-dotted-left'] {
+  --qc-rule-image: var(--qc-rule-dotted);
+  --qc-rule-mask: var(--qc-rule-mask-left);
 }
 
-[data-v='quote-d'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet) {
-  font-style: normal;
+[data-v='quote-dotted-none'] {
+  --qc-rule-image: var(--qc-rule-dotted);
+  --qc-rule-mask: none;
 }
 
-[data-v='quote-d'] .callout[data-callout='quote'] > .callout-title {
-  border-block-start-style: dashed;
+[data-v='quote-solid-both'] {
+  --qc-rule-image: var(--qc-rule-solid);
+  --qc-rule-mask: var(--qc-rule-mask-both);
 }
 
-[data-v='quote-d'] .callout[data-callout='quote'] .callout-title-text::before {
-  content: '$ ';
+[data-v='quote-solid-right'] {
+  --qc-rule-image: var(--qc-rule-solid);
+  --qc-rule-mask: var(--qc-rule-mask-right);
 }
 
-[data-v='quote-d'] .callout[data-callout='quote']::before,
-[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet)::before {
-  content: none;
+[data-v='quote-solid-left'] {
+  --qc-rule-image: var(--qc-rule-solid);
+  --qc-rule-mask: var(--qc-rule-mask-left);
 }
 
-[data-v='quote-d'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-d'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
-  float: none;
-  margin-inline-end: 0;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: inherit;
-}
-
-/* ==================================================================
- * Variant E: a quiet flourish, the closest thing left to what an epigraph
- * was for, an opening line rather than a boxed callout. No card fill, no
- * author row (hidden outright, even if the markup carries one), no
- * watermark, no drop cap. Just a rule on the inline-start edge and italic.
- * ================================================================== */
-
-[data-v='quote-e'] {
-  --qc-bg: transparent;
-  --qc-fg: var(--muted);
-  --qc-border: light-dark(
-    color-mix(in oklab, var(--brand-purple) 45%, transparent),
-    color-mix(in oklab, var(--brand-purple) 60%, transparent)
-  );
-}
-
-[data-v='quote-e'] .callout[data-callout='quote'],
-[data-v='quote-e'] blockquote:not(.callout):not(.twitter-tweet) {
-  border: 0;
-  border-inline-start: 2px solid var(--qc-border);
-  padding: 0 0 0 1.2rem;
-}
-
-[data-v='quote-e'] .callout[data-callout='quote'] > .callout-title {
-  display: none;
-}
-
-[data-v='quote-e'] .callout[data-callout='quote']::before,
-[data-v='quote-e'] blockquote:not(.callout):not(.twitter-tweet)::before {
-  content: none;
-}
-
-[data-v='quote-e'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-e'] blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
-  float: none;
-  margin-inline-end: 0;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: inherit;
+[data-v='quote-solid-none'] {
+  --qc-rule-image: var(--qc-rule-solid);
+  --qc-rule-mask: none;
 }

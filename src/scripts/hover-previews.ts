@@ -1,7 +1,9 @@
 // Gwern/Quartz-style draggable hover previews. Progressive enhancement only:
 // links keep working with JS off, this just adds a floating preview card on
 // top. No build-time data pipeline: the target page's already-built HTML is
-// fetched and parsed for <title> + meta description at hover time.
+// fetched and parsed for <title> + meta description at hover time. A footnote
+// reference is the one exception: its note is already in this page's DOM, so
+// its card is read straight out of that instead of fetched (see getMeta).
 
 interface Meta {
   title: string
@@ -73,6 +75,10 @@ function previewable(link: HTMLAnchorElement): boolean {
   // A bookmark card is already the preview: title, description and host, in a
   // card. Showing a hover card on top of one shows the same thing twice.
   if (!link.href || link.closest('.hp-card') || link.closest('.bookmark')) return false
+  // A footnote reference points down the same page, so it fails the
+  // different-page check below on purpose. Give it a card anyway, built from
+  // the note's own text (see getMeta / getFootnoteMeta).
+  if (link.hasAttribute('data-footnote-ref')) return true
   let url: URL
   try {
     url = new URL(link.href)
@@ -114,6 +120,39 @@ async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
   }
 }
 
+// A footnote is often two lines of prose; long enough past this and the card
+// would grow past what a hover popover should be, so it is cut with an
+// ellipsis rather than left to grow unbounded (the card itself still scrolls
+// past 60vh, see .hp-card in hover-previews.css, but that is a safety net,
+// not the intended reading experience for a citation).
+const FOOTNOTE_TEXT_MAX = 480
+
+/**
+ * The note's text, read out of its spot at the foot of the page rather than
+ * fetched: the content is already in this document. The bracketed number is
+ * the title, echoing the "[1]" the reference itself renders (see
+ * footnotes.css), and the note's own prose is the description. The
+ * back-reference arrow is dropped, it points back into the body text and
+ * means nothing inside a popover.
+ */
+function getFootnoteMeta(hash: string, linkText: string): Meta | null {
+  const target = document.getElementById(hash.slice(1))
+  if (!target) return null
+
+  const clone = target.cloneNode(true) as HTMLElement
+  for (const backref of clone.querySelectorAll('[data-footnote-backref]')) backref.remove()
+
+  const paragraphs = clone.querySelectorAll('p')
+  const raw = paragraphs.length > 0 ? Array.from(paragraphs, (p) => p.textContent ?? '').join(' ') : (clone.textContent ?? '')
+  const text = raw.replace(/\s+/g, ' ').trim()
+  if (!text) return null
+
+  return {
+    title: `[${linkText.trim()}]`,
+    description: text.length > FOOTNOTE_TEXT_MAX ? `${text.slice(0, FOOTNOTE_TEXT_MAX).trimEnd()}…` : text,
+  }
+}
+
 async function getMeta(href: string, linkText: string): Promise<Meta | null> {
   // A cross-site card falls back to the link's own text when nothing is known
   // about the target, so two links to the same URL with different words are two
@@ -126,6 +165,13 @@ async function getMeta(href: string, linkText: string): Promise<Meta | null> {
 
   if (external) {
     return remember(key, await getExternalMeta(href, linkText))
+  }
+
+  // A footnote reference: the note is already on this page, so it is read
+  // straight out of the DOM instead of fetched a second time.
+  const url = new URL(href)
+  if (url.hash && samePath(url, new URL(location.href))) {
+    return remember(key, getFootnoteMeta(url.hash, linkText))
   }
 
   inflight.get(href)?.abort()

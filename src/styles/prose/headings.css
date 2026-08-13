@@ -18,29 +18,38 @@ article h1 {
 }
 
 /*
- * Hovering a heading tints the whole line, not just the # at the end: the target
- * is the heading, so the heading is what lights up. The negative inline margin
- * cancels the padding so no text moves when the tint appears.
+ * The anchor link rehype-heading-anchors injects, pulled out into the left
+ * margin so it reads as a marker beside the heading rather than punctuation
+ * after it. Fades in on hover, and is always visible on keyboard focus,
+ * otherwise it is unreachable without a mouse.
+ *
+ * The plugin appends it as the last child, so `position: absolute` is what puts
+ * it on the left without needing the DOM order changed.
  */
-article :is(h1, h2, h3, h4, h5, h6):hover {
-  margin-inline: -0.4em;
-  padding-inline: 0.4em;
-  background: var(--heading-hover-bg);
+article :is(h1, h2, h3, h4, h5, h6) {
+  position: relative;
 }
 
-/*
- * The anchor link rehype-heading-anchors injects. Hidden until the heading is
- * hovered, but always visible on keyboard focus, otherwise it is unreachable
- * without a mouse.
- */
 .heading-anchor {
-  margin-inline-start: 0.35em;
+  position: absolute;
+  inset-inline-start: -1.1em;
+  inset-block-start: 0;
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 0.7em;
+  font-weight: 400;
+  line-height: inherit;
   text-decoration: none;
   opacity: 0;
   transition: opacity var(--duration) var(--ease);
+}
+
+/* Nowhere to put it outside the column on a narrow screen, so it comes inline. */
+@media (width < 48rem) {
+  .heading-anchor {
+    position: static;
+    margin-inline-start: 0.35em;
+  }
 }
 
 :is(h1, h2, h3, h4, h5, h6):hover > .heading-anchor,
