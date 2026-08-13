@@ -1,5 +1,11 @@
-// A lone markdown image becomes a figure, its title becomes the caption.
+// A lone markdown image becomes a figure, and its alt text becomes the caption.
 // The image node is kept intact so astro:assets still produces srcset.
+//
+// Alt, not title, because Obsidian is the editor: the Image Captions plugin
+// renders alt text as the caption, so a post looks the same while it is being
+// written as it does once published. A markdown title still wins when there is
+// one, which is what the 191 migrated posts carry and what to reach for when the
+// caption and the alt text genuinely need to say different things.
 
 import { readFileSync } from 'node:fs'
 
@@ -39,7 +45,11 @@ function attribute(name, value) {
 }
 
 function figureFor(image) {
-  const caption = typeof image.title === 'string' ? image.title.trim() : ''
+  const titled = typeof image.title === 'string' ? image.title.trim() : ''
+  const described = typeof image.alt === 'string' ? image.alt.trim() : ''
+  // The alt text stays on the image either way: it is what a search engine and a
+  // screen reader read when the file itself will not load.
+  const caption = titled === '' ? described : titled
   // Otherwise the caption renders as a browser tooltip as well.
   image.title = null
 

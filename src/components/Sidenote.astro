@@ -7,10 +7,24 @@
  * `components` prop, so its public shape (tag name, slot content) must not
  * change.
  *
- * - Numbering is a CSS counter on <body> (see src/styles/sidenotes.css), *   no client JS, works even if this is the only Sidenote on the page.
- * - On wide viewports the note text floats into the right margin, always
- *   visible. On narrow viewports it collapses to a tap/click-to-reveal
- *   popover, toggled by a checkbox (zero JS either way).
+ * - Numbering is a CSS counter on <body> (see src/styles/sidenotes.css),
+ *   no client JS, works even if this is the only Sidenote on the page.
+ * - Each instance also gets a build-time sequential id (`sidenote-1`,
+ *   `sidenote-2`, ...) for its own permalink: a copy-link icon that appears
+ *   in the note's own top-right corner on hover/focus, click to copy via the
+ *   existing delegated handler in BaseLayout. It lives inside `.note-text`,
+ *   not in the running text, see src/styles/sidenotes.css.
+ * - Hovering or focusing anywhere on the note (marker, popover, or the
+ *   floated margin text) highlights the text it is attached to, the plain
+ *   prose right before this tag. That text is not wrapped in anything here,
+ *   so the highlight is applied to a Range by
+ *   src/components/FootnoteSidenotes.astro, not by this component's markup.
+ * - On wide viewports the note text floats into the right margin, a thick
+ *   inline-start border only, always visible. On narrow viewports it
+ *   collapses to a tap/click-to-reveal popover, toggled by a checkbox (zero
+ *   JS either way). Following a link to this note's own anchor rings the
+ *   marker, it never forces the popover open (nothing on this page should
+ *   land in a state the reader cannot dismiss).
  * - Slot content MUST be inline only: text, <strong>, <em>, <a>, <code>.
  *   Never headings or block elements, this renders inside a <span>, and a
  *   popover card is not a place for a blockquote.
@@ -18,16 +32,38 @@
 import { localeFromPath, t } from '../i18n/ui'
 import '../styles/sidenotes.css'
 
-// Crypto.randomUUID() runs at build time (this is a static site),
-// so each instance gets a stable id for its checkbox/label pair and for the
-// CSS anchor-positioning enhancement, with no client script involved.
-const id = `sn-${crypto.randomUUID()}`
+// Module-scoped on purpose: Astro renders a page's components top to bottom
+// before moving to the next page, so watching the pathname for a change is
+// enough to zero the count at the first Sidenote of a new page, the same
+// "resets per page" the CSS counter above already gets for free from the
+// browser. If a future build ever renders pages concurrently in one process
+// this can go stale; ids stay unique, they just may stop matching the
+// visible 1, 2, 3 the CSS counter shows. A separate counter from
+// MarginNote's own (not shared): the two id spaces never need to interleave,
+// only stay unique within their own prefix.
+let lastPath = ''
+let count = 0
+
 // MDX calls this without props, so the URL is what tells us the language.
 const locale = localeFromPath(Astro.url.pathname)
+
+if (Astro.url.pathname !== lastPath) {
+  lastPath = Astro.url.pathname
+  count = 0
+}
+count += 1
+const anchorId = `sidenote-${count}`
+const toggleId = `${anchorId}-toggle`
 ---
 
-<span class="note sidenote">
-  <input type="checkbox" id={id} class="note-toggle" aria-label={t(locale, 'showNote')} />
-  <label for={id} class="note-marker" style={`anchor-name: --${id}`}></label>
-  <span class="note-text" style={`position-anchor: --${id}`}><slot /></span>
+<span class="note sidenote" id={anchorId}>
+  <input type="checkbox" id={toggleId} class="note-toggle" aria-label={t(locale, 'showNote')} />
+  <label for={toggleId} class="note-marker" style={`anchor-name: --${toggleId}`}></label>
+  <span class="note-text" style={`position-anchor: --${toggleId}`}
+    ><slot /><a
+      href={`#${anchorId}`}
+      class="note-copy-link"
+      data-copy-link
+      aria-label="link to this note"></a></span
+  >
 </span>

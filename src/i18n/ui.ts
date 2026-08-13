@@ -28,6 +28,9 @@ type UIKey =
   | 'seriesNav'
   | 'seriesDescription'
   | 'youAreHere'
+  | 'linkCopied'
+  | 'footnotes'
+  | 'openInNewTab'
   | 'notWrittenYet'
   | 'allPosts'
   | 'categories'
@@ -98,6 +101,9 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     seriesNav: 'Navegação da série',
     seriesDescription: 'Todos os artigos da série %s.',
     youAreHere: 'você está aqui',
+    linkCopied: 'link copiado',
+    footnotes: 'Notas de rodapé',
+    openInNewTab: 'abrir em uma aba',
     notWrittenYet: 'ainda não escrito',
     allPosts: 'Todos os posts',
     categories: 'Categorias',
@@ -168,6 +174,9 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     seriesNav: 'Series navigation',
     seriesDescription: 'Every article in the %s series.',
     youAreHere: 'you are here',
+    linkCopied: 'link copied',
+    footnotes: 'Footnotes',
+    openInNewTab: 'open in a tab',
     notWrittenYet: 'not written yet',
     allPosts: 'All posts',
     categories: 'Categories',

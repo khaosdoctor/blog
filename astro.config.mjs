@@ -12,6 +12,10 @@ import { redirectStubs } from './src/integrations/redirect-stubs.mjs'
 import { lastModified, noindexPaths } from './src/lib/post-dates.mjs'
 import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
 import { remarkFigures } from './src/plugins/remark-figures.mjs'
+import { rehypeHeadingIds } from '@astrojs/markdown-remark'
+import { rehypeFootnoteSidenotes } from './src/plugins/rehype-footnote-sidenotes.mjs'
+import { rehypeHeadingAnchors } from './src/plugins/rehype-heading-anchors.mjs'
+import { rehypeMathCopy } from './src/plugins/rehype-math-copy.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
 import { remarkWikilinks } from './src/plugins/remark-wikilinks.mjs'
 
@@ -34,6 +38,21 @@ export default defineConfig({
     expressiveCode({
       themes: ['github-light', 'github-dark'],
       styleOverrides: { borderRadius: '4px', codeFontSize: '0.85rem' },
+      // Fence labels written years ago that Shiki has no grammar for, so those
+      // blocks silently lost their highlighting. Aliases rather than edits across
+      // eight posts, and a place to add the next one.
+      shiki: {
+        langAlias: {
+          Dockerfile: 'dockerfile',
+          output: 'plaintext',
+          Bash: 'bash',
+          JSON: 'json',
+          YAML: 'yaml',
+          ssh: 'bash',
+          fortran: 'fortran-free-form',
+          tys: 'ts',
+        },
+      },
     }),
     mdx(),
     // The search page and the offline fallback are chrome, not content. A post
@@ -70,7 +89,22 @@ export default defineConfig({
     // running after the embed check keeps a wikilink alone in a paragraph from
     // being mistaken for something to embed.
     remarkPlugins: [remarkReadingTime, remarkMath, remarkEmbeds, remarkFigures, remarkWikilinks],
-    rehypePlugins: [rehypeCallouts, rehypeKatex],
+    rehypePlugins: [
+      // Obsidian's theme, not the plugin's github default: the vocabulary the
+      // posts are written in is Obsidian's (quote, question, example and the
+      // rest), and the github theme only knows five types, so anything else
+      // rendered as a plain blockquote with a stray title line.
+      [rehypeCallouts, { theme: 'obsidian' }],
+      rehypeKatex,
+      rehypeMathCopy,
+      // Astro adds the heading ids itself, but only after this list runs, and the
+      // anchor plugin refuses to invent an id that would be the only one of its
+      // kind on the site. Running it explicitly here puts the ids in place first;
+      // Astro's own pass then finds every heading already has one.
+      rehypeHeadingIds,
+      rehypeHeadingAnchors,
+      rehypeFootnoteSidenotes,
+    ],
   },
   image: {
     // The migration colocates images next to posts; they are all local files.

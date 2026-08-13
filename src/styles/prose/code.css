@@ -1,0 +1,26 @@
+/*
+ * Every block says which language it is. Bottom right by default: the copy
+ * button owns the top right corner, and a filename tab owns the top left when
+ * there is one. The lab page shows the other placements.
+ *
+ * The frame itself, the filename tab and the marked lines live in
+ * src/styles/code-and-callouts.css.
+ */
+.expressive-code figure {
+  position: relative;
+}
+
+.expressive-code figure pre::after {
+  content: attr(data-language);
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  padding: 0.1em 0.5em;
+  background: var(--rule);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}

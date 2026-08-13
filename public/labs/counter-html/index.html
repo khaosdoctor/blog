@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A plain HTML demo</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        display: grid;
+        place-content: center;
+        min-height: 100vh;
+        font-family: ui-monospace, monospace;
+        text-align: center;
+      }
+      button {
+        padding: 0.4rem 0.9rem;
+        border: 1px solid currentColor;
+        border-radius: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+      output { display: block; margin-block-end: 0.8rem; font-size: 2.5rem; }
+    </style>
+  </head>
+  <body>
+    <div>
+      <output id="n">0</output>
+      <button id="go" type="button">count</button>
+    </div>
+    <script>
+      let n = 0
+      const out = document.getElementById('n')
+      document.getElementById('go').addEventListener('click', () => {
+        n += 1
+        out.textContent = String(n)
+      })
+    </script>
+  </body>
+</html>

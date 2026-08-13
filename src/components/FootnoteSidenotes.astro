@@ -1,0 +1,72 @@
+---
+/**
+ * <FootnoteSidenotes /> — the one piece of this feature CSS cannot do alone.
+ *
+ * Hovering or focusing a Sidenote or MarginNote (src/components/Sidenote.astro,
+ * src/components/MarginNote.astro) should highlight the text it is attached
+ * to, but that text is not wrapped in anything: it is whatever plain prose
+ * sits right before the tag in the paragraph. There is no element for a
+ * `:hover` rule to select, and short of giving every note a second,
+ * author-written wrapper around "just the words this refers to" (a bigger
+ * surface than either needs), CSS alone cannot reach it.
+ *
+ * The CSS Custom Highlight API can: it paints an arbitrary Range without
+ * touching the DOM, so the text stays exactly as authored. This script's
+ * only job is to build that Range on hover/focus and hand it to
+ * `CSS.highlights`; the paint itself is `::highlight(note-bound)` in
+ * src/styles/sidenotes.css.
+ *
+ * One delegated listener pair on the document, not one per note: this
+ * runs on every page whether that page has zero notes or a dozen.
+ * Feature-detected and wrapped, so a browser without the API, or any
+ * unexpected DOM shape, leaves the note working exactly as it does with CSS
+ * off, minus the tint, never a broken page.
+ */
+---
+
+<script is:inline>
+  ;(function () {
+    try {
+      if (typeof CSS === 'undefined' || !('highlights' in CSS) || typeof Highlight === 'undefined') return
+
+      var NAME = 'note-bound'
+
+      // The bound text is the plain text node immediately before the note's
+      // own <span>, in the same parent: whatever prose the author placed the
+      // <Sidenote>/<MarginNote> tag right after.
+      function boundRange(note) {
+        var node = note.previousSibling
+        if (!node || node.nodeType !== Node.TEXT_NODE || !node.textContent.trim()) return null
+        var range = document.createRange()
+        range.selectNodeContents(node)
+        return range
+      }
+
+      function show(target) {
+        if (!target || typeof target.closest !== 'function') return
+        var note = target.closest('.note')
+        if (!note) return
+        var range = boundRange(note)
+        if (!range) return
+        CSS.highlights.set(NAME, new Highlight(range))
+      }
+
+      function hide(event) {
+        var goingTo = event && event.relatedTarget
+        if (goingTo && typeof goingTo.closest === 'function' && goingTo.closest('.note')) return
+        CSS.highlights.delete(NAME)
+      }
+
+      document.addEventListener('mouseover', function (event) {
+        show(event.target)
+      })
+      document.addEventListener('mouseout', hide)
+      document.addEventListener('focusin', function (event) {
+        show(event.target)
+      })
+      document.addEventListener('focusout', hide)
+    } catch (_error) {
+      // A highlight that never shows is a cosmetic loss, not a broken page.
+    }
+  })()
+</script>

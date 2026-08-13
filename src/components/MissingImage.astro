@@ -25,6 +25,7 @@ const host = (() => {
 
 <figure class="missing">
   <div class="frame" role="img" aria-label={alt || t(locale, 'imageGoneAlt', host)} data-original={src}>
+    <p class="sad" aria-hidden="true">=(</p>
     <p class="label">{t(locale, 'imageGone')}</p>
     <p class="host">{host}</p>
   </div>
@@ -38,6 +39,7 @@ const host = (() => {
   }
 
   .frame {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -45,10 +47,30 @@ const host = (() => {
     gap: 0.3rem;
     min-height: 8rem;
     padding: 1.5rem;
-    border: 1px dashed var(--rule);
-    border-radius: 4px;
+    border: var(--border) dashed var(--rule);
+    border-inline-start: var(--border-card-edge) solid var(--rule);
+    border-radius: var(--radius);
     color: var(--muted);
     text-align: center;
+  }
+
+  /* A typed-out sad face rather than an emoji: an emoji is a font-dependent
+     colour image, and this whole site is going pixel and monochrome. Sits behind
+     the labels as a watermark, hidden from screen readers because it is
+     decoration and the frame already carries a real label. */
+  .sad {
+    position: absolute;
+    z-index: -1;
+    margin: 0;
+    color: var(--rule);
+    font-family: var(--font-mono);
+    font-size: 5rem;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    user-select: none;
+    /* Typed sideways, read upright: rotating it puts the eyes above the mouth
+       instead of leaving the reader to tilt their head. */
+    transform: rotate(90deg);
   }
 
   .label {

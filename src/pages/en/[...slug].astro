@@ -4,8 +4,8 @@ import { render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Bookmark from '../../components/Bookmark.astro'
-import Epigraph from '../../components/Epigraph.astro'
 import HoverPreviews from '../../components/HoverPreviews.astro'
+import HtmlLab from '../../components/HtmlLab.astro'
 import LangBanner from '../../components/LangBanner.astro'
 import MarginNote from '../../components/MarginNote.astro'
 import MissingImage from '../../components/MissingImage.astro'
@@ -27,7 +27,7 @@ import {
 
 const mdxComponents = {
   Bookmark,
-  Epigraph,
+  HtmlLab,
   MarginNote,
   MissingImage,
   RawEmbed,
@@ -100,7 +100,9 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
         <LangBanner lang="en" originalHref={sourcePath} />
       )
     }
-    <Content components={mdxComponents} />
+    <div class="prose">
+      <Content components={mdxComponents} />
+    </div>
   </article>
   <HoverPreviews locale="en" />
 </BaseLayout>

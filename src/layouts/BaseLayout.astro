@@ -4,13 +4,29 @@
 import 'katex/dist/katex.min.css'
 // rehype-callouts emits the markup and the icons but ships its themes as opt-in
 // stylesheets, so without this line every > [!note] rendered as plain text with
-// a stray title. github is the plugin's own default theme, which is what the
-// markup already matches; the ASCII redesign replaces this file, not the syntax.
-import 'rehype-callouts/theme/github'
+// a stray title. Obsidian's theme, matching the plugin option in astro.config.mjs
+// and the vocabulary the posts are actually written in.
+import 'rehype-callouts/theme/obsidian'
 // Every colour, font stack, size and duration the site uses. Nothing below
 // should hardcode one.
 import '../styles/theme.css'
+// How the body of a post reads: headings, emphasis, lists, tables, links, code.
+import '../styles/prose.css'
+// Callout cards and the code block frame, which are both dense enough to want
+// their own file. Ordered after prose.css so they win where they overlap.
+import '../styles/code-and-callouts.css'
+// Footnotes rendered beside the text instead of only at the foot of the page.
+import '../styles/footnotes.css'
+// Every embed centred in the reading column instead of hugging its left edge.
+import '../styles/embeds.css'
+// Display equations and their copy control.
+import '../styles/math.css'
+// Quote and epigraph treatments the lab page shows side by side. This file is a
+// menu, not a decision: the chosen variant moves into prose.css and the rest go.
+import '../styles/variants/quotes.css'
+import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
 import LangSwitcher from '../components/LangSwitcher.astro'
+import MathCopy from '../components/MathCopy.astro'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
@@ -119,6 +135,8 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
         <a href={commitUrl} rel="noopener">{t(locale, 'version')}: {version}</a>
       </p>
     </footer>
+    <MathCopy locale={locale} />
+    <FootnoteSidenotes />
     {
       analyticsToken && (
         <script
@@ -128,6 +146,32 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
         />
       )
     }
+    <script is:inline define:vars={{ copiedLabel: t(locale, 'linkCopied') }}>
+      // Clicking a heading's # both jumps to the section and puts the full URL on
+      // the clipboard. One delegated listener rather than one per heading, and
+      // the jump is left to the browser: preventDefault would break opening the
+      // anchor in a new tab and lose the history entry.
+      document.addEventListener('click', async (event) => {
+        const anchor = event.target.closest('a[data-copy-link]')
+        if (anchor === null) return
+
+        try {
+          await navigator.clipboard.writeText(anchor.href)
+        } catch {
+          // No clipboard permission, or an insecure origin. The jump still works,
+          // which is the part that matters, so say nothing.
+          return
+        }
+
+        document.querySelector('.toast')?.remove()
+        const toast = document.createElement('div')
+        toast.className = 'toast'
+        toast.setAttribute('role', 'status')
+        toast.textContent = copiedLabel
+        document.body.append(toast)
+        setTimeout(() => toast.remove(), 2000)
+      })
+    </script>
     <script is:inline define:vars={{ commitShort }}>
       // Registers the offline cache. Everything above works without it; this
       // only makes already-read posts available with no connection.
@@ -234,6 +278,23 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
   h3 {
     line-height: 1.25;
     text-wrap: balance;
+  }
+
+  /*
+   * GFM stamps `class="sr-only"` on the footnotes heading and nothing defined it,
+   * so a stray "Footnotes" showed up above the list on every post that has one.
+   * It belongs in the accessibility tree and nowhere else.
+   */
+  .sr-only {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
 
   a {

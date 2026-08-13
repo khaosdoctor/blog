@@ -6,7 +6,8 @@
  * The palette is the brand's, traced from the favicon. The type stacks are
  * placeholders on purpose: the coming design is ASCII/ANSI, 8-bit, pixelated, and
  * the real faces get committed to the repo when they are picked. See
- * docs/design-system.md for the direction and the font licensing notes.
+ * docs/design.md for the direction, the font licensing notes and the open
+ * questions behind the values below.
  */
 
 :root {
@@ -17,6 +18,9 @@
   --brand-green: #45b384;
   --brand-yellow: #f5b200;
   --brand-blue: #0578be;
+  /* Not from the favicon: quotes need a purple and the brand has none. Provisional
+   * until the hex is picked, see the quotes question in docs/design.md. */
+  --brand-purple: #6b4fbb;
 
   /* Roles. Components reference these, never the brand values above. */
   --bg: light-dark(#fffdf9, #14161a);
@@ -46,6 +50,81 @@
   /* Square by default: rounded corners fight a pixel grid. */
   --radius: 0;
   --border: 1px;
+  /* Anything card-shaped carries a thick left edge, in its own border colour. */
+  --border-card-edge: 8px;
+
+  /*
+   * Prose decoration. Every one of these is a candidate the lab page shows
+   * variants of, so changing the look later is changing a value here, not a
+   * stylesheet. See the Lab feedback section of docs/design.md.
+   */
+
+  /* Bold is a highlighter chip, the way the old blog had it. */
+  --em-bold-bg: light-dark(
+    color-mix(in oklab, var(--brand-yellow) 32%, transparent),
+    color-mix(in oklab, var(--brand-yellow) 24%, transparent)
+  );
+  --em-bold-fg: var(--fg);
+  /* Italic reads as italic on its own; this makes it unmissable. */
+  --em-italic-fg: light-dark(
+    color-mix(in oklab, var(--brand-blue) 80%, var(--fg)),
+    color-mix(in oklab, var(--brand-blue) 45%, var(--fg))
+  );
+  --em-italic-weight: 500;
+
+  /* Wikipedia's red link: a post linked before it was written. */
+  --link-unwritten: light-dark(#a4232e, #ff8b93);
+
+  /* Headings: a rule that fades out, a glow behind h1, a tint on hover. */
+  --heading-rule: var(--rule);
+  --heading-hover-bg: light-dark(
+    color-mix(in oklab, var(--accent) 8%, transparent),
+    color-mix(in oklab, var(--accent) 14%, transparent)
+  );
+  --heading-glow: light-dark(
+    color-mix(in oklab, var(--brand-green) 35%, transparent),
+    color-mix(in oklab, var(--brand-green) 45%, transparent)
+  );
+  --heading-glow-blur: 0.5em;
+
+  /* Quotes. The purple has no brand value yet, see --brand-purple. */
+  --quote-bg: light-dark(
+    color-mix(in oklab, var(--brand-purple) 12%, var(--bg)),
+    color-mix(in oklab, var(--brand-purple) 22%, var(--bg))
+  );
+  --quote-edge: light-dark(
+    color-mix(in oklab, var(--brand-purple) 45%, transparent),
+    color-mix(in oklab, var(--brand-purple) 55%, transparent)
+  );
+  --quote-mark: light-dark(
+    color-mix(in oklab, var(--brand-purple) 18%, transparent),
+    color-mix(in oklab, var(--brand-purple) 30%, transparent)
+  );
+
+  /* Task list boxes: hollow square, green tick, no radius. */
+  --check-box: light-dark(#ffffff, transparent);
+  --check-edge: var(--fg);
+  --check-tick: var(--brand-green);
+
+  /* A section break: a short glowing bar, not a full-width line. */
+  --rule-length: 150px;
+  --rule-weight: 2px;
+  --rule-core: light-dark(#1a1c20, #ffffff);
+  --rule-glow: light-dark(
+    color-mix(in oklab, var(--brand-green) 30%, transparent),
+    color-mix(in oklab, var(--brand-green) 50%, transparent)
+  );
+  --rule-glow-blur: 6px;
+
+  /* Tables: every cell ruled, header tinted and bold, room around the text. */
+  --table-edge: light-dark(#1a1c20, #e6e4e0);
+  /* A glimpse of a tint, nothing more: at 12% the header read as a filled band
+   * and pulled the eye away from the rows, which are the content. */
+  --table-head-bg: light-dark(
+    color-mix(in oklab, var(--brand-blue) 5%, transparent),
+    color-mix(in oklab, var(--brand-blue) 8%, transparent)
+  );
+  --table-cell-pad: 0.45rem 0.7rem;
 
   --duration: 120ms;
   --ease: ease;

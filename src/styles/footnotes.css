@@ -1,0 +1,155 @@
+/*
+ * Astro's GFM footnotes already put a numbered link in the text and the full
+ * body at the foot of the post. src/plugins/rehype-footnote-sidenotes.mjs
+ * copies that body into an `<aside class="footnote-aside">` right after the
+ * paragraph that references it (aria-hidden: the accessible copy stays the
+ * one at the foot of the page). This file styles two things:
+ *
+ *   - the reference mark in the text: bracketed "[1]", not a bare
+ *     underlined number, so it reads as a citation and is never mistaken
+ *     for src/components/Sidenote.astro's bordered, unbracketed marker.
+ *   - the aside itself: floated into the right margin on a wide viewport,
+ *     collapsed to a hover/focus-revealed panel pinned to the bottom of the
+ *     viewport on a narrow one.
+ */
+
+:root {
+  /* Narrower than a Sidenote's margin box (13rem, see sidenotes.css): a
+     footnote is usually a short citation, and the narrower box is what
+     leaves enough gutter to justify the lower wide-mode breakpoint below. */
+  --footnote-aside-width: 9rem;
+  --footnote-aside-gap: 1.5rem;
+}
+
+/* --------------------------------------------------------------- section */
+
+/*
+ * The same section break as `.prose hr` (see the "rule" heading in
+ * prose.css): a short bar, fading out at both ends, with a glow behind it.
+ * Reuses that rule's own tokens rather than new ones, so the two treatments
+ * cannot drift apart. A `::before`, not a border, because a border cannot
+ * fade or glow.
+ */
+.prose section[data-footnotes]::before {
+  content: '';
+  display: block;
+  inline-size: var(--rule-length);
+  block-size: 2px;
+  margin-block: 3rem;
+  margin-inline: auto;
+  background: linear-gradient(to right, transparent, var(--rule-core), transparent);
+  box-shadow: 0 0 var(--rule-glow-blur) var(--rule-glow);
+}
+
+/* ------------------------------------------------------------- reference */
+
+/*
+ * Generated content on the wrapping <sup>, not text in the tree: copying the
+ * sentence never copies a stray "[" or "]", and user-select: none is a second
+ * line of defence against that on browsers that would otherwise include
+ * pseudo-element content in a selection. Targeting <sup> rather than the <a>
+ * itself also sidesteps prose.css's `a:is([data-footnote-ref], ...)::after {
+ * content: none }` rule, which only touches the anchor, not its parent.
+ */
+.prose sup:has(> a[data-footnote-ref])::before,
+.prose sup:has(> a[data-footnote-ref])::after {
+  color: var(--accent);
+  user-select: none;
+}
+
+.prose sup:has(> a[data-footnote-ref])::before {
+  content: '[';
+}
+
+.prose sup:has(> a[data-footnote-ref])::after {
+  content: ']';
+}
+
+/* The brackets are the signal now, so the underline (the only thing telling
+   a footnote apart from a Sidenote before this change) goes away. */
+.prose a[data-footnote-ref] {
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------------ aside */
+
+/*
+ * Narrow baseline: a fixed panel pinned to the bottom of the viewport,
+ * hidden until the reference is hovered or focused. Already aria-hidden (see
+ * the plugin), so there is no accessibility reason to keep it in the layout
+ * while hidden the way sidenotes.css's popover does for its "before it's
+ * toggled" state; opacity/visibility is enough here.
+ */
+.footnote-aside {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 20;
+  max-height: 40vh;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  overflow-y: auto;
+  background: var(--bg);
+  border-block-start: var(--border) solid var(--rule);
+  font-size: var(--text-small);
+  line-height: var(--leading-tight);
+  color: var(--fg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.4rem);
+  transition:
+    opacity var(--duration) var(--ease),
+    transform var(--duration) var(--ease),
+    visibility 0s linear var(--duration);
+}
+
+.footnote-aside p {
+  margin: 0;
+}
+
+.footnote-aside p + p {
+  margin-block-start: 0.5rem;
+}
+
+/*
+ * Chained two deep: two footnotes in the same paragraph is already rare on
+ * this site, and there is no sibling combinator for "every same-class
+ * sibling up to the next paragraph" that would reach a third without also
+ * matching asides belonging to a later, unrelated paragraph.
+ */
+p:has(sup:hover, sup:focus-within) + .footnote-aside,
+p:has(sup:hover, sup:focus-within) + .footnote-aside + .footnote-aside {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+/* Wide: margin room exists (see the comment in sidenotes.css for the same
+   math against its own, wider box), so the panel above turns off and the
+   note floats beside its paragraph instead. */
+@media (min-width: 70rem) {
+  .footnote-aside {
+    position: static;
+    float: right;
+    clear: right;
+    z-index: auto;
+    width: var(--footnote-aside-width);
+    max-height: none;
+    margin-top: 0.15rem;
+    margin-bottom: 0.4rem;
+    margin-left: var(--footnote-aside-gap);
+    margin-right: calc(-1 * (var(--footnote-aside-width) + var(--footnote-aside-gap)));
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border-block-start: 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--muted);
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: none;
+  }
+}
