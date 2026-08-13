@@ -76,9 +76,13 @@ function withoutCode(source: string): string {
   return source
     .replace(/```[\s\S]*?```/g, '')
     .replace(/`[^`\n]*`/g, '')
+    // Maths is raw to MDX: remark-math's tokenizer claims the whole span, so
+    // \frac{a}{b} inside $...$ is LaTeX, never an expression to execute.
+    .replace(/\$\$[\s\S]*?\$\$/g, '')
+    .replace(/\$[^$\n]+\$/g, '')
     .replace(/\\[<{}]/g, '')
     .replace(/\]\(<[^>]*>\)/g, ']()')
-    .replace(/<(?:RawEmbed|Video|Figure|MissingImage|Tweet|Bookmark)\b[\s\S]*?\/>/g, '')
+    .replace(/<(?:RawEmbed|Video|MissingImage|Tweet|Bookmark)\b[\s\S]*?\/>/g, '')
 }
 
 function frontmatterOf(source: string): string {
