@@ -1,35 +1,57 @@
 import { glob } from 'astro/loaders'
 import { defineCollection, z } from 'astro:content'
 
-// The folder Obsidian opens directly. Generated translations go in a
-// separate build-managed folder later, kept out of the writing view.
-//
-// One post is one folder: content/blog/<slug>/index.md(x) plus its images, so a
-// post and its assets live together and image paths are just ./image.png.
-// Matching only `index` files also means a stray note Obsidian creates with
-// Ctrl+N is not a post, instead of failing the build on a missing title.
+/**
+ * One collection, one folder per post: content/blog/<folder>/index.md(x) is the
+ * post, and every other markdown file in that same folder is a translation of
+ * it. The folder IS the pairing, which is why no frontmatter field points at a
+ * source post: two files in one folder are the same article, and `lang` says
+ * which language each one is.
+ *
+ * The pattern matches exactly one level deep instead of recursing, because a
+ * post file always lives directly inside its post folder. A note Obsidian
+ * creates with Ctrl+N anywhere else is not a post, so it cannot fail the build
+ * on a missing title.
+ */
 const blog = defineCollection({
-  loader: glob({ pattern: '**/index.{md,mdx}', base: './content/blog' }),
+  loader: glob({
+    pattern: '*/*.{md,mdx}',
+    base: './content/blog',
+    // The default would use a `slug` in the frontmatter as the entry id, which
+    // collides the moment a translation's English slug matches its folder name:
+    // both entries claim the same id and one silently replaces the other, so a
+    // published Portuguese post loses its page. The id is the file's path, and
+    // the URL slug is computed separately in src/lib/posts.ts.
+    generateId: ({ entry }) => entry.replace(/\.mdx?$/, '').replace(/\/index$/, ''),
+  }),
   // image() resolves the relative path to a real built asset, which is what
   // makes heroImage usable as og:image. A wrong path now fails the build.
+  // Translations share the folder, so they share those relative paths too.
   schema: ({ image }) =>
     z.object({
-    title: z.string(),
-    // A future pubDate means scheduled: the build hides it until its time.
-    pubDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    // The language this article was WRITTEN in; the other one is generated.
-    lang: z.enum(['pt', 'en']).default('pt'),
-    // THE SECTION, exactly one per post. Tags stay separate and many.
-    category: z.string(),
-    tags: z.array(z.string()).default([]),
-    // A short slug you can remember, e.g. `grpc`. It is also the series URL.
-    series: z.string().optional(),
-    // The display title. Write it on the first part only.
-    seriesName: z.string().optional(),
-    seriesOrder: z.number().optional(),
-    // Doubles as the hover-preview excerpt and the meta description.
-    description: z.string(),
+      title: z.string(),
+      // A future pubDate means scheduled: the build hides it until its time.
+      pubDate: z.coerce.date(),
+      updatedDate: z.coerce.date().optional(),
+      // The language of THIS file. Posts are written in Portuguese by default;
+      // a translation says so here and gets its own /<lang>/ URL.
+      lang: z.enum(['pt', 'en']).default('pt'),
+      /**
+       * Overrides the URL slug, so an English translation reads as English in
+       * the address bar instead of inheriting the Portuguese folder name. When
+       * absent the slug is the folder name (index files) or the file name.
+       */
+      slug: z.string().optional(),
+      // THE SECTION, exactly one per post. Tags stay separate and many.
+      category: z.string(),
+      tags: z.array(z.string()).default([]),
+      // A short slug you can remember, e.g. `grpc`. It is also the series URL.
+      series: z.string().optional(),
+      // The display title. Write it on the first part only.
+      seriesName: z.string().optional(),
+      seriesOrder: z.number().optional(),
+      // Doubles as the hover-preview excerpt and the meta description.
+      description: z.string(),
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
       epigraph: z.string().optional(),
@@ -39,43 +61,11 @@ const blog = defineCollection({
       visibility: z.enum(['public', 'members', 'paid']).default('public'),
       /** Thin or placeholder pages: keep the URL working, keep it out of search. */
       noindex: z.boolean().default(false),
-      canonicalUrl: z.url().optional(),
+      /** Drives the translation banner. False once a human edits the file. */
+      machineTranslated: z.boolean().default(false),
       seoTitle: z.string().optional(),
       seoDescription: z.string().optional(),
     }),
 })
 
-/**
- * Machine translations, written by scripts/translate.ts and committed by CI.
- * Deliberately a separate collection in a separate folder: Obsidian only ever
- * opens content/blog, so the writing view shows source-language posts only.
- */
-const translated = defineCollection({
-  loader: glob({ pattern: '**/index.{md,mdx}', base: './content/translated' }),
-  schema: z.object({
-    title: z.string(),
-    pubDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    lang: z.enum(['pt', 'en']),
-    category: z.string(),
-    tags: z.array(z.string()).default([]),
-    series: z.string().optional(),
-    seriesOrder: z.number().optional(),
-    description: z.string(),
-    heroImage: z.string().optional(),
-    heroImageAlt: z.string().optional(),
-    epigraph: z.string().optional(),
-    epigraphCite: z.string().optional(),
-    draft: z.boolean().default(false),
-    visibility: z.enum(['public', 'members', 'paid']).default('public'),
-    canonicalUrl: z.url().optional(),
-    seoTitle: z.string().optional(),
-    seoDescription: z.string().optional(),
-    /** False once a human edits the file: their version wins and the banner goes. */
-    machineTranslated: z.boolean().default(true),
-    /** Slug of the source post this was translated from. */
-    translationOf: z.string(),
-  }),
-})
-
-export const collections = { blog, translated }
+export const collections = { blog }

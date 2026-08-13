@@ -32,6 +32,7 @@ const { category, posts } = Astro.props
 <BaseLayout
   title={`${category} | Lucas Santos`}
   description={t('pt', 'sectionDescription', category)}
+  section={{ name: category, url: `/${category}/` }}
 >
   <h1>{category}</h1>
   <p class="count">

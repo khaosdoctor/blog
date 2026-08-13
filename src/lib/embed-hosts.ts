@@ -1,37 +1,22 @@
 /**
- * Every third party this site may talk to, and why. One registry, two consumers:
- * the CSP meta tag in BaseLayout.astro and the frame/script allowlists in
- * scripts/check-output.ts. Before this existed a host had to be added in both
- * places, and missing one failed silently in a different way each time: missing
- * from the CSP meant a blocked embed with nothing in the build log, missing from
- * the guard meant an unguarded frame.
- *
- * This is deliberately NOT derived from the built output. An allowlist that
- * grows to fit whatever frame appears in a page would let anything that can
- * write a frame grant itself permission, which is the failure the previous site
- * had. Adding a provider here is a reviewed edit; the build tells you when one
- * is needed.
- *
- * `component` names the thing that emits it, so the registry reads as a map of
- * the embed pipeline: see src/plugins/remark-embeds.mjs.
+ * The single source for the CSP meta tag (BaseLayout.astro) and the
+ * check-output.ts frame/script allowlists. Never derive this from build
+ * output: an allowlist that grows to fit the page grants permission to
+ * whatever wrote the page.
  */
 export interface EmbedProvider {
   /** Component or feature that produces this traffic. */
   component: string
-  /** Hosts allowed in an <iframe>. Becomes `frame-src`. */
+  /** Becomes `frame-src`. */
   frame?: string[]
-  /**
-   * Hosts allowed to serve and run JavaScript. Becomes `script-src`, so this is
-   * the narrowest list and the one to think hardest about.
-   */
+  /** Becomes `script-src`, the narrowest list and the one to think hardest about. */
   script?: string[]
-  /** Hosts allowed as a fetch/XHR/beacon target. Becomes `connect-src`. */
+  /** Becomes `connect-src`. */
   connect?: string[]
   /**
-   * Hosts that legitimately appear in the output without executing anything:
-   * thumbnails, preconnect hints, and URLs a facade assembles inside its own
-   * script before the reader clicks. The guard accepts these; the CSP grants
-   * them nothing, which is the point of keeping them separate.
+   * Hosts that appear in the output without executing anything: thumbnails,
+   * preconnect hints, facade-assembled URLs. The guard accepts these; the CSP
+   * grants them nothing.
    */
   referenced?: string[]
   /** Why these hosts are here, when it is not obvious. */

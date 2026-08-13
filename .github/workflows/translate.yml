@@ -14,8 +14,6 @@ on:
       - 'content/blog/**'
   workflow_dispatch:
 
-# The model-driven step gets read-only. Only the last step, which is our own
-# code, gets write, so a compromised action cannot commit to main by itself.
 permissions:
   contents: read
 
@@ -24,8 +22,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # GITHUB_TOKEN is minted once per job, so read-only for the model means the
+  # model gets a job of its own. It hands its output over as an artifact and
+  # never holds a token that could write to the repo.
   translate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -49,41 +54,149 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             Translate every post under content/blog changed in the last commit
-            into English, writing each to content/translated/<slug>/index.mdx.
+            into English.
 
-            - Keep the frontmatter fields. Translate title and description only.
-            - Set lang: en, machineTranslated: true, translationOf: <slug>.
-            - Do not translate code blocks, identifiers, or inline code spans.
-            - Keep every link, image path and embed exactly as it is.
-            - Leave a file alone if it already has machineTranslated: false.
-              A human edited it and their version wins.
-            - Do not touch anything outside content/translated.
+            A translation lives in the SAME FOLDER as its source post, named
+            after its own English slug: content/blog/<folder>/<english-slug>.mdx.
+            content/blog/<folder>/index.mdx is the source. Never edit, rename,
+            or move that source file.
 
-      - name: Reject unsafe markup before committing
+            Frontmatter for the translation:
+            - title, description, and seoTitle/seoDescription (only if the
+              source has them): translated.
+            - pubDate, updatedDate, category, tags, series, seriesOrder:
+              copied verbatim from the source, untranslated.
+            - lang: en
+            - slug: the english slug used for the filename.
+            - machineTranslated: true
+            - draft: false
+            - Do not write translationOf, seriesName, heroImage, visibility,
+              or canonicalUrl. Those keys are gone from the schema.
+
+            - Do not translate code blocks, identifiers, or inline code
+              spans.
+            - Keep every link, image path and embed exactly as it is: the
+              translation sits in the same folder as the source's images, so
+              relative paths stay unchanged.
+            - Output is MDX with plain markdown only: no import lines, no
+              export lines, and no { } expressions anywhere in the file.
+            - Leave a translation alone if it already exists and
+              machineTranslated is false. A human edited it and their
+              version wins.
+            - Do not touch the source index.md(x) file, and do not touch
+              anything outside content/blog.
+
+      - name: Stage the produced translations
+        id: diff
         if: steps.auth.outputs.present == 'true'
-        run: node scripts/check-translations.ts
-
-      - name: Open a PR with the translations
-        if: steps.auth.outputs.present == 'true'
-        permissions:
-          contents: write
-          pull-requests: write
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -z "$(git status --porcelain content/translated)" ]; then
+          CHANGES=$(git status --porcelain content/blog)
+          if [ -z "$CHANGES" ]; then
             echo "Nothing changed."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
+          # The model only ever adds or updates the translation beside a
+          # post, never the source itself. A touched index file means it
+          # edited a source post, which is not its job.
+          if echo "$CHANGES" | cut -c4- | grep -qE '/index\.mdx?$'; then
+            echo "::error::The model changed a source index.md(x) file. Refusing to hand this off."
+            exit 1
+          fi
+
+          # Stage only the files that actually changed, keeping their
+          # content/blog/... path, so the artifact carries a handful of
+          # translation files rather than the whole (200+ MB) media library.
+          STAGE="$RUNNER_TEMP/translations"
+          mkdir -p "$STAGE"
+          echo "$CHANGES" | cut -c4- | while IFS= read -r file; do
+            mkdir -p "$STAGE/$(dirname "$file")"
+            cp "$file" "$STAGE/$file"
+          done
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "stage=$STAGE" >> "$GITHUB_OUTPUT"
+
+      # The staged file set is the boundary: whatever else the model wrote to
+      # the workspace is left behind here and never reaches the job that can
+      # commit.
+      - name: Hand the translations to the review job
+        if: steps.diff.outputs.changed == 'true'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: translations
+          path: ${{ steps.diff.outputs.stage }}
+          if-no-files-found: error
+          # Unreviewed output, of no use past the next job in this same run.
+          retention-days: 1
+
+  # Our own code only, which is why this is the job that gets write access.
+  review:
+    needs: translate
+    if: needs.translate.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      BRANCH: automated-translations
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.ref_name }}
+
+      # check-translations.ts has no dependencies, so it needs a Node that
+      # strips its types on its own rather than an npm ci.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Continue the existing translation branch, if there is one
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          BRANCH="automated-translations"
-          git checkout -B "$BRANCH"
-          git add content/translated
+          # Committing on top of the remote tip is what keeps a reviewer's own
+          # commits in history and makes the plain push below fast-forward.
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch --no-tags origin "$BRANCH"
+            git switch -c "$BRANCH" FETCH_HEAD
+          else
+            git switch -c "$BRANCH"
+          fi
+
+      - name: Fetch the translations
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: translations
+          path: .
+
+      # Ordered before the commit on purpose: unsafe markup never gets as far as
+      # an object in the repository, let alone a branch someone might merge.
+      - name: Reject unsafe markup before committing
+        run: node scripts/check-translations.ts
+
+      - name: Commit and open a PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          if [ -z "$(git status --porcelain content/blog)" ]; then
+            echo "Nothing left to commit once the branch is taken into account."
+            exit 0
+          fi
+          git add content/blog
           git commit -m "content: update machine translations"
-          git push --force origin "$BRANCH"
-          if ! gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
-            gh pr create --base "${{ github.ref_name }}" --head "$BRANCH" \
+          # Never --force. A rejection means someone pushed to the branch after
+          # this job read it, and their commits are worth more than this run.
+          if ! git push origin "$BRANCH"; then
+            echo "::error::Push to $BRANCH was rejected, so someone pushed there while this run was working. Nothing was overwritten. Merge or close that PR, then run this workflow again."
+            exit 1
+          fi
+          # --state open, because `gh pr view` answers for a merged PR too, and
+          # a branch left behind after a merge would then never get a new one.
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base "$BASE" --head "$BRANCH" \
               --title "content: update machine translations" \
               --body "Generated translation output. Review before merging."
           fi

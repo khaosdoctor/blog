@@ -1,13 +1,9 @@
 ---
-import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { formatDate } from '../../lib/posts'
+import { formatDate, getPublishedPosts, urlOf } from '../../lib/posts'
 import { t } from '../../i18n/ui'
 
-const now = new Date()
-const posts = (
-  await getCollection('translated', ({ data }) => data.lang === 'en' && !data.draft && data.pubDate <= now)
-).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+const posts = await getPublishedPosts('en')
 ---
 
 <BaseLayout
@@ -27,7 +23,7 @@ const posts = (
     {
       posts.slice(0, 30).map((post) => (
         <li>
-          <a href={`/en/${post.id.replace(/^en\//, '')}/`}>{post.data.title}</a>
+          <a href={urlOf(post)}>{post.data.title}</a>
           <p class="meta">
             <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, 'en')}</time>
           </p>

@@ -2,6 +2,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
+import { bold, count, dim, heading, ok } from './lib/cli.ts'
 
 const SOURCE = 'public/favicon.svg'
 const OUT_DIR = 'public/icons'
@@ -26,6 +27,8 @@ const ICONS: Icon[] = [
   { name: 'apple-touch-icon.png', size: 180, scale: 0.75, background: PAPER },
 ]
 
+heading(`build-icons: rendering ${ICONS.length} sizes from ${SOURCE}`)
+
 const svg = readFileSync(SOURCE, 'utf8')
 
 mkdirSync(OUT_DIR, { recursive: true })
@@ -49,5 +52,7 @@ for (const icon of ICONS) {
     .toBuffer()
 
   writeFileSync(join(OUT_DIR, icon.name), composed)
-  console.log(`${icon.name} ${icon.size}x${icon.size} (${composed.length} bytes)`)
+  console.log(`  ${bold(icon.name)} ${icon.size}x${icon.size} ${dim(`(${composed.length} bytes)`)}`)
 }
+
+ok(`wrote ${count(ICONS.length, 'icon', 'icons')} to ${OUT_DIR}`)

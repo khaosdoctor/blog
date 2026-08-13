@@ -14,10 +14,12 @@ permissions:
   pages: write
   id-token: write
 
-# A newer push wins; a half-finished run is never left going.
+# Only a pull request cancels itself, and only its own runs. Everything else
+# queues, because the Worker that fires scheduled-publish has a 60 second window
+# and no persistence: cancel that run and the post simply never publishes.
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:

@@ -17,6 +17,7 @@ import { join } from 'node:path'
 import { createInterface } from 'node:readline/promises'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { parseArgs } from 'node:util'
+import { bold, dim, fail as failLine, heading, ok } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 const MODEL = 'black-forest-labs/flux-dev'
@@ -33,7 +34,7 @@ interface Prediction {
 }
 
 function fail(message: string): never {
-  console.error(message)
+  failLine(message)
   process.exit(1)
 }
 
@@ -104,6 +105,8 @@ const { values, positionals } = parseArgs({
 const slug =
   positionals[0] ?? fail('Usage: node scripts/cover.ts <slug> [--bg url] [--prompt text] [--seed n] [--n 4] [--pick 2]')
 
+heading(`cover: making the cover for ${slug}`)
+
 const dir = join(SOURCE_DIR, slug)
 const postFile = ['index.mdx', 'index.md'].map((name) => join(dir, name)).find(existsSync) ?? fail(`No post at ${dir}.`)
 
@@ -129,9 +132,9 @@ async function background(): Promise<string> {
   const count = Number.parseInt(values.n ?? '4', 10)
   const seed = values.seed === undefined ? undefined : Number.parseInt(values.seed, 10)
 
-  console.log(`Generating ${count} backgrounds for "${title}"`)
+  console.log(`generating ${bold(String(count))} backgrounds for ${bold(`"${title}"`)}`)
   const urls = await generate(token, prompt, count, seed)
-  for (const [index, url] of urls.entries()) console.log(`  ${index + 1}. ${url}`)
+  for (const [index, url] of urls.entries()) console.log(`  ${bold(String(index + 1))}. ${dim(url)}`)
 
   const answer = values.pick ?? (await ask(urls.length))
   const picked = urls[Number.parseInt(answer, 10) - 1]
@@ -149,10 +152,10 @@ if (!cover.ok) fail(`Cover service returned ${cover.status}: ${await cover.text(
 
 const target = join(dir, 'cover.png')
 writeFileSync(target, Buffer.from(await cover.arrayBuffer()))
-console.log(`wrote ${target}`)
+ok(`wrote ${target}`)
 
 if (/^heroImage:/m.test(frontmatter)) {
-  console.log(`${postFile} already sets heroImage, left alone`)
+  console.log(dim(`${postFile} already sets heroImage, left alone`))
   process.exit(0)
 }
 
@@ -160,4 +163,4 @@ writeFileSync(
   postFile,
   raw.replace(/^---\n([\s\S]*?)\n---/, (_, fm: string) => `---\n${fm}\nheroImage: "./cover.png"\n---`),
 )
-console.log('set heroImage: "./cover.png"')
+ok('set heroImage: "./cover.png"')

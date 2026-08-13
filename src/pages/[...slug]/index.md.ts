@@ -1,10 +1,10 @@
 import type { APIRoute, GetStaticPaths } from 'astro'
-import { getPublishedPosts } from '../../lib/posts'
+import { getPublishedPosts, slugOf } from '../../lib/posts'
 import { toAgentMarkdown } from '../../lib/markdown-twin'
 
 export const getStaticPaths = (async () => {
   const posts = await getPublishedPosts()
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }))
+  return posts.map((post) => ({ params: { slug: slugOf(post) }, props: { post } }))
 }) satisfies GetStaticPaths
 
 export const GET: APIRoute = ({ props, site }) => {

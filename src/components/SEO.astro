@@ -23,6 +23,7 @@ export interface Alternate {
 interface Props {
   title: string
   description: string
+  /** This page's own absolute URL. Everything relative resolves against it. */
   canonical: string
   type: 'website' | 'article'
   publishedAt?: Date
@@ -60,6 +61,11 @@ const {
   markdown,
 } = Astro.props
 
+// Every page carries its own ranking. Three posts were on Medium first and a
+// canonical pointing there would hand Google the other domain, so they do not
+// get one: the traffic belongs here.
+const indexUrl = canonical
+
 // A page with no image of its own shares as a bare link on most networks, so
 // it gets the card of its section instead.
 const card = image ?? sectionOgImage(section?.url)
@@ -68,7 +74,7 @@ const absoluteImage = new URL(card, canonical).href
 const jsonLd = buildPrimaryJsonLd(type, {
   title,
   description,
-  canonical,
+  canonical: indexUrl,
   lang,
   image: absoluteImage,
   publishedAt,
@@ -83,16 +89,30 @@ const homeUrl = Astro.site ? new URL('/', Astro.site).href : '/'
 
 // Home -> section -> post. The middle step is what produces the breadcrumb line
 // under a result in Google instead of a bare URL, and it only appears on pages
-// that are actually in a section.
+// that are actually in a section. Built on `canonical`, never `indexUrl`: this
+// is the trail through THIS site, so a post that credits Medium still shows its
+// own path here.
+//
+// The section index passes its own section, which would repeat the trail's last
+// step, and a BreadcrumbList whose last two items are the same URL is rejected
+// as malformed.
+const sectionUrl = section === undefined ? null : new URL(section.url, canonical).href
 const breadcrumbItems: BreadcrumbItem[] = [
   { name: SITE_NAME, url: homeUrl },
-  ...(section ? [{ name: section.name, url: new URL(section.url, canonical).href }] : []),
+  ...(section !== undefined && sectionUrl !== null && sectionUrl !== canonical
+    ? [{ name: section.name, url: sectionUrl }]
+    : []),
   { name: title, url: canonical },
 ]
 const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems)
 const personJsonLd = buildPersonJsonLd(homeUrl)
 
-const xDefault = alternates.find((alt) => alt.lang === DEFAULT_LOCALE) ?? alternates[0]
+// Compared on the language subtag: callers emit region-qualified hreflang
+// values (`pt-BR`), so an exact match against DEFAULT_LOCALE (`pt`) never hit,
+// and x-default pointed at the right page only because pt happens to be listed
+// first everywhere.
+const xDefault =
+  alternates.find((alt) => alt.lang.split('-')[0] === DEFAULT_LOCALE) ?? alternates[0]
 const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 ---
 
@@ -100,7 +120,7 @@ const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 <meta name="description" content={description} />
 <meta name="author" content={AUTHOR_NAME} />
 <meta name="robots" content={robots} />
-<link rel="canonical" href={canonical} />
+<link rel="canonical" href={indexUrl} />
 {markdown && <link rel="alternate" type="text/markdown" href={markdown} />}
 
 {alternates.map((alt) => <link rel="alternate" hreflang={alt.lang} href={alt.href} />)}
@@ -109,7 +129,7 @@ const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 <meta property="og:type" content={type} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:url" content={canonical} />
+<meta property="og:url" content={indexUrl} />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:locale" content={toOgLocale(lang)} />
 <meta property="og:image" content={absoluteImage} />

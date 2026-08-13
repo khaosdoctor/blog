@@ -10,6 +10,12 @@ import { redirects } from '../data/redirects.ts'
 // site that predates the English tree. A reader sees this page for a few
 // milliseconds before the refresh fires. If an /en/ redirect ever appears, pick
 // the copy from the target path here.
+//
+// data-pagefind-ignore, not the robots meta: Pagefind crawls dist/ in postbuild,
+// when these stubs are already on disk, and it does not read robots. Every stub
+// used to be a six-word document titled "Redirecionando…" competing with real
+// posts for the words in that sentence. The "all" value drops the metadata too,
+// so not even the title survives into the index.
 function page(target, site) {
   const absolute = new URL(target, site).href
   return `<!doctype html>
@@ -22,7 +28,7 @@ function page(target, site) {
     <link rel="canonical" href="${absolute}" />
     <meta name="robots" content="noindex, follow" />
   </head>
-  <body>
+  <body data-pagefind-ignore="all">
     <p>Esta página mudou de endereço. <a href="${target}">Continuar</a>.</p>
   </body>
 </html>

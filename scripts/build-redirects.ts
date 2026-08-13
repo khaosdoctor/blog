@@ -1,9 +1,18 @@
 // Regenerates src/data/redirects.ts. Run when content moves.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+// The same function the tag route uses, so a generated redirect can never point
+// at a slug the site spells differently.
+import { slugify } from '../src/lib/slugify.ts'
 
 const SOURCE_DIR = 'content/blog'
 const OUT = 'src/data/redirects.ts'
+
+// Not imported from src/lib/taxonomy.ts: that file pulls in ./posts, which
+// pulls in the astro:content virtual module, which only exists inside
+// Astro/Vite. This script runs under plain node, so that import chain cannot
+// resolve here. See the report for this task for the two ways to fix this
+// properly without duplicating the function forever.
 
 // The newsletter section has no published posts yet, so /newsletter/ is not a
 // page. Sending 48 URLs to a 404 is worse than sending them home, and sending
@@ -13,23 +22,65 @@ const OUT = 'src/data/redirects.ts'
 // roundup. checkTargets below fails the build if this points at nothing.
 const NEWSLETTER_TARGET = '/'
 
-function slugify(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-/** Slugs listed as `- [ ] \`slug\`` or `- \`slug\`` in a review file. */
-function slugsFrom(file: string): string[] {
-  const path = join('.migration', file)
-  if (!existsSync(path)) {
-    console.warn(`warning: ${path} is missing, its redirects will not be generated`)
-    return []
-  }
-  return [...readFileSync(path, 'utf8').matchAll(/^- (?:\[ \] )?`([^`]+)`/gm)].map((match) => match[1])
+// Ghost URLs for newsletter issues and roundups that were never migrated to
+// posts here. These came from .migration/review-newsletter-roundups.md and
+// .migration/dropped-newsletter-issues.md, both gitignored working files that
+// no longer exist on disk. Pulled from the `newsletter issue` rows already
+// committed in src/data/redirects.ts, since that generated output is the last
+// record of the full list. Fixed on purpose: Ghost is never publishing these
+// slugs again, so there is nothing left to regenerate this from.
+const NEWSLETTER_SLUGS = [
+  'fts-fundadores-news',
+  'ganhadores-do-sorteio-de-4k-seguidores',
+  'giro-de-noticias-abril-de-2021',
+  'giro-de-noticias-agosto-2021',
+  'giro-de-noticias-dezembro-de-2020',
+  'giro-de-noticias-fevereiro-2021',
+  'giro-de-noticias-janeiro-de-2021',
+  'giro-de-noticias-julho-2021',
+  'giro-de-noticias-junho-de-2021',
+  'giro-de-noticias-marco-de-2021',
+  'giro-de-noticias-novembro-de-2020',
+  'giro-de-noticias-outubro-2020',
+  'ls-news-1',
+  'ls-news-10',
+  'ls-news-11-2',
+  'ls-news-11',
+  'ls-news-13',
+  'ls-news-14',
+  'ls-news-15',
+  'ls-news-16',
+  'ls-news-17',
+  'ls-news-18',
+  'ls-news-19',
+  'ls-news-2',
+  'ls-news-3',
+  'ls-news-4',
+  'ls-news-5',
+  'ls-news-6',
+  'ls-news-7',
+  'ls-news-8',
+  'ls-news-9',
+  'ls-news-especial',
+  'noticias-mai-21',
+  'noticias-semanais-1',
+  'noticias-semanais-10',
+  'noticias-semanais-11',
+  'noticias-semanais-12',
+  'noticias-semanais-2',
+  'noticias-semanais-3',
+  'noticias-semanais-4',
+  'noticias-semanais-5',
+  'noticias-semanais-6',
+  'noticias-semanais-7',
+  'noticias-semanais-8',
+  'noticias-semanais-9',
+  'por-essa-surpresa-voce-nao-esperava',
+  'queria-ter-aprendido-isso-antes',
+  'sobe-a-semana-ts',
+]
+if (NEWSLETTER_SLUGS.length === 0) {
+  throw new Error('NEWSLETTER_SLUGS is empty, the newsletter redirect rules would silently disappear')
 }
 
 const tags = new Set<string>()
@@ -94,7 +145,7 @@ for (const author of ['lucas-santos', 'khaosdoctor']) {
  * roundups are drafts, which build no page. Email-only sends are deliberately
  * absent, Ghost never gave them a web page, so there is nothing to preserve.
  */
-for (const slug of new Set([...slugsFrom('review-newsletter-roundups.md'), ...slugsFrom('dropped-newsletter-issues.md')])) {
+for (const slug of NEWSLETTER_SLUGS) {
   if (liveSlugs.has(slug)) continue // published after all: it has its own page
   rows.push({ from: `/${slug}/`, to: NEWSLETTER_TARGET, note: 'newsletter issue' })
 }
