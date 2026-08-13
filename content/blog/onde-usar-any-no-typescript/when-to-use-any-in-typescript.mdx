@@ -1,0 +1,70 @@
+---
+title: "When to Use ANY in TypeScript"
+pubDate: 2024-08-07T11:00:19.000Z
+updatedDate: 2026-07-16T17:54:12.000Z
+lang: en
+slug: "when-to-use-any-in-typescript"
+category: "typescript"
+tags: ["typescript", "javascript"]
+description: "We all know that using \"any\" is a bad pattern, but did you know there are some cases where any is our only option!"
+machineTranslated: true
+draft: false
+---
+If you watched my **TypeScript Training** streams (or took the course), you know I'm extremely against `any` in code. Mostly because `any` has become an escape hatch — whenever we want to turn off TypeScript, we just throw `any` into the code and everything resolves. A lot of people have asked me: "So why does TypeScript even have `any` if we can't use it?"
+
+The truth is that `any` is an extremely important type. First, because it's the only type that can be assigned to any other type without that type being constrained to something more specific. Plus, it's the most open type of all and accepts everything — `any` is everywhere.
+
+While in most cases it's really bad to use `any`, there are some interesting cases where, actually, `any` is our only correct option.
+
+## Allowing Type Inference
+
+The first example is precisely what I mentioned above. When we use `any`, we're not fixing a specific type and we're allowing TypeScript to infer that type. The way TypeScript resolves types is always from the most open to the most closed — `any` is like initializing a numeric variable to infinity.
+
+A classic example (which you'll find in many places) is `ReturnType`, a utility type that exists natively in TypeScript. Basically, what it does is grab the return type of a function. Let's try to recreate this type:
+
+```ts
+type ReturnType<T extends (...args: unknown[]) => unknown> = T extends (...args: unknown[]) => infer Retorno ? Retorno : never
+```
+
+Basically, we're saying we want a type. This type takes a generic that will be a function. We don't really care what's in the parameters or the function's return, so instead of using `any`, we'll use `unknown` to keep our type safer. But what if we do this:
+
+```ts
+const foo = (i: string) => i
+type retorno = ReturnType<typeof foo>
+```
+
+We get an interesting error:
+
+```
+ype '(i: string) => string' does not satisfy the constraint '(...args: unknown[]) => unknown'.
+  Types of parameters 'i' and 'args' are incompatible.
+    Type 'unknown' is not assignable to type 'string'.
+```
+
+That's because when we use `unknown`, we're automatically telling TypeScript that we don't know what's there, so TS will **force** us to manually cast it. What we want is for TS to infer on its own. So to do that, we have to say we don't care what's there, and TS will always try to bring the most specific type possible.
+
+If we change our type declaration to:
+
+```ts
+type ReturnType<T extends (...args: any[]) => any> = T extends (...args: any[]) => infer Retorno ? Retorno : never
+```
+
+Our error disappears and our `retorno` type becomes `string`.
+
+## External Values
+
+Another case is when we're dealing with values that are truly external. This is a valid use case for `any`, but we always have to remember that we need to type these later. For example:
+
+```ts
+const externalData: any = someAPICall()
+// processing here
+const internalData: YourType = confirmedData
+```
+
+The use of `any` in this case is only when we're getting the data through a `JSON.parse` or any other call, but it's **extremely important** that we don't keep the `any` afterwards. If we need to do any processing, it's important that we cast that type to something much more specific.
+
+## Codebase Migration
+
+One of the most important use cases is when we're migrating from JavaScript to TypeScript in an old codebase. For that, it's common to start the migration using `any` in the old code and gradually replace those `any`s with specific types.
+
+This is probably the most acceptable case for using `any` in any application.

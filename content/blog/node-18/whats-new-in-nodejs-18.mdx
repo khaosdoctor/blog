@@ -1,0 +1,173 @@
+---
+title: "What's New in Node.js 18!"
+pubDate: 2022-05-04T14:00:00.000Z
+updatedDate: 2026-07-16T16:09:30.000Z
+lang: "en"
+slug: "whats-new-in-nodejs-18"
+category: "javascript"
+tags: ["nodejs", "javascript"]
+description: "Learn all about the 2022 Node.js release and how it can (and will) impact the whole ecosystem, with the addition of awesome APIs and new import models."
+seoDescription: "Learn all about the 2022 Node.js release and how it can (and will) impact the whole ecosystem, with the addition of awesome APIs."
+machineTranslated: true
+draft: false
+---
+Like I always do around here, let's talk about another awesome Node.js release, [as usual](/veja-o-que-ha-de-novo-no-node-js-16/): **version 18 was announced in April 2022**! And you're probably wondering: so what?
+
+Whether you're a JavaScript dev or not, this Node.js version brought a bunch of really interesting changes to the runtime itself, and some of these changes are important enough that they might inspire other runtimes to do the same. So let's take a look at everything we've got.
+
+But first, like I always do in this kind of article, let's explain a bit more about Node.js's release process.
+
+## The Node.js release process
+
+Just like a lot of other big projects that depend heavily on the community, Node.js has an extremely well organized calendar and structure for new versions and releases.
+
+All even versions are considered "production ready", while odd versions are the testing and development versions. In other words, odd versions are like the _staging_ environment, meaning more structured testing, to later make way for a production version. New features are usually tested with the community in these versions and, after a while, get promoted to a stable version.
+
+![](./image.png "Node.js release calendar for 2022")
+
+Even versions ship in **April** and are labeled as _Current_ until October, when they become the active version, pushing the previous even version into **maintenance** state.
+
+The difference between an **Active** and a **Current** version is that active versions are considered **LTS**, or **Long Term Support**, and get security updates and maintenance for 3 years. There are always 3 versions in maintenance state and one LTS version, and every version older than 3 years gets deprecated, which is exactly what happened to **version 10** now that version 18 has shipped.
+
+You can check all the dates and plans for previous and upcoming versions [on the official releases site](https://github.com/nodejs/Release#release-schedule).
+
+Here's the current state of things:
+
+-   **Node v12:** reached its end of life in April 2022
+-   **Node v14**: Stays in maintenance until April 2023, then gets abandoned
+-   **Node v16:** Currently the LTS version until October 2022, then goes into maintenance until April 2024, when it gets abandoned.
+-   **Node v18:** Is the _Current_ version until October 2022, when it becomes the next LTS until April 2025.
+
+## Global fetch available by default
+
+In Node 17, it was announced that the `fetch` API, already present in most JavaScript browsers, would also land in Node. That meant we wouldn't need external packages like the famous `axios` and `got` anymore to make HTTP requests more easily, without touching Node's native HTTP client, which is, let's say, a bit complex.
+
+This client is implemented using one of the most interesting libraries ever built for Node, [undici](https://undici.nodejs.org/#/), an HTTP/1.1 client written **from scratch**, entirely in JavaScript, for Node.js.
+
+This implementation was originally added behind an experimental flag in Node that turned the feature on, but now we've got `fetch` enabled by default.
+
+Here's how we can use this new client:
+
+```js
+const res = await fetch('https://nodejs.org/api/documentation.json');
+if (res.ok) {
+  const data = await res.json();
+  console.log(data);
+}
+```
+
+On top of `fetch`, other global variables were added: `Headers`, `Request`, `Response` and `FormData`
+
+> Watch out not to confuse the native `Request` and `Response` types with the same types from Express when you're using TypeScript
+
+## Other global APIs
+
+-   An experimental version of the [WebStreams](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API) API was added, allowing native use of streams in Web environments without local integrations
+-   A new experimental `Buffer` type, [`Blob`](https://nodejs.org/api/buffer.html#class-blob), was also added to the global APIs
+-   As an addition to `worker_threads`, [`BroadcastChannel`](https://nodejs.org/api/worker_threads.html#class-broadcastchannel-extends-eventtarget) is now also exposed as a global API
+
+## Native test runner
+
+One of the coolest APIs that I, personally, had been waiting years for, is native support for running tests. That's right, no more `mocha`, `jest`, `ava`, and the rest.
+
+Now you can natively run every test you already have through the `test` module, which can only be loaded if you prefix it with `node:`:
+
+```js
+import test from 'node:test'
+import assert from 'node:assert'
+
+test('top level test', async (t) => {
+  await t.test('subtest 1', (t) => {
+    assert.strictEqual(1, 1);
+  });
+
+  await t.test('subtest 2', (t) => {
+    assert.strictEqual(2, 2);
+  });
+});
+```
+
+The [API is fully documented](https://nodejs.org/dist/latest-v18.x/docs/api/test.html). Of course, it'll take a while before it reaches the level of other libraries like `jest`, if it ever does.
+
+I say that because the main idea behind this library isn't to replace the main libs we already use, the ones I mentioned above, but to lower the barrier to entry for writing automated tests with Node.js. That way more systems can have automated tests and end up a lot safer.
+
+That said, there are **a few implementation details worth considering**:
+
+-   Node runs every test file when you start the runtime with the `--test` flag, and each test runs in its own isolated process.
+-   Tests can be synchronous or asynchronous. Synchronous tests are considered valid if they don't throw. Async ones, as expected, are valid if they don't reject a [Promise](https://dev.to/khaosdoctor/series/1993)
+-   Subtests created with the `t` context, the one we're passing in the example, run the same way as the parent test
+-   If you want to skip a test, just pass an options object with the `{ skip: 'message' }` flag to the test object, like in this example:
+
+```js
+test('pulado', { skip: 'Esse teste foi pulado' }, (t) => {
+    // never executed
+})
+```
+
+Currently the options object accepts three kinds of keys:
+
+-   `concurrency`: Sets how many tests run in parallel
+-   `skip`: Can be a boolean or a string, if it's the boolean `true`, the test gets skipped with no message, otherwise the message gets shown
+-   `todo`: Same as above, accepts a boolean or a string. If it evaluates to `true`, the test gets marked as To-Do.
+
+The test runner is still experimental and running behind flags, but that should change in upcoming versions.
+
+## The `node:` prefix
+
+Let's take a detour to explain a feature that isn't strictly something that came with Node 18 itself, but was an important change that sets a precedent other modules might follow down the line.
+
+In the test runner example above, you probably noticed we're importing the `assert` and `test` modules with a `node:` prefix. That's the start of what's called **prefix-only core modules**.
+
+This existed before, but it wasn't mandatory. Until now, every native module like `fs`, `assert`, and others worked the same way whether you imported them with the `node:` prefix or not. Today that's no longer the case.
+
+`node:test` is the first native module that can only be imported with the `node:` prefix. If you don't use the prefix, the runtime tries to load a module called `test` that's considered a _userland module_, meaning a module built by the community.
+
+This is a fantastic change because with the `node:` prefix landing on new modules (and probably as a breaking change in some future version for the older ones), we get the ability to have two modules with the same name, one in userland and one in Node's core.
+
+That way, since core modules take precedence over userland modules, whoever contributes to Node will be able to create modules without worrying whether the name already exists on NPM, for example.
+
+On the other hand, this creates two problems. The first one is that we now have a clear inconsistency between modules that already exist, like `fs` and `http`, and the new modules that only use the prefix. The fix for that would have to be making the prefix mandatory for every module, not just the newer ones.
+
+On top of that, a security problem comes up: **typosquatting**, when someone creates an NPM module with the same name, or a name very close to an original package (something like calling `express` `expres` on NPM), so that unsuspecting devs download the malicious package instead of the real one. These issues aren't on the Node team, especially since NPM already has some security guards against it, but either way, it's worth mentioning.
+
+## Userland snapshots
+
+Something really interesting that showed up in version 18 is using snapshots at build time for Node's runtime. This is pretty useful if you've got a lot of dev teams that need to sync things up, or even improve performance across a product shared between teams.
+
+Starting with this new version, you can compile a Node.js binary with a custom startup snapshot using the `--node-snapshot-main` flag. For example:
+
+```bash
+$ cd /path/to/node/source
+$ ./configure --node-snapshot-main=marked.js
+# Build the binary
+$ make node
+```
+
+Building the Node binary with an entrypoint like `marked.js`, a Markdown renderer, initializes the module and loads it into `globalThis`, and you can use it natively like this:
+
+```js
+const html = globalThis.marked(process.argv[1]);
+console.log(html);
+```
+
+And run the built binary with:
+
+```bash
+$ out/Release/node render.js test.md
+```
+
+Of course, this is for pretty specific use cases where you actually need to recompile the whole Node runtime to bake one or more module entrypoints directly into the binary, to improve build time.
+
+As a follow-up, the team is working on PRs [#42617](https://github.com/nodejs/node/issues/42617) and [#38905](https://github.com/nodejs/node/pull/38905), which respectively:
+
+-   Let the module load without a startup script, which turns the whole binary into the user's application. That way your final binary would run as `$ out/Release/markedNode test.md`, a step closer to fully self-contained Node binaries, the way Golang itself does it
+-   Let you add entrypoints without needing to recompile the whole runtime with a compiler.
+
+## Changes in V8 and other points
+
+Version 10 of V8 brings a few new things:
+
+-   Support for the new `findLast` and `findLastIndex` array methods, which do exactly the same thing as `find`, but find the last value instead of the first
+-   Improvements to the `Intl.Locale` API
+-   Performance improvements for initializing class properties and private methods, so they're as fast as regular properties.
+-   Importing JSON modules was officially [removed from the experimental flag](https://github.com/tc39/proposal-import-assertions)

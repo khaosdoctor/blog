@@ -1,0 +1,90 @@
+---
+title: "Parallel Assignments - A Feature You Didn't Know Existed in JavaScript"
+pubDate: 2024-03-13T11:00:54.000Z
+updatedDate: 2026-07-16T15:52:12.000Z
+lang: en
+slug: "parallel-assignments-a-feature-you-didnt-know-existed-in-javascript"
+category: "javascript"
+tags: ["javascript", "typescript"]
+description: "Do you know what parallel assignments are? Let's discover this lesser-known JavaScript feature!"
+seoTitle: "Do you know what parallel assignments are in JavaScript?"
+machineTranslated: true
+draft: false
+---
+Today for another quick article, I'm showing you a feature you probably didn't know existed in JavaScript: **parallel assignments**.
+
+Many languages have the concept of parallel assignments, but what is it exactly?
+
+A parallel assignment, or "simultaneous assignment," is a feature that lets you swap the values of two variables at the same time, even if they reference each other. In JavaScript, this is part of the [_destructuring_](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment) syntax, so we can assign more than two variables at once.
+
+For example, imagine this fibonacci function, where each item in the sequence is the sum of the two previous items:
+
+```js
+function fibonacci(terms: number) {  
+  let a = 0;
+  let b = 1;
+  for (let i = 0; i <= terms; i++) {    
+    const temp = a + b;   
+    a = b;  
+    b = temp; 
+  }  
+  return a;
+}
+```
+
+If you look closely, inside our `for` loop we have a temporary variable that only stores the value of `a+b`, then variable `a` takes the value of `b`, and `b` becomes the sum of the two.
+
+But what if I told you it's possible to do this entire loop in a single line?
+
+We can use the syntax `[a, b] = [v1, v2]` where `a` and `b` are the variables we want to swap, and `v1` and `v2` are the values we want to give them respectively. This works **even if the variables reference themselves**, like in our case where `b` becomes `a+b`.
+
+So we can rewrite our function like this:
+
+```ts
+function fibonacci (terms: number) {
+	let a = 0;
+	let b = 1;
+	for (let i = 0; i <= terms; i++) {
+  	  [a, b] = [b, a + b];
+	}
+	return a;
+}
+```
+
+_Destructuring_ is commonly used when creating variables from arrays or objects, like in:
+
+```js
+const [a, b] = [0, 1]
+const { nome, idade } = { nome: 'lucas', idade: 28, sexo: 'M' }
+```
+
+But this syntax can also be applied when assigning variables to their values. We can even reduce it further by doing:
+
+```ts
+function fibonacci (terms: number) {
+    let [a, b] = [0, 1];
+	for (let i = 0; i <= terms; i++) {
+  	  [a, b] = [b, a + b];
+	}
+	return a;
+}
+```
+
+And even transform this function into a generator:
+
+```ts
+function* fibonacciGenerator () {
+    let [a, b] = [0, 1]
+	while (true) {
+		yield a;
+		[a, b] = [b, a + b]
+	}
+}
+
+const fGen = fibonacciGenerator()
+fGen.next() // 0
+
+for (let i = 0; i < 10; i++) {
+  console.log(fGen.next()) // 0 1 1 2 3 5 8 ...
+}
+```

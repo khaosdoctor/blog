@@ -1,0 +1,196 @@
+---
+title: "Meet JavaScript's New Data Types: Tuples and Records"
+pubDate: 2022-03-22T14:00:00.000Z
+updatedDate: 2026-07-16T16:10:30.000Z
+lang: en
+slug: "javascript-new-data-types-tuples-records"
+category: "javascript"
+tags: ["javascript", "nodejs"]
+description: "Meet the tuples and records proposal that could change JavaScript's history for the better! And you can still help shape this idea!"
+machineTranslated: true
+draft: false
+---
+If you follow the [list of JavaScript proposals](https://github.com/tc39/proposals) in the TC39 repository, you've probably already run into the newest proposals for the language.
+
+> If you still don't know what TC39 is or how JavaScript works, I made a pretty cool video about it that you can watch [here](https://www.youtube.com/watch?v=hDQu3AvvDfg).
+
+![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
+
+JavaScript's evolution model is extremely important for the language because it lets **anyone** submit their own proposal and suggest changes and additions to the language. All you need is a good use case and enough votes to convince the majority of champions!
+
+One of the proposals gaining a bit of traction is the **addition of two new primitives** called **Tuple** and **Record**. And they're going to make a real difference for whoever uses them.
+
+## About immutability
+
+Records and Tuples aren't new in programming. Other languages already use this kind of primitive to represent values we call **collections**. Just like Arrays and Objects, a Tuple (or "tupla" in Portuguese) or a Record are also sets of values grouped into a single memory address.
+
+The difference between these primitives and the ones we already have, like Array and Object, is that they're **immutable**.
+
+You can define a Tuple like this:
+
+```js
+let tuple = #['minha', 'tupla']
+
+let tupla = Tuple(['um', 'array'])
+```
+
+We can also define a tuple from another array:
+
+```js
+const tupla = Tuple(...[1, 2, false, true])
+const tuple = Tuple.from([false, true, 'a'])
+```
+
+Records, in turn, are the object variant of tuples and can be defined as:
+
+```js
+let record = #{
+  meu: 'novo',
+  record: true
+}
+
+let outroRecord = Record({ um: 'objeto' })
+```
+
+Immutability is a trait that's becoming more and more common in most systems built today, but, just like collections, it's actually been around for a long time.
+
+The idea behind creating an immutable object is that, as the name says, it never changes throughout its lifetime. But that doesn't mean you can never alter the variable again once it's created. What happens is that its **original** value is never changed.
+
+In practice, an immutable variable would create a copy of itself on every operation performed on it. We already have some kinds of immutability in JavaScript with functions like `map`, `slice`, `find`, `filter`, `reduce`, and a few others. So, for example, if we had a string and a method to change that string, if it weren't immutable we'd get the following result:
+
+```js
+let string = 'mutavel'
+console.log(string) // mutavel
+
+string.mudar('outro valor')
+console.log(string) // outro valor
+```
+
+But if we have an **immutable** string, we'd get the following flow instead:
+
+```js
+let string = 'imutavel'
+console.log(string) // imutavel
+
+let novaString = string.mudar('outro valor') // returns a new string
+
+console.log(string) // imutavel
+console.log(novaString) // outro valor
+```
+
+If, instead of a string, the value were an Array, every new item added to that array would return a new array. That's easy to picture if you think about how the Array's `slice` function returns a new array that's a subset of the original one.
+
+Libraries like ImmutableJS do this job really well. And the big advantage of immutability is exactly that you get much tighter control over your application, because you have complete control over every step of the data flow, to the point where you can roll back to any previous value at any moment.
+
+Of course that comes at a cost. Each new version of your variable takes up extra space in memory, and if you don't clean up your previous states, you can end up with some performance problems.
+
+## Immutable collections
+
+So far so good, but what's the big idea behind talking so much about immutability when the whole point of this post is two new collections? Because that factor makes all the difference when we're talking about objects and arrays, especially in JavaScript.
+
+Tuples and Records work the same way as regular Arrays or Objects. The biggest difference is that we don't have the _"in place"_ mutation operators, that is, the functions that change the original value itself, like `Array.push` or `Array.splice`. If we try to create a tuple and modify that value, or a record and try to do the same, we'll get an error:
+
+```js
+let record = #{
+  nome: 'Lucas'
+}
+
+record.idade = 26 // Error
+
+let tupla = #[1, 2, 3]
+tupla[0] = 2 // error
+```
+
+## Comparison by value
+
+One of the biggest issues I get asked about by a lot of people over the years is the fact that JavaScript compares objects and arrays by reference. I already went over this quickly in an article I published about prototypes and inheritance.
+
+The idea is that when we compare two objects or two arrays (or even other structures that end up being converted to the object type), we'll always get `false` as the answer:
+
+```js
+console.log({ a: 1 } === { a: 1 }) // false
+console.log(['a'] === ['a']) // false
+```
+
+A lot of people think this behavior is a language bug and that it should be fixed if we used the simple comparison, `==`, instead of `===`. But the problem isn't the types, it's the reference.
+
+For JavaScript, two objects or arrays are equal if they point to the same memory reference, which is never possible when we compare two object literals like these, because every time we create a new object, we get a new object created and, therefore, a new memory address, so we'll never get a true comparison.
+
+> At this point we could even say that JavaScript makes object creation, in effect, immutable.
+
+And that's where one of the most important and most useful features of these new primitives comes in: **Tuples and Records are compared by value**.
+
+Since we're dealing with content that's immutable, JavaScript can now naturally compare the two objects directly by value. That means we can compare something like this:
+
+```js
+#{a:1} === #{a:1} // true
+#[1, 2, 3] === #[1, 2, 3] // true
+```
+
+That makes the whole object comparison process much easier than having to compare objects by their text representation with the classic `JSON.stringify`.
+
+## Manipulating Tuples and Records
+
+As I explained before, tuples and records have exactly the same methods as objects and arrays. The difference is that we won't be able to add new values or modify existing ones, so methods like `push` don't exist in this context. Still, it's possible to manipulate and even extend the values of these objects in a much easier way.
+
+We can use the **rest** modifier on both tuples and objects to create a new instance of these values without modifying the previous one. That lets us add and modify values on the fly without writing as much code. For example, if we have a record like this:
+
+```js
+const record = #{
+  nome: 'Lucas'
+}
+```
+
+And now we want to add the `idade` property, we can do this:
+
+```js
+const record = #{
+  nome: 'Lucas'
+}
+
+const recordComIdade = #{
+  ...record,
+  idade: 26
+}
+```
+
+In other words, the same way we naturally do with objects, just immutably.
+
+The same goes for tuples:
+
+```js
+const tuple = #[1, 2, 3]
+const tupleComMaisValores = #[...tuple, 4, 5]
+```
+
+The difference is that tuples have one extra method, `with`, which lets us add (or concatenate) values at the end of the tuple:
+
+```js
+const tuple = #[1, 2, 3]
+const tupleComMaisValores = tuple.with(4, 5) // same result as before
+```
+
+And, just to make it even clearer, we can work with any of these new objects as if they were regular arrays or objects. We can even forget they're a new type at all:
+
+```js
+const chaves = Object.keys(#{ name: 'Lucas', age: 26 }) // ['name', 'age']
+const tuple = #[1,2,3,4,5]
+
+for (const i of tuple) {
+  console.log(i % 2 === 0 ? 'par' : 'impar')
+}
+```
+
+## How can I start using it?
+
+This proposal is still at stage 2, which means it's relatively stable and has a working implementation, but it's still not considered an official one. So it's not present yet in any of the major players out there, like Node.js or browsers such as Mozilla Firefox, Chrome, and Edge.
+
+But part of being a stage 2 proposal is that it needs a working _polyfill_ (a "fake" implementation that fully mimics the functionality using features already present in the language). So you can [use this polyfill](https://babeljs.io/docs/en/babel-plugin-proposal-record-and-tuple#docsNav) and start testing the feature right now!
+
+## Conclusion
+
+The proposal is still a work in progress. There's even [an issue open since 2019](https://github.com/tc39/proposal-record-tuple/issues/10) to decide whether tuples and records will be created through keywords like `immutable` or `fixed`, or through object literals, like I explained above.
+
+On top of that, the keywords `tuple` and `record` already exist in type systems like TypeScript, and they might clash in some way, something that's also [being discussed](https://github.com/tc39/proposal-record-tuple/issues/9) since 2020.
+
+The bottom line is that all of this is still pretty early, but the proposal is getting close to a conclusion, and you can help establish JavaScript's next data type!

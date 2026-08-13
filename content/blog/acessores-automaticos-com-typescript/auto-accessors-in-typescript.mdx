@@ -1,0 +1,52 @@
+---
+title: "Auto-accessors in TypeScript"
+pubDate: 2024-03-20T11:00:23.000Z
+updatedDate: 2026-07-16T17:57:47.000Z
+lang: en
+slug: "auto-accessors-in-typescript"
+category: "typescript"
+tags: ["typescript"]
+description: "Ever heard of auto-accessors? Know what that feature does? Let's dig into how it works."
+seoTitle: "Auto-accessors in TypeScript"
+seoDescription: "Learn how one of TypeScript's most interesting but underused features works. Auto-accessors explained."
+machineTranslated: true
+draft: false
+---
+TypeScript has a bunch of really interesting features that few people know about, one of them is [auto-accessors in classes](https://devblogs.microsoft.com/typescript/announcing-typescript-4-9/#auto-accessors-in-classes).
+
+Available since TypeScript 4.9, it's also a feature described in the [original decorators proposal](https://github.com/tc39/proposal-decorators) (which we've actually talked about [here](/javascript-decorators/)).
+
+So here's how it works. When you have an accessor, you typically have a `get` method that retrieves an internal class variable. For example:
+
+```ts
+class Pessoa {
+    #__nome: string;
+
+    get name() {
+        return this.#__nome;
+    }
+    set name(val: string) {
+        this.#__nome = val;
+    }
+
+    constructor(nome: string) {
+        this.nome = nome;
+    }
+}
+```
+
+See how that's not one or two lines, but seven just to create an accessor that sets and gets the internal `#__nome` variable? It would be so much better if you could do all that at once, and that's exactly what auto-accessors are for. All that code I just wrote can become this:
+
+```ts
+class Person {
+    accessor nome: string;
+
+    constructor(nome: string) {
+        this.nome = nome;
+    }
+}
+```
+
+Under the hood, auto-accessors do exactly what we did in that first example. They expand `nome` into an internal private variable and an external variable you can only access through a getter and a setter.
+
+All in all, this feature isn't about logic, it's about quality of life. Especially when you're creating decorators that need a bunch of getters and setters.

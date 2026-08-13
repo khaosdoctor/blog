@@ -1,0 +1,245 @@
+---
+title: "Optimizing costs with Kubernetes and AKS"
+pubDate: 2020-09-03T15:41:57.000Z
+updatedDate: 2026-07-16T16:25:10.000Z
+lang: en
+slug: "optimizing-costs-with-kubernetes-and-aks"
+category: "infra"
+tags: ["kubernetes", "azure", "cloud", "containers", "docker", "technology", "development"]
+description: "Kubernetes has a reputation for being a much more expensive approach than usual for most applications. Want to know how you can optimize your costs efficiently?"
+seoDescription: "Kubernetes is a much more expensive approach than usual for most applications. How can you optimize your costs efficiently?"
+machineTranslated: true
+draft: false
+---
+Since the early days of distributed computing and the arrival of the cloud, everyone has had to deal, one way or another, with cost optimization. Whether that optimization comes in the form of reducing storage usage, or even cutting down network traffic.
+
+One of the most expensive tools when we talk about distributed computing is **[Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan)**. That's kind of obvious for two fairly simple reasons:
+
+1.  [**Kubernetes**](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) works as a cluster of machines
+2.  Because it's a cluster, we have more resources to manage
+
+Unfortunately, this problem means a lot of amazing solutions end up not running in their ideal environment, which is a distributed and highly scalable one, and instead run in smaller environments purely for cost reasons.
+
+But it doesn't have to be that way.
+
+## Billing models
+
+To understand how we can optimize costs inside a cloud architecture with distributed computing, using [Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan), first we need to understand the billing models.
+
+Every cloud has its own individual billing model. Here we're going to work only with [**AKS**](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) (Azure Kubernetes Service), which runs on [Microsoft Azure](https://azure.microsoft.com/?WT.mc_id=blog-personal-ludossan).
+
+> If you use another cloud provider, look up the pricing and billing options for each offered service on the provider's site. That said, the optimization options I'm going to show here apply to every cloud, with some changes to the command line, of course.
+
+![](./image-17.png "Description of the billing methods for AKS")
+
+As we can see, in the case of [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan), billing is done only for the resources used, and managing the cluster as a whole carries no extra charge. That means that, in a standard [Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) architecture, what we call the **Control Plane**, the control plane where all the system resources are created, isn't billed. Instead, all the other resources that [Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) needs to work are.
+
+This is a fairly common practice across several cloud providers. Some other providers also charge for allocating the control plane, generally because it isn't fully managed and leaves room for the people administering it to modify part of its content, meaning they offer a greater level of customization.
+
+So what are these billed resources?
+
+## Billed resources
+
+In general, creating a [Kubernetes](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) cluster requires a series of small resources, ranging from [virtual machines](https://azure.microsoft.com/services/virtual-machines/?WT.mc_id=blog-personal-ludossan), which back the nodes, to network interfaces and traffic controllers. Depending on the kind of features you're choosing for your cluster, you might end up with DNS zones and other resources on that list too.
+
+In the case of [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan), when we create a cluster, we select what's called a **Resource Group**. Inside this resource group, Azure will create a control resource called **Kubernetes Service**, as we can see below:
+
+![](./image-18.png "We created a demo-cluster inside a resource group")
+
+But where are all the billed resources I mentioned at the start of the paragraph? For internal management reasons, Azure creates another resource group whose name starts with `MC_<resource-group>-<cluster>_<region>`. And that's where all the billed resources get placed:
+
+![](./image-19.png "Resources billed by a cluster")
+
+Notice we have eight different resources, but we can end up being billed for more than that because what's called a `Virtual Machine Scale Set` is actually a list of [VMs](https://azure.microsoft.com/services/virtual-machines/?WT.mc_id=blog-personal-ludossan) that can be scaled according to what we need.
+
+## Optimizing costs with AKS
+
+To build this article, I'm using as a base an excellent piece of material made available **for free** on Microsoft Learn. The course "[Optimize compute costs on Azure Kubernetes Service (AKS)](https://docs.microsoft.com/learn/modules/aks-optimize-compute-costs?WT.mc_id=blog-personal-ludossan)".
+
+> In this article, we're going to go through the full material, but I'll throw in a few examples outside the context and explain a few things beyond what's being shown. That said, it's strongly recommended that you complete the module, it's free and takes just a few minutes.
+
+### Setting up the environment
+
+To start, we're going to need three important things:
+
+1.  You need to have the [Azure CLI installed on your machine](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest&WT.mc_id=blog-personal-ludossan)
+2.  You need to have [Kubectl installed on your machine](https://docs.microsoft.com/cli/azure/aks?view=azure-cli-latest&WT.mc_id=blog-personal-ludossan#az-aks-install-cli)
+3.  You need to have an [Azure account](https://azure.microsoft.com/free/?WT.mc_id=blog-personal-ludossan)
+
+As a second option, **if you already have an Azure account**, you can go into [Azure Cloud Shell](https://shell.azure.com/?WT.mc_id=blog-personal-ludossan) and run every command from there, since Cloud Shell already has both the Azure CLI and Kubectl installed. If it's your first time using Cloud Shell, then pick **Bash** as your main shell.
+
+Run the following command to enable preview mode on your Azure CLI:
+
+```shell
+az extension add --name aks-preview
+```
+
+Then run the following command to register the permission features we're going to need:
+
+```shell
+az feature register --namespace "Microsoft.ContainerService" --name "spotpoolpreview"
+```
+
+This command takes a few minutes to run. To check the progress, periodically run the command below:
+
+```shell
+az feature list -o table --query "[?contains(name,'Microsoft.ContainerService/spotpoolpreview')].{Name:name,State:properties.state}"
+```
+
+While the result of this query is `Registering`, wait until it becomes `Registered`. Once it's registered, run the command to refresh the CLI:
+
+```shell
+az provider register --namespace Microsoft.ContainerService
+```
+
+## Node Pools
+
+Before we can move on to creating our cluster, we need to understand what the so-called [**Node Pools**](https://docs.microsoft.com/azure/aks/use-multiple-node-pools?WT.mc_id=blog-personal-ludossan) are. They'll be essential for us to save money while using AKS.
+
+Basically, a [Node Pool](https://docs.microsoft.com/azure/aks/use-multiple-node-pools?WT.mc_id=blog-personal-ludossan) describes a group of Kubernetes _nodes_ that share common characteristics.
+
+For example, we can have _nodes_ that are specific VMs for Machine Learning, or ones that have more memory. The point of [Node Pools](https://docs.microsoft.com/azure/aks/use-multiple-node-pools?WT.mc_id=blog-personal-ludossan) is precisely to let the people operating the cluster have an option to build their applications on whatever infrastructure best fits the kind of work being done.
+
+On [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan), we have two kinds of [Node Pools](https://docs.microsoft.com/azure/aks/use-multiple-node-pools?WT.mc_id=blog-personal-ludossan).
+
+### System Node Pools
+
+These get created automatically with the cluster and generally serve to hold pods and deployments for the AKS system and Kubernetes in general. It's not a good practice to run custom workloads on the same [node pool](https://docs.microsoft.com/azure/aks/use-multiple-node-pools?WT.mc_id=blog-personal-ludossan). Every [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) cluster must contain at least one system [Node Pool](https://docs.microsoft.com/azure/aks/use-multiple-node-pools?WT.mc_id=blog-personal-ludossan) with at least one _node_.
+
+### User Node Pools
+
+As you might guess, these are the groups of _nodes_ created by the user. In these pools we get some interesting configuration options, since we can specify either Windows or Linux for the machines that run, and we can also allocate machines of different sizes and categories than the ones defined on [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan).
+
+### Execution capacity
+
+Every _node_ has a maximum capacity for running pods, meaning we can fit a maximum number of pods inside a VM before its resources run out. Because of that, you can specify the number of _nodes_ inside a pool up to a limit of 100.
+
+In user pools you can set the number of _nodes_ to zero, while in system pools the minimum number is one.
+
+### Creating a Node Pool
+
+You can create a new pool on an existing cluster using the [Azure CLI](https://docs.microsoft.com/cli/azure/?view=azure-cli-latest&WT.mc_id=blog-personal-ludossan) with the following command:
+
+```bash
+az aks nodepool add \
+  -g <resource-group> \
+  --cluster-name <cluster name> \
+  --name <pool name> \
+  --node-count <number of nodes> \
+  --node-vm-size <VM size and type> \
+```
+
+## Scalability
+
+When a _node_ hits its maximum execution capacity, meaning we've already put the maximum possible number of pods inside that machine, we have to increase, or scale, the number of _nodes_ in the pool. This can be done manually, through the following command:
+
+```bash
+az aks nodepool scale \
+  -g <resource-group> \
+  --cluster-name <cluster name> \
+  --name <pool name> \
+  --node-count <new number of nodes>
+```
+
+Scalability is one of the main reasons your cluster can end up costing a lot. Mainly because the more machines, the more resources, and the more resources we're using, the more we're going to have to pay. That's why it's highly recommended to use automatic ways of scaling our pools, the main one being the [Cluster Autoscaler](https://docs.microsoft.com/azure/aks/cluster-autoscaler?WT.mc_id=blog-personal-ludossan).
+
+### Cluster autoscaler
+
+Scalability should be automatic, since it's much safer and also saves a lot more money, because it will always increase the number of _nodes_ when needed and reduce the number of nodes when those nodes are no longer needed. You can enable the [autoscaler](https://docs.microsoft.com/azure/aks/cluster-autoscaler?WT.mc_id=blog-personal-ludossan) on an existing cluster with the command:
+
+```bash
+az aks update \
+  -g <resource-group> \
+  -n <cluster name> \
+  --enable-cluster-autoscaler \
+  --min-count <minimum number of nodes> \
+  --max-count <maximum number of nodes>
+```
+
+## Spot Instances with Node Pools
+
+One of the most efficient ways to save money while using [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan) instances is through the use of multiple [node pools](https://docs.microsoft.com/azure/aks/use-multiple-node-pools?WT.mc_id=blog-personal-ludossan) with the so-called [Spot Instances](https://docs.microsoft.com/azure/virtual-machines/spot-vms?WT.mc_id=blog-personal-ludossan).
+
+### Spot VMs
+
+[Spot type VMs](https://docs.microsoft.com/azure/virtual-machines/spot-vms?WT.mc_id=blog-personal-ludossan) are virtual machines that offer all the same scalability features a normal VM would, while still cutting costs by using **surplus compute**. This means [Spot VMs](https://docs.microsoft.com/azure/virtual-machines/spot-vms?WT.mc_id=blog-personal-ludossan) use computing power that Azure isn't currently using, guaranteeing significant discounts on their price.
+
+But all of that comes at a price. [Spot Instances](https://docs.microsoft.com/azure/virtual-machines/spot-vms?WT.mc_id=blog-personal-ludossan), because they take advantage of unused computing power, **can be deactivated or interrupted at any time**. This means that, while the VM is in use, you'll get a notification 30 seconds before the machine gets deallocated. After that time, the machine goes into a deallocated state and its computation stops abruptly.
+
+For this reason, [Spot VMs](https://docs.microsoft.com/azure/virtual-machines/spot-vms?WT.mc_id=blog-personal-ludossan) work really well for applications that don't hold state and can be interrupted at any moment, restarting their processes whenever needed. Some use cases:
+
+-   Batch processing
+-   Stateless applications
+-   Development environments
+-   CI and CD pipelines
+
+### Joining forces
+
+Using [Spot VMs](https://docs.microsoft.com/azure/virtual-machines/spot-vms?WT.mc_id=blog-personal-ludossan) with node pools gives you a lot of power to save good money when processing data at large scale. Mainly because, when we use [Spot VMs](https://docs.microsoft.com/azure/virtual-machines/spot-vms?WT.mc_id=blog-personal-ludossan) with node pools, we get to choose between two deallocation policies:
+
+-   **Deallocate**: When the policy is set to deallocate, the machine will be stopped and deallocated once the VM reaches a state where there's no more compute power available. You can deploy it again once capacity is available again, but keep in mind that all CPU and disk allocation costs keep being counted.
+-   **Delete**: In this case, the machine gets completely removed and you won't pay for any more resources consumed.
+
+## Spot Node Pools
+
+[Spot Node Pools](https://docs.microsoft.com/azure/aks/spot-node-pool?WT.mc_id=blog-personal-ludossan) let you set a maximum hourly value you're willing to pay. When that value is reached, the machine gets deallocated or removed, according to the selected policy.
+
+> Even though they guarantee reduced costs, [spot node pools](https://docs.microsoft.com/azure/aks/spot-node-pool?WT.mc_id=blog-personal-ludossan) aren't recommended for any kind of critical workload, since their availability isn't guaranteed.
+
+To create a [spot node pool](https://docs.microsoft.com/azure/aks/spot-node-pool?WT.mc_id=blog-personal-ludossan), we can use the following command:
+
+```bash
+az aks nodepool add \
+  -g <resource-group> \
+  --cluster-name <cluster name> \
+  --name <pool name> \ 
+  --enable-cluster-autoscaler \
+  --min-count <minimum number of nodes> \
+  --max-count <maximum number of nodes> \
+  --priority Spot \
+  --eviction-policy Delete \
+  --spot-max-price -1 \
+```
+
+When we set the hourly price value to `-1`, the _nodes_ won't get removed based on price, and new instances created will be based on whichever is lower between the current spot VM price or the standard price for a _node_.
+
+### Creating resources on the new pool
+
+To create resources on our [spot node pools](https://docs.microsoft.com/azure/aks/spot-node-pool?WT.mc_id=blog-personal-ludossan), we need to know the concept of Kubernetes [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) (we'll have an article here about that soon). And also the concept of [Node Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/).
+
+In short, every _node_ has a _taint_. These _taints_ repel new pods from being created on those _nodes_ unless those pods have a _toleration_ for that specific _taint_. It's a way of choosing which VM your applications get created on.
+
+By default, every node created inside a [spot node pool](https://docs.microsoft.com/azure/aks/spot-node-pool?WT.mc_id=blog-personal-ludossan) will have a `kubernetes.azure.com/scalesetpriority=spot:NoSchedule` _taint_, meaning that, unless the pod has a _toleration_ of the same type, no other pod can be scheduled on that _node_.
+
+For us to be able to create a pod, or any other workload, on a _node_ that lives inside a [spot node pool](https://docs.microsoft.com/azure/aks/spot-node-pool?WT.mc_id=blog-personal-ludossan), we need to define a new _toleration_ in the pod's declarative file, for example:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+  labels:
+    env: example
+spec:
+  containers:
+  - name: example
+    image: node
+    imagePullPolicy: IfNotPresent
+  tolerations:
+  - key: "kubernetes.azure.com/scalesetpriority"
+    operator: Equal
+    value: spot
+    effect: NoSchedule
+```
+
+Notice we defined an operator so that it matches the _taint_ of the _node_ in question, so new pods will get created on this _node_.
+
+## Conclusion
+
+Even though it's a lot of extra work, using [spot node pools](https://docs.microsoft.com/azure/aks/spot-node-pool?WT.mc_id=blog-personal-ludossan) can be a lifesaver in terms of resources when we're working on cost optimization on [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=blog-personal-ludossan), but always remember that spot type machines don't guarantee high availability.
+
+I strongly recommend reading the documentation about the [cost optimization baseline](https://docs.microsoft.com/azure/architecture/reference-architectures/containers/aks/secure-baseline-aks?WT.mc_id=blog-personal-ludossan#cost-optimization) for AKS, an amazing piece of documentation on how you can define policies and best practices for AKS clusters in production.
+
+In this article we talked a lot about more advanced Kubernetes concepts, like _taints_ and _tolerations_. I'm putting together an article just about these concepts, and also about another super interesting tool from this container orchestrator, so don't forget to subscribe to the newsletter to get that content and weekly news too! Like and share your feedback in the comments!
+
+See you around

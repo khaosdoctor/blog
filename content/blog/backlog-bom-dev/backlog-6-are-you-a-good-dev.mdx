@@ -1,0 +1,178 @@
+---
+title: "Backlog #6 - Are You a Good Dev?"
+pubDate: 2025-01-23T11:00:04.000Z
+updatedDate: 2026-07-16T17:48:55.000Z
+lang: en
+slug: "backlog-6-are-you-a-good-dev"
+category: "career"
+tags: ["backlog-newsletter", "career"]
+description: "What makes a good dev a good dev? What's a strong engineer and what's a weak one? Are you one of the good ones?"
+seoTitle: "Is It Possible to Measure Efficiency in Tech?"
+machineTranslated: true
+draft: false
+---
+Another day, another backlog live! Today I want to bring something different: it's not about a story, and it's not directly about development either, it's about devs in general. Let's talk about **the act of doing engineering** and _the software engineering profession as a whole_.
+
+I recently came across an [interesting post](https://www.seangoedecke.com/what-makes-strong-engineers-strong/?=&aid=recomink1dKTOjct0) by Sean Goedecke called "What makes strong engineers strong". Here, strength has nothing to do with physical might, it's about execution, accountability, and the ability to deliver any kind of work.
+
+The plan was to just comment on that article, but then I found an [earlier one](https://www.seangoedecke.com/weak-engineers/) where the author also digs into the concept of "strong engineers" and "weak engineers". That left me a bit unsettled.
+
+So let's start from the start.
+
+## How did we get here?
+
+Before I define what a strong or weak engineer is, I need to explain how we got here in the first place.
+
+The [first article](https://www.seangoedecke.com/weak-engineers/?__readwiseLocation=) mentions a [famous Stanford study](https://arxiv.org/pdf/2409.15152) that measured the productivity of a bunch of devs across more than 100 companies and found that roughly [9.5% of any given software engineer](https://x.com/yegordb/status/1859290734257635439) at a company is, essentially, doing nothing. The so-called _0.1x engineer_, a nod to the fantastic term _"10x engineer"_, coined by an investor named Shekhar Kirani in a [Twitter thread in 2019](https://x.com/skirani/status/1149302828420067328). In theory, 10x engineers are mythical creatures who deliver everything, while 0.1x engineers are the exact opposite.
+
+I actually read the study, but I found it odd that it never mentions any split between remote and in-office workers, so I have no idea where the efficiency percentages came from. Same thing with the financial numbers: the study doesn't mention any kind of financial result, so I also don't know where the data for _these engineers costing a $500B loss_ came from.
+
+![Table showing the cost of "ghost engineers"](./DraggedImage.png 'Table showing the cost of "ghost engineers"')
+
+> This might be a different study built on the same source. Either way, I couldn't confirm where these numbers came from beyond what's in the images. If anyone knows, let me know.
+
+According to the study, 108 companies sent in 1.73 million commits from 50,935 engineers. Those commits were combined with public repositories at a ratio of 1 public commit for every 5 private ones. After normalization, 70 commits were selected as the sample, and every claim was based on those.
+
+One of the metrics used was the number of commits in a month, something even [the author himself](https://x.com/yegordb/status/1859291435339743361/photo/1) considers unreliable. And it's already been proven to be a bad metric.
+
+![On average, weak engineers ship 2 to 3 commits a month](./DraggedImage-1.png "On average, weak engineers ship 2 to 3 commits a month")
+
+But it looks like the goal of the study wasn't to measure the participants' efficiency, it was to build a model for evaluating programmer efficiency, something practically _everyone_ in the industry has been trying to do forever.
+
+Anyway, that's the study that kicked all of this off. But how, exactly, do we define what makes an engineer "strong" or "weak"?
+
+## The legend of efficiency in tech
+
+The first article defines strong and weak engineers as:
+
+> Strong engineers can do tasks that weak engineers simply cannot do. Not even if you gave them all the time in the world.
+
+But what are these tasks, exactly? According to the article:
+
+-   Really tricky bugs like _race conditions_;
+-   Shipping meaningful improvements to legacy code, whatever "meaningful" means;
+-   Making changes that require a huge architectural refactor.
+
+Those are valid points, but, in my opinion, not enough. For example, are these tasks something both strong and weak engineers have already dealt with before? Or are both facing them for the first time?
+
+If someone is labeled weak for trying and failing to solve a completely new problem, that would make all of us terrible devs the moment something is as complex as fueling up a space rocket.
+
+The point is that this isn't black and white, and the author himself acknowledges that. Still, I disagree with how he categorizes people. He splits engineers into strong, regular, and weak. According to him, you can be an excellent "regular engineer" at solving complex bugs, or a very good "weak engineer" at keeping things running.
+
+In my view, things aren't that simple.
+
+Things live in shades of gray (way more than 50). I'm already not a big fan of the junior/mid/senior split, though I get the purpose when it comes to hiring. But I don't agree at all with slicing it even further based on who "can solve complicated problems". All of us are great at something and terrible at something else.
+
+I want to believe I'm an excellent programmer, it's probably the best thing I do, but I'm a terrible soccer player.
+
+You can't, and won't, be good at everything. That's called: _being a normal person_.
+
+## What makes a good dev
+
+In the first article he states, emphatically:
+
+> ... The real measure of talent isn't speed or volume of delivery, it's the ability to do tasks that others can't.
+
+But in the second article, the author lays out the 4 pillars of strong engineers:
+
+-   _Speed_;
+-   _Pragmatism_;
+-   _Self-confidence_;
+-   _Technical skill_.
+
+That feels a bit contradictory to me. Right off the bat, _speed_ shows up as one of the elements, and even though delivery volume isn't listed directly, it's a metric that's clearly tied to speed. After all, the faster you work, the more stuff gets shipped.
+
+I agree with three of the pillars, but _speed_ deserves its own discussion. As for _technical skill_, I think that's implicit, you need some baseline of skill to be a good dev, so I won't focus on that here.
+
+### Speed
+
+Speed should never be treated as the main metric for judging good or bad engineers. Sure, hitting deadlines matters, but shipping something fast without quality is basically the same as shipping nothing at all.
+
+I actually touched on this recently in this thread:
+
+https://bsky.app/profile/lsantos.dev/post/3lfpr5zw6cc2h
+
+Shipping code fast and "for now" is one of the easiest things in software engineering. If you believe that spinning up a Bolt template with a few ChatGPT prompts to automate everything and deliver "quick value" is a solid practice, then we have very different opinions.
+
+The problem is that, in that scenario, you probably haven't seen a single line of the code that got produced. Which means, most of the time, it'll be extremely hard to maintain long-term, if it's even possible at all. And that's the hardest part of software development: shipping something now that's still functional and sustainable 10 years from now.
+
+Funny story: my first big project as a freelancer, some 8 or 9 years ago. It was a fairly simple system, and I wrote the code as fast as I could to ship the MVP. The client loved it, the product ran for 2 years and nobody ever had to touch it. Nailed it, right? Nope.
+
+Two years later, they needed to do something super simple: add more options to a page. And that's where the problem showed up. I couldn't maintain the code at all. Everything was so tightly coupled that it was easier to rebuild from scratch than to change what was already there.
+
+All because I only thought about the now and never gave a second thought to what I'd need to do to keep it running in the future. I was fast, sure, but at what cost?
+
+![](./DraggedImage-2.png)
+
+Of course we have to weigh what we need right now, we can't always be perfect and deliver the best possible outcome, a lot of the time _done is better than perfect_, and that's fine.
+
+### Quality vs Efficiency
+
+I always like to remind people that being a _"good engineer"_ is quite different from being an _"efficient engineer"_. Generally, good engineers end up being efficient, but not every efficient engineer is necessarily good.
+
+The line between efficiency and pure trial and error is thin. Purely efficient engineers tend to fail a lot and fast, iterating over every failure until they land on something more solid and reliable. You know who else does that? Machine learning.
+
+![](./DraggedImage-3.png)
+
+That's not to say good devs don't iterate, quite the opposite. Good devs absolutely iterate to improve their solutions, but the difference is in how. The iteration isn't happening on top of a pile of "half-baked attempts", it's happening on an idea implemented as well as possible for that moment. Each new iteration improves on the last one, it's not a full do-over.
+
+And the author himself drops a pretty interesting line:
+
+> Genius, generally, runs counter to efficiency.
+
+That lines up exactly with what I just said. Failing fast and fixing even faster isn't, to me, a synonym for quality. It's just a sign that you burned through every option that didn't work and settled on the first one that did, without worrying whether it's actually the best solution or not.
+
+### Pragmatism and Confidence
+
+These two qualities deserve to be highlighted together, because, in my opinion, they're the most important ones for any dev (or technical person, in general).
+
+Being pragmatic is essential, especially when you need to deliver something. It's that ability to read the moment and focus on what actually matters. I've actually talked about this in a video:
+
+![](https://www.youtube.com/watch?v=eppWQKUixmI)
+
+Thinking pragmatically means knowing when to drop the bone. It's recognizing when your solution isn't the best one, when what you built needs to be redone, or when giving in is the right call.
+
+I used to get **really** mad whenever someone told me I was wrong and needed to change my implementation. But after banging my head against the wall enough times, I realized the code I'm writing isn't "mine". I'm not writing it for myself, I'm writing it for whoever comes next and has to maintain all of it.
+
+> Coding is teamwork, you'll rarely manage to do something on your own forever.
+
+On the other hand, it's important to know how to stand your ground and trust your own skills when you need to defend a point of view. Being pragmatic and trusting what you know are, to me, two of the main qualities of a good dev.
+
+Of course, too much of anything is bad. Being overly pragmatic and dropping everything in favor of data can be just as harmful as being overly confident and thinking you're always right.
+
+## The learning paradox
+
+There's an interesting paradox that explains a lot about how the market works as you gain more experience. Sean makes a point here I fully agree with: why is it easier to find "weak engineers" in senior positions than in junior ones?
+
+The answer is simple. When hiring a senior, we evaluate more than just technical ability. We also weigh:
+
+-   Technical ability;
+-   Leadership ability;
+-   Communication ability;
+-   Problem-solving ability.
+
+For juniors, on the other hand, the main metric is almost always technical skill. That makes it easier for people who aren't that technically strong to get through on charisma alone. I've seen this happen more than once at places I've worked, and if you haven't seen it yet, sooner or later you will, especially at big companies.
+
+Another reason is that it's totally fine for a junior to mess up, that's expected. But socially, a mistake coming from a senior isn't received the same way. People expect someone with 30 years on their resume and an enviable career to be some kind of mythical figure who never fails. That pushes a lot of seniors into learning quietly, on their own, which is a lot harder.
+
+Personally, I have zero fear about saying I don't know something. I actually preach this a lot to everyone I know and/or mentor:
+
+> Not knowing isn't a problem. Not wanting to learn is.
+
+So as long as someone messes up and wants to learn, staying open about it, that's totally fine by me. The problem shows up when someone messes up and refuses to keep learning, maybe as a way to hide some kind of shame.
+
+Never be afraid of being wrong, everyone here is still learning.
+
+## What I think about all this
+
+Overall, both articles are pretty interesting and really well written. Solid points worth keeping in mind and discussing.
+
+What about you? What makes a dev good/strong or bad/weak? Send it my way on my socials:
+
+-   [Twitter](https://twitter.lsantos.dev)
+-   [Bluesky](https://bsky.lsantos.dev)
+-   [Linkedin](https://linkedin.lsantos.dev)
+
+Or send me [an email](mailto:hello@lsantos.dev) if you want me to cover it in the next edition of the backlog!
+
+See you next time! And don't forget to [give me your feedback](https://forms.gle/2kVANfh5SJUnBerg8)!

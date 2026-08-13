@@ -1,0 +1,116 @@
+---
+title: "JavaScript Gets New Set Methods"
+pubDate: 2024-07-04T11:00:40.000Z
+updatedDate: 2026-07-16T17:55:39.000Z
+lang: en
+slug: "javascript-new-set-methods"
+category: "typescript"
+tags: ["ecmascript", "javascript"]
+description: "JavaScript just got new Set methods in 2024, let's explore them!"
+seoTitle: "Everything about the new JavaScript Set methods"
+machineTranslated: true
+draft: false
+---
+
+Seven years ago, folks asked for Sets to have more methods beyond the standard `add`, `has`, and so on. These were designed for cases where you need to work with multiple sets. Creating unions, intersections and stuff like that, which are super common operations.
+
+Well, 7 years later, [this proposal](https://github.com/tc39/proposal-set-methods) finally hit stage 4! That means it's getting implemented in JavaScript and browsers for real now.
+
+> If you don't know what sets are: they're basically structures like arrays, but they can only store a value once (we covered these techniques [here](/removendo-itens-duplicados-no-javascript-es6/)). It's a way to deduplicate an array efficiently.
+
+Starting now, we have these new methods on sets:
+
+> [!NOTE] 💡
+> To be clear, let's say set **A** is the initial Set, and set **B** is the secondary set
+
+## Set.prototype.intersection
+
+Returns elements that are in both A and B:
+
+```js
+const A = new Set([1, 3, 5, 7, 9]);
+const B = new Set([1, 4, 9]);
+console.log(A.intersection(B)); // Set(2) { 1, 9 }
+```
+
+## Set.prototype.difference
+
+The opposite of intersection, returns items that are in A but not in B:
+
+```js
+const A = new Set([1, 3, 5, 7, 9]);
+const B = new Set([1, 4, 9]);
+console.log(A.difference(B)); // Set(3) { 3, 5, 7 }
+```
+
+## Set.prototype.union
+
+Combines both sets into a single set. This was a pain to do before, because you had to keep two separate sets, turn them into arrays, then merge them into a third set. So this method:
+
+```js
+const A = new Set([2, 4, 6, 8]);
+const B = new Set([1, 4, 9]);
+console.log(A.union(B)); // Set(6) { 2, 4, 6, 8, 1, 9 }
+```
+
+Is a shorthand for this:
+
+```js
+const A = new Set([2, 4, 6, 8]);
+const B = new Set([1, 4, 9]);
+console.log(new Set([...A, ...B])); // Set(6) { 2, 4, 6, 8, 1, 9 }
+```
+
+## Set.prototype.symmetricDifference
+
+This one's cool. It returns elements that are in either A or B, but **not** in both. If you know a bit of logic, this is the equivalent of an XOR (e**x**clusive **or**) gate.
+
+```js
+const A = new Set([2, 4, 6, 8]);
+const B = new Set([1, 4, 9]);
+console.log(A.symmetricDifference(B)); // Set(5) { 2, 6, 8, 1, 9 }
+```
+
+## Set.prototype.isSubsetOf
+
+A check function that tells you whether A is **completely contained** in B:
+
+```js
+const A = new Set([4, 8, 12, 16]);
+const B = new Set([2, 4, 6, 8, 10, 12, 14, 16, 18]);
+console.log(A.isSubsetOf(B)); // true
+```
+
+## Set.prototype.isSupersetOf
+
+Same idea, but flipped. This tells you whether all elements of B are contained in A:
+
+```js
+const A = new Set([4, 8, 12, 16]);
+const B = new Set([2, 4, 6, 8, 10, 12, 14, 16, 18]);
+console.log(B.isSupersetOf(A)); // true
+```
+
+## Set.prototype.isDisjointFrom
+
+This is the final method to round it out. It tells you whether A and B are disjoint, meaning there's no element from A in B.
+
+> Which also means there's no element from B in A, so this function is idempotent.
+
+```js
+const A = new Set([2, 3, 5, 7, 11, 13, 17, 19]);
+const B = new Set([1, 4, 9, 16]);
+console.log(A.isDisjointFrom(B)); // true
+console.log(B.isDisjointFrom(A)); // true
+```
+
+## Conclusion
+
+The new Set methods are available in:
+
+- Chrome 122 or newer
+- Edge 122 or newer
+- Firefox 127 or newer
+- Safari 17 or newer
+
+You can see more details on [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/intersection)

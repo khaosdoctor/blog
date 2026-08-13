@@ -1,0 +1,132 @@
+---
+title: "Queues have arrived in Deno KV"
+pubDate: 2024-01-10T11:00:32.000Z
+updatedDate: 2026-07-16T15:54:36.000Z
+lang: "en"
+slug: "queues-have-arrived-in-deno-kv"
+category: "javascript"
+tags: ["deno", "typescript", "development"]
+description: "The simplest way to build messaging systems these days is Deno Queues, let's understand everything about this new tool!"
+seoTitle: "Meet Deno Queues"
+machineTranslated: true
+draft: false
+---
+Ever since [Deno KV](/deno-kv-beta/) launched, the Deno team has been doing an excellent job adding more features to what could've just been a simple key-value database, but now it's a lot more than that!
+
+One of the newest additions to Deno's toolbox is queues, through **Deno Queues**.
+
+## About queues
+
+Queues are a very old concept in programming. The idea is to literally have a data structure that hands you one item at a time, FIFO style (First In First Out). Queues are great when you have processes that take a while to run but aren't urgent and can happen in the background, sending emails or notifications, for example.
+
+As distributed computing advanced, queues became something pretty important because now it was possible to build a queue distributed across several systems over a network.
+
+Queues could either be 1:1, meaning one message to a single system, or a **pub/sub** model (publisher/subscriber), which is the most common one today, where you have a message queue listened to by one or more systems. Whenever a new message arrives, those systems get notified and receive the latest message.
+
+Message queuing became pretty famous over the years with Apache Kafka and RabbitMQ.
+
+## Deno Queues
+
+Deno wasn't going to be any different! The queue implementation in Deno KV follows the pub/sub model. But instead of being able to listen to multiple queues (an email queue and a webhook queue, say), Deno Queues only has one, so the code ends up pretty simple:
+
+```ts
+using db = await Deno.openKv()
+
+db.listenQueue(async (msg) => {
+  await sendEmail(msg.from, msg.to, msg.body)
+})
+
+await db.enqueue({ 
+  from: 'hello@lsantos.dev', 
+  to: 'suporte@formacaots.com.br', 
+  body: 'Formação TS is awesome!' 
+})
+```
+
+It's that simple. Right now KV can only listen to a single queue, but that's more than enough for serverless applications.
+
+The `enqueue` method takes another property called `delay` that pushes the message delivery back by that many milliseconds. In the example above the message would be delivered right away, but imagine we're sending something an hour from now:
+
+```ts
+using db = await Deno.openKv()
+
+db.listenQueue(async (msg) => {
+  await sendEmail(msg.from, msg.to, msg.body)
+})
+
+await db.enqueue({ 
+  from: 'hello@lsantos.dev', 
+  to: 'suporte@formacaots.com.br', 
+  body: 'Formação TS is awesome!' 
+}, { delay: 3_600_000 })
+```
+
+### At-least-once delivery
+
+When we're talking about queue models and other distributed systems, there's the concept of **QoS**, or [_Quality of Service_](https://en.wikipedia.org/wiki/Quality_of_service). This concept dictates how our messages get delivered, for example, queues deliver messages in the order they were received, but other structures might deliver messages and events out of order.
+
+For us here, though, what matters is how many times we're going to deliver the message. There are systems that don't guarantee a message gets delivered at all (UDP, for example).
+
+With Deno Queues we're guaranteed the message will be delivered at least once, and if delivery fails, the same handler gets called multiple times (up to 5 by default).
+
+The same happens if, for whatever reason, you throw an exception. After that the message gets dropped unless you have a **DLQ** (Dead-letter queue).
+
+Since we're already on the topic of queues, you just need to pass a second option to `enqueue` called `keysIfUndelivered` to set up a way to check for undelivered messages. This option takes a two-dimensional array of strings (`string[][]`) that will be the keys set if the message fails, for example:
+
+```ts
+const user = { id: 123 }
+await db.enqueue(user, { 
+  keysIfUndelivered: [['dlq', 'user', user.id]] 
+})
+```
+
+If this message fails to deliver, a new key `dlq:user:123` gets created with the original message content.
+
+### Duplication
+
+One of the things we always need to watch out for in distributed systems is duplication.
+
+It's expected that message-based (event-based) systems might:
+
+-   Receive an event exactly once
+-   Receive an event multiple times
+-   Receive an event in order
+-   Receive an event out of order
+
+So it's really important to have a way to build **idempotency**, meaning no matter how many times you send the same event, it only runs once, whether that idempotency comes from a key (called an _idempotency key_) or from the logic itself, for example, an operation that sets a value to 100 will always set it to 100 no matter how many times it's called.
+
+In the actual [queues launch article](https://deno.com/blog/queues) the team shows an interesting example using _nonces_, which are basically idempotency keys:
+
+```ts
+const db = await Deno.openKv()
+
+db.listenQueue(async (msg) => {
+  const nonce = await db.get(["nonces", msg.nonce])
+  if (nonce.value === null) return
+
+  // The message hasn't been processed yet at this point
+  await db.atomic()
+    // Check again
+    .check({ key: nonce.key, versionstamp: nonce.versionstamp })
+    // Delete the nonce
+    .delete(nonce.key)
+    // Some processing
+    .sum(["processed_count"], 1n)
+    .commit()
+})
+
+// Send the message
+await db.enqueue({ nonce: crypto.randomUUID() })
+```
+
+Notice we're checking the message twice: first to see if the nonce value exists under the nonces key, if it doesn't, that means we've already processed the message. If it does, we open an [atomic transaction](/kv-atomic-ops/), check again whether the version matches the version we're validating, to catch the case where another process might have changed it.
+
+Mixing atomic operations with Deno Queues is a genuinely interesting idea too, because it opens up entirely new doors to compose even more complex applications.
+
+---
+
+## FTS moment!
+
+If you liked this article, I also have a full TypeScript course called **Formação TypeScript!**
+
+I invite you to take a look if you want to learn more about TypeScript with me and our amazing community of hundreds of students!

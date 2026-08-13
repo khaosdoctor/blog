@@ -1,0 +1,251 @@
+---
+title: "Good and Bad TypeScript Practices - #SemanaTS Day 3"
+pubDate: 2023-04-05T11:00:41.000Z
+updatedDate: 2026-07-16T16:02:06.000Z
+lang: en
+slug: "good-and-bad-typescript-practices-semanats-day-3"
+category: "typescript"
+tags: ["typescript"]
+series: typescript-week
+seriesOrder: 3
+description: "Have you ever wondered what the best TypeScript practices are for keeping your code typed and safe? I'll show you!"
+seoTitle: "Good and Bad TypeScript Practices"
+machineTranslated: true
+draft: false
+---
+---
+
+For today I thought I'd bring a bit of something people ask me all the time when I'm talking about TypeScript: **What are the good practices? What are the main problems we run into when working with TypeScript?**
+
+So today we're going to talk more about code best practices, type best practices, and we're also going to touch on configuration best practices, plus explain more about **interfaces, types, and enums**.
+
+## Typing best practices
+
+To start, let's talk about the best practices for typing your code with TypeScript. Keep in mind that these practices aren't set in stone, they're the main ones that I personally prefer to use and that the community also adopts as good practice.
+
+So this isn't something you need to be completely rigid about when someone comes and asks you, it all depends on the context and where you're going to apply these practices.
+
+### Naming
+
+The first good practice isn't related to a type, but to your mental well being when writing types. **Always try to give your generics the most descriptive name possible**, for example, let's use this code:
+
+![](./image-50.png)
+
+This is code from a `.d.ts` declaration file for a module called Camelize. The idea is that it turns any object key into CamelCase, but notice how hard it is to read when all our types are `T` or `K`, it even gets hard to understand what the type's purpose is.
+
+This can be fixed easily by renaming your **generics**, which are the type annotations that appear between `<>`, we haven't talked about generics here yet, but think of them as a kind of parameter for types, the same way functions take parameters.
+
+We can make this type much more readable like this:
+
+![](./image-51.png)
+
+The text got considerably longer, but the code is much simpler to read and much simpler to understand.
+
+## Using generics
+
+Using generics as a whole can be considered a good practice because it can greatly simplify how we read and understand types, on top of reducing a lot of repetition. For example, imagine this interface:
+
+![](./image-53.png)
+
+Look at how many times we use `string | null`, that type could be replaced with something like:
+
+![](./image-54.png)
+
+Which is another good practice, but it's not what we're after right now, because we have a leftover `number | null` type, and we'd have to create another type just for it. In this case it's much better to create a generic type `Nullable<Type>` and replace it like this:
+
+![](./image-55.png)
+
+## Type aliases
+
+Continuing what I just said. Using type aliases is highly recommended, especially when we have to use types in multiple places, for example:
+
+![](./image-56.png)
+
+In this case we can convert everything into a `Point` type:
+
+![](./image-58.png)
+
+Which also lets us extend that type, for example, if we want a Z coordinate now:
+
+![](./image-59.png)
+
+Type aliases are also great for building our own **utility types** (which I'll talk about further ahead) and for creating enumerators with **union types**:
+
+![](./image-61.png)
+
+Which brings us to the next topic.
+
+## Interfaces
+
+Interfaces are every dev's best friend when we have to code something a bit more complex, especially when it comes to API responses. There's a whole universe of stuff behind using interfaces and it could have its own post (keep an eye out, it might show up on my [blog](/) 👀), but let's stick to the basics for today.
+
+An interface can only be used to type complete objects, so its main use is typing the return of external APIs. They not only accept generics, they can also be extended. So let's imagine we have an API that returns one of two possible request options:
+
+![](./image-63.png)
+
+This interface could be written as an extension of another interface:
+
+![](./image-64.png)
+
+Notice that we're using a **utility type** called `Omit` that removes one of the keys from our union.
+
+We could make it even more useful if we built a **discriminated union**, which does what we call **type narrowing**, reducing the type down to only what we pass, for example, for the `admin` key:
+
+![](./image-65.png)
+
+And we could make it even more generic using generics:
+
+![](./image-66.png)
+
+### Types vs Interfaces
+
+Another question I've gotten more than once in different places is: "What's the difference between types and interfaces?" I'll give a bunch of examples here, and you can see all of them [in this TS Playground link](https://www.typescriptlang.org/play?ssl=44&ssc=81&pln=28&pc=1#code/PTAEBUEsAcHsGdRwCYFMC2p6oE6gK7wCGyCoaoAZrDukaAMawB2AVvswC71OaRe5KRBqngAofp0HDUoAMJEcOWAEkBOISNABvMaFDLkReAC5QAJjEBfMWM4BPaLIVLY4R7IC8OvQdhHTC2tbJmZ4TkYARjMXZXcnUG9tPwCzcxtQ8MZzGMVlNSkNGUSdFOM0jJYshgBmXNd4r2zQEAJMThhYUABL0GN4WAZIAEOAN1QAGz62+klpEVtWgFEADykwgGOu0ch6NAYJxSIOllB0XABzfgusAGeepAR4AFvxqYxQOaKRcS-NZ0gOAY+AmXV0+hwREgsDMzHw6AARrhgn9inJAcDQT59MhdudOMpYfCkThgmJMhEhkCQTD5BiaSVkpDoWZIgAach41AE2nmUA2MStADyZ1E6C6zC2Dzg8Beb0YsHanXEDgS6OpoKgcEZBihtLhiNw-LsHjpGrcnR1uKI+MJoANJONgrAAEFEWQUB9sHhROtcaREHAcN0lTKCMQ+OpsAwAOdS3igABkoGdoFkqJ+4Zt02gREOo0hjAAFkRxmm1qhmMhfup-qAAAqiAb0cH2xWoMzhHDXXyQIxoImG0kCjOyF0TDhdVAVquIRuy2At3x5ydmAn4VC+aDKShNmhmIQTbC95Cdgk9yphCKN5B28eTnXMdtmADkN+UL45fZIHYs5g5K5PmuOAbhy26wLuC44AeebYF+p6gC+kTmDUyE1C+TrLKAHRhp6mC+pWaB4BQo4qqa9Y7nueDePOzZJqUgG0oecFIJRUHARuxoUqALrMEQZgURBVGPs+iG8UQn6fP2v7mAAbABE5AVQsGoGBbEDNB2EgbIArCgYqC8IRJBdL0hCKJ8tYyIGRzYcq5CyLACKsNyHo0AAjhuqZCoguDKIgJGWZm8BSnQkCIEimBoJQ-B9ggEiBbIACywjCGCvijIuMFHpu+jGOUoAAAxkqqzg0PgrD0Ek6WZVpnn6E+nD4DgSnrjlfTEIElgChM3JnClTBmMlDCpTqGX8cp2UAR1ZgFcaPWUmVFUxItlWlGNHGqW2jXNbSrVTfl6TkitJR0MNTBiKdI3eEwIEVYsYAFPMohprZuH+F6RqQOg0A9ecXDGYGNCgLA+AEsYjCHLKojxYUdbgN2RDMBcNKPd8sitgixi-g6yK5RM23jTjpK5TgqDjQAFAAlIkAB89rEsiAoHP0EAI0jDJfT9GCVpwiDw7s7OgqjdathSIEMJwQPk6TxnMBM9igJj2CDiSHIy6QcsK3mBMq7g1PaDYJNk6AVPYvo+nbcwJucEWYUAHRK7IABU2G2-Adva01RCU8Alj6DYAolaAACK+AkJCpBal0VX6IcpC68TfQy2YpueHTRNkszsoh2Ht7GZ832-TziCh+HxlR2bYv4BLUvqyw8ugHH+oMzg+uG0nxum62ELck1Vs2-bTegC7fvGrpYD1jQIZYO2AgWbDVmPGg+HhIRRpZ9g4hEAiXbCJSkOIAAYjQdBm9vu8Sx3RBUwnADcZKjmamKwC6O9g5f05+kfJ9LjiXI8gnXwzJm5DkzlUSkMR6SglfhfCIMcr5d18D3S2iFJQmTaPaAAX+cD8vgrBsl8NaW0vICEQj1KyawQA).
+
+Let's start with the most obvious one: **Interfaces only represent objects**. Types can do the same job, but plain types can also represent primitives, which isn't possible with interfaces, so we can represent an object like this:
+
+![](./image-67.png)
+
+But interfaces can't have primitive types or tuples, that's a job for types:
+
+![](./image-71.png)
+
+And types are interchangeable, meaning we can assign a variable to an interface and then assign that interface to a type:
+
+![](./image-68.png)
+
+**Declaration merging** is only possible with interfaces. Extension through merging, or _interface augmentation_, is only possible when working with interfaces, because the TS compiler will merge every identifier with the same name under the same object. The same isn't possible with types because they're static and can only be declared once:
+
+![](./image-69.png)
+
+But that doesn't mean we can't extend types too, and declaration merging isn't a good practice for interfaces anyway, because you lose track of where the declarations are. So we can extend types using the intersection operator `&`, while interfaces can be extended with the `extends` keyword:
+
+![](./image-70.png)
+
+Even though types are pretty great, their error messages are more cryptic than interfaces, which are built to be worked with as objects. In this case it's much more recommended, if you have an object, to use the interface directly instead of a type. For example, in this case:
+
+![](./image-72.png)
+
+While the error we get on the type will be a bit harder to pin down, because it'll look something like:
+
+```bash
+Type 'Coruja' is not assignable to type 'Macaco'.
+  Types of property 'voa' are incompatible.
+    Type 'true' is not assignable to type 'false'.
+```
+
+On the other type that represents the interface (the `macaco`) we'll get a more direct error:
+
+```bash
+Property 'noturno' is missing in type 'Macaco' but required in type 'Coruja'.
+```
+
+Another thing both can do is be used as part of an implementation by a class, meaning we can say a class implements both a type and an interface, and that class can be used interchangeably with that interface or type, which is great for building polymorphism into your code:
+
+![](./image-73.png)
+
+However, only interfaces can **extend classes**, which is pretty cool when you want to create a new object from an existing object, but that new object won't be a class itself:
+
+![](./image-74.png)
+
+## Unknown, Any, and Never
+
+Let's talk about the last set of type practices, the three horsemen of the apocalypse: `any`, `never`, and `unknown`.
+
+### Using Any
+
+It essentially turns off type inference. It's the equivalent of saying that type can be anything. Any type that has a union or intersection with `any` gets inferred as `any`. Using `any` is considered one of the worst practices in TS.
+
+That said, there are cases where `any` has to be there. These usually come up when a type is completely unknown, to the point where you don't even know what that type's shape is.
+
+So, without knowing the shape, we can't use `unknown`, because it would force us into a type cast. So the way out is using `any` to type some argument that could be completely unknown. But this is **STRONGLY** discouraged.
+
+> NEVER use `any` on function returns or on interfaces that might get merged with other objects. Because as soon as TS grabs your function's return, it'll type any variable that receives that function as `any`, and you'll lose every other type inference.
+
+But it's super important to say that, in 99% of cases, you can replace `any` with some other type, and even the [official documentation itself](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html#any) says not to use `any` unless you're migrating your JavaScript codebase to TypeScript.
+
+### Using Unknown
+
+`unknown` is the way out for the cases above. `any`'s more well behaved sibling, using `unknown` says you don't know what that data's type is, so TS is going to force you to do a **type cast** (using `data as <new type>`) before you can do anything with it.
+
+![](./image-76.png)
+
+> It's the exact opposite of `any`, using `unknown` forces TypeScript to check your type before doing anything with it.
+
+`unknown` isn't included in any type, but unlike `any`, a type `x = unknown & string` gets inferred as `string`, because joining a set that's not inside any other with another set always results in that other set. In practice, this means that if you mix `unknown` with any other type using an intersection, it'll infer the other type, but in the case of a union (with `|`), `unknown` wins.
+
+When you don't know the result of an API call, or when you want to force your user to type the return of something, you can use `unknown` because it's an extremely restrictive type. For example:
+
+![](./image-75.png)
+
+Unless the person using that function passes in the return argument, the output can't be manipulated.
+
+> Actually, that's how the browser's native `fetch` is implemented.
+
+### Never say never
+
+The non-type. The `never` type is the type that represents no type at all, it can't be intersected or unioned with anything, it just is what it is, and it represents the result of an operation that can never happen. So, if you've reached the end of a case, a recursion, or anything else, `never` is your friend because it stops that return from being mixed with anything else.
+
+The most common uses of `never` are to flag paths a function can't take, meaning ways it can't be used.
+
+> `never` is much more common in libraries and other typings that get extended by other people, you'll rarely have to use it by hand in production code.
+
+One example is using `never` to handle a division where the denominator is zero and we don't want that to happen. So if we have a function like this:
+
+![](./image-78.png)
+
+In our return we're specifically saying the function will always return a number, but we can also have an error. In this case, we can tell whoever's using it that we need to check the return value before doing an operation using `never`:
+
+![](./image-79.png)
+
+We can use several other techniques to make the function completely type safe. Among them, using `infer` (which I already explained [here](/infer-typescript/)) does a type narrowing on our generic to guarantee we only ever use numbers greater than zero:
+
+![](./image-80.png)
+
+## Configuration
+
+On top of code best practices, there are also configuration best practices, meaning setting up the TS compiler so it can give you the best of type inference without letting you fall into traps.
+
+> Every option I'm going to mention here goes inside the `compilerOptions` key in your `tsconfig.json`.
+
+### Always use `strict: true`
+
+As a first recommendation, keep the `strict: true` option on, that'll guarantee a whole set of explicit code checks the compiler runs by default, on top of being the safest setup, recommended even by the TS devs themselves.
+
+> Turning this option on automatically turns on the following options and [several others](https://www.typescriptlang.org/tsconfig#strict)
+
+### Strict null checks
+
+Another recommendation is turning on the `strictNullChecks` key, what it does is make every type that can return `undefined` or `null` throw an error if you don't check for them, like this:
+
+![](./image-82.png)
+
+### Going one step further with `noImplicitAny`
+
+Another super important setting that makes your project a lot safer is removing TS's ability to infer any variable as `any` without throwing an error. As we saw before, `any` is the worst practice you can have with TS, and removing as many of them as possible will make your code much safer.
+
+The `noImplicitAny` setting turns TS from an optionally typed tool into something that's **mandatorily** typed. Meaning you'll need to specify the type of everything that would otherwise get flagged as any.
+
+![](./image-83.png)
+
+Keep in mind this is a fairly strict option, especially if you're migrating a platform from JS to TS, in that case the migration won't just be renaming files, it'll need some manual changes too.
+
+> If you're up for using TS the way it was meant to be used, you can turn on an [ESLint setting called](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-explicit-any.md) `noExplicitAny`, which will stop you from using `any` **anywhere at all.**
+
+### Other good settings
+
+-   `noUnusedLocals`: Throws an error if there are unused variables
+-   `noUnusedParameters`: Errors when there are unused parameters
+-   `noFallthroughCasesInSwitch`: Forces the use of `break` in `switch / case` to stop a `case` from falling through to the next one
+-   `noUncheckedIndexedAccess`: Any object accessed by index (example: `obj['index']`) will have its value inferred as `<value> | undefined`, because it could be empty and will need to be checked.
+
+## For you to practice
+
+Before I send the next challenge, let's go over the previous one! Where we had to type [this file](https://gist.github.com/khaosdoctor/9e9a30d5053974f7221be7e06ec19ffc). You can find the answer [here](https://gist.github.com/khaosdoctor/c38e01c1da0aaee69ce1c7bb5ed66b47)!
+
+Now let's see if you've got the hang of good code practices with two exercises:
+
+-   Create a type called Flatten, which accepts a generic parameter that can only be an array of a single type (a `string[]` for example) and it should return the array's type (for example `string`).
+-   **Challenge:** Implement the `FlattenDeep` function which accepts arrays of any dimension (for example a `string[][]`) and extracts the value that exists inside the array (a `string[][]` would be `string`).
+-   Implement a generic interface for a geometric shape containing `area` and `volume` as functions, and implement that interface to create the concrete classes `Quadrado`, `Circulo`, and `Triangulo`.
+
+> Don't forget to leave your feedback about #SemanaTS here [in this form](https://forms.gle/6hAqjVmah9uyR4by8)!

@@ -1,0 +1,211 @@
+---
+title: "External Types and Declaration Files - TS Week Day 2"
+pubDate: 2023-04-04T11:00:24.000Z
+updatedDate: 2026-07-16T16:02:20.000Z
+lang: en
+slug: "external-types-and-declaration-files-ts-week-day-2"
+category: "typescript"
+tags: ["typescript"]
+series: typescript-week
+seriesOrder: 2
+description: "On the second day of TS Week, let's talk about type declaration files and best practices for building libraries!"
+seoTitle: "What are .d.ts declaration files in TypeScript"
+machineTranslated: true
+draft: false
+---
+Today let's talk about **type declaration files**, the famous `.d.ts` files you've probably already seen if you've done any kind of project with TypeScript. I'll also show you some of the best practices for publishing your type library on NPM (or another package manager).
+
+So let's get to it! And don't forget to leave [your feedback](https://forms.gle/6hAqjVmah9uyR4by8) about #SemanaTS!
+
+## Declaration files
+
+`.d.ts` files are known as **type declaration files**, they have a slightly different syntax and are rarely seen in applications as code shown to users or other devs. And that's the whole point.
+
+Declaration files are used to tell TypeScript what the type of a given module, file, or function is. For example, one of the most common uses for declaration files is typing NPM modules that don't have any types at all. That way you can use that package and still enjoy the type system TS gives you, as if the package itself had been written in TypeScript.
+
+> You can check out an [example](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/64842/files#diff-2dfda1c06c01252655eb83b1bd389beb27213848707db6a58180b71fcc229b25R6) of a declaration file for an NPM package called [keychain](http://npm.im/keychain) that I wrote recently.
+
+Let's get our hands dirty and write some code. Create a folder anywhere on your computer and put the following content in a `package.json` file:
+
+![](./image-24.png)
+
+Run `npx tsc --init` at the root of that folder to create our `tsconfig` file, then run `npm i` to install all the dependencies. Finally, inside the folder, create another folder called `minhaLib` and put an `index.js` file (yes, `.js`) in there with this content:
+
+![](./image-23.png)
+
+At the root of the folder, create an `index.ts` file and import your `index.js` file the traditional way with `import lib from './minhaLib'`, and now let's watch the magic happen.
+
+> I'm assuming you already have Node installed on your machine to run these commands. If not, [go install it](https://nodejs.org/) so you have `npm` and `npx` available.
+
+If you followed the steps, you've probably run into an error that says the following:
+
+> Could not find a declaration file for module './minhalib'. 'caminho/para/minhalib/index.js' implicitly has an 'any' type.
+
+That's because under the hood, TypeScript always tries to find a type for the file you're importing. If the file is a `.ts` file, it'll use the typings that are already there. If the file is a `.js` file, it'll try to find a `.d.ts` file with the definitions it needs to understand what's going on.
+
+That's when projects like [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/) come into play, they're type repositories. If you look at our `package.json` file, we have a dependency called `@types/node`, and `@types` is the organization behind this project. It's so important that it became part of TypeScript's own pipeline.
+
+> By default, TypeScript will look first in your library's own folder, but if it doesn't find anything, it'll go check `node_modules/@types/<nome-da-lib>/index.d.ts`, which is where DefinitelyTyped's types live, and if those types don't exist either, that's when you get the error we saw above.
+
+### Creating types where there weren't any before
+
+This kind of problem isn't uncommon. You'll find plenty of libraries out there that aren't typed, the Keychain example I gave is just one among millions of other packages.
+
+> A different use for declaration files is when you want to extend or modify a library, that's called **module augmentation**, but we won't get into that here
+
+The first thing we have to do when dealing with an untyped package is figure out what kind of file it is. Is it a module? A function? A class? And you can figure that out by looking at how the file behaves.
+
+There are two ways to notice this, one is through usage and the other is through the code itself. For usage specifically, look at things like:
+
+-   How do you generally get the library? Via NPM, via CDN? Some other way?
+-   How do you import that lib in your code? Does it have a global object? Does it use `require` or `import/export`?
+
+Modular libs will usually have one of these two kinds of calls, either `const lib = require('lib')` or `import x from 'lib'`. In our case, we can see our library is a module, and more than that, it's a module that uses [ESModules](/os-ecmascript-modules-estao-aqui/) because of the exports using `export`.
+
+This identification is super important because it'll tell us how to define the types. But first, we need to define these types somewhere. Best practice is to create an `index.d.ts` file inside a folder with the same name as the library, in our case it's just a matter of creating an `index.d.ts` file next to `index.js`.
+
+There are other cases where, for example, you download an untyped NPM package, and because of that you can't add the types directly inside `node_modules`, since you're not going to commit that folder to version control. In these cases, best practice is to create a folder called `@types` at the root of your project, inside it another folder with the same name as your lib, and inside that, the `index.d.ts` file. In other words, you'll be mimicking DefinitelyTyped's structure.
+
+In our `index.d.ts` file, we're going to add all the type declarations our lib exports like this:
+
+![](./image-22.png)
+
+Notice we don't have an implementation of the function, we're only declaring its signature, which is what TypeScript needs to know the type and guide us. When you go back to our `index.ts` file, you'll see that not only has the error disappeared, you now also get intellisense for your lib:
+
+![](./image-14.png)
+
+### Global objects and namespaces
+
+Libraries can be classes too. For example, if instead of our lib exporting functions directly, it exported a class, like this:
+
+![](./image-25.png)
+
+Now our declaration has changed, because we're no longer receiving the functions directly. In this case we have to change our `index.d.ts` file to export a class, which basically follows the same shape as the original file:
+
+![](./image-27.png)
+
+And that way we also get the same typing for our class:
+
+![](./image-28.png)
+
+But what if our package doesn't use ESM? And what if it exports everything as a module inside an object? That's where the concept of `namespaces` comes in. Let's say our lib looks like this:
+
+![](./image-30.png)
+
+To use this lib, we'll have to import it as a destructure like `const { objetoOla } = require('./minhaLib')`. Our declaration file then needs to contain an object that acts as the container for all the functions, that's what we call `namespaces`, and we can declare one like this:
+
+![](./image-31.png)
+
+> Think of the namespace as an object, a box that holds all the functions we have, and namespaces can have other namespaces inside them, and so on
+
+Notice we have a new keyword there, `declare`. Think of it as a kind of `let` or `const` for declaration files, it's saying we're creating a new object. Every declaration that appears at the top level of a `.d.ts` file needs to start with either `declare` or `export`.
+
+Then we have to say our lib is a module, otherwise we'll get an error saying "File \<seu caminho> is not a module". We can do this in two ways, the first is to be explicit and declare the module by default-exporting the namespace, like this:
+
+![](./image-32.png)
+
+Or we can do it a more concise way and omit the export, which leaves it implicit that everything declared in the file gets exported by default:
+
+![](./image-33.png)
+
+The end result is the same, and we get intellisense again:
+
+![](./image-34.png)
+
+### Default exports and extra types
+
+In this case I want to walk through the [PR](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/64842/files) I opened for the Keychain package over on DefinitelyTyped. Besides being super old, this package is a CommonJS package (just like what we did above) but it exports a default object instead of a namespace, so using it looks something like this:
+
+![](./image-35.png)
+
+To create a type and publish it to DefinitelyTyped, we first have to create our type locally, so to get started I did exactly what we did here, a folder. Except instead of creating a folder with my library's name, I followed the structure `<root>/@types/keychain/index.d.ts`, so we can organize all the types there.
+
+Since we're dealing with an old module, and we need to support every possibility, we'll have to export this functionality not as a module, but as a _default export_, but first, let's create the typing for all the functions.
+
+![](./image-36.png)
+
+Notice I'm using the `Pick` utility, which grabs keys from a base object, and that base object lives inside a namespace called `keychainTypes`. That's because I noticed we can type the library even further, so we can add **extra types** and make it even better typed. But when we're talking about CommonJS exports, these declarations need to live inside a namespace. So we can create our namespace like this:
+
+![](./image-37.png)
+
+By default, everything inside the namespace gets exported, which means I'm exporting more types than the lib itself has, but can you even do that!?
+
+Not only can you, it's actually best practice, because if we export types that identify things like errors and enums, the people using our typing can improve their own type assertions!
+
+> A good exercise, and a good way to understand how libs work, is to create types for them, because then you not only understand the library's shape, but also how it works internally.
+
+In the end, what we have to do is create a constant that'll be the default object (our default export) exported by the lib:
+
+![](./image-38.png)
+
+Let's go step by step:
+
+1.  I'm declaring a constant called `keychain`, the name doesn't matter since our package is a default export
+2.  I assigned this constant the type of our namespace, the `typeof` keyword grabs all the members of an object and returns their types
+3.  I used the `&` operator, which is type intersection. In TS, when we intersect two objects that don't share any keys, the result is an object with all the keys from both
+
+Now all that's left is to export everything with `export = keychain`, just like in the PR. But to test it locally we'll have to create a module so TS can identify our file and import that module locally, so let's make a small tweak, and the complete file looks like this:
+
+![](./image-40.png)
+
+We just typed our first external module:
+
+![](./image-41.png)
+
+### Type tests
+
+Just like it's important to test our code, our types need tests too, but type tests are a bit different. Let's take a look at the test file for the types we just created (which lives over on [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/keychain/keychain-tests.ts)):
+
+![](./image-45.png)
+
+The idea behind a type test is simply to call our functions passing the correct parameters, since the file is never actually going to run, we're just going to run it through the TS compiler to see if the code compiles as expected.
+
+We're going to lean hard on directives like `@ts-expect-error` to say the next line should throw a compilation error, and that's how we manage to test not just the code but our types too.
+
+## Publishing a library with TS
+
+Publishing a TypeScript module isn't much different from publishing a native JavaScript module on NPM, but we're dealing with another important situation here: we also need to ship the types, meaning the `.d.ts` files need to be present in the package that NPM uses.
+
+To publish your first lib on NPM, what you need to do is make sure the following options are set in your `tsconfig.json` file (the one you create with `tsc --init`):
+
+![](./image-46.png)
+
+The most important part here is having `declaration: true`, because that tells TS to generate your types based on what you write. Then, in `package.json` you can also specify a field called `types` and say where to find your library's types, like this:
+
+![](./image-48.png)
+
+Here I'm assuming your `tsconfig.json`'s `outDir` value is `dist`, so your output folder would be `dist` and your declaration files will live right alongside your JavaScript files.
+
+It's also important to ignore the `dist` folder in your `.gitignore`, but not for NPM, because we want that folder there. So you can override the default behavior by adding a `files` key to your `package.json`, which tells NPM which files it needs to grab to include in the package, let's put the `dist` folder in there:
+
+![](./image-49.png)
+
+Now all that's left is to implement your library and publish your package with `npm publish`!
+
+## For you to practice
+
+First, let's start by solving the previous challenges!
+
+### Hello World
+
+To solve this challenge, just define the type as a string:
+
+```ts
+type HelloWorld = string
+```
+
+#### If
+
+To implement something like `if` inside TS's type system, we're going to use **generics**, which we'll cover in the next few days! The idea is that `If<true, 'a', 'b'>` should return `a`, so let's implement a type that takes a condition and, if it's `true`, returns the first value:
+
+```ts
+type If<Condicao, Verdadeiro, Falso> = Condicao extends true
+	? Verdadeiro
+    : Falso
+```
+
+---
+
+👉 There's just one challenge tomorrow! Try typing [this library](https://gist.github.com/khaosdoctor/9e9a30d5053974f7221be7e06ec19ffc) in a `.d.ts` file and we'll go over the fix tomorrow!
+
+> Don't forget to leave your feedback about #SemanaTS here [in this form](https://forms.gle/6hAqjVmah9uyR4by8)!

@@ -1,0 +1,91 @@
+---
+title: "Understanding container runtimes"
+pubDate: 2021-02-18T12:37:00.000Z
+updatedDate: 2026-07-16T16:18:24.000Z
+lang: en
+slug: "understanding-container-runtimes"
+category: "infra"
+tags: ["cloud", "containerd", "containers", "cri", "devops", "docker", "kubernetes", "microservices", "microsserviços", "oci", "technology", "cri-o"]
+description: "Did you know there are several types of container runtimes? Let's dig into the difference between them."
+seoTitle: "Understanding the differences between the containerd and CRI-O runtimes"
+machineTranslated: true
+draft: false
+---
+We talked in the [last post about the subject](/oci-cri-docker-ecossistema-de-containers/) about how container runtimes work, and we also covered what OCI is, what a CRI is, and even [built a container using ContainerD](/integrando-containers-na-sua-aplicacao-com-containerd/) directly through integration with the application.
+
+ContainerD isn't the only runtime out there though, so let's understand a bit about what ContainerD is, its advantages and disadvantages against its counterpart CRI-O, and how Docker fits into all of this.
+
+## Docker
+
+![](./image-34.png)
+
+As I mentioned in [my article about Docker's history](https://www.freecodecamp.org/news/what-is-docker-used-for-a-docker-container-tutorial-for-beginners/), before version 1.11, Docker was considered a single monolith. Everything a container runtime could do was being done by Docker in one single place: downloading images, networking, lifecycle management, all of it in a single process running as root.
+
+But like any system that grows over time, Docker couldn't stay monolithic forever. It was starting to weigh down the architecture and making integration with operating systems like Linux harder. Until someone had the idea of splitting Docker into several pieces.
+
+In a [1.11 release note](https://www.docker.com/blog/docker-engine-1-11-runc/), the company said it would break up the Docker daemon and start using runC alongside containerd. That meant a lot for the ecosystem, because now Docker would actually be using the same runtime it had donated to the CNCF back in 2015, creating the OCI. That way we wouldn't just have a standardized container model, we'd have one that could evolve independently over the years.
+
+Splitting a tool into more specialized sections lets other people specialize in maintaining those sections, so the application as a whole becomes better because it's better built. In that same release note they showed the new model of how Docker works:
+
+![](./image-41.png "Docker's operating model (Source: Docker)")
+
+We can see that Docker's main engine (dockerd) was separated from the runtime, and now it focused solely on receiving user input and passing it along to containerd, which in turn would start runC runtimes, or any other runtime compatible with the OCI.
+
+In short, naming every piece:
+
+-   **Docker Engine (or Docker Daemon, `dockerd`):** Responsible for receiving user commands through the CLI and passing those requests to containerd.
+-   **containerd**: An OCI-compatible interface capable of running, downloading and extracting any image that's also OCI-compatible, and running runC processes.
+-   **runC:** Handles all the management and creation of containers according to the OCI spec.
+
+This opened up a series of doors for other people and other companies to build their own container runtimes too, so now let's understand the difference between the two main ones.
+
+## containerd
+
+![](./image-42.png)
+
+As we mentioned in the articles cited above, containerd is a daemon that runs and controls runC instances. It manages their lifecycle, as well as the whole business of transferring and extracting images, storage, networking and so on. This is what we call a **container engine**.
+
+containerd is the main tool that abstracts away most of the functionality Docker used to pile up as a whole. If we were to simplify it, we could say containerd is the minimal set of functions a container runtime needs to run any container.
+
+containerd helps abstract kernel calls (syscalls) so containers can run the same way on any operating system, regardless of what's happening underneath them. This is called **supervision**, and it's a very common pattern when we're running VMs.
+
+Whenever we run an OS inside another one, the guest OS has no idea it's running inside a VM, so it keeps making the syscalls it needs to talk to the hardware. That's where the **hypervisor**'s job comes in: abstracting those system calls so the guest OS doesn't need to implement each individual kernel if it's running, say, inside a Linux machine.
+
+containerd is that implementation, so other tools can build their own runtime implementations on top of it without worrying about which operating system they're running on, since containerd abstracts all of that functionality away.
+
+### Advantages of containerd
+
+-   You get full control over images, being able to download and push images to registries
+-   Allows usage via API from within your own programming language
+-   When used inside Kubernetes, it can act as a CRI
+-   Fully configurable
+-   Lets you manage container lifecycles through an API
+-   Storage and snapshot management
+-   Extensible
+-   Fully abstracts away the OS it's running on
+
+## CRI-O
+
+![](./crio-logo.svg)
+
+Besides containerd, another famous runtime is [CRI-O](https://cri-o.io). CRI stands for Container Runtime Interface, a plugin that exposes an interface allowing a Kubelet (the agent that runs inside every node in a Kubernetes cluster) to use different OCI-compatible runtime types without needing a recompile or a restart. runC is the most famous runtime, but there are others such as [crun](https://github.com/containers/crun), [railcar](https://github.com/oracle/railcar) and [kata](https://katacontainers.io).
+
+> We won't go into the details of why Kubernetes needs a CRI, since we already covered all of that [in the previous post](/oci-cri-docker-ecossistema-de-containers/)
+
+With all that in mind, CRI-O was built specifically to let Kubernetes run containers without much external code or tooling. That's because CRI-O is built out of several different libraries, here are some of its components:
+
+-   An OCI-compatible Container Runtime, runC by default but it can be any of them
+-   `containers/storage`: The module responsible for handling storage layers and filesystems
+-   `containers/image`: The module responsible for downloading images from registries
+-   `networking`: Used to build the pod network layer, there are several plugins called CNIs that can be used
+-   `conmon`: A "container monitoring" utility used to monitor what's happening inside containers
+
+The image below illustrates the whole lifecycle of CRI-O inside a Kubernetes cluster:
+
+![](./image-44.png "CRI-O's usage process inside Kubernetes (Source: CRI-O)")
+
+## Conclusion
+
+Even though we're used to Docker, there are still plenty of other tools and ideas hovering over our heads when the subject is containers. I used [this article](https://computingforgeeks.com/docker-vs-cri-o-vs-containerd/) as a base to write this piece, and I strongly recommend you check out the other related articles too.
+
+See you next time!

@@ -1,0 +1,239 @@
+---
+title: "Using Jest with TypeScript"
+pubDate: 2024-06-19T11:00:32.000Z
+updatedDate: 2026-07-16T17:55:51.000Z
+lang: en
+slug: "using-jest-with-typescript"
+category: "typescript"
+tags: ["tests", "typescript", "jest", "nodejs"]
+description: "Learn how to set up your application to run automated tests with Jest written in TypeScript"
+machineTranslated: true
+draft: false
+---
+In another article here on the blog I talked about how we get started with the Node.js Test Runner to write our tests. A lot of people messaged me asking what the difference is between Node Test Runner and [Jest](https://jestjs.io), and how to get started with Jest and TypeScript.
+
+Since this is a topic I constantly have to look up myself, because the ways of doing this change every day, I'm going to write this article with what **I think** is the most common way to do it, with the smallest number of steps possible.
+
+> [!IMPORTANT] 💡
+> If you want to check out a ready-made repository with Jest and TypeScript, I suggest you look at [our project 3](https://github.com/Formacao-Typescript/projeto-3/tree/jest) from [Formação TS](https://formacaots.com.br).
+
+## Setup
+
+First of all, the main difference between Node Test Runner and Jest, at least initially, is that Jest needs a lot more configuration than Node's native one. This is mostly because Jest is much older, from a time when Node had way fewer things than it has today and TypeScript was still crawling.
+
+> Jest was "officially" released in 2016, but it already existed a few years before that internally at Facebook. It was originally created as a way to test React applications without needing a lot of configuration, which is ironic, because these days Jest's configuration is the library's biggest problem.
+
+First of all, I'm going to assume you have a folder somewhere on your machine, mine is called `jest`, and inside it I just ran `npm init -y` to initialize a Node.js project.
+
+Let's install TypeScript with `npm i -D typescript @types/node` and run `npx tsc --init` to initialize TypeScript too.
+
+Now let's install Jest with `npm i -D jest @types/jest`. Here's my `package.json` so far:
+
+```json
+{
+  "name": "jest",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Lucas Santos <hello@lsantos.dev> (https://lsantos.dev/)",
+  "license": "GPL-3.0",
+  "description": "",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.2",
+    "jest": "^29.7.0",
+    "typescript": "^5.4.5"
+  }
+}
+```
+
+> Pay attention to the **package versions**. Jest is an actively maintained package with a lot of updates (and, unfortunately, some of them aren't backwards compatible), so it's highly likely that future versions won't work the same way as in this article.
+
+Now, let's run Jest's initialization command with `npm init jest@latest` (or `jest@yourversion`). This script is going to ask a series of things:
+
+-   _Do you want Jest to change your package file to add the test command:_ **Y**
+-   _Do you want to use TS for the config file:_ **Y**
+-   _What's the test environment:_ **Node**
+-   _Do you want code coverage:_ **Y**
+-   _Which code coverage provider:_ Here we'll use **v8** but you can use babel, it won't make much of a difference
+-   _Clear all mocks after every test:_ **N**
+
+This creates a file called `jest.config.ts` at your root. The full file is a lot bigger because it has every option commented out, I'm only going to show the options that are active here:
+
+```ts
+/**
+ * For a detailed explanation regarding each configuration property, visit:
+ * https://jestjs.io/docs/configuration
+ */
+
+import type {Config} from 'jest';
+
+const config: Config = {
+  collectCoverage: true,
+  coverageDirectory: "coverage",
+  coverageProvider: "v8",
+};
+
+export default config;
+```
+
+With that we should already have a `jest` command available. But if we try to use this command on any test file, something like this one here:
+
+```js
+describe('Suite', () => {
+  it('should pass', () => {
+    expect(1).toBe(1)
+  })
+})
+```
+
+It's not going to work, because our config file is TypeScript and Jest doesn't know how to read TypeScript. And it's going to give us this error:
+
+```output
+Error: Jest: Failed to parse the TypeScript config file /jest/jest.config.ts
+  Error: Jest: 'ts-node' is required for the TypeScript configuration files. Make sure it is installed
+Error: Cannot find package 'ts-node' imported from /jest/node_modules/jest-config/build/readConfigFileAndSetRootDir.js
+```
+
+## Applying TypeScript
+
+To be able to apply TypeScript in Jest, let's do what the error above told us to do: install `ts-node`. We can do that with `npm i -D ts-node`. Now we can use Jest to run our JavaScript test with `npm test`:
+
+![](./image-2.png)
+
+And what if we change this test to TS? Well, if we keep the test as is and just change the extension to `teste.test.ts` everything should work normally, of course the content is still JavaScript, so what happens when we actually use TypeScript in there? Let's change the test a bit:
+
+```ts
+import { randomUUID } from 'node:crypto'
+
+describe('Suite', () => {
+  it('should pass', () => {
+    expect(randomUUID()).toEqual(expect.any(String))
+  })
+})
+```
+
+Without touching anything else, let's run `npm test`, and we're going to get a bunch of errors. That's because Jest isn't using ts-node to parse the test file, only [babel directly](https://jestjs.io/docs/next/getting-started#using-typescript), so we have to configure babel ourselves to make this work. But adding every babel config by hand is pretty annoying.
+
+On top of that, Babel's whole configuration is pure transpilation, we won't get type checking, and no source maps either. Let's use a package called `ts-jest` that does exactly that.
+
+First let's install it with `npm i -D ts-jest`, the version I have here is `29.1.5`. Now let's add the settings we want to our `jest.config.ts` file, which is basically:
+
+-   Change the config type to the extended type that `ts-jest` adds
+-   Add the preset we want
+
+Our `jest.config.ts` now looks like this:
+
+```ts
+import type {JestConfigWithTsJest} from 'ts-jest';
+
+const config: JestConfigWithTsJest = {
+    preset: 'ts-jest',
+    collectCoverage: true,
+    coverageDirectory: "coverage",
+    coverageProvider: "v8",
+};
+
+export default config;
+```
+
+Now, if we run our test, it's going to work normally. But what if we make a small change, and want to use [ESM](/os-ecmascript-modules-estao-aqui/)?
+
+## Using ESModules
+
+I always recommend using ECMAScript Modules in every application we build. If you're not using this feature, then this section of the tutorial won't make a difference to you, what you've already done above is more than enough to keep a TypeScript application running with Jest.
+
+But if you want to learn how to use what's eventually going to be the only way to write TypeScript, I recommend you start using ESM right now!
+
+To start, let's change our `package.json` and add `type: "module"`:
+
+```json
+{
+  "name": "jest",
+  "version": "0.0.1",
+  "main": "index.js",
+  "type": "module", // << Here
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Lucas Santos <hello@lsantos.dev> (https://lsantos.dev/)",
+  "license": "GPL-3.0",
+  "description": "",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
+```
+
+Now let's go to our `tsconfig.json` file and change two options, `module` and `moduleResolution`, both are going to be `NodeNext`, and let's change `target` to `ESNext`. These settings will look like this:
+
+```json
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext'
+  }
+}
+```
+
+If you run `npx tsc` this command should create two files, a `jest.config.js` and an untouched `teste.test.js`. That means everything worked. Now what about the tests? If we run them they'll pass normally, but what if I told you that's actually wrong?
+
+One interesting thing about Jest with ESM is that it can resolve every one of Node's internal packages normally, because those packages don't have any extension. For example, when we import `randomUUID` we import it from `node:crypto`, but if we import from another file, that file is required to have the `.js` extension, except that's not what's going to happen, because in our source, we're only ever going to have the `.ts` file. For example, let's create a new file `sum.ts` at the root, with the following content:
+
+```ts
+export const sum = (a: number, b: number): number => a + b
+```
+
+If we change our test to import and test this function, we're going to get an error:
+
+```ts
+import { sum } from './sum.js'
+
+describe('Suite', () => {
+  it('should pass', () => {
+    expect(sum(1,1)).toBe(2)
+  })
+})
+```
+
+The error is going to say that the file can't be found, even if we change it to `sum.ts`.
+
+### ESM with TypeScript and Jest
+
+To be able to configure Jest correctly, we're going to have to add a few more settings to our config file:
+
+```ts
+import type { JestConfigWithTsJest } from 'ts-jest'
+const config: JestConfigWithTsJest = {
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  coverageProvider: 'v8',
+  preset: 'ts-jest/presets/default-esm',
+  testPathIgnorePatterns: ['/node_modules/'],
+  transform: {},
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
+  testEnvironment: 'node'
+}
+
+export default config
+```
+
+The most important settings here are `preset`, now set to `default-esm`, which is ts-jest's default config for reading ESM, and `transform`, which **needs** to be an empty object, to turn off any of Jest's native TS transformation.
+
+And the thing that's going to make Jest find the `.js` files is [`moduleNameMapper`](https://kulshekhar.github.io/ts-jest/docs/getting-started/paths-mapping), where we're defining a RegExp to catch any path we set and rewrite it to `.js`. It's worth mentioning that this option only matters when you're using the paths option or `baseUrl` in your `tsconfig`, but I like adding it anyway since we're already leaving it configured for other future options.
+
+Now, if we run our test, everything is going to work perfectly:
+
+![](./image-3.png)

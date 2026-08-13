@@ -1,0 +1,266 @@
+---
+title: "Creating and Managing Users in Kubernetes"
+pubDate: 2021-02-11T13:00:00.000Z
+updatedDate: 2026-07-16T16:18:34.000Z
+lang: en
+slug: "creating-and-managing-users-in-kubernetes"
+category: "infra"
+tags: ["kubernetes", "aks", "cloud", "azure", "containers", "devops", "docker", "microsserviços", "microservices", "security"]
+description: "Using the same config file for every user can be a huge problem for your security and your cluster's! Learn how to create new users to improve the audit trail and security of your applications!"
+seoDescription: "Learn how to create new users to improve the audit trail and security of your applications using Kubernetes."
+machineTranslated: true
+draft: false
+---
+Kubernetes got pretty famous for its ability to manage distributed applications and make container orchestration easy. But, with the wider adoption of the system, we forgot about fundamental things like the security of our cluster.
+
+## The shared access problem
+
+One of the conveniences Kubernetes gives us is `kubectl`, its command-line standardization and its ability to manage multiple clusters at once make it tempting to use as the only tool available to a dev team.
+
+To give a bit of context and level everyone up, `kubectl` works with a file called `config` that usually sits in the `~/.kube` folder, and we call it `kubeconfig`. This file has the credentials and instructions for how `kubectl` should behave to connect to the clusters listed in it. In short, it's the key to every cluster you have access to.
+
+During my years using Kubernetes, and also consulting for companies, more than once I've seen cluster access shared across an entire dev team, meaning the same `kubeconfig` gets passed around to everyone and even ends up in automated CI tools.
+
+### But what's the problem with that?
+
+Just like it's a terrible idea to hand your house key to anyone walking down the street, it's terrible for everyone on the team to have the same access, because even though Kubernetes has an audit tool that lets you know what was done and who did it, if every user is `admin`, it gets pretty hard to figure out what actually happened.
+
+On top of that, giving full admin permission to anyone who can touch the cluster is a recipe for disaster in no time. Too many people managing every tool and every namespace tends to create a lack of control by the cluster admin.
+
+## Authorization and authentication in Kubernetes
+
+Fortunately, Kubernetes lets us have an authentication and authorization system through users, which lets us create specific access for each person.
+
+Authentication and authorization are different systems. Kubernetes doesn't manage users themselves, but it does have native tools to manage their permissions, called `Role`, `ClusterRole`, `RoleBinding`, and `ClusterRoleBinding`, which we'll cover in a future article. In other words, authenticating users (knowing who's who) and authorizing them (knowing who can do what) are separate tools that can be managed separately.
+
+### But why bother?
+
+Imagine you work at a big company, like Microsoft, for example. Inside companies of this size (or even much smaller ones), there's usually a clear split between areas and teams. Each area is responsible for a task or takes care of one or a handful of specific applications.
+
+For example, the team that takes care of Microsoft Teams isn't the same one that takes care of Windows. Even though they need to share resources, one shouldn't have permission to access or touch the other's resources.
+
+Bringing this analogy down to smaller companies with fewer products, if you have two distinct teams using the same cluster, each team should only have permissions inside its own namespace. On top of that, not everyone on the team should have permission to change certain resources. For example, the management team might be able to modify every resource in a namespace, but a BI team shouldn't be able to write or delete resources, only read them.
+
+All of this is called **RBAC** (**R**ole **B**ased **A**ccess **C**ontrol), and that's just one of the possibilities we have inside AKS for managing users. We'll explore other options down the line.
+
+## How authorization works in Kubernetes
+
+Kubernetes exposes a REST API. And that's exactly what we need to control to keep unauthorized people from accessing the cluster, meaning the same way we protect our APIs from external access, we have to protect our cluster.
+
+To do this, Kubernetes uses this server to authorize requests, evaluating the attributes of that request against a set of policies created by the admin, and returning a boolean _yes_ or _no_ depending on whether the user can or can't perform the action. By default, Kubernetes follows a _deny all_ policy, meaning nobody has permission for anything, permissions need to be added explicitly.
+
+`kubectl` has a command called `auth can-i` to check whether a given user can or can't perform some action against the API, for example:
+
+```bash
+$ kubectl auth can-i create pods --namespace production
+```
+
+And, if you're an admin, you can combine this command with the `--as` flag to impersonate a user and test permissions on their behalf.
+
+```bash
+$ kubectl auth can-i create pods -n production --as lucas
+```
+
+### RBAC with AKS
+
+By default, when we create an AKS cluster, RBAC is enabled, meaning we don't need to do anything special to get a cluster with this capability already built in. In the Azure portal, there's an option that tells us whether we can use RBAC for authorization:
+
+![](./Picture1.png)
+
+> In this article, we're only going to create users, we're not going to work on the authorization side yet. That's going to be left for a future article
+
+To create a cluster from the command line, we can do it like this:
+
+```bash
+az aks create \
+  -n nome \
+  -g rg \
+  --enable-rbac \
+  --generate-ssh-keys \
+  --node-count 1
+```
+
+## Creating users in Kubernetes
+
+In Kubernetes, we have two concepts of users, because they can be people like you and me, but they can also be other non-human services, like a CI, for example. That's why we have a distinction between a `User` and a `ServiceAccount`.
+
+Essentially, a `User` is a concept that **doesn't exist** inside K8s as a valid resource, meaning we don't have a manifest file with a `Kind: User`, because `User` isn't a valid _resource definition_. Users are processes or humans that exist **outside** the cluster, so they aren't managed by it.
+
+`ServiceAccounts`, on the other hand, are processes tied to their namespaces and aren't human in essence, though we can create SAs for humans too, and these resources exist as a valid _RD_, meaning we have a `Kind: ServiceAccount` and can create one from a Kubernetes manifest file. These are processes **internal** to the cluster, and they're usually more commonly tied to pods.
+
+In short, both use the authorization API, but we can do this:
+
+```bash
+kubectl create serviceaccount minhaconta
+```
+
+But we can't do this:
+
+```bash
+kubectl create user lucas
+```
+
+That means **Kubernetes neither stores nor manages user information**. All of that identity management happens through the usual means outside the cluster, and the most common way is through X509 digital certificates.
+
+### Using certificates
+
+The most common and safest way, as we mentioned before, is to use an X509 certificate to create a user. This certificate is signed by the cluster's CA, and it lets the user authenticate against the API using that validation, meaning Kubernetes checks whether the request is authenticated with the certificate's key, and if so, it's a trusted user, since nobody other than the cluster itself can issue such a certificate.
+
+But beyond all the cryptographic security of the certificate, the process is also quite secure because it requires both the person requesting authorization and the authorizer to take part in the user creation process, which roughly goes like this:
+
+1.  The user generates a private key (or uses their own)
+2.  The user generates a new CSR (Certificate Signing Request) with this key and sends it to the admin
+3.  The admin signs the CSR with the cluster's CA, turning it into a valid X509 certificate in `CRT` format, and sends the CRT file back to the user
+4.  The user can use `kubectl`'s own commands to create their user on their machine
+
+### Creating a user
+
+Let's walk through the whole process, simulating a freshly created cluster so we can authenticate our user.
+
+First, let's generate a new private key with OpenSSL:
+
+```bash
+openssl genrsa -out ./lucas-k8s.key 4096
+```
+
+Now we can generate the CSR file:
+
+```bash
+openssl req \
+  -new 
+  -key ./lucas-k8s.key \
+  -out ./lucas-k8s-csr \
+  -subj "/CN=lucas/O=devs"
+```
+
+There are a few important things to notice here. First, we're generating the key for a user called `lucas`, and that becomes clear when we set the **Common Name (CN)** on the CSR, since that field is what's going to name our user. We also have the **Organization (O)** field, and in this case we're creating a user called `lucas` who's part of the `devs` organization.
+
+For Kubernetes, the **CN** is the username, and the **O** is the groups this user belongs to. We'll use this information when we create **Roles** and **RoleBindings** in the next articles.
+
+Now our user already has both the key and the CSR they need, so let's send these files to our cluster's admin, who's going to sign this certificate.
+
+The admin can SSH into the Kubernetes _control plane_ and sign the certificate manually, which is harder but safer, or create an object called **CertificateSigningRequest** inside Kubernetes, which tells the cluster it has a CSR to sign with its CA.
+
+Every CSR object needs a valid CSR file in base64 format, so let's convert our `lucas-k8s.csr` into this new encoding:
+
+```bash
+$ cat ./lucas-k8s.csr | base64 | tr -d '\n'
+```
+
+Copy the terminal output, and let's create a manifest file called `csr.yaml`:
+
+```yaml
+apiVersion: certificates.k8s.io/v1beta1
+kind: CertificateSigningRequest
+metadate:
+  name: lucas-csr
+spec:
+  request: <cole o base64 aqui>
+  usages:
+    - digital signature
+    - key encipherment
+    - client auth
+```
+
+Now we create this object in the cluster by calling `kubectl apply -f csr.yaml`, and we can see what we've created with the command `kubectl get csr`:
+
+```output
+NAME        AGE    REQUESTOR      CONDITION
+lucas-csr    34s   masterclient   Pending
+```
+
+Notice the certificate shows as _Pending_, that's because every CSR needs the operator's approval before it can be created. Let's approve this creation with the command `kubectl certificate lucas-csr approve`. This is going to spit out a confirmation message, and then we can run `kubectl get csr` again, which is going to have a slightly different output:
+
+```output
+NAME        AGE    REQUESTOR      CONDITION
+lucas-csr   5m3s   masterclient   Approved,Issued
+```
+
+Notice that besides being _Approved_ it's also already been issued (_Issued_), so we're ready to send this certificate back to our user. To get the certificate, let's run an elegant _oneliner_:
+
+```bash
+kubectl get csr lucas-csr \
+  -o jsonpath='{.status.certificate}' \
+  | base64 -d > lucas-k8s.pem
+```
+
+We'll end up with a new file called `lucas-k8s.pem`, let's make sure it's valid with the command `openssl x509 -in ./lucas-k8s.pem -text -noout`. That's going to give us, among other information, the name and validity dates of the certificate.
+
+### Registering the user in kubeconfig
+
+Now let's send the certificate back to the user so they can create their user. To do this, we're going to need to touch our `kubeconfig`, and since we don't have two machines here, make a copy of your current file so you don't lose your data with `mv ~/.kube/config ~/.kube/config.bkp`.
+
+Let's fetch the base AKS data again with `az aks get-credentials -n cluster -g rg`, and then use kubectl to create new credentials:
+
+```bash
+kubectl config set-credentials lucas \
+  --client-key /caminho/para/lucas-k8s.key \
+  --client-certificate /caminho/para/lucas-k8s.pem \
+  --embed-certs=true
+```
+
+Now let's join the user config we just created with the cluster config:
+
+```bash
+kubectl config set-context lucas \
+  --cluster=nome_do_cluster \
+  --user=lucas
+```
+
+Since we cloned the AKS base image, it has admin access by default, so let's strip the admin access before sending it off to our user:
+
+```bash
+kubectl config delete-context <nome-do-contexto> 
+kubectl config unset users.nome_do_resource-group_nome-do-cluster
+```
+
+> To find the right names, take a look at your `kubeconfig` file to find these keys.
+
+Now you can test it with `kubectl config use-context lucas`, try running any command, and since we haven't set up any permission scheme, it's always going to give you back a message:
+
+```output
+Error from server (Forbidden): pods is forbidden: User "lucas" cannot ...
+```
+
+## Using Tokens
+
+Another way to create users is by giving them JWT tokens for authentication. A common use case for this kind of authentication is external services or temporary users, since it's easier to revoke a token than a certificate.
+
+That's because we create tokens using ServiceAccounts, the same way we create them for non-human services. Each SA is going to create a new Secret with a JWT token that's valid even outside the cluster.
+
+Creating one is pretty simple:
+
+```bash
+kubectl create serviceaccount lucas-sa
+```
+
+Now, let's fetch the SA and see what the Secret it created is called, using `kubectl get sa lucas-sa -o yaml`. Notice we have a key called `secrets`, and this key is going to be an array of objects whose `name` property is the name of the secret we're looking for, in my case it looked like this:
+
+```bash
+secrets:
+  - name: lucas-sa-token-6dfl4
+```
+
+Now let's fetch the token with this simple command:
+
+```bash
+TOKEN=$(kubectl get secret lucas-sa-token-6dfl4 -o jsonpath='{.data.token}')
+```
+
+To create a new user in `kubectl` with a token, we can use the following command line:
+
+```bash
+kubectl config set-credentials lucas-token \
+  --token=$TOKEN && \
+kubectl config set-context lucas-token-context \
+  --cluster=nome-do-cluster \
+  --user=lucas-sa
+```
+
+## Conclusion
+
+We saw how we can create users in Kubernetes through digital certificates and tokens. In the next articles, we're going to explore how we can complete the set by giving them different permission levels with roles. Don't miss [the next part of this series](/dando-permissoes-a-usuarios-com-kubernetes/)
+
+With this, your cluster's security is going to improve a lot, and you'll be able to understand and manage users so nobody can do anything you're not explicitly allowing. Improving the audit trail along the way.
+
+See you!

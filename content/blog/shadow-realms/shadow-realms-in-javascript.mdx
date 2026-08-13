@@ -1,0 +1,148 @@
+---
+title: "Safer Code with Shadow Realms in JavaScript"
+pubDate: 2022-06-21T13:00:00.000Z
+updatedDate: 2026-07-16T16:08:44.000Z
+lang: en
+slug: "shadow-realms-in-javascript"
+category: "javascript"
+tags: ["javascript", "nodejs", "ecmascript", "development"]
+description: "One of the most interesting JavaScript proposals in a while is getting people talking. Find out what shadow realms are and how they let you run code more safely."
+seoDescription: "One of the most interesting JavaScript proposals in a while. What shadow realms are and how they improve the security of your code!"
+machineTranslated: true
+draft: false
+---
+JavaScript has always been and continues to be a pretty dynamic language, and because of that I'm kicking off a new series of articles where I'll talk more and more about the new proposals and possible features coming to this incredible ecosystem!
+
+Today's pick is a proposal being driven forward by none other than our great representative at TC39, [Leo Balter](https://twitter.com/leobalter), along with a bunch of other amazing people, and it's called [ShadowRealm](https://github.com/tc39/proposal-shadowrealm).
+
+## A bit of context
+
+When we're talking about the web, we always have to keep in mind that it's like a blank sheet of paper, meaning we have a lot of room to create and experiment with pretty much anything.
+
+One of the most common things out there is extensible applications, for example the kind where you can write your own code to extend existing functionality, like plugins.
+
+The big problem with this kind of application is that we have to run the application's own code, called _core_, alongside the user's or plugin's code. And, in JavaScript, that shares the same global object called [Window](https://developer.mozilla.org/en-US/docs/Web/API/Window), meaning virtually all the code is running in the same place, and there's nothing stopping the plugin from accessing sensitive user information, for instance.
+
+On the other hand, this is exactly the kind of behavior that makes applications like jQuery possible, because being in a global environment lets us create shared objects and also extend standard functionality, like the `$` that jQuery injected into the global object, or modifying the `Array.prototype.pop` method, which are among the most common things those old libs used to do.
+
+Sounds like a security problem, doesn't it?
+
+## Enter ShadowRealm
+
+Realm, in English, is the word that defines a "kingdom." These days we don't have many kingdoms around, but imagine those as countries. And just like countries have their own problems, borders, laws and so on, realms also have their own "world."
+
+A `ShadowRealm` creates another execution context, meaning a new spot inside the same code with its own global object and its own internal objects (like its own `Array.prototype.pop`), which means we can run code inside that spot without interfering with the outside code. It's as if we isolated the code in a separate place.
+
+This feature always runs code synchronously, which allows for a virtualization of every DOM API that runs inside it:
+
+```js
+const shadowRealm = new ShadowRealm()
+
+shadowRealm.evaluate('globalThis.x. = "Um novo lugar"')
+globalThis.x = "root"
+
+const shadowRealmEval = shadowRealm.evaluate('globalThis.x')
+
+shadowRealmEval // Um novo lugar
+x // root
+```
+
+In this code we're creating an `x` property both inside the ShadowRealm and outside it, with two different values, and we can see those values are in fact isolated from one another.
+
+It's important to note that a ShadowRealm instance can only pass around primitive data: String, Number, BigInt, Symbol, Boolean, undefined and null. Any other type of data, like objects, isn't allowed. And this matters a lot for keeping the environments cohesive and separate, since objects carry references to the place where they were created, meaning passing an object into a ShadowRealm could leak an outer scope into an inner one.
+
+However, a ShadowRealm can share functions and the values returned by those functions, and that allows for pretty robust communication between the two sides:
+
+```js
+const sr = new ShadowRealm()
+
+const srFn = sr.evaluate('(x) => globalThis.value = x')
+srFn(42)
+globalThis.value // undefined
+sr.evaluate('globalThis.value') // 42
+```
+
+There are some other really cool examples of using ShadowRealms in a more basic way [in the authors' original blog post](https://developer.salesforce.com/blogs/2022/04/introducing-shadowrealm), which is a great read!
+
+## External value injection
+
+ShadowRealms let us run arbitrary functions and code with the `evaluate` command, which takes a string as a parameter and works like a somewhat safer version of `eval`, but it's still subject to [Content Security Policies (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) in the browser, so an `unsafe-eval` CSP would disable this feature.
+
+To inject code straight into the ShadowRealm, it also has the `importValue` method, which basically works like an `import()` inside the code to load a module and grab an exported value.
+
+```js
+const sr = new ShadowRealm()
+const specifier = './spec-file.js'
+const name = 'sum'
+
+const shadowSum = await sr.importValue(specifier, name)
+shadowSum(1) // Runs the operation and captures the result
+```
+
+Basically, `await sr.importValue` is a promise that resolves with the `name` value imported from `specifier`, so if the specifier were:
+
+```js
+//spec-file.js
+const sum = (a,b) => a+b
+
+export { sum }
+```
+
+We'd get the `sum` function in `shadowSum`.
+
+Beyond that, it's important to note that the values imported through `importValue` are **always** relative to the ShadowRealm they belong to, so, borrowing another example from the authors' blog post, imagine that instead of being a simple sum function, `spec-file.js` modified `globalThis`:
+
+```js
+globalThis.total = 0;
+
+export function sum(n) {
+  return globalThis.total += n;
+}
+
+export function getTotal() {
+  return globalThis.total;
+}
+```
+
+If we had local code running the function inside a ShadowRealm, `globalThis` would be the object **inside** the ShadowRealm, not the `globalThis` from the global scope outside the ShadowRealm:
+
+```js
+const sr = new ShadowRealm();
+
+const specifier = './spec-file.js';
+
+const [ shadowSum, shadowGetTotal ] = await Promise.all([
+    sr.importValue(specifier, 'sum'),
+    sr.importValue(specifier, 'getTotal')
+]);
+
+globalThis.total = 0; // Local scope outside the SR
+
+shadowSum(10); // 10
+shadowSum(20); // 30
+shadowSum(30); // 60
+
+globalThis.total; // 0
+shadowGetTotal(); // 60
+
+// Now we're importing into the local scope
+const { sum, getTotal } = await import(specifier);
+
+sum(42); // 42
+globalThis.total; // 42
+
+// The internal value is preserved
+shadowGetTotal(); // 60
+```
+
+## Implications of ShadowRealms
+
+While this API is still just a proposal, it already improves a lot on how we work with sandboxed code, meaning running code in separate environments, which today is done with iFrames, currently the only relatively good way to keep two contexts apart within the same spot.
+
+With SRs, though, we could end up with an even greater ability to run not just simple functions, but also test code in isolated environments, fully separating responsibilities so that unit tests, integration tests, or anything else, don't interfere with one another.
+
+Taking it even further, it would even become possible to run entire applications inside other applications, as long as those applications are optimized and built to work with message-passing models. Anyway, the possibilities are huge and pretty exciting!
+
+## Conclusion
+
+If you want to stay on top of this and plenty of other news about JS, Node, and tech in general, with curated content served in just the right dose, don't forget to sign up for [my newsletter](https://news.lsantos.dev) to get the best content every month!

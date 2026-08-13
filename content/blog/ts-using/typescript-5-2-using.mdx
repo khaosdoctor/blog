@@ -1,0 +1,362 @@
+---
+title: "TS 5.2's new feature: meet Using"
+pubDate: 2023-08-03T11:00:11.000Z
+updatedDate: 2026-07-16T15:58:29.000Z
+lang: en
+slug: "typescript-5-2-using"
+category: "typescript"
+tags: ["typescript", "javascript", "nodejs", "development"]
+description: "TypeScript 5.2 is rolling out a new keyword called using. But do you know what it's for?"
+seoTitle: "Everything about \"using\" in TypeScript 5.2 and its benefits"
+machineTranslated: true
+draft: false
+---
+Once again we're here for the latest news on **[TypeScript](https://hotm.art/yd4IsL)!** This time we're talking about something that isn't just a TS novelty, it's also [coming](https://github.com/tc39/proposal-explicit-resource-management) to JavaScript itself soon!
+
+This is the feature called **explicit resource management**. It's best defined as a new keyword: `using`.
+
+In other languages like C#, `using` is already a [pretty famous](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-statement) keyword, and it shows up in other forms too, like `try-with-resources` in [Java](https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html) or `with` in [Python](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement). The idea behind this proposal is to tie a resource's lifecycle to the resource itself, so we don't need to call other functions like a `finally` block to clean it up.
+
+## Resource management
+
+When we're talking about lower-level programming like C or C++, resource management is essential. But in higher-level languages, this kind of concern tends to fade away because the compiler or the engine takes care of it for us.
+
+Still, sometimes you need to do some "cleanup" on a resource after you're done creating or using it. The classic example is closing a network or database connection. Say we have something like this:
+
+```ts
+import connection from 'your-db'
+
+export async function runQuery (query: string) {
+	const db = connection.start()
+    const result = await db.query(query)
+    connection.close()
+    return result
+}
+```
+
+If, for whatever reason, we need an early return, we'll end up duplicating the code that releases our resource with `connection.close()`:
+
+```ts
+import connection from 'your-db'
+
+export async function runQuery (query: string) {
+	const db = connection.start()
+    const result = await db.query(query)
+    if (!result) {
+    	connection.close()
+        return
+    }
+    connection.close()
+    return result
+}
+```
+
+But that doesn't cover us if an error happens, so we need a `try/catch`, and at that point it's easier to shove all of it into a `finally` to keep things readable, right?
+
+```ts
+import connection from 'your-db'
+
+export async function runQuery (query: string) {
+	try {
+        const db = connection.start()
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    } finally {
+    	connection.close()
+    }
+}
+```
+
+While that's a decent solution, we've written a fair amount of code just to close a connection. And that's exactly why explicit resource management exists, to treat these cases as a first-class concern.
+
+## Symbol.dispose
+
+Everything revolves around a property called `Symbol.dispose`, which is an internal symbol available on every class.
+
+Let's imagine this is our connection class (and that there's a factory somewhere that returns the instance we used above):
+
+```ts
+export class Connection {
+	constructor (options: ConnectionOptions) {
+    	// ...
+    }
+    
+    start () { }
+    close () { }
+}
+```
+
+To turn our connection class into one that can be disposed, we implement a new property:
+
+```ts
+export class Connection {
+	constructor (options: ConnectionOptions) {
+    	// ...
+    }
+    
+    start () { }
+    close () { }
+    
+    [Symbol.dispose]() {
+    	this.close()
+    }
+}
+```
+
+If you want a bit more convenience, TS already ships a global interface called `Disposable` you can implement to keep the code more cohesive:
+
+```ts
+export class Connection implements Disposable {
+	constructor (options: ConnectionOptions) {
+    	// ...
+    }
+    
+    start () { }
+    close () { }
+    
+    [Symbol.dispose]() {
+    	this.close()
+    }
+}
+```
+
+And now we can simply call this feature to clean up our file:
+
+```ts
+import connection from 'your-db'
+
+export async function runQuery (query: string) {
+	try {
+        const db = connection.start()
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    } finally {
+    	connection[Symbol.dispose]()
+    }
+}
+```
+
+Didn't help much, did it? We just moved the problem from one side to the other. Although now we do have a dedicated place to call all that logic, which is still easier than chasing down every specific method.
+
+## Using
+
+But if we want to move all of this into one single place, we can take advantage of the new `using` keyword. It works like a `let` or a `const`, except instead of just declaring the variable, it instructs the engine to call `Symbol.dispose` at the end of that function's scope. So our previous function can be rewritten like this:
+
+```ts
+import connection from 'your-db'
+
+export async function runQuery (query: string) {
+	try {
+        using db = connection.start()
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    }
+}
+```
+
+Now we no longer carry resource management logic inside our app, which makes it much easier to manage these connections and abstract the feature away from users, especially if you're building libraries!
+
+> If you want to learn how to use this feature properly, go check out my [complete TypeScript course](https://hotm.art/yd4IsL)!
+
+Disposals work like a stack, so they get called from the last one created to the first. This example from the docs shows it well:
+
+```ts
+function loggy(id: string): Disposable {
+    console.log(`Creating ${id}`);
+
+    return {
+        [Symbol.dispose]() {
+            console.log(`Disposing ${id}`);
+        }
+    }
+}
+
+function func() {
+    using a = loggy("a");
+    using b = loggy("b");
+    {
+        using c = loggy("c");
+        using d = loggy("d");
+    }
+    using e = loggy("e");
+    return;
+
+    // Unreachable.
+    using f = loggy("f");
+}
+
+func();
+// Creating a
+// Creating b
+// Creating c
+// Creating d
+// Disposing d
+// Disposing c
+// Creating e
+// Disposing e
+// Disposing b
+// Disposing a
+```
+
+Notice they're created in order from A to D, but destroyed from D to A. And if you create a scope in the middle of the function, like C and D here, those get destroyed first as soon as they leave scope.
+
+### Async with Symbol.asyncDispose
+
+Besides the synchronous version, there's also an async version of dispose. It behaves the same way, except it's an async function and needs to be used with `await using` instead of `using`.
+
+```ts
+async function wait () {
+	await new Promise(resolve => setTimeout(resolve, 500))
+}
+
+function loggy(id: string): AsyncDisposable {
+    console.log(`Creating ${id}`);
+
+    return {
+        async [Symbol.asyncDispose]() {
+            console.log(`Disposing ${id} async`);
+            await wait()
+        }
+    }
+}
+
+function func() {
+    await using a = loggy("a");
+    await using b = loggy("b");
+    {
+        await using c = loggy("c");
+        await using d = loggy("d");
+    }
+    await using e = loggy("e");
+    return;
+
+    // Unreachable.
+    await using f = loggy("f");
+}
+
+func();
+// Creating a
+// Creating b
+// Creating c
+// Creating d
+// Disposing d async
+// Disposing c async
+// Creating e
+// Disposing e async
+// Disposing b async
+// Disposing a async
+```
+
+## Error handling
+
+What happens if our dispose function throws an error? Or if we get an error during the function itself and also while tearing it down? For that case there's a new error type extended from `Error`, called `SuppressedError`.
+
+Errors of type `SuppressedError` have a `suppressed` property holding the earlier error that was thrown, and an `error` property for the most recent one.
+
+For example, if we have code like this:
+
+```ts
+class ErrorA extends Error {
+    name = "ErrorA";
+}
+class ErrorB extends Error {
+    name = "ErrorB";
+}
+
+function foo (id: string) {
+	return {
+    	[Symbol.dispose]() {
+        	throw new ErrorA(`Error for id ${id}`)
+         }
+	}
+}
+
+function bar () {
+	using f = foo("1")
+    throw new ErrorB("Error!")
+}
+
+try {
+	bar()
+} catch (e: any) {
+	console.log(e.name, e.message) // SuppressedError An error was suppressed during disposal
+    console.log(e.error.name) // ErrorA
+    console.log(e.error.message) // Error for id 1
+    console.log(e.suppressed.name) // ErrorB
+    console.log(e.suppressed.message) // Error!
+}
+```
+
+So basically the most recent error is the one thrown inside the symbol, while the suppressed error is the one that was thrown inside the function before disposal got called.
+
+## DisposableStacks
+
+As you might have noticed, `Symbol.dispose` and its async counterpart can be great solutions for more complex code, since we're already working with a class and can implement the feature directly. But for something as simple as our example, going through all that logic can feel like overkill.
+
+In our case we just want to remember to call `close` at the end of execution, nothing more. For that, TS gives us two new features: `DisposableStack` and `AsyncDisposableStack`, which basically work as tools to run these symbols manually at the end of a function.
+
+So if we set aside our class and assume it has no cleanup logic of its own, going back to our original function, we could have written it like this:
+
+```ts
+import connection from 'your-db'
+
+export async function runQuery (query: string) {
+	try {
+        const db = connection.start()
+        using cleanup = new DisposableStack()
+        cleanup.defer(() => connection.close())
+        
+        const result = await db.query(query)
+        if (!result) return
+        return result
+    } catch (err) {
+    	console.error(err)
+    }
+}
+```
+
+Notice we're using a feature called `defer`, which is quite common in [Golang](https://go.dev/tour/flowcontrol/12). What it does is push that block's execution to the end of the current scope.
+
+Picture it as a class implemented like this (just for illustration):
+
+```ts
+export class DisposableStack implements Disposable {
+    #stack = []
+    
+    defer (fn: (...args: any) => void) {
+    	this.#stack.push(fn)
+    }
+    
+    [Symbol.dispose]() {
+    	for (const fn of this.#stack) {
+            fn()
+        }
+    }
+}
+```
+
+The idea is that you can define a stack and call `defer` multiple times to add one or more functions to the cleanup stack.
+
+## Conclusion
+
+To use `using` on newer TS versions you'll need to tweak a few options in your `tsconfig`'s `compilerOptions`. These include changing the compilation target to 2022 and adding the necessary polyfills, ending up with something like this:
+
+```json
+{
+    "compilerOptions": {
+    	"target": "es2022",
+        "lib": ["es2022", "esnext.disposable", "dom"]
+    }
+}
+```
+
+You can read more about this new feature over on the [TS blog](https://devblogs.microsoft.com/typescript/announcing-typescript-5-2-beta/#using-declarations-and-explicit-resource-management), and you can also learn how to use it properly in my [TS Formation course](https://hotm.art/yd4IsL).

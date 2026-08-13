@@ -1,0 +1,67 @@
+---
+title: "What Is TypeScript Infer and What Does It Do?"
+pubDate: 2022-04-18T14:00:00.000Z
+updatedDate: 2026-07-16T16:09:42.000Z
+lang: en
+slug: "typescript-infer-explained"
+category: "typescript"
+tags: ["typescript", "development", "javascript", "nodejs"]
+description: "If you've written TypeScript code, you might not have seen the famous `infer` keyword yet. But trust me, one day it'll show up and you'll know what it is!"
+seoDescription: "If you've written TypeScript code, you might not have seen the famous infer keyword yet. But one day it'll show up and you'll know what it is!"
+machineTranslated: true
+draft: false
+---
+
+If you've used TypeScript, you've probably heard about the `infer` keyword. It's not very common in day-to-day work, but most advanced libraries will eventually use `infer` for some operation.
+
+To fully understand `infer`, we need to grasp how TypeScript performs type assertions and the hierarchy of those types. I won't go into those details now, but you can find lots of content about it in the TS documentation itself.
+
+The `infer` keyword complements what we call _conditional typing_, which is when we have a type inference followed by a condition. For example:
+
+```typescript
+type NonNullable<T> = T extends null | undefined ? never : T
+```
+
+In the example above, we're taking a type and checking if it extends `null` or `undefined`, that is, types that don't resolve to `true`. Then we're making a **type condition** to say: "If the type is one of these, you return `never`, otherwise you return the type itself".
+
+The `infer` keyword lets us go a bit further than we're used to with these patterns. The idea is that we can define a variable within our type inference that can be used or returned. It's like we could do `const type = <inference>`.
+
+For example, let's look at the native TS utility called `ReturnType`, which takes a function as a parameter and returns the type of its return value:
+
+```typescript
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any
+```
+
+What's happening here is a conditional inference, since `infer` **cannot be used outside conditionals**. First we check if the type passed extends a function signature. If yes, we assign the return value of that function to a variable we call `R`, and then return it.
+
+Another example is extracting the return value of a promise, which I mentioned [in this thread](https://twitter.com/_StaticVoid/status/1507444433486233609). If we think about how we can build this type, first we need to check if the passed type extends the `Promise<T>` type, and then infer `T` to return it. Otherwise, we return `never`:
+
+```typescript
+type Unpromise<P> = P extends Promise<infer T> ? T : never
+```
+
+## Other Use Cases
+
+We can use `infer` in a series of cases, the most common being:
+
+-   Get the first parameter of a function:
+
+```typescript
+type FirstArgument<T> = T extends (first: infer F, ...args: any[]) => any ? F : never
+```
+
+-   Get the type of an array
+
+```typescript
+type ArrayType<T> = T extends (infer A)[] ? A : T
+```
+
+-   Recursively get the type of a function until we find its final type
+
+```typescript
+type ExtractType<T> = T extends Promise<infer R>
+  ? R
+  : T extends (...args: any[]) => any
+    	? ExtractType<ReturnType<T>>
+			: T
+```

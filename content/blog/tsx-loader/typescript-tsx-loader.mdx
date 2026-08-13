@@ -1,0 +1,85 @@
+---
+title: "How to run TypeScript natively on Node.js with TSX"
+pubDate: 2023-10-04T17:45:33.000Z
+updatedDate: 2026-07-16T15:56:25.000Z
+lang: en
+slug: "typescript-tsx-loader"
+category: "typescript"
+tags: ["typescript", "nodejs", "development", "javascript"]
+description: "Have you ever wondered what it would be like to run TypeScript directly on Node.js without needing a compilation step? It's possible, with TSX!"
+seoTitle: "Running TypeScript on Node.js with TSX and loaders!"
+machineTranslated: true
+draft: false
+---
+
+Who hasn't wondered how runtimes like [Deno](/tags/deno/) can execute TypeScript natively? When will this arrive in Node? When will we be able to run native TypeScript anywhere?!
+
+Well, while the idea of running TS natively without a compilation process is still far off, we can actually run TypeScript files directly on Node.js without any compilation step. These are called **loaders**.
+
+## Loaders
+
+Loaders are functions that act as hooks between reading a module and executing it. For example, many people are used to using `ts-node` or `ts-node-dev`.
+
+Both of these packages are loaders. They receive files that will be loaded by the runtime and can perform actions on them. In our case, the action is compiling the TypeScript file to JavaScript.
+
+> You can read more about this feature [in the official documentation](https://nodejs.org/api/module.html#transpilation), including the transpilation example itself.
+
+A loader can then choose which file it will work with, in our case `.ts`, and perform an action on it that, in this case, is transpiling to JavaScript and sending it to Node to evaluate the code.
+
+### TSX
+
+[TSX](https://npm.im/tsx) is the newer and improved version of `ts-node`, using [ESBuild](https://esbuild.github.io) to transpile TS files to JS very quickly.
+
+The interesting part is that TSX was developed to be a complete replacement for Node. So you can actually use TSX as a TypeScript REPL. If you install it globally with `npm i -g tsx`, just run `tsx` in your terminal and you can write TypeScript natively.
+
+But what's cooler is that you can load TSX for **all TypeScript files** using `--loader tsx` when running your file. For example, let's say we have a file called `index.ts`:
+
+```ts
+export function main(a: number, b: number) {
+	console.log(a**b)
+}
+
+main(5,5)
+```
+
+If we run the command `tsx index.ts`, we'll get output `3125`, even without any project setup.
+
+TSX also has a watch mode that can be run with `tsx watch <arquivo>`, to keep watching a file for changes.
+
+## TSX as a loader
+
+Running a file (or all your files) through a loader is as simple as creating a `start` script in your `package.json` with the following:
+
+```bash
+node --loader tsx index.ts
+```
+
+And run it with `npm start`.
+
+> Using TSX as a loader doesn't allow it to be used with any other options, like `watch`.
+
+### Extending the functionality
+
+Starting from Node version 20.6, one of the things we can do is [load environment configuration files directly](https://nodejs.org/en/blog/release/v20.6.0#built-in-env-file-support) from `.env` files. But how can we use both the loader and the configuration files?
+
+Node also reads an environment variable called `NODE_OPTIONS` that lets you pass as a string all the options Node will receive, for example `NODE_OPTIONS='--loader tsx'`.
+
+Since we can't pass the `--env-file .env` option as one of the `NODE_OPTIONS` options, we can load the loader from it and pass the configuration file in the main command:
+
+```bash
+NODE_OPTIONS='--loader=tsx' node --env-file=.env index.ts
+```
+
+Try running this command in your projects to make development easier!
+
+> **Important:** Loading TS files directly from disk and compiling them with loaders is much slower than transpiling first and passing JavaScript files directly. That's why it's recommended you do this only for development environments.
+
+## Update Oct-2023
+
+Starting from Node version 20.6, the `--loader` option was [deprecated](https://nodejs.org/api/cli.html#--experimental-loadermodule). Now the option we need to pass is `--import`:
+
+```bash
+NODE_OPTIONS='--import tsx' node --env-file=.env index.ts
+```
+
+Read more about the new API in the [official documentation](https://nodejs.org/api/module.html#enabling).

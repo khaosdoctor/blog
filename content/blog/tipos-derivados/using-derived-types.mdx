@@ -1,0 +1,112 @@
+---
+title: "Using Derived Types"
+pubDate: 2024-09-11T11:00:14.000Z
+updatedDate: 2026-07-16T17:51:23.000Z
+lang: en
+slug: "using-derived-types"
+category: "typescript"
+tags: ["typescript", "javascript"]
+description: "When should we be smarter about coupling our types to other types? When does repeating code actually pay off?"
+machineTranslated: true
+draft: false
+---
+Whenever I talk to someone about TypeScript, one of the things that inevitably comes up is the question:
+
+> When do we need to create a new type, and when do we need to derive one from another type?
+
+If you're in [Formação TS](https://formacaots.com.br), you already know I'm a big fan of deriving types: write it in a single place, then use variations of that type everywhere else. It's an application of the **DRY** principle (_don't repeat yourself_) that applies just as well to types as it does to code. And when I say a derived type, I'm talking about things like this:
+
+```ts
+interface Person {
+  name: string;
+  id: string;
+}
+
+interface Employee extends Person {
+  salary: number;
+}
+```
+
+See how we're extending an interface to create a second one, which contains the types from the first but isn't exactly the same? This doesn't just happen with interfaces either. It happens with any type that depends on another type, like union types and intersection types:
+
+```ts
+type Person = { name: string, id: string }
+type Employee = Person & { salary: number }
+
+type Cat = {
+  type: 'cat';
+  meow: () => void;
+}
+
+type Dog = {
+  type: 'dog';
+  woof: () => void;
+}
+
+type Animal = Cat | Dog;
+```
+
+Derived types can't modify the original types, but they can modify the types derived from them. For example, `Employee` can't modify `Person`, but if another type extends `Employee`, it can modify that type, because if any of its properties change, the other type changes along with it.
+
+When this happens, we say the type is **coupled**, because the derived type depends on the original one.
+
+## Is coupling worth it?
+
+Coupled, or derived, types are great when we're dealing with the same "domain". For example, as I mentioned in the [last article about enums](/enums-no-typescript/), when we're using enums, one option is to create objects with [`as const`](/entenda-o-que-e-as-const-no-typescript/) and then create the list of values as a separate type:
+
+```ts
+const envs = {
+  PROD: 'production', 
+  DEV: 'development',
+  TEST: 'test'
+} as const
+
+type Envs = (typeof envs)[keyof typeof envs]
+```
+
+If we didn't do this, we'd have to duplicate every value in that object twice, which would create two sources of information we'd need to keep in sync.
+
+Another case where deriving types gets really interesting is when we're dealing with variations of input types in an API. Say we have a payload for creating a user:
+
+```ts
+interface User {
+  id: string
+  name: string;
+  age: number;
+}
+
+type UserCreate = Omit<User, 'id'>
+```
+
+Here, a derivation makes total sense, because our user entity always has an ID once it's created, but when we want to create a user, we don't need to send an ID. The same goes for updating a user: we can't send the ID, and every field can be optional:
+
+```ts
+type UserUpdate = Omit<Partial<User>, 'id'>
+```
+
+So it makes a lot of sense to derive when we're dealing with the same entity and both types are part of a whole that doesn't make sense split apart. The big win here is that you can change the type in one place and it automatically propagates through the whole project, which makes development a lot easier. But these derivation chains can get messy when they get too long, because they can have side effects you didn't ask for.
+
+## When does decoupling make more sense?
+
+Contrary to what we're used to, decoupling types actually makes a lot of sense when we're dealing with parts of the data from a full type. For example, a function that only takes the user's name, or just the name and the age.
+
+```ts
+import type { User } from 'types'
+
+function calculate(age: User['age']) {}
+```
+
+This looks like a simple example, but notice that now the entire file depends on that type living in the types folder. If it moves, every file that depends on it takes the hit, and on top of that we're pulling out a single property for a use case our type might have no business knowing about.
+
+> If you're not sure, ask yourself this: "If I derive this type, will it feel weird when the original type changes?"
+
+If the answer is yes, decouple the type. And what does "feel weird" mean? For example, if we change a utility file that calculates a user's age to display on screen, we shouldn't have to modify our database because of it.
+
+In the end it all comes down to watching how much work you'll have to maintain down the road. Maybe the right question to ask is:
+
+> If I decouple this, will I have more work to maintain?
+
+So here's the base rule:
+
+-   If, when one type changes, the other **has to** change too, then couple them
+-   If a derived type creates more work for you every time it changes, decouple it

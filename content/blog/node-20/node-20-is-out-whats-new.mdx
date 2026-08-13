@@ -1,0 +1,108 @@
+---
+title: "Node.js 20 is out! Here's what's new"
+pubDate: 2023-04-27T10:00:07.000Z
+updatedDate: 2026-07-16T16:01:05.000Z
+lang: en
+slug: "node-20-is-out-whats-new"
+category: "javascript"
+tags: ["nodejs", "javascript", "ecmascript", "development"]
+description: "Another year, another official Node.js release. Version 20 brings some significant changes, learn all about them here!"
+seoTitle: "What's new in the new Node.js 20?"
+machineTranslated: true
+draft: false
+---
+Another year, another version of Node is out! And, as usual, I'm putting all the coolest news right here so you don't miss anything!
+
+Node v20 is a pretty important release because, being an even-numbered version, it's the one that's going to become the next LTS down the line!
+
+![](./image-57.png)
+
+Right now, we have version 18 as the current active release until October 2023, then we have version 19 acting as an intermediate version for testing, which stays available until the release of the new version 20, which will replace version 18 as the active one in October.
+
+## Permissions system
+
+Node is following in [Deno](/deno/)'s footsteps once again. For context, Deno has a file permissions system, where each executable has specific permissions to be able to run tasks, like reading files, network access, environment variables and so on.
+
+So, for example, if we want to run a program that reads a file, we need to run it with a flag called `--allow-read`. In the same way, Node has just implemented an experimental permissions system for running programs.
+
+Initially, the implemented permissions are:
+
+-   FS access with the `--allow-fs-read` and `--allow-fs-write` flags
+-   Restricting access to spawning child processes with `--allow-child-process`
+-   The same goes for worker threads with `--allow-worker`
+
+You need to start Node with the `--experimental-permission` flag along with the permissions you want when starting your program. So for example, a program that can read and write to the entire file system would look something like this:
+
+```bash
+$ node --experimental-permission --allow-fs-read=* --allow-fs-write=* index.js
+```
+
+Just like with Deno, you can specify which folder and file this program is allowed to read:
+
+```bash
+$ node --experimental-permission --allow-fs-write=/tmp/ --allow-fs-read=/home/index.js index.js
+```
+
+And, also just like Deno, you can check permissions programmatically. If you enable the `--experimental-permission` flag, you'll get access to the `permission` object present on `process`. With it you can check whether permissions exist and were granted. For example:
+
+```js
+process.permission.has('fs.write'); // true
+process.permission.has('fs.write', '/home/nodejs/protected-folder'); // true
+```
+
+Adding this permissions system is a huge deal because it moves the runtime toward a more security-focused mindset, which is one of the big weak points of Node these days.
+
+## Test runner is stable
+
+We finally have a stable test runner in Node.js! And we won't need other libraries like Jest, Ava, Mocha and so on anymore. Version 20 includes changes that made the runner stable, so it's now possible to run your tests in production!
+
+I [wrote an article about Node's test runner](/node-test-runner/) a while back, where I go over pretty much everything the runner had, but now we have more features like **watch mode**, **mocking** and the ability for `node --test` to run files in parallel.
+
+Here's an example taken from Node's site with all its new features:
+
+```js
+import { test, mock } from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+
+mock.method(fs, 'readFile', async () => "Hello World");
+test('synchronous passing test', async (t) => {
+  // Test passes because it doesn't throw any exception
+  assert.strictEqual(await fs.readFile('a.txt'), "Hello World");
+});
+```
+
+## Performance
+
+Generally speaking, Node is getting faster. With the version bump for Ada, a URL parsing library written in C++, the cost of parsing a URL and performing other basic operations dropped quite a bit. For example, the cost of initializing an `EventTarget` object was cut in half, which means every library and every piece of code that uses it is going to get faster.
+
+Along the same lines, other APIs are being optimized and tweaked to become even faster so the runtime as a whole gets better.
+
+## Single Executable Applications (SEA)
+
+Also following in the footsteps of `deno compile`, Node is bringing initial support for files that get compiled into a single executable, containing all the tools needed to run the runtime and your code even if Node isn't installed on the machine.
+
+This is amazing because it lets you install Node applications much faster and much more securely, since you can, for example, start a container _[from scratch](/um-mergulho-em-imagens-de-containers-parte-3/)_ with only your application running inside it. Which drastically cuts down the attack surface.
+
+The problem is we still can't ship more than a single file to be run as a SEA, but we already have initial support that requires a prepared blob and an initial configuration file like this one:
+
+```json
+{
+  "main": "hello.js",
+  "output": "sea-prep.blob"
+}
+```
+
+And then running it like this:
+
+```bash
+$ node --experimental-sea-config sea-config.json
+```
+
+Using a configuration file is both good and bad because, while we need to pass a whole file to Node, it also opens up new use cases where multiple resources can co-exist in the same binary.
+
+## Other news
+
+-   Official ARM64 support for Windows
+-   The Web Crypto API implementation is now validating arguments according to the WebIDL spec
+-   WASM interface support in Node keeps growing

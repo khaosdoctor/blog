@@ -1,0 +1,102 @@
+---
+title: "Cron jobs in the cloud with Deno Cron"
+pubDate: 2024-01-17T11:00:19.000Z
+updatedDate: 2026-07-16T15:54:01.000Z
+lang: en
+slug: "cron-jobs-in-the-cloud-with-deno-cron"
+category: "javascript"
+tags: ["deno", "typescript", "development"]
+description: "Probably a feature everyone has had to use at some point just got a fully serverless equivalent! Let's take a look at Deno Cron"
+machineTranslated: true
+draft: false
+---
+Continuing with our Deno updates, this time I want to bring something I've personally needed several times but never found a good solution for: cron jobs!
+
+Cron jobs are processes that run repeatedly at a pre-determined interval. The idea is pretty simple, and they're widely used for all sorts of things, like scheduling actions that need to happen at a specific time, such as social media posts, or even credit card processing. They're the famous **batch jobs**.
+
+## The problem
+
+As simple as the idea is, cron jobs have a problem baked into how they work. Since you have to run something every so often, the only way to know when it needs to run is to have a system that watches the clock and checks whether there's a job that needs to run at that moment.
+
+That requires a machine that's always on, checking periodically (usually every minute) whether there's anything for it to do. There are two problems with that.
+
+### Cost
+
+Keeping a machine running all the time, no matter how small it is, costs money, especially if you go with one of the bigger cloud providers.
+
+To cut that cost, a lot of people prefer using a machine they already had lying around, like an old laptop, a media server, a NAS, or, like I've done, a Raspberry Pi connected and running the system's Cron (or Systemd).
+
+But then you hit another problem: security and networking. How do you expose a machine like that so it can be reached from the outside? VPNs maybe? But what about security?
+
+All these problems eventually have solutions, but it's a lot of work for something that's sometimes very small.
+
+### Wasted compute
+
+The vast majority of _watchdog_ or _daemon_ type services won't execute anything during 90% of their runtime. In other words, if we have a system that's a cron, chances are that in 90% of the cycles that application is running, nothing is happening.
+
+That's wasted compute, but it's still compute you're paying for, which ties directly into what we just talked about. To fix that we could use Serverless, but then we hit another problem, because Serverless doesn't run unless there's an event that triggers that function, so we're back to the virtual machine problem.
+
+## The solution
+
+Luckily there are services that offer online crontabs, but they're all paid and generally don't have a great user experience. That is, until **Deno Cron**.
+
+Deno Cron is the newest addition to the Deno Deploy family. It lets you add cron jobs that run in a serverless environment right in your application's deploy. And it's as simple as this:
+
+```ts
+Deno.cron('Meu cronjob', '* * * * *', () => {
+  console.log('Esse job roda a cada 1 minuto')
+})
+```
+
+The first parameter is the name of your job. This name matters a lot because it's the key that prevents other cron jobs from being created with the same name, and it's also the name that shows up in the dashboard.
+
+In the second parameter we use a syntax just like crontab's (which you can get from sites like [crontab.guru](https://crontab.guru)), and the third is our function.
+
+Locally, this cron will behave like a `setInterval`, but on Deno Deploy it gets its own tab, like the one I created in the [deno playground](https://dash.deno.com/playground/good-gecko-26):
+
+![](./image-1.png "Check out the Cron tab")
+
+If we open the Cron tab up top, we'll see every run of the Cronjob, along with the logs in the logs tab:
+
+![](./image-2.png)
+
+The cron tab only shows the last run of each defined cronjob, while the logs show everything that happened:
+
+![](./image-3.png)
+
+To remove a cronjob, just remove the code and deploy again.
+
+It's worth pointing out that **jobs don't overlap**, meaning if a job is already running when another one is supposed to start, it gets skipped.
+
+### Failure handling
+
+Deno Cron already ships with an exponential backoff failure control system, so setting up retries is pretty simple: just pass the `backoffSchedule` option with an array of times in milliseconds, for example:
+
+```ts
+Deno.cron(
+  'Meu cronjob', 
+  '* * * * *', 
+  { backoffSchedule: [1000, 4000, 8000] }, 
+  () => console.log('Esse job roda a cada 1 minuto')
+)
+```
+
+If this cronjob fails, it retries after 1 second, then 4, then 8. You can also pass an `AbortSignal` so the promise's execution can be cancelled from somewhere else.
+
+## Limitations and details
+
+For now, the [cron documentation](https://docs.deno.com/kv/manual/cron) says you can only create cron jobs at the top-level domain. In other words, **you can't create a cron inside a function** or inside any scope, which means you need to already know what needs to run ahead of time. For dynamic cron jobs, [queues](/deno-kv-queues/) might be a good option!
+
+On top of that, **Deno Cron's timezone is UTC, regardless of where you are.**
+
+This is an API that's really going to make life a lot easier for anyone developing with Deno and TypeScript! Let me know what you end up building with it!
+
+See you around!
+
+---
+
+## FTS moment!
+
+If you enjoyed this article, I also have a full TypeScript course called **Formação TypeScript!**
+
+I invite you to take a look if you want to learn more about TypeScript with me and our amazing community of hundreds of students!

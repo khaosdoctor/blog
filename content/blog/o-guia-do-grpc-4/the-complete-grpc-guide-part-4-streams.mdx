@@ -1,0 +1,332 @@
+---
+title: "The Complete gRPC Guide Part 4: Streams"
+pubDate: 2021-07-07T12:00:00.000Z
+updatedDate: 2026-07-16T16:13:40.000Z
+lang: "en"
+slug: "the-complete-grpc-guide-part-4-streams"
+category: "infra"
+tags: ["grpc", "javascript", "protobuf", "architecture", "series"]
+series: grpc
+seriesOrder: 4
+description: "Learn how to use one of the most interesting gRPC features: streams! Performance and speed for large data made super simple!"
+machineTranslated: true
+draft: false
+---
+
+In the previous articles of this series we learned what gRPC is, how it works, and how we can use this protocol to move data between systems built with different technologies and languages. But all of that was done using only the simplest protobuf definition models, meaning we were sending a simple request and getting back a simple response in a client/server model.
+
+## Streaming
+
+Besides what's called _Unary Calls_, we also have _Streaming calls_, which are nothing more than requests and responses made through an asynchronous data stream. There are three types of streaming calls in gRPC:
+
+-   **Server-side streaming:** the request is sent in a simple (unary) way, but the server's response is a data stream.
+-   **Client-side streaming:** the opposite of the previous one, when the request is sent as a data stream and the server's response is unary.
+-   **Duplex streaming:** when both the request and the response are data streams.
+
+This is reflected inside a `.proto` file in a really simple way. Let's go back to our [repository for the second article of the series](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), where we have the following `notes.proto` file:
+
+```protobuf
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+
+// Entities
+message Note {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message Void {}
+
+// Requests
+message NoteFindRequest {
+  int32 id = 1;
+}
+
+// Responses
+message NoteFindResponse {
+  Note note = 1;
+}
+
+message NoteListResponse {
+  repeated Note notes = 1;
+}
+```
+
+If we wanted to change the call so that, instead of sending a ready-made list of notes, we sent a stream of notes as the response of the `List` service, we can simply add the word `stream` in the direction we want:
+
+```protobuf
+service NoteService {
+  rpc List (Void) returns (stream NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+```
+
+Done! We don't need to do anything else, our response will be a stream of notes as defined in `NoteListResponse`.
+
+For the other stream models we can follow the same idea. If we want a client-side stream, we put `stream` only on the request side:
+
+```protobuf
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (stream NoteFindRequest) returns (NoteFindResponse);
+}
+```
+
+And for duplex streams, we put `stream` on both sides:
+
+```protobuf
+service NoteService {
+  rpc List (Void) returns (stream NoteListResponse);
+  rpc Find (stream NoteFindRequest) returns (stream NoteFindResponse);
+}
+```
+
+## What are streams
+
+If you're not familiar with the concept of streams yet, don't worry, I wrote a whole series of articles on iMasters just about it:
+
+-   [What are streams - part 1](https://imasters.com.br/back-end/streams-no-node-js-o-que-sao-streams-afinal-parte-01)
+-   [What are streams - part 2](https://imasters.com.br/back-end/streams-no-node-js-o-que-sao-streams-afinal-parte-02)
+-   [What are streams - part 3](https://imasters.com.br/back-end/streams-no-node-js-o-que-sao-streams-afinal-parte-03)
+
+Basically, streams are a continuous flow of data that's loaded at the moment it's read. This model has several benefits: for example, when we're working with files or content that's very large, if we had to return that content to whoever requested it, we'd have to load the entire file into memory first before we could respond.
+
+If your file is, say, 3GB, then you're going to use 3GB of memory. With a stream, on the other hand, you show the file as it's loaded, and the content that already went by gets discarded and freed from memory. That way you get much faster processing while using far fewer resources.
+
+In this talk I showed visually what this means:
+
+![](https://www.youtube.com/watch?v=gzWv4PPD4S0)
+
+That's why streams are widely used with files and large-scale data: they can handle an enormous amount of information while using very few resources.
+
+## Streams and gRPC
+
+Since streams are so simple to use in gRPC, you'd expect the protocol's support for them to be really good. And that's exactly what happens: gRPC's stream support is one of the best out there, and it integrates with almost every supported language.
+
+For this demo, we're going to use the same application [we used in article number 2](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), and we'll make a few changes to it to turn a unary call into an asynchronous call.
+
+> The code for this demo is [on my GitHub](https://github.com/khaosdoctor/grpc-guide-part-4-sample)
+
+Let's start from a base: we clone the original repository from article 2 so we have the complete application. The first thing we need to do is change our `.proto` file to add a stream to the note listing service.
+
+The first change is simply adding `stream` to `rpc List`. Then we'll remove `NoteListResponse` so that our response is just `Note`. The file ends up like this:
+
+```protobuf
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (stream Note);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+
+// Entities
+message Note {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message Void {}
+
+// Requests
+message NoteFindRequest {
+  int32 id = 1;
+}
+
+// Responses
+message NoteFindResponse {
+  Note note = 1;
+}
+```
+
+It's worth pointing out that we're only removing the response entity because, since we're talking about a stream, obviously every piece of data that comes through will be a note. If we kept a response shaped like `{ note: { } }`, every chunk of the stream would have a new `note` object which would, of course, have a note inside it... that's pretty repetitive.
+
+## Server
+
+The next step is to change our server, or really, just a small part of it. The first and simplest change we're going to make is to remove our little in-place database where we had our three fixed notes, and move it to a `notes.json` file that will represent a large amount of data.
+
+In this file I put around 200 notes:
+
+```json
+[
+  {
+    "id": 0,
+    "title": "Note by Lucas Houston",
+    "description": "Content http://hoateluh.md/caahaese"
+  }, {
+    "id": 1,
+    "title": "Note by Brandon Tran",
+    "description": "Content http://ki.bo/kuwokal"
+  }, {
+    "id": 2,
+    "title": "Note by Michael Gonzalez",
+    "description": "Content http://hifuhi.edu/cowkucgan"
+  }, { ...
+```
+
+> Keep in mind that 200 notes isn't, by any stretch, a large amount of data. This is just an example.
+
+Now we load the file at the top of our server with `require` (keep in mind this doesn't work for [ES Modules](/os-ecmascript-modules-estao-aqui/)):
+
+```js
+const grpc = require('grpc')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+const notes = require('../notes.json')
+```
+
+The second part of the file we're going to change is the definition of the `List` method. Let's take a look at the old definition for a moment:
+
+```js
+function List (_, callback) {
+  return callback(null, { notes })
+}
+```
+
+There are a few things we need to change here:
+
+1.  The response can no longer be `{ notes }`, because we're no longer returning an object
+2.  We can no longer return the whole file at once, or our chunk would be way too big, so we'll iterate note by note to return them to the client
+3.  The function signature no longer takes a callback
+
+We'll sort all of this out as follows. First, instead of the two parameters of a unary call, a stream only takes a single parameter, which we'll call `call`:
+
+```js
+function List (call) {
+    //
+}
+```
+
+The `call` object is an implementation of a writable stream together with the call's metadata, so if we had some kind of parameter to send, we could get it through `call.request.parametro`.
+
+Now let's define that a _chunk_ of our stream will be a single note, so we'll iterate over the notes array and return the notes one by one:
+
+```js
+function List (call) {
+  for (const note of notes) {
+    call.write(note)
+  }
+  call.end()
+}
+```
+
+Notice that we're calling `call.write` and passing the note directly, because we changed our response to be just a note and not an object with a `note` key.
+
+It's also worth noting that as soon as the call to `write` happens, the response is sent and the client receives it right away. This is useful when we need to do some kind of processing: for example, if we needed to uppercase all the titles, we could do that transformation and send the results out without waiting for every note to be loaded.
+
+At the end, we call `call.end()`, which matters because it tells the client to close the connection. If we don't do this, that same client won't be able to make another call to the same service.
+
+## Client
+
+On the client side, very little is going to change, really just the method call. Our old call could be made in two ways:
+
+```js
+client.listAsync({}).then(console.log)
+client.list({}, (err, notes) => {
+  if (err) throw err
+  console.log(notes)
+})
+```
+
+Now we can't call it in two ways anymore, because a stream is necessarily asynchronous. On top of that, we won't have a callback: instead, we make the call to the server, which gives us back a readable stream, and only after we set up a _listener_ for that stream will the call actually happen and the data come back.
+
+This means we'll be working with the _event emitter_ and _event listener_ pattern, which is very common in Node and JavaScript. Our function will look like this:
+
+```js
+const noteStream = client.list({})
+noteStream.on('data', console.log)
+```
+
+To be more explicit, we can do it like this:
+
+```js
+const noteStream = client.list({})
+noteStream.on('data', (note) => console.log(note))
+```
+
+The stream also has another event called `end`, which fires when the server stream calls the `call.end()` method. To listen for it, we just create another listener:
+
+```js
+noteStream.on('end', () => {})
+```
+
+## Client-side streaming
+
+To wrap up the article and not leave anything out, in case we use a model like:
+
+```protobuf
+rpc Find (stream NoteFindRequest) returns (NoteFindResponse);
+```
+
+Where the client makes the request using streams, we'll have a similar implementation on the server. The big difference is that our `Find` method, on the server side, will receive the client's stream as its first parameter, and the second parameter will still be the callback.
+
+This is our old method, with the two unary calls:
+
+```js
+function Find ({ request: { id } }, callback) { }
+```
+
+It's still valid because the call has a `request` property. But we don't have the `on` method, so let's update it to:
+
+```js
+function Find (call, callback) { }
+```
+
+And we can receive the client's data the same way we received the server's data in server-side streaming:
+
+```js
+function Find (call, callback) {
+    call.on('data', (data) => {
+        // do something
+    })
+    call.on('end', () => {
+        // the call has ended
+    })
+}
+```
+
+And on the client, we'll have a call that looks exactly like the server's, but this time we have to account for the fact that the server doesn't return a stream to us, so we have a callback:
+
+```js
+const call = client.find((err, response) => {
+    if (err) throw err
+    console.log(response)
+})
+
+call.write({ id: 1 })
+call.end()
+```
+
+The inner function of `find` will only run after the `end()` method is called.
+
+## Duplex streams
+
+For duplex streams (or _bidirectional streams_), all we need to do, on both the server and client side, is implement the `call` parameter. This parameter is a bidirectional stream that has both the `on` method and the `write` method.
+
+On the server we'd have something like:
+
+```js
+function duplex (call) {
+    call.on('data', (data) => {
+        // receiving data from the client
+    })
+    call.write('sending data back to the client')
+    call.end() // server closes the connection
+}
+```
+
+And on the client we'd have a call like:
+
+```js
+const duplex = client.duplex()
+duplex.on('data' (data) => {
+	// receives data from the server
+})
+duplex.write('sends data to the server')
+duplex.close() // client closes connection
+```

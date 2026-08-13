@@ -1,0 +1,185 @@
+---
+title: "Meet the GitHub Container Registry"
+pubDate: 2020-09-18T22:59:27.000Z
+updatedDate: 2026-07-16T16:24:09.000Z
+lang: en
+slug: "meet-the-github-container-registry"
+category: "infra"
+tags: ["docker", "containers", "github", "development", "technology"]
+description: "Have you ever thought about how much easier your life would be if you could store your Docker images in the same place where you version your code?"
+machineTranslated: true
+draft: false
+---
+A while back, GitHub announced they were building **GitHub Packages**. This was one more tool from this amazing network to make developers' lives even easier.
+
+You can access packages through your own profile, and there you'll find a bunch of options, from NPM packages all the way to, more recently, **Docker** images!
+
+![](./image-33.png "Go to your profile to see your packages")
+
+That's right! Now, besides Docker Hub, you can also store your images directly on GitHub, but what does that actually change?
+
+## GitHub Container Registry
+
+GH Container Registry is a way for you to join your code with the image it represents, keeping the infrastructure and the code itself in the same place.
+
+This makes things a lot easier when you need to point a user to a downloads page, or let them know they can also pull a container's image directly from your own profile!
+
+Initially, this tool was in closed beta, but on September 1st, the team opened it up to everyone so users could try out the new packages model.
+
+### How much it costs
+
+Comparing it with Docker Hub, which doesn't charge for public repositories but does for private ones, GH Container Registry works the same way. Once this feature reaches its public release, the famous _GA (General Availability)_, public images will cost nothing, while private images will come with an extra cost.
+
+For now, though, during the whole beta, both public and private packages are **free**. So take the chance to run that test and get your images up there!
+
+But wait a second... how do we actually do this?
+
+## Creating an image
+
+Creating and storing an image in the GitHub registry is super simple. We can do it in two ways.
+
+### Through Docker
+
+We can log in to GitHub from our local Docker and push the image to the registry, the same way we log in to other private registries, like [ACR](https://azure.microsoft.com/services/container-registry/?WT.mc_id=personal-blog-ludossan).
+
+To do that, let's follow these steps:
+
+1.  Run the login command in your terminal of choice:
+
+```bash
+docker login docker.pkg.github.com -u <your github username>
+```
+
+2\. The prompt will ask for your password, so generate a new _access token_ [on this page](https://github.com/settings/tokens)
+
+![](./image-34.png)
+
+It's important that the token has read and write permissions for packages
+
+![](./image-45.png "Make sure the permissions are correct")
+
+3\. Use this generated token as the password to log in
+
+4\. Push any image using `docker push docker.pkg.github.com/username/repository/image-name:tag`
+
+### Through GitHub Actions
+
+We've [already talked in another article](https://dev.to/azure/do-zero-a-automacao-em-7-minutos-com-github-actions-1386) about how we can automate a bunch of things using GH Actions (and more articles are coming 😎), so how do we use actions to push our images to GitHub's CR?
+
+For this example I'll use a repository I maintain, called [Zaqar](https://github.com/khaosdoctor/zaqar). This project is a microservice by nature and **needs** Docker to work, so we can use it in a more realistic way.
+
+First, I'll create a new _access token_ so I can use it as our password in the action
+
+![](./image-35.png)
+
+Inside our repository, let's go to the `settings` tab and then to the `secrets` tab. There, we'll create a new secret called `PACKAGES_PASSWORD` and put the content of our _access token_ inside it:
+
+![](./image-46.png)
+
+Then, let's go to the `actions` tab inside the repository:
+
+![](./image-36.png)
+
+We'll click on new workflow (in my case, because I already had an existing workflow), and when we get to the screen showing all the different workflows, we'll click the link below the title that says _"Set up a workflow yourself"_.
+
+![](./image-37.png "We're not going to work with templates")
+
+There we'll have a small default document with a few lines, and we'll make a change so our action only runs on pushes to the master branch and also on tags that start with `v`, so we can have `v1.0.0` and so on.
+
+Here's how our base file will look
+
+```yaml
+# This is a basic workflow to help you get started with Actions
+
+name: Publish to GitHub Container Registry
+
+on:
+  push:
+    branches: [ master ]
+    tags: v*
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+```
+
+Now, let's go to the menu on the right side and look for Docker's own action called "Build and push Docker images"
+
+![](./image-39.png)
+
+We'll copy the code by clicking the copy button on the right side:
+
+![](./image-40.png "Copying the usage code")
+
+And we'll paste it right below our previous action, inside `steps`, then we'll delete some of the lines set as parameters, because we won't use all of them.
+
+```yaml
+# This is a basic workflow to help you get started with Actions
+
+name: Publish to GitHub Container Registry
+
+on:
+  push:
+    branches: [ master ]
+    tags: v*
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Build and push image
+        uses: docker/build-push-action@v1.1.1
+        with:
+          # Username used to log in to a Docker registry. If not set then no login will occur
+          username: khaosdoctor
+          # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
+          password: ${{ secrets.PACKAGES_PASSWORD }}
+          # Server address of Docker registry. If not set then will default to Docker Hub
+          registry: docker.pkg.github.com
+          # Docker repository to tag the image with
+          repository: khaosdoctor/zaqar/zaqar
+          # Automatically tags the built image with the git reference as per the readme
+          tag_with_ref: true
+```
+
+Let's go through this file piece by piece so we can understand what's going on. First, we're telling the workflow in the `name` key that we'll name this step of our process with a new name besides the action's own name, this is just for organization.
+
+Then, we're saying we'll use Docker's action as a base, passing the repository name and the action name, as well as its version.
+
+Then we go through the parameters we want to set:
+
+-   `username` is our GitHub username
+-   `password` is the secret we just created, holding our _access token_ so we can log in to the registry
+-   Then we have the `registry` key, where we define which registry we're sending our container to. In this case, since we're using GitHub itself, we'll fix this value to `docker.pkg.github.com`
+-   In the `repository` key we put the name of our image, it must **always** follow the format we mentioned above, where we have `username/repository/image:tag`
+-   And then we have the last setting, which is the most interesting one and the one that saves the most work for whoever is developing. The `tag_with_ref` key does a few interesting things, the main one being that it automatically tags the image for us: when we push directly to the `master` branch, our image gets the `latest` tag, and when we push a git tag, the image tag becomes the name of our git tag. You can check more about the ins and outs and how each setting works on the [action's page](https://github.com/docker/build-push-action/tree/releases/v1)
+
+Once we're done, let's name our file and save it. From there a new build will run and we'll have a new image in our repository:
+
+![](./image-44.png "The new image in our repository, ready to be downloaded")
+
+You can check the page for this individual package [at this URL](https://github.com/khaosdoctor/zaqar/packages/404513)
+
+## Conclusion
+
+By combining GitHub with container registries, we get a much greater ability to bring our code and our infrastructure together in a single place. This unification cuts down our complexity, since we have to deal with fewer environments, so we can start thinking about other features that take advantage of these conveniences down the road!
+
+I hope you enjoyed the article, leave a comment, like it and share it!
+
+See you next time!

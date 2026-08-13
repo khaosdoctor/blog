@@ -1,0 +1,585 @@
+---
+title: "The Complete gRPC Guide Part 2: Hands-on with JavaScript"
+pubDate: 2021-05-12T13:00:00.000Z
+updatedDate: 2026-07-16T16:15:27.000Z
+lang: en
+slug: "the-complete-grpc-guide-part-2-hands-on-with-javascript"
+category: "infra"
+tags: ["grpc", "javascript", "protobuf", "nodejs"]
+series: grpc
+seriesOrder: 2
+description: "Understand what gRPC is for JavaScript, how a gRPC call works, and how you can turn all your APIs into something faster and more descriptive!"
+seoTitle: "The Complete gRPC Guide: gRPC and JavaScript"
+seoDescription: "Understand what gRPC is for JavaScript, how a gRPC call works, and how you can turn all your APIs into something faster."
+machineTranslated: true
+draft: false
+---
+
+We've made it to **part two of our series** on what gRPC is and how we can use it efficiently to replace what we do today with REST. In the [first part of this series](/guia-grpc-1/) I explained in full how gRPC works under the hood and how it's built on top of a standard HTTP/2 request with a binary payload, using **protobuf** as the encoding layer.
+
+In this part of the series, we're diving into how gRPC actually gets implemented in **JavaScript**. Let's take a quick pass through today's agenda.
+
+## Agenda
+
+-   Which gRPC tools exist for JavaScript today
+-   How the client/server model works and which models are available to us
+-   Creating your first `.proto` file
+-   The pros and cons of the static and dynamic models
+-   Time to code!
+
+## The tools we're working with
+
+As Russel Brown put it in his [great series "The Weird World of gRPC Tooling for Node.js"](https://medium.com/expedia-group-tech/the-weird-world-of-grpc-tooling-for-node-js-part-1-40a442966876), protobuf's documentation, **especially for JavaScript**, still isn't fully fleshed out, and that's a recurring theme. Protobuf as a whole was built with lower-level languages like Go and C++ in mind. For those languages the documentation is great, but once you get to JavaScript and TypeScript you start running into a documentation gap where things are either half-written or don't exist at all.
+
+Thankfully this is changing a lot, largely thanks to Uber, who's been working on great tools like [Buf](https://github.com/bufbuild/buf), plus a set of best practices baked into another great tool called [Prototool](https://github.com/uber/prototool).
+
+For this article we're sticking to the traditional tools built by the gRPC team itself, and in a future article we'll explore this world further with other supporting tools.
+
+## Proto Compiler, or `protoc`
+
+Our main tool for handling proto files, called [protoc](https://github.com/protocolbuffers/protobuf), is part of the same package as protocolbuffers. Think of it as protobuf's CLI.
+
+It's the core implementation of the code generator and parser for protobuf across several languages, all listed in the repository's README. There's a [page with the main tutorials](https://developers.google.com/protocol-buffers/docs/tutorials), but, as you'd expect, it doesn't cover JavaScript...
+
+We can use `protoc` from the command line to convert our `.proto` contract definition files into a `.pb.js` file that contains everything we need to serialize and deserialize our data in the binary format protobuf uses, and send it over the HTTP/2 transport protocol.
+
+In theory, we could build a manual request to a gRPC service using nothing but an HTTP/2 client, as long as we know the route we want to hit and the required headers. Everything else in the payload can be identified as the binary representation that protobuf produces at the end of compilation. We'll get into that later.
+
+## `protobufjs`
+
+This is the [alternative implementation](https://github.com/protobufjs/protobuf.js) of `protoc`, written entirely in JavaScript. It's great for working with protobuf files as **messages**, meaning if you're using protobuf as a messaging system between queues, for example, as we already showed in the previous article, it's excellent for generating a more JavaScript-friendly implementation.
+
+The problem is it doesn't support gRPC, so you can't define services or RPCs on top of protobuf files, which makes this package, essentially, a message decoder.
+
+## `@grpc/proto-loader`
+
+This is the missing piece that lets `protobufjs` dynamically generate stub and skeleton definitions straight from `.proto` files. Today it's the recommended implementation for what we're doing for the rest of this article: implementing our contract files dynamically, without having to precompile every proto file up front.
+
+## `grpc` and `grpc-js`
+
+This is the core that makes gRPC work inside dynamic languages like JS and TS. The original `grpc` package has two versions, one [implemented as a C library](https://github.com/grpc/grpc) that's mostly used when you're writing either the client or the server in C or C++.
+
+> **Important note**: since this article was published, the `grpc` library has been marked for deprecation, so from now on **always** use the newer, maintained version, `@grpc/grpc-js`.
+
+For our case, the ideal option is the [implementation as an NPM package](https://github.com/grpc/grpc-node/tree/master/packages/grpc-native-core) which, essentially, takes the C implementation we just mentioned and uses `node-gyp` to compile this extension as a [native module](https://medium.com/the-node-js-collection/native-extensions-for-node-js-767e221b3d26) for Node.js. All the bindings between C and Node are done through [N-API](https://nodejs.org/api/n-api.html), which acts as the go-between for C++ code and JavaScript code, letting us integrate JavaScript with C++ code at runtime.
+
+> If you want to know more about how Node integrates with C++ and how it all works under the hood, I have a [10-part series on Node.js internals](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-1-conhecendo-nossas-ferramentas-34b6) I'd recommend reading.
+
+Right now, the NPM package for gRPC is the most widely used one for building gRPC clients, although a lot of people are currently migrating to [`grpc-js`](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js), an implementation of the gRPC client written entirely in JS.
+
+## The gRPC client-server model
+
+The client-server model in gRPC is nothing more than standard HTTP/2 communication, the difference is in the headers we send. As I explained in the first part of the series, every gRPC call is, in reality, an HTTP/2 call with a binary payload encoded in base64.
+
+To illustrate this, alongside [the code we'll be building here](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), I put together a small example of a gRPC call using a tool called `grpc-web`, which lets the browser connect directly to a gRPC client, because the browser, even though it supports HTTP/2, doesn't expose that configuration so application clients can make requests using the protocol.
+
+> If you want to know a bit more about how it works, [this article by Mark Kose](https://medium.com/@Mark.io/how-to-get-a-browser-communicate-with-containerd-using-grpc-fd44f7cf7512) has a good overview of how a call like this can be made.
+
+The problem is that, thanks to stricter CORS rules and the lack of a server that lets me tweak those settings, the call got blocked from returning, but for what I want to show here, which is just the request, it'll do fine.
+
+![A gRPC call made from the browser showing the URL and request information](./image-14.png)
+
+Notice that our request URL is `/{service}/{method}`, and that holds for anything we run. If we had services with namespaces, for example `com.lsantos.notes.v1`, our URL would look a bit different, expressing our full service name, something like `http://host:port/com.lsantos.notes.v1.NoteService/Find`.
+
+For this service we're building a notes system with just two methods, `List` and `Find`. The `List` method takes no parameters, while `Find` takes an `id` parameter that we're sending in the payload, as you can see in the image. Notice it's encoded as base64 with the value `AAAAAAMKATI=`.
+
+Inside the code repository we have a [`request.bin`](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample/blob/main/web/request.bin) file, which is the result of running `echo "AAAAAAMKATI=" | base64 -d > request.bin`. If we open this file with a Hex Editor (like the one we showed in the first article of the series, in VSCode), we'll see the following bytes: `00 00 00 00 03 0A 01 32`. Strip out all the `00`s and also the `03`, since it's just a marker for the `grpc-web` encoding. What's left is `0A 01 32`, and we can run it through the same analysis we did in the previous article of the series:
+
+![Bit breakdown of the request](./image-15.png)
+
+We can see we're sending a string with the value "2" as the payload, which is the first index.
+
+## Proto files
+
+Let's get our hands dirty and build our first `.proto` file, which will describe how our whole API works.
+
+First, let's create a new project in a folder with `npm init -y`, name it whatever you like. Then let's install the dependencies we'll need with `npm i -D google-protobuf protobufjs`.
+
+Now let's create a `proto` folder and, inside it, a file called `notes.proto`. This is the file that will describe our API and our whole service. We always start by declaring a syntax version:
+
+```protobuf
+// notes.proto
+syntax = "proto3";
+```
+
+There are two versions of protobuf syntax, you can read more about them [in this article](https://ywjheart.wordpress.com/2018/08/17/proto2-vs-proto3/). For us, the important bits are that, now, every protobuf field becomes optional, we no longer have the `required` notation that existed in syntax version 2, and we also don't have default values for properties anymore (which, essentially, makes them optional).
+
+Now, let's start organizing the file. I generally organize a protobuf file following the idea of `Service -> Entities -> Requests -> Responses`. Following Uber's best practices, it's also worth using a namespace marker like `com.yourusername.notes.v1` in case we need to keep more than one version around at the same time, but to keep things simple here we'll go with the plain form, no namespace.
+
+> Protobuf also supports importing packages from other namespaces and reusing definitions across different files.
+
+Let's first define our service, or RPC, which is the spec of every method our API will accept:
+
+```protobuf
+// notes.proto
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+```
+
+A few details matter when we're talking about `services`:
+
+-   Each `rpc` is a route and, essentially, an action that can be performed against the API.
+-   Each RPC can only take **one** input parameter and **one** output parameter.
+-   The `Void` type we defined can be swapped for the [`google.protobuf.Empty`](https://developers.google.com/protocol-buffers/docs/reference/csharp/class/google/protobuf/well-known-types/empty) type, which is what's called a `Well-Known` type, but it requires the library with those types to be installed on your machine.
+-   Another Uber best practice is putting `Request` and `Response` in your parameter names, essentially wrapping them around a bigger object.
+
+Now let's define the entities we need. First let's define the `Void` type, which is nothing more than an empty object:
+
+```protobuf
+// notes.proto
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+
+// Entities
+message Void {}
+```
+
+Every object type is defined with the `message` keyword, think of each `message` as a JSON object. Our application is a list of notes, so let's define the note entity:
+
+```protobuf
+// notes.proto
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+
+// Entities
+message Void {}
+
+message Note {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+}
+```
+
+Here we're defining all the types for our main entity, the note itself. Protobuf has [several scalar types](https://developers.google.com/protocol-buffers/docs/proto3#scalar), as well as [enums](https://developers.google.com/protocol-buffers/docs/proto3#enum) and other well-defined types described in the language's docs.
+
+Notice too that we define the message and its fields in the `type name = index;` format. We **must** pass an index for every field, otherwise protobuf won't know how to decode the binary.
+
+> Notice we changed our type definition slightly to take an integer instead of a string, unlike what we did with grpc-web earlier. Can you figure out what binary that generates?
+
+Now let's specify the `Request` and `Response` types we referenced in our service definition at the top of the file. Let's start with the simplest one, the request for the `Find` method just takes an ID, so let's specify `NoteFindRequest`:
+
+```protobuf
+// notes.proto
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+
+// Entities
+message Void {}
+
+message Note {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+// Requests
+message NoteFindRequest {
+  int32 id = 1;
+}
+```
+
+Let's move on to the response for this same method, which should return a note if one is found. For that we'll create `NoteFindResponse` and understand why this pattern is a good practice.
+
+```protobuf
+// notes.proto
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+
+// Entities
+message Void {}
+
+message Note {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+// Requests
+message NoteFindRequest {
+  int32 id = 1;
+}
+
+// Responses
+message NoteFindResponse {
+  Note note = 1;
+}
+```
+
+Why are we creating a response instead of just using the `Note` type directly as the return? We could change our service to return `Note` directly:
+
+```protobuf
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (Note);
+}
+```
+
+The problem is that if we did it this way, we'd run into more trouble fetching these details directly from the client. As a best practice, it's always worth wrapping the response of any composite type (like `Note`) inside an index of the same name, so our return essentially goes from:
+
+```json
+{
+  "id": 1,
+  "title": "title",
+  "description": "description"
+}
+```
+
+To:
+
+```json
+{
+  "note": {
+    "id": 1,
+    "title": "title",
+    "description": "description"
+  }
+}
+```
+
+Much more semantic, don't you think?
+
+To wrap things up, let's create the response for our listing service:
+
+```protobuf
+// notes.proto
+syntax = "proto3";
+
+service NoteService {
+  rpc List (Void) returns (NoteListResponse);
+  rpc Find (NoteFindRequest) returns (NoteFindResponse);
+}
+
+// Entities
+message Void {}
+
+message Note {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+// Requests
+message NoteFindRequest {
+  int32 id = 1;
+}
+
+// Responses
+message NoteFindResponse {
+  Note note = 1;
+}
+
+message NoteListResponse {
+  repeated Note notes = 1;
+}
+```
+
+Here we have a new keyword, `repeated`, it marks an array of the following type, in this case an array of `Note`.
+
+This is going to be our contract definition file. Think of it this way: if we had, say, a queue service, we could use this same file to encode a Note exactly the way it's used across other systems, in binary, and send it over the network without worrying that the other side won't understand what we're sending. In other words, we can standardize every input and output of every API in a large system using nothing but declarative files.
+
+## Static or dynamic
+
+gRPC always gives you two ways to compile things, the first is the static compilation model.
+
+In this model, we run `protoc` to compile our files into `.js` files that contain the type and encoding definitions for our messages. The upside of this model is that we get to use the types as a library instead of reading them directly, but they're a lot more complex to work with than if we just dynamically generate the package contents.
+
+> Check out the `compile` script inside [the package file in this project's repository](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample/blob/main/package.json#L8) to see how we can compile the files and what they look like once compiled.
+
+I won't go deep into the static generation model in this article, but once again Russel Brown has [a great article on building static services with gRPC](https://medium.com/expedia-group-tech/the-weird-world-of-grpc-tooling-for-node-js-part-2-daafed94cc32).
+
+What we're going to do is **dynamic generation**. In this model we don't have to manually encode and decode _every_ message. The dynamic model also handles imported packages better. But, since everything has a downside, the con of using dynamic generation is that we'll **always** need the original sources on hand, meaning we have to import and download the `.proto` files alongside our project's own files. That can be a problem in a few cases:
+
+-   When we have several interconnected systems, we need a central repository where we fetch every proto file from.
+-   Whenever we update a `.proto` file, we have to spot that change and update every corresponding service.
+
+These problems are easily solved with a package management system like NPM, just simpler. On top of that, Buf, which we mentioned earlier, is already working on bringing this kind of functionality to protobuf.
+
+## Server
+
+To start building the server, let's install the gRPC packages we need, starting with `grpc` itself and `proto-loader` with `npm i grpc @grpc/proto-loader`.
+
+Create a `src` folder and a `server.js` file. Let's start by importing the packages and loading the protobuf definition inside the gRPC server:
+
+```javascript
+//server.js
+const grpc = require('grpc')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+```
+
+What we're doing here is essentially the dynamic generation idea we talked about earlier. The `proto` file gets loaded into memory and parsed at runtime, not precompiled. First, `protoLoader` loads an object from a `.proto` file, think of it as an intermediate representation between the actual service and what you can work with in JavaScript.
+
+Then we pass this interpretation to `grpc`, essentially generating a valid definition we can use to build a service and, in turn, an API. Everything from here on out is the specific implementation of our business logic. Let's start by creating our "database".
+
+Since we want something simple, let's create just an object and an array of notes that our functions will manipulate:
+
+```javascript
+const grpc = require('grpc')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+
+const notes = [
+  { id: 1, title: 'Note 1', description: 'Content 1' },
+  { id: 2, title: 'Note 2', description: 'Content 2' }
+]
+```
+
+Now let's create and start our server, adding the service we just read from the `.proto` file:
+
+```javascript
+//server.js
+const grpc = require('grpc')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+
+const notes = [
+  { id: 1, title: 'Note 1', description: 'Content 1' },
+  { id: 2, title: 'Note 2', description: 'Content 2' }
+]
+
+const server = new grpc.Server()
+server.addService(NotesDefinition.NoteService.service, { List, Find })
+
+server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure())
+server.start()
+console.log('Listening')
+```
+
+Notice we're adding `NotesDefinition.NoteService.service`, which is a class that holds our HTTP server that will respond to incoming requests, then we're passing an object `{List, Find}`, these are the implementations of our two methods, which we still need to write.
+
+We're also listening on port 50051, this port can be any free port on your machine up to 65535. That said, it's good practice to pick ports above 50000 to keep a good gap from the usual suspects like `8080`, `443`, `9090`, `3000`, and so on.
+
+Finally, we're using `createInsecure` because, by default, HTTP/2 requires a digital certificate to start, so we're just passing an empty certification so we don't have to create one locally. If you're taking this service to production, you should use a real digital certificate for the communication.
+
+## Implementation
+
+To get our server running, we need to implement each of the RPCs we defined for it. In this case we created a `List` RPC and a `Find` RPC. Their implementation is simply a function that takes an error and a callback as its signature. They do, though, need to **have the exact same name as the RPCs**.
+
+Let's learn with the simplest example, the implementation of the `List` method. What it does is always return the full list of notes.
+
+```javascript
+function List (_, callback) {
+  return callback(null, { notes })
+}
+```
+
+Notice we also have to follow the same response shape. If our proto file says we're expecting the return to be a list of `Note` inside an index called `notes`, we have to return an object `{ notes }`.
+
+The `callback` is a function we call in the `callback (err, response)` shape, meaning if we have errors we send them as the first parameter and the response as null, and vice versa.
+
+To build the `Find` method we need to handle a few errors and run a find over our array. The method is quite simple, but it takes an `id` parameter. To grab this parameter we use the function's first argument, the one we ignored in `List` with `_`, to get a `request` object, which holds the `id` parameter that was sent:
+
+```javascript
+function Find ({ request: { id } }, callback) {
+  const note = notes.find((note) => note.id === id)
+  if (!note) return callback(new Error('Not found'), null)
+  return callback(null, { note })
+}
+```
+
+It's worth pointing out that, if we have an error inside gRPC and don't return it as the first parameter (if we just do a plain `return` or a `throw`), our client won't get the right information back, which is why we need to build an error structure and return it in the callback.
+
+Likewise, when we call the `callback` function at the end of execution, we're passing the error as null, which tells the caller everything went fine, and we're also sending an object `{ note }`, matching what our `NoteFindResponse` specified.
+
+The full server file ends up looking like this:
+
+```javascript
+//server.js
+const grpc = require('grpc')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+
+const notes = [
+  { id: 1, title: 'Note 1', description: 'Content 1' },
+  { id: 2, title: 'Note 2', description: 'Content 2' }
+]
+
+function List (_, callback) {
+  return callback(null, { notes })
+}
+
+function Find ({ request: { id } }, callback) {
+  const note = notes.find((note) => note.id === id)
+  if (!note) return callback(new Error('Not found'), null)
+  return callback(null, { note })
+}
+
+const server = new grpc.Server()
+server.addService(NotesDefinition.NoteService.service, { List, Find })
+
+server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure())
+server.start()
+console.log('Listening')
+```
+
+## Client
+
+The client isn't much different, the first few lines are exactly the same as the server, after all we're loading the same definition file. Let's write it in the same `src` folder, in a `client.js` file:
+
+```javascript
+//client.js
+const grpc = require('@grpc/grpc-js')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+```
+
+Here I'm using, for the sake of the explanation, the `@grpc/grpc-js` package. The big difference between it and the original `grpc` package, beyond the implementation itself, is that it doesn't have a `bind` method for the server, so you need to use `bindAsync` (in case you want to use it to build the server too). On the client, you can swap it out for the `grpc` package just as easily as on the server. If you want to follow this tutorial and use both, install `grpc-js` with `npm i @grpc/grpc-js`.
+
+The big difference between the server and the client is that, on the client, instead of loading the whole service to spin up a server, we just load the note service's definition. After all, we only need the network call and what it responds with.
+
+```javascript
+//client.js
+const grpc = require('@grpc/grpc-js')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+
+const client = new NotesDefinition.NoteService('localhost:50051', grpc.credentials.createInsecure())
+```
+
+Notice we're initializing a new instance of `NoteService`, not adding a `NoteService.service`. We still need to pass the server's address so we can actually communicate.
+
+From here we already have everything we need, our client has every method defined in our RPC, and we can call it as if it were a local object call:
+
+```javascript
+//client.js
+const grpc = require('@grpc/grpc-js')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+
+const client = new NotesDefinition.NoteService('localhost:50051', grpc.credentials.createInsecure())
+
+client.list({}, (err, notes) => {
+  if (err) throw err
+  console.log(notes)
+})
+```
+
+This call will make the server send us the list of notes, and calling the `Find` endpoint will search for notes the same way:
+
+```javascript
+//client.js
+const grpc = require('@grpc/grpc-js')
+const protoLoader = require('@grpc/proto-loader')
+const path = require('path')
+
+const protoObject = protoLoader.loadSync(path.resolve(__dirname, '../proto/notes.proto'))
+const NotesDefinition = grpc.loadPackageDefinition(protoObject)
+
+const client = new NotesDefinition.NoteService('localhost:50051', grpc.credentials.createInsecure())
+
+client.list({}, (err, notes) => {
+  if (err) throw err
+  console.log(notes)
+})
+
+client.find({ id: 2 }, (err, { note }) => {
+  if (err) return console.error(err.details)
+  if (!note) return console.error('Not Found')
+  return console.log(note)
+})
+```
+
+> Notice that, on the client, the function calls are in lowercase, but both versions exist on the same object.
+
+We're already handling the error for when there's no note with the given ID, and sending the `{ id: 2 }` parameter as specified in our `NoteFindRequest`.
+
+## Going further
+
+Working with callbacks is kind of painful, so we can convert the calls into something more modern with `async` like this:
+
+```javascript
+function callAsync (client, method, parameters) {
+  return new Promise((resolve, reject) => {
+    client[method](parameters, (err, response) => {
+      if (err) reject(err)
+      resolve(response)
+    })
+  })
+}
+```
+
+And call your client like this:
+
+```javascript
+callAsync(client, 'list', {}).then(console.log).catch(console.error)
+```
+
+Another option is to return every method as an async function, essentially making the whole client async. We can grab every enumerable property of the object and, for each one, create a `{property}Async` variant:
+
+```javascript
+function promisify (client) {
+  for (let method in client) {
+    client[`${method}Async`] = (parameters) => {
+      return new Promise((resolve, reject) => {
+        client[method](parameters, (err, response) => {
+          if (err) reject(err)
+          resolve(response)
+        })
+      })
+    }
+  }
+}
+```
+
+And update our file to look like this:
+
+```javascript
+const client = new NotesDefinition.NoteService('localhost:50051', grpc.credentials.createInsecure())
+promisify(client)
+
+client.listAsync({}).then(console.log)
+```
+
+As output, we'll get our `Note` object.
+
+## Conclusion
+
+We've reached the end of our second article in the series, here we talked a bit about how to build our gRPC service using JavaScript, figured out how to make it async, and got a better grip on the concepts and tools behind building a gRPC application in JavaScript.
+
+In the next article, we'll level this application up even further by bringing TypeScript types into the mix!
+
+If you liked this post, share it with your friends, and if you don't want to miss out on future releases and tips, subscribe to the newsletter :D!
+
+See you!

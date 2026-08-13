@@ -1,0 +1,298 @@
+---
+title: "What's new in TypeScript 4.7"
+pubDate: 2022-06-08T14:27:00.000Z
+updatedDate: 2026-07-16T16:08:55.000Z
+lang: en
+slug: "whats-new-in-typescript-47"
+category: "typescript"
+tags: ["typescript", "development", "javascript", "nodejs"]
+description: "Get up to speed on the main new features of TypeScript 4.7. Which, among many other things, includes the ability to use native ESModules!"
+seoDescription: "Get up to speed on the main new features of TypeScript 4.7. Which, among many other things, includes the ability to use ESModules"
+machineTranslated: true
+draft: false
+---
+TypeScript 4.7 is out, and, as always, let's go through the main things the development team announced.
+
+## ESModules support in Node.js
+
+It's been a while since Node.js got ESM support (we even [have articles here on the blog](/os-ecmascript-modules-estao-aqui/) about it), but TypeScript wasn't exactly keeping up with what was happening, mostly because this was one of the most critical changes in the whole ecosystem, since all of Node.js was built around the CommonJS (CJS) model.
+
+Interoperability between the two import modes isn't just complex, it also brings a bunch of problems and new challenges, especially with older features. Even though ESM support had been in TypeScript as an experimental feature since 4.5, it wasn't quite the moment to ship it as a complete feature yet.
+
+Now, though, TS 4.7 brings the most recent support (Node 16) for ESM through the `module` option in `tsconfig.json`.
+
+```json
+{
+  "compilerOptions": {
+    "module": "node16"
+  }
+}
+```
+
+### Support for `type` and new extensions
+
+As we've mentioned in other articles here on the blog, to use ESM in a Node.js module you basically just need to either call the file with the `.mjs` extension, or add the `type` key to `package.json` with the value `module`.
+
+Let's remind ourselves of some of the rules when using ESM:
+
+-   We can use the `import` and `export` keywords
+-   We have that oh so useful top-level `await`, so we don't need an `async` function
+-   We need to use the **full** file name including the extension in imports
+-   A few other smaller rules
+
+The change on the TS side was smaller, because we already used the "ESM style" to import modules, but that was native, when we compiled the code down to JS at the end we still ended up with a bunch of `require` calls anyway.
+
+What happens now is that TS starts treating `.ts` files (and their variants like `.tsx`) the same way Node would treat JS files, meaning the compiler looks for the closest `package.json` to figure out whether that file is inside a module or not. If it is, `import` and `export` are left as is in the final code, and a few things change around module imports in general.
+
+The classic example is the extension, so a common piece of code like this, which would work fine with CJS:
+
+```ts
+export function foo() {}
+
+import { foo } from './foo'
+```
+
+Wouldn't work under ESM because `./foo` doesn't have the full file extension. The `import` would need to be swapped for this other form to work under both resolution modes:
+
+```ts
+import { foo } from './foo.ts'
+```
+
+On top of that, the same way we have the `.mjs` and `.cjs` extensions to tell JS files apart as ESM or CJS, we now have the `.mts` and `.cts` extensions, which produce `.d.mts` and `.d.cts` definition files, plus matching `.mjs` or `.cjs` files depending on the entry file.
+
+All the other ESM vs CJS rules keep applying as usual.
+
+## Exports, Imports and self-referencing in package.json
+
+Ever since we got ESM in Node.js, we've had a new field in `package.json` that lets a package define different entry points depending on whether it's imported via ESM or CJS. That field is `exports`:
+
+```json
+// package.json
+{
+  "name": "my-package",
+  "type": "module",
+  "exports": {
+    ".": {
+      // entry point for ESM
+      "import": "./esm/index.js",
+      // entry point for cjs
+      "require": "./commonjs/index.cjs"
+    }
+  },
+  // Fallback for other versions
+  "main": "./commonjs/index.cjs"
+}
+```
+
+The way TS supports these new fields basically comes down to how it already works today. The idea is that when a type gets inferred from a package, TS looks for the `main` field inside that package's `package.json` and then looks for the matching `.d.ts` file, unless the package specifies a `types` key.
+
+As you'd expect, under the new model, TS will look for the `import` field inside the `exports` key of a `package.json` if it exists, or a `require` field if the file is a CJS file. You can also define, for each of them, where the types live and where Node.js should look:
+
+```json
+// package.json
+{
+  "name": "my-package",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        // Where TS will look for types
+        "types": "./types/esm/index.d.ts",
+        // Where Node.js will look for the package
+        "default": "./esm/index.js"
+      },
+      "require": {
+        "types": "./types/commonjs/index.d.cts",
+        "default": "./commonjs/index.cjs"
+      }
+    }
+  },
+  // Fallback for other TS versions
+  "types": "./types/index.d.ts",
+  "main": "./commonjs/index.cjs"
+}
+```
+
+Something worth noting:
+
+> The `types` key must always come before `default` in an `exports` object
+
+## Control flow analysis for object elements
+
+An improvement in type detection for object keys landed in TS 4.7. Code like this used to be a problem:
+
+```ts
+const key = Symbol()
+
+const numberOrString = Math.random() < 0.5 ? 42 : 'hello'
+
+const obj = {
+  [key]: numberOrString
+}
+
+if (typeof obj[key] === 'string') {
+  let str = obj[key].toUpperCase()
+}
+```
+
+It wouldn't find the type of the `obj[key]` key automatically and would keep reporting the type as `string | number`. Today it's possible to detect that this type is now, by default, a `string`.
+
+The same fine-grained improvement was applied to parameters that are function objects, like this example:
+
+```ts
+declare function f<T>(arg: { produce: (n: string) => T; consume: (x: T) => void }): void
+
+f({
+  produce: () => 'hello',
+  consume: (x) => x.toLowerCase()
+})
+
+f({
+  produce: (n: string) => n,
+  consume: (x) => x.toLowerCase()
+})
+
+// Error before, works now
+f({
+  produce: (n) => n,
+  consume: (x) => x.toLowerCase()
+})
+
+// Error before, works now
+f({
+  produce: function () {
+    return 'hello'
+  },
+  consume: (x) => x.toLowerCase()
+})
+
+// Error before, works now
+f({
+  produce() {
+    return 'hello'
+  },
+  consume: (x) => x.toLowerCase()
+})
+```
+
+In other words, TS got smarter at finding function types and their return values inside objects that are actually parameters of another function.
+
+## Instantiation Expressions
+
+When we use generics in TS, most of the time functions end up extremely generic, as you'd expect. But if we want to specialize them a bit, we've always had to build a wrapper. For example, this function returns a `Box` type, which is generic:
+
+```ts
+interface Box<T> {
+  value: T
+}
+
+function makeBox<T>(value: T) {
+  return { value }
+}
+```
+
+If we wanted to create a variation of this function (essentially an alias) where T is explicitly a `Hammer` or `Wrench` type, we'd either have to create a new function that takes `Hammer` as a parameter and returns the call to `makeBox` with that parameter, so TS would infer the type:
+
+```ts
+function makeHammerBox(hammer: Hammer) {
+  return makeBox(hammer)
+}
+```
+
+Or do a type overload:
+
+```ts
+const makeWrenchBox: (wrench: Wrench) => Box<Wrench> = makeBox
+```
+
+Now it's possible to bind the type directly to a variable, meaning we can swap the generic right at the variable's type assignment:
+
+```ts
+const makeHammerBox = makeBox<Hammer>
+```
+
+That would have the same effect as the previous options. And this is especially useful when we have native generic types, like `Map`, `Set` and `Array`:
+
+```ts
+const MapComum = new Map(1, 2) // Would assume a Map<number, number>
+const ErrorMap = Map<string, Error>
+
+const errorMap = new ErrorMap() // type is Map<string, Error>
+```
+
+## `extends` available for `infer` types
+
+I recently posted [an article here on the blog](/infer-typescript/) about what `infer` is in TS. In short, it lets us extract the type of a variable when we're using it inside an `extends` clause, for example, when we want to grab the first element of a tuple only if it's a string:
+
+```ts
+type FirstIfString<T> = T extends [infer S, ...unknown[]] ? (S extends string ? S : never) : never
+
+// "hello"
+type B = FirstIfString<['hello', number, number]>
+
+// "hello" | "world"
+type C = FirstIfString<['hello' | 'world', boolean]>
+
+// never
+type D = FirstIfString<[boolean, number, string]>
+```
+
+Now, having to write two ternaries for this kind of check is a bit annoying, so to simplify the idea, we can now use `extends` together with `infer` and the type looks like this:
+
+```ts
+type FirstIfString<T> =
+  T extends [infer S extends string, ...unknown[]]
+    ? S
+    : never
+```
+
+## Explicit type variance
+
+Now it's possible to annotate a function's input or output types with a variance indicator. The full explanation [is fairly complex](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#optional-variance-annotations-for-type-parameters) and covers a set of use cases that are pretty advanced.
+
+In essence, the idea is trying to tell when a generic type `T`, for example, is different across distinct invocations, for example:
+
+```ts
+interface Animal {
+  animalStuff: any
+}
+
+interface Dog extends Animal {
+  dogStuff: any
+}
+// ...
+type Getter<T> = () => T
+type Setter<T> = (value: T) => void
+```
+
+In this case, if we have two instances of the `Getter` type, trying to figure out whether the type we sent it, or the type T, is indistinguishable from the other is pretty tricky. Especially because one type extends the other, meaning that on one side, every `Dog` is an `Animal`, but not every `Animal` is a `Dog`, so the variance `Dog -> Animal` holds true while `Animal -> Dog` doesn't.
+
+Now we can define whether the type is an input or output type with the `in` and `out` annotations:
+
+```ts
+interface Animal {
+  animalStuff: any
+}
+
+interface Dog extends Animal {
+  dogStuff: any
+}
+// ...
+type Getter<out T> = () => T
+type Setter<in T> = (value: T) => void
+```
+
+So if we have an output type in the same scope, TS can be a lot faster at identifying the type, even more so with circular types.
+
+> But careful, it's not recommended that you go around annotating every one of your functions and every one of your parameters with `in` or `out`, since TS already does a great job with this on its own.
+
+## Smaller changes:
+
+-   [Group-aware organize imports](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#group-aware-organize-imports)
+-   [Go to Source definition](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#go-to-source-definition)
+-   [Resolution mode can be customized](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#resolution-customization-with-modulesuffixes)
+-   [Intellisense for object method completions](https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#object-method-snippet-completions)
+
+## Conclusion
+
+That's it! If you want to know more about what's new not just in TS but in Node.js too, don't forget to subscribe to [my newsletter](https://news.lsantos.dev) to get the best news and the best curated tech content straight to your inbox!

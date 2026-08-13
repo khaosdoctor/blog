@@ -1,0 +1,144 @@
+---
+title: "Is JavaScript Going to Stop Being Single-Threaded? Understanding Module Expressions"
+pubDate: 2022-12-08T13:00:41.000Z
+updatedDate: 2026-07-16T16:04:57.000Z
+lang: en
+slug: "is-javascript-going-to-stop-being-single-threaded"
+category: "typescript"
+tags: ["ecmascript", "javascript", "development"]
+description: "What if JavaScript were as good at running on more than one thread as it is at running on just one? Let's understand Module Expressions!"
+seoTitle: "What are Module Expressions in JavaScript"
+machineTranslated: true
+draft: false
+---
+We all grew up hearing, as devs, that JavaScript is a _single-threaded_ language, meaning we only get one single process and can't step outside of it. That turned out to be wrong a few years back, when new APIs like [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) and [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) showed up.
+
+On top of that, every extension of JavaScript got labeled single-threaded too. How many times have you heard someone say Node.js is single-threaded? That's not true either, even though the set of APIs and the infrastructure behind Node aren't the same as the Web's.
+
+Now we're taking a step further with this idea thanks to the **[Module Expressions](https://github.com/tc39/proposal-module-expressions)** proposal, which just hit stage 3! If you don't know how the JavaScript release process works, I explain it in more detail in this video. If you haven't watched it yet, I strongly recommend it so you can understand everything else here better!
+
+![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
+
+## The problem
+
+When we want to run some kind of async computation in JavaScript, using some API (or even another browser window), we hit a problem that's essentially baked into how JavaScript was built. Since it's an environment designed to run on a single thread, a lot of these APIs don't allow memory to be shared between, say, a Web Worker and the main page.
+
+One example is when we need to run user code inside a controlled environment, a sandbox. For that we can spin up a web worker (or even a [Shadow Realm](/shadow-realms/), which guarantees the same memory space isn't shared, and that's a good thing). But how do we get that function over to this new "realm"?
+
+Some libraries that implement multi-thread execution patterns, like [ParallelJS](https://github.com/parallel-js/parallel.js) and [Greenlet](https://github.com/developit/greenlet), use an interesting strategy: turn the code into a string or a blob so it can be sent as a message to the executor.
+
+Once the code is on the other side, you have to `eval` it to get the result. But that brings a few problems, mainly, as you'd expect, security problems around [CSPs (Content Security Policies)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), which are already complex on their own and get even messier once more than one thread is involved.
+
+![](./image-1.png "The code is passed from one thread to another as a string or a BLOB")
+
+Beyond that problem, there's another one that's even bigger: **the code loses its execution context**. That means a piece of code like this example from the proposal:
+
+```js title="Example from the proposal"
+import greenlet from 'greenlet'
+
+const API_KEY = "...";
+
+let getName = greenlet(async username => {
+  let url = `https://api.github.com/users/${username}?key=${API_KEY}`
+  let res = await fetch(url)
+  let profile = await res.json()
+  return profile.name
+});
+```
+
+Has a serious execution problem: it loses the reference to the `API_KEY` variable, because when the code runs on the other side, it has no idea what that value is since it doesn't exist in that context. And since Greenlet turns everything into a string, it doesn't even check the file to swap the value from one side to the other.
+
+Among other issues, the most common workaround is to use a separate file with the needed code and run whatever's described there, which wouldn't work in the context above and is also a big developer experience problem, because we have bundlers whose whole job is to put everything back together in one place at the end.
+
+## The solution
+
+What if we could package a module, literally create a sequence of lines of code that carries context and semantics, and hand it to our worker or our thread without needing any kind of string or blob at all?
+
+That's where Module Expressions come in.
+
+The idea behind Module Expressions is pretty simple and looks a lot like [Do Expressions](/do-expressions/), which I already covered here on the blog. Here's an example of what an implementation looks like:
+
+```js title="Example from the proposal"
+let mod = module {
+  export let y = 1;
+};
+let moduleExports = await import(mod);
+assert(moduleExports.y === 1);
+
+assert(await import(mod) === moduleExports);
+```
+
+The big idea is that, instead of having to send the content as a string, we can send a module that gets assigned on the other side as a module object, not as a string. And that's basically it, there isn't much more to say.
+
+![](./image-2.png "Now the module doesn't change type and doesn't lose context")
+
+One detail worth remembering: this kind of object can only be imported through **dynamic imports**, using `import()`, and not through the `import` statements you put at the top of a file, because you can't use a string to access the content of this module since it's being created at runtime.
+
+Also, because they can only be imported at runtime, they inherit the async nature of `import()`, since a module can import another module over the network.
+
+### Context
+
+The context of a Module Expression is the context where it's syntactically located, meaning the spot in the file where the code sits. This example helps clear it up:
+
+```js title="Example from the proposal"
+// main.js
+const mod = module {
+	export async function main(url) {
+		return import.meta.url;
+	}
+}
+const worker = new Worker("./module-executor.js");
+worker.postMessage(mod);
+worker.onmessage = ({data}) => assert(data == import.meta.url);
+
+// module-executor.js
+addEventListener("message", async ({data}) => {
+	const {main} = await import(data);
+	postMessage(await main());
+});
+```
+
+Notice we're declaring an expression that uses `import.meta.url`. Within the context of that expression, the value will be the URL of the `main.js` file. When we spin up a new worker from another file and send the module over via message, we'll see that the return of `await main()` is the same URL, because we're not in a different context.
+
+> An extension to the proposal is planned [here](https://github.com/tc39/proposal-module-expressions#worker-constructor) that lets workers be created directly with Module Expressions.
+
+Essentially, the idea is to carry code along with its local context into another context without losing any information. Paired with ShadowRealms, we get a pretty powerful API that lets us run code from wherever we are without the problem of losing information:
+
+```js title="Example from the proposal"
+globalThis.flag = true;
+
+let mod = module {
+  export let hasFlag = !!globalThis.flag;
+};
+
+let m = await import(mod);
+assert(m.hasFlag === true);
+
+let realm = new ShadowRealm();
+let realmHasFlag = await r1.importValue(mod, "hasFlag");
+assert(realmHasFlag === false);
+```
+
+## Conclusion
+
+One of the most interesting uses of this proposal is building what's called an _off-thread scheduler_, a function that takes a module and runs it on another thread, without sharing resources.
+
+The proposed syntax for this looks like this:
+
+```js
+let workerModule = module {
+  onmessage = async function({data}) {
+    let mod = await import(data);
+    postMessage(mod.default());
+  }
+};
+
+let worker = new Worker({type: "module"});
+worker.addModule(workerModule);
+worker.onmessage = ({data}) => alert(data);
+worker.postMessage(module { export default function() { return "hello!" } });
+```
+
+Pay attention to `new Worker({type: 'module'})` and to the worker declaration already carrying a module expression right there on the last line.
+
+That wraps up this rundown on **Block Expressions**, but unfortunately, since the proposal is long, a lot of content got left out so this wouldn't turn into a giant article. So I'd suggest reading the original proposal too, so you can get an even better picture of it!

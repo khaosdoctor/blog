@@ -1,0 +1,107 @@
+---
+title: "What Is Corepack and How Can You Use It?"
+pubDate: 2024-07-11T11:00:51.000Z
+updatedDate: 2026-07-16T17:55:13.000Z
+lang: en
+slug: "what-is-corepack-and-how-to-use-it"
+category: "javascript"
+tags: ["nodejs"]
+description: "Learn how to use Corepack, the tool that's stirring up controversy in the Node.js world"
+machineTranslated: true
+draft: false
+---
+If you've been following the [controversy](https://socket.dev/blog/node-community-debates-enabling-corepack-unbundling-npm) around the Node.js and NPM ecosystem in 2024, you probably already know what I'm about to talk about. But today, I want to show you what **Corepack** is, the tool that promises to end the war between Node's package managers!
+
+But first, a bit of history!
+
+## About NPM
+
+Since Node was created, NPM has always been the main package manager. It's built directly into the runtime's binary, and it lets you install packages in a very simple and easy way.
+
+There are theories saying that NPM's creator, Isaac Schlueter, forced NPM's adoption by Node, in a way coercing the team into bundling it into the binary. That's not true. NPM was an agreement between Isaac and Ryan Dahl to meet the needs of a growing user community: having a simple way to install external packages.
+
+For many years, NPM was the only place where you could publish and download packages for Node.js. That hasn't been true since the arrival of others like Yarn and PNPM, which I actually made a video covering:
+
+![](https://www.youtube.com/watch?v=vxES6rbrd-U)
+
+So NPM got bundled into Node even before it became a for-profit corporation, [acquired by GitHub in 2020](https://github.blog/2020-03-16-npm-is-joining-github/), and when GitHub itself got acquired by Microsoft, it ended up in their catalog too.
+
+What you can take from this is that, since 2009, NPM has held the biggest share of the package manager market. Not that this means much in practice, but holding basically a monopoly over how packages get downloaded and used meant NPM pretty much dictated how packages needed to be built. Plenty of Node's features were even designed with NPM in mind, like the fact that any package without a prefix will automatically have its manager set to NPM.
+
+This close coupling with Node gave NPM an advantage that was almost impossible for any other package manager to overcome. A lot of people saw this as a way of eliminating competition, as this talk from CJ Silverio (NPM's former CTO) shows:
+
+![](https://www.youtube.com/watch?v=MO8hZlgK5zc)
+
+But what now? Where does that leave the other managers? The fact is, when NPM became nearly unusable due to how slow package installs were, other people moved to create other managers, like Yarn and pnpm. That's when the package manager war started, a war that, just like the browser war, had and still has a huge, already-established monopoly to deal with.
+
+But all of this might change with Corepack.
+
+## What Corepack Is
+
+Corepack is a tool that now ships together with Node.js since version 14.19, just like NPM, but instead of being a package manager, it's **all** the package managers.
+
+This tool doesn't just let you choose whichever package manager you want, it also lets you install any of them without going through the long process of downloading the binary and installing it globally, and so on. Just run:
+
+```bash
+corepack enable && corepack enable npm
+```
+
+This command activates Corepack for every package on your system, globally. The same goes for Yarn and pnpm. In other words, Corepack is a way for you to use whichever package manager _you_ or your project happen to be using at the moment, and it also lets you tell people using your project which package manager is preferred (or required).
+
+> [!TIP] 🤖
+> As you can imagine, NPM's reaction to this tool couldn't have been anything else. They were [vehemently](https://socket.dev/blog/node-community-debates-enabling-corepack-unbundling-npm) against adopting the protocol, because that would also mean NPM would stop being bundled into Node's binary.
+
+## How to Use Corepack
+
+Using Corepack is pretty simple. Go to your `package.json` file and create a new key called `packageManager`. This key needs to have the value `yarn`, `npm` or `pnpm`, but not just any value, you also need to specify a version for the package:
+
+```json
+{
+  // npm
+  "packageManager": "npm@10.8.1",
+  // pnpm
+  "packageManager": "pnpm@9.1.4",
+  // yarn
+  "packageManager": "yarn@3.1.1"
+}
+```
+
+You can't use notations like `pnpm@latest` or `yarn@^10.0.0` (nor omit the version, like just `pnpm`). But that's where the magic happens.
+
+Say you have a package or project with the following configuration in its `package.json`:
+
+```json
+{
+  "packageManager": "pnpm@9.1.4"
+}
+```
+
+And you try to run `npm install`, you'll get an error saying:
+
+```
+Usage Error: This project is configured to use pnpm
+```
+
+Now, if you type `pnpm install`, you'll get a different message:
+
+```
+Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-9.1.4.tgz.
+
+Do you want to continue? [Y/n]
+```
+
+And the same goes for Yarn.
+
+What Corepack does is intercept calls to Yarn and pnpm, but it doesn't do the same for NPM, that's why we need `corepack enable npm`, so it also intercepts NPM's calls and does the same thing.
+
+Now you can use any package manager, in any repository, at any time.
+
+## Conclusion
+
+While this is some kind of a win for the community in terms of having more options in a fairer way, it's worth pointing out that NPM is one of the greatest tools out there, and probably one of the main reasons Node is what it is today.
+
+So we also have to be grateful to them for doing all this work since 2009, and for maintaining the community and package management so well, so that every user could thrive in a much easier, much more intuitive environment.
+
+Besides that, it's important to say that bundling NPM inside Node gets us a few things. One of them, maybe the main one, is the fact that we know the current version of Node will always work with the installed version of NPM, which makes package management a lot easier for us. It is, however, a bigger problem for the Node team, since a new version has to be kept in sync between the two binaries.
+
+On the other hand, always using Corepack the way it currently works isn't very intuitive, so decoupling NPM by default could make life a lot harder for anyone who just wants to install or use a Node package. That's exactly why this controversy isn't as simple as it looks!

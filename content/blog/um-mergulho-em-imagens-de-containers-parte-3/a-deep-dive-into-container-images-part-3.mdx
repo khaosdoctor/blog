@@ -1,0 +1,179 @@
+---
+title: "A Deep Dive Into Container Images - Part 3"
+pubDate: 2020-08-14T17:34:25.000Z
+updatedDate: 2026-07-16T16:26:37.000Z
+lang: en
+slug: "a-deep-dive-into-container-images-part-3"
+category: "infra"
+tags: ["docker", "containers", "javascript", "development", "technology", "typescript"]
+series: container-images
+seriesOrder: 3
+description: "How do you build a fast, light, efficient image for your application when you're using a dynamic language like JavaScript?"
+machineTranslated: true
+draft: false
+---
+In the [previous post](/um-mergulho-em-imagens-de-containers-parte-2/) we talked about the best way to build a Docker image for languages considered static, like C or Go. In this post we're going to dig a bit deeper into building images with **dynamic** languages, like Python or JavaScript.
+
+## Goodbye Scratch Images
+
+As we mentioned back in the [first post](/um-mergulho-em-imagens-de-containers-parte-1/), there's an image type called **scratch**, which is a completely empty image, really just an empty filesystem. We used this type of image to build our container in the previous post.
+
+The bad news is we can't use this type of image to build our dynamic containers, because we're going to need the language runtime installed in the operating system. So this time we'll only be using **full**, **slim** and **alpine** images.
+
+## Multi-stage builds
+
+Just like we did in the previous post, we can take advantage of a multi-stage build process, meaning we have a container that holds all the resources and development tools needed to build our application, but we don't use that container in production. Instead we use another container that holds as little as possible.
+
+This applies to dynamic languages too, but there are a few tweaks we need to make so these builds stay efficient. Since we won't have a single binary to copy, the best approach is to copy the whole directory. Some languages, like Python, play well with this kind of build because Python has VirtualEnv, which lets us logically separate the environments we're working with.
+
+Let's run this test with a simple application, a JavaScript API that sends emails. The source code is available [here](https://github.com/khaosdoctor/zaqar). To start, let's look at the `Dockerfile` with the build image:
+
+```Dockerfile
+FROM node:12 AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+```
+
+The Node:12 image size can vary, but the raw image sits at around 340Mb. As you can see, base images for dynamic languages are much bigger than images for compiled languages, because we need the runtime to be bundled in.
+
+That said, let's make a change here since full images can carry plenty of vulnerabilities. Let's switch to the **slim** image, which is around **40mb**:
+
+```Dockerfile
+FROM node:12-slim AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+```
+
+We can do even better if we switch our image to an **alpine** one!
+
+```Dockerfile
+FROM node:12-alpine AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+```
+
+Now our build image only has to download 28mb up front.
+
+## Production image
+
+We've built our builder, now let's create our production image. For that, we're going to use the **alpine** image, which is much smaller!
+
+```Dockerfile
+# PRODUCTION IMAGE
+
+FROM node:12-alpine
+
+RUN mkdir -p /usr/app
+WORKDIR /usr/app
+
+COPY --from=builder [\
+  "/usr/src/app/package.json", \
+  "/usr/src/app/package-lock.json", \
+  "/usr/app/" \
+  ]
+
+COPY --from=builder "/usr/src/app/dist" "/usr/app/dist"
+COPY ["./scripts/install_renderers.sh", "/usr/app/scripts/"]
+
+RUN npm install --only=prod
+
+EXPOSE 3000
+
+ENTRYPOINT [ "npm", "start" ]
+```
+
+We're only copying the TypeScript output folder into our production image, and we're only installing the dependencies a production application actually needs, with `npm install --only=prod`.
+
+Same deal with exposing the necessary ports and setting up the startup script only in this image, not in the build image, since that one is never actually run.
+
+Putting it all together we get:
+
+```Dockerfile
+FROM node:12-slim AS builder
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+## Install dependencies
+COPY ["./package.json", "./package-lock.json", "/usr/src/app/"]
+
+RUN npm install
+
+## Add source code
+COPY ["./tsconfig.json", "/usr/src/app/"]
+COPY "./src" "/usr/src/app/src/"
+
+## Build
+RUN npm run build
+
+# PRODUCTION IMAGE
+
+FROM node:12-alpine
+
+RUN mkdir -p /usr/app
+WORKDIR /usr/app
+
+COPY --from=builder [\
+  "/usr/src/app/package.json", \
+  "/usr/src/app/package-lock.json", \
+  "/usr/app/" \
+  ]
+
+COPY --from=builder "/usr/src/app/dist" "/usr/app/dist"
+COPY ["./scripts/install_renderers.sh", "/usr/app/scripts/"]
+
+RUN npm install --only=prod
+
+EXPOSE 3000
+
+ENTRYPOINT [ "npm", "start" ]
+```
+
+The final image ends up at roughly **120mb**, but the Node alpine image alone is 28Mb, meaning we've got about 90mb of application and dependencies sitting in this image. If we'd used a full image, that size would easily have gone past 1gb.
+
+## Conclusion
+
+Knowing how to build your own images is an important skill: it lets you shrink your application down to something far more concise and light, which makes downloading and running your images much easier.
+
+Don't forget to subscribe to the newsletter for more exclusive content and weekly news! Like and share your feedback in the comments!
+
+See you around!

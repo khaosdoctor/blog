@@ -1,0 +1,885 @@
+---
+title: "Using JWT tokens safely"
+pubDate: 2022-08-18T14:00:00.000Z
+updatedDate: 2026-07-16T16:07:18.000Z
+lang: en
+slug: "using-jwt-tokens-safely"
+category: "javascript"
+tags: ["javascript", "security", "typescript"]
+description: "You've been using JWT tokens unsafely in every one of your projects! In this article you'll learn how to protect your tokens against attacks!"
+seoTitle: "You're using JWT wrong! Using tokens safely"
+machineTranslated: true
+draft: false
+---
+Web security should be everyone's concern, especially the people behind software development projects. For devs, it's a lot more worrying to build systems that don't follow security rules, because any kind of malicious action can escalate real fast.
+
+If you've read my stuff before, you know I'm a big fan of the RFC7519 standard, the famous [JWT](https://jwt.io). I even [wrote an article](https://medium.com/trainingcenter/jwt-usando-tokens-para-comunicação-eficiente-cf0551c0dd99) a while back about how it all works and explained every detail of implementing this kind of token.
+
+The problem is that implementation is inherently **insecure**, and I'll tell you why.
+
+> The code used in this example can be found [on my GitHub](https://github.com/khaosdoctor/secure-jwt-tokens)
+
+https://github.com/khaosdoctor/secure-jwt-tokens
+
+## The problem
+
+JWT tokens have been around for a while, and they've already been the target of [plenty of controversy](http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/\(), most of it about how the tokens are exposed to a specific kind of attack called an XSS Attack.
+
+> If you don't know what an XSS attack is yet, here's a video I made together with Código Fonte TV
+
+![](https://www.youtube.com/watch?v=2LYPyUk-L0k)
+
+In most applications, when we get a JWT token back from the server, as a rule we think:
+
+> "Where am I going to store this token so I don't have to log the user in every time?" – Pretty much everyone
+
+And most of the time, `LocalStorage` is the place people pick. It's an extremely simple API to use, it stores data across sessions and across tabs, so as long as the tab is on the same domain, the browser will store the token and let it be used. It's one of the most efficient ways to handle a login.
+
+The big problem is that it can be accessed easily via JS. So any site with an XSS vulnerability, meaning the chance of getting a malicious script to run on the domain, immediately makes the token insecure, because anyone can read that token using scripts.
+
+## The solutions
+
+There's a ton of solutions to work around this problem. Let's explore some of them.
+
+### Token in memory
+
+To work around this problem, we can use another technique. Instead of storing the token directly in `LocalStorage`, we can keep it in memory only, meaning we never store it anywhere. For example:
+
+```js
+const _token = null
+
+fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'usuario', password: 'senha' })
+})
+.then(data => data.json())
+.then(token => { _token = token })
+```
+
+Doing this makes the token virtually invisible to any other script, since it's not in the same scope as that other script and lives only in memory. It can still be accessed with a **memory dump**, but for that the attacker needs access to the victim's machine.
+
+But there's a pretty strong downside here. If the user reloads the page or switches tabs, we won't have the token saved in that new environment, so we'd need to ask the user to log in every single time, which isn't great UX.
+
+> There's a way around this hurdle using long-lived tokens. We'll talk about them further ahead.
+
+### HttpOnly cookies
+
+Just to level the playing field on cookies: a cookie is a piece of information up to 4kb that stays saved in the browser across tabs, as long as they're on the same domain. It's another way to persist data even after the user's session ends, since even if the user closes the browser, the cookies stay there for future use.
+
+> Cookies are heavily used in those "Remember me" checkboxes during user logins.
+
+The other option here would be to store the access token in a cookie with the `httpOnly` flag turned on. Cookies with this property aren't accessible from JavaScript, only by the browser and by requests.
+
+```js
+const express = require('express');
+const app = express();
+
+// middleware setup and so on...
+
+app.post('/login', (req, res) => {
+  // perform the login...
+  res.cookie('token', '12345', { maxAge: 5*60*1000, httpOnly: true, sameSite: 'strict' });
+  res.send('OK')
+})
+```
+
+Because of how browsers work by default, they send back to the server every cookie set by that same domain on every request. So on every subsequent call to our backend, we'd have a cookie with our user's token right there, and we could validate through it instead of using an `Authorization: Bearer` header like usual.
+
+The problem is that JWT tokens can hold a lot of information, and a lot of the time these tokens go over the 4kb limit. So it's a bit risky to use these cookies to store access tokens, on top of the fact that they stay saved on the user's machine and, even though they're not a target for XSS, they could fall victim to a different kind of attack called **Cross Site Request Forgery**, or CSRF.
+
+> CSRF can be mitigated and prevented using anti-CSRF tokens, which is a topic for the next article.
+
+## A mix of ideas
+
+There are other possible solutions I'll mention at the end of this article, and I'll dig into them in more detail in future articles. But what if we used a mix of the two solutions I proposed before?
+
+The idea is that we log the user in, store the access token straight in memory, and nobody gets access to it. But how do we deal with keeping logins alive?
+
+### Refresh tokens
+
+One of the ways out we have for dealing with volatile tokens, like the in-memory storage case, are the so-called **refresh tokens**. The idea is that an access token has a short lifetime (15 minutes at most) while a refresh token has a longer one (a few hours or days).
+
+A refresh token's only job is to give you a new access token, so it doesn't carry any internal information, and it shouldn't. That's why it's an extremely lightweight token that can be stored in a cookie.
+
+Basically, if we have a route like this, any valid refresh token could create a new access token:
+
+```js
+router.post('/refresh', withRefreshAuth, (_, res) => {
+  const accessToken = createAccessToken(user)
+  const refreshToken = createRefreshToken(user)
+
+  setRefreshCookie(res, refreshToken)
+  res.json({ accessToken })
+})
+```
+
+Notice that we're also recreating the refresh token to avoid having another endpoint just for that. So when we rotate one, we already rotate both.
+
+This solution still isn't ideal, because we still have a token that can produce other tokens. The big difference is we can keep tighter control over the access tokens that get created, and we can shrink the attack surface by having these tokens last a lot less time.
+
+### Fingerprinting
+
+One way we can keep refresh tokens safe is by using what we call _fingerprints_, which look a lot like CSRF tokens. The idea is to have a unique value generated server-side and stored as a secure cookie.
+
+On top of that, the fingerprint gets included in the token, so it can't be changed without invalidating the token.
+
+> The code for this example is on the `fingerprinting` branch of the [GitHub repository](https://github.com/khaosdoctor/secure-jwt-tokens). Check the `handlers.ts` and `index.js` files for the [differences](https://github.com/khaosdoctor/secure-jwt-tokens/compare/fingerprinting)
+
+When the user makes a request to refresh, the fingerprint goes along with the refresh token. We can then decode the token and check if the token's fingerprint matches the cookie's. If for some reason the cookie's fingerprint is different from the one in the token, that's an invalid access.
+
+On top of that, we can hash our refresh token and store that hash in a temporary database (like Redis) so we can invalidate sessions or compromised tokens as an extra layer of protection.
+
+> To keep this article from getting too long, I'll write another one just about how the fingerprinting process was done.
+
+## Implementation
+
+To implement a solution like this, let's simulate an app that does user lookups. We'll have a few users in a local database and we'll use two different tokens to handle authentication. The code for this repository is on my GitHub:
+
+https://github.com/khaosdoctor/secure-jwt-tokens
+
+### Backend
+
+Let's start with the backend. To simulate an app in the browser, I built a small app using only JavaScript and HTML, so it's a lot easier to see what happens under the hood.
+
+> **Note:** Keep in mind that in this example, I'm intentionally leaving out some best practices for the sake of clarity.
+
+> **Note 2:** I'm not going to walk through the basic files (package.json, tsconfig.json, etc). You can head to the repository to copy them.
+
+For this app we'll use a few libraries as direct dependencies, so run the install command:
+
+```bash
+npm i cookie-parser dotenv express jsonwebtoken
+```
+
+I installed a few dev libraries, mostly because of TypeScript:
+
+```bash
+npm i -D @types/cookie-parser @types/node @types/express @types/jsonwebtoken copyfiles rimraf ts-node ts-node-dev typescript
+```
+
+In my `package.json` I also set up a few scripts to make development easier. The file ended up like this:
+
+```json
+{
+  "name": "jwt",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/backend.js",
+  "scripts": {
+    "dev": "tsnd src/index.ts",
+    "build": "rimraf ./dist && tsc && copyfiles -u 1 \"./src/frontend/**/*.*\" ./dist",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "Lucas Santos <hello@lsantos.dev> (https://lsantos.dev/)",
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.3",
+    "@types/express": "^4.17.13",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/node": "^18.7.3",
+    "copyfiles": "^2.4.1",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.4"
+  }
+}
+```
+
+Skipping the basic app setup, let's create a `src` folder, and inside it let's start by creating our user database:
+
+```ts
+export type User = {
+  username: string
+  name: string
+  age: number
+  social: string
+  password: string
+}
+
+export const users: User[] = [
+  {
+    name: 'Lucas Santos',
+    age: 27,
+    social: 'twitter.lsantos.dev',
+    username: 'lsantosdev',
+    password: '123456'
+  },
+  {
+    name: 'Rosa Barnett',
+    age: 33,
+    social: 'http://ko.st/wa',
+    username: 'rosabarnett',
+    password: '123456'
+  },
+  {
+    name: 'Russell Spencer',
+    age: 66,
+    social: 'http://egki.tp/ecbu',
+    username: 'russellspencer',
+    password: '123456'
+  }
+]
+```
+
+Now, let's create our app's entry point, which will be the `index.ts` file. Let's start by importing everything we need and setting up the global middlewares:
+
+-   We'll use `cookie-parser` to parse the `Cookie` headers the browser sends back to us. Otherwise we won't have the `req.cookies` key
+-   To parse the request body (for the login route), I'm using `express.json()`
+
+```ts
+import path from 'path'
+import dotenv from 'dotenv'
+import express from 'express'
+import cookieParser from 'cookie-parser'
+
+dotenv.config()
+
+const app = express()
+app.use(express.json())
+app.use(cookieParser())
+```
+
+First, let's load our variables from the `.env` file, which should be at the root of our app and has the following content:
+
+```bash
+ACCESS_TOKEN_SECRET=secret_access_token
+REFRESH_TOKEN_SECRET=secret_refresh_token
+ACCESS_TOKEN_DURATION_MINUTES=5
+REFRESH_TOKEN_DURATION_MINUTES=120
+```
+
+> This file is also in the repository, but remember it's not good practice to push environment variables to a public repo. Also, each token's secret should be a lot more secure than the ones I put here.
+
+To make things easier to follow, I'll split each route's handlers into another file called `handlers.ts`, which we'll create later, but we can already import it here too:
+
+```ts
+import path from 'path'
+import dotenv from 'dotenv'
+import express from 'express'
+import cookieParser from 'cookie-parser'
+
+import { apiRoutes } from './handlers'
+
+dotenv.config()
+
+const app = express()
+app.use(express.json())
+app.use(cookieParser())
+```
+
+Our frontend needs to be on the same domain as our app, so I'll use express itself to serve the HTML files through `express.static()`. Let's put the whole site behind a `/site` path to keep it separate from the API:
+
+```ts
+// Previous code
+
+app.use('/site', 
+  express.static(
+    	path.resolve(__dirname, './frontend'), 
+    	{ cacheControl: false }
+  )
+)
+```
+
+Then let's use a `Router` to bring in our API routes:
+
+```ts
+app.use('/api', apiRoutes)
+```
+
+And finally, let's listen on port 3000:
+
+```ts
+app.listen(3000, () => console.log('JWT example listening on port 3000!'))
+```
+
+Now let's create a new file called `handlers.ts` where we'll build all our logic. First, let's import the functions we're going to use:
+
+```ts
+import { createHmac } from 'crypto'
+import { 
+  NextFunction, 
+  Request, 
+  RequestHandler, 
+  Response, 
+  Router 
+} from 'express'
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import { User, users } from './users'
+```
+
+So if you're using TypeScript, let's extend two interfaces. The first one will be Express's own `Response`, so we can type the `res.locals` object, which is an object where we can stash any information to pass along to the next middlewares.
+
+In our case, we'll have an object holding our user (already typed in our "database") and the hash of our refresh token:
+
+```ts
+interface ExtendedResponse extends Response<any, { user: Partial<User>; refreshHash: string }> {}
+```
+
+Let's create another type that will be our token's payload, which is the whole user object minus the password and the username (that one lives in the `sub` key):
+
+```ts
+interface AccessTokenPayload extends JwtPayload, Omit<User, 'username' | 'password'> {}
+```
+
+On top of that, let's simulate a sessions database using a `Map`, where we'll store our refresh tokens together with the user they belong to:
+
+```ts
+const refreshTokenDB = new Map<string, string>()
+```
+
+Finally, let's create our router to start building the routes:
+
+```ts
+const router = Router()
+```
+
+#### Login
+
+Our API will have 3 routes. The first one is the login route, which is completely open. The idea behind this route is that we get the username and password in the request body, check if the user exists in the database, and if it does, generate an access token and a refresh token for that user, set the necessary cookies, and return the access token straight in the response body so the front end can save it.
+
+```ts
+router.post('/login', (req, res: ExtendedResponse) => {
+  const { username, password } = req.body
+  const user = users.find((user) => user.username === username && user.password === password)
+  if (!user) return res.status(401).send('Unauthorized')
+
+  const accessToken = createAccessToken(user)
+  const refreshToken = createRefreshToken(user)
+
+  setRefreshCookie(res, refreshToken)
+  res.json({ accessToken })
+})
+```
+
+I'm using a few helper functions to create the tokens. Let's build them, starting with the token creation functions.
+
+Creating the access token is pretty simple. We'll just sign a new JWT with all the user's data (except the password) and make it last only 5 minutes:
+
+```ts
+const createAccessToken = (user: User) => {
+  return jwt.sign(
+    { sub: user.username, name: user.name, age: user.age, social: user.social },
+    process.env.ACCESS_TOKEN_SECRET!,
+    {
+      audience: 'urn:jwt:type:access',
+      issuer: 'urn:system:token-issuer:type:access',
+      expiresIn: `${process.env.ACCESS_TOKEN_DURATION_MINUTES}m`
+    }
+  )
+}
+```
+
+> Notice that I'm using `audience` and `issuer` with URNs. That's good practice so we can identify who's generating the token and who it's meant for.
+
+The refresh token is a bit more complicated, because we have to add it to our database and set up a timeout to expire it. In databases like Redis, this kind of feature (called a TTL) already comes built in.
+
+First let's create a signed token. The token's `sub` will be the user's username, the token type is defined in `audience`, and it lasts 120 minutes:
+
+```ts
+const createRefreshToken = (user: User) => {
+  const token = jwt.sign({ sub: user.username }, process.env.ACCESS_TOKEN_SECRET!, {
+    audience: 'urn:jwt:type:refresh',
+    issuer: 'urn:system:token-issuer:type:refresh',
+    expiresIn: `${process.env.REFRESH_TOKEN_DURATION_MINUTES}m`
+  })
+}
+```
+
+Next, let's hash our token to save in the database, save the session, and set up the timeout. After that, we return the token:
+
+```ts
+const createRefreshToken = (user: User) => {
+  const token = jwt.sign({ sub: user.username }, process.env.ACCESS_TOKEN_SECRET!, {
+    audience: 'urn:jwt:type:refresh',
+    issuer: 'urn:system:token-issuer:type:refresh',
+    expiresIn: `${process.env.REFRESH_TOKEN_DURATION_MINUTES}m`
+  })
+  const tokenHash = createHmac('sha512', process.env.REFRESH_TOKEN_SECRET!).update(token).digest('hex')
+
+  refreshTokenDB.set(tokenHash, user.username)
+  setTimeout(() => {
+    refreshTokenDB.delete(tokenHash)
+    console.log(`Refresh token ${tokenHash} expired`)
+    console.table(refreshTokenDB.entries())
+  }, 5 * 60 * 1000)
+
+  console.table(refreshTokenDB.entries())
+  return token
+}
+```
+
+Another function I'm using a lot is just a utility to avoid repeating code for creating cookies. It just creates the cookie securely:
+
+```ts
+const setRefreshCookie = (res: ExtendedResponse, token: string) => {
+  res.cookie('refresh-token', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    expires: new Date(Date.now() + Number(process.env.REFRESH_TOKEN_DURATION_MINUTES) * 60 * 1000)
+  })
+}
+```
+
+To make it easier, let me walk through the options we're using to configure the cookies:
+
+-   `httpOnly`: Stops the token from being accessible via JS
+-   `secure`: Stops the cookie from being used outside HTTPS environments
+-   `sameSite`: Cookies can only be used on the same domain
+-   `expires`: The token's expiration date
+
+#### Refresh
+
+The next route we need to build is the refresh route, which will receive the cookie with the refresh token and run the logic to create a new access token. But this route can only be reached if the refresh token is present, so for that I'll create an authentication middleware.
+
+The idea behind this middleware is that we first grab the cookie from inside the request and check if it exists. If it doesn't, we return an error:
+
+```ts
+const withRefreshAuth = (req: Request, res: ExtendedResponse, next: NextFunction) => {
+  const token = req.cookies['refresh-token']
+  if (!token) return res.status(401).send('Unauthorized')
+}
+```
+
+After that, let's check if the token is valid. For that we'll use the `jwt.verify` function, which both validates and decodes the token at the same time. If the process succeeds we land inside our `try`, otherwise we return an invalid token error. Notice I'm passing the audience to the verifier too, so it can also attest to that token's validity:
+
+```ts
+const withRefreshAuth = (req: Request, res: ExtendedResponse, next: NextFunction) => {
+  const token = req.cookies['refresh-token']
+  if (!token) return res.status(401).send('Unauthorized')
+  try {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!, {
+      audience: 'urn:jwt:type:refresh'
+    })
+  } catch (error) {
+    return res.status(401).send('Unauthorized')
+  }
+}
+```
+
+Inside our success block, let's hash that token and stash it inside `res.locals`:
+
+```ts
+const withRefreshAuth = (req: Request, res: ExtendedResponse, next: NextFunction) => {
+  const token = req.cookies['refresh-token']
+  if (!token) return res.status(401).send('Unauthorized')
+  try {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!, {
+      audience: 'urn:jwt:type:refresh'
+    })
+    const tokenHash = createHmac('sha512', process.env.REFRESH_TOKEN_SECRET!).update(token).digest('hex')
+    res.locals.refreshHash = tokenHash
+    next()
+  } catch (error) {
+    return res.status(401).send('Unauthorized')
+  }
+}
+```
+
+Now we can create our route with the authentication middleware:
+
+```ts
+router.post('/refresh', withRefreshAuth, (_, res) => {})
+```
+
+The idea behind the route is simple. We'll do the following steps:
+
+1.  We already validated the token, so we need to check if it exists in our database
+2.  If it exists, let's fetch the user it's related to
+3.  We generate a new access token and a new refresh token
+4.  We send the refresh token via cookie and return the access token
+
+The final code looks like this:
+
+```ts
+router.post('/refresh', withRefreshAuth, (_, res) => {
+  const username = refreshTokenDB.get(res.locals.refreshHash)
+  const user = users.find((user) => user.username === username)
+  if (!username || !user) return res.status(403).send('Could not find user for this refresh token')
+
+  const accessToken = createAccessToken(user)
+  const refreshToken = createRefreshToken(user)
+
+  setRefreshCookie(res, refreshToken)
+  res.json({ accessToken })
+})
+```
+
+#### A protected route
+
+Now let's build our user route, the route that'll be protected by our JWT token. It'll return one of our users from the database, but it needs to be protected by the access token (not the refresh one), so let's write another middleware for it.
+
+The idea is even simpler. We just need to grab the token from inside the `Authorization` header and, if it's valid, we can decode it and build a user object inside `res.locals`:
+
+```ts
+const withAccessAuth = (req: Request, res: ExtendedResponse, next: NextFunction) => {
+  const token = req.headers['authorization']?.split('Bearer ')[1]
+  if (!token) return res.status(401).send('Unauthorized')
+  try {
+    const { sub, name, age, social } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!, {
+      audience: 'urn:jwt:type:access'
+    }) as AccessTokenPayload
+
+    res.locals.user = { username: sub!, name, age, social }
+    next()
+  } catch (error) {
+    return res.status(401).send('Unauthorized')
+  }
+}
+```
+
+> Keep in mind that for this kind of protected route, it's standard to send an `Authorization: Bearer <token>` header, that's why we're splitting the string.
+
+We can already create our protected route:
+
+```ts
+router.get('/users/:username', withAccessAuth, (req, res) => {
+  const user = users.find((user) => user.username === req.params.username)
+  if (!user) return res.status(404).send('User not found')
+
+  res.json(user)
+})
+```
+
+The idea is simply to fetch a piece of data from the database and return it, always validating that the token we got is valid.
+
+With that, we're done building our routes. We just need to export our router:
+
+```ts
+export const apiRoutes = router
+```
+
+### Front end
+
+Now that we're done with the backend, let's start working on the frontend. To keep things simple, I didn't use any kind of framework, I built everything from scratch using just Bootstrap for CSS and a JS file where we'll put our logic.
+
+For the HTML file, it doesn't really make sense to explain what's going on in it, since it's just the page markup. So I'll just drop the code that's in the `index.html` file, inside a `src/frontend` folder, here so we can take a look:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- CSS only -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx"
+      crossorigin="anonymous"
+    />
+    <title>Safe JWT</title>
+  </head>
+  <body class="m-3">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col text-center">
+          <form id="loginForm" class="input-group mb-3">
+            <input
+              required
+              type="text"
+              name="username"
+              class="form-control"
+              autocomplete="username"
+              placeholder="Username"
+              value="lsantosdev"
+            />
+            <input
+              required
+              type="password"
+              class="form-control"
+              autocomplete="current-password"
+              name="password"
+              placeholder="Password"
+              value="123456"
+            />
+            <input id="loginAction" class="btn btn-dark" type="submit" value="Login" />
+          </form>
+        </div>
+        <div class="col text-left">
+          <div class="alert alert-primary show fade" role="alert">
+            <strong>Message:</strong> <span class="login-result"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-5 align-items-center">
+        <div class="col-6 text-center"><strong>Raw access token</strong></div>
+        <div class="col-6 text-center"><code id="rawToken"></code></div>
+      </div>
+
+      <div class="row align-items-center">
+        <div class="col-6 text-center"><strong>Decoded access token</strong></div>
+        <div class="col-6 text-center"><pre id="decodedToken"></pre></div>
+      </div>
+
+      <div class="row align-items-center mt-5 mb-5">
+        <div class="col-12 text-center"><button type="button" class="btn btn-primary" id="refreshAction" disabled>Force token Refresh</button></div>
+      </div>
+
+      <div class="row align-items-center">
+        <div class="col-6 text-center">
+          <form id="userForm">
+            <input required type="text" name="username" autocomplete="username" placeholder="Search for username" />
+            <input id="userAction" type="submit" value="Search" />
+          </form>
+        </div>
+        <div class="col-6 text-left">
+          <div class="alert alert-info show fade" role="alert">
+            <strong>Results:</strong>
+            <pre class="user-result"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="index.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+```
+
+In the end, this HTML and CSS should give us a page like this (I'm not that good at design):
+
+![](./image.png)
+
+Inside that same `frontend` folder, let's create an `index.js` file and do a bit of setup.
+
+First, so we can work more easily, I created a function to update the app's error messages:
+
+```js
+function updateMessage(message, selector = '.login-result') {
+  const infoBox = document.querySelector(selector)
+  infoBox.innerHTML = message
+}
+```
+
+Next, let's create a safe place to keep our access token. I know it's tempting to put that information on the `document` object, but unfortunately that's a global object accessible by any script on the page, so let's try to keep it more restricted.
+
+On top of that, a nice idea would be for the screen to update automatically whenever this token gets updated, so let's use a [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) together with a [Symbol](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mist%C3%A9rio-383e359e64e3).
+
+Let's start by creating the Symbol:
+
+```js
+const tokenSymbol = Symbol.for('accessToken')
+```
+
+Now let's create a Proxy. A Proxy is an object that intercepts calls to other objects. Since it doesn't work over primitives (like strings), we'll create an object and use the Symbol as a key so we can access our access token:
+
+```js
+const internalToken = new Proxy({ [tokenSymbol]: null }, {})
+```
+
+The initial value will be null, and the second object holds our Proxy's config. The first one is the `getter` config, which is what happens when someone tries to read this object's value.
+
+Since I'm working with the token object, I can't just return the proxy itself, so I'll use the [Reflection](https://medium.com/trainingcenter/reflection-em-javascript-73fc0e702e2) API to grab the property being called. If it's a function, we return it already bound with the right `this`, otherwise we just return the value:
+
+```js
+const internalToken = new Proxy({ [tokenSymbol]: null }, {
+    get(target, prop) {
+      const primitive = Reflect.get(target, tokenSymbol)
+      const value = primitive[prop]
+      return typeof value === 'function' ? value.bind(primitive) : value
+    },
+})
+```
+
+Next is the `setter`, which is where we'll do the magic:
+
+```js
+const internalToken = new Proxy(
+  { [tokenSymbol]: null },
+  {
+    get(target, prop) {
+      const primitive = Reflect.get(target, tokenSymbol)
+      const value = primitive[prop]
+      return typeof value === 'function' ? value.bind(primitive) : value
+    },
+    set(target, _, value) {
+      document.querySelector('#rawToken').innerHTML = value
+
+      const header = atob(value.split('.')[0])
+      const payload = JSON.parse(atob(value.split('.')[1]))
+      document.querySelector(
+        '#decodedToken'
+      ).innerHTML = `<strong>Header:</strong>${header}<br>---<br><strong>Payload</strong>: ${JSON.stringify(
+        payload,
+        null,
+        2
+      )}<br> <b>Expires at ${new Date(payload.exp * 1000).toLocaleTimeString()}</b>`
+      document.querySelector('#refreshAction').disabled = false
+      return Reflect.set(target, tokenSymbol, value)
+    }
+  }
+)
+```
+
+Basically what we're doing is updating our page with the information we get, and at the end, we're using the reflection API again, except this time to set the Symbol's value with the new token.
+
+#### Login
+
+Let's wire up the login action to the button click. For that, let's add an event listener that turns our form's data into a `FormData` and then into JSON so we can use `fetch` to send it to our route:
+
+```js
+document.querySelector('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  updateMessage('Logging in...')
+
+  const form = new FormData(e.target)
+  const data = Object.fromEntries(form.entries())
+  const result = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+})
+```
+
+After getting the response back, let's handle the result and update the token variable with our access token:
+
+```js
+document.querySelector('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  updateMessage('Logging in...')
+
+  const form = new FormData(e.target)
+  const data = Object.fromEntries(form.entries())
+  const result = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+
+  updateMessage(result.ok ? 'Login successful' : `Login failed with ${result.status}`)
+  if (result.status === 200) {
+    const response = await result.json()
+    internalToken[tokenSymbol] = response.accessToken
+  }
+})
+```
+
+#### Silent Refresh
+
+Another technique that's used a lot with refresh tokens is _silent refresh_, which is refreshing the access token before it actually expires. So let's say our access token lasts 5 minutes: every 4 and a half minutes we'll quietly hit the `/refresh` endpoint and it'll give us a new access token as well as a new refresh token.
+
+Doing this is pretty simple. We just use our login action to set up an interval that'll call a function to refresh the tokens. Let's change our login code to add two more lines:
+
+```js
+document.querySelector('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  updateMessage('Logging in...')
+
+  const form = new FormData(e.target)
+  const data = Object.fromEntries(form.entries())
+  const result = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+
+  updateMessage(result.ok ? 'Login successful' : `Login failed with ${result.status}`)
+  if (result.status === 200) {
+    const response = await result.json()
+    internalToken[tokenSymbol] = response.accessToken
+    setInterval(refreshToken, refreshIntervalMinutes)
+    updateMessage('Next refresh at ' + new Date(Date.now() + refreshIntervalMinutes).toLocaleTimeString())
+  }
+})
+```
+
+And let's add a new variable at the top of the file to say when we want to refresh:
+
+```js
+const refreshIntervalMinutes = 4.5 * 60 * 1000
+```
+
+And of course, let's take the chance to write the refresh function, which will just make a call with `fetch`:
+
+```js
+function refreshToken() {
+  updateMessage('Refreshing token...')
+  fetch('/api/refresh', {
+    method: 'POST'
+  })
+    .then((res) => res.json())
+    .then(({ accessToken }) => {
+      internalToken[tokenSymbol] = accessToken
+      updateMessage('Next refresh at ' + new Date(Date.now() + refreshIntervalMinutes).toLocaleTimeString())
+    })
+}
+```
+
+### Looking up the user
+
+To make the user lookup call, let's use the same technique: sending the form data to our protected route with an `Authorization` header:
+
+```js
+document.querySelector('#userForm').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  if (!internalToken) return updateMessage('Login first', '.user-result')
+  updateMessage('Searching user...', '.user-result')
+
+  const form = new FormData(e.target)
+  const data = Object.fromEntries(form.entries())
+  const result = await fetch(`/api/users/${data.username}`, {
+    headers: {
+      Authorization: `Bearer ${internalToken}`
+    }
+  })
+  updateMessage(result.ok ? 'User found' : `Search failed with ${result.status}`, '.user-result')
+  if (result.status === 200) {
+    const response = await result.json()
+    updateMessage(JSON.stringify(response, null, 2), '.user-result')
+  }
+})
+```
+
+### Force refresh
+
+The last step is bringing the force-refresh button to life, which is basically calling the refresh function we wrote earlier:
+
+```js
+document.querySelector('#refreshAction').addEventListener('click', refreshToken)
+```
+
+## Result
+
+You can see the result when we click the login button:
+
+![](./image-1.png)
+
+We'll have the access token's data available through JavaScript via memory, but we can't get the refresh token unless we open DevTools on the `application` tab:
+
+![](./image-2.png)
+
+You can also see we made the request that returned the cookie to us:
+
+![](./image-3.png)
+
+On the server side, we can see the tokens getting set and expiring as time passes:
+
+![](./image-4.png)
+
+Check out the animated final result:
+
+<Video src="/videos/jwt-seguro/Kap-Recording---2022-08-18-0.05.51.mp4" />
+
+## Conclusion
+
+This saga isn't over yet! We'll explore a lot more about how to store and use tokens safely in the next articles! Two reads I recommend a lot are [the Hasura blog's posts on tokens](https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/) and [this really cool article by Ryan Chenkie](https://medium.com/@ryanchenkie_40935/react-authentication-how-to-store-jwt-in-a-cookie-346519310e81).
+
+Don't forget to come back and [subscribe to the newsletter](https://news.lsantos.dev) for new, exclusive content!

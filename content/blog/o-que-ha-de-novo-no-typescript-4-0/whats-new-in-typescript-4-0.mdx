@@ -1,0 +1,126 @@
+---
+title: "What's New in TypeScript 4.0"
+pubDate: 2020-08-31T20:45:39.000Z
+updatedDate: 2026-07-16T16:25:22.000Z
+lang: en
+slug: "whats-new-in-typescript-4-0"
+category: "typescript"
+tags: ["typescript", "development", "technology"]
+description: "Let's dig into the newest TypeScript update, version 4.0!"
+machineTranslated: true
+draft: false
+---
+On August 20th, 2020, TypeScript announced its newest version, 4.0! So in this article, I got ready to walk you through the latest changes and news in this release!
+
+Even though it's a **major version**, the changes introduced in this release aren't that substantial and, you can relax, there's no breaking change at all :D
+
+## Labeled tuples
+
+Let's start with the fix for a fairly old problem in everyone's favorite superset. When we have tuples (elements made up of pairs of data), we used to write a definition like this:
+
+```typescript
+function tupla (...args: [string, number]) {}
+```
+
+Notice we don't have a name for either the `string` position or the `number` position. As far as type inference and checking in general go, that makes no difference at all, but it's very useful when we're **documenting our code**.
+
+Because of type checking, the previous function would translate to something like this:
+
+```typescript
+function tupla (args_0: string, args_1: number) {}
+```
+
+Which is essentially the same thing, but when we're actually writing code, our _intellisense_, which is one of the big advantages of using TypeScript in general, gives us a naming scheme that helps nobody, as we can see in the gif below
+
+![](./XLsqvHe-ca302083.gif "Naming like args_0 and args_1")
+
+Now, with version 4.0, we can add names to our tuples so they show up labeled in the intellisense:
+
+```typescript
+function tupla (...args: [nome: string, idade: number]) {}
+```
+
+And then we get a result like this:
+
+![](./giphy-c98fe1.gif "We can see the naming for each parameter")
+
+It's important to note: if you're naming any element of a tuple, you **need** to name all of them. Otherwise you'll get an error:
+
+```typescript
+type Segment = [first: string, number];
+//                             ~~~~~~
+// error! Tuple members must all have names or all not have names.
+```
+
+## Property inference from constructors
+
+From now on, when we set up TypeScript with the `noImplicitAny` setting, we can rely on the flow analysis done at compile time to figure out class property types based on the assignments made inside their constructor.
+
+```typescript
+class Test {    
+   public x   
+   constructor (b: boolean){      
+     this.x = 42
+     if (b) this.x = 'olá'
+   }
+}
+```
+
+In older versions, since we're not specifying the property's type, the compiler would assign the type `any`, but since we've told it we don't want implicit `any`, the compiler would throw an error saying we can't have any implicit `any` types.
+
+In the latest version, TypeScript can infer, from the constructor, that `x` is of type `string | number`.
+
+## Short-circuiting on compound operators
+
+Few people know about this JavaScript feature, but plenty of other languages also have what's called a _compound assignment operator_.
+
+What they do is resolve the expression on the right side and assign the value to the variable on the left side. The most famous ones are the algebraic operators:
+
+```javascript
+let b += 2
+let c /= 3
+```
+
+They all work great and exist for most logical operations. But, according to [the TS team themselves](https://devblogs.microsoft.com/typescript/announcing-typescript-4-0/#short-circuiting-assignment-operators), there are three notable exceptions to this rule: the logical operators `&&`, `||` and the nullish coalescing operator `??`. In 4.0 we get three new operators added:
+
+```javascript
+a ||= b
+// which is the same as
+a || (a = b)
+```
+
+On top of that, we also get the `&&=` and `??=` operators.
+
+## Catch with `unknown`
+
+Since the earliest days of TypeScript, whenever we had a `catch` clause, the error argument's value was always typed as `any`, since there was no way to know what its return type would be.
+
+So TypeScript simply didn't check the types of these parameters, even with `noImplicitAny` turned on.
+
+```typescript
+try {
+  throw 'Alguma coisa'
+} catch (err) { // This 'err' is Any
+  console.log(err.foo()) // won't throw an error
+}
+```
+
+That wasn't very safe, since we could call any function inside the `catch`. Starting with 4.0, TS will type errors as `unknown`.
+
+The `unknown` type is specifically meant for typing things we don't know the shape of. So they **need** a _type-cast_ before they can be used. It's like a value of type `unknown` is a blank sheet of paper and you can paint it whatever color you want. In this case, `unknown` can be cast to any type.
+
+## Other changes
+
+Besides changes to the language itself, compile speed with the `--noEmitOnError` flag got faster when used together with `--incremental`. What the latter flag does is make it possible to compile an application faster based on a previous compilation of that same application, what's called **incremental compilation**.
+
+When we used `--incremental` together with `--noEmitOnError`, if we compiled a program for the first time and it threw an error, that meant it emitted no output, so there was no `.tsbuildinfo` file for `--incremental` to look at, which made everything super slow.
+
+In version 4.0 this problem got fixed. On top of that, it's now allowed to use the `--noEmit` flag together with `--incremental`, which wasn't allowed before since `--incremental` needed a `.tsbuildinfo` to be emitted.
+
+A few other smaller changes were made around editing and editors in general. You can check out the blog post [here](https://devblogs.microsoft.com/typescript/announcing-typescript-4-0).
+
+## Conclusion
+
+And that wraps up our update on this fantastic superset! Remember that [we need help translating the TypeScript website into Portuguese](https://github.com/microsoft/TypeScript-Website/issues/233), help us out with the translation!
+
+Don't forget to subscribe to the newsletter for more exclusive content and weekly news! Like and share your feedback in the comments!

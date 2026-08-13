@@ -1,0 +1,182 @@
+---
+title: "What to Expect from JavaScript in 2025"
+pubDate: 2024-07-24T11:00:49.000Z
+updatedDate: 2026-07-16T17:54:37.000Z
+lang: en
+slug: "what-to-expect-from-javascript-in-2025"
+category: "typescript"
+tags: ["ecmascript", "javascript", "development"]
+description: "What to expect from JavaScript in 2025? Learn about the main proposals and features you might get in the future!"
+machineTranslated: true
+draft: false
+---
+Every year, the committee behind ECMAScript, known as TC39, gets together to discuss the main changes, and also to advance, approve, or reject existing [proposals](https://github.com/tc39/proposals).
+
+In this article I'll show you what happened at this year's meeting, which was in Finland (just next door for me), the proposals that got discussed, but I also want to run through some other proposals that exist in the repository and place my bets on what I think is going to end up becoming reality in the next version of the spec!
+
+Before anything else, if you have no idea what I'm talking about, I made a full video a few years back explaining exactly how this whole process works, including the story behind JavaScript and the names ECMA and TC39:
+
+![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
+
+## [Lazy Module Initialization](https://github.com/tc39/proposal-defer-import-eval)
+
+This proposal moved to stage 2.7 (which is almost a stage that's ready for implementation).
+
+> This was actually the old name for the proposal. It went through a change and is now called "Deferred Import Evaluation"
+
+This is a proposal that won't have much visual effect in code, but it'll let module declarations be postponed to run later, and that can create a great performance effect, especially for modules that don't need to load right at the start of the application.
+
+The technique of "not running" something is a well known optimization trick for every JS dev. So imagine if you could postpone the execution of your heaviest module until it's actually used. That can save you a lot of seconds and CPU cycles.
+
+The syntax for this proposal adds a `defer` keyword in front of module declarations:
+
+```js
+// a
+import "b";
+import defer * as c from "c"
+
+setTimeout(() => {
+  c.value
+}, 1000);
+```
+
+In this example, module `b` gets loaded first, and only when `c.value` is actually used does module `c` get loaded.
+
+> [!CAUTION] ⚠️
+> It's important to remember that top-level await can't run inside what we call __deferred initialization__, because the module that has the top-level await has no way of knowing whether the module it's using is going to respond now or later. In other words, if there's a top-level await, you can't use `import defer`
+
+## [Error.isError](https://github.com/tc39/proposal-is-error)
+
+This is an interesting feature that, if you think about it, has quite a bit of impact, and it moved to stage 2.
+
+The rationale behind this proposal is that when we're running scripts in two different domains, the errors we throw in one domain aren't the same instance as an error in another domain.
+
+> By domain here I don't mean sites and URLs, but execution domains (scopes). For example, a window with an iframe inside has two execution scopes (or two domains): the main page's, and the domain running the iframe
+
+The `Error.isError` proposal is pretty simple: it checks whether the error in question is a native error and returns a boolean (there's [a case](https://tc39.es/proposal-is-error/#sec-iserror) where it throws too), regardless of the domain it's running in.
+
+To give you an example, imagine we have a main window `jPrincipal` and an iframe `jIframe`. If we throw inside the iframe, the error propagates to the main window because that's where the error handlers live, but if we do a check like `jIframeError instanceof Error` we'll get an error (ironic), because the reality is that the `Error` instance inside the iframe is different from the `Error` instance in `jPrincipal`.
+
+> That's because all objects, no matter where they are, always get passed as a memory reference in JavaScript, so the reference is always different
+
+For this check to work, we'd have to compare it like this:
+
+```js
+jIframeError instanceof document.getElementsByTagName('iframe')[0].contentWindow.Error
+```
+
+Or, with `isError`:
+
+```js
+if (Error.isError(jIframeError) { ... }
+```
+
+## [RegExp Escaping](https://github.com/tc39/proposal-regex-escaping/)
+
+This proposal advanced to stage 2, and it's probably the best proof that any proposal, at any point, can be approved or even considered, since it started as an [idea](https://simonwillison.net/2006/Jan/20/escape/) some guy posted back in January 2006, which sparked a [discussion](https://esdiscuss.org/topic/regexp-escape) in 2010, and is now being implemented.
+
+The basic idea behind this proposal is simple and quite useful. When you're creating a RegExp in JavaScript, whatever you put inside it gets interpreted as a valid regular expression, for example:
+
+```js
+const s = "Eu quero arquivos com a extensão *.*"
+console.log(s.replace(new RegExp("*.*", "g"), ".pdf"))
+```
+
+This is going to throw an error: "Nothing to Repeat". That's because you need to escape the characters, since `*` and `.` are reserved in RegExp. So you can do something like:
+
+```js
+const s = "Eu quero arquivos com a extensão *.*"
+console.log(s.replace(new RegExp("\\*\\.\\*", "g"), ".pdf"))
+```
+
+And now we get "Eu quero arquivos com a extensão .pdf".
+
+With this new proposal, the idea is to do:
+
+```js
+const s = "Eu quero arquivos com a extensão *.*"
+console.log(s.replace(new RegExp(RegExp.escape("*.*"), "g"), ".pdf"))
+```
+
+## [Promise.try](https://github.com/tc39/proposal-promise-try)
+
+Another simple idea that's basically a shortcut for something we already do today is wrapping a function in a promise. What happens with JavaScript (usually not with TypeScript) is that we're calling some external function that may or may not be a [Promise](https://dev.to/_staticvoid/series/1993).
+
+Today, so we don't have to worry about these details, we can simply do this. Imagine `f` is my function and I don't know if it's a promise:
+
+```js
+Promise.resolve().then(f)
+```
+
+What this does is create an already resolved Promise and then run the function `f`, returning a _thenable_ (a value we can chain with `.then`), but all of this only happens on the next event loop tick.
+
+To make all of this run on the same tick, we can go with a more direct approach:
+
+```js
+new Promise((resolve => resolve(f()))
+```
+
+It creates a promise that runs `f` on the same tick as its first `then`.
+
+The proposal is now at stage 3, meaning it's very likely to be implemented still this year or next. The idea is to create `Promise.try`:
+
+```js
+Promise.try(f).then(() => ...)
+```
+
+Which does the same thing as before.
+
+## Other interesting proposals
+
+Besides these proposals, there are other ones that also got discussed, but haven't reached a stage that could be considered further along. Aside from some others that stayed put, let's talk about those first:
+
+### Proposals that stayed put
+
+-   [Async Iterators](https://github.com/tc39/proposal-async-iterator-helpers) (2): A sequence of helper methods for Async Iterators (which I already talked about [here](/async-iterators-js/))
+-   [Base64](https://github.com/tc39/proposal-arraybuffer-base64) (3): Something I've needed many times, converting ByteArrays (UInt8Arrays, SharedArrays) to base64 and back. Today we don't have a native method for it.
+-   [Cancellation](https://github.com/tc39/proposal-cancellation/) (1): The ability to cancel promises midway through
+-   [Explicit Resource Management](https://github.com/tc39/proposal-explicit-resource-management) (3): This is the proposal for [Using](/ts-using/), which is at stage 3
+-   [Intl.DurationFormat](https://github.com/tc39/proposal-intl-duration-format) (3): Part of the web localization effort, using a native way to turn time into duration.
+-   [Intl.MessageFormat](https://github.com/tc39/proposal-intl-messageformat/issues/58) (1): The same as the previous one, but for arbitrary text to be converted and interpolated with variables.
+-   [ShadowRealm](https://github.com/tc39/proposal-shadowrealm) (2): A way to run user code in a separate domain (I talked about it [here](/shadow-realms/))
+-   [Shared struct](https://github.com/tc39/proposal-structs) (1): The ability to add immutable objects (structs) to JS
+-   [Signals](https://github.com/tc39/proposal-signals) (1): A way to work with state (à la React) natively with a single protocol
+-   [Smart Units](https://github.com/tc39/proposal-smart-unit-preferences) (1): Another one from the localization effort, aiming to add units automatically based on locale
+-   [Source Maps](https://docs.google.com/presentation/d/1H6nu-Q0FllP2rsnCRxepiB_iBgsA0TMba5FGntDL5fg/edit?usp=sharing) (0): Creates a formal specification for (already existing) sourcemaps.
+-   [Temporal](https://github.com/tc39/proposal-temporal) (3): The proposal for JavaScript's new date API (details [here](/temporal-api/))
+
+### Proposals that had or might have advances
+
+-   [Atomics.pause](https://github.com/syg/proposal-atomics-microwait) (2.7): A way to pause execution through micro-pauses for operations that require a lock
+-   [Decimal](https://github.com/tc39/proposal-decimal) (1): The proposal aiming to (finally) add correct decimal numbers to JavaScript
+-   [ESM Phase Imports](https://github.com/tc39/proposal-esm-phase-imports) (2): Allows customizations when loading modules in JS
+-   [Iterator Sequencing](https://github.com/tc39/proposal-iterator-sequencing) (2): Lets you concatenate two iterators into one so the values stay sequential between them.
+-   [Joint Iteration](https://github.com/tc39/proposal-joint-iteration) (2.7): A new method to run iterators synchronously with each other, the famous lodash `zip` method
+-   [Discard Bindings](https://github.com/tc39/proposal-discard-binding) (2): An interesting proposal that proposes a syntax for variables that won't need to be tied to any memory address, including the ones we want to discard from array and object destructuring.
+
+## Predictions
+
+As always, I'm going to make some predictions (which might be completely wrong) about what I think could show up in the next version of ECMAScript. Let's go.
+
+Personally, I believe some of these proposals **aren't going anywhere** for a good while. Two of them, **Decimals** and **Temporal**, I'm pretty sure are going to stay right where they are (Decimals might move up a stage or two), because they're too big to be implemented in a single year (Temporal itself has been at the same stage for about 7 years already).
+
+That said, I believe **Source Maps** might get a boost this year since we're starting to see several runtimes like the Node Test Runner, Vitest, and various others using this pattern, so it's possible this usage ends up pushing the proposal forward. But I'm sure it won't see the light of day for a good while.
+
+Other proposals that I believe **might make it** into the next version (though with less certainty) are:
+
+-   **Async Iterator Helpers**: Simpler implementations and extra methods usually get added because they don't break the previous spec
+-   **Shadow Realm**: With the "realms" conversation heating up (with Error.isError itself), I think it's quite likely this proposal also gets approved
+-   **Signals**: People are making a lot of noise about this proposal, but it's at too early a stage to be sure it makes it into the next version. Most likely not.
+-   **Phase Imports**: Import management and module loading are very hot right now, mostly because of WASM and runtimes like Deno
+-   **Deferred Imports**: Same reason as the previous one
+-   **Error.isError**: Implementing something like this isn't complex, so I think it can get approved
+-   **Base64**: Likewise, this is a method that's been requested for a while and is a fairly primitive function.
+
+Now, other proposals I'm pretty sure are going to be in the next version of the spec:
+
+-   Promise.try
+-   RegExp.escape
+-   Explicit Resource Management
+-   At least one of the Intl methods
+
+Let's see if these predictions hold up. If you have different opinions, don't forget to comment over on my [socials](https://lsantos.dev) or hit me up on [X](https://twitter.lsantos.dev) so we can chat about it!

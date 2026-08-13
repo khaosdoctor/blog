@@ -1,0 +1,251 @@
+---
+title: "Are UUIDs Bad? Understanding What ULID Is"
+pubDate: 2024-08-14T11:00:09.000Z
+updatedDate: 2026-07-16T17:54:00.000Z
+lang: en
+slug: "are-uuids-bad-understanding-ulid"
+category: "meta"
+tags: ["theory", "computing", "architecture"]
+description: "How can you generate IDs that are random but also sortable at the same time? Meet ULIDs and what they promise to change!"
+machineTranslated: true
+draft: false
+---
+In software development, the ability to generate unique IDs has always been necessary, especially when we're dealing with large volumes of data. Over time we ran into another problem: we can't just generate sequential IDs. They come with a bunch of issues, one of them being that they're predictable and vulnerable to outside attacks.
+
+So we came up with a bunch of other types of IDs. One example is [Snowflake](https://en.wikipedia.org/wiki/Snowflake_ID), the kind of ID Twitter used to generate IDs that would be unique in a distributed computing setup (which has its own extra headache: the same ID could be generated in two different places without either one knowing about the other). But what really caught on was the UUID protocol, or _Universal Unique IDentifiers_.
+
+Recently though, we got an addition to our toolbox: ULIDs. Let's understand what they are. But first we need to understand a bit about UUIDs.
+
+## UUIDs
+
+The UUID model was originally proposed in an [RFC](https://datatracker.ietf.org/doc/html/rfc4122), then later moved to [RFC-9562](https://datatracker.ietf.org/doc/html/rfc9562). UUIDs now have 8 versions, each one a bit different from the others, with some special uses.
+
+-   [UUID V1](https://www.rfc-editor.org/rfc/rfc9562.html#name-uuid-version-1): Generated from a timestamp, a monotonic counter and a MAC address. It has 128 bits like the others, where the first 60 are reserved for a timestamp in nanoseconds since October 15th, 1582.
+-   UUID V2: Sits outside the original spec because it's reserved for security IDs, almost no one uses these today.
+-   [UUID V3](https://www.rfc-editor.org/rfc/rfc9562.html#name-uuid-version-3): IDs generated from an MD5 hash created by the user. As you can imagine, they're not that random. It only has 2 bits of variance and is used more as an individual identifier, which doesn't make a ton of sense.
+-   [UUID V4](https://www.rfc-editor.org/rfc/rfc9562.html#name-uuid-version-4): The most common of all the IDs, generated from completely random data. This is the one most of us use to store data in DBs and so on.
+-   [UUID V5](https://www.rfc-editor.org/rfc/rfc9562.html#name-uuid-version-5): A slightly better implementation of version 3, uses SHA1 (which also isn't ideal anymore). Still, barely used.
+-   [UUID V6](https://www.rfc-editor.org/rfc/rfc9562.html#name-uuid-version-6): This one is exactly the same as V1, but the bit order was changed so that, when sorted, it can be sorted by creation date.
+-   [UUID V7](https://www.rfc-editor.org/rfc/rfc9562.html#name-uuid-version-7): The closest implementation we have to ULID, it's a timestamp plus random data. 48 bits of timestamp, 4 of version, 2 of variance and 74 of randomness.
+-   [UUID V8](https://www.rfc-editor.org/rfc/rfc9562.html#name-uuid-version-8): V8 is the custom version of UUID, the only two fields required are version and variance.
+
+### How do we create a UUID?
+
+Every UUID has 128 bits, and every single one has 4 version bits, which is literally a number showing which version it is. For example, UUID V4 would have this bit equal to `0b0100`, which is 4 in binary, 7 would be `0b0111` and so on.
+
+> `0bxxx` means a binary number, for example `0b1010` is the same as 10 in binary
+
+The variant always starts as `0b10`, in binary `0010` would be two, but this `10` has another meaning we'll get to soon. This is why every UUID v4 has a `4` in the third block:
+
+```
+919108f7-52d1-4320-9bac-f847db4148a8
+              ^ver ^var
+```
+
+Overall, V1 and V6 are obsolete and should be replaced by 7, v2 is reserved for computer security and v3 became obsolete once v5 showed up. So the ones that matter are: 4, 5, 7 and 8.
+
+### A real example
+
+![](./image-11.png)
+
+There are 4 blocks of 32 bits (0-3, counting 0-9 in each). The first 48 bits (from 0 up to 32 in block 3, plus 6) go to the first random set, `random_a`. Then from octet 6 to bit 9 of the first block we get the version `ver`, which in this case is `0b0100`. Then we have 12 more bits of random data `random_b`, the variance which is always `0b10`, and the final 62 bits are `random_c`. So it works like this:
+
+1.  128 bits is 16 bytes, we can generate 16 random bytes in hex `975e79e12bef34bd33bb11ea33560517`. This representation has 32 characters, and since each hex character is 4 bits, that's 4 bits \* 32 chars = 128 bits.
+
+> [!NOTE] 💡
+> You'll usually see hexadecimal numbers represented in a buffer, and a buffer is an array of bytes, meaning an array where each position is 8 bits: `0000 1111`, where each set of four is one hex digit.
+>
+> That's why the string representation looks something like `97 5e 79 e1...`
+
+1.  Now let's define our bits
+    1.  48 random bits: 48 bits is 6 bytes (48/8), so that's the first 12 letters `975e79e12bef`. To keep the block separation, we split it into 8 and 4 chars: `975e79e1-2bef`.
+    2.  4 version bits: fixed at `0b0100`.
+    3.  12 bits of randomness: 12 bits can be understood as one full byte plus half a byte, so the next 3 letters. But we already took one letter for the version, so we skip the next one (the 3) and take `4bd`.
+    4.  2 variance bits: fixed at `0b10`.
+    5.  62 bits of randomness: starting from `4bd`, that's 7 more bytes (7\*8 = 56 bits) plus 6 more bits, so 14 letters plus 1 extra letter, but skipping the first 3 (from `33bb`) because we already carved out half a byte for the variance: `3bb11ea33560517`.
+2.  If we split everything up, we end up with something like this:
+
+![](./image-13.png)
+
+4.  But that math doesn't add up... We're missing two bits. We pulled one of the characters out (at position `v3bb`) to fit the variance in, but the variance is `0b10`, not `0b0010`... Well, that's why we calculated the hex first. So imagine we have this:
+
+```
+975e79e1-2bef-34bd-33bb-11ea33560517
+xxxxxxxx-xxxx-Vxxx-vxxx-xxxxxxxxxxxx
+```
+
+5.  To replace the version `V`, we can just ignore whatever number is sitting there (which is 3) and put a 4 in its place, since we have 4 bits for the version, which is enough for one hex digit:
+
+```
+975e79e1-2bef-34bd-33bb-11ea33560517 -- initial
+xxxxxxxx-xxxx-4xxx-vxxx-xxxxxxxxxxxx -- mask
+975e79e1-2bef-44bd-33bb-11ea33560517 -- final
+```
+
+6.  Now for the variance bit, since we only have 2 bits, we have to fill the missing two with the two most significant bits of the next number. In our case the number sitting at the mask's `v` is 3, so `0b0011`. Since we fixed the first two variance bits at `0b10`, we take the first two bits of the next number and drop the rest. The final number is `0b1000`, which is 8:
+
+```
+975e79e1-2bef-34bd-33bb-11ea33560517 -- initial
+xxxxxxxx-xxxx-4xxx-vxxx-xxxxxxxxxxxx -- mask
+975e79e1-2bef-44bd-83bb-11ea33560517 -- final
+```
+
+In JavaScript (Node) we can do this with buffers, and it looks like this:
+
+```js
+const randombuf = crypto.randomBytes(16)
+Buffer.concat([
+  randombuf.subarray(0,6), // 48 bits, 6 bytes
+  Buffer.from([(randombuf[6] & 15) | 64]), // 4 version bits + 4 existing bits
+  randombuf.subarray(7,8), // 1 byte
+  Buffer.from([(randombuf[8] & 63 ) | 128]), // append the variance
+  randombuf.subarray(8) // the rest
+])
+```
+
+Which we can simplify into a single buffer:
+
+```js
+const randombuf = crypto.randomBytes(16)
+const result = Buffer.alloc(16)
+randombuf.copy(result, 0, 0, 6)
+result[6] = (randombuf[6] & 15) | 64
+result[7] = randombuf[7]
+result[8] = (randombuf[8] & 63) | 128
+randombuf.copy(result, 9, 9, 16)
+```
+
+But what are these magic numbers? 15, 63, 128? They're the decimal representation of the binary numbers `0000 1111` or `0f`, which is 15, `0011 1111` or `3f`, which is 63, and `1000 0000` or `80`, which is 128. Essentially, these operations exist so we can strip bits directly. For example, our version bit is 3, sitting in the 6th byte, which is `34`:
+
+```
+V = 0x34 or 0011 0100
+# We need to zero out the first 4 bits while keeping the last 4
+# for that we can AND with 0000 1111, which is 0x0f
+
+0011 0100
+    &
+0000 1111
+---------
+0000 0100 # 0x04
+
+# Now we can "add" 4
+# which is an OR with the number 0x40, which is 64 or 0100 0000
+
+0000 0100
+    +
+0100 0000
+---------
+0100 0100 # 0x44
+```
+
+Just for comparison's sake, this is the functionality implemented in the [UUID](https://www.npmjs.com/package/uuid) module on NPM:
+
+```ts
+function v4(options?: Version4Options, buf?: Uint8Array, offset?: number): UUIDTypes {
+  options ??= {};
+
+  if (native.randomUUID && !buf && !options) {
+    return native.randomUUID();
+  }
+
+  options = options || {};
+
+  const rnds = options.random || (options.rng || rng)();
+
+  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+
+  // Copy bytes to buffer, if provided
+  if (buf) {
+    offset = offset || 0;
+
+    for (let i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+
+    return buf;
+  }
+
+  return unsafeStringify(rnds);
+}
+```
+
+Again, it generates a random buffer first, then does a **bitwise and** with `0x0f`, which in binary is `0000 1111`, meaning it's discarding the first block. Then it does a **bitwise or** with `0x40`, which is `0100 0000`, replacing the first quartet with `0b0100`:
+
+```
+# Random
+rnds[6] = 0x8a => 1000 1010
+1000 1010 & 0x0f = 1000 1010 & 0000 1111
+
+1000 1010 # 0x8a
+    &
+0000 1111 # 0x0f
+---------
+0000 1010 # now we add (+ is an or) with 0x40
+    +
+0100 0000 # 0x40
+---------
+0100 1010 # 0x4a
+```
+
+For the variance, it takes the value at the 8th position, strips the first two bits of the first quartet through an AND with `0x3f`, which is 63 in decimal. With the first two bits zeroed out, we can replace them with `0b1000`, which is 8 in decimal, but since we have a full byte, that's `1000 0000`, which is 128 in decimal:
+
+```
+# Random
+rnds[8] = 0x75 => 0111 0101
+0111 0101 & 0x3f = 0111 0101 & 0011 1111
+
+0111 0101 # 0x75
+    &
+0011 1111 # 0x3f
+---------
+0011 0101 # now we add (+ is an or) with 0x80
+    +
+1000 0000 # 0x80
+---------
+1011 0101 # 0xb5
+```
+
+Here's the thing: the ID's first block isn't sortable, it's just a random number from a buffer.
+
+## ULID
+
+ULID stands for _Universally Unique Lexicographically Sortable Identifiers_, an ID compatible with UUIDs, also 128 bits. ULIDs are case sensitive, and don't have any other special characters, so we can use them in URLs, just like UUIDs.
+
+The difference is that a ULID's layout is a lot simpler.
+
+```
+ 01AN4Z07BY      79KA1307SR9X4MV3
+
+|----------|    |----------------|
+ Timestamp           Random
+   48bits             80bits
+```
+
+The timestamp is a 48-bit integer representing UNIX time in milliseconds, while the randomness is 80 bits of generic random data. The main difference, as the name already tells you, is that they're sortable alphabetically. They're also not encoded using hexadecimal, but rather an algorithm called [Base32](https://www.crockford.com/base32.html) (created by Douglas Crockford, who also happens to be the creator of JSON), so the amount of symbols is pretty limited:
+
+```
+0123456789ABCDEFGHJKMNPQRSTVWXYZ
+```
+
+This makes the ID smaller (26 letters instead of 32), which is more space efficient. But there's a catch: collisions can happen if two ULIDs are generated in the same millisecond, which isn't uncommon in distributed systems. When that's detected (however it's detected), the random component gets incremented by 1 in the least significant bit. Remember it uses [big endian](https://en.wikipedia.org/wiki/Endianness) notation, so the most significant bits are on the left, meaning the least significant ones are on the right.
+
+While the comparison is a bit uncertain and even a little unfair, ULIDs do have some advantages over UUIDs:
+
+1.  They're smaller, 26 instead of 32 chars, saving at least 6 bytes per ID.
+2.  Lexical ordering, though this isn't much of a selling point since UUID v7 is also sortable, just not lexically.
+3.  Advantages in database storage
+    1.  When we're using ordered indexes, ULIDs can take advantage of that same order and perform better.
+    2.  If you're storing time series data, ULIDs can be stored and retrieved in order without needing any further sorting.
+4.  Another point I consider an advantage is that ULIDs are more readable than UUIDs.
+
+## Conclusion
+
+In the end this article turned out to be more about UUID than ULID itself 🤣, but I hope you learned how UUIDs work.
+
+Overall, ULIDs are a good option when you want to generate data that needs to be sorted or looked up lexically. For small applications I don't think it makes that much of a difference, but for large distributed applications you can get both space savings and a performance boost by using ULIDs lexically.
+
+That said, ULIDs aren't very common, so odds are you'll have to implement your own generator or your own validator. Libraries like [Zod](https://zod.dev) already implement validations for ULID, but Node, for example, doesn't implement a ULID generator and probably never will, because ULID isn't based on any IETF RFC, which makes it riskier since it's a protocol that may or may not survive for decades (the same goes for Snowflake, for example).
+
+My suggestion: don't use ULIDs unless it's absolutely necessary. Prefer trying UUID v7 first for data that needs to be sortable.

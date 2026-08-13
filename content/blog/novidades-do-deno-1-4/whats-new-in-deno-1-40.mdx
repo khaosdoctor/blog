@@ -1,0 +1,129 @@
+---
+title: "What's New in Deno 1.40"
+pubDate: 2024-02-28T11:00:45.000Z
+updatedDate: 2026-07-16T15:52:50.000Z
+lang: en
+slug: "whats-new-in-deno-1-40"
+category: "javascript"
+tags: ["deno", "typescript"]
+description: "Understand the main changes in Deno 1.40 and how they directly impact your life with the tool!"
+machineTranslated: true
+draft: false
+---
+
+Deno hit [version 1.40](https://deno.com/blog/v1.40) and this is one of the coolest releases of all! First, because it added the [Temporal API](/temporal-api/) that I've been talking about here since 2020! And I think it's the first runtime to actually implement this feature!
+
+Beyond that, a whole bunch of other updates I'll walk through one by one.
+
+## Temporal API
+
+The Temporal API is the new way to handle dates in JavaScript. I talked a lot about it in [this article](/temporal-api/) and showed all the details, so I won't go into too much detail here, but essentially, Deno is the first runtime to fully implement this API.
+
+It's still behind an `--unstable-temporal` flag but you can use it exactly as the [official docs](https://tc39.es/proposal-temporal/docs/) show! If you run a terminal with `deno --unstable-temporal`, you can already run some tests:
+
+```ts
+console.log(Temporal.Now.instant()) // today's date and time
+console.log(Temporal.Now.zonedDateTimeISO()) // equivalent to toISOString
+const birthday = Temporal.PlainMonthDay.from("12-15");
+const birthdayIn2030 = birthday.toPlainDate({ year: 2030 });
+console.log(birthdayIn2030.toString()); // 2030-12-15
+```
+
+> [!NOTE] 💡
+> For some reason the `Temporal.Now.timeZoneId` method wasn't implemented.
+
+## import.meta.filename and dirname
+
+This was something I really wanted to see happen. Since the advent of ECMAScript modules, the whole module resolution changed, which means getting the name of a file or the directory where it exists is no longer that simple to fetch.
+
+In Node, we have two "magic" variables called `__dirname` and `__filename` that return the directory path and the file you're running respectively.
+
+But with ESM we can't use them because they aren't set at the beginning of the application, so we have to get the module URL with `import.meta.url`, which returns a _fileURL_ in the `file://path` format, and then we have to use `dirname` on that URL, but only after converting that URL to a path!
+
+```ts
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
+
+const fileurl = import.meta.url
+const path = fileURLToPath(fileurl)
+const dir = dirname(path)
+const filename = path.split('/').pop()
+
+console.log({ fileurl, path, dir, filename })
+/*
+{
+  fileurl: "file:///Users/lucas/repos/deno/teste.ts",
+  path: "/Users/lucas/repos/deno/teste.ts",
+  dir: "/Users/lucas/repos/deno",
+  filename: "teste.ts"
+}
+*/
+```
+
+This was really annoying! Especially if you had to deal with paths constantly, so two proposals were added to support both the file and the folder, called `import.meta.filename` and `import.meta.dirname`. Now you can replace all of that with:
+
+```ts
+console.log(import.meta.dirname) // /Users/lucas/repos/deno
+console.log(import.meta.filename) // /Users/lucas/repos/deno/teste.ts
+```
+
+## Decorators
+
+Finally we're getting native support for [decorators](/javascript-decorators/), a proposal in its final stage and should arrive in browsers soon! After more than 5 years of waiting, the new proposal brings together all the previous proposals into one.
+
+A classic example we can give is the `@trace` that's used to debug any function by putting a console before and after the execution:
+
+```ts
+function trace(fn: any, ctx: ClassMethodDecoratorContext) {
+  return function (...args: unknown[]) {
+    console.log("ENTERED", ctx.name);
+    const v = fn(...args);
+    console.log("EXITED", ctx.name);
+    return v;
+  };
+}
+
+class App {
+  @trace
+  static start() {
+    console.log("Hello World!");
+  }
+}
+
+App.start();
+```
+
+## Simpler imports
+
+This is another interesting update. In the past, when we had import maps with modules that had subdirectories, we had to define two different imports:
+
+```json
+{
+  "imports": {
+    "preact": "npm:preact@10.5.13",
+    "preact/": "npm:/preact@10.5.13/"
+  }
+}
+```
+
+This let us import both the top-level `preact` with `import preact from 'preact'`, and also submodules like `import hooks from 'preact/hooks'`.
+
+Now the simplification works so you can just have one module in the import map and import everything from the same root with just one map:
+
+```json
+{
+  "imports": {
+    "preact": "npm:preact@10.5.13"
+  }
+}
+```
+
+> Although I'm not a big fan of using import maps and prefer the `deps.ts` file approach
+
+## Other changes
+
+- [A series of APIs and commands](https://deno.com/blog/v1.40#deprecations-stabilizations-and-removals) are being deprecated, especially `deno.run` and `deno.serveHttp`
+- Support for `rejectionHandled`, an event that fires whenever an exception happens in a promise that's already been rejected (when you have an unused catch)
+- Support for [windows with WebGPU](https://deno.com/blog/v1.40#webgpu-windowing--bring-your-own-window)
+- Support for [new Node.js native APIs](https://deno.com/blog/v1.40#nodejs-api-updates)
+- Better messages in deno lint and deno doc

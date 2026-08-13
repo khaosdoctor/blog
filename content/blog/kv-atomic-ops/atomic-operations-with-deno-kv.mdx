@@ -1,0 +1,236 @@
+---
+title: "Atomic operations with Deno KV"
+pubDate: 2023-07-27T08:00:25.000Z
+updatedDate: 2026-07-16T15:59:05.000Z
+lang: en
+slug: "atomic-operations-with-deno-kv"
+category: "javascript"
+tags: ["deno", "typescript", "databases"]
+description: "Deno KV is moving faster and faster, let's learn what atomic transactions are and what use they have in a KV database."
+machineTranslated: true
+draft: false
+---
+In the [other article](/deno-kv-beta/) we talked about the new closed beta version of Deno KV and also about the concept of key and value. But, unfortunately, since the article was already pretty long, some things got left out, one of them being KV's incredible atomicity capability.
+
+But what does it mean to be atomic? And what does that mean in the context of a database of this kind?
+
+## Atomicity
+
+Atomicity is the **A** in the acronym **ACID**, which you've probably heard before. Each letter in ACID carries deep meaning for any database, especially one that supports transactions:
+
+-   **Atomicity**: The most important one for us right now. This is nothing more than the concept of **transactions**. In other words, a set of operations that run all at once as if they were a single atom: either everything happens, or nothing happens.
+-   **Consistency**: The guarantee that transactions in the database will only modify tables in a predefined way. This property also guarantees that any kind of data corruption or loss in one place won't affect other tables.
+-   **Isolation:** Essentially deals with the race problem. When multiple users are reading from and writing to the database at the same time, transaction isolation guarantees that these concurrent transactions don't interfere with each other.
+-   **Durability:** The main property of a database. It guarantees that any change made to your data through a successful transaction will be persisted even in the event of a system failure.
+
+Besides non-atomic [operations](https://deno.land/manual@v1.35.1/runtime/kv/operations), KV also supports [atomic](https://deno.land/api@v1.35.1?s=Deno.AtomicOperation&unstable=) transactions, where either everything runs or nothing runs. This concept is based on **mutations**, which are a set of actions applied to a record.
+
+Once again, KV uses `versionstamps` to know what has changed or not. The transaction will only be sent successfully if the current `versionstamps` of the keys match the ones passed in the mutation. This way, we can guarantee that we're modifying the latest version of the data.
+
+These operations include everything from before, with a few differences:
+
+-   `check`: equivalent to `get`, but instead of getting a key, it tests an already-obtained key against the versionstamp that's in the database
+-   `sum`: a type of `mutate` operation, but without a direct shortcut
+-   `min`: another `mutate`, but this one has a direct shortcut
+-   `max`: another `mutate`, also with a direct shortcut
+-   `commit`: finishes the transaction and sends the values to the database
+-   `delete`: same as before
+
+For this explanation it's better to use an example than to go through method by method, since most of the functionality is already familiar. Deno's own example is great here, because it's one of the main use cases when working with transactions: **transferring money**.
+
+When we're transferring funds from one account to another, we first have to guarantee the first account has the funds. If we do this asynchronously, it's possible that, while we're trying to transfer the money from one account to the other, a transaction happens in the middle and we no longer have the funds we need. That's why we need to run all the operations (taking from one account and putting into the other) at once, or not run any of them at all.
+
+```ts
+const senderKey = ['account', 'alice']
+const receiverKey = ['account', 'bob']
+cosnt amount = 100
+
+// we try the transaction until it works
+let res = { ok: false }
+
+while (!res.ok) {
+	const [senderResponse, receiverResponse] = await kv.getMany([senderKey, receiverKey])
+    
+    if (!senderResponse || !receiverResponse) break
+    
+    const senderBalance = senderRes.value
+    const receiverBalance = receiverRes.value
+    
+    if (senderBalance < amount) {
+    	throw new Error('Saldo insuficiente')
+    }
+    
+    const newSenderBalance = senderBalance - amount
+    const newReceiverBalance = receiverBalance + amount
+ 	
+    // we save it to the database
+}
+```
+
+So far we're doing everything in memory. To save to the database we first need to check both balances, and we can do that with the `check` command:
+
+```ts
+const senderKey = ['account', 'alice']
+const receiverKey = ['account', 'bob']
+const amount = 100
+
+// we try the transaction until it works
+let res = { ok: false }
+
+while (!res.ok) {
+	const [senderResponse, receiverResponse] = await kv.getMany([senderKey, receiverKey])
+    
+    if (!senderResponse || !receiverResponse) break
+    
+    const senderBalance = senderRes.value
+    const receiverBalance = receiverRes.value
+    
+    if (senderBalance < amount) {
+    	throw new Error('Saldo insuficiente')
+    }
+    
+    const newSenderBalance = senderBalance - amount
+    const newReceiverBalance = receiverBalance + amount
+ 	
+    // we save it to the database
+    res = await kv.atomic()
+    	.check(senderResponse)
+        .check(receiverResponse)
+}
+```
+
+Here it's important to notice two things:
+
+1.  We're using the `atomic()` method, which is the namespace holding all of KV's atomic properties
+2.  We're using `check` and passing as a parameter not a value, but the entire response from the `getMany` command, because we need to pass both the value and that key's `versionstamp`
+
+What `check` does is run a `get` on KV and verify whether the two records are **identical**. If it fails, the transaction gets aborted. Now we can update each person's values:
+
+```ts
+const senderKey = ['account', 'alice']
+const receiverKey = ['account', 'bob']
+const amount = 100
+
+// we try the transaction until it works
+let res = { ok: false }
+
+while (!res.ok) {
+	const [senderResponse, receiverResponse] = await kv.getMany([senderKey, receiverKey])
+    
+    if (!senderResponse || !receiverResponse) break
+    
+    const senderBalance = senderRes.value
+    const receiverBalance = receiverRes.value
+    
+    if (senderBalance < amount) {
+    	throw new Error('Saldo insuficiente')
+    }
+    
+    const newSenderBalance = senderBalance - amount
+    const newReceiverBalance = receiverBalance + amount
+ 	
+    // we save it to the database
+    res = await kv.atomic()
+    	.check(senderResponse)
+        .check(receiverResponse)
+        .set(senderKey, newSenderBalance)
+        .set(receiverKey, newReceiverBalance)
+        .commit()
+}
+```
+
+Every transaction has to be finished with a `commit()` so we can run the queue of operations that were made.
+
+Now that we understand the concept, let's look at the other operations.
+
+### `kv.atomic().mutate()` - Sum, Min and Max
+
+Besides the normal operations, there's another method called `mutate` inside `atomic()`. This method accepts a config object that can have three keys:
+
+-   `type`: The mutation type, which can currently be `sum`, `min` or `max`
+-   `key`: The key to be modified
+-   `value`: The new value, which needs to be an object of type `Deno.KvU64`, created from a `BigInt` with `new Deno.KvU64(100n)`, for example
+
+Let's talk about mutations in general. I'll give the first example with `sum`, but there's not much need to walk through the others with examples, since they follow the same idea:
+
+**Sum**
+
+`sum` will atomically add a value to a key. If the value doesn't exist, it gets created with the value that would have been added. For example, if we add 10 to a key that doesn't exist, the result will be that key with the value 10. If the key already exists, the value gets added through a sum.
+
+> Mutation operations **can only be done on BigInt data types**, which in Deno KV are represented by the `Deno.KvU64` type, meaning [Deno KV Unsigned 64-bit Integer](https://deno.land/manual@v1.35.1/runtime/kv/key_space#denokvu64-type). This type can't be stored inside any structure, it needs to be a top-level value.
+
+The basic structure of a sum is as follows:
+
+```ts
+await kv.atomic()
+	.mutate({
+    	type: 'sum',
+        key: ['accounts', 'alice'],
+        value: new Deno.KvU64(80n),
+    })
+    .commit()
+```
+
+This means we can replace our code above with something like:
+
+```ts
+const senderKey = ['account', 'alice']
+const receiverKey = ['account', 'bob']
+const amount = 100
+
+// we try the transaction until it works
+let res = { ok: false }
+
+while (!res.ok) {
+	const [senderResponse, receiverResponse] = await kv.getMany([senderKey, receiverKey])
+    
+    if (!senderResponse || !receiverResponse) break
+    
+    const senderBalance = senderRes.value
+    const receiverBalance = receiverRes.value
+    
+    if (senderBalance < amount) {
+    	throw new Error('Saldo insuficiente')
+    }
+ 	
+    // we save it to the database
+    res = await kv.atomic()
+    	.check(senderResponse)
+        .check(receiverResponse)
+        .mutate({
+        	type: 'sum',
+            key: senderKey,
+            value: new Deno.KvU64(-BigInt(amount)),
+        })
+        .mutate({
+        	type: 'sum',
+            key: receiverKey,
+            value: new Deno.KvU64(BigInt(amount)),
+        })
+        .commit()
+}
+```
+
+**Min and Max**
+
+The same way as `sum`, setting `min` and `max` as the `type` will make the key end up with the smallest or largest value, respectively, compared between the key's current value and the value you're passing.
+
+For example, if we have a key `['accounts', 'alice']` whose value is `100`, and we pass a `min` mutation with a value of `50`, the new value will be `Math.min(100, 50)`, which is `50`. But if the original value were `30`, the key wouldn't be modified. The same applies to `max`.
+
+Just like with `sum`, if the key doesn't exist it gets created with the passed value. In other words, the value is never assumed to start at `0` in either case.
+
+```ts
+await kv.atomic()
+	.mutate({
+    	type: 'min',
+        key: ['accounts', 'alice'],
+        value: new Deno.KvU64(100n),
+    })
+    .commit()
+```
+
+## Conclusion
+
+With atomic operations, we can carry out safer transactions that are guaranteed to have the expected result.
+
+In upcoming articles we'll build a project using Deno Deploy and Deno KV!

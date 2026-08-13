@@ -1,0 +1,240 @@
+---
+title: "Getting Started with ECMAScript Modules"
+pubDate: 2021-06-23T11:00:00.000Z
+updatedDate: 2026-07-16T16:14:16.000Z
+lang: en
+slug: "getting-started-with-ecmascript-modules"
+category: "javascript"
+tags: ["javascript", "nodejs"]
+description: "ES Modules are the next generation of module imports in JavaScript. Here's how this feature promises to change what we know."
+machineTranslated: true
+draft: false
+---
+It's been a while since we started hearing about the availability of ECMAScript Modules in our JavaScript packages and code. Even though the model has been supported across the web through a `<script type="module">` tag for some time now, it's only now, with the official deprecation of Node 10 in favor of Node 16, that we get full support for it on the server too!
+
+> Check an example of ESM module usage in the browser [in this repository](https://github.com/khaosdoctor/js-containerd-example/tree/main/child-process/static)
+
+## A bit of history
+
+Since 2012 there have been conversations on GitHub and in the official TC39 repositories about the standard implementation of a new module system, one more suited to the new times of JavaScript.
+
+Right now, the most common model in use is the famous `CommonJS`. With it we get the classic `require()` syntax at the top of Node.js modules, but it was [never officially supported by browsers](https://stackoverflow.com/questions/7576001/how-can-i-require-commonjs-modules-in-the-browser) without the help of external plugins like Browserify and RequireJS.
+
+The demand for a module model started from there, with people wanting to modularize their JavaScript applications on the client side too. But implementing a module system isn't easy, and it took several years until an acceptable implementation showed up.
+
+So now we have what's called ESM (ECMAScript Modules), which a lot of people already knew, mostly because it's the syntax that's shipped with TypeScript since its creation. In other words, we're no longer going to work with modules through `require()`, but through an `imports` key and an `exports` key instead.
+
+## CommonJS
+
+In a classic CommonJS use case we get code that looks like this:
+
+```javascript
+function foo () { }
+
+module.exports = foo
+```
+
+Notice that all Node.js (in this case) is going to read is an object called `module`. Inside it, we're defining an `exports` key that holds the list of things we're going to export from this module. Then, another file can import it like this:
+
+```js
+const foo = require('./foo')
+```
+
+When we import a module using this syntax, we're loading it synchronously, because the module resolution algorithm first needs to figure out the type of the module. If it's a local module, it's mandatory that it starts with `./`, otherwise module resolution will look through the folders known to hold existing modules.
+
+After finding the module, we need to read its content, parse it, and generate the `module` object that will be used to figure out what we can or can't import from that module.
+
+This kind of import, mostly because it's synchronous, causes some problems when running applications in the more asynchronous nature of Node.js, so a lot of people ended up importing modules only when they were actually needed.
+
+## ESM
+
+In ESM we get a drastic paradigm shift. Instead of importing modules synchronously, we start importing asynchronously, meaning we don't block the event loop with any kind of I/O.
+
+On top of that, we no longer have to manually define what modules import or export. That's handled by the two `imports` and `exports` keywords: whenever they're parsed, the compiler identifies a new symbol to be exported or imported and automatically adds it to the export list.
+
+ESM also comes with a few default rules that make module resolution more precise, and therefore faster. For example, it's always mandatory to add the file extension when importing a module. That means importing modules by file name alone is no longer valid:
+
+```js
+import foo from './foo.js'
+```
+
+This means the resolution system doesn't have to guess what type of file we're trying to import, since with `require()` we could import several file types besides `.js`, like JSON. Which brings us to the second big change: a lot of the file types that used to be supported through direct import now need to be read via `fs.promises.readFile`.
+
+For example, when we wanted to import a JSON file directly, we could run a `require('file.json')`. Now we no longer have that capability, and we need to use the file reading module to natively read the JSON.
+
+> There's still an experimental API to enable this functionality in Node.js, but it comes disabled by default. Read more about it [here](https://nodejs.org/api/esm.html#esm_json_modules)
+
+So, to import a JSON as an object you can do it like this:
+
+```js
+import {promises as fs} from 'fs';
+
+const packageJson = JSON.parse(await fs.readFile('package.json', 'utf8'))
+```
+
+Every path to a module in ESM is a URL, so the model supports a few valid protocols like `file:`, `node:`, and `data:`. That means we can import a native Node module with:
+
+```js
+import fs from 'node:fs/promises'
+```
+
+We won't go deeper here, but you can check more about this feature in the [Node docs](https://nodejs.org/api/esm.html#esm_urls).
+
+ESM also supports a new file extension called `.mjs`, which is pretty useful because we don't need to worry about configuration, since Node and JavaScript already know how to resolve this file type.
+
+Other changes include the **removal** of variables like `__dirname` inside Node.js modules. That's because, by default, modules have an object called `import.meta`, which holds all the information about that module that used to be populated by the runtime into a global variable. In other words, that's one less piece of global state to worry about.
+
+To resolve a local module path without using `__dirname`, a good option is to use `fileURLToPath`:
+
+```js
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+```
+
+Although you can also import using the URL directly with `new URL(import.meta.url)`, since a lot of Node APIs accept URLs as parameters.
+
+Finally, the most anticipated of all the changes that came with modules is **top-level await**. That's right, we no longer need to be inside an `async` function to run an `await`, but that's only for modules! So things like this are going to be pretty common:
+
+```js
+async function foo () {
+  console.log('Hello')
+}
+
+await foo() // Hello
+```
+
+We've already had to use this feature inside our own function just to read a JSON file.
+
+## Interoperability
+
+ESM took so long because it needed to be as compatible as possible with CommonJS the way it was at the time, so interoperability between the two matters a lot, since we have way more modules in CommonJS than in ESM.
+
+In CJS (CommonJS) we already had the possibility of an asynchronous import using the `import()` function, and these expressions are supported inside CJS to load modules written in ESM. So we can import an ESM module this way:
+
+```js
+// esm.mjs
+export function foo () {
+  return 1
+}
+
+// cjs.js
+const esm = import('./esm.mjs')
+esm.then(console.log) // { foo: [λ: foo], [Symbol(Symbol.toStringTag)]: 'Module' }
+```
+
+On the other side, we can use the same `import` syntax for a CJS module, but we need to keep in mind that every CJS module comes with a namespace. In the default case of a module like the one below, the namespace will be `default`:
+
+```js
+function foo () { }
+module.exports = foo
+```
+
+So, to import this module we can import its namespace through a _named import_:
+
+```js
+import {default as cjs} from './cjs.js'
+```
+
+Or through a default import:
+
+```js
+import cjs from './cjs.js'
+```
+
+> If you want to see what a CJS module export looks like, just run a full import with `import * as cjs from './cjs.js'` and log the result to the console.
+
+In Node.js, we also get a great option where, when we use named exports with CJS, this way:
+
+```js
+exports.foo = () => {}
+exports.bar = () => {}
+```
+
+The runtime will try to resolve each `exports` key into a named `import`. In other words, we'll be able to do this:
+
+```js
+import { foo } from './cjs.js'
+```
+
+## Main differences
+
+Let's sum up the main differences between the two module systems so we can learn how to use them:
+
+-   ESM doesn't have `require`, `exports`, or `module.exports`
+-   We don't have the famous _dunder vars_ like `filename` and `dirname`, instead we have `import.meta.url`
+-   We can't load JSON as modules, we need to read them through `fs.promises.readFile` or `module.createRequire`
+-   We can't load Native Modules directly
+-   We no longer have `NODE_PATH`
+-   We no longer have `require.resolve` to resolve relative paths, instead we can build a URL with `new URL('./path', import.meta.url)`
+-   We no longer have `require.extensions` or `require.cache`
+-   Since they're full URLs, ESM modules can carry query strings just like HTML pages, so it's possible to do something like `import {foo} from './module?query=string'`. That's handy for when you need to bypass the cache.
+
+## Using ESM with Node.js
+
+There are two ways to use ESM: through `.mjs` files, or by adding the `type` key to `package.json` with the value `"module"`. This lets you keep using `.js` extensions while still having ESM modules instead of CJS.
+
+```jsonc
+// Using CJS
+{
+  "name": "package",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+}
+
+// Using ESM
+{
+  "name": "package",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "exports": "./index.mjs",
+}
+```
+
+If you're creating a new JavaScript package from scratch, go with ESM right away. To do that you don't even need to add a `type` key to your `package.json`, you just need to swap the `"main"` key for `exports`, like this example:
+
+```jsonc
+// Using CJS
+{
+  "name": "package",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+}
+
+// Using ESM
+{
+  "name": "package",
+  "version": "0.0.1",
+  "description": "",
+  "exports": "./index.mjs",
+}
+```
+
+Another important step is adding the `engines` key, restricting which Node versions can run your package without breaking. For this key, use the values `"node": "^12.20.0 || ^14.13.1 || >=16.0.0"`.
+
+If you're using `'use strict'` in any file, remove it.
+
+From there, all your files will be modules and will need the standard refactors, like swapping `require` for `import` and adding extensions to local file names, like we talked about before.
+
+## ESM with TypeScript
+
+Even though it's been using the ESM model for a while now, TypeScript doesn't usually generate compiled JavaScript in ESM, only in CJS. To force the use of ESM even in the distribution files generated by TS, we're going to need a few basic settings.
+
+First, let's edit our `package.json` as if we were creating a normal JS module. That means doing this list of things:
+
+-   Creating a `"type": "module"` key
+-   Replacing `"main": "index.js"` with `"exports": "./index.js"`
+-   Adding the `"engines"` key with the `"node"` property value for the versions we showed earlier
+
+Then, let's generate a `tsconfig.json` file with `tsc --init` and modify it to add a `"module": "ES2020"` key. That's already enough for the final files to be exposed as ESM, but there are a few precautions we need to take when writing our TypeScript files:
+
+-   Don't use partial relative imports like `import index from '.'`, **always** use the full path `import index from './index.js'`
+-   It's recommended to use the `node:` protocol to import native Node modules like `fs`
+
+The most important part, and also the one that, in my opinion, is the biggest letdown of using ESM with TS, is that **we always need to import files with the `.js` extension, even when we're using `.ts`.** In other words, if inside an `a.ts` file you want to import the module in `b.ts`, you'll need an import like `import {b} from './b.js'`.
+
+That's because, when compiling, since TS already natively uses ESM as its syntax, it won't remove or fix the import lines in your source files.
