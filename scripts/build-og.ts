@@ -2,6 +2,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
+import { bold, count, dim, heading, ok } from './lib/cli.ts'
 
 const OUT_DIR = 'public/og'
 const WIDTH = 1200
@@ -20,6 +21,8 @@ const SECTIONS: Record<string, string> = {
   opinion: '#45b384',
   meta: '#1a1c20',
 }
+
+heading(`build-og: rendering ${Object.keys(SECTIONS).length} section cards`)
 
 const mark = readFileSync('public/favicon.svg', 'utf8')
 
@@ -52,5 +55,7 @@ for (const [name, accent] of Object.entries(SECTIONS)) {
 
   const png = await canvas.png().toBuffer()
   writeFileSync(join(OUT_DIR, `${name}.png`), png)
-  console.log(`${name}.png ${WIDTH}x${HEIGHT} (${(png.length / 1024).toFixed(1)}kB)`)
+  console.log(`  ${bold(`${name}.png`)} ${WIDTH}x${HEIGHT} ${dim(`(${(png.length / 1024).toFixed(1)}kB)`)}`)
 }
+
+ok(`wrote ${count(Object.keys(SECTIONS).length, 'card', 'cards')} to ${OUT_DIR}`)

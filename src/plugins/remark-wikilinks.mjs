@@ -5,32 +5,78 @@
 // A link to a draft still links, and carries the same "not written yet" marker
 // the series table of contents uses, so the two agree. A link to a slug that does
 // not exist at all fails the build, which is the only way a typo gets caught.
+//
+// A wikilink is always written as [[folder-name]], the Portuguese slug, because
+// that is the one Obsidian autocompletes. A translation lives beside its source
+// in the same folder, named after its own slug (content/blog/<folder>/<file>.mdx),
+// with its own `lang` frontmatter. A wikilink resolves in the locale of the page
+// it is written on, so an English page links the English file in that folder.
+// When that file does not exist yet the link falls back to another locale, with
+// that locale's title: the reader is going to land on a Portuguese article, so
+// the link should say so.
 
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import GithubSlugger from 'github-slugger'
 import { visit } from 'unist-util-visit'
 
 const BASE = 'content/blog'
 const PATTERN = /\[\[([^\]|#]+)(#[^\]|]+)?(?:\|([^\]]+))?\]\]/g
 
-/** slug -> { draft, title }, read once per build. */
+/** folder name (the pt slug) -> locale -> { draft, title, url }, read once per build. */
 let posts = null
+
+/** null when the file has no frontmatter, e.g. a stray note Obsidian created. */
+function read(path) {
+  const text = readFileSync(path, 'utf8')
+  if (!text.startsWith('---')) return null
+  const front = text.split('---')[1] ?? ''
+  return {
+    draft: /^draft:\s*true/m.test(front),
+    title: front.match(/^title:\s*"?(.*?)"?\s*$/m)?.[1],
+    lang: front.match(/^lang:\s*"?([a-z]{2})"?/m)?.[1] ?? 'pt',
+    slug: front.match(/^slug:\s*"?([^"\s]+)"?\s*$/m)?.[1],
+  }
+}
+
+function record(folder, locale, entry) {
+  const byLocale = posts.get(folder) ?? new Map()
+  // First writer wins, which is why files within a folder are read in sorted order.
+  if (!byLocale.has(locale)) byLocale.set(locale, entry)
+  posts.set(folder, byLocale)
+}
 
 function index() {
   if (posts !== null) return posts
   posts = new Map()
-  for (const slug of readdirSync(BASE)) {
-    const file = ['index.mdx', 'index.md']
-      .map((name) => `${BASE}/${slug}/${name}`)
-      .find((path) => existsSync(path))
-    if (file === undefined) continue
-    const front = readFileSync(file, 'utf8').split('---')[1] ?? ''
-    posts.set(slug, {
-      draft: /^draft:\s*true/m.test(front),
-      title: front.match(/^title:\s*"?(.*?)"?\s*$/m)?.[1] ?? slug,
-    })
+
+  // Sorted, so the fallback a page gets never depends on directory order.
+  for (const folder of readdirSync(BASE).sort()) {
+    const dir = `${BASE}/${folder}`
+    for (const name of readdirSync(dir).sort()) {
+      if (!/\.mdx?$/.test(name)) continue
+      const front = read(`${dir}/${name}`)
+      if (front === null) continue
+
+      const isIndex = name === 'index.mdx' || name === 'index.md'
+      // The file's own slug frontmatter wins, else index.* answers on the
+      // folder name, else the filename itself is the slug.
+      const urlSlug = front.slug ?? (isIndex ? folder : name.replace(/\.mdx?$/, ''))
+      const url = front.lang === 'pt' ? `/${urlSlug}/` : `/${front.lang}/${urlSlug}/`
+      record(folder, front.lang, { draft: front.draft, title: front.title ?? folder, url })
+    }
   }
   return posts
+}
+
+/**
+ * The reader's own locale first, then whatever else has the post. Insertion order
+ * makes that fallback the source-language post whenever one exists, since files
+ * are read in sorted order and index.mdx sorts before any translation's filename.
+ */
+function resolve(slug, locale) {
+  const byLocale = index().get(slug)
+  if (byLocale === undefined) return undefined
+  return byLocale.get(locale) ?? byLocale.values().next().value
 }
 
 /**
@@ -62,15 +108,18 @@ export function remarkWikilinks() {
 
       const children = []
       let cursor = 0
+      // The locale of the page doing the linking, the same signal the draft marker
+      // below uses.
+      const locale = file.data?.astro?.frontmatter?.lang ?? 'pt'
 
       for (const match of node.value.matchAll(PATTERN)) {
         const [raw, target, fragment, label] = match
         const slug = target.trim()
-        const post = index().get(slug)
+        const post = resolve(slug, locale)
 
         if (post === undefined) {
           throw new Error(
-            `${file.path ?? 'a post'}: [[${slug}]] points at no post. ` +
+            `${file.path ?? 'a post'}: [[${slug}]] points at no post, in any locale. ` +
               `Expected ${BASE}/${slug}/index.mdx. Fix the link or create the post.`,
           )
         }
@@ -80,17 +129,20 @@ export function remarkWikilinks() {
         }
         cursor = match.index + raw.length
 
+        // The title comes from the post that was resolved, not from the source
+        // language: an English page linking a post nobody has translated yet shows
+        // the Portuguese title, which is what the reader will find on arrival.
         const text = (label ?? post.title).trim()
         children.push({
           type: 'link',
-          url: `/${slug}/${anchor(fragment)}`,
+          url: `${post.url}${anchor(fragment)}`,
           children: [{ type: 'text', value: text }],
         })
 
         // The link still works, it just says so: a draft has no page until it is
         // published. Marked in the language of the post doing the linking.
         if (post.draft) {
-          const lang = file.data?.astro?.frontmatter?.lang === 'en' ? 'en' : 'pt'
+          const lang = locale in NOT_WRITTEN_YET ? locale : 'pt'
           children.push(
             { type: 'text', value: ' ' },
             {

@@ -1,6 +1,6 @@
 ---
 import type { GetStaticPaths } from 'astro'
-import { getCollection, render } from 'astro:content'
+import { render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Bookmark from '../../components/Bookmark.astro'
@@ -16,7 +16,15 @@ import SpeakerDeck from '../../components/SpeakerDeck.astro'
 import Spotify from '../../components/Spotify.astro'
 import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
-import { formatDate } from '../../lib/posts'
+import {
+  folderOf,
+  formatDate,
+  getPublishedByFolder,
+  getPublishedPosts,
+  slugOf,
+  SOURCE_LANG,
+  urlOf,
+} from '../../lib/posts'
 
 const mdxComponents = {
   Bookmark,
@@ -35,22 +43,37 @@ const mdxComponents = {
 }
 
 // English lives under /en/, Portuguese stays unprefixed at the root so every
-// URL Ghost ever published keeps working.
+// URL Ghost ever published keeps working. The slug is this file's own, so an
+// English article reads as English in the address bar.
 export const getStaticPaths = (async () => {
-  const now = new Date()
-  const posts = await getCollection(
-    'translated',
-    ({ data }) => data.lang === 'en' && !data.draft && data.pubDate <= now,
-  )
-  return posts.map((post) => ({
-    params: { slug: post.id.replace(/^en\//, '') },
-    props: { post },
-  }))
+  const [posts, byFolder] = await Promise.all([getPublishedPosts('en'), getPublishedByFolder()])
+  return posts.map((post) => {
+    // Every language of this article is a file in the same folder.
+    const siblings = byFolder.get(folderOf(post)) ?? [post]
+    const source = siblings.find((entry) => entry.data.lang === SOURCE_LANG)
+    return {
+      params: { slug: slugOf(post) },
+      props: {
+        post,
+        // The original to link back to. A translation of a post that is still a
+        // draft has nowhere to point, so the banner has to cope with null.
+        sourcePath: source === undefined ? null : urlOf(source),
+        alternates: siblings.map((entry) => ({
+          // pt-BR, not pt: the region is what search engines match against.
+          lang: entry.data.lang === 'pt' ? 'pt-BR' : entry.data.lang,
+          path: urlOf(entry),
+        })),
+      },
+    }
+  })
 }) satisfies GetStaticPaths
 
-const { post } = Astro.props
+const { post, sourcePath, alternates: folderAlternates } = Astro.props
 const { Content } = await render(post)
-const source = `/${post.data.translationOf}/`
+const alternates = folderAlternates.map(({ lang, path }) => ({
+  lang,
+  href: new URL(path, Astro.site).href,
+}))
 ---
 
 <BaseLayout
@@ -63,10 +86,7 @@ const source = `/${post.data.translationOf}/`
   tags={post.data.tags}
   series={post.data.series}
   section={{ name: post.data.category, url: `/${post.data.category}/` }}
-  alternates={[
-    { lang: 'pt-BR', href: new URL(source, Astro.site).href },
-    { lang: 'en', href: new URL(Astro.url.pathname, Astro.site).href },
-  ]}
+  alternates={alternates}
 >
   <article>
     <h1>{post.data.title}</h1>
@@ -77,7 +97,11 @@ const source = `/${post.data.translationOf}/`
       <span aria-hidden="true">·</span>
       <span>{post.data.category}</span>
     </p>
-    {post.data.machineTranslated && <LangBanner lang="en" originalHref={source} />}
+    {
+      post.data.machineTranslated && sourcePath !== null && (
+        <LangBanner lang="en" originalHref={sourcePath} />
+      )
+    }
     <Content components={mdxComponents} />
   </article>
   <HoverPreviews locale="en" />

@@ -44,13 +44,17 @@ export function toOgLocale(lang: string): string {
  * Sections that have a card in `public/og/`. A section missing from this list
  * gets the default card, so writing a post in a brand new section never points
  * a share at a PNG nobody drew.
+ *
+ * One entry per file that actually exists, and nothing else: the list used to
+ * carry `newsletter`, which is neither a category any post uses nor a drawn
+ * card, and to omit `opinion`, which is both.
  */
 export const OG_SECTION_CARDS = [
   'career',
   'infra',
   'javascript',
   'meta',
-  'newsletter',
+  'opinion',
   'security',
   'typescript',
 ]

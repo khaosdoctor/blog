@@ -1,100 +1,190 @@
-# How this blog works
+# Architecture
 
-## Content
+How the site is built and why. `content/WRITING.md` is the authoring reference, `docs/decisions.md` records what was
+decided, `docs/design.md` holds the visual direction. This file is the machinery.
 
-One post is one folder: `content/blog/<slug>/index.mdx` plus its images. The slug is the folder name and the URL. Image paths are `./image.png`.
+Astro 7, static output, no server, no database. Deployed to GitHub Pages. One author, writing in Obsidian.
 
-The files are `.mdx` but the content is plain markdown. That combination is deliberate: Obsidian opens `content/blog` as a vault and renders every post natively, while the extension keeps components available for the rare post that needs one. The collection only matches `index.*`, so a stray note does not become a post or break the build.
+## The content model
 
-Frontmatter is validated by `src/content.config.ts`. `draft` defaults to `true`, so forgetting the field cannot publish anything. A `pubDate` in the future means scheduled.
+One folder per article. Every language of that article is a file inside it.
 
-### Writing
-
-| You write | Obsidian shows | The site renders |
-|---|---|---|
-| `![alt](./img.png "caption")` | the image | `<figure>` + `<figcaption>`, with srcset |
-| `![](https://youtube.com/watch?v=X)` | the player | a YouTube embed |
-| `![](https://vimeo.com/123)` | the player | a Vimeo embed |
-| `> quote`<br>`> — ![via Twitter](status-url)` | the live tweet | `<Tweet>`, upgraded by widgets.js |
-| a bare URL on its own line | a link | a bookmark card, or a link |
-| `> [!NOTE]` | a callout | a callout |
-
-`src/plugins/remark-figures.mjs` and `src/plugins/remark-embeds.mjs` do the conversion. Both accept the bare-link spelling as well, so pasting a URL and forgetting the `![]()` degrades to a plain link rather than breaking.
-
-Components that stay components: `Video`, `RawEmbed`, `MissingImage`. Six uses between them, and none has a markdown spelling worth inventing.
-
-### Series
-
-Three frontmatter fields, and only one of them goes on every part:
-
-```yaml
-series: grpc                              # short slug, also the URL
-seriesOrder: 1                            # position
-seriesName: "O guia completo do gRPC"     # first part only
+```
+content/blog/error-cause/
+  index.mdx                     lang: pt (the default)   ->  /error-cause/
+  what-is-error-cause.mdx       lang: en, slug: ...      ->  /en/what-is-error-cause/
+  image.png                     shared by both
 ```
 
-The table of contents is generated from those and rendered on every part, dev.to style. Parts that are still drafts appear in the list as plain text marked "not written yet", which is why the crypto series links resolve even though five of its seven parts have never been written.
+- **The folder is the pairing.** Two files in one folder are translations of each other, which is where `hreflang`
+  comes from. There is no `translationOf` field to keep in sync.
+- **`lang` decides the language.** Nothing else does.
+- **`slug` overrides the URL**, so an English article reads as English in the address bar. Without it, the slug is the
+  folder name for `index.*` and the filename for anything else.
+- **Portuguese stays at the root.** Every URL Ghost ever published still answers, which is the whole reason the
+  migration kept flat URLs.
+- Images are `./image.png` from either file, because they are in the same folder.
 
-The slug is what you type and what you have to remember, so keep it short. The title is looked up from the first part that sets `seriesName`, falling back to the slug, so renaming a series means editing one file.
+Posts are `.mdx` files whose content is **plain markdown**. No imports, no component tags. Obsidian cannot open `.mdx`
+and cannot render component tags, and Obsidian is the point of the rebuild, so two remark plugins turn markdown into
+components at build time instead. Do not "clean this up" by writing components in content.
 
-### Why the build never fetches anything
+```mermaid
+flowchart TD
+  A["Obsidian vault at content/"] --> B["content/blog/&lt;folder&gt;/index.mdx"]
+  B --> C["prebuild: vendor-media.ts<br/>downloads remote media, rewrites the reference"]
+  C --> D["glob loader + Zod schema<br/>src/content.config.ts"]
+  D --> E["remark chain"]
+  E --> E1["reading-time"]
+  E1 --> E2["math"]
+  E2 --> E3["embeds: bare URL or image syntax becomes a player"]
+  E3 --> E4["figures: a lone image becomes a figure, title becomes caption"]
+  E4 --> E5["wikilinks: [[folder]] resolves per locale"]
+  E5 --> F["rehype: callouts, KaTeX"]
+  F --> G["page HTML"]
+  D --> H["drafts and future pubDate held back"]
+  H --> I["scheduled.json"]
+```
 
-Bookmark cards and tweets render from metadata captured out of Ghost, in `content/bookmarks.json`. `astro-embed`'s LinkPreview refetches every bookmarked URL at build time and dies on sites without OG tags; Twitter's oEmbed needs a live call. A build that depends on somebody else's uptime is a build that fails for reasons you cannot fix. Anything needing the network happens in an explicit script instead.
+Why each plugin exists, in the order they run:
 
-`content/dead-images.json` lists remote images whose host stopped serving them. They stay in the markdown so the caption and the surrounding sentence survive, and render as a placeholder.
+| Plugin | Turns this | Into this |
+|---|---|---|
+| `remark-reading-time` | the body | a `readingTime` number in the frontmatter |
+| `remark-math` + `rehype-katex` | `$...$` | rendered maths |
+| `remark-embeds` | a bare URL or `![](url)` alone in a paragraph | `<YouTube>`, `<Vimeo>`, `<Tweet>`, `<SpeakerDeck>`, `<Spotify>`, `<Bookmark>` |
+| `remark-figures` | a lone image whose title is set | `<figure>` plus `<figcaption>` |
+| `remark-wikilinks` | `[[folder]]` | a link to that article in the reader's language |
+| `rehype-callouts` | `> [!note]` | a callout box |
 
-## Routes
+`remark-embeds` runs before `remark-figures` because an image and a bare link are both "the only thing in a
+paragraph", and once a figure is wrapped the link check would have to look one level deeper for nothing.
 
-Post URLs are flat, `/<slug>/`, exactly as Ghost served them. Sections are `/<category>/`, tags `/tags/<tag>/`, series `/series/<name>/`. English mirrors under `/en/`.
+Both accept `![](url)` on purpose: Obsidian renders image syntax for YouTube and tweets as a live embed while you
+write, so a post previews correctly in the editor.
 
-Route paths are English. Post slugs and titles are not: they are whatever was written, mostly Portuguese, and must never change. Every existing URL has to keep working.
+## The build
 
-The section route fails the build if a category name ever collides with a post slug.
+```mermaid
+flowchart LR
+  A["npm run build"] --> B["prebuild<br/>vendor-media.ts"]
+  B --> C["astro build"]
+  C --> D["astro:config:done<br/>integrations capture the site URL"]
+  D --> E["render every route"]
+  E --> F["astro:build:done<br/>redirect-stubs.mjs writes 139 stubs"]
+  F --> G["postbuild<br/>pagefind indexes dist"]
+  G --> H["check-output.ts<br/>guards the artefact"]
+  H -->|clean| I["dist/ ready"]
+  H -->|any failure| J["non-zero exit, CI red"]
+```
 
-### Redirects
+What each step can fail on:
 
-Static hosting cannot issue a 301, so `src/integrations/redirect-stubs.mjs` writes a meta-refresh page with a canonical for every entry in `src/data/redirects.ts`. Google treats that as a redirect. Regenerate the list with `node scripts/build-redirects.ts`.
+- **`vendor-media.ts`** never fails the build. A download that does not answer leaves the remote URL in the post and
+  is listed in `.migration/unreachable-media.md`. Everything it does succeed at is committed, so the step is a no-op
+  on the next run and the site stops depending on anyone else's server.
+- **`astro build`** fails on a schema violation, a broken image path (the `image()` helper resolves it), an MDX parse
+  error, or a wikilink pointing at a folder that does not exist.
+- **`redirect-stubs.mjs`** fails if a redirect target is not in the output, so a stub can never point at a 404.
+- **`check-output.ts`** is the post-build guard, and it exists because the previous Ghost site served an injected
+  script for a month with nobody noticing. See Checks below.
 
-It is an integration rather than a route because these paths would fight `[...slug].astro`, and because a redirect should not be in the sitemap. The build fails if a redirect points at a page that does not exist.
+## Publishing and scheduling
 
-Newsletter issue URLs currently point at `/`, not `/newsletter/`: that section has no published posts, so the page does not exist. Change `NEWSLETTER_TARGET` in `scripts/build-redirects.ts` once any roundup is published.
+A future `pubDate` means scheduled. The build hides the post and lists it in `dist/scheduled.json`; a Cloudflare
+Worker polls that file every minute and fires a `repository_dispatch` when a post comes due, which rebuilds the site.
 
-## Versioning
+```mermaid
+sequenceDiagram
+  participant W as Cloudflare Worker (cron, 1 min)
+  participant S as scheduled.json
+  participant GH as GitHub Actions
+  participant P as GitHub Pages
+  W->>S: read the manifest
+  S-->>W: posts still waiting, with pubDate
+  W->>W: dueNow(posts, controller.scheduledTime)
+  W->>GH: repository_dispatch (scheduled-publish)
+  GH->>GH: check, build, guard
+  GH->>P: deploy
+```
 
-The footer shows `1.2.3-14`: the semver from the last release tag, plus the number of posts published since. Both halves are derived, the semver from `package.json` and the count from git history, so there is no counter to maintain. `src/lib/version.ts` does this, and it needs full history, which is why CI checks out with `fetch-depth: 0`.
+Two things make this correct rather than nearly correct:
 
-Clicking it opens the repository at the commit the site was built from.
+- **One instant per build.** `PUBLISH_CUTOFF` in `src/lib/posts.ts` is evaluated once per process and every
+  publication cutoff compares against it. Astro settles the route table before rendering, so a build that straddles a
+  `pubDate` and asks the clock twice can list a post on the homepage whose page was never generated.
+- **The window follows the tick, not the clock.** `dueNow` uses `controller.scheduledTime`. A tick that Cloudflare
+  runs 65 seconds late would otherwise produce a window that skips a whole-minute `pubDate` entirely, and the
+  scheduler is stateless, so that post would never publish.
 
-Releases are manual. Run the Release workflow when you want one, merge the PR it opens, and the tag follows. Publishing a post never triggers it. Commit types: `feat` minor, `fix` patch, `!` or `BREAKING CHANGE` major, `content:` for writing.
+`check-output.ts` asserts the invariant those two produce: every non-draft post is either on the site or in the
+manifest, never both, never neither.
 
-## Offline
+## What the reader gets
 
-`public/sw.js` is hand-written; `@vite-pwa/astro` caps its peer range at Astro 5. HTML is network-first so a reader online always gets the current version of a post, hashed assets are cache-first, everything else passes through.
+```mermaid
+flowchart TD
+  A["first visit"] --> B["static HTML, no JS needed"]
+  B --> C["service worker registers on load"]
+  C --> D["caches keyed on the commit sha"]
+  D --> E["revisit: network-first for HTML"]
+  E -->|offline| F["cached page, or /offline/"]
+  B --> G["progressive enhancement"]
+  G --> G1["search: real GET form, Pagefind upgrades it"]
+  G --> G2["tweets: cached quote, widgets.js upgrades it"]
+  G --> G3["hover previews: plain links until JS runs"]
+  G --> G4["sidenotes: checkbox, zero JS"]
+```
 
-Cache names are keyed on the commit, passed in via `/sw.js?v=<sha>`. A new deploy changes the script URL, which is what makes the browser install a new worker, and renames the caches so the previous deploy's entries are dropped.
+Everything degrades to working HTML. The search page submits a real GET request, a tweet is a blockquote with a link,
+a preview card is an ordinary `<a href>`, and the sidenote toggle is a checkbox.
 
-## For agents
+## Trust boundaries
 
-Every post is also served as markdown at `/<slug>/index.md`, advertised in the HTML with `<link rel="alternate" type="text/markdown">`. `/llms.txt` indexes all of them by section. Static hosting cannot negotiate on an `Accept` header, so a predictable URL is the alternative.
+The Ghost site was compromised through a third-party integration token that could write into the page. Two mechanisms
+exist because of that, and both read from one registry, `src/lib/embed-hosts.ts`.
 
-## Search
+```mermaid
+flowchart LR
+  R["src/lib/embed-hosts.ts<br/>one registry"] --> C["CSP meta tag<br/>frame-src, script-src, connect-src"]
+  R --> G["check-output.ts<br/>frame and script allowlists"]
+  C -->|blocks at runtime| B["the reader's browser"]
+  G -->|fails the build| A["the artefact"]
+```
 
-Pagefind, indexed in `postbuild`, rendered with our own markup, with a working no-JS form fallback.
+- A host that may **run script** is separate from a host that may only be **named** in the output. Thumbnails and
+  preconnect hints are the second kind, and `script-src` grants them nothing.
+- The registry is never derived from the built output. An allowlist that grows to fit whatever appears in a page
+  would let anything that can write a page grant itself permission, which is exactly the failure that happened.
+- Adding an embed host is one line there. Both the CSP and the guard follow, so they cannot disagree.
+
+Model-written translations are the only untrusted content producer in the system, so the translation pipeline has its
+own gate: `scripts/check-translations.ts` rejects script tags, event handlers, `javascript:` URLs, unknown elements,
+and, most importantly, MDX expressions and `import`/`export` lines, because in an `.mdx` file those execute during
+the build.
 
 ## Checks
 
-`node scripts/check-output.ts` runs in CI and fails on: a published post with no page, leftover Ghost markup, an unrendered component tag, a missing feed or manifest icon, an image that never reached the output, and any remote-script loader pattern. That last one exists because the Ghost site was serving an injected script for a month before anyone noticed.
+`check-output.ts` runs after every build and exits non-zero on any of these:
 
-## Scripts
+1. A post that is both published and still scheduled, or neither.
+2. Leftover Ghost markup (`kg-` classes, `__GHOST_URL__`).
+3. A component tag that leaked into the HTML as literal text.
+4. A script, iframe, or URL inside an inline script pointing at a host that is not in the registry.
+5. A missing feed, sitemap, manifest, 404 or robots file.
+6. A manifest icon that does not exist in the output.
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | local server |
-| `npm run build` | build + pagefind index |
-| `node scripts/check-output.ts` | post-build checks |
-| `node scripts/build-redirects.ts` | regenerate the redirect list |
-| `node scripts/build-icons.ts` | regenerate PWA icons from `public/favicon.svg` |
+## Layout
 
-## Not wired yet
-
-Deploy is commented out in `build.yml` and Pages is off. Translation needs `CLAUDE_CODE_OAUTH_TOKEN`. The scheduler Worker in `worker/` needs a Cloudflare account and a GitHub PAT. Analytics needs `PUBLIC_CF_ANALYTICS_TOKEN`.
+```
+content/blog/<folder>/       posts, translations and their images
+content/internal/            Obsidian templates and snippets, ignored by the build
+src/pages/                   routes. [...slug] is Portuguese, en/[...slug] is English
+src/components/              rendering. Injected into MDX, so content needs no imports
+src/plugins/                 the remark chain
+src/integrations/            build hooks: redirect stubs
+src/lib/                     posts, taxonomy, seo, embed-hosts, version
+src/i18n/ui.ts               every string the chrome shows, both languages
+scripts/                     build steps and guards
+worker/                      the Cloudflare scheduler
+```

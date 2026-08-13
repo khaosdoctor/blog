@@ -19,9 +19,27 @@ draft: true                 # defaults to true, so you cannot publish by acciden
 
 Sections in use: `javascript`, `infra`, `typescript`, `career`, `opinion`, `meta`, `security`. A new value creates a new section page.
 
-Optional: `updatedDate`, `heroImage`, `heroImageAlt`, `epigraph`, `epigraphCite`, `seoTitle`, `seoDescription`, `noindex`, `canonicalUrl`, `lang`.
+Optional: `updatedDate`, `heroImage`, `heroImageAlt`, `epigraph`, `epigraphCite`, `seoTitle`, `seoDescription`, `noindex`, `lang`, `slug`.
 
 For a series: `series` is a short slug that becomes the URL (`grpc`), `seriesOrder` is the position, and `seriesName` goes on the first part only. The table of contents generates itself, including parts you have not written yet.
+
+## Another language
+
+A translation is a second file in the same folder, named after its own slug.
+
+```
+blog/error-cause/
+  index.mdx                                  <- source, lang defaults to pt, URL /error-cause/
+  what-is-error-cause.mdx                    <- lang: en, URL /en/what-is-error-cause/
+  image.png                                  <- shared by both
+```
+
+- `lang: "en"` is what makes it English. Nothing else.
+- `slug: "what-is-error-cause"` sets the URL. Without it the filename is the slug.
+- `machineTranslated: true` shows the banner offering the original. Set it to `false` once you have edited the text yourself and the banner goes away.
+- Images stay `./image.png`, because the translation sits next to them.
+- Being in the same folder is what pairs the two, so search engines get the `hreflang` links for free. There is no field to keep in sync.
+- Copy `category`, `tags`, `series` and `seriesOrder` verbatim: they are URL segments, not prose.
 
 ## Images
 

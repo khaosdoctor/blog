@@ -2,6 +2,9 @@
 // Self-hosted rather than a CDN link, per the plan: no third-party requests.
 // Without this the one post with LaTeX renders its formulas as raw $...$ text.
 import 'katex/dist/katex.min.css'
+// Every colour, font stack, size and duration the site uses. Nothing below
+// should hardcode one.
+import '../styles/theme.css'
 import LangSwitcher from '../components/LangSwitcher.astro'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
@@ -141,19 +144,9 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 </html>
 
 <style is:global>
-  /* Theming is native light-dark() + color-scheme, no toggle and no
-     JS yet. A manual toggle needs a stored preference, add it with the real
-     design in Phase 1. */
-  :root {
-    color-scheme: light dark;
-    --bg: light-dark(#fffdf9, #14161a);
-    --fg: light-dark(#1a1c20, #e6e4e0);
-    --muted: light-dark(#5d6169, #9a9ea6);
-    --accent: light-dark(#0b5ea8, #7cc0ff);
-    --rule: light-dark(#e4e0d8, #2a2d33);
-    --measure: 68ch;
-  }
-
+  /* Tokens live in src/styles/theme.css, imported above. Theming is native
+     light-dark() + color-scheme, so there is no toggle and no JS; a manual
+     toggle needs a stored preference and arrives with the real design. */
   *,
   *::before,
   *::after {
@@ -162,12 +155,12 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 
   body {
     margin: 0;
-    padding: 0 1.5rem;
+    padding: 0 var(--gutter);
     background: var(--bg);
     color: var(--fg);
-    font-family: ui-serif, Georgia, 'Times New Roman', serif;
-    font-size: 1.05rem;
-    line-height: 1.65;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading);
     text-wrap: pretty;
   }
 

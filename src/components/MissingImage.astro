@@ -8,6 +8,9 @@ interface Props {
   caption?: string
 }
 
+// The dead URL is kept in data-original on the frame. It used to be an HTML
+// comment, and Astro does not evaluate expressions inside comments, so every page
+// shipped the literal text `{src}` instead.
 const { src, alt, caption } = Astro.props
 // MDX calls this without props, so the URL is what tells us the language.
 const locale = localeFromPath(Astro.url.pathname)
@@ -21,12 +24,11 @@ const host = (() => {
 ---
 
 <figure class="missing">
-  <div class="frame" role="img" aria-label={alt || t(locale, 'imageGoneAlt', host)}>
+  <div class="frame" role="img" aria-label={alt || t(locale, 'imageGoneAlt', host)} data-original={src}>
     <p class="label">{t(locale, 'imageGone')}</p>
     <p class="host">{host}</p>
   </div>
   {caption && <figcaption>{caption}</figcaption>}
-  <!-- original: {src} -->
 </figure>
 
 <style>

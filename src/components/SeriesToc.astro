@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import { t, type Locale } from '../i18n/ui'
+import { PUBLISH_CUTOFF, type Post, urlOf } from '../lib/posts'
 import { seriesTitle } from '../lib/taxonomy'
 
 interface Props {
@@ -13,31 +14,47 @@ const { series, current, locale } = Astro.props
 
 // Drafts are included on purpose: an unwritten part still belongs in the map of
 // the series, it just is not a link.
-const parts = (await getCollection('blog', ({ data }) => data.series === series)).sort(
-  (a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0),
-)
+//
+// Filtered by language, because a translation carries its source's `series` and
+// would otherwise appear in the other language's contents, linking at a URL that
+// route never builds.
+const parts = (
+  await getCollection('blog', ({ data }) => data.series === series && data.lang === locale)
+).sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0))
 const title = seriesTitle(series, parts)
+
+// Same predicate as getPublishedPosts, against the same cutoff: a draft has no
+// page, and a future pubDate is a scheduled post, which also has no page until
+// the rebuild at that minute. Asking the clock again here would let a component
+// disagree with the route table about a post published mid-build.
+const isPublished = (part: Post) => !part.data.draft && part.data.pubDate <= PUBLISH_CUTOFF
+
+// /series/<slug>/ is only built when the series has more than one PUBLISHED part
+// (src/pages/series/[name].astro), so the heading links on exactly those terms.
+// One published post and two drafts used to render a link to a 404.
+const publishedCount = parts.filter(isPublished).length
 ---
 
 {
   parts.length > 1 && (
     <nav class="series-toc" aria-label={t(locale, 'series')}>
       <p class="heading">
-        <a href={`/series/${series}/`}>{title}</a> &middot; {t(locale, 'seriesContents', parts.length)}
+        {publishedCount > 1 ? <a href={`/series/${series}/`}>{title}</a> : title} &middot;{' '}
+        {t(locale, 'seriesContents', parts.length)}
       </p>
       <ol>
         {parts.map((part) => (
-          <li class:list={{ current: part.id === current, unwritten: part.data.draft }}>
+          <li class:list={{ current: part.id === current, unwritten: !isPublished(part) }}>
             {part.id === current ? (
               <>
                 <strong>{part.data.title}</strong> <span class="marker">({t(locale, 'youAreHere')})</span>
               </>
-            ) : part.data.draft ? (
+            ) : !isPublished(part) ? (
               <>
                 {part.data.title} <span class="marker">({t(locale, 'notWrittenYet')})</span>
               </>
             ) : (
-              <a href={`/${part.id}/`}>{part.data.title}</a>
+              <a href={urlOf(part)}>{part.data.title}</a>
             )}
           </li>
         ))}

@@ -1,0 +1,59 @@
+/*
+ * Every design decision that is a value lives here. Nothing else in the site
+ * should hardcode a colour, a font stack, a radius or a duration: if a component
+ * needs one that does not exist yet, add the token here first.
+ *
+ * The palette is the brand's, traced from the favicon. The type stacks are
+ * placeholders on purpose: the coming design is ASCII/ANSI, 8-bit, pixelated, and
+ * the real faces get committed to the repo when they are picked. See
+ * docs/design-system.md for the direction and the font licensing notes.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Brand, from the favicon. Fixed points, not themeable. */
+  --brand-red: #e30613;
+  --brand-green: #45b384;
+  --brand-yellow: #f5b200;
+  --brand-blue: #0578be;
+
+  /* Roles. Components reference these, never the brand values above. */
+  --bg: light-dark(#fffdf9, #14161a);
+  --fg: light-dark(#1a1c20, #e6e4e0);
+  --muted: light-dark(#5d6169, #9a9ea6);
+  --accent: light-dark(#0b5ea8, #7cc0ff);
+  --rule: light-dark(#e4e0d8, #2a2d33);
+
+  /*
+   * Two stacks, deliberately. A pixel font is right for chrome, labels and
+   * headings and punishing for a 3000 word article, so body copy keeps a
+   * readable face. --font-display is where an 8-bit face lands.
+   */
+  --font-body: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
+  --font-display: var(--font-mono);
+
+  --text-base: 1.05rem;
+  --text-small: 0.9rem;
+  --text-tiny: 0.75rem;
+  --leading: 1.65;
+  --leading-tight: 1.25;
+
+  --measure: 68ch;
+  --gutter: 1.5rem;
+
+  /* Square by default: rounded corners fight a pixel grid. */
+  --radius: 0;
+  --border: 1px;
+
+  --duration: 120ms;
+  --ease: ease;
+}
+
+/* Motion is decoration everywhere on this site, so it can all go. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration: 0ms;
+  }
+}

@@ -98,11 +98,6 @@ export function getSeriesNavigation(
 }
 
 /** Tags and series names become URL segments, so they need slugifying. */
-export function slugify(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
+// Re-exported so existing callers keep importing it from here, while the
+// implementation stays reachable from a plain node script.
+export { slugify } from './slugify'

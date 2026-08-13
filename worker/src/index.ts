@@ -8,8 +8,9 @@
  * time it was set to.
  *
  * Deliberately stateless: the window check means no KV, no dedupe bookkeeping,
- * and no way to get stuck. A missed cron run costs at most one late post, and
- * /scheduled.json is still correct on the next run.
+ * and no way to get stuck. The price of that is a single shot per post: no tick
+ * ever looks at a past minute again, so the window is anchored to the minute the
+ * tick was scheduled for and never to the clock at the moment it happens to run.
  */
 export type Env = {
   /** Fine-grained PAT with contents:write on the blog repo. */
@@ -61,11 +62,14 @@ async function dispatch(env: Env, slugs: string[]): Promise<void> {
 }
 
 export default {
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     ctx.waitUntil(
       (async () => {
         const posts = await readManifest(env)
-        const due = dueNow(posts, Date.now())
+        // scheduledTime, not Date.now(): a tick can start late, and by the time
+        // the manifest has been fetched the wall clock has moved on again. Either
+        // one slides the window past a post nothing will ever look at again.
+        const due = dueNow(posts, controller.scheduledTime)
         if (due.length === 0) return
         await dispatch(
           env,

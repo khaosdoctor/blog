@@ -1,6 +1,6 @@
 ---
 import type { Post } from '../lib/posts'
-import { formatDate } from '../lib/posts'
+import { formatDate, urlOf } from '../lib/posts'
 
 interface Props {
   posts: Post[]
@@ -14,7 +14,7 @@ const { posts, showCategory = true } = Astro.props
   {
     posts.map((post) => (
       <li>
-        <a href={`/${post.id}/`}>{post.data.title}</a>
+        <a href={urlOf(post)}>{post.data.title}</a>
         <p class="meta">
           <time datetime={post.data.pubDate.toISOString()}>
             {formatDate(post.data.pubDate, post.data.lang)}

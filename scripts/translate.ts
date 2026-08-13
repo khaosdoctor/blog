@@ -2,9 +2,18 @@
  * Write once, publish twice.
  *
  * Every post is written in one language (`lang` in its frontmatter). This script
- * translates the ones that changed into the other locale and writes them to
- * content/translated/<locale>/<slug>/index.mdx, which is NOT opened in Obsidian:
- * the writing view only ever shows source-language files.
+ * translates the ones that changed into the other locale and writes the result
+ * into the SAME FOLDER as the source, named after its own slug:
+ * content/blog/<folder>/index.mdx is the source, and
+ * content/blog/<folder>/<translated-slug>.mdx is the translation. The folder is
+ * the pairing, there is no separate collection and no `translationOf` key.
+ *
+ * Output stays .mdx, same as the source: the figures, embeds and wikilink
+ * markers on this site are produced by remark plugins that emit MDX nodes, and
+ * a plain .md translation would silently lose every one of them. The model is
+ * told never to write an `import`, an `export`, or a `{ }` expression, and
+ * scripts/check-translations.ts rejects the output if it did anyway before it
+ * is ever committed.
  *
  *   node scripts/translate.ts [--locale en] [--only slug] [--all] [--dry-run]
  *
@@ -34,8 +43,10 @@ import { dirname, join } from 'node:path'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 
 const SOURCE_DIR = 'content/blog'
-const OUTPUT_ROOT = 'content/translated'
-const CACHE_FILE = join(OUTPUT_ROOT, '.translation-cache.json')
+// Sits directly in content/blog, not one level down inside a post folder like
+// every real post and translation does, so it never matches the collection's
+// glob and never looks like a translation to check-translations.ts either.
+const CACHE_FILE = join(SOURCE_DIR, '.translation-cache.json')
 
 const PROVIDERS = ['anthropic', 'openai-compatible'] as const
 type Provider = (typeof PROVIDERS)[number]
@@ -116,24 +127,58 @@ function frontmatterValue(frontmatter: string, key: string): string | null {
   return match[1].trim().replace(/^"(.*)"$/, '$1')
 }
 
-/**
- * The three human-facing strings worth translating in frontmatter. Everything
- * else (dates, category, tags, slugs, paths) must survive untouched or the
- * collection schema and the URLs break.
- */
-const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription', 'heroImageAlt', 'epigraph'] as const
+/** Copies a frontmatter key through byte for byte, whatever shape its value has. */
+function frontmatterLine(frontmatter: string, key: string): string | null {
+  const match = new RegExp(`^${key}:.*$`, 'm').exec(frontmatter)
+  return match === null ? null : match[0]
+}
 
-const SYSTEM_PROMPT = `You translate technical blog posts written in MDX. You are given a post body and a few frontmatter strings, and you return the same content in the target language.
+/**
+ * The human-facing strings worth translating in frontmatter. Everything else
+ * (dates, category, tags, series) is copied verbatim instead, or dropped: see
+ * buildFrontmatter.
+ */
+const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription'] as const
+
+/** ASCII kebab-case, stable across runs so a rerun on an unchanged title reuses the same file. */
+function slugify(title: string): string {
+  return title
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+type ExistingTranslation = { file: string; slug: string }
+
+/** Finds the translation already sitting in a post's folder for this locale, if any. */
+function findExistingTranslation(postDir: string, locale: Locale): ExistingTranslation | null {
+  for (const entry of readdirSync(postDir, { withFileTypes: true })) {
+    if (entry.isDirectory()) continue
+    if (!/\.mdx?$/.test(entry.name)) continue
+    if (/^index\.mdx?$/.test(entry.name)) continue
+    const full = join(postDir, entry.name)
+    const { frontmatter } = splitFrontmatter(readFileSync(full, 'utf8'))
+    if (frontmatterValue(frontmatter, 'lang') !== locale) continue
+    const slug = frontmatterValue(frontmatter, 'slug') ?? entry.name.replace(/\.mdx?$/, '')
+    return { file: full, slug }
+  }
+  return null
+}
+
+const SYSTEM_PROMPT = `You translate technical blog posts written in MDX. The post you are given is MDX; what you return is MDX too, but plain markdown, no imports and no { } expressions of any kind. You are given a post body and a few frontmatter strings, and you return the same content in the target language.
 
 Rules, in order of importance:
 
 1. NEVER translate anything inside a fenced code block (\`\`\`), an inline code span (\`), or an MDX/JSX component tag. Component names, prop names, and prop values like src, alt, poster, id, url and caption stay exactly as they are. Code comments inside code blocks stay in the original language too: they are part of the code sample.
 2. NEVER translate LaTeX. Anything between $...$ or $$...$$ is math and must come through byte for byte.
-3. NEVER change a URL, a file path, a relative image reference, an anchor, or a footnote marker like [^1]. Link text is translated, link targets are not.
+3. NEVER change a URL, a file path, a relative image reference, an anchor, or a footnote marker like [^1]. Link text is translated, link targets are not. Relative image paths (e.g. ./photo.jpg) stay exactly as written: the translation is written into the same folder as the original post and its images, so the same relative path still resolves.
 4. Keep the markdown structure identical: the same heading levels, the same list markers, the same blockquote callout syntax (> [!NOTE] and friends stay in English, they are syntax), the same number of paragraphs, in the same order.
 5. Translate prose so it reads as if it had been written in the target language by the same author: an experienced software engineer writing for other engineers, direct and conversational, technically precise. Do not add, remove, explain or summarise anything. Do not soften opinions.
 6. Keep technical terms that the target audience uses in English in English (backend, deploy, feature, pull request, container). Translate everything else.
 7. Never use an em dash. Use a comma, parentheses, or two sentences.
+8. Write plain markdown only. Copy a component tag that is already in the post through byte for byte, and never invent a new one. Never write an "import" or an "export" line, and never write a { } expression of any kind, anywhere: the output is MDX and any of those would execute as code when the site builds, and the file is checked for them and rejected if it has any.
 
 Return ONLY the translated content, with no preamble, no closing remark, and no code fence wrapping the whole thing.`
 
@@ -255,20 +300,31 @@ function yamlString(value: string): string {
 }
 
 /**
- * Rebuilds the frontmatter with translated strings swapped in, the locale
- * changed, and the provenance fields the LangBanner reads.
+ * Builds the translation's frontmatter from scratch rather than patching the
+ * source's: the field set is deliberately smaller (no heroImage, no
+ * translationOf, no seriesName, no visibility, no canonicalUrl), so starting
+ * clean is simpler than subtracting keys out of a copy.
  */
-function rebuildFrontmatter(original: string, translated: Map<string, string>, locale: Locale, slug: string): string {
-  const lines = original.split('\n').map((line) => {
-    const key = /^([a-zA-Z]+):/.exec(line)?.[1]
-    if (key === undefined) return line
-    if (key === 'lang') return `lang: ${locale}`
-    const value = translated.get(key)
-    if (value === undefined) return line
-    return `${key}: ${yamlString(value)}`
-  })
-  lines.push(`machineTranslated: true`)
-  lines.push(`translationOf: ${yamlString(slug)}`)
+function buildFrontmatter(original: string, fields: Map<string, string>, locale: Locale, slug: string): string {
+  const lines: string[] = [`title: ${yamlString(fields.get('title') ?? '')}`]
+
+  for (const key of ['pubDate', 'updatedDate', 'category', 'tags', 'series', 'seriesOrder']) {
+    const line = frontmatterLine(original, key)
+    if (line !== null) lines.push(line)
+  }
+
+  lines.push(`lang: ${locale}`)
+  lines.push(`description: ${yamlString(fields.get('description') ?? '')}`)
+
+  for (const key of ['seoTitle', 'seoDescription']) {
+    const value = fields.get(key)
+    if (value !== undefined) lines.push(`${key}: ${yamlString(value)}`)
+  }
+
+  lines.push(`slug: ${yamlString(slug)}`)
+  lines.push('machineTranslated: true')
+  lines.push('draft: false')
+
   return lines.join('\n')
 }
 
@@ -291,9 +347,6 @@ if (PROVIDER === 'openai-compatible' && BASE_URL.length === 0) {
   process.exit(1)
 }
 
-const outputDir = join(OUTPUT_ROOT, args.locale)
-mkdirSync(outputDir, { recursive: true })
-
 const cache = readCache()
 const sources = readdirSync(SOURCE_DIR, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -302,7 +355,7 @@ const sources = readdirSync(SOURCE_DIR, { withFileTypes: true })
   .map((slug) => ({ slug, file: sourceFile(slug) }))
   .filter((post): post is { slug: string; file: string } => post.file !== null)
 
-const changed: { slug: string; file: string; raw: string; sourceHash: string }[] = []
+const changed: { slug: string; file: string; raw: string; sourceHash: string; existingSlug: string | null }[] = []
 const overrides: string[] = []
 
 for (const post of sources) {
@@ -316,10 +369,11 @@ for (const post of sources) {
 
   const sourceHash = hash(raw)
   const entry = cache[post.slug]
-  const target = join(outputDir, post.slug, 'index.mdx')
+  const postDir = join(SOURCE_DIR, post.slug)
+  const existing = findExistingTranslation(postDir, args.locale)
 
-  if (entry !== undefined && existsSync(target)) {
-    const currentOutputHash = hash(readFileSync(target, 'utf8'))
+  if (entry !== undefined && existing !== null) {
+    const currentOutputHash = hash(readFileSync(existing.file, 'utf8'))
     // Someone edited the generated file: their version wins, forever.
     if (currentOutputHash !== entry.outputHash) {
       overrides.push(post.slug)
@@ -328,7 +382,7 @@ for (const post of sources) {
     if (entry.sourceHash === sourceHash && !args.all) continue
   }
 
-  changed.push({ slug: post.slug, file: post.file, raw, sourceHash })
+  changed.push({ slug: post.slug, file: post.file, raw, sourceHash, existingSlug: existing?.slug ?? null })
 }
 
 console.log(`${sources.length} source posts, ${changed.length} to translate into ${args.locale} with ${MODEL}`)
@@ -371,8 +425,11 @@ for (const post of changed) {
     continue
   }
 
-  const output = `---\n${rebuildFrontmatter(frontmatter, parsed.fields, args.locale, post.slug)}\n---\n\n${parsed.body}\n`
-  const target = join(outputDir, post.slug, 'index.mdx')
+  // Reuse the slug a previous run already picked, so a rerun updates the same
+  // file instead of renaming it out from under existing links.
+  const slug = post.existingSlug ?? slugify(parsed.fields.get('title') ?? post.slug)
+  const output = `---\n${buildFrontmatter(frontmatter, parsed.fields, args.locale, slug)}\n---\n\n${parsed.body}\n`
+  const target = join(SOURCE_DIR, post.slug, `${slug}.mdx`)
   mkdirSync(dirname(target), { recursive: true })
   writeFileSync(target, output)
 

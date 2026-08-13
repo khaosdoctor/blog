@@ -1,6 +1,6 @@
 ---
 import type { GetStaticPaths } from 'astro'
-import { getCollection, render } from 'astro:content'
+import { render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Bookmark from '../components/Bookmark.astro'
@@ -16,7 +16,14 @@ import SpeakerDeck from '../components/SpeakerDeck.astro'
 import Spotify from '../components/Spotify.astro'
 import Tweet from '../components/Tweet.astro'
 import Video from '../components/Video.astro'
-import { formatDate, getPublishedPosts } from '../lib/posts'
+import {
+  folderOf,
+  formatDate,
+  getPublishedByFolder,
+  getPublishedPosts,
+  slugOf,
+  urlOf,
+} from '../lib/posts'
 import { buildSeriesMap, getSeriesNavigation, slugify } from '../lib/taxonomy'
 import { t } from '../i18n/ui'
 
@@ -44,43 +51,37 @@ const mdxComponents = {
 // Flat URLs: /{slug}/ exactly as Ghost had them, so moving a post between
 // sections only ever changes its `category`, never its URL.
 //
-// Series navigation and hreflang translations both used to be looked up once
-// per post page (an O(N) collection fetch each, N times over). Build the
-// shared indices here instead, once, and hand each post its own slice.
+// Series navigation and hreflang alternates both used to be looked up once per
+// post page (an O(N) collection fetch each, N times over). Build the shared
+// indices here instead, once, and hand each post its own slice.
 export const getStaticPaths = (async () => {
-  const [posts, allTranslations] = await Promise.all([
-    getPublishedPosts(),
-    getCollection('translated'),
-  ])
+  const [posts, byFolder] = await Promise.all([getPublishedPosts(), getPublishedByFolder()])
   const seriesMap = buildSeriesMap(posts)
-  const translationsByPost = new Map<string, typeof allTranslations>()
-  for (const entry of allTranslations) {
-    const current = translationsByPost.get(entry.data.translationOf) ?? []
-    current.push(entry)
-    translationsByPost.set(entry.data.translationOf, current)
-  }
   return posts.map((post) => ({
-    params: { slug: post.id },
+    params: { slug: slugOf(post) },
+    // Alternates come from the post's own folder: every language of the same
+    // article is a file in there, so a post with no translation yields a list
+    // of one, itself.
     props: {
       post,
       series: getSeriesNavigation(post, seriesMap),
-      translations: translationsByPost.get(post.id) ?? [],
+      alternates: (byFolder.get(folderOf(post)) ?? [post]).map((entry) => ({
+        // pt-BR, not pt: the region is what search engines match against.
+        lang: entry.data.lang === 'pt' ? 'pt-BR' : entry.data.lang,
+        path: urlOf(entry),
+      })),
     },
   }))
 }) satisfies GetStaticPaths
 
-const { post, series, translations } = Astro.props
+const { post, series, alternates: folderAlternates } = Astro.props
 const { Content, remarkPluginFrontmatter } = await render(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
 
-const self = new URL(Astro.url.pathname, Astro.site).href
-const alternates = [
-  { lang: 'pt-BR', href: self },
-  ...translations.map((entry) => ({
-    lang: entry.data.lang,
-    href: new URL(`/${entry.data.lang}/${post.id}/`, Astro.site).href,
-  })),
-]
+const alternates = folderAlternates.map(({ lang, path }) => ({
+  lang,
+  href: new URL(path, Astro.site).href,
+}))
 ---
 
 <BaseLayout
@@ -150,12 +151,12 @@ const alternates = [
       series !== null && (
         <nav class="series-nav" aria-label={t('pt', 'seriesNav')}>
           {series.previous !== null && (
-            <a href={`/${series.previous.id}/`} rel="prev">
+            <a href={urlOf(series.previous)} rel="prev">
               ← {series.previous.data.title}
             </a>
           )}
           {series.next !== null && (
-            <a href={`/${series.next.id}/`} rel="next" class="next">
+            <a href={urlOf(series.next)} rel="next" class="next">
               {series.next.data.title} →
             </a>
           )}

@@ -6,11 +6,17 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 
 **Posts are `.mdx` files containing plain markdown.** No imports, no component tags. Two remark plugins turn markdown into components at build time. This is deliberate: `content/` is an Obsidian vault, Obsidian cannot render component tags, and writing in Obsidian is the point of the whole rebuild. Do not "modernise" posts back into components.
 
-**A `.md` post silently loses content.** The plugins emit MDX nodes, and the plain markdown pipeline drops them without an error. Posts must be `.mdx`.
+**A `.md` post silently loses content.** The plugins emit MDX nodes, and the plain markdown pipeline drops them without an error. Posts must be `.mdx`, translations included. That is why the translation guard, not the file extension, is what stops model-written code.
 
-**Post URLs are frozen.** Every slug came from six years of Ghost and is linked from elsewhere. Route paths are English (`/search/`, `/tags/`, `/series/`), post slugs and titles are whatever was written, mostly Portuguese. Never rename a post folder.
+**One folder is one article, in every language.** `content/blog/<folder>/index.mdx` is the source; any other `.mdx` in that folder is a translation, identified by its `lang` and given its own URL by `slug`. The folder is the pairing, which is where `hreflang` comes from, so there is no field to keep in sync. Images are `./image.png` from either file.
 
-**The build makes no network requests.** Bookmark and tweet metadata come from `content/bookmarks.json`. Anything needing a fetch goes in an explicit script that a human runs, never in the build. A build that depends on someone else's uptime fails for reasons nobody can fix.
+**Post URLs are frozen.** Every slug came from six years of Ghost and is linked from elsewhere. Route paths are English (`/search/`, `/tags/`, `/series/`), Portuguese post slugs are whatever was written. Never rename a post folder. English lives under `/en/` with an English slug.
+
+**Never ask the clock twice.** `PUBLISH_CUTOFF` in `src/lib/posts.ts` is the one instant a build calls now. Astro settles the route table before rendering, so a second `new Date()` can list a post whose page was never generated.
+
+**The build fetches only its own media.** `prebuild` runs `scripts/vendor-media.ts`, which downloads any remote image a post references into the post folder and rewrites the reference, so the site stops depending on other people's servers. It never fails the build. Nothing else in the build touches the network: bookmark and tweet metadata come from `content/bookmarks.json`.
+
+**One line adds an embed host.** `src/lib/embed-hosts.ts` feeds both the CSP meta tag and the output guard. Never derive it from build output.
 
 **`scripts/migrate/` and `.migration/` are untracked on purpose.** One-shot Ghost tooling. The MDX is the source of truth now.
 
@@ -19,9 +25,12 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 Run these, in order:
 
 ```
+npm run check
 npm run build
 node scripts/check-output.ts
 ```
+
+`npm run check` is `astro check` plus `tsc -p worker`. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
 
 `check-output.ts` fails on a published post with no page, leftover Ghost markup, an unrendered component tag, a missing feed or manifest icon, an image that never reached the output, and any remote-script loader pattern. That last check exists because the old Ghost site served an injected script for a month before anyone noticed. Do not weaken it.
 

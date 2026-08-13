@@ -34,11 +34,35 @@ function walk(dir: string): string[] {
 const files = walk(DIST)
 const pages = files.filter((file) => file.endsWith('.html'))
 
-// 1. Every published post produced a page.
+// Read the scheduler manifest first: it is the build's own record of which posts
+// it held back, and check 1 is stated in terms of it. This script runs in a
+// separate process once the build has exited, so asking the clock here would be a
+// second opinion on the cutoff, which is the disagreement being checked for.
+const manifestPath = join(DIST, 'scheduled.json')
+const scheduled = new Set<string>()
+if (files.includes(manifestPath)) {
+  try {
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+      posts?: { slug?: string }[]
+    }
+    if (!Array.isArray(manifest.posts)) {
+      failures.push({ check: 'scheduled.json', detail: 'posts is not an array' })
+    }
+    for (const post of manifest.posts ?? []) {
+      if (typeof post.slug === 'string') scheduled.add(post.slug)
+    }
+  } catch (error) {
+    failures.push({ check: 'scheduled.json', detail: `unparseable: ${(error as Error).message}` })
+  }
+}
+
+// 1. Every non-draft post is either on the site or waiting in the manifest, and
+// never both or neither. The two conditions come from one instant in one build,
+// so a post that is in both states, or in neither, means they came apart.
 // One post is one folder holding index.md(x) and its images, so the slug is the
 // folder name. Anything else in content/blog (a stray note, a loose file) is not
 // a post and is deliberately not checked.
-const expected = readdirSync(CONTENT, { withFileTypes: true })
+const postFolders = readdirSync(CONTENT, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
   .filter((slug) => {
@@ -46,8 +70,14 @@ const expected = readdirSync(CONTENT, { withFileTypes: true })
     if (file === undefined) return false
     return !/^draft:\s*true/m.test(readFileSync(file, 'utf8'))
   })
-for (const slug of expected) {
-  if (!files.includes(join(DIST, slug, 'index.html'))) {
+const expected = postFolders.filter((slug) => !scheduled.has(slug))
+for (const slug of postFolders) {
+  const hasPage = files.includes(join(DIST, slug, 'index.html'))
+  if (scheduled.has(slug) && hasPage) {
+    failures.push({ check: 'post both published and still scheduled', detail: slug })
+    continue
+  }
+  if (!scheduled.has(slug) && !hasPage) {
     failures.push({ check: 'missing page', detail: slug })
   }
 }
@@ -55,7 +85,7 @@ for (const slug of expected) {
 // 2. No Ghost markup survived the conversion.
 // 3. No component tag leaked as literal text (a rule that never matched).
 const GHOST_CLASS = /\bkg-[a-z-]+\b/
-const LEAKED_TAG = /&#60;(?:Figure|Video|Bookmark|CourseCTA|RawEmbed|Sidenote|MarginNote|YouTube|Vimeo)\b/
+const LEAKED_TAG = /&#60;(?:Figure|Video|Vimeo|YouTube|Bookmark|RawEmbed|Sidenote|MarginNote|Tweet|Epigraph|MissingImage|SpeakerDeck|Spotify)\b/
 
 const REMOTE_LOADER = /new Function\s*\(|gist\.githubusercontent|eval\s*\(\s*await/
 
@@ -127,21 +157,11 @@ for (const page of pages) {
   }
 }
 
-// 4. The feeds, the sitemap and the scheduler manifest all exist and parse.
+// 4. The feeds, the sitemap and the scheduler manifest all exist. The manifest is
+// also parsed, at the top, because check 1 is written against it.
 for (const required of ['rss.xml', 'sitemap-index.xml', 'scheduled.json', '404.html', 'robots.txt']) {
   if (!files.includes(join(DIST, required))) {
     failures.push({ check: 'missing artifact', detail: required })
-  }
-}
-const manifestPath = join(DIST, 'scheduled.json')
-if (files.includes(manifestPath)) {
-  try {
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { posts?: unknown[] }
-    if (!Array.isArray(manifest.posts)) {
-      failures.push({ check: 'scheduled.json', detail: 'posts is not an array' })
-    }
-  } catch (error) {
-    failures.push({ check: 'scheduled.json', detail: `unparseable: ${(error as Error).message}` })
   }
 }
 
@@ -182,7 +202,9 @@ for (const file of files) {
   if (size > 8 * 1024 * 1024) warnings.push(`${file} is ${(size / 1024 / 1024).toFixed(1)}MB`)
 }
 
-console.log(`checked ${pages.length} pages, ${expected.length} published posts`)
+console.log(
+  `checked ${pages.length} pages, ${expected.length} published posts, ${scheduled.size} scheduled`,
+)
 for (const warning of warnings) console.log(`warning: ${warning}`)
 
 if (failures.length === 0) {
