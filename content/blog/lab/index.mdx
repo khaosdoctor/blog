@@ -9,11 +9,13 @@ draft: false
 noindex: true
 ---
 
-import Counter from '../../../src/components/lab/Counter.vue'
+import Counter from './components/Counter.vue'
+import counterSource from './components/Counter.vue?raw'
+import counterHtml from './components/counter.html?raw'
 
 Esta página existe para ser aberta no navegador. Cada seção abaixo nomeia um recurso, explica em uma ou duas frases para que ele serve, mostra o código exato que você digitaria e, logo em seguida, o resultado renderizado. Se algo aqui aparecer quebrado, o recurso está quebrado.
 
-A linha de `import` no topo é a única exceção: ela existe porque a ilha interativa do final precisa de uma importação real. Nenhum post normal importa nada, porque todos os componentes já são injetados em todos os posts.
+As linhas de `import` no topo são a única exceção, e existem por causa das duas ilhas interativas do final: uma diretiva de cliente precisa de uma importação real, e o botão de ver o código precisa do arquivo como texto. Os dois arquivos moram em `components/`, dentro da pasta deste post. Nenhum post sem ilha importa nada, porque todos os outros componentes já são injetados em todos os posts.
 
 ## Frontmatter
 
@@ -608,82 +610,6 @@ Sem autor, é uma citação comum, e o cartão vem sem a linha de autoria.
 
 > Toda abstração vaza, mais cedo ou mais tarde.
 
-### Escolha como a régua do autor é desenhada
-
-O tratamento escolhido é a moldura dupla ANSI: sem preenchimento, corpo monoespaçado, moldura viva. O que falta decidir é a régua que separa a citação do autor. As oito variações abaixo são idênticas em tudo, menos nisso.
-
-<div data-v="quote-dotted-both">
-
-**pontilhada, apagando nas duas pontas**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-dotted-right">
-
-**pontilhada, apagando só à direita**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-dotted-left">
-
-**pontilhada, apagando só à esquerda**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-dotted-none">
-
-**pontilhada, sem apagar**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-solid-both">
-
-**sólida, apagando nas duas pontas**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-solid-right">
-
-**sólida, apagando só à direita**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-solid-left">
-
-**sólida, apagando só à esquerda**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
-<div data-v="quote-solid-none">
-
-**sólida, sem apagar**
-
-> [!quote] Alan Kay
-> A melhor forma de prever o futuro é inventá-lo.
-
-</div>
-
 ## Links para outros posts
 
 Um wikilink aponta para a pasta de outro post. O Obsidian autocompleta e o grafo enxerga, e o site transforma em um link comum. Sem rótulo, o link usa o título do post de destino. Um wikilink para um post que não existe quebra o build de propósito, então um erro de digitação nunca chega ao site.
@@ -704,16 +630,33 @@ O último aponta para um rascunho: o link continua funcionando, mas vem seguido 
 
 ## Uma ilha interativa em Vue
 
-Este é o único lugar onde uma linha de `import` está certa em um post, porque uma diretiva de cliente precisa de uma importação real do componente. `client:visible` significa que o JavaScript do contador só é baixado quando ele entra na tela; o resto da página continua sendo HTML estático.
+O componente mora na pasta do próprio post, em `components/`, junto com as imagens. As duas linhas de `import` são o único lugar onde um `import` está certo em um post: uma diretiva de cliente precisa da importação real do componente, e a segunda traz o código-fonte como texto para o botão de ver o código. `client:visible` significa que o JavaScript do contador só é baixado quando ele entra na tela; o resto da página continua sendo HTML estático.
 
 ```mdx
-import Counter from '../../../src/components/lab/Counter.vue'
+import Counter from './components/Counter.vue'
+import counterSource from './components/Counter.vue?raw'
 
-<Counter client:visible />
+<LabDemo source={counterSource} name="Counter.vue">
+  <Counter client:visible />
+</LabDemo>
 ```
 
-<Counter client:visible />
+<LabDemo source={counterSource} name="Counter.vue">
+  <Counter client:visible />
+</LabDemo>
 
-Some, subtraia, zere, e navegue pelos três botões com Tab e Espaço para confirmar que a ilha hidratou.
+Some, subtraia, zere, e navegue pelos três botões com Tab e Espaço para confirmar que a ilha hidratou. Abra `ver o código` para ver o arquivo inteiro.
+
+## Uma ilha que é só HTML
+
+Quando a demonstração já é uma página HTML completa, com script e estilo próprios, ela entra inteira. O arquivo também mora em `components/` e é embutido em um iframe, então o CSS dele não briga com o do post e o script dele não vê nada desta página.
+
+```mdx
+import counterHtml from './components/counter.html?raw'
+
+<HtmlLab html={counterHtml} name="counter.html" title="um contador em HTML puro" />
+```
+
+<HtmlLab html={counterHtml} name="counter.html" title="um contador em HTML puro" />
 
 [^1]: A fonte, no pé da página. Note o link de volta para o ponto de origem no texto.

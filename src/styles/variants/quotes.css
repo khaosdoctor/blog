@@ -1,6 +1,6 @@
 /*
- * Quotes. The only quote-shaped thing on the site now that epigraphs are
- * going away: every quote is a card, in two markup shapes.
+ * Quotes. The only quote-shaped thing on the site: every quote gets one look,
+ * no card fill, an italic body, and a bold, underlined author line.
  *
  * `> [!quote] Author Name` + body is an Obsidian callout, run through
  * rehype-callouts (theme: obsidian, see astro.config.mjs). Its actual output
@@ -13,30 +13,31 @@
  * form that actually matches, so this keeps working unchanged if the
  * container tag is ever reconfigured to `blockquote`.
  *
- * A plain `>` blockquote with no callout gets the same card minus the author
- * row: no `.callout-title` exists to show. `.twitter-tweet` and `.epigraph`
- * are excluded because they are also bare `<blockquote>`s produced by other
- * parts of the site (the Ghost tweet-card migration, and the epigraph
- * component mid-removal); neither is a quote.
+ * A plain `>` blockquote with no callout gets the same look minus the author
+ * row: no `.callout-title` exists to show. `.twitter-tweet` is excluded
+ * because it is also a bare `<blockquote>` produced elsewhere on the site
+ * (the Ghost tweet-card migration), and is not a quote. `.epigraph` used to
+ * be excluded here for the same reason, but that component no longer exists
+ * anywhere in the codebase, so the guard is gone with it.
  *
  * The author arrives as the callout's TITLE (its first child) and has to
- * render at the BOTTOM of the card. Solved with flex-order, no markup
- * change: the container becomes a column flex box, the title gets `order:
- * 2`, the content `order: 1`.
+ * render at the BOTTOM. Solved with flex order, no markup change: the
+ * container is a column flex box, the title gets `order: 2`, the content
+ * `order: 1`.
  *
- * House style, round 2: every card carries a double-rule border (top, right,
- * bottom) except the left edge, which stays the thick solid bar it always
- * was. `border-style: double` renders as a single line under 3px, hence
+ * House style: every card carries a double-rule border (top, right, bottom)
+ * except the left edge, which stays the thick solid bar it always was.
+ * `border-style: double` renders as a single line under 3px, hence
  * --qc-border-width below.
  *
- * The default (an author card, or a plain blockquote) plus eight variants,
- * selected on the lab page with `[data-v="quote-x"]`. All eight are the
- * double-ANSI look (transparent fill, monospace body, no drop cap, no
- * watermark) and differ only in how the rule above the author line is
- * drawn: dotted or solid, faded at both ends, one end, or not at all. That
- * rule is built the same way as the fading `hr` in prose/rules.css, a
- * background pattern plus a mask, just spanning the card instead of a
- * centred short bar.
+ * The look itself, picked after a lab page compared eight variants (now
+ * removed): no background fill, the body always italic in both markup
+ * shapes, the author bold and underlined, and a short dashed rule above the
+ * author line that starts around the card's middle and fades out toward the
+ * right. That rule is built the same way as the fading `hr` in
+ * prose/rules.css, a background pattern clipped by a mask, except here the
+ * pseudo-element's own inline-size does the shortening instead of the mask,
+ * so --qc-rule-start is the one value that changes its length.
  */
 
 :root {
@@ -52,16 +53,14 @@
   --qc-border-width: 4px;
 
   /*
-   * Default: barely a background, a vivid border. A solid purple card made the
-   * fill and the border the same colour, so the card had no edge at all, and it
-   * needed inverted text to stay readable. Round 2: still read as too present
-   * at 6%/10%, taken fainter again rather than swapped for a darker purple,
-   * which would have reintroduced that same fill-meets-border problem.
+   * No card fill, per the final decision: the double-rule frame does the
+   * separating, and the quote now reads straight off the page background.
+   * --qc-fg and --qc-muted-fg were already the site's own --fg and --muted,
+   * so both still clear 4.5:1 against --bg with nothing changed here: --fg
+   * comes out to roughly 16.8:1 in light and 14.3:1 in dark, --muted to
+   * roughly 6.1:1 in light and 6.7:1 in dark.
    */
-  --qc-bg: light-dark(
-    color-mix(in oklab, var(--brand-purple) 4%, var(--bg)),
-    color-mix(in oklab, var(--brand-purple) 7%, var(--bg))
-  );
+  --qc-bg: transparent;
   --qc-fg: var(--fg);
   --qc-muted-fg: var(--muted);
   --qc-border: light-dark(
@@ -70,38 +69,45 @@
   );
   --qc-dropcap-fg: var(--qc-border);
 
-  /* Watermark glyph: a `"` behind the text, upper left, ~48px. White at 30%
-   * alpha reads on the dark card; the same alpha in white would vanish on
-   * the near-white light card, so light theme gets black at a comparable
-   * alpha instead, same visual weight, both comfortably clear the 4.5:1
-   * floor against the card underneath. */
-  --qc-glyph-size: 48px;
+  /*
+   * Watermark glyph: a `"` behind the text, upper left, much bigger and more
+   * transparent than before, per the owner's call: 160px at 10% white on the
+   * dark page, 5% black on the light page. Halving the alpha for light mode
+   * keeps the same ratio the previous two values used, so both themes read
+   * at a comparable visual weight. It is a decoration behind the text: the
+   * real content always paints above it (see the z-index rule below), so
+   * size and alpha are free to move without touching legibility. Clipping is accepted
+   * on purpose: at 160px, `overflow: hidden` on the card trims it off the
+   * bottom edge on a short, single-line quote; a longer quote or one with an
+   * author line has enough card height to clear it.
+   */
+  --qc-glyph-size: 160px;
   --qc-glyph-inset: 0.05em;
   --qc-glyph: light-dark(
-    color-mix(in oklab, black 15%, transparent),
-    color-mix(in oklab, white 30%, transparent)
+    color-mix(in oklab, black 5%, transparent),
+    color-mix(in oklab, white 10%, transparent)
   );
 
-  /* The rule above the author line: a background pattern (solid colour or a
-   * dotted repeat) cut by a mask that decides where it fades. Default card
-   * fades at both ends; the eight variants below swap --qc-rule-image and
-   * --qc-rule-mask only. */
+  /*
+   * The rule above the author line: a dashed background pattern, marks
+   * longer than the site's dotted `hr` (prose/rules.css uses a 3px mark),
+   * clipped by a fixed right-fade mask. What makes it short and starts it
+   * around the middle is the pseudo-element's own inline-size, set below
+   * with `inset-inline: var(--qc-rule-start) 0`: --qc-rule-start is the only
+   * value to change to make the rule longer or shorter, the mask always
+   * fades over the last 30% of whatever length results.
+   */
   --qc-rule-weight: 2px;
-  --qc-rule-solid: var(--qc-border);
-  --qc-rule-dotted: repeating-linear-gradient(to right, var(--qc-border) 0 2px, transparent 2px 5px)
-    center / 100% 100% no-repeat;
-  --qc-rule-mask-both: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
-  --qc-rule-mask-right: linear-gradient(to right, black 70%, transparent);
-  --qc-rule-mask-left: linear-gradient(to right, transparent, black 30%);
-  --qc-rule-image: var(--qc-rule-solid);
-  --qc-rule-mask: var(--qc-rule-mask-both);
+  --qc-rule-start: 50%;
+  --qc-rule-image: repeating-linear-gradient(to right, var(--qc-border) 0 10px, transparent 10px 16px);
+  --qc-rule-mask: linear-gradient(to right, black 70%, transparent);
 }
 
 /* ---------------------------------------------------------- card shape */
 
 .prose blockquote.callout[data-callout='quote'],
 .prose .callout[data-callout='quote'],
-.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
+.prose blockquote:not(.callout):not(.twitter-tweet) {
   position: relative;
   isolation: isolate;
   display: flex;
@@ -132,7 +138,7 @@
 }
 
 .prose .callout[data-callout='quote'] > *,
-.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > * {
+.prose blockquote:not(.callout):not(.twitter-tweet) > * {
   position: relative;
   z-index: 1;
 }
@@ -151,7 +157,6 @@
   font-family: var(--font-mono);
   font-size: var(--text-small);
   font-style: normal;
-  font-weight: 400;
   color: var(--qc-muted-fg);
 }
 
@@ -161,7 +166,7 @@
   content: '';
   position: absolute;
   inset-block-start: 0;
-  inset-inline: 0;
+  inset-inline: var(--qc-rule-start) 0;
   block-size: var(--qc-rule-weight);
   background: var(--qc-rule-image);
   mask: var(--qc-rule-mask);
@@ -171,6 +176,15 @@
   content: '\00bb  '; /* the ANSI-prompt » rather than an em dash */
 }
 
+/* Bold and underlined: the author name is the one line on the card that
+ * carries no italic, so it needs its own weight to read as set apart. The
+ * `»` prefix above is part of the same text node, so it comes along for
+ * free rather than fighting it. */
+.prose .callout[data-callout='quote'] .callout-title-text {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .prose .callout[data-callout='quote'] > .callout-content {
   order: 1;
 }
@@ -178,14 +192,14 @@
 /* -------------------------------------------------------------- body */
 
 .prose .callout[data-callout='quote'] .callout-content,
-.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
+.prose blockquote:not(.callout):not(.twitter-tweet) {
   font-style: italic;
 }
 
 /* ------------------------------------------------------- watermark glyph */
 
 .prose .callout[data-callout='quote']::before,
-.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before {
+.prose blockquote:not(.callout):not(.twitter-tweet)::before {
   content: '\201c';
   position: absolute;
   z-index: 0;
@@ -206,7 +220,7 @@
 /* ------------------------------------------------------------- drop cap */
 
 .prose .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-.prose blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter {
+.prose blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
   float: inline-start;
   margin-inline-end: 0.1em;
   font-family: var(--font-display);
@@ -214,154 +228,4 @@
   font-style: normal;
   line-height: 0.82;
   color: var(--qc-dropcap-fg);
-}
-
-/* ==================================================================
- * The double-ANSI matrix: one look (transparent fill, monospace body, no
- * drop cap, no watermark, the vivid frame colour), the rule above the
- * author line is the only thing that changes across the eight.
- * ================================================================== */
-
-[data-v='quote-dotted-both'],
-[data-v='quote-dotted-right'],
-[data-v='quote-dotted-left'],
-[data-v='quote-dotted-none'],
-[data-v='quote-solid-both'],
-[data-v='quote-solid-right'],
-[data-v='quote-solid-left'],
-[data-v='quote-solid-none'] {
-  --qc-bg: transparent;
-  --qc-fg: var(--fg);
-  --qc-muted-fg: light-dark(
-    color-mix(in oklab, var(--brand-purple) 65%, var(--fg)),
-    color-mix(in oklab, var(--brand-purple) 55%, var(--fg))
-  );
-  --qc-border: light-dark(
-    color-mix(in oklab, var(--brand-purple) 55%, var(--fg)),
-    color-mix(in oklab, var(--brand-purple) 60%, var(--fg))
-  );
-}
-
-[data-v='quote-dotted-both'] .callout[data-callout='quote'],
-[data-v='quote-dotted-right'] .callout[data-callout='quote'],
-[data-v='quote-dotted-left'] .callout[data-callout='quote'],
-[data-v='quote-dotted-none'] .callout[data-callout='quote'],
-[data-v='quote-solid-both'] .callout[data-callout='quote'],
-[data-v='quote-solid-right'] .callout[data-callout='quote'],
-[data-v='quote-solid-left'] .callout[data-callout='quote'],
-[data-v='quote-solid-none'] .callout[data-callout='quote'],
-[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
-  padding: 1.25rem 1.5rem;
-}
-
-[data-v='quote-dotted-both'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-dotted-right'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-dotted-left'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-dotted-none'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-solid-both'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-solid-right'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-solid-left'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-solid-none'] .callout[data-callout='quote'] .callout-content,
-[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph),
-[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) {
-  font-style: normal;
-  font-family: var(--font-mono);
-}
-
-[data-v='quote-dotted-both'] .callout[data-callout='quote']::before,
-[data-v='quote-dotted-right'] .callout[data-callout='quote']::before,
-[data-v='quote-dotted-left'] .callout[data-callout='quote']::before,
-[data-v='quote-dotted-none'] .callout[data-callout='quote']::before,
-[data-v='quote-solid-both'] .callout[data-callout='quote']::before,
-[data-v='quote-solid-right'] .callout[data-callout='quote']::before,
-[data-v='quote-solid-left'] .callout[data-callout='quote']::before,
-[data-v='quote-solid-none'] .callout[data-callout='quote']::before,
-[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
-[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
-[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
-[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
-[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
-[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
-[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before,
-[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph)::before {
-  content: none;
-}
-
-[data-v='quote-dotted-both'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-dotted-right'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-dotted-left'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-dotted-none'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-solid-both'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-solid-right'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-solid-left'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-solid-none'] .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
-[data-v='quote-dotted-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
-[data-v='quote-dotted-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
-[data-v='quote-dotted-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
-[data-v='quote-dotted-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
-[data-v='quote-solid-both'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
-[data-v='quote-solid-right'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
-[data-v='quote-solid-left'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter,
-[data-v='quote-solid-none'] blockquote:not(.callout):not(.twitter-tweet):not(.epigraph) > p:first-of-type::first-letter {
-  float: none;
-  margin-inline-end: 0;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: inherit;
-}
-
-/* The one axis of the matrix: line style crossed with fade position. */
-
-[data-v='quote-dotted-both'] {
-  --qc-rule-image: var(--qc-rule-dotted);
-  --qc-rule-mask: var(--qc-rule-mask-both);
-}
-
-[data-v='quote-dotted-right'] {
-  --qc-rule-image: var(--qc-rule-dotted);
-  --qc-rule-mask: var(--qc-rule-mask-right);
-}
-
-[data-v='quote-dotted-left'] {
-  --qc-rule-image: var(--qc-rule-dotted);
-  --qc-rule-mask: var(--qc-rule-mask-left);
-}
-
-[data-v='quote-dotted-none'] {
-  --qc-rule-image: var(--qc-rule-dotted);
-  --qc-rule-mask: none;
-}
-
-[data-v='quote-solid-both'] {
-  --qc-rule-image: var(--qc-rule-solid);
-  --qc-rule-mask: var(--qc-rule-mask-both);
-}
-
-[data-v='quote-solid-right'] {
-  --qc-rule-image: var(--qc-rule-solid);
-  --qc-rule-mask: var(--qc-rule-mask-right);
-}
-
-[data-v='quote-solid-left'] {
-  --qc-rule-image: var(--qc-rule-solid);
-  --qc-rule-mask: var(--qc-rule-mask-left);
-}
-
-[data-v='quote-solid-none'] {
-  --qc-rule-image: var(--qc-rule-solid);
-  --qc-rule-mask: none;
 }

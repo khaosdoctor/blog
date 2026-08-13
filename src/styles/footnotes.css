@@ -2,15 +2,32 @@
  * Astro's GFM footnotes already put a numbered link in the text and the full
  * body at the foot of the post. src/plugins/rehype-footnote-sidenotes.mjs
  * copies that body into an `<aside class="footnote-aside">` right after the
- * paragraph that references it (aria-hidden: the accessible copy stays the
- * one at the foot of the page). This file styles two things:
+ * paragraph that references it, prefixed with the note's own "[1] " so it is
+ * obvious which one it is once it is read on its own in the margin. This
+ * file styles three things:
  *
  *   - the reference mark in the text: bracketed "[1]", not a bare
  *     underlined number, so it reads as a citation and is never mistaken
  *     for src/components/Sidenote.astro's bordered, unbracketed marker.
+ *   - the section at the foot of the post: `display: none`, not removed
+ *     from the tree. The margin aside is the only place a reader now reads
+ *     a footnote, but the foot-of-page copy still has to exist for the
+ *     reference anchor to resolve to something, for a reader with CSS off,
+ *     and for an RSS reader. `display: none` also drops it out of the
+ *     accessibility tree, which is deliberate here (unlike the
+ *     visually-hidden clip technique src/styles/sidenotes.css uses for
+ *     `.note-text`): the margin aside below is the copy left reachable to
+ *     assistive tech, and hiding this one the same way sighted readers see
+ *     it hidden keeps exactly one copy accessible instead of two, or zero.
  *   - the aside itself: floated into the right margin on a wide viewport,
  *     hidden below it, where the reference's own hover-preview card
- *     (src/scripts/hover-previews.ts) already covers the same note.
+ *     (src/scripts/hover-previews.ts) already covers the same note by
+ *     reading straight out of the (still-present, just invisible) section
+ *     this hides, and is itself reachable by keyboard focus and touch
+ *     long-press regardless of viewport width. Below the wide breakpoint
+ *     that card is the only surface a footnote appears on; narrower than
+ *     that used to also show the foot-of-page section, which is now gone
+ *     everywhere.
  */
 
 :root {
@@ -24,33 +41,20 @@
 /* --------------------------------------------------------------- section */
 
 /*
- * The same section break as `.prose hr` (see src/styles/prose/rules.css): a
- * short dotted bar fading out at both ends. Reuses that rule's own tokens
- * rather than new ones, so the two treatments cannot drift apart. A `::before`,
- * not a border, because a border cannot be dotted to a chosen rhythm or faded.
- */
-.prose section[data-footnotes]::before {
-  content: '';
-  display: block;
-  inline-size: var(--rule-length);
-  block-size: var(--rule-weight);
-  margin-block: 3rem;
-  margin-inline: auto;
-  background: repeating-linear-gradient(
-    to right,
-    var(--rule-core) 0 var(--rule-dot),
-    transparent var(--rule-dot) calc(var(--rule-dot) + var(--rule-gap))
-  );
-  mask: linear-gradient(to right, transparent, black 35%, black 65%, transparent);
-}
-
-/*
- * The notes themselves are a different register from the body: smaller and
- * quieter, the way a footnote is set in print, but not so small that reading one
- * is work. The heading GFM emits above them is visually hidden (see the .sr-only
- * rule in BaseLayout), so this block is all a reader sees.
+ * The margin aside is now the only place a footnote is read (see the file
+ * comment above), so the section GFM renders at the foot of the post is
+ * hidden outright, unconditionally, including at print. It stays in the
+ * tree on purpose: the reference anchor still needs somewhere to resolve
+ * to, and a reader with CSS off (a text browser, view-source, an RSS reader
+ * that strips stylesheets) still gets the notes at the foot of the post the
+ * way GFM always rendered them. The colour/size rules below are for exactly
+ * that reader; a CSS-on browser never paints them. Printing a post now
+ * drops its footnotes along with everything else `display: none` hides,
+ * which is a real loss with no fallback (the margin aside is not printed
+ * either, see the aside rules below): worth a look if that matters.
  */
 .prose section[data-footnotes] {
+  display: none;
   color: var(--muted);
   font-size: var(--text-small);
 }
@@ -113,6 +117,22 @@
   margin-block-start: 0.5rem;
 }
 
+/*
+ * "The italic here has no color, this gray is perfect": the aside is
+ * `color: var(--muted)` below, but a footnote can itself contain a markdown
+ * *emphasis* run, and src/styles/prose/emphasis.css's `.prose em` rule
+ * reaches right into it (the aside lives inside `.prose`), painting that
+ * word the bold treatment's yellow instead of leaving it gray. Undo both
+ * properties that rule sets, so an `<em>` here reads as this aside's own
+ * italic and colour, not the body's. Kept outside the wide-viewport media
+ * query below, since it corrects the colour regardless of layout and costs
+ * nothing while the aside is hidden.
+ */
+.footnote-aside em {
+  color: inherit;
+  font-weight: inherit;
+}
+
 /* Wide: margin room exists (see the comment in sidenotes.css for the same
    math against its own, wider box), so the note floats beside its paragraph.
    Not hover-triggered, so it does not compete with the card above: this one
@@ -127,8 +147,24 @@
     margin-bottom: 0.4rem;
     margin-left: var(--footnote-aside-gap);
     margin-right: calc(-1 * (var(--footnote-aside-width) + var(--footnote-aside-gap)));
+    padding-inline-start: 0.6rem;
     font-size: 0.82rem;
+    font-style: italic;
     line-height: 1.5;
     color: var(--muted);
+    /*
+     * The house double-ANSI border (src/styles/sidenotes.css, and
+     * docs/design.md's "double-ANSI border becomes the house style"), but
+     * left-only: every card-shaped element's left edge is thick and solid
+     * in every case already, never double, so "left border only" is just
+     * that spine on its own, with no thin double frame on the other three
+     * sides (that full frame is what a Sidenote gets, not a footnote).
+     * --border-card-edge, not sidenotes.css's --note-border-width: this
+     * file is imported globally (src/layouts/BaseLayout.astro), on every
+     * page with a footnote whether or not that page also has a Sidenote or
+     * MarginNote, so it cannot depend on a custom property sidenotes.css
+     * only defines when a Sidenote/MarginNote component is actually used.
+     */
+    border-inline-start: var(--border-card-edge) solid var(--fg);
   }
 }

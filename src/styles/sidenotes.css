@@ -87,6 +87,16 @@
      same technique as src/styles/prose/links.css (an inline SVG as a mask,
      so it takes currentColor and costs no request). */
   --note-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'/%3E%3Cpath d='M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'/%3E%3C/svg%3E");
+
+  /* Reserved for .note-copy-link, on whichever inline side it lives on (see
+     .sidenote/.marginnote below): the icon control is 1.5rem square, inset
+     0.1rem from that edge, so 1.6rem clears it outright, with a little extra
+     breathing room before the text starts. This is a dedicated column for
+     the full height of the box, not just its top few pixels, which is what
+     keeps the icon off every line of text, not only the first: text simply
+     never lays out inside this padding, whether the note is one line or
+     five. */
+  --note-icon-gutter: 1.9rem;
 }
 
 .note {
@@ -149,6 +159,24 @@
 
 .marginnote .note-copy-link {
   left: 0.1rem;
+}
+
+/*
+ * The icon used to sit inside .note-text's own padding, on top of whatever
+ * prose started there: fine for a note that opened with a short first word,
+ * a straight overlap for anything longer. --note-icon-gutter (above) reserves
+ * a column on the icon's own side, for the box's full height, so the text
+ * content box itself starts clear of the icon: not just its first line, none
+ * of them, because that column carries no text at any point down the box,
+ * however many lines it wraps to. Applied per state below (the narrow
+ * popover and the wide float have different base padding to begin with).
+ */
+.sidenote .note-toggle:checked ~ .note-text {
+  padding-inline-end: var(--note-icon-gutter);
+}
+
+.marginnote .note-toggle:checked ~ .note-text {
+  padding-inline-start: var(--note-icon-gutter);
 }
 
 .note-copy-link::before {
@@ -251,6 +279,32 @@ main {
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
   white-space: nowrap;
+  /* .note-grow (below) is what actually changes; the transition lives here
+     so it applies in every state, not just the ones that currently use it. */
+  transition: transform var(--duration) ease-in-out;
+}
+
+/*
+ * The mirror of the highlight above: hovering a note tints the text it is
+ * bound to, so hovering that text grows the note back, to make the pairing
+ * obvious in both directions. That text still isn't wrapped in anything (see
+ * the highlight comment above), so FootnoteSidenotes.astro hit-tests the
+ * pointer position instead and toggles this class on the .note whose bound
+ * text is under it. A transform, not a font-size or padding change: those
+ * would reflow the floated column in the wide layout below, which is a
+ * bigger, and louder, effect than "slightly enlarge" asked for. A transform
+ * does not reflow, though, which is the trade-off: two notes floated close
+ * together (see /lab/'s "Notas na margem" section, a Sidenote and a
+ * MarginNote back to back) can have the growing one paint over the small
+ * space before its neighbour. transform-origin below points growth away
+ * from the note above rather than centering it, which keeps it clear of
+ * that space for a typical short note; a very tall one, or a very tight
+ * stack, could still touch. Kept to a few percent, on purpose, to keep that
+ * headroom.
+ */
+.note.note-grow .note-text {
+  transform: scale(1.04);
+  transform-origin: top left;
 }
 
 .note-toggle:checked ~ .note-text {
@@ -280,15 +334,15 @@ main {
 
 /*
  * The double-ANSI border is the house style for card-shaped things now (see
- * src/styles/variants/quotes.css's quote-c variant and code-and-callouts.css),
- * and a sidenote is the numbered, bordered one of the two note types: the
- * thick solid left edge above stays exactly as it is, the other three sides
- * get a thin double rule. MarginNote does not get this: the owner called it
- * "perfectly fine the way it is" in the same round of feedback that asked
- * for this, and it carries no thin sides to begin with, so there is nothing
- * here for it to apply to.
+ * src/styles/variants/quotes.css's quote-c variant and code-and-callouts.css):
+ * the thick solid left edge above stays exactly as it is, the other three
+ * sides get a thin double rule. A round of feedback ago this only applied to
+ * Sidenote, MarginNote having been called "perfectly fine the way it is" in
+ * that same round; the answer since is "add the double border on margin and
+ * sidenotes too", so both note types share this rule now.
  */
-.sidenote .note-toggle:checked ~ .note-text {
+.sidenote .note-toggle:checked ~ .note-text,
+.marginnote .note-toggle:checked ~ .note-text {
   border-block-start: var(--note-border-thin) double var(--fg);
   border-inline-end: var(--note-border-thin) double var(--fg);
   border-block-end: var(--note-border-thin) double var(--fg);
@@ -357,14 +411,27 @@ main {
 
   /* Same double-ANSI frame as the narrow popover above, kept in sync: the
      thick left edge stays as it is, the other three sides get the thin
-     double rule, sidenote only. A little padding is added on those three
+     double rule, both note types. A little padding is added on those three
      sides so the floated text does not run into its own frame; the left
      side already had padding for the thick edge. */
-  .sidenote .note-text {
+  .sidenote .note-text,
+  .marginnote .note-text {
     padding: 0.35rem 0.5rem 0.4rem 0.6rem;
     border-block-start: var(--note-border-thin) double var(--fg);
     border-inline-end: var(--note-border-thin) double var(--fg);
     border-block-end: var(--note-border-thin) double var(--fg);
+  }
+
+  /* Same icon gutter as the narrow popover state (see --note-icon-gutter and
+     .note-copy-link above), reserved on whichever side the icon lives on: the
+     floated box is just as tall as its content either way, so this stays a
+     full-height column here too, not only a corner. */
+  .sidenote .note-text {
+    padding-inline-end: var(--note-icon-gutter);
+  }
+
+  .marginnote .note-text {
+    padding-inline-start: var(--note-icon-gutter);
   }
 }
 

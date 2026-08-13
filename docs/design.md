@@ -1,6 +1,6 @@
 # Design
 
-Nothing here is applied yet beyond the tokens. This is the plan and the shortlist, kept short on purpose.
+The plan, the shortlist, and what has already been decided. Kept short on purpose: the code is the detail.
 
 ## Direction
 
@@ -53,205 +53,30 @@ Keep whatever we adopt in `src/components/icons/` as one small `.astro` per icon
 Link icons (external-host vs. stays-on-the-blog) are inlined as data-URI SVG masks, not fetched — same shortlist
 as above, see [Link icons](#7-link-icons) below.
 
-## Lab feedback
+## Settled
 
-Owner review of the `/lab/` showcase. Per item: what he asked for, the decision being implemented now, and any
-open question left for him.
+Decided and implemented. Kept short on purpose; the code is the detail.
 
-### 1. Epigraphs
-
-- Ask: an epigraph reads identically to a blockquote today, needs a look of its own.
-- Status: undecided, 3 options below, his pick.
-- **A. Box-drawing frame** — `┌─┐│└─┘` border via CSS `border-image` (SVG), not literal Unicode text (would leak
-  into the accessible tree). Token: `--epigraph-border`. A11y: none.
-- **B. ANSI bracket** — large `❯`/`❮` glyphs flanking the text in accent colour, like a prompt marker. Token:
-  `--epigraph-bracket`. A11y: decorative, needs `aria-hidden`.
-- **C. Oversized pixel glyph + dither** — big pixelated `"` mask behind the text at low opacity, optional dithered
-  SVG tile backdrop. Tokens: `--epigraph-glyph-opacity`, `--epigraph-dither-opacity`. A11y: opacity must stay low
-  enough that text keeps WCAG AA contrast.
-- OPEN QUESTION: pick A, B, or C (or a mix).
-
-### 2. Code block language chip
-
-- Ask: every code block shows its language in a small chip — top-left, top-right or bottom-right.
-- Decision: top-right, hidden when expressive-code's frame plugin already renders a filename/title bar (two
-  labels would collide).
-- OPEN QUESTION: should the chip show even when a title bar is present?
-
-### 3. Heading anchors
-
-- Ask: hovering a heading reveals a clickable `#`; clicking jumps to the anchor, copies the full URL, and
-  confirms with a toast.
-- Decision: implementing as described.
-- OPEN QUESTION: toast position and auto-dismiss (default: bottom-centre, 2s).
-
-### 4. Heading rules
-
-- Ask: h1–h3 get a rule underneath that fades out (gradient, not solid); h4 and deeper get nothing.
-- Decision: implementing as described.
-
-### 5. Heading glow
-
-- Ask: h1/h2 get a faint glow behind the text.
-- Decision: `--glow-color` token, so the colour is a one-line change later.
-- OPEN QUESTION: which colour — brand red (CRT-phosphor), brand green (terminal), or a neutral white/black glow
-  that just lifts the text. Recommendation: green — it reinforces the terminal direction, and its mid luminance
-  reads as a soft lift in both themes without the alarm connotation red carries.
-
-### 6. Emphasis colours
-
-- Ask: bold gets a background chip wrapping the word (small padding), brand colours, both themes, like the old
-  blog. Italic is open to suggestions, wants it reading as more clearly italic than plain slant.
-- Bold decision: tinted background chip. Token pair per theme via `light-dark()`: `--em-bold-bg` / `--em-bold-fg`.
-- Italic, 3 options: (a) distinct brand-coloured text, (b) weight bump to 500, (c) dotted/dashed underline.
-  Default: **dotted underline** — reads as "italic plus" without fighting the slant, leaves colour free for
-  links and bold.
-
-### 7. Link icons
-
-- Ask: every link gets an inline icon — "open external" if the host differs from the blog, a curved
-  left-to-right arrow (rotated footnote-backref shape) if it stays on the blog or another of his domains.
-- Decision: CSS-only, inline SVG as a `mask-image: url(data:...)` so it inherits `currentColor`, no extra
-  request, no JS.
-- OPEN QUESTION: internal-domain list. `lsantos.dev` confirmed, needs the rest.
-
-### 8. Quotes vs. citations
-
-- Ask: quotes and citations are different things; he rarely writes bibliographic/scientific citations, so no
-  citation styling for now. A quote should be a card with its own background (not a padded block), a very large
-  faded quote glyph watermarked top-left behind the text, the author at the bottom when there is one, the body
-  in italic, and a drop-cap first letter.
-- Markup decision: reuse the Obsidian callout he already writes — `> [!quote] Author Name` + body. `rehype-callouts`
-  already understands `quote`, it renders natively in Obsidian, no new syntax or component. Callout title → author
-  row, callout body → quote text. A plain `>` blockquote with no callout gets the same card minus the author row.
-- Card colour: faded purple in dark theme, solid purple in light theme. **Flag: no purple exists in the brand
-  palette** (red `#e30613`, green `#45b384`, yellow `#f5b200`, blue `#0578be`) — a `--brand-purple` hex needs
-  picking. Candidates: `#6b4fbb` (muted violet, sits closest in saturation to the existing set, works solid on
-  light), `#8a63d2` (brighter, more legible faded at low opacity on dark), `#5b3e99` (deep plum, safest contrast
-  for a solid light-theme card since it's dark enough to pair with light text).
-- OPEN QUESTION: which purple, and does it double as one hex used at different opacity per theme, or two hexes.
-- OPEN QUESTION: on a solid purple light-theme card, body text needs to invert to stay readable — solid purple
-  with inverted text, or a tinted/lighter purple that keeps normal text colour? Contrast risk either way.
-- OPEN QUESTION: author position — he said both "below the box" and "bottom of the card." Default being
-  implemented: inside the card, bottom row, right-aligned. Confirm.
-- Note: drop cap + italic + watermark glyph is three effects stacked at once; the `/lab/` page will render
-  several combinations side by side so he can cut what's too much, and the variant he picks is what gets
-  promoted into the default stylesheet.
-
-## Lab feedback, round 2
-
-Second pass over `/lab/`, after the first round shipped. Not implemented yet, listed in his order. Anything here
-overrides the round 1 note above it.
-
-**Headings**
-
-- Hover shows only the `#`, on the **left** of the heading, fading in. Nothing else.
-- No background tint on hover. Remove it.
-
-**Side notes and margin notes**
-
-- Hovering the note highlights the **background of the text it is bound to**, not just the reference number.
-- While hovering, a second `#` appears: **top left** for a margin note, **top right** for a side note. It links to
-  that note's own anchor.
-
-**Horizontal rule**
-
-- 150px is the right length.
-- No glow at all. Remove it.
-- 1px, dotted.
-- Fainter, around 80% alpha.
-- Render the lab variants in several colours and several alpha levels so the colour can be picked.
-
-**Footnotes**
-
-- Hovering a footnote reference shows the footnote in a popover, with **exactly** the behaviour the link hover
-  previews already have. Same component, not a second implementation.
-- No "Footnotes" block heading at the bottom. Just the notes.
-- The notes at the bottom render small, the way a footnote should, but still comfortably readable: small enough to
-  read as a different register from the body, not smaller.
-
-**Emphasis**
-
-- Bold: solid background colour, not a faded one.
-- Italic: the treatment is right, but use the same yellow the bold uses. Watch light mode, where that yellow will not
-  read, and switch to something legible there, probably blue.
-
-**Quotes**
-
-- The card background is still too present. Either fainter again, or a darker shade of purple.
-
-**Code blocks**
-
-- A filename tab appears only when the first line is a comment **that looks like a filename**. If there is no comment,
-  or the comment is not a filename, no tab. A shebang in a bash block is the example of a first-line comment that must
-  not become a tab.
-- Question: can the syntax highlighting theme be changed, and better, can the reader choose between a few?
-
-**LaTeX**
-
-- The copy button works, but Greek letters come out as their names (`lambda`). They should come out as the letters
-  themselves, using whatever ASCII or Unicode representation reads correctly when pasted.
-
-**Side notes and margin notes, continued**
-
-- Side notes (the numbered ones) get a full border: the thick solid left edge stays as it is, and the other three sides
-  get a thin border.
-- Margin notes are right as they are.
-- The copy-link control is far too small in both. Use a normal-sized link icon, clickable. Clicking it copies the
-  anchor URL, it does **not** navigate there.
-- A blue outline is stuck around the reference number and will not go away (screenshot). That is the `:target` ring
-  added in round 1. The numbers must carry no special treatment at all: remove it.
-- The hover highlight over the bound text uses the **faded yellow from the bold treatment**, not blue.
-
-**Quotes, continued**
-
-- With an author: the rule dividing the quote from the author line fades out at **both** ends.
-- Both forms, with and without an author, are still missing the `"` watermark: upper left, roughly 48px, white at
-  about 30% alpha, behind the text.
-- The double-ANSI treatment is the one he likes: monospaced body, dotted rule. Build a test matrix of it:
-  - dotted, faded at both ends
-  - dotted, faded on the right only
-  - dotted, faded on the left only
-  - dotted, no fade
-  - and the same four again with a solid rule instead of dotted.
-
-**The double-ANSI border becomes the house style**
-
-- Apply the same double-ANSI border to callouts, side notes and margin notes.
-- In every case the left border stays thicker than the others, and stays solid, exactly as it is now.
-
-**Unwritten links**
-
-- The superscript marker on a link to a post that does not exist yet is **still rendering**. It must not.
-
-**Footnotes at the foot of the post**
-
-- The heading is gone, but the notes themselves are still full body size. Make them smaller and fainter than the body,
-  while staying comfortably readable.
-
-**Interactive components**
-
-- Each interactive island gets a small "code" button beside it. Clicking it reveals that component's own source.
-- Add a second interactive example to `/lab/` that is a plain HTML page and nothing else, alongside the Vue one.
-
-**Process**
-
-- Every change from now on bumps the version, so each change is traceable. See `src/lib/version.ts` and the release
-  workflow for how the version is currently derived.
-
-**Images: settled, no change**
-
-Obsidian does support the title form after all. So what shipped stays: the caption is the markdown title when there is
-one, otherwise the alt text, and the alt attribute is always the alt text. Both channels exist, both render in Obsidian.
-
-**Answers given on the round 2 questions**
-
-- Italic: yellow *text*, `#f5b200` in dark, dropping to an amber that passes 4.5:1 on a near-white page in light. One
-  colour family, no blue.
-- Versioning: the patch number comes from the commit count since the last tag, computed at build time. No manual bump,
-  no tag per change. Minor and major tags stay hand-cut when something meaningful ships.
-- Code theme: a reader-facing picker with a handful of themes, remembered in `localStorage`, sharing whatever settings
-  surface the pinned-preview toggle ends up in.
+- **Quotes.** One look, no variants. No background fill. Body always italic. Author bold and underlined, with a `»`
+  prefix, on a dashed rule that starts halfway across the card and fades out to the right (`--qc-rule-start` is the one
+  value that changes its length). A `"` watermark at 160px, white 10% on dark and black 5% on light, behind the text and
+  clipped by the card on short quotes. Double frame, thick solid left edge.
+- **Rule.** 150px, 1px, dotted at 2px on / 8px off, foreground at full strength, no glow. The colour options stay on the
+  lab page until one is picked; `--rule-core` is the single value.
+- **Headings.** `#` in the left margin on hover, no background tint. Glow on `h1` only.
+- **Emphasis.** Bold is a solid brand-yellow chip with dark text in both themes. Italic is yellow text, dropping to
+  `#8a6400` in light where the brand yellow cannot be read.
+- **Footnotes.** No section at the foot of the post. The note is read in the margin, italic, muted, left edge only, with
+  its `[1]` repeated at the start. Hovering a reference raises the same card a link does.
+- **Captions.** From the markdown title only. Alt text is alt text and never becomes a caption.
+- **Unwritten links.** Red, no marker text. The words live in a `title` attribute for anyone who cannot see the colour.
+  Two code paths carried this: the wikilink plugin and `SeriesToc.astro`.
+- **Cards.** Every card carries a thick solid left edge (`--border-card-edge`) and a double rule on the other three.
+  `border-style: double` collapses to one line under 3px, so the thin edges are 3–4px.
+- **Islands.** A post's own components live in a `components/` folder beside it, imported relatively. The content
+  collection globs `*/*.{md,mdx}`, so that folder is invisible to it. `LabDemo` wraps an island and reveals its source
+  through a `<details>`; `HtmlLab` embeds a whole HTML page from the same folder via `srcdoc`.
+- **Version.** Commits since the last tag, as semver build metadata (`0.0.1+42`). No tag per change.
 
 ## Open decisions
 
@@ -259,5 +84,10 @@ one, otherwise the alt text, and the alt attribute is always the alt text. Both 
 - Cover and OG layout: flat brand background or generated art, what the card carries besides the title, how a
   90 character title behaves. Covers are per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in.
 - Whether the theme toggle becomes explicit. Today it is native `light-dark()` with no JS and no stored preference.
-- Where the reader settings live once there is a footer, starting with the pinned-preview persistence checkbox.
-- Per-component open questions from the `/lab/` review: see "Lab feedback" above.
+- Where the reader settings live once there is a footer. Two already exist and have nowhere to sit: the
+  pinned-preview persistence checkbox and the code theme picker.
+- `--brand-purple` is provisional at `#6b4fbb`. Quotes are the only thing using it. Candidates: `#8a63d2` reads better
+  faded on a dark page, `#5b3e99` is the safest against light text.
+- `--rule-core`: the lab page carries the colour and density options for the section break.
+- Whether the code language chip should still show when a filename tab is already present.
+- Which of his other domains count as internal for the link icon. `lsantos.dev` is the only one confirmed.

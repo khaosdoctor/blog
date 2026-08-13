@@ -50,9 +50,10 @@ const publishedCount = parts.filter(isPublished).length
                 <strong>{part.data.title}</strong> <span class="marker">({t(locale, 'youAreHere')})</span>
               </>
             ) : !isPublished(part) ? (
-              <>
-                {part.data.title} <span class="marker">({t(locale, 'notWrittenYet')})</span>
-              </>
+              // No marker text: the colour says it, the same way an unwritten
+              // wikilink does, and the title attribute carries the words for
+              // anyone who cannot see the colour.
+              <span title={t(locale, 'notWrittenYet')}>{part.data.title}</span>
             ) : (
               <a href={urlOf(part)}>{part.data.title}</a>
             )}
@@ -87,8 +88,9 @@ const publishedCount = parts.filter(isPublished).length
     margin-block-start: 0.25rem;
   }
 
+  /* Wikipedia's red link, the same token an unwritten wikilink uses. */
   .unwritten {
-    color: var(--muted);
+    color: var(--link-unwritten);
   }
 
   .marker {

@@ -1,0 +1,44 @@
+---
+// Reader-facing code-block theme picker, the same shape as HoverPreviews.astro:
+// a plain <select> does nothing on its own (there is no server to post it to),
+// so it stays hidden until code-theme.ts confirms it can run and wires it up.
+// Option labels travel through data attributes for the same reason: that script
+// has no access to t().
+//
+// This only renders the picker. Preventing a flash of the wrong theme needs the
+// blocking script in BaseLayout's <head>, which runs before any stylesheet.
+//
+// The four theme names are not translated: they are the themes' own names, the
+// way a font name is not translated either.
+import { t, type Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+---
+
+<p
+  class="ct-settings"
+  hidden
+  data-label={t(locale, 'codeTheme')}
+  data-auto={t(locale, 'codeThemeAuto')}
+  data-github-light="GitHub light"
+  data-github-dark="GitHub dark"
+  data-monokai="Monokai"
+  data-solarized-dark="Solarized dark"
+>
+  <label for="ct-theme"></label>
+  <select id="ct-theme">
+    <option value="auto"></option>
+    <option value="github-light"></option>
+    <option value="github-dark"></option>
+    <option value="monokai"></option>
+    <option value="solarized-dark"></option>
+  </select>
+</p>
+
+<script>
+  import '../scripts/code-theme'
+</script>

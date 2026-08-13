@@ -23,8 +23,9 @@
  *   prose right before this tag. That text is not wrapped in anything here,
  *   so the highlight is applied to a Range by
  *   src/components/FootnoteSidenotes.astro, not by this component's markup.
- * - On wide viewports the note text floats into the right margin, a thick
- *   inline-start border only, always visible. On narrow viewports it
+ * - On wide viewports the note text floats into the right margin, the
+ *   double-ANSI frame (thick solid inline-start edge, thin double rule on
+ *   the other three sides), always visible. On narrow viewports it
  *   collapses to a tap/click-to-reveal popover, toggled by a checkbox (zero
  *   JS either way). Following a link to this note's own anchor rings the
  *   marker, it never forces the popover open (nothing on this page should

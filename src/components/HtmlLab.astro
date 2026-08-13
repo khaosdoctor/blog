@@ -2,19 +2,26 @@
 import { localeFromPath, t } from '../i18n/ui'
 
 /**
- * A self-contained HTML page embedded in a post.
+ * A self-contained HTML page embedded in a post, with its source one click away.
  *
- * For a demo that is a whole page with its own scripts and styles, which is what
- * most of the old ones are. Put the page in `public/labs/<name>/index.html` and
- * write `<HtmlLab name="the-name" title="what it does" />` in the post.
+ * For a demo that is a whole page with its own script and style, which is what
+ * most of the old ones are. The file lives next to the post it belongs to and is
+ * imported as a string:
  *
- * An iframe rather than inlining the markup, deliberately: a pasted-in demo's CSS
- * would inherit and then fight the post's own styles, and its script would share
- * the page's globals. Same origin, so `frame-src 'self'` covers it, and the
- * `sandbox` attribute still keeps it from navigating the parent or opening popups.
+ *   import demo from './components/counter.html?raw'
+ *
+ *   <HtmlLab html={demo} name="counter.html" title="a counter in plain HTML" />
+ *
+ * `srcdoc` rather than a URL: the page stays in the post's own folder instead of
+ * having to be copied into public/, and there is still an iframe boundary, so the
+ * demo's CSS cannot inherit from the post and its script cannot see the post's
+ * globals. `sandbox` without `allow-same-origin` puts it in an opaque origin, so
+ * it cannot reach this site's storage or cookies either.
  */
 interface Props {
-  /** Folder under public/labs/. */
+  /** The page source, imported with Vite's `?raw`. */
+  html: string
+  /** Filename, shown on the source toggle. */
   name: string
   /** What the demo is, for the iframe's accessible name. Required, not decorative. */
   title: string
@@ -22,33 +29,62 @@ interface Props {
   height?: string
 }
 
-const { name, title, height = '24rem' } = Astro.props
+const { html, name, title, height = '18rem' } = Astro.props
 const locale = localeFromPath(Astro.url.pathname)
 ---
 
-<figure class="lab" style={`--lab-height: ${height}`}>
-  <iframe
-    src={`/labs/${name}/`}
-    title={title}
-    loading="lazy"
-    sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-  <figcaption>
-    {title} <a href={`/labs/${name}/`} rel="noopener">{t(locale, 'openInNewTab')}</a>
-  </figcaption>
+<figure class="lab-demo" style={`--lab-height: ${height}`}>
+  <iframe srcdoc={html} title={title} loading="lazy" sandbox="allow-scripts"></iframe>
+  <details>
+    <summary>{t(locale, 'showSource')} <code>{name}</code></summary>
+    <pre><code>{html.trim()}</code></pre>
+  </details>
 </figure>
 
 <style>
-  .lab {
+  .lab-demo {
     margin-block: 2rem;
     margin-inline: 0;
+    border: var(--border) double var(--rule);
+    border-inline-start: var(--border-card-edge) solid var(--rule);
+    border-radius: var(--radius);
   }
 
-  .lab iframe {
+  iframe {
     display: block;
     inline-size: 100%;
     block-size: var(--lab-height);
-    border: var(--border) solid var(--rule);
-    border-radius: var(--radius);
+    border: 0;
     background: var(--bg);
+  }
+
+  details {
+    border-block-start: var(--border) solid var(--rule);
+  }
+
+  summary {
+    padding: 0.4rem 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  summary:hover {
+    color: var(--accent);
+  }
+
+  summary code {
+    text-transform: none;
+  }
+
+  details pre {
+    margin: 0;
+    border: 0;
+    border-block-start: var(--border) solid var(--rule);
+    border-radius: 0;
+    font-size: 0.78rem;
   }
 </style>
