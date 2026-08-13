@@ -1,9 +1,13 @@
 /*
- * A section break, not a full-width line. A short bar centred in the column,
- * fading out at both ends, with a glow behind it.
+ * A section break, not a full-width line: a short dotted bar centred in the
+ * column, fading out at both ends. No glow.
  *
- * The footnotes section reuses these same tokens for its own separator, so the
- * two never drift apart. See src/styles/footnotes.css.
+ * The dots are a repeating gradient rather than `border-style: dotted`, which
+ * gives no control over dot size or spacing, and the fade is a mask so it works
+ * the same over any background.
+ *
+ * The footnotes section reuses these tokens for its own separator, so the two
+ * never drift apart. See src/styles/footnotes.css.
  */
 .prose hr {
   inline-size: var(--rule-length);
@@ -11,56 +15,69 @@
   margin-block: 3rem;
   margin-inline: auto;
   border: 0;
-  background: linear-gradient(to right, transparent, var(--rule-core), transparent);
-  box-shadow: 0 0 var(--rule-glow-blur) var(--rule-glow);
+  background: repeating-linear-gradient(
+    to right,
+    var(--rule-core) 0 var(--rule-dot),
+    transparent var(--rule-dot) calc(var(--rule-dot) + var(--rule-gap))
+  );
+  mask: linear-gradient(to right, transparent, black 35%, black 65%, transparent);
 }
 
 /*
- * Lengths to choose from, rendered one under another on the lab page. The winner
- * becomes --rule-length in theme.css and the rest of this block goes.
+ * Colours to choose from, rendered one under another on the lab page. The winner
+ * becomes --rule-core in theme.css and everything below here goes.
  */
-[data-v='rule-30'] hr {
-  inline-size: 30px;
+[data-v='rule-fg-80'] hr {
+  --rule-core: color-mix(in oklab, var(--fg) 80%, transparent);
 }
 
-[data-v='rule-60'] hr {
-  inline-size: 60px;
+[data-v='rule-fg-60'] hr {
+  --rule-core: color-mix(in oklab, var(--fg) 60%, transparent);
 }
 
-[data-v='rule-100'] hr {
-  inline-size: 100px;
+[data-v='rule-fg-40'] hr {
+  --rule-core: color-mix(in oklab, var(--fg) 40%, transparent);
 }
 
-[data-v='rule-150'] hr {
-  inline-size: 150px;
+[data-v='rule-fg-100'] hr {
+  --rule-core: var(--fg);
 }
 
-[data-v='rule-200'] hr {
-  inline-size: 200px;
+[data-v='rule-muted'] hr {
+  --rule-core: var(--muted);
 }
 
-[data-v='rule-250'] hr {
-  inline-size: 250px;
+[data-v='rule-green'] hr {
+  --rule-core: color-mix(in oklab, var(--brand-green) 80%, transparent);
 }
 
-/* Same length, different weight and glow strength, for the one that wins. */
-[data-v='rule-thin'] hr {
-  block-size: 1px;
-  box-shadow: 0 0 3px var(--rule-glow);
+[data-v='rule-red'] hr {
+  --rule-core: color-mix(in oklab, var(--brand-red) 80%, transparent);
 }
 
-[data-v='rule-thick'] hr {
-  block-size: 4px;
-  box-shadow: 0 0 12px var(--rule-glow);
+[data-v='rule-yellow'] hr {
+  --rule-core: color-mix(in oklab, var(--brand-yellow) 80%, transparent);
 }
 
-[data-v='rule-dotted'] hr {
-  block-size: 3px;
-  background: repeating-linear-gradient(
-      to right,
-      var(--rule-core) 0 3px,
-      transparent 3px 7px
-    )
-    center / 100% 100% no-repeat;
-  mask: linear-gradient(to right, transparent, black 30%, black 70%, transparent);
+[data-v='rule-blue'] hr {
+  --rule-core: color-mix(in oklab, var(--brand-blue) 80%, transparent);
+}
+
+[data-v='rule-purple'] hr {
+  --rule-core: color-mix(in oklab, var(--brand-purple) 80%, transparent);
+}
+
+/* Same colour, different dot rhythm. */
+[data-v='rule-tight'] hr {
+  --rule-dot: 2px;
+  --rule-gap: 2px;
+}
+
+[data-v='rule-loose'] hr {
+  --rule-dot: 2px;
+  --rule-gap: 8px;
+}
+
+[data-v='rule-solid'] hr {
+  background: var(--rule-core);
 }

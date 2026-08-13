@@ -7,8 +7,11 @@
  * rehype-katex leaves the original LaTeX behind inside
  * <annotation encoding="application/x-tex">, deep in the MathML half of its
  * own output. That is read once, at build time, and turned into a small
- * ASCII rendering written to a data attribute, so the click handler in
- * MathCopy.astro does zero conversion work at runtime.
+ * plain-text rendering written to a data attribute, so the click handler in
+ * MathCopy.astro does zero conversion work at runtime. Symbols that have a
+ * real Unicode character (Greek letters, ×, ≡, ...) get that character
+ * rather than a spelled-out word, since the paste target is Slack and chat,
+ * which are UTF-8 everywhere.
  *
  * latexToAscii only understands the LaTeX this blog actually writes (see
  * the self-check at the bottom, sourced from content/blog/lab/index.mdx and
@@ -16,52 +19,58 @@
  * does not recognise is left exactly as written rather than mangled.
  */
 
+// Real Unicode Greek letters, not their spelled-out names: \lambda is λ, not
+// the seven characters "lambda". The paste target is Slack and chat, both
+// UTF-8 everywhere, so there is no reason to fall back to a word.
 const GREEK = {
-  alpha: 'alpha',
-  beta: 'beta',
-  gamma: 'gamma',
-  delta: 'delta',
-  epsilon: 'epsilon',
-  zeta: 'zeta',
-  eta: 'eta',
-  theta: 'theta',
-  iota: 'iota',
-  kappa: 'kappa',
-  lambda: 'lambda',
-  mu: 'mu',
-  nu: 'nu',
-  xi: 'xi',
-  omicron: 'omicron',
-  pi: 'pi',
-  rho: 'rho',
-  sigma: 'sigma',
-  tau: 'tau',
-  upsilon: 'upsilon',
-  phi: 'phi',
-  chi: 'chi',
-  psi: 'psi',
-  omega: 'omega',
-  Gamma: 'Gamma',
-  Delta: 'Delta',
-  Theta: 'Theta',
-  Lambda: 'Lambda',
-  Xi: 'Xi',
-  Pi: 'Pi',
-  Sigma: 'Sigma',
-  Upsilon: 'Upsilon',
-  Phi: 'Phi',
-  Psi: 'Psi',
-  Omega: 'Omega',
+  alpha: 'α',
+  beta: 'β',
+  gamma: 'γ',
+  delta: 'δ',
+  epsilon: 'ε',
+  zeta: 'ζ',
+  eta: 'η',
+  theta: 'θ',
+  iota: 'ι',
+  kappa: 'κ',
+  lambda: 'λ',
+  mu: 'μ',
+  nu: 'ν',
+  xi: 'ξ',
+  omicron: 'ο',
+  pi: 'π',
+  rho: 'ρ',
+  sigma: 'σ',
+  tau: 'τ',
+  upsilon: 'υ',
+  phi: 'φ',
+  chi: 'χ',
+  psi: 'ψ',
+  omega: 'ω',
+  Gamma: 'Γ',
+  Delta: 'Δ',
+  Theta: 'Θ',
+  Lambda: 'Λ',
+  Xi: 'Ξ',
+  Pi: 'Π',
+  Sigma: 'Σ',
+  Upsilon: 'Υ',
+  Phi: 'Φ',
+  Psi: 'Ψ',
+  Omega: 'Ω',
 }
 
-// Commands that carry no ASCII meaning of their own: \left and \right only
-// size a delimiter that is already there, and the three spacing macros only
-// nudge KaTeX's layout.
+// Commands that carry no plain-text meaning of their own: \left and \right
+// only size a delimiter that is already there, and the three spacing macros
+// only nudge KaTeX's layout.
 const DROPPED = new Set(['left', 'right', ',', ';', '!', ' '])
 
-// Commands with a direct plain-text equivalent, applied with padding so they
-// never fuse with whatever character sits on either side of them.
-const SYMBOLS = { times: '*', cdot: '*', equiv: '==', mid: '|' }
+// Commands with a direct, real-character equivalent, substituted in place
+// with no added spacing: whatever separation the source LaTeX had (or did
+// not have) around the command is preserved as-is. \mid already produces
+// the real "|"; \frac, \pmod/\mod, ^, and _ get their own text-shaped
+// handling below because there is no single character standing in for them.
+const SYMBOLS = { times: '×', cdot: '·', equiv: '≡', mid: '|', therefore: '∴' }
 
 /** Reads a brace-delimited group starting at `str[start] === '{'`. */
 function readGroup(str, start) {
@@ -163,8 +172,14 @@ function convert(str) {
       continue
     }
 
+    // A single character never needs padding to avoid fusing: unlike a
+    // spelled-out word, "λ" next to "n" is not ambiguous. Any separator the
+    // source actually had (a literal space in the LaTeX) survives on its
+    // own, copied through by the ch !== '\\' branch above; inventing one
+    // here would put whitespace into output where the source had none, e.g.
+    // turning \lambda(n) into "λ (n)" instead of "λ(n)".
     if (name in SYMBOLS) {
-      out += ` ${SYMBOLS[name]} `
+      out += SYMBOLS[name]
       i = next
       continue
     }
@@ -175,14 +190,8 @@ function convert(str) {
       continue
     }
 
-    if (name === 'therefore') {
-      out += ' therefore '
-      i = next
-      continue
-    }
-
     if (name in GREEK) {
-      out += ` ${GREEK[name]} `
+      out += GREEK[name]
       i = next
       continue
     }
@@ -279,13 +288,20 @@ function selfCheck() {
     ['x^{n}', 'x^n', 'braced superscript'],
     ['x^n', 'x^n', 'bare superscript'],
     ['x_{i}', 'x_i', 'braced subscript'],
-    ['a \\times b', 'a * b', 'times'],
-    ['a \\cdot b', 'a * b', 'cdot'],
-    ['a \\equiv b', 'a == b', 'equiv'],
+    ['a \\times b', 'a × b', 'times'],
+    ['2 \\times 3', '2 × 3', 'times keeps the source spacing on both sides'],
+    ['a \\cdot b', 'a · b', 'cdot'],
+    ['a \\equiv b', 'a ≡ b', 'equiv'],
+    ['a \\equiv b \\pmod{n}', 'a ≡ b mod n', 'equiv adjacent to pmod invents no extra space'],
+    ['a \\therefore b', 'a ∴ b', 'therefore'],
     ['a \\pmod{n}', 'a mod n', 'pmod'],
     ['a \\mid b', 'a | b', 'mid'],
     ['a | b', 'a | b', 'bare pipe passes through'],
-    ['\\lambda(n)', 'lambda (n)', 'greek letter'],
+    ['\\lambda(n)', 'λ(n)', 'greek letter directly against a delimiter: no invented space'],
+    ['\\lambda n', 'λ n', 'greek letter followed by a real source space: space preserved'],
+    ['\\Lambda(n)', 'Λ(n)', 'greek letter, uppercase (case distinction from lowercase)'],
+    ['\\alpha', 'α', 'greek letter alpha'],
+    ['\\Sigma', 'Σ', 'greek letter Sigma'],
     ['\\left(a\\right)', '(a)', 'left/right dropped'],
     ['a\\,b\\;c\\!d', 'abcd', 'spacing macros dropped'],
     ['{a}', 'a', 'transparent grouping braces removed'],
@@ -295,11 +311,16 @@ function selfCheck() {
     // build; the transform is checked against them anyway).
     ['C = b^x\\mod{m}', 'C = b^x mod m', 'RSA: modular exponentiation'],
     ['encriptada = plano^e \\mod n', 'encriptada = plano^e mod n', 'RSA: encryption formula'],
-    ['d \\equiv e^{-1}(\\mod(\\lambda{n}))', 'd == e^-1(mod (lambda n))', 'RSA: modular inverse'],
+    ['d \\equiv e^{-1}(\\mod(\\lambda{n}))', 'd ≡ e^-1(mod (λn))', 'RSA: modular inverse'],
+    [
+      '54 = 2\\times27 \\therefore 216 = 2\\times2\\times2\\times27',
+      '54 = 2×27 ∴ 216 = 2×2×2×27',
+      'RSA: factorization, times and therefore together, no source spacing to invent',
+    ],
     // content/blog/lab/index.mdx, the one real $$ block on the site today.
     [
       '\\lambda(n) = \\frac{|(p-1)(q-1)|}{mdc((p-1),(q-1))}',
-      'lambda (n) = (|(p-1)(q-1)|)/(mdc((p-1),(q-1)))',
+      'λ(n) = (|(p-1)(q-1)|)/(mdc((p-1),(q-1)))',
       'lab page: Carmichael function',
     ],
   ]

@@ -1,28 +1,73 @@
 ---
 /**
- * <FootnoteSidenotes /> — the one piece of this feature CSS cannot do alone.
+ * <FootnoteSidenotes /> — the pieces of this feature CSS cannot do alone.
  *
- * Hovering or focusing a Sidenote or MarginNote (src/components/Sidenote.astro,
- * src/components/MarginNote.astro) should highlight the text it is attached
- * to, but that text is not wrapped in anything: it is whatever plain prose
- * sits right before the tag in the paragraph. There is no element for a
- * `:hover` rule to select, and short of giving every note a second,
- * author-written wrapper around "just the words this refers to" (a bigger
- * surface than either needs), CSS alone cannot reach it.
+ * Two independent, feature-detected behaviours, neither depending on the
+ * other working:
  *
- * The CSS Custom Highlight API can: it paints an arbitrary Range without
- * touching the DOM, so the text stays exactly as authored. This script's
- * only job is to build that Range on hover/focus and hand it to
- * `CSS.highlights`; the paint itself is `::highlight(note-bound)` in
- * src/styles/sidenotes.css.
+ * 1. Hovering or focusing a Sidenote or MarginNote (src/components/Sidenote.astro,
+ *    src/components/MarginNote.astro) should highlight the text it is attached
+ *    to, but that text is not wrapped in anything: it is whatever plain prose
+ *    sits right before the tag in the paragraph. There is no element for a
+ *    `:hover` rule to select, and short of giving every note a second,
+ *    author-written wrapper around "just the words this refers to" (a bigger
+ *    surface than either needs), CSS alone cannot reach it.
  *
- * One delegated listener pair on the document, not one per note: this
- * runs on every page whether that page has zero notes or a dozen.
- * Feature-detected and wrapped, so a browser without the API, or any
- * unexpected DOM shape, leaves the note working exactly as it does with CSS
- * off, minus the tint, never a broken page.
+ *    The CSS Custom Highlight API can: it paints an arbitrary Range without
+ *    touching the DOM, so the text stays exactly as authored. This script's
+ *    only job is to build that Range on hover/focus and hand it to
+ *    `CSS.highlights`; the paint itself is `::highlight(note-bound)` in
+ *    src/styles/sidenotes.css.
+ *
+ *    One delegated listener pair on the document, not one per note: this
+ *    runs on every page whether that page has zero notes or a dozen.
+ *    Feature-detected and wrapped, so a browser without the API, or any
+ *    unexpected DOM shape, leaves the note working exactly as it does with CSS
+ *    off, minus the tint, never a broken page.
+ *
+ * 2. Each note's `.note-copy-link` (a `<button>`, not a link) copies that
+ *    note's own anchor URL to the clipboard without navigating anywhere.
+ *    BaseLayout.astro already has a delegated handler for exactly this shape
+ *    of interaction, `a[data-copy-link]`, but it exists to let the browser
+ *    follow the link after copying, which is precisely the behaviour a note's
+ *    reference number must not have (round 1 shipped that as an `<a>` and it
+ *    jumped the page). So this is its own small handler, same shape as
+ *    BaseLayout's (and src/components/MathCopy.astro's) but `preventDefault`
+ *    is moot on a `<button>` with no default action to prevent, and it
+ *    reuses the exact `.toast` confirmation and 2-second removal both of
+ *    those already use, so the site still has exactly one copy-confirmation
+ *    pattern rather than a second one growing here.
  */
+import { localeFromPath, t } from '../i18n/ui'
+
+const locale = localeFromPath(Astro.url.pathname)
 ---
+
+<script is:inline define:vars={{ copiedLabel: t(locale, 'linkCopied') }}>
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.note-copy-link')
+    if (button === null) return
+
+    const anchor = button.dataset.copyAnchor
+    if (!anchor) return
+
+    try {
+      await navigator.clipboard.writeText(location.href.split('#')[0] + anchor)
+    } catch {
+      // No clipboard permission, or an insecure origin. Silent: there is
+      // nothing else for this button to do.
+      return
+    }
+
+    document.querySelector('.toast')?.remove()
+    const toast = document.createElement('div')
+    toast.className = 'toast'
+    toast.setAttribute('role', 'status')
+    toast.textContent = copiedLabel
+    document.body.append(toast)
+    setTimeout(() => toast.remove(), 2000)
+  })
+</script>
 
 <script is:inline>
   ;(function () {

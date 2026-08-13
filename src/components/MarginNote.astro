@@ -11,9 +11,12 @@
  * - On narrow viewports there is no margin to show it in, so a small dot
  *   becomes the tap/click target for a popover (checkbox hack, zero JS).
  * - Each instance also gets a build-time sequential id (`marginnote-1`, ...)
- *   for its own permalink: a copy-link icon in the note's own top-right
- *   corner on hover/focus, click to copy via BaseLayout's existing delegated
- *   handler. Lives inside `.note-text`, see src/styles/sidenotes.css.
+ *   for its own permalink: a normal-sized copy-link button in the note's own
+ *   top-left corner on hover/focus. Clicking it copies the anchor URL and
+ *   does not navigate, handled by FootnoteSidenotes.astro's own click
+ *   listener, not BaseLayout's delegated `a[data-copy-link]` handler (that
+ *   one deliberately lets the browser follow the link). Lives inside
+ *   `.note-text`, see src/styles/sidenotes.css.
  * - Hovering or focusing the note highlights the text it is attached to,
  *   done by src/components/FootnoteSidenotes.astro via the CSS Custom
  *   Highlight API, since that text is not wrapped in anything here.
@@ -45,10 +48,10 @@ const toggleId = `${anchorId}-toggle`
   <input type="checkbox" id={toggleId} class="note-toggle" aria-label={t(locale, 'showMarginNote')} />
   <label for={toggleId} class="note-marker" style={`anchor-name: --${toggleId}`}></label>
   <span class="note-text" style={`position-anchor: --${toggleId}`}
-    ><slot /><a
-      href={`#${anchorId}`}
+    ><slot /><button
+      type="button"
       class="note-copy-link"
-      data-copy-link
-      aria-label="link to this note"></a></span
+      data-copy-anchor={`#${anchorId}`}
+      aria-label="link to this note"></button></span
   >
 </span>

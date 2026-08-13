@@ -23,6 +23,15 @@
   /* How much the callout's own colour washes into its title band. */
   --cc-callout-tint: 14%;
 
+  /*
+   * The house-style frame: a double rule on three edges, a thick solid bar on
+   * the left. `border-style: double` collapses to a single line under 3px, and
+   * 4px is the first width that splits cleanly into line-gap-line, so the thin
+   * edges are thicker here than a 1px border would be. Same value as the quote
+   * cards use, see src/styles/variants/quotes.css.
+   */
+  --cc-frame-width: 4px;
+
   /* Highlighter marker: a translucent wash over the code background, not a
    * solid fill, so the underlying syntax colours still show through. Faint on
    * purpose: at 40% the yellow buried the code it was meant to point at. */
@@ -53,8 +62,12 @@
   );
 
   padding: 0;
-  border: var(--border) solid var(--callout-color);
-  /* The left edge carries the type, so it gets the weight. */
+  /* House style: double rule on three edges, thick solid bar on the left, which
+   * is the edge that carries the type. */
+  border-style: double;
+  border-color: var(--callout-color);
+  border-width: var(--cc-frame-width);
+  border-inline-start-style: solid;
   border-inline-start-width: var(--border-card-edge);
   border-radius: var(--radius);
   background: none;
