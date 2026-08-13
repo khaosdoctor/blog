@@ -1,0 +1,404 @@
+---
+title: "Using HarperDB with Kubernetes"
+pubDate: 2022-06-30T14:45:00.000Z
+updatedDate: 2026-07-16T16:08:07.000Z
+lang: en
+slug: "using-harperdb-with-kubernetes"
+category: "infra"
+tags: ["kubernetes", "harperdb", "databases", "containers", "docker"]
+description: "Ready to learn how to install and manage an awesome database on Kubernetes? Let me introduce you to HarperDB and show how we can distribute databases across clusters."
+seoDescription: "Ready to learn how to install and manage an awesome database on Kubernetes? Let's see HarperDB and K8S together!"
+machineTranslated: true
+draft: false
+---
+## Summary
+
+-   [Summary](#sum%C3%A1rio)
+-   [HarperDB](#harperdb)
+-   [Kubernetes e Databases](#kubernetes-e-databases)
+-   [Criando containers com o HarperDB](#criando-containers-com-o-harperdb)
+    -   [Migrando para o Kubernetes](#migrando-para-o-kubernetes)
+        -   [Criando o cluster Kubernetes](#criando-o-cluster-kubernetes)
+    -   [Criando os manifestos](#criando-os-manifestos)
+    -   [Acessando o HarperDB](#acessando-o-harperdb)
+-   [Conclusão](#conclus%C3%A3o)
+
+When working with any kind of application, one of the biggest challenges is making it reusable and sustainable. That's why we tend to pick containers as the tool to get around this problem.
+
+Containers are simple to build and easy to maintain. A while back I [wrote this article on FreeCodeCamp](https://www.freecodecamp.org/news/what-is-docker-used-for-a-docker-container-tutorial-for-beginners/) that explains a lot about what containers are and why we should use them.
+
+Now, while I was coding an app recently, I ran into another problem: **How can I run my database, using HarperDB, inside a container? And how can I install this database on Kubernetes?**
+
+After some brainstorming, I found a solution, and that's what I'm going to share with you here!
+
+But first, what is [HarperDB](https://harperdb.io/)?
+
+## HarperDB
+
+[HarperDB](https://harperdb.io/) is a general-purpose, multi-paradigm database designed to be fast and easy to use. It wraps SQL and NoSQL functionality, data aggregation like CSV, and several helper tools such as Math.js for working with math, GeoJSON support for working with geographic data, and moment.js for working with dates.
+
+Okay, but what's the big deal? Other databases already do this. The thing is that HarperDB stores all of this as a unified data structure and serves it through its own storage algorithm that's **genuinely** fast for every different data type.
+
+On top of that, HarperDB was also designed to be a complete solution for building not just the database itself, but also a full API that talks to it through [Custom Functions](https://harperdb.io/docs/custom-functions/) (which will show up in another article), websockets, and the cherry on top: it doesn't need a specific driver to work. It exposes a standard REST API that any language can use, so you can query data and run operations with plain HTTP calls.
+
+Here's a quick diagram of how HarperDB works, taken straight from [HarperDB's site](https://harperdb.io/product):
+
+![HarperDB Architecture](https://harperdb.io/app/webp-express/webp-images/doc-root/app/uploads/2021/09/stack.png.webp)
+
+Long story short, I wanted to try it out and I wasn't disappointed! Now, how do we install this database in a Kubernetes environment?
+
+## Kubernetes and Databases
+
+Normally, when we're dealing with databases, we tend to install them on a separate computer or VM and connect our app to it. While that's a decent option to keep things easy to manage, it's not the best option for making the database faster, distributable, highly available, or reliable.
+
+To get there, we have to spread the database across several machines using a cluster approach, which means we have a main control layer (called the **control plane**), the main connection point for a database, and several other instances of that same database across which the control plane will distribute the load. These instances are called **nodes**.
+
+Some nodes can be read-only, others write-only, some can be both. This lets us guarantee we have the right permissions for each node, and it also lets us guarantee there's no data loss or corruption. Whenever any data is inserted, deleted, or changed in the database, these nodes publish a message so other nodes make the same change, keeping the data always consistent. It does take a bit of time for that data to replicate when we have a big infrastructure though, and that's what we call [eventual consistency (even though "eventual" isn't exactly the best word for it)](https://en.wikipedia.org/wiki/Eventual_consistency).
+
+In this article, I'm going to create a single HarperDB instance on Kubernetes, but I plan to show how to build a cluster of HarperDB instances in future articles.
+
+## Building HarperDB containers
+
+Most databases already have a ready-made container approach, and Harper is no different. You can find the containerized version of HarperDB [on their Docker Hub page](https://hub.docker.com/r/harperdb/harperdb), and it's very simple to install and run. Before putting the database on Kubernetes, let's make sure we can run it locally with Docker.
+
+> If you don't have Docker installed, you can head to the [Docker site](https://www.docker.com/get-started/) and download it.
+
+The simplest command to run it is:
+
+```bash
+docker run -d \
+  -e HDB_ADMIN_USERNAME=user \
+  -e HDB_ADMIN_PASSWORD=password \
+  -p 9925:9925 \
+  harperdb/harperdb
+```
+
+HarperDB needs port 9925 open so we can connect it to [HarperDB Studio](https://studio.harperdb.io/), which lets us manage the database directly from the browser.
+
+We also need to remember that containers are _ephemeral_, meaning they **don't** persist data once you stop them. That's why we need a volume to persist the data. For that, we can add the `-v` flag to our Docker command, pointing to the `/opt/harperdb/hdb` directory inside the container:
+
+```bash
+docker run -d \
+  -e HDB_ADMIN_USERNAME=user \
+  -e HDB_ADMIN_PASSWORD=password \
+  -p 9925:9925 \
+  -v $PWD/.hdb:/opt/harperdb/hdb \
+  harperdb/harperdb
+```
+
+In this command we're telling Docker to mount the `/opt/harperdb/hdb` directory into a local folder called `/.hdb`, so we can persist the data. Once the command runs, we can do `ls -la` on the `/.hdb` directory to check that it's actually mounted:
+
+![The mounted Harper directory](./2022-06-26-15-35-49-1.png)
+
+Now let's head to [HarperDB Studio](https://studio.harperdb.io/) and log in. If you don't have an account yet, go to [the sign-up page](https://studio.harperdb.io/sign-up) and create one, it's free. Then create an organization for yourself and you should land on this page:
+
+![HarperDB Studio landing page](./HarperDB-Studio.png)
+
+Let's create a local instance by clicking the **Register User-installed Instance** button:
+
+![HDB Studio](./2022-06-26-15-40-42.png)
+
+Let's fill in the instance details and then click the **instance details** button:
+
+![HDB Studio registering an instance](./2022-06-26-15-41-39.png)
+
+Next, we pick the free tier and click Next:
+
+![HDB Studio instance details](./2022-06-26-15-42-07.png)
+
+Confirm the terms of service and **Add Instance**. You should end up with a local instance of the database:
+
+![HDB Studio final instance created](./2022-06-26-15-43-01.png)
+
+If you click on it, you should get access to all your schemas and tables. So that's what we need to do next.
+
+### Moving to Kubernetes
+
+First, let's lay out a plan for what we need to do:
+
+1.  Create a Kubernetes cluster
+2.  Create a namespace called `database` so we can keep our resources organized
+3.  Create a `deployment` for HarperDB so we can install the database on the cluster
+4.  Create a persistent volume for the `/opt/harperdb/hdb` directory
+5.  Create a service for HarperDB so we can do a direct _port-forward_ to our browser
+
+Since we won't be exposing the database to the Internet, we won't create an Ingress rule for it. We'll use port-forwarding to connect to it from inside the cluster.
+
+#### Creating the Kubernetes cluster
+
+There are several ways to create a new Kubernetes cluster, but the easiest and fastest way is to use a managed cluster. In this tutorial, we'll use Azure's AKS, but you can use any other provider.
+
+The first thing to do is log in to your Azure account on the [Azure Portal](https://portal.azure.com/). If you don't have an account, just create one on [their site](https://azure.microsoft.com).
+
+There are two ways to create a managed AKS cluster: one is through the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli), the other is through the portal itself, which is the way I'll use in this tutorial.
+
+Search for "Kubernetes" in the Azure Portal and click the **Kubernetes Services** result:
+
+![Azure-search-k8s](./Azure-search-k8s.png)
+
+Then click the **create** dropdown and create a new cluster:
+
+![Create-a-new-cluster](./Create-a-new-cluster.png)
+
+Let's create a new resource group called `harperdb-aks`. We'll change the preset to development to save money, since we're not going to use it for production. Then name the cluster `harperdb` and pick the closest region:
+
+![AKS-Create-step-1](./AKS-Create-step-1.png)
+
+Let's pick the **B2s** instance in the instance selector and remove _cluster autoscaling_, because we're going to use a fixed-size cluster with a fixed number of instances, in this case 1 node:
+
+![AKS-Create-step-2](./AKS-Create-step-2.png)
+
+Click the blue **Review+Create** button to create the cluster:
+
+![AKS-Create-step-3](./AKS-Create-step-3.png)
+
+The process will take a while to finish, so let's wait until it's done.
+
+> While we wait, take the time to install and log in to the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) if you haven't already, because we'll need it to connect to the cluster.
+
+Once the process finishes, go to your terminal, start your `az cli`, and install the `kubectl` tool with `az aks install-cli`. After that, we'll download the credentials into our `kubeconfig` file, so we can connect to the cluster using `az aks get-credentials -n harperdb -g harperdb-aks --admin`.
+
+If everything went well, you'll be able to connect to the cluster with `kubectl get nodes` and get back a response with a single node like this:
+
+```bash
+NAME                                STATUS   ROLES   AGE    VERSION
+aks-agentpool-17395436-vmss000000   Ready    agent   2m6s   v1.22.6
+```
+
+Let's create our namespace with `kubectl create namespace database`, and now we can create our manifests.
+
+### Creating the manifests
+
+To start, let's create a deployment for HarperDB so we can install the database on the cluster. Let's create a new file called `manifests.yaml` where I'll write all the necessary declarations. In this file, we start with the deployment declaration:
+
+```yaml
+# Deployment para o HarperDB
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harperdb
+  namespace: database # Namespace que a gente criou antes
+spec:
+  selector:
+    matchLabels:
+      app: harperdb # juntamos todos os pods com o mesmo label
+  template:
+    metadata:
+      labels:
+        app: harperdb # criamos os pods com a label que a gente quer agrupar
+    spec:
+      containers:
+      - name: harperdb-container
+        image: harperdb/harperdb # mesma imagem do dockerhub
+        env:
+          - name: HDB_ADMIN_USERNAME
+            value: harperdb # fixando username e password, em produção isso seria um secret
+          - name: HDB_ADMIN_PASSWORD
+            value: harperdb
+        resources:
+          limits:
+            memory: "512Mi" # limitando o uso de memória
+            cpu: "128m" # limitando o uso de cpu
+        ports:
+        - containerPort: 9925 # expondo a porta 9925 para o cluster
+          name: hdb-api # nomeando a porta
+        volumeMounts: # criando o ponto de mount do volume
+          - mountPath: "/opt/harperdb" # escolhendo o local pra montar o volume
+            name: hdb-data # referenciando o volume
+        livenessProbe: # criando um ping para detectar o o status de ativação
+          tcpSocket: # vamos pingar a porta 9925
+            port: 9925
+          initialDelaySeconds: 30 # vai começar depois de 30s do início do pod
+          periodSeconds: 10 # depois vai ser checado a cada 10s
+        readinessProbe: # ping para testar se o pod está pronto
+          tcpSocket:
+            port: 9925
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+        - name:  hdb-data # esse é o volume que vamos montar
+          persistentVolumeClaim: # referencia a um claim
+            claimName: harperdb-data # esse é o nome do claim
+```
+
+Before moving on, I need to talk a bit about volumes. Since we're dealing with managed volumes on Azure, we don't need to (and can't) create a volume inside the host or inside the pod, because they'll get deleted when we delete the resources. What we want to do is delegate the creation process to Azure through `StorageClasses` and `PersistentVolumeClaims`.
+
+> The normal process would be to create a `PersistentVolume` and a `PersistentVolumeClaim` for that volume
+
+The idea is that we declare that we want to grab a certain amount of space from Azure for the volume, and then we mount it at the path we want. Azure will pick up that request through a Kubernetes operator that manages the CSI (**C**ontainer **S**torage **I**nterface) plugin and creates the volume in our Azure account.
+
+By default, Azure has two storage types: Azure File and Azure Disk. We'll use Azure File storage because it's easier to view the files in the Azure Portal, and also because clustering is only supported on Azure File storage.
+
+Notice also that we're mounting the volume not at `/opt/harperdb/hdb` but at `/opt/harperdb`. That's because if we mount the volume at the innermost directory, we'll run into permission issues, since the outer directory belongs to the user running the container while the inner directory is created by Azure.
+
+The other important detail is that HDB takes a bit of time to start up, so we're setting up a `livenessProbe` and a `readinessProbe` to check whether the pod is ready. These probes will check the connection on TCP port 9925, and once that port is open, the service will be online.
+
+Next, we'll add the volume declaration:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harperdb-data
+  namespace: database
+spec:
+  resources:
+    requests:
+      storage: 2Gi # Vamos solicitar 2GB de espaço
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: azurefile-csi # Vamos usar o armazenamento do Azure File
+```
+
+And to wrap up the manifest file, we'll add a service:
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: harperdb
+  namespace: database
+spec:
+  selector:
+    app: harperdb
+  ports:
+  - port: 9925
+    name: api
+    targetPort: hdb-api
+```
+
+The final file will look like this:
+
+```yml
+# manifests.yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: harperdb-data
+  namespace: database
+spec:
+  resources:
+    requests:
+      storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: azurefile-csi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harperdb
+  namespace: database
+spec:
+  selector:
+    matchLabels:
+      app: harperdb
+  template:
+    metadata:
+      labels:
+        app: harperdb
+    spec:
+      containers:
+      - name: harperdb-container
+        image: harperdb/harperdb
+        env:
+          - name: HDB_ADMIN_USERNAME
+            value: harperdb
+          - name: HDB_ADMIN_PASSWORD
+            value: harperdb
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "128m"
+        ports:
+        - containerPort: 9925
+          name: hdb-api
+        volumeMounts:
+          - mountPath: "/opt/harperdb"
+            name: hdb-data
+        livenessProbe:
+          tcpSocket:
+            port: 9925
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 9925
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+        - name:  hdb-data
+          persistentVolumeClaim:
+            claimName: harperdb-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harperdb
+  namespace: database
+spec:
+  selector:
+    app: harperdb
+  ports:
+  - port: 9925
+    name: api
+    targetPort: hdb-api
+```
+
+The last thing is to apply the manifests on the cluster using `kubectl apply -f ./manifests.yml`. You'll get a message like this:
+
+```bash
+persistentvolumeclaim/harperdb-data created
+deployment.apps/harperdb created
+service/harperdb created
+```
+
+We can check everything is fine by running `kubectl get deploy harperdb -n database`:
+
+```bash
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+harperdb   1/1     1            1           20m
+```
+
+Then we can take a look at our Azure Portal and check whether the volume is there. First, select **Resource Groups** in the portal, either by searching for it or clicking the home page.
+
+Find a resource group named `MC_harperdb-aks_harperdb_<local>`, click it, and you should see a bunch of resources.
+
+![HDB Resources](./2022-06-26-18-04-00.png)
+
+One of these resources is our Storage Account, click on it. Then, in the left panel, go to **File Shares**, and you should see an Azure File volume starting with `pvc-`, click it.
+
+![Azure File Volume for PVC](./Azure-File-volume.png)
+
+Here's our mounted volume with all the HDB files. Now let's access our HDB instance and check that everything is working.
+
+### Accessing HarperDB
+
+To access the database from outside the world, since we didn't expose it as a good practice, we'll forward our own connection to our service using the following command:
+
+```bash
+kubectl port-forward svc/harperdb 9925:9925 -n database
+```
+
+You should see the following messages:
+
+```bash
+Forwarding from 127.0.0.1:9925 -> 9925
+Forwarding from [::1]:9925 -> 9925
+Handling connection for 9925
+Handling connection for 9925
+Handling connection for 9925
+...
+```
+
+Then, let's go to our studio in the browser and create a new instance with the credentials we included in our deployment manifest, the username and password are `harperdb`.
+
+![Connecting to our local instance in the cluster](./HDB-Studio-K8S.png)
+
+After that, you can follow the same steps to create a new database, create a new user, and grant permissions to the user.
+
+## Conclusion
+
+We've reached the end of this tutorial and I hope you enjoyed it! Now you can create your own HDB instance on a Kubernetes cluster.
+
+To learn more and find more information about how HDB works, check out [the docs](https://harperdb.io/docs/overview/).

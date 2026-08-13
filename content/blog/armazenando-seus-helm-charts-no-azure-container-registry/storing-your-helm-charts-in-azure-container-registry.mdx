@@ -1,0 +1,169 @@
+---
+title: "Storing your Helm Charts in Azure Container Registry"
+pubDate: 2021-03-30T13:00:00.000Z
+updatedDate: 2026-07-16T16:17:13.000Z
+lang: en
+slug: "storing-your-helm-charts-in-azure-container-registry"
+category: "infra"
+tags: ["helm", "kubernetes", "containers", "azure", "acr", "docker", "aks", "cloud"]
+description: "Helm has plenty of amazing tools around it, but storing charts has always been a problem. Learn how we can make that process a lot easier!"
+seoDescription: "Helm has plenty of amazing tools around it, but storing charts has always been a problem. Learn how we can make that process a lot easier!"
+machineTranslated: true
+draft: false
+---
+One of the great advantages of understanding how the [container ecosystem](/oci-cri-docker-ecossistema-de-containers/) works is that we can figure out when to apply the same pattern to a bunch of different specifications.
+
+Last year, [Helm](https://helm.sh) announced it would support [OCI Artifacts](https://docs.microsoft.com/azure/container-registry/container-registry-image-formats?WT.mc_id=containers-20841-ludossan#oci-artifacts), which are nothing more than an [open OCI specification](https://github.com/opencontainers/distribution-spec) for distributing container images and other types of data, called artifacts. This specification, like every other OCI specification, is agnostic of providers, tools or clouds, which makes it a fantastic tool to work with.
+
+## Container Registries
+
+A container registry is something everyone who has ever had to deal with containers has had to use. The CR is where we store our container images so we can pull them from anywhere whenever we want.
+
+In essence, an image is basically a set of files that follows a structure more or less like this one:
+
+```
+       ├── blobs
+       │   └── sha256
+       │       ├── 1b251d38cfe948dfc0a5745b7af5ca574ecb61e52aed10b19039db3...
+       │       ├── 31fb454efb3c69fafe53672598006790122269a1b3b458607dbe106...
+       │       └── 8ec7c0f2f6860037c19b54c3cfbab48d9b4b21b485a93d87b64690f...
+       ├── index.json
+       └── oci-layout
+```
+
+The `index.json` file is the list of every manifest available in there, in other words, the list of every image available at that location. In our case, it is a list of every Helm chart stored there.
+
+Each file inside `blobs/sha256` is a JSON that identifies an artifact, whether it's an image or a chart. This JSON follows the [OCI specification](https://github.com/opencontainers/image-spec/blob/master/image-layout.md#blobs) for SHA files. In short, they are a list of settings describing the blob's characteristics, its configuration, properties, filesystem layers, and also the initial commands. For a Helm Chart we get the following file:
+
+```json
+{
+  "schemaVersion": 2,
+  "config": {
+    "mediaType": "application/vnd.cncf.helm.config.v1+json",
+    "digest": "sha256:8ec7c0f2f6860037c19b54c3cfbab48d9b4b21b485a93d87b64690fdb68c2111",
+    "size": 117
+  },
+  "layers": [
+    {
+      "mediaType": "application/tar+gzip",
+      "digest": "sha256:1b251d38cfe948dfc0a5745b7af5ca574ecb61e52aed10b19039db39af6e1617",
+      "size": 2487
+    }
+  ]
+}
+```
+
+Notice the difference in `mediaType`: while a regular Docker image has a type of `application/vnd.oci.image.config.v1+json`, here we have a type of `application/vnd.cncf.helm.config`. The same goes for the layers: every layer of an OCI image is of type `application/vnd.oci.image.layer.v1.tar+gzip`, while here we just have the plain `.tar.gz` format.
+
+## Storing Charts Locally
+
+Storing charts in a local registry is quite simple. Assuming you already have Helm 3 installed, let's first enable the flag that tells Helm we can use OCI artifacts, since **support for them is still experimental**. To do that, just export a variable in your shell:
+
+```bash
+export HELM_EXPERIMENTAL_OCI=1
+```
+
+Now, let's run a Docker registry locally with:
+
+```bash
+docker un -dp 5000:5000 --name docker-registry registry
+```
+
+From there we already have an official repository running on our machine and we can push our charts to it. As an example, I'll use a chart from a repository of mine called [Zaqar](https://github.com/khaosdoctor/zaqar). After cloning the repository so I have more control over it, I'll go into the `helm` folder and run `helm chart save zaqar localhost:5000/zaqar/zaqar:2.1.3`.
+
+This will save my chart locally, the same way `docker pull` does. Now I can push my saved chart to the repository specified by name with `helm chart push localhost:5000/zaqar/zaqar:2.1.3`.
+
+If we want to install the chart we downloaded, we first have to export it from the cache using `helm chart export localhost:5000/zaqar/zaqar:2.1.3 -d <destination>`, and then run `helm install <name> ./<destination>`.
+
+## Hosting charts on Azure Container Registry
+
+Now that we know how to host a chart in a local repository, hosting it on Azure CR is pretty much the same thing. We need access to Azure through the Azure CLI, and once we're logged in, we have almost the same set of commands.
+
+I'll assume you already have the [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?WT.mc_id=containers-20841-ludossan) installed, so let's create our ACR. First we have to create our resource group with `az group create -n helm-reg -l eastus`, and then the ACR with `az acr create -n chartregistry$RANDOM -g helm-reg --sku Basic -o tsv --query loginServer`.
+
+One tip is to store the repository name in a variable:
+
+```bash
+export ACR=$(az acr create -n chartregistry$RANDOM -g helm-reg --sku Basic -o tsv --query loginServer)
+```
+
+Now let's log in to our registry using Azure's managed keys, but first we need to enable admin control with `az acr update -n $ACR --admin-enabled true`. Now we can run two commands to fetch the login credentials and save them in our shell:
+
+```bash
+export ACRUSER=$(az acr credential show -n $ACR --query username -o tsv)
+export ACRPASS=$(az acr credential show -n $ACR --query 'passwords[0].value' -o tsv)
+```
+
+Now we can log in to our registry with Helm using `helm registry login $ACR --username $ACRUSER --password $ACRPASS`, and from here on our registry is already configured. Let's create another artifact with `helm chart save zaqar $ACR/zaqar:2.1.3`. Then let's push it with `helm chart push $ACR/zaqar:2.1.3`.
+
+Once it's up there, we can list everything that exists in the repository with an Azure CLI command:
+
+```bash
+az acr repository show -n $ACR --repository zaqar
+```
+
+Notice that we get an output that is exactly what we sent:
+
+```json
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2021-03-16T20:56:49.6118202Z",
+  "imageName": "zaqar",
+  "lastUpdateTime": "2021-03-16T20:56:49.7812323Z",
+  "manifestCount": 1,
+  "registry": "chartregistry23657.azurecr.io",
+  "tagCount": 1
+}
+```
+
+We can also get more details with the `show-manifests` command, adding a `--detail` flag:
+
+```bash
+az acr repository show-manifests -n $ACR --repository zaqar --detail
+```
+
+This will give us exactly the OCI artifact definition we saw in the first example:
+
+```bash
+[
+  {
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "quarantineState": "Passed",
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "configMediaType": "application/vnd.cncf.helm.config.v1+json",
+    "createdTime": "2021-03-16T20:56:49.7213057Z",
+    "digest": "sha256:4780713fa23d7144d356c353795b5b84e66ad2b8bbd47c7118b4b85435d50bbc",
+    "imageSize": 1378,
+    "lastUpdateTime": "2021-03-16T20:56:49.7213057Z",
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "tags": [
+      "2.1.3"
+    ]
+  }
+]
+```
+
+To install it, we can follow the same steps we took for the local registry. After running `helm char remove $ACR/zaqar:2.1.3` to remove it locally, since we already have it there from our earlier exercise:
+
+1.  `helm chart pull $ACR/zaqar:2.1.3`
+2.  `helm chart export $ACR/zaqar:2.1.3 -d ./destino`
+3.  `helm install zaqar-acr ./destino`
+
+## Conclusion
+
+Using Helm was already easy. One of the big problems we had was that there wasn't a "simple" way to host a chart somewhere when we wanted some kind of private registry. Even though Helm has excellent tools like [Chart Museum](https://github.com/helm/chartmuseum), they still aren't fully standard, and for distributed development to be easy, it's essential that we have open standards the whole market can follow.
+
+Keep in mind this feature is still experimental (at least as I write this article). It should be released soon, and then you won't need the environment variable to control the behavior anymore.
+
+Being experimental doesn't mean you can't use it to store your charts, it just means the API might change drastically, with some of its commands potentially being completely reworked. But this is a strong sign that the container ecosystem is increasingly heading toward a single, unified place.
+
+See you next time!

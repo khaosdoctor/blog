@@ -1,0 +1,525 @@
+---
+title: "Custom metrics with AKS"
+pubDate: 2021-02-09T13:00:00.000Z
+updatedDate: 2026-07-16T16:18:46.000Z
+lang: en
+slug: "custom-metrics-with-aks"
+category: "infra"
+tags: ["kubernetes", "azure", "containers", "monitor", "devops", "cloud", "technology", "aks", "azure monitor", "prometheus", "golang", "nodejs", "docker"]
+description: "Monitoring matters a lot for distributed applications. Learn how to create and monitor your applications with custom Prometheus metrics for Azure Monitor."
+seoTitle: "Custom metrics with AKS and Azure Monitor"
+seoDescription: "Monitoring matters a lot for distributed applications. Learn how to create and monitor your applications with custom metrics for Azure Monitor."
+machineTranslated: true
+draft: false
+---
+Whenever we work with microservices, we always hear that **monitoring** and **observability** are key metrics for keeping our ecosystem cohesive, functional, and for not going crazy trying to figure out what's happening. We talked about this in the [#FalaDev podcast I joined alongside several guests](/podcast-faladev-vamos-falar-de-microsservicos/).
+
+After all, in distributed systems, the complexity doesn't live in the unit itself, but in how these units interact with one another. And if we don't know what's happening in our ecosystem, we can't diagnose, understand, or respond to incidents in a timely manner.
+
+So how do we solve these problems? The answer is pretty simple: we have to start monitoring our applications.
+
+## Azure Monitor For Containers
+
+For this kind of situation we have tools like [Azure Monitor](https://docs.microsoft.com/azure/azure-monitor/insights/container-insights-overview?WT.mc_id=containers-12310-ludossan). It's a tool made available by Azure to monitor several of its products, and one of them is AKS.
+
+The idea of this article is to first understand a bit more about Azure Monitor, then build a small application that will extract some custom metrics from a few of our services. So let's start by understanding how it works!
+
+### How does Azure Monitor For Containers work?
+
+According to this [amazing article](https://trstringer.com/native-azure-logging-aks/) by Thomas Stringer, Azure Monitor is a solution with several facets, one of which is data visualization, obtained through metrics captured by what we call an `agent`.
+
+![](./image-18.png "Azure Monitor architecture diagram (Source: Microsoft Docs)")
+
+An `agent` is a small service that runs inside our cluster as a `daemonset`, which means a service that creates a pod on every node in our cluster to capture machine resource metrics, such as CPU, RAM, and so on.
+
+> By default, this feature comes disabled when we create a new AKS cluster, so we have to enable it. We'll learn how to do that in the next chapter.
+
+Once the feature is enabled, a DaemonSet called `omsagent` is installed on the cluster, and a deployment called `omsagent-rs` is created on each of the cluster's nodes. This deployment is responsible for aggregating metrics and sending them to what we call a [Log Analytics workspace](https://docs.microsoft.com/azure/azure-monitor/learn/quick-create-workspace?WT.mc_id=containers-12310-ludossan), the place where all our metrics get stored so we can read them.
+
+![](./image-17.png "Azure Monitor metrics flow (Source: Thomas Stringer)")
+
+Once all the services are running, we'll be able to fetch our cluster's metrics either through the Azure portal itself, or through a tool called [Azure Data Explorer](https://dataexplorer.azure.com).
+
+![](./image-19.png "Azure Monitor for Containers screen")
+
+## Monitoring a cluster
+
+First, we need to create an AKS cluster to monitor, and for that we need to register two extensions in our [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?WT.mc_id=containers-12310-ludossan) (if you don't have the Azure CLI installed yet, go ahead and install it on your machine).
+
+Let's check if we already have the providers installed with the following commands:
+
+```bash title="Checking if we already have the providers installed"
+az provider show -n Microsoft.OperationsManagement -o table && \
+az provider show -n Microsoft.OperationalInsights -o table
+```
+
+If we get an output like this:
+
+```output
+Namespace                       RegistrationPolicy    RegistrationState
+------------------------------  --------------------  -------------------
+Microsoft.OperationsManagement  RegistrationRequired  Registered
+
+Namespace                      RegistrationPolicy    RegistrationState
+-----------------------------  --------------------  -------------------
+Microsoft.OperationalInsights  RegistrationRequired  Registered
+```
+
+It means the providers are installed and running (see the `Registered` status), but if we need to install them, we'll have to run the following commands:
+
+```bash
+az provider register --namespace Microsoft.OperationsManagement && \
+az provider register --namespace Microsoft.OperationalInsights
+```
+
+The process can take a few minutes to complete, so run the first command again to make sure the provider was registered. Now let's create a new Resource Group and store both its value and our new cluster's name in a variable:
+
+```bash
+export RESOURCE_GROUP=aksmonitor
+export CLUSTER_NAME=aksmonitor
+az group create -n $RESOURCE_GROUP -l eastus
+```
+
+Then we can create a new AKS cluster with monitoring enabled through the command:
+
+```bash
+az aks create \
+  -g $RESOURCE_GROUP \
+  -n $CLUSTER_NAME \
+  --node-count 1 \
+  --generate-ssh-keys \
+  --enable-addons monitoring,http_application_routing
+```
+
+> If you already have an AKS cluster created, you can enable monitoring through the command `az aks enable-addons -a monitoring -n $CLUSTER_NAME -g $RESOURCE_GROUP`
+
+### Creating a test
+
+Let's create a few test pods so we can monitor system usage. First we'll create a simple deployment that exposes a small Node.js API. For that, let's create a new file called `simple_api.yaml` and write our instructions:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-api
+spec:
+  selector:
+    matchLabels:
+      app: simple-api
+  template:
+    metadata:
+      labels:
+        app: simple-api
+    spec:
+      containers:
+      - name: simple-api
+        image: khaosdoctor/scalable-node-api:2.0.0
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+          - name: PORT
+            value: "8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: simple-api
+  ports:
+  - port: 80
+    targetPort: http
+```
+
+This service will give us an external IP address that we can grab using `kubectl get svc` in the `EXTERNAL-IP` column:
+
+```output
+NAME         TYPE           CLUSTER-IP    EXTERNAL-IP     PORT(S)        
+simple-api   LoadBalancer   10.0.50.182   xxx.xxx.xxx.xxx   80:30287/TCP
+```
+
+Access the address after a few moments to see the pod running. In this version, we have a 2-second delay generating a bit of load so we can see resource consumption. Let's head to the Azure portal, select our AKS cluster, then go to the "Insights" menu:
+
+![](./image-24.png)
+
+Let's use the kubectl `scale` command to scale our pods and see that we have constant monitoring:
+
+![](./image-20.png "Number of pending and running pods")
+
+If we run a stress test, we'll see a gradual increase in memory and CPU usage:
+
+![](./image-21.png)
+
+We also have several `workbooks`, which are ready-made dashboards that let us see some data:
+
+![](./image-22.png "Deployments workbook")
+
+We can also get our containers' logs through the `logs` menu on the left of the panel:
+
+![](./image-23.png)
+
+Here we'll get an initial view with a modal asking whether we want to see some ready-made queries. Let's go to the "Audit" tab and click "Run" under "List containers logs per namespace":
+
+![](./image-25.png)
+
+Here's an example query in [Kusto](https://docs.microsoft.com/azure/data-explorer/kusto/query/?WT.mc_id=containers-12310-ludossan) format:
+
+```kusto
+// List container logs per namespace 
+// View container logs from all the namespaces in the cluster. 
+ContainerLog
+| join(KubePodInventory
+    | where TimeGenerated > startofday(ago(1h)))//KubePodInventory Contains namespace information
+    on ContainerID
+| where TimeGenerated > startofday(ago(1h))
+| project TimeGenerated, Namespace, LogEntrySource, LogEntry
+```
+
+We'll get a list of every log our application has generated:
+
+![](./image-26.png)
+
+But what if we want to generate more information and fetch more data? How do we create a custom metric in Azure Monitor?
+
+## Creating custom metrics
+
+To understand what we're going to do next, we need to understand how Kubernetes works with metrics.
+
+### Prometheus
+
+Nowadays, [Prometheus](https://prometheus.io/) is the market leader when it comes to storing and collecting metrics for distributed applications. Prometheus works on a scraping model, meaning that every so often it hits a URL defined on its registered endpoints and fetches the data in a specific format. The abstraction layer that runs between a service and Prometheus is called an **exporter**.
+
+Exporters fetch metrics from APIs and applications and format them so Prometheus can consume them correctly, which is why they usually run inside the same pod, in a separate container, accessing the application locally. As this image from Thomas Stringer's blog shows us:
+
+![](./image-27.png "Diagram of how an exporter works (Source: Thomas Stringer)")
+
+### Exporters
+
+When we're working with a technology that doesn't have [a ready-made exporter](https://prometheus.io/docs/instrumenting/exporters/#third-party-exporters) yet, or when we want to scrape metrics from applications we wrote ourselves (which is our case here), we can write our own using a [list of available clients](https://prometheus.io/docs/instrumenting/clientlibs/).
+
+An exporter's job is basically to run a loop where it:
+
+1.  Starts an HTTP server
+2.  Fetches metrics from the target application
+3.  Processes and formats the metrics
+4.  Returns the metrics to Prometheus when requested
+5.  Sleeps for a set amount of time before starting over
+
+The application we're going to use is a simple voting application written in Go. You can check the source code in [this repository](https://github.com/khaosdoctor/go-vote-api). We have an image hosted on my [personal Docker Hub](https://hub.docker.com/r/khaosdoctor/go-vote-api).
+
+Since I built the application from scratch, I also built a small Node.js exporter for it, which you can check out in [this repository](https://github.com/khaosdoctor/nodejs-go-vote-exporter), with [this image](https://hub.docker.com/r/khaosdoctor/go-vote-api-exporter). Basically the application only has a single `index.js` file that starts a Koa server using a Prometheus client library.
+
+```javascript
+const Koa = require('koa')
+const app = new Koa()
+const axios = require('axios').default
+
+const prometheus = require('prom-client')
+const PrometheusRegistry = prometheus.Registry
+const registry = new PrometheusRegistry()
+
+const PREFIX = `go_vote_api_`
+const pollingInterval = process.env.POLLING_INTERVAL_MS || 5000
+registry.setDefaultLabels({ service: 'go_vote_api', hostname: process.env.POD_NAME || process.env.HOSTNAME || 'unknown' })
+
+// METRICS START
+
+const totalScrapesCounter = new prometheus.Counter({
+  name: `${PREFIX}total_scrapes`,
+  help: 'Number of times the service has been scraped for metrics'
+})
+registry.registerMetric(totalScrapesCounter)
+
+const scrapeResponseTime = new prometheus.Summary({
+  name: `${PREFIX}scrape_response_time`,
+  help: 'Response time of the scraped service in ms'
+})
+registry.registerMetric(scrapeResponseTime)
+
+const localResponseTime = new prometheus.Summary({
+  name: `${PREFIX}exporter_response_time`,
+  help: 'Response time of the exporter in ms'
+})
+registry.registerMetric(localResponseTime)
+
+const totalVotes = new prometheus.Gauge({
+  name: `${PREFIX}total_votes`,
+  help: 'Total number of votes computed until now',
+  async collect () {
+    const total = await scrapeApplication()
+    this.set(total)
+  }
+})
+registry.registerMetric(totalVotes)
+
+// --Utility Function-- //
+
+async function scrapeApplication () {
+  const id = Date.now().toString(16)
+  console.log(`Scraping ${process.env.SCRAPE_URL}:${process.env.SCRAPE_PORT}/${process.env.SCRAPE_PATH} [scrape id: ${id}]`)
+  const start = Date.now()
+  const metrics = await axios.get(`${process.env.SCRAPE_URL}:${process.env.SCRAPE_PORT}/${process.env.SCRAPE_PATH}`)
+  scrapeResponseTime.observe(Date.now() - start)
+  totalScrapesCounter.inc()
+  console.log(`Scraped data [scrape id: ${id}]`)
+  return metrics.data.total
+}
+
+// --Servers start-- //
+
+app.use(async (ctx, next) => {
+  console.log(`Received scrape request: ${ctx.method} ${ctx.url} @ ${new Date().toUTCString()}`)
+  const start = Date.now()
+  await next()
+  localResponseTime.observe(Date.now() - start)
+})
+
+app.use(async ctx => {
+  ctx.set('Content-Type', registry.contentType)
+  ctx.body = await registry.metrics()
+})
+
+// start loop
+if (pollingInterval > 0) {
+  setInterval(async () => {
+    const total = await scrapeApplication()
+    totalVotes.set(total)
+  }, pollingInterval)
+}
+
+console.log(`Listening on ${process.env.SCRAPER_PORT || 9837}`)
+app.listen(process.env.SCRAPER_PORT || 9837)
+```
+
+What this application does is register a set of metrics on a default Prometheus registry. The metrics we're grabbing are:
+
+-   Total number of votes
+-   How many times we've fetched the metrics
+-   Response time of the exporter and also of the API on the `/total` route
+
+> Obviously these metrics aren't as important as other metrics you could get by instrumenting the application directly. A good practice for that is to have a `/metrics` route that serves the application's own instrumentation metrics, like CPU, RAM, and others, in addition to the exporter.
+
+If we hit the exporter, we get an output like this:
+
+![](./image-29.png)
+
+## Extracting metrics from the application
+
+To extract metrics from the application, what we'll do is run both containers side by side. That way we don't burden the original application with fetching and parsing metrics, and we still keep the connection fast since they're on the same network. Our previous deployment file will change a bit:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-api
+spec:
+  selector:
+    matchLabels:
+      app: vote-api
+  template:
+    metadata:
+      labels:
+        app: vote-api
+    spec:
+      containers:
+      - name: vote-api
+        image: khaosdoctor/go-vote-api
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 8080
+          name: http
+      - name: vote-api-exporter
+        image: khaosdoctor/go-vote-api-exporter
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        ports:
+        - containerPort: 9837
+          name: exporter
+        env:
+          - name: SCRAPE_PORT
+            value: "8080"
+          - name: SCRAPE_PATH
+            value: total
+          - name: SCRAPE_URL
+            value: "http://localhost"
+      - name: vote-api-voter
+        image: curlimages/curl
+        command: ["/bin/sh"]
+        args: [
+          "-c",
+          "while true; do wget -O- http://localhost:8080/votes/Lucas; sleep 3; done"
+        ]
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: vote-api
+  ports:
+  - port: 80
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-api-exporter
+spec:
+  selector:
+    app: vote-api
+  ports:
+  - port: 9837
+    targetPort: exporter
+```
+
+What we're doing is spinning up three containers alongside the application: one is the exporter, and the other is a simple application that keeps voting every 3 seconds to simulate the vote count increasing. Notice that we're setting `localhost` as the scrape URL, because all the containers are on the same local network.
+
+We can check the logs of each created container afterward with the command `kubectl  logs deploy/vote-api -c <container-name>`. If we want to see our exporter in action, we just need to run `kubectl port-forward svc/vote-api-exporter 9837:9837` and hit `localhost:9837` on our machine:
+
+![](./image-30.png)
+
+Notice that now we have more labels, like `hostname`, which wasn't fetched before.
+
+## Setting up Azure Monitor
+
+Now that our API is ready, let's set up Azure Monitor so it can fetch the metrics. To do that, we'll create a simple ConfigMap that configures our agent inside the Node. Microsoft itself has a default configuration template we can download with the command below
+
+```bash
+$ curl -Lo agent-config.yaml https://aka.ms/container-azm-ms-agentconfig
+```
+
+Save the file, and you'll see it's pretty heavily commented. It's a long file, but the part we care about is this one:
+
+```yaml
+        # When monitor_kubernetes_pods = true, replicaset will scrape Kubernetes pods for the following prometheus annotations:
+        # - prometheus.io/scrape: Enable scraping for this pod
+        # - prometheus.io/scheme: If the metrics endpoint is secured then you will need to
+        #     set this to `https` & most likely set the tls config.
+        # - prometheus.io/path: If the metrics path is not /metrics, define it with this annotation.
+        # - prometheus.io/port: If port is not 9102 use this annotation
+        monitor_kubernetes_pods = false
+```
+
+Let's change `monitor_kubernetes_pods` to `true`. This will make any deployment with the `prometheus.io/scrape` and `prometheus.io/scheme` annotations get scraped by the agent as if it were Prometheus fetching metrics. Now let's apply the configuration with `kubectl apply -f agent.yaml`.
+
+Now let's add the annotations to our deployment file:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-api
+spec:
+  selector:
+    matchLabels:
+      app: vote-api
+  template:
+    metadata:
+      labels:
+        app: vote-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /
+        prometheus.io/port: "9837"
+    spec:
+      containers:
+      - name: vote-api
+        image: khaosdoctor/go-vote-api
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 8080
+          name: http
+      - name: vote-api-exporter
+        image: khaosdoctor/go-vote-api-exporter
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        ports:
+        - containerPort: 9837
+          name: exporter
+        env:
+          - name: SCRAPE_PORT
+            value: "8080"
+          - name: SCRAPE_PATH
+            value: total
+          - name: SCRAPE_URL
+            value: "http://localhost"
+      - name: vote-api-voter
+        image: curlimages/curl
+        command: ["/bin/sh"]
+        args: [
+          "-c",
+          "while true; do wget -O- http://localhost:8080/votes/Lucas; sleep 3; done"
+        ]
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: vote-api
+  ports:
+  - port: 80
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-api-exporter
+spec:
+  selector:
+    app: vote-api
+  ports:
+  - port: 9837
+    targetPort: exporter
+```
+
+Now we can fetch the metrics through our portal. Let's click on `Logs`, just like we did before, and now we can query inside the `InsightsMetrics` table with the following query:
+
+```kusto
+InsightsMetrics
+| where Namespace == "prometheus"
+| where Name in ("go_vote_api_total_votes")
+| summarize sum(Val) by TimeGenerated, Name
+| order by TimeGenerated asc
+```
+
+This gives us every vote that's been computed, broken down by the time they were generated:
+
+![](./image-31.png)
+
+If we click **Chart**, we'll get a graph we can configure to see the metric grow:
+
+![](./image-32.png)
+
+## Conclusion
+
+Extracting metrics is important and necessary so we can get a better view of our system. With Azure Monitor it's a lot easier to take these measurements, because we don't need to install anything external like Prometheus, and we don't need to manage databases or anything else either.

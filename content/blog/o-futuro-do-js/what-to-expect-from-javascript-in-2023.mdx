@@ -1,0 +1,179 @@
+---
+title: "What to Expect from JavaScript in 2023"
+pubDate: 2022-08-27T00:09:44.000Z
+updatedDate: 2026-07-16T16:07:06.000Z
+lang: en
+slug: "what-to-expect-from-javascript-in-2023"
+category: "javascript"
+tags: ["javascript", "ecmascript", "development", "typescript"]
+description: "What does JavaScript have in store for us in 2023? In this post I go over the main proposals that could become reality next year!"
+machineTranslated: true
+draft: false
+---
+I'm always posting JavaScript news here on the blog, especially the most talked about pieces, but everything I cover there is already confirmed for that year's version. So what can we expect from JavaScript next year?
+
+First, we need to understand how the JavaScript process actually works. In this video I explain a bit more about how new JavaScript features get released. If you haven't watched it yet, I strongly recommend it so you can understand how everything works.
+
+![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
+
+I picked the main stage 3 or higher proposals from the TC39 repository. These are the proposals with the best shot at making it into a future version of the language in 2023, but all of this is just a guess: every proposal, even stage 3 ones, can get pulled if something happens.
+
+> I'll also write separate articles for some of these proposals so I can go deeper into the motivation and implementation of each one, and many more!
+
+So, what will JavaScript in 2023 actually look like?
+
+## JSON Modules and Import Assertions
+
+These two proposals go hand in hand, but they're independent proposals. In [ESM](/os-ecmascript-modules-estao-aqui/), you can't import JSON directly the way you can with CommonJS, so the [JSON Modules](https://github.com/tc39/proposal-json-modules) proposal fits like a glove. The idea is to let you import JSON files straight from your code file.
+
+The second proposal, [import assertions](https://github.com/tc39/proposal-import-assertions), lets you add extra metadata about the type of module being imported, giving us a standard way to import files that aren't JS:
+
+```js
+import arquivoJson from './meuArquivo.json' assert { type: 'json' }
+import ("outroArquivo.json", { assert: { type: 'json' } })
+```
+
+## Accessing source text from JSON methods
+
+This [proposal](https://github.com/tc39/proposal-json-parse-with-source) has been open since 2018. The idea is super interesting but it's a pretty specific niche. What it does is let you pass extra arguments to the so-called `reviver` functions that exist in the `JSON.parse` and `JSON.stringify` methods.
+
+These functions work like mapping functions: they receive the keys and values after conversion so they can be filtered. In the proposal, you'd be able to pass a new parameter called `source` so you can handle certain primitive types and avoid losing precision in the conversion to JSON.
+
+```js
+const muitoGrandeParaNumber = BigInt(Number.MAX_SAFE_INTEGER) + 2n
+const converterParaBigInt = (key, val, { source }) => (typeof val === 'number' && val % 1 === 0 ? BigInt(source) : val)
+const numeroAposConversao = JSON.parse(String(muitoGrandeParaNumber), converterParaBigInt)
+muitoGrandeParaNumber === numeroAposConversao
+```
+
+## Decorators
+
+This [proposal](https://github.com/tc39/proposal-decorators) is a legend at this point, it's been around for roughly 5 years. The idea is to implement the concept of _decorators_, which is already a common concept in languages like Java and also exists experimentally in TypeScript.
+
+The simple idea behind a decorator (I'll go deeper into this in its own article) is to annotate a class or method to change its behavior. They can replace, grant access to, or initialize a value being decorated.
+
+The standard decorator interface looks like this:
+
+```ts
+type Decorator = (value: Input, context: {
+  kind: string;
+  name: string | symbol;
+  access: {
+    get?(): unknown;
+    set?(value: unknown): void;
+  };
+  private?: boolean;
+  static?: boolean;
+  addInitializer?(initializer: () => void): void;
+}) => Output | void;
+```
+
+One possible implementation would be, for example, adding a console log for every argument of a method for debugging:
+
+```js
+function debug(value, { kind, name }) {
+  if (kind === "method") {
+    return function (...args) {
+      console.log(`chamando '${name}' com os argumentos: ${args.join(", ")}`);
+      const ret = value.call(this, ...args);
+      console.log(`fim de ${name}`);
+      return ret;
+    };
+  }
+}
+
+class Classe {
+  @debug
+  metodo(arg) {}
+}
+
+new Classe().m(1);
+// chamando 'metodo' com os argumentos: 1
+// fim de metodo
+```
+
+Personally, I don't believe we'll have decorator support in 2023, but it doesn't hurt to dream.
+
+## Copy-based array modification
+
+This is a [proposal](https://github.com/tc39/proposal-change-array-by-copy/) that will probably get implemented because it's pretty straightforward and relatively simple. The idea is to add the `toReversed`, `toSorted`, `with` and `toSpliced` functions to arrays.
+
+The goal is simple: except for `with`, the other functions already exist today under the names `reverse`, `sort`, `splice` and `slice`, but they mutate the original array instead of returning a copy, which is bad when you're working with a lot of objects:
+
+```js
+require('core-js/proposals/change-array-by-copy')
+const sequencia = [1, 2, 3]
+console.log(sequencia.toReversed()) // => [3, 2, 1]
+console.log(sequencia) // => [1, 2, 3]
+
+const desordenado = new Uint8Array([3, 1, 2])
+console.log(desordenado.toSorted()) // => Uint8Array [1, 2, 3]
+console.log(desordenado) // => Uint8Array [3, 1, 2]
+
+const precisaDeCorrecao = [1, 1, 3]
+console.log(precisaDeCorrecao.with(1, 2)) // => [1, 2, 3]
+console.log(precisaDeCorrecao) // => [1, 1, 3]
+
+const spliced = [1, 2, 3]
+console.log(spliced.toSpliced(1, 1)) // => [1, 3]
+console.log(spliced) // => [1, 2, 3]
+```
+
+## Array Grouping
+
+This is another [proposal](https://github.com/tc39/proposal-array-grouping) that I think will make it into next year's spec because the idea is pretty simple and has been around for a while. Plus it's only been around for 14 months, which is a record time for a proposal to go from stage 0 to stage 3.
+
+The idea behind this proposal is to implement what already existed in libraries like LoDash: the famous `groupBy`, except here you pass a function that decides what the right grouping is for each item:
+
+```js
+const array = [1, 2, 3, 4, 5]
+
+const grupo = array.group((num, index, array) => {
+  return num % 2 === 0 ? 'par' : 'impar'
+})
+
+console.log(grupo) // =>  { impar: [1, 3, 5], par: [2, 4] }
+```
+
+## Say goodbye to Date, hello to Temporal
+
+This is a [proposal](https://github.com/tc39/proposal-temporal) I won't spend too much time explaining, but it's the one I'm rooting for the most. I've already written about Temporal in another article:
+
+[Forget Date and embrace the new way of handling dates in JavaScript](/temporal-api/)
+
+The goal of Temporal isn't just a tweak, it's a complete API that will fully replace JavaScript's `Date` API, which is genuinely awful to use, with a model based on `moment.js` (in fact, the people who maintained moment are the same people maintaining this proposal). In other words, the idea is to implement moment natively in JavaScript.
+
+Today you can already get similar functionality with the [luxon](https://moment.github.io/luxon/#/) library, which comes from the same creators and is considered the "testing ground" for this new API.
+
+## Duplicate named capturing groups
+
+This is a simple but pretty clever idea: what if we have multiple ways to write something and want to capture those options with a RegExp? Today we could do something like this:
+
+```js
+str.match(/(?<ano>[0-9]{4})-[0-9]{2}|[0-9]{2}-(?<ano-fim>[0-9]{4})/)
+```
+
+But wouldn't it be nice if we could give the group the same name? Well, that's exactly the [proposal](https://github.com/tc39/proposal-duplicate-named-capturing-groups)!
+
+With it, we could give the same name to two capturing groups as long as they're in different alternatives, like we saw above with `|`: it's either `2022-08` or `08-2022`, so we could have this:
+
+```js
+str.match(/(?<ano>[0-9]{4})-[0-9]{2}|[0-9]{2}-(?<ano>[0-9]{4})/)
+```
+
+## Number internationalization, version 3
+
+This is another one of the [proposals](https://github.com/tc39/proposal-intl-numberformat-v3) I'll cover in a separate article because it's huge and one of the oldest, 5 years and counting!
+
+The proposal adds more formats and internationalization to the current `Intl` library. The main changes are:
+
+-   The `formatRange` method
+-   Adding an enumerator for number grouping
+-   Improvements to decimal rounding
+-   Interpreting strings as decimals
+-   Rounding modes
+-   Options for displaying the sign
+
+I won't go into detail here, I'll save that for a separate article where I can explain each point in more depth!
+
+See you!

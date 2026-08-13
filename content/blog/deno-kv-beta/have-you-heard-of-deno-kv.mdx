@@ -1,0 +1,243 @@
+---
+title: "Have you heard of Deno KV?"
+pubDate: 2023-07-20T11:00:50.000Z
+updatedDate: 2026-07-16T15:59:17.000Z
+lang: en
+slug: "have-you-heard-of-deno-kv"
+category: "javascript"
+tags: ["deno", "databases", "typescript"]
+description: "Have you heard of the new Deno KV? Then it's time to discover this tool that can save your life"
+seoTitle: "Deno KV Principles"
+machineTranslated: true
+draft: false
+---
+It's been a while since I started talking about [Deno](/deno/), and I even [talked about Deno KV here](/deno-kv/) back when it was still an alpha experiment with no defined API. Now we have the **official** beta version, and it's being tested.
+
+## What KV databases are
+
+KV is short for "Key Value", which names a concept called **key and value** in data storage, and it's also the name of a paradigm that goes by the same name.
+
+Key-value databases aren't rare or new, there are hundreds of them out there, the most famous and widely used today is **Redis**, but there are others like ETCD, Arango, Memcached, and so on.
+
+The idea behind key-value databases is that they're super simple to use, because they don't carry any inherent complexity, you can picture a KV database as a table:
+
+| **Key** | **Value** |
+| --- | --- |
+| name | Lucas |
+| age | 28 |
+| job | dev |
+
+And that's it. There isn't much more to it than that idea. What most key-value databases do differently is how they optimize and store these data structures in memory or on disk, which data types they support and so on, but the core idea is that.
+
+### Advantages
+
+The advantage of this kind of structure is that looking up or inserting a value is **extremely fast**, because keys are indexed by default and there's only ever one value per key, so even with billions of keys, it's easy to know where each one lives based on the value it holds.
+
+> This is exactly why databases like Redis and Memcached get used as site caches so often. Because reads are so fast that they don't hurt performance.
+
+Many times, as was the case with Redis years ago, there wasn't even a need for disk storage, persistence was basically a memory dump to a binary file, and then reading that same file back when the database started up again.
+
+### Disadvantages
+
+Precisely because they don't have any kind of relationship, key-value databases can't represent very complex structures well, exactly because they have no native structure to relate one piece of data to another, most of the time the relationship is implicit in the key's name. For example, if we want to store a teacher and their classes, we can create a key `teachers:<id>`, and then another key `teachers:<id>:classes`, which defines that the classes belong to that teacher.
+
+> This technique is called **secondary indexes.** And the key naming convention is called [Key Space](https://deno.land/manual@v1.35.1/runtime/kv/key_space)
+
+So systems with relationships or a clear dependency between their data will generally still benefit from traditional SQL databases like Postgres. But that doesn't mean we can't represent any kind of relationship in key-value databases. The same way we did above, putting the relationship directly in the key name, we can also take advantage of something key-value databases have that relational databases usually don't: _the ability to store any type of value under any type of key._
+
+We call this property **schemaless**, meaning the database has no table with a defined **schema**, unlike traditional tables with numeric columns, varchar and so on. Redis, for example, can store everything from strings (including JSON objects) to bytes, bitmaps and much more.
+
+So it's technically possible to represent complex relationships using only the key-value paradigm, but the more complex these relationships get, the harder it becomes to deal with those keys when working on your application. Since the database won't give you any help finding one relationship or another, you'll have to do it all manually in your code.
+
+> To mitigate a lot of these problems, Deno itself has a [manual on secondary indexes](https://deno.land/manual@v1.35.1/runtime/kv/secondary_indexes) that shows how you can build relationships across multiple keys.
+
+This is usually where the disadvantage of key-value databases shows up. When you have to architect a system with several relationships, your code quickly turns into a tangle of dependency resolution between your application's entities. Not to mention it takes you a lot longer to write your code, since you also have to write all the database logic yourself.
+
+> Usually, the solution to something like "list all the students of a teacher" and "list all the teachers of a student", where the keys have the same relationships but opposite results, is to duplicate the key, one for each side of the relationship.
+
+Now that we know the advantages and disadvantages of key-value databases, let's get a better understanding of how Deno KV works.
+
+## Deno KV
+
+Deno KV is a serverless, globally distributed key-value database. Among its notable properties is that it has variable consistency, so you can choose between a **strongly consistent** model or an **eventually consistent** one.
+
+The difference is that, in the **strong consistency** model, you'll always be able to access keys right after they're inserted, there's no propagation delay or anything like that. Just like traditional databases, KV also supports transactions.
+
+In **eventual consistency** models, you're trading consistency for speed, meaning reads will be much faster, but not always guaranteed.
+
+In my other article I already talked about KV, but it wasn't complete yet. Back then what we had was an alpha version released only so users could check out how the interfaces worked. But now we have a much more stable version, though it still hasn't shipped to the public.
+
+Deno KV is in **closed beta** and you can [request access](https://dash.deno.com/kv) by heading to the [Deno Deploy documentation site](https://deno.com/deploy/docs/kv), which is Deno's cloud. KV is already fully integrated into it (which wasn't the case in alpha either). During the closed beta, usage is free and includes 1GB of storage.
+
+The base APIs stayed the same, so to create a new database or open an existing one, you just do:
+
+```ts
+// main.ts
+const kv = await Deno.openKv('optional database name');
+```
+
+It's worth noting that, as of this writing, Deno Deploy still doesn't support multiple databases. So you can use a ternary to load either a local database or the default one.
+
+```ts
+// main.ts
+const isProduction = Deno.env.get('DENO_ENV') === 'production'
+const kv = await Deno.openKv(isProduction ? '' : './meubanco.db')
+```
+
+To run it, just run `deno run --unstable -A main.ts`, keep in mind the `--unstable` flag is needed during the beta.
+
+If you used a different name (or path) you'll see that, in the location you chose, Deno created a SQLite database, which is the backend it uses for local projects.
+
+> You can access that database with any SQLite client and see what's inside.
+
+## Usage
+
+Deno KV supports a handful of operations, and you can check the manual for all of them directly in the [API](https://deno.land/api@v1.35.1?s=Deno.Kv&unstable):
+
+-   Get
+-   GetMany
+-   List
+-   Set
+-   Delete
+
+## `kv.set(key, value)`
+
+Used to insert a value into the database. It's as simple as:
+
+```ts
+const res = await kv.set(['users', 'alice'], { name: 'alice', age: 28 })
+```
+
+The result stored in `res` is an object with a **versionstamp**. I won't go into detail here but [the docs explain it well](https://deno.land/manual@v1.35.1/runtime/kv/key_space#versionstamp), in short, a versionstamp is a unique, incrementing, non-sequential ID that represents the version of your value.
+
+```js
+//example response
+const res = {
+    versionstamp: '000002fa526aaccb0000'
+}
+```
+
+Like other databases such as MongoDB, KV also stores different versions of the same value so you can compare the values you get from a `get` against those from a `set`, since consistency might be weak, it's also possible that the value you got from a `get` is older than the value that was set, because of replication lag.
+
+That's why versionstamps are comparable and sortable, a stamp that's greater than another means it's more recent.
+
+```ts
+const versionA = '000002fa526aaccb0000'
+const versionB = '000002fa526aacc90000'
+versionA > versionB // true, A is more recent
+```
+
+### Key spaces
+
+As we mentioned earlier, we can set keys with scopes, and those scopes are defined by an array. If the key is a string, Deno will assume it's a simple key, but if we pass an array, each position in the array becomes a scope of the key:
+
+```ts
+const simpleKey = 'users'
+const scopedKey = ['users', 'alice']
+```
+
+Keys can have [several types](https://deno.land/manual@v1.35.1/runtime/kv/key_space#key-part-ordering), namely:
+
+-   `Uint8Array` - A byte array
+-   `string`
+-   `number`
+-   `bigint`
+-   `boolean`
+
+Keys can't be objects, structures or classes. If the key doesn't exist it'll be created, if it already exists, it'll be replaced. **All write operations are strongly consistent**.
+
+## `kv.get<T>(['key'], options?)`
+
+[`get`](https://deno.land/api?s=Deno.Kv&p=prototype.get&unstable) is the single-key version of [`getMany`](https://deno.land/api?s=Deno.Kv&p=prototype.getMany&unstable), both are commands to fetch values from the database. They only accept complete keys and can't be used to list, say, every key under `['users']`.
+
+```ts
+const res = await kv.get(['users', 'alice'])
+// { key: ['users', 'alice'], value: 'value', versionstamp: 'stamp' }
+```
+
+In the second parameter, we can pass an options object that only has the `consistency` key, which can be `'strong'` or `'eventual'`.
+
+Besides that, it's possible to specify the return type via the type parameter T, identifying the type of the object you'll get back.
+
+```ts
+const res = await kv.get<string>(['users', 'alice']) // res is a string
+```
+
+The same way, we can use `getMany` to fetch more than one key at once:
+
+```ts
+const [res1, res2, res3] = await kv.getMany<[string, string, string]>([
+  ["users", "sam"],
+  ["users", "taylor"],
+  ["users", "alex"],
+]);
+```
+
+If a key isn't found, the result will be an object `{ key: ['searched', 'key'], value: null, versionstamp: null }`.
+
+> It's always a good idea to check whether a value exists via the **versionstamp** and not the `value`, since `value` can genuinely be null.
+
+## `kv.list<T>(selector, options?)`
+
+[list](https://deno.land/api?s=Deno.Kv&p=prototype.list&unstable) is a more powerful version of `get`, built precisely to list a large number of keys based on a specific selector.
+
+`options` is an options object that can hold several keys:
+
+-   `limit`: how many objects are returned by the search
+-   `cursor`: a cursor to resume iteration from, if none exists, it'll start from the beginning (ideal for pagination)
+-   `reverse`: before returning the array, reverses it, essentially starting from the end
+-   `consistency`: same as `get`
+-   `batchSize`: `list` fetches values in batches, the bigger the batch, the more data gets returned at once. The default is 100, the max is 500.
+
+`selector` is an object whose keys are the chosen selectors. There are two types of selectors you can use:
+
+-   `prefix`: Finds every key that starts with a given prefix, meaning the array's first elements match the elements passed in. For example: `{ prefix: ['users'] }` will find every key starting with `['users']`, including `['users', 'alice']` or `['users', 'bob']`.
+
+> You can also pass a `start` and `end` parameter to `prefix`, telling it where the list should start and end (including `start` and excluding `end`)
+
+```ts
+const iter = kv.list<string>({ prefix: ["users"] }, { limit: 2 } )
+const users = [];
+for await (const res of iter) users.push(res);
+console.log(users[0]); 
+// { key: ["users", "alex"], value: "alex", versionstamp: "00a44a3c3e53b9750000" }
+console.log(users[1]); 
+// { key: ["users", "sam"], value: "sam", versionstamp: "00e0a2a0f0178b270000" }
+
+const iter = kv.list<string>({ prefix: ["users"], start: ["users", "taylor"] });
+const users = [];
+for await (const res of iter) users.push(res);
+console.log(users[0]); 
+// { key: ["users", "taylor"], value: "taylor", versionstamp: "0059e9035e5e7c5e0000" }
+```
+
+It's worth noting that the result of any `list` call returns an `asyncIterator` that can be iterated with `for await of`.
+
+-   `range`, if we skip the `prefix` key and only include `start` and `end`, we'll only get the keys that fall between those two values, excluding `end` and including `start`.
+
+```ts
+const iter = kv.list<string>({ start: ["users", "a"], end: ["users", "n"] });
+// users between 'a' and 'm' since 'n' isn't included
+const users = [];
+for await (const res of iter) users.push(res);
+console.log(users[0]); 
+// { key: ["users", "alex"], value: "alex", versionstamp: "00a44a3c3e53b9750000" }
+```
+
+> Unlike `prefix`, `range` can hold **partial keys**, meaning the key can contain any character that matches the expression, like we did with `a` and `n`.
+
+## `kv.delete(key)`
+
+Deletes a key. If the key doesn't exist, nothing happens. These operations are always **strongly consistent**.
+
+```ts
+await kv.delete(['users', 'alice'])
+```
+
+## And there's a lot more
+
+This article only covers the basic parts of KV, but there's another article coming up covering all the **atomic** parts and the transactions KV also supports, and further down the road we'll talk about the queue and pub/sub properties.
+
+Still, with just the basic operations, you can already build a lot, I strongly recommend you take a look at the current state of Deno KV and try it out on Deno Deploy to draw your own conclusions.
+
+See you next time!

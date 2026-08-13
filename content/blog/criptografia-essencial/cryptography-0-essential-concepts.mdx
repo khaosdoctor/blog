@@ -1,0 +1,149 @@
+---
+title: "Cryptography #0 - Essential concepts"
+pubDate: 2024-01-15T23:47:05.000Z
+updatedDate: 2026-07-16T15:54:12.000Z
+lang: "en"
+category: "security"
+tags: ["cryptography", "security", "series"]
+series: cryptography-beginners
+seriesOrder: 0
+description: "How about learning several essential cryptography concepts?!"
+seoTitle: "Cryptography in 10 minutes - All the essential concepts"
+seoDescription: "Learn the main cryptography concepts in this straight-to-the-point article series"
+draft: false
+machineTranslated: true
+slug: "cryptography-0-essential-concepts"
+---
+The importance of cryptography goes beyond just understanding why it's cool, it can also **be the difference between you being a good or a bad dev** in the long run. Any decent system, especially ones that handle user data, will need some kind of security, and a lot of the time it's in your hands as a dev.
+
+But one thing I've noticed is that there aren't many devs who know about, or worse, care about the concept of security. A lot of people because they never had the chance to learn, others because they never found a simple way to learn a complex topic.
+
+So I decided to write this series of articles about cryptography, so you can understand a bit more about the concepts and how everything works! Let's start with a simple article about the main terms and how they work, then we'll ramp up the difficulty with more details and more information, maybe even implementing some of the algorithms!
+
+This is the first article in the series. Here we're just going to chat about the main concepts and ideas you need to know so you can follow along with the rest of the series! So let's get to it!
+
+> [!WARNING] ❗
+> ****A word of warning!****
+> I'm not a cryptologist, nor have I studied cryptography formally. The concepts here are purely the result of my own personal research. While this article can be used for study, it shouldn't be used as the basis for sensitive applications.
+
+## Cryptography
+
+This is a concept I've already explained on my channel:
+
+![](https://www.youtube.com/watch?v=nTfTVCAPn5o)
+
+The idea behind cryptography is, basically, being able to transmit a message from one side to the other so that only the sender and the recipient know what its content is. Cryptography means "to write in secret" in Greek.
+
+Every cryptography mechanism depends on 3 parts:
+
+-   **The message** that will be transmitted
+-   **The medium** we'll use to encrypt the message. Or the **Schema** that will be applied. This is the algorithm or the step by step process we'll use to generate the encrypted text, one of the oldest mediums is the _Caesar Cipher._
+-   **The key** that will be used to encrypt the message
+
+Every **medium** needs a way to encrypt a piece of data and optionally a way to decrypt it. Some mediums don't have a decryption method, as is the case with **hashes**. **Reversible** cryptography is when we can decrypt, **irreversible** is when we can't extract the original text.
+
+In the end, applying the **medium** to the **message** using the **key** gives us a **cipher** or **ciphertext**, which is the encrypted text that will be transmitted.
+
+## Keys
+
+Keys are the medium we use to keep a message secure, your computer password is a key, for example. Keys can have several classifications
+
+-   _Symmetric_: Encrypt and decrypt at the same time
+-   _Asymmetric_: Either encrypt or decrypt a message
+-   _Composite_: Symmetric or Asymmetric, made up of several parts that form a whole, for example, the _Enigma_ had several properties that formed a key
+-   _Simple_: Just one key is enough to decrypt the message
+-   _Physical_: The most common concept of a key, the key itself... Your house key is a physical key, it exists in the real world
+-   _Virtual_: The opposite, a key made of bits that doesn't physically exist
+-   _Mixed_: A physical key that contains a virtual key ([Yubikeys](https://www.yubico.com) are an example)
+
+## The pillars of security
+
+When we talk about security and cryptography, there are a few main concepts that most algorithms need to implement:
+
+-   **Availability:** The information needs to be present and available when needed (performance matters)
+-   **Integrity:** The data can only be accessed by authorized users
+-   **Non-repudiation:** Ensures that someone can't deny an action because the system itself has proof that the action was performed by a given user (origin guarantee)
+
+## Symmetric Cryptography
+
+We'll talk more about this in the next articles, but symmetric cryptography is a type of cryptography where we have just one key that works both for encrypting and decrypting a piece of data.
+
+The Caesar Cipher, for example, is a symmetric cryptographic cipher, since just one key is used to encrypt the message for sending and to decrypt it on receipt.
+
+But symmetric cryptography doesn't have to use just one key. The _Enigma_ (see the video below) was a reversible machine that used a series of keys that, combined, made it possible to decrypt the message.
+
+![](https://www.youtube.com/watch?v=CbObdmRBrms)
+
+## Asymmetric Cryptography
+
+Unlike symmetric cryptography, an asymmetric scheme always has more than one key, usually a **key pair** (RSA is the most well known). The two keys are connected somehow, whether mathematically (through [Modular Exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation), for example), or physically connected in the case of hardware.
+
+Usually one or both parts are private, one part is made to encrypt a message that can only be decrypted by the other part, which is a way to prove that the first part (the sender) really is who they say they are (non-repudiation, the user can't deny who they are)
+
+## Block or stream ciphers
+
+Cryptography algorithms can encrypt data in blocks or in a data stream:
+
+-   **Block Ciphers:** Encrypt data block by block, meaning they take a whole block of information and encrypt it all at once. Block sizes are generally fixed (64~1024 bits), often these sizes are predetermined and the output always has the same size (like hashes)
+-   **Stream Ciphers**: Instead of taking a whole block of information, they encrypt data bit by bit, the advantage is you don't need as much processing power and it's relatively fast, but they require a bit more setup, like having an _Initialization Vector._
+
+## Hash functions
+
+Irreversible cryptography functions that take an input and generate a fixed size block as output, widely used to guarantee integrity. Hashes have 3 very important properties:
+
+-   **Entropy:** any minimal change in the input generates a completely different result
+-   **Predictability:** The same input always generates the same output
+-   **No collision:** two hashes generated for different values can't have the same output (see the [SHA1 example](https://shattered.io))
+
+## XOR Encryption
+
+XOR cryptography is a way of applying a key to a cipher. Stream algorithms often use this type of application to encrypt the message.
+
+The idea is to apply the XOR (e**X**clusive **OR**) operation bit by bit on the message using the key. XOR returns 1 only if both bits are different from each other, for example:
+
+|  |  |  |
+| --- | --- | --- |
+| A | B | A XOR B |
+| 0 | 0 | 0 |
+| **0** | **1** | **1** |
+| **1** | **0** | **1** |
+| 1 | 1 | 0 |
+
+All digital text is a sequence of 0 or 1 bits, when we generate a key, it's also a sequence of 0 or 1 bits, if we use `key XOR text` we get an encrypted text, and if we apply the operation again to the encrypted text with the same key, the text goes back to normal.
+
+## Ephemeral Keys
+
+A type of key that's generated only to execute a specific step of some algorithm, or as part of encrypting another key through _Key Wrapping_ (when we encrypt a key with another key).
+
+These keys are used once and discarded, and they also have no connection to the original data, hence, ephemeral.
+
+## Rainbow Table
+
+When we're talking about hashes, each hash can only have one unique output for each input, one of the ways to attack and figure out hashes is by computing ALL the hashes for ALL possible letter combinations. These computed tables are known as Rainbow Tables.
+
+Hackers usually use encrypted passwords from databases to check if the original values are in the table, for example, `123456` encrypted with `MD5` hashing is `f447b20a7fcbf53a5d5be013ea0b15af`, if a database with passwords leaks, any `f447b20a7fcbf53a5d5be013ea0b15af` that shows up can be compared in a rainbow table to get the result `123456`.
+
+## Salt
+
+A salt is a random sequence of bytes (usually 16 or more) that's added to the end of a text that will be hashed in order to increase entropy and reduce the chance of **Rainbow Table** attacks, since `123456` is different from `123456A96!@#$F@f`.
+
+Salts are added to the end of users' passwords when an account is created and saved in the database alongside the hashed password, when we need to check if the password matches, we just add the password to the salt to see if it produces the same saved hash.
+
+## A few more acronyms
+
+-   **Integrated Encryption Schemes (IES):** Cryptography models that apply both symmetric and asymmetric cryptography to create a secure form of communication. HTTPS is based on a model like this
+-   **Elliptic Curve Cryptography (ECC)**: Instead of using very large prime numbers, this model uses an elliptic curve function to create a number that can be used as a key
+-   **Key Wrapping (Key Encapsulation Mechanism \[KEM\]):** Encapsulating a key with another key, essentially encrypting a key with another one
+-   **Message Authentication Code (MAC):** Used with an algorithm and a password to produce an authentication value that can be validated by the receiver to guarantee the message wasn't altered
+-   **Hash MAC (HMAC):** The same as MAC but applied to hashes
+-   **Public-key encryption (PKE):** Another name for asymmetric cryptography
+-   **Key-Derivation Functions (KDFs):** Functions that can derive one key into another key, they can be chained
+-   **RSA:** Asymmetric cryptography algorithm that generates key pairs
+-   **AES:** Symmetric cryptography algorithm (also known as Rijndael)
+-   **MD5, SHA, Argon2, PBKDF2, Blake2:** Hashing algorithms
+
+## Conclusion
+
+That's a lot of content and a lot to take in, right? You don't need to memorize all these names, just bookmark this page and check it whenever you need! I hope you enjoyed the journey so far! Stick with me because there's a lot more coming!
+
+Share it with your friends if you liked it and follow me on my [social media](https://lsantos.dev), if you have any questions just send me a message there!

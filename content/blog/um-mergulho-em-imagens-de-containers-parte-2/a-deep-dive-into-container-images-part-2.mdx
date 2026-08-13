@@ -1,0 +1,190 @@
+---
+title: "A Deep Dive Into Container Images - Part 2"
+pubDate: 2020-07-29T13:00:00.000Z
+updatedDate: 2026-07-16T16:27:56.000Z
+lang: en
+slug: "a-deep-dive-into-container-images-part-2"
+category: "infra"
+tags: ["containers", "docker", "golang", "development", "technology"]
+series: container-images
+seriesOrder: 2
+description: "We already know what each image type is for, now let's put that knowledge to work in a compiled application! Is the smallest image really the best one?"
+seoDescription: "Now that we know what each image type is for, it's time to put that knowledge to work in an application!"
+machineTranslated: true
+draft: false
+---
+In the [last post](/um-mergulho-em-imagens-de-containers-parte-1/?utm_source=series&utm_medium=post&utm_campaign=deep_dive_2) in our series we talked a bit about what container images are and how they're split up. We went over what a `slim` image is, what a `full` image is, and talked about `alpine` images. But how does any of this actually affect your application?
+
+## The application
+
+Let's build a simple application in Go that serves a static HTML file, to show how we can optimize our image for our application.
+
+We're not going to actually develop this application here, we're just going to imagine the following scenario:
+
+-   We have a Go application that serves a static HTML file
+-   This application compiles without errors, it's small and fast
+
+## Optimizing the build
+
+For compiled languages like Go, C#, Java and others, a good practice, even before you choose any kind of base operating system, is to optimize the compilation, or **build**, of the application. To do this, what's generally used, though not widely talked about, is something called **[multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/).**
+
+When we compile an application, the container doing the compiling usually has every tool needed to make that compilation happen. That includes tools that are **not** needed at runtime. With Go, for example, we don't need the entire runtime installed, since Go is already capable of running as a single binary, so it makes no sense to have all that tooling installed in the container that's going to run in production.
+
+And that's exactly what **[multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/)** do. We start with a container, one that has all the tooling for building the application, usually a container specific to that language, and then we move only the binary generated at the end into a new, empty container. That empty container has none of the tools we don't need in production.
+
+This kind of build is used to keep production images as small as possible, so we don't run into network I/O problems and we also have less data to download! And the great thing is we can do all of this straight from our Dockerfile!
+
+### Creating an optimized build
+
+To get started, let's create the Dockerfile. Inside it, we'll create the steps responsible for building the application:
+
+```Dockerfile
+FROM golang:1.11-stretch as build
+
+WORKDIR /go/src/github.com/khaosdoctor/webapp
+
+COPY web.go web.go
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./bin/webapp github.com/khaosdoctor/webapp
+
+FROM debian:stretch
+
+RUN mkdir -p /web/static/ 
+
+COPY --from=build /go/src/github.com/khaosdoctor/webapp/bin/webapp /usr/bin
+COPY index.html /web/static/index.html
+
+WORKDIR /web
+
+EXPOSE 3000
+
+ENTRYPOINT ["webapp"]
+```
+
+Notice that we're giving the first container a name with `FROM <image>:<tag> as build`. The `as build` part is what names our intermediate container and tells Docker that this container won't be the final step of our build pipeline.
+
+Notice also that we're using a `full` image for the build. That's fine, because this container is going to be discarded.
+
+Let's skip a line and create our next container, the one that will be the final container with our application already built for production:
+
+```Dockerfile
+# Start of the build container
+FROM golang:1.11-stretch as build
+
+WORKDIR /go/src/github.com/khaosdoctor/webapp
+
+COPY web.go web.go
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./bin/webapp github.com/khaosdoctor/webapp
+
+# Start of the production container
+FROM debian:stretch-slim
+
+RUN mkdir -p /web/static/ 
+
+COPY --from=build /go/src/github.com/khaosdoctor/webapp/bin/webapp /usr/bin
+COPY index.html /web/static/index.html
+
+WORKDIR /web
+
+EXPOSE 3000
+
+ENTRYPOINT ["webapp"]
+```
+
+Notice one important instruction here. We're using `COPY --from=build`, which means we're telling Docker to copy files not from our own filesystem, but from another, intermediate container! That's exactly what defines a multi-stage build.
+
+## Shrinking the image
+
+Now notice that we're using a `debian:stretch-slim` image. As we've already seen, this image is smaller than a full image, so it has fewer vulnerabilities and takes up less space. A build test of both images shows that the full image comes in at around 110mb, against 62mb for the slim image.
+
+Besides those two images, there's one more type we mentioned, `alpine`, which is based on Alpine Linux. For that, all we need to do is change the base image to `alpine:3.8`
+
+```Dockerfile
+# Start of the build container
+FROM golang:1.11-stretch as build
+
+WORKDIR /go/src/github.com/khaosdoctor/webapp
+
+COPY web.go web.go
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./bin/webapp github.com/khaosdoctor/webapp
+
+# Start of the production container
+FROM alpine:3.8
+
+RUN mkdir -p /web/static/ 
+
+COPY --from=build /go/src/github.com/khaosdoctor/webapp/bin/webapp /usr/bin
+COPY index.html /web/static/index.html
+
+WORKDIR /web
+
+EXPOSE 3000
+
+ENTRYPOINT ["webapp"]
+```
+
+Now we have an image that's **11mb**, with no vulnerabilities and no external dependencies. So we can see that moving an image to `Alpine` is an excellent choice when we're working with compiled applications that already ship their own runtime alongside their binary.
+
+## Optimizing from zero
+
+To wrap up, let's try putting our application in a `scratch` image. If we remember correctly, a scratch image genuinely has absolutely nothing installed, it's literally an image "_from scratch"._ Here we're going to see two main changes.
+
+The first will be in our `build` container:
+
+```Dockerfile
+# Start of the build container
+FROM golang:1.11.2-alpine3.8 as build
+
+WORKDIR /go/src/github.com/khaosdoctor/webapp
+
+COPY web.go web.go
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./bin/webapp github.com/khaosdoctor/webapp
+```
+
+Notice that we're using Alpine to build our application, since `scratch` doesn't have absolutely anything in it. So we're going to build the image in an Alpine container and copy the binary into the `scratch` production container.
+
+> We could also do this with the build image on Slim. That would make the build even faster, because the build image would be smaller.
+
+Now let's copy the Go binary into the `scratch` image:
+
+```Dockerfile
+# Start of the build container
+FROM golang:1.11.2-alpine3.8 as build
+
+WORKDIR /go/src/github.com/khaosdoctor/webapp
+
+COPY web.go web.go
+COPY index.html /web/static/index.html
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./bin/webapp github.com/khaosdoctor/webapp
+
+# Start of the production container
+FROM scratch
+
+RUN mkdir -p /web/static/ 
+
+COPY --from=build /go/src/github.com/khaosdoctor/webapp/bin/webapp /usr/bin
+COPY --from=build /web/static/index.html /web/static/index.html
+
+EXPOSE 3000
+
+ENTRYPOINT ["/usr/bin/webapp"]
+```
+
+Notice we made two main changes here:
+
+1.  We dropped the `WORKDIR` instruction, because `scratch` doesn't have an initial filesystem, so everything sits in the same directory
+2.  The `ENTRYPOINT` is now a full path, because the `scratch` container has no `PATH` to look through, since it has no OS at all
+
+With that, we shrank the image size even further, down to **7mb**. And on top of that, we get the best security possible, since there's no package of any kind installed in our image.
+
+## Conclusion
+
+We learned how to best build an image for a compiled language, Go in this case, but you can carry this approach over to any other language that needs to be compiled ahead of time!
+
+Don't forget to subscribe to the newsletter below for more exclusive content and weekly news! Like and share your feedback in the comments right after the post!
+
+See you next time.

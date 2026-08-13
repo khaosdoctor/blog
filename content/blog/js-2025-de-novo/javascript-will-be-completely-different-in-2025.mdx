@@ -1,0 +1,155 @@
+---
+title: "JavaScript Will Be Completely Different in 2025"
+pubDate: 2024-10-16T11:00:01.000Z
+updatedDate: 2026-07-16T17:50:52.000Z
+lang: en
+slug: "javascript-will-be-completely-different-in-2025"
+category: "javascript"
+tags: ["javascript", "ecmascript", "development"]
+description: "JavaScript could change quite a bit in 2025, some very interesting proposals were approved, see which ones!"
+machineTranslated: true
+draft: false
+---
+Not long ago I made a series of [predictions for JS in 2025](/js-2025/), and I wasn't that far off from reality! TC39 met this week in Tokyo to discuss the proposals that would move forward in the next JS versions, this was the committee's 104th meeting since it was created.
+
+As always happens, Rob Palmer, one of the TC39 members, posts on his [Twitter](https://x.com/robpalmer2/status/1843448233340875143?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1843448233340875143%7Ctwgr%5E%7Ctwcon%5Es1_c10&ref_url=https%3A%2F%2Fsocket.dev%2Fblog%2Ftc39-advances-10-ecmascript-proposals-key-features-to-watch) everything that will be discussed during the meetings. This year the agenda was:
+
+-   Array.zip
+-   Atomics.pause
+-   Error.isError
+-   Extractors
+-   Immutable ArrayBuffer
+-   Iterator helpers
+-   Math.sumPrecise
+-   Promise.try
+-   RegExp modifiers
+-   Structs
+
+And some of them really did move forward to the next stages, not all the ones I predicted, but at least 50% of them! This was my best hit rate ever! Let's go through everything that was discussed:
+
+## [Iterator helpers](https://github.com/tc39/proposal-iterator-helpers)
+
+A proposal that's actually several. Here we're talking not just about the helpers (which moved to stage 4 and will be implemented), but also about another proposal I mentioned could see progress.
+
+![](./image.png)
+
+This proposal adds a set of helper methods to iterators (like Map, Set and generators), like `map`, `filter`, `reduce` and many others, to make working with iterators closer to working with an array.
+
+Something that isn't very easy to understand today, because, for example:
+
+```js
+const arr = [1,2,3]
+arr.map((v) => v) // ok
+
+const set = new Set([1,2,3])
+set.map((v) => v) // error, sets don't have map
+```
+
+Notice that Array, which is an iterable, has `map`, but Set doesn't, because even though the main way to use a Set is through iteration, it isn't an Iterable.
+
+Besides this proposal, another one I also mentioned (which was at stage 2) moved to 2.7, [Iterator Sequencing](https://github.com/tc39/proposal-iterator-sequencing?ref=blog.lsantos.dev). It lets us build iterators by concatenating other iterators with `Iterator.concat`, the same way we do with `Array.concat`.
+
+## [Import attributes](https://github.com/tc39/proposal-import-attributes) & [JSON Modules](http://github.com/tc39/proposal-json-modules)
+
+Now we'll finally get to use what we'd already been using for months. Both proposals that change how we import JSON and other modules moved to stage 4 and will be implemented!
+
+Now we'll be able to do this:
+
+```js
+import json from './arquivo.json' with { type: 'json' }
+```
+
+Originally the two proposals were just one, but they got split. The reason is that, for import attributes (the `with`), this could open up opportunities for us to natively import other file types beyond just JSON, XML or CSV for example.
+
+So each module type that gets imported will get its own new proposal, the same way JSON modules did. This ensures engines don't end up with their own specific implementations for each thing, imagine how awful it'd be if every browser read JSON differently...
+
+Both proposals passed and now we'll have a native way to read JSON files directly from JS, something Node already implemented, but that wasn't part of the spec.
+
+## [RegExp Modifiers](https://github.com/tc39/proposal-regexp-modifiers)
+
+One more that moved to stage 4. Now we'll be able to use modifiers like `/i`, `/m` and others directly in JS RegExps. I admit this one caught me off guard, I didn't know it was even up for a vote, I figured this feature was already in the current engine, but apparently it hadn't been implemented (unlike every other language before it, which implemented it right off the bat... go figure).
+
+## [Structs](https://github.com/tc39/proposal-structs)
+
+This is a proposal I genuinely thought wouldn't move this fast. Structs add four logical objects to JS:
+
+-   Structs: Objects with a fixed layout that behave like classes, but with some restrictions that make them faster and easier to statically analyze for a compiler
+-   Shared Structs: Slightly more restricted structs that can be accessed by multiple threads in parallel. This structure alone is what enables real parallelism in JS
+-   Mutex and Condition: Abstractions to synchronize access to shared structs
+-   Unsafe Blocks: Objects that mark where unsafe memory can be initialized and worked with
+
+The big idea behind this proposal started with Structs, which would be fixed objects that can't have more or fewer fields, which is great because most of the objects we use are like that anyway. That way the compiler doesn't need to optimize every object to be dynamic by default.
+
+SharedStructs will let us use objects that share memory across files, without needing Realms or other structures. This proposal just moved to stage 2 and now the design is what's going to get worked on!
+
+## [Extractors](https://github.com/tc39/proposal-extractors)
+
+Extractors moved to stage 2. They're nothing more than a function that can be applied while destructuring an object. This lets us do both validation and normalization of values, for example, we can lowercase every key:
+
+```js
+const LowercaseExtractor = {
+  [Symbol.customMatcher](valor) {
+    if (typeof valor === 'string') {
+      return valor.toLowerCase()
+    }
+  }
+}
+
+const LowercaseExtractor({ nome, rua }) = { nome: 'LUCAS', rua: 'RUA' }
+console.log({ nome, rua }) // { nome: 'lucas', rua: 'rua' }
+```
+
+## [Promise.try](https://github.com/tc39/proposal-promise-try)
+
+After [8 years](https://x.com/ljharb/status/1843884468647682382), Promise.try finally reached stage 4 and will be implemented in the language! I'd predicted this one in the other article too!
+
+The big idea here is actually pretty simple, when we have a value and we don't know whether it's a promise or not, we usually wrap it in a Promise and get on with our lives:
+
+```js
+// We don't know if F's return value is a promise or not
+const p = new Promise(resolve => resolve(F()))
+// but p will always be a promise
+```
+
+With this proposal we'll be able to turn that code into something like:
+
+```js
+await Promise.try(F) // returns F as a promise
+```
+
+This isn't a way to run functions in parallel or asynchronously, it simply calls a function, one that used to be synchronous, in a unified way, as a promise.
+
+## [Error.isError](https://github.com/tc39/proposal-is-error)
+
+Another one I'd predicted might move on from its current stage, `Error.isError` went to stage 2.7 and is waiting on tests and validation. The idea here is pretty simple and I honestly don't know why we haven't had this all along, but this proposal lets us do something similar to `Array.isArray`, only for errors:
+
+```js
+if (Error.isError(err)) {
+  // err is an error
+}}
+```
+
+This will cut down on the use of `instanceof Error`, since `instanceof` can be modified externally.
+
+## Conclusion
+
+There are other proposals that moved forward too, but honestly, none of them are going to make much of a difference in most people's day to day, two of the more interesting ones were [Array.zip](https://github.com/tc39/proposal-array-zip) and [Immutable ArrayBuffers](https://github.com/Agoric/tc39-proposal-immutable-arraybuffer), which might still get amended in the coming days.
+
+Other proposals could be up for discussion too, like:
+
+-   AsyncContext
+-   Dataview Clamped Methods
+-   Decimal
+-   Discard Bindings
+-   ESM Phase Imports
+-   Explicit Compile Hints
+-   Intl.DurationFormat
+-   JSSugar
+-   Math.emplace
+-   Measure Object
+-   Observables
+-   Porffor
+-   Smart Units
+-   Temporal
+
+From what I've seen lately, Temporal is picking up steam and might genuinely be up for release next year, so let's keep an eye on it.

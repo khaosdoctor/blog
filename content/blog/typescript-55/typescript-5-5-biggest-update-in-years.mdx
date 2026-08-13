@@ -1,0 +1,228 @@
+---
+title: "The Biggest TypeScript Update in Years - TypeScript 5.5"
+pubDate: 2024-07-10T17:23:32.000Z
+updatedDate: 2026-07-16T17:55:26.000Z
+lang: en
+slug: "typescript-5-5-biggest-update-in-years"
+category: "typescript"
+tags: ["typescript"]
+description: "Learn everything about the biggest TypeScript update in years!"
+seoTitle: "What's new in TypeScript 5.5?"
+machineTranslated: true
+draft: false
+---
+After a little while without posting TypeScript news here, I'm finally back to show what's new in the world of the most beloved language out there!
+
+TypeScript 5.5 has [officially launched](https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/) and it's being considered one of the most important updates ever. This new version improves several parts of the code and the general behavior of TS, and it also adds some really interesting things.
+
+## Inferred predicates
+
+One of the main changes is the automatic inference of predicates as a variable gets changed throughout the code. This change was made in [this PR](https://github.com/microsoft/TypeScript/pull/57465) recently, and honestly it was something most people weren't expecting to land in a recent version.
+
+For example, when we have something like this:
+
+```ts
+const foo: string | number = 'str'
+```
+
+If we have any code that uses `foo` after this line, any statement needs the type `string | number`, since that's the original type of the variable. We can do some _narrowing_ (which I explain in Formação TS, my TypeScript course) and reduce the possible set of types, for example, if I just want to grab the string:
+
+```ts
+const foo: string | number = 'str'
+
+if (typeof foo === 'string') {
+  // in here, foo is string
+}
+
+// out here it's still string | number
+```
+
+Another common use of this kind of function is when we want to create [type guards](/assertion-functions/), meaning we want to pull this check out of the if and reuse it, so we can do it like this:
+
+```ts
+function isString (v: unknown) {
+  return typeof v === 'string'
+}
+```
+
+But, without us manually specifying the return of this function, we're going to get something pretty odd:
+
+```ts
+if (isString(foo)) {
+  console.log(foo); // string | number
+}
+```
+
+This happens because, inside a function, TS loses the narrowing. The way to fix this is to manually use a _type predicate_, a suffix we can add to tell TS that a given type is actually another type:
+
+```ts
+function isString (v: unknown): v is string {
+  return typeof v === 'string'
+}
+
+if (isString(foo)) {
+  console.log(foo); // string
+}
+```
+
+A big advantage of using this kind of function is that we can pass it to other methods, mainly iterative ones, like `map`, `filter` and `reduce`:
+
+```ts
+const foo = [0, "foo", 99, "bar"] // Array<string | number>
+const strings = arr.filter(isString) // string[]
+```
+
+But there's a problem with type guards, which is the fact that we're manually telling TS what it needs to know, so TS won't complain if we do something like this:
+
+```ts
+function isString (v: unknown): v is number {
+  return typeof v === 'string'
+}
+
+if (isString(foo)) {
+  console.log(foo); // number
+}
+```
+
+Which is completely wrong. And that's exactly why this new proposal exists. You can now write the same function without the predicate and TS will automatically infer that the function returns the correct result.
+
+```ts
+function isString (v: unknown) {
+  return typeof v === 'string'
+}
+
+if (isString(foo)) {
+  console.log(foo); // string
+}
+```
+
+And this uses a core TypeScript primitive that's also used to infer and narrow other types, so anything you need to infer from `if`s, or any other function that:
+
+-   Doesn't have an explicit return type declaration
+-   Has an inferred return of `boolean`
+-   Has a single `return` and no implicit return
+-   Never modifies the received parameter at any point
+
+Is going to be a candidate for use as a type predicate.
+
+## Indexed object access now works
+
+One of the biggest problems pretty much everyone has run into with TS is when we need to access objects using the `obj[key]` form. For example:
+
+```ts
+function foo(obj: Record<string, unknown>, key: string) {
+    if (typeof obj[key] === "string") {
+        obj[key].toUpperCase(); // Property 'toUpperCase' does not exist on type 'unknown'
+    }
+}
+```
+
+Even when we manually narrow to `string`, TS still infers `obj[key]` as `unknown`, because any value of `obj[key]` is defined as `unknown` in `Record<string, unknown>`.
+
+In TS 5.5 this no longer happens, as long as neither `obj` nor `key` gets modified during the function.
+
+## The @import tag in JSDoc
+
+For anyone who likes or needs to use JS with TS in their project, one of the main problems is importing a type just to do type checking inside a JS file. You basically have three options:
+
+1.  Import it as a namespace, but the module still gets imported at runtime
+
+```js
+import * as modulo from "./modulo";
+
+/**
+ * @param {modulo.Tipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+2.  Use the `import()` function inside JSDoc, but that's not reusable.
+
+```js
+/**
+ * @param {import("./modulo").Tipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+3.  To make it reusable, we can use JSDoc's `typedef`, but that's really long to write, and it can get super long for complex types.
+
+```js
+/**
+ * @typedef {import("./modulo").Tipo} MeuTipo
+ */
+
+/**
+ * @param {MeuTipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+Now TS implements a new JSDoc definition that lets you use ESM-style imports:
+
+```js
+/** @import * as modulo from "modulo" */
+
+/**
+ * @param {modulo.Tipo} valor
+ */
+function foo(valor) {
+    // ...
+}
+```
+
+## Syntax checking in RegExp
+
+There isn't much to say here. Previously TS would simply let any regex through as valid, now the compiler also checks for valid and invalid syntax. Check out a few examples:
+
+```ts
+let myRegex = /@robot(\s+(please|immediately)))? do some task/;
+//                                            ~
+// Unexpected ')'. Did you mean to escape it with backslash?
+```
+
+The check works with capture groups:
+
+```ts
+let myRegex = /@typedef \{import\((.+)\)\.([a-zA-Z_]+)\} \3/u;
+//                                                        ~
+// This backreference refers to a group that does not exist.
+// There are only 2 capturing groups in this regular expression.
+```
+
+And with named groups too:
+
+```ts
+let myRegex = /@typedef \{import\((?<importPath>.+)\)\.(?<importedEntity>[a-zA-Z_]+)\} \k<namedImport>/;
+//                                                                                        ~~~~~~~~~~~
+// There is no capturing group named 'namedImport' in this regular expression.
+```
+
+## Support for the new Set methods
+
+TS now supports the new Set methods that shipped in [ECMAScript 2024](/ecma-2024-sets/), even though they haven't been fully implemented yet. I won't go into detail here because you can check the article I linked, which has the full explanation for each method.
+
+## Other changes
+
+-   You can use the `${configDir}` placeholder inside `tsconfig.json` to point to the location where the file lives, which is quite useful when you have separate config files ([see the explanation](https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#the-configdir-template-variable-for-configuration-files))
+-   The `isolatedDeclarations` flag and property make it easier to build public libraries by forcing explicit returns when they're needed to generate `.d.ts` files ([see the explanation](https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#using-isolateddeclarations))
+-   The following properties were disabled
+    -   `charset`
+    -   `target: ES3`
+    -   `importsNotUsedAsValues`
+    -   `noImplicitUseStrict`
+    -   `noStrictGenericChecks`
+    -   `keyofStringsOnly`
+    -   `suppressExcessPropertyErrors`
+    -   `suppressImplicitAnyIndexErrors`
+    -   `out`
+    -   `preserveValueImports`
+    -   `prepend` in project references
+    -   implicit OS `newLine`
+-   You can no longer create a type called `undefined`

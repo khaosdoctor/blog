@@ -1,0 +1,129 @@
+---
+title: "Everything about TypeScript's new satisfies operator"
+pubDate: 2022-10-05T13:00:52.000Z
+updatedDate: 2026-07-16T16:05:55.000Z
+lang: en
+slug: "everything-about-the-new-satisfies-operator-in-typescript"
+category: "typescript"
+tags: ["typescript", "javascript"]
+description: "With the TypeScript 4.9 beta, we got a new operator, satisfies. Let's understand how this new operator can be useful and why it's super cool!"
+seoDescription: "With the TypeScript 4.9 beta, we got a new operator, satisfies. Let's understand how this new operator can be useful."
+machineTranslated: true
+draft: false
+---
+In the latest open beta of TypeScript, the devs showed what's coming in version 4.9 of the language. Besides some optimizations, which are pretty common, in type inference, we're getting a new operator in the language: `satisfies`. Let's understand a bit more about how this operator works.
+
+## The `satisfies` operator
+
+When we're developing with TS, we often run into a tricky dilemma. TS's type inference is really good and specific, so it's great to have that super specific inference, but at the same time, this inference doesn't take some factors into account, like key names.
+
+In the example taken straight from the [beta announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-beta/#the-satisfies-operator), we get a really good idea of what this means. Let's imagine the following: we have a type that can be either a string or an RGB tuple, meaning we need a `[number, number, number]`. We can write it like this:
+
+```ts
+const palette = {
+  red: [255, 0, 0],
+  green: "#00ff00",
+  bleu: [0, 0, 255]
+// ^^^ we have a typo here
+}
+```
+
+TS's automatic type inference will say `palette` is:
+
+```ts
+{
+  red: [255, 0, 0],
+  green: "#00ff00",
+  bleu: [0, 0, 255]
+}
+```
+
+In other words, we have a literal type. These types let us use certain functions for each data type in some cases, for example a `toUpperCase` function on `green` since it's a string, and a `.at(0)` on `red` since it's an array:
+
+```ts
+// We can use array methods here
+const redComponent = palette.red.at(0);
+
+// But not here, because we can only use strings
+const greenNormalized = palette.green.toUpperCase();
+```
+
+The problem is we lose inference on the key names. See, we have a typo there, we should have written `blue` and not `bleu`, but to fix this we'd have to create a new, more generic type and tell TS that's the type of the object. In this case, the type could be:
+
+```ts
+type Colors = "red" | "green" | "blue"
+type RGB = [red: number, green: number, blue: number]
+
+const palette: Record<Colors, string | RGB> = {
+  red: [255, 0, 0],
+  green: "#00ff00",
+  bleu: [0, 0, 255]
+}
+```
+
+This gives us the error `Object literal may only specify known properties, and 'bleu' does not exist in type 'Record<Colors, string | RGB>'.`, which is expected, meaning we're now matching the keys against the object, so we can fix it:
+
+```tys
+const palette: Record<Colors, string | RGB> = {
+  red: [255, 0, 0],
+  green: "#00ff00",
+  blue: [0, 0, 255]
+}
+```
+
+We'll end up with a type like this:
+
+```ts
+{
+  red: string | RGB,
+  green: string | RGB,
+  blue: string | RGB
+}
+```
+
+But now we'll get two pretty annoying errors on the two functions below:
+
+```ts
+// Property 'at' does not exist on type 'string | RGB'.
+const redComponent = palette.red.at(0);
+
+// Property 'toUpperCase' does not exist on type 'string | RGB'.
+const greenNormalized = palette.green.toUpperCase();
+```
+
+The first because strings don't have `.at`, and the second because `RGB` doesn't have `.toUpperCase`. This only happens because, when we tell TS that object is of a certain type, that type generalizes whatever goes into the object. In this case, for example, it's unsure whether each key is a string or an array of numbers, and then we can't infer both things at once.
+
+To solve this problem, we'd have to do an explicit cast:
+
+```ts
+nent = (palette.red as RGB).at(0);
+const greenNormalized = (palette.green as string).toUpperCase();
+```
+
+And that's exactly what `satisfies` is for. We can keep the more detailed inference while also saying it must follow some kind of shape. For example:
+
+```ts
+const palette = {
+  red: [255, 0, 0],
+  green: "#00ff00",
+  blue: [0, 0, 255]
+} satisfies Record<Colors, string | RGB>
+```
+
+Now the new type of `palette` will be:
+
+```ts
+{
+    red: [number, number, number];
+    green: string;
+    blue: [number, number, number];
+}
+```
+
+See how we're now combining the power of specific inference with the power of declared type inference to get the most out of TypeScript. This way we can use string functions on keys that are strings, and array functions on keys that are arrays of numbers.
+
+## Conclusion
+
+This is, without a doubt, one of the best additions to the superset in recent times. I believe the main recommendation from now on is to write all your types with zero manual assertions, and use satisfies to say which object it should belong to. This way we get the best of both worlds.
+
+For more examples, check out the [issue that proposed this feature](https://github.com/microsoft/TypeScript/issues/47920).

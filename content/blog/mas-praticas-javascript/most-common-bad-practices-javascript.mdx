@@ -1,0 +1,250 @@
+---
+title: "The most common bad practices in JavaScript"
+pubDate: 2022-02-01T13:00:00.000Z
+updatedDate: 2026-07-16T16:10:54.000Z
+lang: en
+slug: "most-common-bad-practices-javascript"
+category: "javascript"
+tags: ["javascript", "architecture"]
+description: "Come learn some of the practices considered \"bad\" in JavaScript, and how you can work around them to make your code better!"
+machineTranslated: true
+draft: false
+---
+![](https://www.youtube.com/watch?v=QPSju6SY570)
+
+When people think about JavaScript, the general idea is usually that it's an extremely simple language that, for some reason, seems to be everywhere you look, no exceptions.
+
+But while JavaScript is indeed simple once you've got some experience with development, that's not always true, especially if you're just starting your journey into the wonderful world of programming.
+
+In this article I'm going to bring up some of the practices considered "obsolete" or "bad" when you're writing JavaScript code. But it's also important to point out that, even though these practices are considered bad practices, that doesn't mean there isn't a legitimate use case for some of them.
+
+I say that because it's important to notice that nothing is black and white on any subject, instead of being purely black or white, we're talking about shades of gray. Everything we do in software development has a reason, and there are cases where we're going to need some of these techniques, whether for performance, for compatibility, and so on.
+
+So here's a heads up: you'll probably see something like this, or even need to do something like this, at some point in your life. Whether it's to support an old product or to improve performance, whatever it is.
+
+## Using var in 2022
+
+I'll start right away with the first and most absurd of all the things you'll see in JavaScript code: `var`.
+
+The only possible explanation for someone still using it manually is forced compatibility with some runtime that's probably been out of use for at least six years.
+
+**"But what's the problem with var? 😱"**
+
+When we talk about variable allocation in JavaScript (or in any other language, for that matter) with `var`, there are two types of scope, as I explained in [this article here](https://imasters.com.br/desenvolvimento/escopos-em-javascript): **global** scope and **function** scope.
+
+The global scope is accessible not just to what's inside the function, but also to everything outside it, and function scope, as the name says, is only accessible inside the function where the variable was declared.
+
+That alone is a big problem because it's really easy to mess up when you declare a variable that's accessible to everyone, but to complete the chain of errors, a very interesting behavior of `var` is that it doesn't throw any kind of error when you redeclare an existing variable (like we see today with `const` and `let`, for example). The problem is that, instead of redeclaring the variable the same way and replacing the value, the engine just does nothing.
+
+That can lead to very confusing behavior and bizarre bugs that show up from broken logic because of a variable with the same name.
+
+### What you can do today
+
+Use `let` and `const`, preferably `const`, since these two kinds of declarations aren't stuck to just the global and function scopes, but to the scope of each block, what we call **lexical scope**. In other words, a variable only exists inside the block of code where it was declared and nothing more, which already avoids a big problem with value leaking.
+
+On top of that, `const` variables are for immutable values, so they can't be reassigned without an error, and neither of the two allows redeclaration with the same name.
+
+## Trusting type coercion
+
+A while back I started a [cool thread on Twitter](https://twitter.com/_StaticVoid/status/1481233189494575106?s=20) about type coercion, the feature that's at the same time the wonder and the destruction, not just of the language as a whole, but also the reason the dev community splits into two camps: the people who like JavaScript and the people who don't.
+
+A quick introduction for anyone who's never heard about this. **Type coercion** is a typical feature of dynamically typed languages, like JavaScript, Python, Ruby... it lets you write your code without worrying about variable types, which is different from other languages like C#, Java, C, and family.
+
+That can be an amazing superpower for whoever's programming, because you move a lot faster and don't need to worry about whether one type is compatible with another, because if it isn't, the language will convert it automatically for you. In other words, the compiler will _coerce_ that variable to the type it wants.
+
+But the catch is that it's only a power for someone who knows every type coercion rule by heart, which isn't true for almost anyone (not even the people who work on the language's core, let alone more experienced devs). So trusting type coercion too much to convert what you're sending the language into the right type isn't really the best thing to do.
+
+I think the most classic example of this, besides what I already showed in the thread, is the famous "1+1 sum". Almost every operator (like `+ - / * ==`) will automatically convert the types of their counterparts, so if we try something like this:
+
+```js
+console.log("1" + "1") // "11"
+console.log("2" - "1") // 1
+
+console.log('' == 0) // true
+console.log(true == []) // false
+console.log(true == ![]) // false
+```
+
+We'll see we get some pretty weird outputs. Why did it add the two strings but subtract the two numbers? Why isn't `[]` `true`? And a bunch of other questions I'm not going to answer here.
+
+The fact is: **trusting coercion too much is bad, not trusting it at all is also bad.**
+
+If you trust JavaScript's type coercion too much, you'll probably end up with code that's completely unreadable to any human being, because JavaScript won't give you any syntactic hint about what's happening in your code (this, by the way, is the reason supersets like TypeScript were created).
+
+On the other hand, if you don't trust JavaScript's type coercion at all, then you're better off not using JavaScript at all. Because if you're going to manually convert, and yes, that's possible, every type into the type you want, you're better off using a naturally typed language.
+
+### What to do?
+
+Don't just take advantage of coercion, **understand** how it works. It's easy to say the compiler is weird, but the history of this language shows why it behaves this way, and why it's _going_ to keep behaving this way forever.
+
+On top of that, add an explicit type conversion when you notice your variable might be ambiguous, for example:
+
+```js
+let qualquerCoisa = // some received value
+
+let stringA = a.tostring()
+let numeroA = Number(a)
+let boolA = Boolean(a)
+```
+
+Trust coercion for creation and receiving values, but only trust it for one-off conversions if you're absolutely sure of the final result, otherwise your code won't hold up well against _edge cases_.
+
+## Thinking arrow functions are the same as regular functions
+
+Even though they do the same things and have almost the same name, **arrow functions and regular functions are completely different things**.
+
+I've lost count of how many times I've seen devs fail logic tests in interviews because of this question. And I myself, sitting in on these interviews, have asked it more times than I can count. And the most impressive part is that a lot of people think they're the same thing, a lot of people say it's just _sugar syntax_ on top of functions, but it's not!
+
+There are a lot of differences between a regular function like `function foo () {}` and an arrow function like `() => {}`. And it's not even like this is hidden away in the JavaScript docs, it's completely out in the open and well documented, in fact it's something that gets talked about a lot.
+
+Some basic differences between these functions (there are a few more [here](https://dmitripavlutin.com/differences-between-arrow-and-regular-functions/)):
+
+-   _**A**_**rrow functions don't have their own context**, meaning the value of `this` inside the function is going to be the value of the scope immediately above it, so if you declare an arrow function inside another function, the value of `this` is going to be a reference to the parent function. **Regular functions have their own context**, so if you declare a function inside another function, the value of `this` in the child function is going to be completely different from the value of `this` in the parent function. That's why, back in the day, we used to save a `var self = this`, because we needed to pass the context from somewhere else into the inner function.
+-   **Arrow functions don't have the** `**arguments**` **system variable**, a special variable in JavaScript that returns everything passed to the function as an array. That was really common back in the day when we used this technique to build **variadic arguments** (arguments that can take a variable number of values). It's not even that necessary today, especially since we can do almost the same thing with _rest_ parameters.
+-   **Arrow functions can't be valid constructors**. Something we'll talk more about further down is _prototypes_, and prototypes are a form of inheritance. In the early days of JS, the only way to do anything with inheritance was using function constructors, that's right, `new MinhaFuncao()` would return an instance of that function, and then we could change its prototype however we wanted. That's not possible with arrow functions, and also, even though it's technically possible, it's not recommended since we now have the JavaScript class structure.
+
+That's just a few things, but it's already a big step toward understanding when to use and when not to use different functions in different cases.
+
+## Ignoring `this`
+
+I think `this` is the most misunderstood topic in JavaScript, so much so that I wrote [an article back in 2018](https://imasters.com.br/javascript/javascript-entendendo-o-de-uma-vez-por-todas) and people are still asking about it to this day.
+
+`this` really is complex to understand when you're getting into the language, having a movable context is one of JavaScript's "peculiarities". If you've worked with JS for a while, you've had to deal with things like `this`, `.bind()`, `.call()`, and `.apply()`.
+
+`this` basically has 3 rules (credit to [Fernando Doglio](https://fernandodoglio.substack.com/) for explaining it so well):
+
+-   Inside a function, `this` takes on the context of that function, meaning the value of the function instance's context. If it were a prototype it'd be the prototype's value, but that's not so common anymore.
+-   Inside an arrow function, it takes on the value of the parent object's context, whatever that is. If you call a function inside another function, `this` is going to be the parent function's `this`. If it's directly at the root, it's the global scope. If it's inside a method, it's the method's context.
+-   Inside class methods, it's the context of that method, including every property of the class (which is the way anyone who's worked with OOP is more used to).
+
+In general, the context is movable, so it can easily be swapped inside a function using methods like `bind` and `call`:
+
+```js
+class foo () {
+	constructor (arg1, arg2) {
+        this.arg1 = arg1
+        this.arg2 = arg2
+    }
+}
+
+function bar () {
+    console.log(this.arg1, this.arg2)
+}
+
+const foo1 = new foo('Lucas', 'Santos')
+const foo2 = new foo(true, 42)
+
+bar.bind(foo1)() // Lucas Santos
+bar.call(foo2) // true 42
+```
+
+Using these methods we can pull out the context and pass whatever `this` value we want to any object. This is still used a lot when we're dealing with systems that inject code into other systems without needing to change their implementation.
+
+## Not using strict comparators
+
+Another problem that catches a lot of people is using `==` instead of `===`. Remember what I said about type coercion? Well, this is where it really shines.
+
+Operators like `==` only compare the values on both sides, and for that to happen, it needs to convert both to the same type before they can even be compared in the first place. So if you pass a string on one side and a number on the other, `==` is going to try to convert both to strings or both to numbers.
+
+That doesn't happen with `===`, because it compares not only the value but also the type, so coercion doesn't happen. So you've got a lot less chance of running into a bizarre coercion error when you use strict comparison operators.
+
+## Ignoring errors in callbacks
+
+This isn't a bad practice only in JavaScript, but in any language. Since JS lets errors exist inside callbacks as parameters that may or may not get handled, this still applies, even though we don't use callbacks as much as we used to.
+
+In cases where we have something like:
+
+```js
+umaFuncaoComCallback((err, data) => {
+  return data
+})
+```
+
+Where the code is perfectly valid, but the error goes unhandled, that's going to cause a lot of errors down the line, especially because these errors might not even come from your own application. So the logic can keep running, but the values it gets will be completely different from what's expected, for example when you get a call back from an API or something like that.
+
+Errors in callbacks, as rare as they are today, should always be handled:
+
+```js
+umaFuncaoComCallback((err, data) => {
+  if (err) throw err
+  return data
+})
+```
+
+## Using callbacks
+
+So now we get to the next "bad practice", which isn't really that bad depending on the case: using callbacks.
+
+There's a fantastic explanation [in this article](https://jscomplete.com/learn/the-difference-between-callbacks-and-promises) about why callbacks and promises are completely different things. But the short version is that with callbacks, you can lose control of your code really easily. One of the reasons is the famous _callback hell_, where one callback leads to another callback that leads to another callback and so on.
+
+The other reason is that, since callbacks are complete functions, you have to hand off control of whatever actions you're going to take once the callback finishes to whoever's running the task, meaning the callback. If something goes wrong inside the callback, it's like you're one level below the rest of the code, with a completely different context.
+
+That's why using Promises, besides being a lot more readable, is preferable, especially when we're using `async/await`, because then we can delegate the "promise" of an execution to an executor, and once that executor finishes running, we get a concrete output and can then run the next action.
+
+Promises are so important that I wrote [two articles](https://dev.to/khaosdoctor/entendendo-promises-de-uma-vez-por-todas-44i7) about them, and they still get a lot of visits and a lot of questions.
+
+Promises can also cause "promise hells", and are also subject to control delegation, but it's a matter of how you use them. You can use promises to create a new execution context while the previous context is still running, like this:
+
+```js
+function promise () {
+	return new Promise((resolve, reject) => {
+    	setTimeout(resolve, 3000)
+    })
+}
+
+promise().then((data) => {
+	// another execution context
+})
+
+//code continues
+```
+
+That's why it's important to know when to use `then` and when to use `await`, because you actually can run processing in different threads in parallel using just Promises, without needing to block the main process. Say you want to log the progress of a function as it moves along, but that task has nothing to do with the original task, so it can run in a separate context.
+
+Now when we need to make a call to a database, that call is tied to our current logic, so we can't keep running the program. We have to stop, wait (without blocking the event loop), and then work with the result.
+
+## Using "archaic" techniques
+
+Honestly, nobody had the slightest idea JavaScript would get this famous. So over the course of the language's life, the applications built with it evolved a lot faster than the language itself.
+
+As a result, people started coming up with hacks to solve their problems. And those hacks stuck around in codebases to this day, for example using `array.indexOf(x) > -1` to check whether an element isn't present in an array, when today you can just use `array.includes(x)`.
+
+[This article](https://dmitripavlutin.com/make-your-javascript-code-shide-knockout-old-es5-hack/) has a really cool guide on how to go through old code and "update it".
+
+## Not using "Zero Values"
+
+Zero values are a technique widely adopted by Golang, where you **always** start a variable with an initial value, a zero value.
+
+In JavaScript, any uninitialized variable takes on the value `undefined`, but at the same time we have `null` values, which can be assigned to a variable to say it has no value at all.
+
+It's usually a bad practice to start as `undefined`, because we have to compare these values directly against `undefined`, otherwise we might accidentally run into a `null` and treat it as `undefined`.
+
+On top of that, JavaScript has a bunch of methods to avoid comparing `propriedade === undefined`, like `if ('prop' in objeto)`. Always try to use initial values, since that also makes it a lot simpler to merge objects with default values, like `{...valorPadrao, ...novosValores}`.
+
+## Not following a code style
+
+This is probably not just a bad practice but a lack of respect for your colleagues, if you're working on a team.
+
+There are a lot of well known code styles out there, like [AirBnB](https://github.com/airbnb/javascript)'s, [Google](https://google.github.io/styleguide/jsguide.html)'s, and my favorite, [Standard](https://standardjs.com/). Please use them, it makes the process a lot simpler and a lot easier to read for other people on the team, not to mention they also make it a lot easier to debug and understand what's going on.
+
+If you always forget, no problem! Use linting tools like [ESLint](https://eslint.org/) and [Prettier](https://prettier.io), and if you want, there's even a [](https://github.com/khaosdoctor/template-node-ts)[repository](https://github.com/khaosdoctor/template-node-ts) [template](https://github.com/khaosdoctor/template-node-ts) I made that already has all of this configured.
+
+## Messing with prototypes
+
+Prototypal inheritance is something pretty complex and pretty advanced, even for people who've been at this a long time.
+
+A long time ago I wrote [an article](https://medium.com/trainingcenter/herança-e-protótipos-no-javascript-2c1e60e005a2) about how prototypes and inheritance work in JavaScript. The idea is that everything is an object, every object has its prototype, which is also an object. That prototype is a reference to the object that created the current object, so it basically has all the methods of that object.
+
+For example, a plain array already has all the common methods `filter`, `map`, `reduce`, and so on. But that actually comes from `Array.prototype`, the object that gets passed to your array when it's created. The way inheritance works is that JS is going to search through every prototype, from the highest one (the current one) down to the lowest one (the original one), looking for the function's name. If it doesn't find it anywhere, that function doesn't exist.
+
+> If that got confusing, that's normal, but I recommend reading the article to understand it better, since here I'm just giving you the basic idea.
+
+Back in the day it was really common to use the prototype to inject a bunch of methods into our function so it behaved like a class, since every instance of that function would share the same prototypes, but **that's not true anymore today**.
+
+Avoid modifying prototypes as much as possible, unless you really know what you're doing, otherwise you can cause **very serious** problems in your application, since you're messing with the way your objects are defined.
+
+## Conclusion
+
+There are a lot of bad practices, some are necessary, a lot of them will show up in the code you're working on, but none of them are irreversible. So it's up to us to leave the code better than we found it.
+
+If you've got more tips, just hit me up on any of my [social media](https://lsantos.dev) :D

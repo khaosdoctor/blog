@@ -1,0 +1,86 @@
+---
+title: "Automatic OS Updates with Unattended Upgrades"
+pubDate: 2020-11-11T16:10:23.000Z
+updatedDate: 2026-07-16T16:21:31.000Z
+lang: en
+slug: "automatic-os-updates-unattended-upgrades"
+category: "infra"
+tags: ["cloud", "security", "architecture"]
+description: "Want to set up your server so it never needs your interaction to perform security updates?"
+seoTitle: "Updating VMs Automatically with Unattended Upgrades"
+seoDescription: "Want to set up your server so it never needs your interaction to perform operating system updates?"
+machineTranslated: true
+draft: false
+---
+When we're creating virtual machines, one of the biggest problems we face is keeping our operating systems updated and free from bugs and security vulnerabilities.
+
+In most cases, the OS already has an internal system for automatic updates, but when we're using a package-based operating system like Linux, say Ubuntu 18.04 Server, we have to constantly run commands like `apt update` and `apt upgrade` to install the latest versions of system packages and update to the latest version and fix any security vulnerabilities.
+
+## The Problem
+
+The big problem with these approaches is that we need to constantly log into the machine, run the command and exit. To solve this, we have the famous crontabs. For example, we can execute the following command:
+
+```bash
+crontab -e
+```
+
+To edit our crontab, and then we can register the following line:
+
+```bash
+0 3 */5 * * sudo apt update && sudo apt upgrade -y
+```
+
+This line will make us run the update commands every 5 days at 3 in the morning. It's a good practice to always run updates outside the machine's usage hours, so this time can be set by you without issues.
+
+Similarly, the frequency of execution is up to whoever is setting up the machine, I usually run the process every 5 days because generally we don't have big updates daily.
+
+But if we have other updates that require a reboot, like Kernel updates, then we'll have to log in and restart the machine manually. There must be a simpler way to do this, right?
+
+## Unattended Upgrades
+
+Ubuntu (and I believe most Debian-based systems) have a package called `unattended-upgrades`, which can be combined with some other packages to provide an amazing functionality in terms of security and OS updates.
+
+To start, let's remove the crontab we created earlier and leave the system clean again. Then, let's install the following packages:
+
+```bash
+sudo apt install -y unattended-upgrades apt-listchanges bsd-mailx
+```
+
+The `bsd-mailx` will ask for some initial configurations to set your email, these configurations are specific to each machine, but the ideal is that you choose the `Internet Site` option so you can configure the FQDN of your own domain. If you need to reconfigure the package because it's not working, use the following command:
+
+```bash
+sudo dpkg-reconfigure -plow postfix
+```
+
+This will open the configuration window again, if you prefer to reconfigure using the configuration file, just edit the file `/etc/postfix/main.cf`, don't forget to run a postfix restart after saving the file with the command:
+
+```bash
+sudo systemctl restart postfix
+```
+
+Now, let's activate the package for stable updates using the following command:
+
+```bash
+sudo dpkg -plow unattended-upgrades
+```
+
+Then we can open the configuration file, use your preferred editor to edit the file `/etc/apt/apt.conf.d/50unattended-upgrades`. This file contains all the configurations needed to define the package's update functionality, first, let's configure our email to receive notifications of important updates, for this we'll set the `Unattended-Upgrade::Mail` key with our chosen email, becoming `Unattended-Upgrade::Mail "hello@lsantos.dev";`.
+
+Now let's configure a series of other keys so we can get the most out of the package:
+
+```
+Unattended-Upgrade::Automatic-Reboot "true";  # To restart the system after a Kernel update
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot-Time "03:00"; # What time we want the system to restart
+```
+
+Now we can run the command `sudo unattended-upgrades --dry-run` to test if our configurations are correct. This command should have no output, if this is the result then everything is fine!
+
+## Conclusion
+
+With the installation of these packages we can be more at ease regarding operating system updates and we can also keep our VMs updated in a more concise way.
+
+If you read [the last article about creating your own VPN](/criando-uma-vpn/), the application of this technique and also [2FA using SSH](/aplicando-two-factor-authentication-no-ssh/) can be a good bet to leave your VM running smoothly!
+
+See you later!

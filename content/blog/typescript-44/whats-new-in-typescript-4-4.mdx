@@ -1,0 +1,172 @@
+---
+title: "What's new in TypeScript 4.4"
+pubDate: 2021-09-15T11:00:00.000Z
+updatedDate: 2026-07-16T16:12:30.000Z
+lang: en
+slug: "whats-new-in-typescript-4-4"
+category: "typescript"
+tags: ["typescript", "javascript", "development"]
+description: "Let's dig into what's new in TypeScript 4.4 and understand every single one of the new features!"
+machineTranslated: true
+draft: false
+---
+On August 26th, 2021, we got the [announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-4-4/) of **TypeScript** 4.4, and as usual, I'm going to highlight everything new and every cool addition to our favorite superset!
+
+## Control flow analysis now works with variables
+
+When we use TypeScript, one of the big fallacies a lot of people bring up as a blocker is having to keep declaring types for every single piece of data you have. That's not true.
+
+The TS compiler is powerful enough to understand the control flow of your code, so it knows when a variable or some other piece of data is of a specific type based on a check made earlier. That check is commonly called a _type guard_. It's when we do something like this:
+
+```js
+function foo (bar: unknown) {
+  if (typeof bar === 'string') {
+    // TS now knows the type is String
+    console.log(bar.toUpperCase())
+  }
+}
+```
+
+This holds true not only for `unknown` but also for generic types like `any`.
+
+The big problem was that if we moved that check into a constant or a function, TS lost track of the flow and couldn't figure out what was going on anymore, for example:
+
+```js
+function foo (bar: unknown) {
+	const isString = typeof bar === 'string'
+    if (isString) console.log(arg.toUpperCase())
+    //                            ~~~~~~~~~~~
+    // Error! Property 'toUpperCase' does not exist on type 'unknown'.
+}
+```
+
+Now, TS can identify the constant and its return, and it can deliver the result without errors. The same works for complex types, or discriminant types:
+
+```js
+type Animal = 
+    | { kind: 'cat', meow: () => void }
+    | { kind: 'dog', woof: () => void }
+
+function speak (animal: Animal) {
+  const { kind } = animal
+  
+  if (kind === 'cat') { animal.meow() }
+  else { animal.woof() }
+}
+```
+
+Inside the types extracted through destructuring, we now get the correct string assertion. Another cool thing is that it also understands transitively how all the types work, meaning it goes type by type to infer the current type of the object based on the checks you've already made:
+
+```js
+function f(x: string | number | boolean) {
+    const isString = typeof x === "string"
+    const isNumber = typeof x === "number"
+    const isStringOrNumber = isString || isNumber
+    if (isStringOrNumber) {
+        x  // Type of 'x' is 'string | number'.
+    }
+    else {
+        x  // Type of 'x' is 'boolean'.
+    }
+}
+```
+
+## Index signatures with Symbols and templates
+
+There's a type called an _index signature_. Basically, this type tells us that the object in question can have arbitrarily named keys, like a dictionary, represented as `[key: string]: any`.
+
+The only possible types for an _index signature_ right now are _string_ and _number_, because those are the most common types.
+
+There's another type called [Symbol](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mistério-383e359e64e3), though, which is heavily used, especially by people building libraries, to index the types of their arrays and objects without having to expose or modify them. With 4.4 landing, you can now do this:
+
+```js
+interface Colors {
+    [sym: symbol]: number;
+}
+
+const red = Symbol("red");
+const green = Symbol("green");
+const blue = Symbol("blue");
+
+let colors: Colors = {};
+
+colors[red] = 255;    
+let redVal = colors[red];  
+```
+
+It was also impossible to have a subset of _string_ or _number_, like template string types, as keys. For example, an object whose keys always start with `data-`. Now that's fully valid:
+
+```js
+interface DataOptions {
+  [key: `data-${string}`]: unknown
+}
+
+let b: DataOptions = {
+    "data-foo": true
+    "qualquer-coisa": true,  // Error! 'unknown-property' wasn't declared in 'DataOptions'.
+};
+```
+
+## Catch now defaults to `unknown`
+
+As a lot of people know (and complained about!), when we use a `try/catch` inside any function in TypeScript, the `catch` block always takes an `error` parameter that, by definition, had type `any`.
+
+After some discussions with the community about what the correct type should be, a lot of people leaned toward `unknown` as the default type for errors. Leaving the type wide open as `any` essentially gives you no typing at all. So TS 4.4 introduces a new `tsconfig` option and a new flag called `useUnknownInCatchVariables`, which is off by default so it doesn't break compatibility, but can and should be turned on.
+
+```js
+try {
+    codigo();
+}
+catch (err) { // err: unknown
+
+    // Error! Property 'message' does not exist on type 'unknown'.
+    console.error(err.message);
+
+    // Define o tipo de erro
+    if (err instanceof Error) {
+        console.error(err.message);
+    }
+}
+```
+
+If you turn on the `strict` flag, this one gets turned on too.
+
+## Exact optional properties
+
+Another problem the community brought up was the conflict between optional properties declared as `prop?: <type>`. This kind of property gets expanded to `prop: <type> | undefined`, but what if the property could actually hold an `undefined` value on purpose?
+
+So if someone wanted to write an optional property of type `number` as `undefined`, that was fine by default, but it caused a bunch of problems:
+
+```js
+interface Pessoa {
+  nome: string
+  idade?: number
+}
+  
+const Lucas: Pessoa = { nome: 'Lucas', idade: undefined } // ok
+```
+
+And this practice leads to a bunch of bugs because we end up treating a valid value the same as a nonexistent one. Even more so if we had to handle the `idade` property at some point. On top of that, each method like `Object.assign`, `Object.keys`, `for-in`, `for-of`, `JSON.stringify`, and so on, handles the "property exists or not" case differently.
+
+In version 4.4, TS adds a new flag called `exactOptionalPropertyTypes`, which makes this error go away, since you won't be able to use `undefined` on a property typed as optional anymore.
+
+```js
+interface Pessoa {
+  nome: string
+  idade?: number
+}
+  
+const Lucas: Pessoa = { nome: 'Lucas', idade: undefined } // Erro
+```
+
+Just like the previous one, this property is part of the `strict` set.
+
+## Support for static blocks
+
+ECMA2022 [has a new feature planned](https://github.com/tc39/proposal-class-static-block#ecmascript-class-static-initialization-blocks) called _static initialization blocks_. This feature will let us write more complex initialization code for static members of a class. We'll talk more about this here on the blog soon!
+
+For now, though, TS 4.4 already supports this feature.
+
+## Wrap-up
+
+These were the most important changes in TS 4.4, but not the only ones. We also got a bunch of performance improvements, plus better readability and VSCode integration.

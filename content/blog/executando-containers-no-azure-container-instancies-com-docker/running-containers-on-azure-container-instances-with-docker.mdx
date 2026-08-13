@@ -1,0 +1,133 @@
+---
+title: "Running Containers on Azure Container Instances with Docker"
+pubDate: 2020-08-03T13:00:00.000Z
+updatedDate: 2026-07-16T16:27:22.000Z
+lang: en
+slug: "running-containers-on-azure-container-instances-with-docker"
+category: "infra"
+tags: ["containers", "docker", "azure", "technology", "cloud"]
+description: "Ever imagined what it would be like to run a container directly on a cloud infrastructure without doing anything new?"
+machineTranslated: true
+draft: false
+---
+If you already use Docker, you've probably run a container on your machine before. But have you ever imagined what it would be like to run a container directly on a cloud infrastructure without doing anything new?
+
+Last month the Docker team [announced](https://www.docker.com/blog/running-a-container-in-aci-with-docker-desktop-edge/) that the new versions of Docker for desktop (called _Edge_ versions) would be getting **native** support for **[Azure Container Instances](https://azure.microsoft.com/services/container-instances/?WT.mc_id=personal-blog-ludossan)**, meaning we could run containers straight from our machine into a cloud environment without downloading a single image locally!
+
+## Azure Container Instances
+
+[Azure Container Instances](https://azure.microsoft.com/services/container-instances/?WT.mc_id=personal-blog-ludossan) (ACI) is one of the products offered by [Azure](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) that lets you deploy an application in a container without worrying about virtual machines or any other kind of infrastructure.
+
+I've already used [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) myself when we did a talk for #CodeInQuarentena. In the video below you can watch us build a complete API using Mongoke and [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan)
+
+![](https://www.youtube.com/watch?v=wsDC5tXR7QA)
+
+Essentially, [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) is a way to run your application as an online container. That way, the only thing you need is an [Azure account](https://azure.microsoft.com/free/search?WT.mc_id=personal-blog-ludossan) and an application that's already inside a container. The best part is that it's all billed by the **second** of use, so you're never paying for idle compute. That's excellent for applications that need to be spun up and torn down quickly.
+
+But how can [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) actually be integrated with Docker?
+
+## Integrating ACI with Docker
+
+Let's set up the integration between Docker and [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan). Assuming you already have an [Azure account](https://azure.microsoft.com/free/search?WT.mc_id=personal-blog-ludossan) and already know a bit about Docker, the first thing you need to do is **download Docker Edge**.
+
+### Docker Edge
+
+Docker Edge is an experimental version of Docker that gets all the updates that haven't made it to the general availability release yet. Since the integration with [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) is still behind an experimental flag, we need to download the Edge version of Docker. [This repository](https://github.com/docker/aci-integration-beta#macos-and-windows-installation) has all the links you need for installing it on various platforms.
+
+> If you **already** have Docker installed on your machine, you'll need to remove the official CE version and install Docker Edge instead. You can't have both versions installed on the same machine.
+
+Once Docker is installed, you should see this screen:
+
+![](./image-9.png "Image showing the main preferences page of Docker Edge")
+
+Check the `Command Line` tab to see if you have the `Enable Cloud Experience` option turned on:
+
+![](./image-10.png 'Image showing the "Enable Cloud Experience" option enabled in Docker tools')
+
+With that, the integration is active. Now what we need to do is create a context!
+
+### Docker Context
+
+[Docker contexts](https://docs.docker.com/engine/context/working-with-contexts/) aren't a new feature. The point of contexts is to let you switch where you're working from. This became really interesting after the arrival of [Kubernetes for Docker](https://docs.docker.com/docker-for-windows/kubernetes/), since with contexts you can switch between the Docker engine, Kubernetes inside Docker, or even a Docker Swarm context.
+
+With [ACI](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=personal-blog-ludossan) it's no different, we have to create a context for the cloud integration! It's quite simple, first we need to log in to Azure with the following command:
+
+```bash
+$ docker login azure
+```
+
+After that, you'll be taken to the Azure site to log in. Once that's done, you can go back to the CLI and run the following command:
+
+```bash
+$ docker context create aci context-name
+```
+
+Next you'll have to pick your subscription and then the resource group that will be used to spin up the images. Once that's done, you can run the `docker context ls` command to see every existing context, and your integration is complete!
+
+## Creating a container
+
+To run this example, we're going to use a public image I have on Docker Hub, called [Simple Node API](https://hub.docker.com/repository/docker/khaosdoctor/simple-node-api).
+
+Let's start by switching our context to the new one we just created, using the `docker context use <context-name>` command.
+
+To deploy it, we can run the command we're already used to, `docker run`:
+
+```bash
+$ docker run -d -p 80:80 --name node-api -e PORT=80 khaosdoctor/simple-node-api
+```
+
+Here's the output we get:
+
+To find the address we should hit to see our API live, let's run `docker ps` and look at the contents of `PORTS`.
+
+See that I need to hit the IP `13.86.141.148` to see the result of the API in the browser, let's go!
+
+![](./image-11.png 'Image showing the browser hitting the previous IP and the API result with the phrase "Hello World"')
+
+Notice that if we go to the Azure portal, we'll see our resource created exactly as if we'd created it by hand!
+
+![](./image-12.png 'Image of the Azure portal with our "node-api" resource created')
+
+To remove it, just run the `docker rm <name>` command. Notice that you can't run `docker stop`, because this kind of integration doesn't let us stop the container remotely. If we type `docker rm node-api`, our ACI gets removed from Azure and our container stops!
+
+## Other applications
+
+We can also use ACI to create multi-container applications with Docker Compose. For this, let's use the same example Docker gives us from the DockerCon site! Here's the YAML file:
+
+```yaml
+# docker-conpose.yaml
+version: '3.3'
+
+services:
+  db:
+    image: bengotch/acidemodb
+  
+  words:
+    image: bengotch/acidemowords
+  
+  web:
+    image: bengotch/acidemoweb
+    ports:
+      - "80:80"
+```
+
+We follow the same process. However, instead of running `docker run`, we run `docker compose up -d`.
+
+> Notice that there's no `-` between `docker` and `compose`, as you'd expect when running the command locally. That's because `compose` is a command of the integration itself!
+
+Then we can use `docker ps` as usual to grab the public IP and see the site live:
+
+![](./image-13.png "The DockerCon site live using the ACI integration")
+
+### Limitations
+
+-   ACI doesn't support port mapping, so you need to make sure your container is running on the same port on both the host and the container, using the `-p port:port` flag (see [this issue](https://github.com/docker/aci-integration-beta/issues/5))
+-   Not every command available in Docker is present in the integration (see [this other issue](https://github.com/docker/aci-integration-beta/issues/4) for more details)
+
+## Conclusion
+
+With the ACI integration we can move a lot faster when integrating with Azure, and it makes building cloud-oriented applications a lot easier! Give it a try yourself!
+
+Don't forget to subscribe to the newsletter below for more exclusive content and weekly news! Like and share your feedback in the comments right after the post!
+
+See you next time.

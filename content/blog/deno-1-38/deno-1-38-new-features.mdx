@@ -1,0 +1,100 @@
+---
+title: "Deno 1.38: env support, API changes, and new features"
+pubDate: 2024-01-03T11:00:52.000Z
+updatedDate: 2026-07-16T15:54:48.000Z
+lang: en
+slug: "deno-1-38-new-features"
+category: "javascript"
+tags: ["deno", "typescript", "development"]
+description: ".env file support, test runner in the REPL, Unix socket support and much more in the new Deno 1.38 release!"
+machineTranslated: true
+draft: false
+---
+
+In November, everyone's favorite TypeScript runtime got a fresh new version! As usual, let's cover what you can expect from Deno 1.38.
+
+## HTML Documentation
+
+Deno has a really interesting command called `deno doc`, which does exactly what you'd expect—it generates documentation for the module you're reading.
+
+Until now we had a few options like generating the documentation as JSON, or only generating the private module documentation, but that wasn't very useful, especially since most of them were just a way to print the same documentation in the terminal.
+
+Now, version 1.38 includes an `--html` option that lets you generate full documentation pages for your module even if it's not published on `deno.land`.
+
+Just run:
+
+```bash
+deno doc --html --name "My module" ./mod.ts
+```
+
+And it'll generate a series of HTML documentation files that you can publish. You can do this for ANY module and any file in your project.
+
+This is the video created by the Deno team showing how it can be done.
+
+![](https://www.youtube.com/watch?v=hQ2wEIUGV-M)
+
+Plus, the new `--lint` option makes Deno analyze your code for problems that could hurt your documentation!
+
+## Hot Module Reload
+
+One of the most interesting features of Deno is being able to use the excellent `--watch` when running code to reload your application if something changes.
+
+The problem is that often this app restart doesn't happen as expected, interrupting processes mid-execution. That's why we now have an improvement with the `--unstable-hmr` option.
+
+HMR (or Hot Module Reload) is a technique widely used in development, especially for frontend work, to replace the contents of a file without restarting the entire process, keeping state, memory, and everything that comes with it.
+
+This video from the Deno team shows how well this feature helps with development:
+
+<Video src="/videos/deno-1-38/deno-hmr.mp4" poster="https://img.spacergif.org/v1/1440x626/0a/spacer.png" />
+
+Notice that as the increment number changes, the application already picks up the result and starts applying the new change without needing to restart the entire app.
+
+You can also pass specific files to this flag with:
+
+```bash
+deno run --unstable-hmr=data.ts ./mod.ts
+```
+
+And you can also listen to HMR update events using an event listener:
+
+```ts
+addEventListener('hmr', (e) => {
+  console.log(e.detail.path)
+})
+```
+
+## .env Support
+
+Like [Node did before](/dotenv-nodejs/), now it's Deno's turn to have native support for `.env` files. That's unexpected, since Deno already has support through its standard library for the dotenv module, but now you can use it directly from the command line.
+
+Imagine you have a `.env` file at your project root. To run this file directly, you can pass the `--env` option to `deno run`:
+
+```bash
+deno run --env main.ts
+```
+
+You can also specify the file:
+
+```bash
+deno run --env=.env.dev mod.ts
+```
+
+## Other changes
+
+- You can now use any package manager (`yarn`, `pnpm`) to download NPM modules
+- Behind the `--unstable-bare-node-builtins` flag you can now use Node modules without the `node:` prefix
+- Faster JSX compilation and transformation
+- `deno task` now supports the `head` command on all platforms
+- The VSCode extension for Deno now supports the standard options for JavaScript and TypeScript from the code editor itself
+- The extension now has a sidebar with all the tasks from your `deno.json` file
+- You can now use `Deno.test` in the REPL
+- You can use `using` with some classes from the `Deno` namespace like: `FsFile`, `FsWatcher`, `HttpConn`, `HttpServer`, `Kv` and `Listener`
+
+---
+
+## FTS Time!
+
+If you liked this article, I also have a complete TypeScript course called **TypeScript Formation!**
+
+I invite you to check it out if you want to learn more about TypeScript with me and our amazing community with hundreds of students!
+

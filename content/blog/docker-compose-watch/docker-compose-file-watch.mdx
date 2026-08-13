@@ -1,0 +1,90 @@
+---
+title: "Everything about the new Docker Compose file watch"
+pubDate: 2023-07-06T11:00:05.000Z
+updatedDate: 2026-07-16T15:59:28.000Z
+lang: en
+slug: "docker-compose-file-watch"
+category: "infra"
+tags: ["docker", "containers", "development", "devops"]
+description: "Docker recently announced a new API for Docker Compose that lets it take automatic actions based on which files changed! Let's understand it all!"
+seoDescription: "Docker recently announced a new API for Docker Compose that lets it take actions based on which files changed! Let's understand it!"
+machineTranslated: true
+draft: false
+---
+After years of people asking for it, Docker finally decided to implement a [watch](https://docs.docker.com/compose/file-watch/) mode for the compose command! With it, we can trigger a kind of automatic update of our containers whenever our files change on disk!
+
+## The problem
+
+One of the biggest headaches for anyone who used (or still uses) Docker Compose is that whenever you have your container cluster running and you're developing locally against one of those containers, any change to a project file means restarting the whole compose setup to build a new image.
+
+Usually, when we're building an external API, for instance, this isn't much of a problem because we can run the API itself outside the compose setup while pointing it at the dependency containers inside, say an external API or something along those lines. But sometimes that's not possible, typically when whatever we're building needs to be on the same Docker network, or needs to run inside a container. In that case, the only option is to run everything inside Docker Compose.
+
+The catch is that every time we update one of the project files, we have to run the infamous `docker compose down` followed by a `docker compose up --rebuild` just to rebuild our service and keep developing.
+
+## The solution
+
+For years, people have been asking for Docker Compose to have a watch mode, a mode that could listen for changes to a given file or set of files in the project and run a specific command when they change. After a few years, we now have the **[compose file watch](https://docs.docker.com/compose/file-watch/) mode**. And the best part is you don't need to enable it for every one of your services.
+
+This now lets us start developing directly inside the compose containers, making the environment much easier to move around, regardless of whether your project needs a direct Docker integration or not.
+
+To turn on `watch` mode, all you need to do is add the `watch` key to any service inside your `docker-compose.yml`. This key takes an array of objects with two properties, one is `path` and the other is `action`: basically, the service will take an `action` whenever there's a change at a given `path`.
+
+Let's look at an example:
+
+```yml
+services:
+	web:
+    	build: .
+        command: npm run dev
+        x-develop:
+        	watch:
+            	- action: sync
+                  path: ./web
+                  target: /src/web
+                  ignore:
+                    - node_modules
+```
+
+> Right now, compose watch mode is experimental, which is why we have to use the `x-develop` key to say we're turning on a beta feature.
+
+## Actions
+
+There are two predefined types of actions you can take: `sync` and `rebuild`:
+
+### Sync
+
+This type of action makes sure any change made to your local file, outside the container, gets added to the container and replaces the file inside it.
+
+It's a lot like the concept of bind mounts, or even volumes, which still exist inside Docker, but unlike them, Sync gives you finer granularity than volumes do. One example is being able to ignore entire files or directories, something we can't do unless we set up multiple volumes.
+
+A really interesting use case for this is our beloved JavaScript, especially with Node.js: it's a good idea to completely ignore the `node_modules` folder because, even though there's a ton of JS code in there, some dependencies use Native Modules, which won't work in environments other than the ones they were built and compiled for.
+
+### Rebuild
+
+When we use Rebuild, we get the equivalent of running `docker compose up --build <service>` every time we save the `path`.
+
+While `sync` is best suited for applications that can do a _hot reload_, meaning reloading the app is enough to check the changes, like a front-end or something similar, `rebuild` is better suited for when we change some key file (like `package.json`) that needs a full recompile of the image to reinstall or remove dependencies that may have changed.
+
+> Another use case is for compiled languages, which need to go through the full build process to be rebuilt, although there are cases where you can just swap out an application's binary and that will be enough.
+
+### Path and Target
+
+Both actions come with two other properties, `path` and `target`.
+
+In short, `target` is the path to the watched file inside the container. For example, if my `package.json` file is at the root of my local folder, but inside the `/app` folder in my container, then my target will be `/app/package.json`.
+
+Keep in mind that, as a rule, every path is based on your application's build directory, meaning the location where Docker found the Dockerfile.
+
+## Running it
+
+To run docker compose watch, we first need to build our service with `docker compose up -d --build --wait`, which will make Docker start the compose setup and build every image.
+
+Then we can run `docker compose alpha watch` to start watch mode, which will read the settings we want from our file.
+
+## Conclusion
+
+Docker watch is a command that will come in handy for most development workflows, especially when we have to build large applications that support Hot Reload.
+
+With this command, we can open the door to developing inside containers more and more, meaning we won't have substantial differences between machines, and we can finally be done with "works on my machine" once and for all!
+
+> **Important:** Keep in mind the command is still in alpha, so its API might change in the coming months. If that happens, I'll try to update the article to reflect the changes!

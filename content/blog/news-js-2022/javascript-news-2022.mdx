@@ -1,0 +1,173 @@
+---
+title: "JavaScript news in 2022"
+pubDate: 2022-07-28T07:00:00.000Z
+updatedDate: 2026-07-16T16:07:56.000Z
+lang: en
+slug: "javascript-news-2022"
+category: "javascript"
+tags: ["javascript", "ecmascript", "nodejs", "development"]
+description: "JavaScript keeps evolving! Come with me in this article where I'll show you what's new in the world's favorite language in 2022."
+draft: false
+seoDescription: "JavaScript keeps evolving! Come with me in this article where I'll show you what's new in the world's favorite language in 2022."
+machineTranslated: true
+---
+
+Every month we get tons of updates in our favorite languages, and JavaScript is no exception.
+
+I made a video explaining a bit more about how JavaScript's release process works for new features. If you haven't watched it yet, I strongly recommend it so you can better understand how everything works.
+
+![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
+
+With that said, the 2022 version of ECMAScript—the spec behind JS—is incredible, and I'll explore all the major features with you!
+
+## The `.at()` method for all indexables
+
+One of the simplest but also coolest additions is the new `.at()` method on arrays and any other native indexable, like strings.
+
+What it does is give you the item at the requested position in an array. For example:
+
+```js
+const cart = ['banana', 'apple', 'pear']
+cart.at(0) // banana
+cart.at(-1) // pear
+
+// Out of bounds
+cart.at(100) // undefined
+```
+
+And it works for any indexable, so if we have a string:
+
+```js
+const phrase = 'The quick brown fox jumps over the lazy dog'
+
+phrase.at(0) // T
+phrase.at(-1) // g
+```
+
+## Capture indices in RegExp
+
+Now, besides returning the match from your regex, the RegExp constructor also returns a list of indices showing where that match started and ended. For example:
+
+```js
+const input = 'abcd'
+const match = /b(c)/.exec(input)
+const indices = match.indices
+
+indices.length // 2
+matches.length // 2
+// The number of indices equals the number of matches
+
+indices[0] // [1,3] start/end of the first match "b"
+input.slice(indices[0][0], indices[0][1
+]) // same as match[0]
+```
+
+## Object.hasOwn
+
+A simpler variation of `Object.hasOwnProperty` that returns true for all properties that belong directly to an object (not inherited):
+
+```js
+const books = {}
+books.pages = 123
+
+Object.hasOwn(books, 'pages') // true
+Object.hasOwn(books, 'toString') // false
+
+// The 'in' operator checks all properties
+'pages' in books // true
+'toString' in books // true
+```
+
+## Error causes with `Error.cause`
+
+This is one of the major changes and one I think will be most useful. This new property on the error class shows you what caused the error.
+
+```js
+const error = new Error('An error', { cause: 'The cause of this error' })
+
+error instanceof Error // true
+error.cause // 'The cause of this error'
+```
+
+The main use case is avoiding passing the error object directly:
+
+```js
+try {
+  doesNotWork();
+} catch (err) {
+  throw new Error('doesNotWork failed!', { cause: err });
+}
+```
+
+## Top-level await
+
+This has been available in Node.js for a while, but since we have [ESModules](/os-ecmascript-modules-estao-aqui/) we can now do top-level await, that is, an `await` outside of an `async function`:
+
+```js
+// index.mjs
+
+// fails in the old implementation
+await Promise.resolve('🍎');
+// → SyntaxError: await is only valid in async function
+
+// the workaround we usually do with IIFE
+(async function() {
+  await Promise.resolve('🍎');
+  // → 🎉
+}());
+
+// new top-level await implementation
+await Promise.resolve('🍎') // '🍎'
+```
+
+## Class field declarations
+
+We **FINALLY** now have class property declarations outside the constructor. That means we can declare and assign a value to a class property without needing a constructor with `this.prop = prop`.
+
+This was already pretty common in TypeScript, but now it's coming natively to JavaScript:
+
+```js
+class MyClass {
+    /*
+      instead of:
+      constructor() { this.publicID = 42; }
+    */
+    publicID = 42; // public field
+
+    /*
+      instead of:
+      static get staticPublicField() { return -1 }
+    */
+    static staticField = -1;
+
+    // private static fields
+    static #privateStaticField = 'private';
+
+    // private methods
+    #privateMethod() {}
+
+    // static initialization with static declaration blocks
+    static {
+      // Runs when the class is created
+    }
+}
+```
+
+## Class field checks through reflection
+
+This is a tricky use case, but when we tried checking a class property through a static initialization block, we'd get an error saying the class wasn't initialized or the property doesn't exist. This got fixed:
+
+```js
+class C {
+  #prop;
+
+  #method() {}
+
+  get #getter() {}
+
+  static isC(obj) {
+    // using 'in'
+    return #prop in obj && #method in obj && #getter in obj;
+  }
+}
+```

@@ -1,0 +1,788 @@
+---
+title: "Controlling Containers From Inside Your Application With ContainerD"
+pubDate: 2021-02-04T14:00:00.000Z
+updatedDate: 2026-07-16T16:19:10.000Z
+lang: en
+slug: "controlling-containers-from-inside-your-application-with-containerd"
+category: "infra"
+tags: ["containerd", "containers", "docker", "oci", "cri", "golang", "devops", "kubernetes", "technology"]
+description: "Ever thought about an alternative to Docker? How about manipulating containers programmatically from your API? Let's integrate your app with the container world!"
+machineTranslated: true
+draft: false
+---
+As we already talked about in the [previous article](/oci-cri-docker-ecossistema-de-containers/), Kubernetes recently marked Docker as deprecated, meaning we won't be able to use the Docker integration directly from inside a Pod anymore unless we install it manually.
+
+In that same article I talked about what that means for the ecosystem and introduced the [Open Container Initiative (OCI)](https://opencontainers.org/), which is responsible for creating the standard we follow so that container runtimes can run the same kind of image. Every image compatible with OCI can be run by any runtime that's also compatible, and that opens the door to building different runtimes.
+
+Now, let's understand how we can use [ContainerD](https://containerd.io/) to integrate with our applications and run containers without needing Docker or any communication with it at all.
+
+## ContainerD
+
+Just like CRI-O, Docker Engine and RKT, ContainerD is a container runtime, meaning it's the tool that manages the whole lifecycle of a container, from pulling the image to creating network interfaces, supervision and storage.
+
+![](./image-7.png "Overview of the ContainerD ecosystem (Source: ContainerD)")
+
+That means we can grab any image compatible with the OCI spec and run it using ContainerD. So if everything is compatible, why don't we just use Docker directly?
+
+For the same reason Kubernetes deprecated Docker support. As much as we might want an application like Docker, it's still fully geared toward users and their interaction with the tool, meaning Docker is a tool built to be used by people, not by machines.
+
+With ContainerD we can integrate container manipulation right into our code, because it doesn't have a user interface. And that's exactly what we're going to do here.
+
+## Getting ready
+
+Before we can run our image using ContainerD, we'll need to prepare a machine to run the tool. `ctr` (ContainerD's CLI) only runs in environments that have the OCI [`runc`](https://github.com/opencontainers/runc/releases) implementation installed, and unfortunately that implementation only exists for Linux.
+
+### Creating a VM
+
+In my case, I'm using a Mac, so if you're on any environment other than Linux (like Windows), you'll need a virtual machine, or you can use [WSL2](https://www.omgubuntu.co.uk/how-to-install-wsl2-on-windows-10) on Windows. I decided to go with the first option and created a virtual machine using [VirtualBox](https://www.virtualbox.org/) and the [Ubuntu 18.4 netboot image](http://cdimage.ubuntu.com/netboot/bionic/) (just because it's lighter and faster to download).
+
+![](./image-5.png "I ran a small VM using Linux on my computer")
+
+> **Note:** If you want to install Ubuntu using the same image I used, select your system architecture (x86, amd64, arm, etc.) at the link above and download the file called `mini.iso`. From there, run the image in VirtualBox.
+
+If you're using Linux or one of its distributions, this step isn't necessary, you can skip straight to installing `runc`.
+
+> **Note 2:** I won't go into the details of how to install the virtual machine or how to run Ubuntu in this article, there are tons of great articles and tutorials on the internet about that exact topic, and they're pretty easy to find.
+
+Once the virtual machine is created, let's install Go on it.
+
+### Installing Go
+
+In this example we're going to integrate our Go application with ContainerD, and while we're at it we'll compile `runc` (another required dependency) straight from source.
+
+I'm using the Ubuntu 18.4 Linux distribution, so the install can be done using Snap or the Tar file. You can find all the options [in the docs](https://golang.org/doc/install). In my case, I installed it using Snap with the following command:
+
+```bash
+sudo snap install go --classic
+```
+
+For this tutorial I'm using version 1.15.6:
+
+![](./image-6.png)
+
+Let's create a folder anywhere, I picked `~/gopath`, to be our `$GOPATH`, then let's open our `.bashrc` file and add the following line:
+
+```bash
+export GOPATH=~/gopath
+export PATH=$PATH:$GOPATH/bin
+```
+
+Then we'll save and run `source .bashrc` to load the changes. Now let's create the right directories with the following command:
+
+```bash
+mkdir -p $GOPATH/src/github.com
+```
+
+**_But do I need to know Go?_**
+
+Not necessarily, ContainerD has a CLI you can use to communicate with it from the command line.
+
+On top of that, ContainerD also has [a gRPC API](https://github.com/containerd/containerd/tree/master/api) that lets you talk directly to the service's socket and call the RPCs you need, like Mark Kose did [here with the browser](https://medium.com/@Mark.io/how-to-get-a-browser-communicate-with-containerd-using-grpc-fd44f7cf7512) (though he used Envoy to talk to the socket) and [here](https://medium.com/@Mark.io/how-to-communicate-with-containerd-using-java-f37d349b9ead) using Java with gRPC.
+
+So, stretching the concept a bit (but not by much), you can use any language supported by gRPC to connect to ContainerD's socket at the `containerd.sock` file. Pretty much the same thing we do when integrating with `docker.sock`. Unfortunately though, there's no native client except the one written in Go.
+
+### Installing `runc`
+
+`runc` is an open source project built by OCI, you can find the official repo [here](https://github.com/opencontainers/runc). We can install it a few different ways:
+
+1.  Downloading a release from the [releases list](https://github.com/opencontainers/runc/releases) and putting it in a folder that's on your `$PATH`
+2.  Cloning the repo and running `make`, as described in the README.
+3.  Using `go get`
+
+The easiest way by far is option 3, since option 1 requires knowing some things about your system and option 2 can cause some issues depending on the architecture. Since we already have Go installed, let's just install `runc` as a new package.
+
+Run the following command to download and install `runc`:
+
+```bash
+go get github.com/opencontainers/runc
+```
+
+After a while, check whether there's a binary called `runc` in the `$GOPATH/bin` folder. Try running `runc --version` to get an output similar to this:
+
+![](./image-8.png "runc installed and ready to run")
+
+If that doesn't work, build the binary yourself by going into the download folder with `cd $GOPATH/src/github.com/opencontainers/runc` and running `make && sudo make install`.
+
+## Installing ContainerD
+
+To install `ctr`, ContainerD's CLI, on our virtual machine. On Ubuntu it's as simple as running `sudo apt install containerd -y`, for other systems check the [downloads page](https://containerd.io/downloads/).
+
+If everything went well, you'll be able to run `ctr version` to show the CLI's version number.
+
+![](./image-10.png)
+
+> If you're having trouble running the `ctr version` command with a "Permission Denied" message when reading the `containerd.sock` file at `/run/containerd`, run the command with `sudo`.
+
+On top of that, ContainerD can also be used with Systemd as a daemon service, to check whether everything's fine, use `sudo systemctl status containerd`, you should get an output saying the ContainerD daemon is installed and running.
+
+If you want to be extra sure, run `ps -fC containerd` and watch the processes show up in the system's process list:
+
+```
+UID        PID  PPID  C STIME TTY          TIME CMD
+root     23133     1  0 14:23 ?        00:00:02 /usr/bin/containerd
+root     23666 23643  0 14:42 ?        00:00:00 containerd
+```
+
+### Using it without `sudo`
+
+To get rid of the need for `sudo` when running `ctr`, we can change the daemon's config file, located at `/etc/containerd/config.toml`. By default the file isn't generated, so we have to generate a base file. To do that let's create the directory and run ContainerD's own command to generate a base file.
+
+```bash
+sudo mkdir -p /etc/containerd
+sudo containerd config default > /etc/containerd/config.toml
+```
+
+This command will generate a file close to this one at `/etc/containerd`:
+
+```toml
+version = 2
+root = "/var/lib/containerd"
+state = "/run/containerd"
+plugin_dir = ""
+disabled_plugins = []
+required_plugins = []
+oom_score = 0
+
+[grpc]
+  address = "/run/containerd/containerd.sock"
+  tcp_address = ""
+  tcp_tls_cert = ""
+  tcp_tls_key = ""
+  uid = 0
+  gid = 0
+  max_recv_message_size = 16777216
+  max_send_message_size = 16777216
+
+[ttrpc]
+  address = ""
+  uid = 0
+  gid = 0
+
+[debug]
+  address = ""
+  uid = 0
+  gid = 0
+  level = "debug"
+
+[metrics]
+  address = ""
+  grpc_histogram = false
+
+[cgroup]
+  path = ""
+
+[timeouts]
+  "io.containerd.timeout.shim.cleanup" = "5s"
+  "io.containerd.timeout.shim.load" = "5s"
+  "io.containerd.timeout.shim.shutdown" = "3s"
+  "io.containerd.timeout.task.state" = "2s"
+
+[plugins]
+  # Omitted
+```
+
+Let's grab our user's ID and our group's ID, to do that type the `id` command on the command line and copy the `uid` and `gid` IDs, in my case, both are 1000:
+
+```
+uid=1000(khaosdoctor) gid=1000(khaosdoctor) groups=1000(khaosdoctor),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),117(lpadmin),124(sambashare),999(vboxsf)
+```
+
+Now open the file and let's edit the `[grpc]`, `[ttrpc]` and `[debug]` sections of the TOML file. Replace the `uid` and `gid` properties from 0 to your user and group's number, ending up like this (remember mine were 1000):
+
+```toml
+[grpc]
+  address = "/run/containerd/containerd.sock"
+  tcp_address = ""
+  tcp_tls_cert = ""
+  tcp_tls_key = ""
+  uid = 1000
+  gid = 1000
+  max_recv_message_size = 16777216
+  max_send_message_size = 16777216
+
+[ttrpc]
+  address = ""
+  uid = 1000
+  gid = 1000
+
+[debug]
+  address = ""
+  uid = 1000
+  gid = 1000
+  level = "debug"
+```
+
+Save the file and close the editor. Now run `sudo systemctl restart containerd` and then `sudo ls -l /run/containerd` and check whether the `containerd.sock` file belongs to your username and group.
+
+![](./image-11.png)
+
+## Using `ctr`
+
+The first step to using ContainerD is understanding `ctr`. The same way Docker works from the command line, we're able to create and manage containers in a more controlled way with `ctr`.
+
+First, we have to create a `namespace`. Namespaces are logical separations in the system that let different users on the same system work without conflicting with each other. To do that let's run `ctr namespaces create`:
+
+```bash
+ctr namespaces create lsantos # I'm creating a namespace called "lsantos"
+```
+
+We can see the namespaces we created with `ctr namespaces ls`:
+
+```
+NAME    LABELS 
+lsantos 
+```
+
+Finally, we can pull our first image. As a test, I'll pull [an image of mine](https://hub.docker.com/repository/docker/khaosdoctor/simple-node-api) that has a small Node.js API that responds with a "Hello World" for anyone hitting a given port. Let's run the command below to pull the image:
+
+```bash
+ctr images pull docker.io/khaosdoctor/simple-node-api:latest
+```
+
+And then we can list the images with `ctr images ls`:
+
+```
+REF                                          TYPE                                                 DIGEST                                                                  SIZE      PLATFORMS   LABELS 
+docker.io/khaosdoctor/simple-node-api:latest application/vnd.docker.distribution.manifest.v2+json sha256:587747676c8aa6e26e2c7f3adf8c76c5653e63e96af6510fbf12357be4fcd0f3 254.1 MiB linux/amd64 -  
+```
+
+Now that we've pulled our image, let's run it. The `ctr` commands are pretty similar to Docker's own commands. Let's run the following command:
+
+```bash
+sudo ctr run \
+  --net-host \
+  --rm \
+  --env PORT=8080 \
+  docker.io/khaosdoctor/simple-node-api:latest \
+  simple-api
+```
+
+And we've got a container running:
+
+![](./image-13.png)
+
+Let's go through the command part by part:
+
+-   `sudo ctr run`: The command that tells ContainerD to create a container from an FS or an image
+-   `--net-host`: Lets us access the container's network through the host (so we can reach our API)
+-   `--rm`: Just like in Docker, removes the container after it runs
+-   `--env PORT=8080`: We create an environment variable inside the container called `PORT` with the value `8080`, as the image's docs say
+-   `docker.io/khaosdoctor/...`: We say which image we want to run
+-   `simple-api`: We give the container a name, this name can be anything
+
+Now we can open the browser at `localhost:8080` and watch the magic happen!
+
+![](./image-12.png)
+
+Congrats! You just created your first container without needing Docker!
+
+## Integrating with the ContainerD API
+
+Now, let's move on to the second part, where we do all of this without any kind of command line or CLI to help. We're going to write a Go application so we can integrate directly with `containerd.sock` and issue commands through its gRPC interface.
+
+The big advantage of using Go for this kind of thing is that we get the native client straight from the source, since ContainerD is written in Go. So everything becomes a lot easier!
+
+The example we're going to build here is very similar to the [example on the lib's site](https://containerd.io/docs/getting-started/), but we'll simplify it a bit more so we can run what we did before through `ctr`.
+
+First, I'll create a directory anywhere on my VM (if you're using VirtualBox, take a look at the "Shared Folders" option), I decided to call my directory `containerd`, and inside it I created another folder called `src`.
+
+### Creating a client
+
+Let's start a new module by running `go mod init containerd` and then download ContainerD's client package with `go get github.com/containerd/containerd`, this will create a new `pkg` folder with the necessary files inside.
+
+> The code you'll see below can be found [in this repo on my GitHub](https://github.com/khaosdoctor/containerd-integration-example)
+
+Inside the `src` folder I'll create a new file called `main.go` and create ContainerD's client:
+
+```go
+package main
+
+import (
+	"log"
+
+	"github.com/containerd/containerd"
+)
+
+func main() {
+	if err := createAPI(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func createAPI () error {
+	client, err := containerd.New("/run/containerd/containerd.sock")
+	defer client.Close()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+```
+
+What we're doing here is basically creating ContainerD's client by passing the path to the `.sock` file we're going to communicate through.
+
+### Creating a context
+
+Since we're using the socket to communicate via gRPC, we'll have to create a context for our calls. To do that, let's import the `github.com/containerd/containerd/namespaces` package at the top of our file and create a new context and a new namespace, very similar to what we already did with `ctr`.
+
+Our `imports` will look like this:
+
+```go
+import (
+	"context"
+	"log"
+
+	"github.com/containerd/containerd"
+	"github.com/containerd/containerd/namespaces"
+)
+```
+
+Then we'll add another line inside the `createAPI` function:
+
+```go
+func createAPI () error {
+	client, err := containerd.New("/run/containerd/containerd.sock")
+	defer client.Close()
+	if err != nil {
+		return err
+	}
+
+	ctx := namespaces.WithNamespace(context.Background(), "lsantos")
+
+	return nil
+}
+```
+
+Here we're creating a new namespace called `lsantos` and passing an empty context.
+
+### Pulling an image
+
+Let's pull our image the same way we did with the `ctr image pull` command. Our final function will look like this:
+
+```go
+func createAPI () error {
+	client, err := containerd.New("/run/containerd/containerd.sock")
+	defer client.Close()
+	if err != nil {
+		return err
+	}
+
+	ctx := namespaces.WithNamespace(context.Background(), "lsantos")
+
+	image, err := client.Pull(ctx, "docker.io/khaosdoctor/simple-node-api:latest", containerd.WithPullUnpack)
+	if err != nil {
+		return err
+	}
+	log.Printf("Image %q pulled", image.Name())
+
+	return nil
+}
+```
+
+On your VM run `go build ./src/main.go` and then `./main`, you should see an output saying the image was pulled.
+
+### Creating a container
+
+To be able to run a container through the programmatic interface, we have to create a valid OCI runtime. This runtime can have several configurations, but ContainerD already has a default runtime that's very good and very useful, so let's use it.
+
+To do that let's create a new function called `createContainer`, it'll have the following signature:
+
+```go
+func createContainer (
+	ctx context.Context,
+	client *containerd.Client,
+	image containerd.Image,
+) (containerd.Container, error) { }
+```
+
+To spin up the container without naming problems, let's automatically create a unique hash based on the current time for each container. Let's import the `crypto/sha256`, `encoding/hex` and `time` libraries and write the following code:
+
+```go
+func createContainer (
+	ctx context.Context,
+	client *containerd.Client,
+	image containerd.Image,
+) (containerd.Container, error) {
+	
+	hasher := sha256.New()
+	hasher.Write([]byte(time.Now().String()))
+	salt := hex.EncodeToString(hasher.Sum(nil))[0:8]
+    
+	containerName := "simple-api-" + salt
+	log.Printf("Creating a new container called %q", containerName)
+```
+
+Now we can create our OCI spec, to do that let's import ContainerD's OCI module, our imports will look like this:
+
+```go
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"log"
+	"time"
+
+	"github.com/containerd/containerd"
+	"github.com/containerd/containerd/namespaces"
+	"github.com/containerd/containerd/oci"
+)
+```
+
+And now we create the spec in a separate variable:
+
+```go
+func createContainer (
+	ctx context.Context,
+	client *containerd.Client,
+	image containerd.Image,
+) (containerd.Container, error) {
+
+	hasher := sha256.New()
+	hasher.Write([]byte(time.Now().String()))
+	salt := hex.EncodeToString(hasher.Sum(nil))[0:8]
+
+	containerName := "simple-api-" + salt
+	log.Printf("Creating a new container called %q", containerName)
+
+	imageSpecs := containerd.WithNewSpec(
+    	oci.WithImageConfig(image),
+        oci.WithEnv([]string{"PORT=8080"}),
+        oci.WithHostNamespace(specs.NetworkNamespace),
+        oci.WithHostHostsFile,
+        oci.withHostResolvconf,
+    	)
+```
+
+Notice that the specs are actually the settings for the image we want to run, that's why we're passing a new config called `oci.WithEnv`, where we pass the environment variable's string.
+
+On top of that we've got `WithHostNamespace`, which sets the container's namespace to be the same as ours, and we've also got `WithHostHostsFile` and `WithHostResolvconf` which mount our `/etc/hosts` and `/etc/resolv.conf` files into the container so we can access it from outside, like we did with `--net-host`.
+
+> By the way, [`ctr`'s own source code](https://github.com/containerd/containerd/blob/1e7a6906bf61943bce1ae1ecb773c9e293219005/cmd/ctr/commands/run/run_unix.go#L193) does the exact same thing we're doing now when a container is started with the `--net-host` flag
+
+After this, let's finish the function by creating the container. The final function would look like this:
+
+```go
+func createContainer (
+	ctx context.Context,
+	client *containerd.Client,
+	image containerd.Image,
+) (containerd.Container, error) {
+
+	hasher := sha256.New()
+	hasher.Write([]byte(time.Now().String()))
+	salt := hex.EncodeToString(hasher.Sum(nil))[0:8]
+
+	containerName := "simple-api-" + salt
+	log.Printf("Creating a new container called %q", containerName)
+
+	imageSpecs := containerd.WithNewSpec(
+    	oci.WithImageConfig(image),
+        oci.WithEnv([]string{"PORT=8080"}),
+        oci.WithHostNamespace(specs.NetworkNamespace),
+        oci.WithHostHostsFile,
+        oci.withHostResolvconf,
+        )
+
+	container, err := client.NewContainer(
+		ctx,
+		containerName,
+		containerd.WithNewSnapshot(containerName + "-snapshot", image),
+		imageSpecs,
+	)
+	if err != nil {
+		return nil, err
+	}
+    
+	log.Printf("Created new container %q", containerName)
+	return container, nil
+}
+```
+
+Then we call the function in our main function, right after pulling the image:
+
+```go
+container, err := createContainer(ctx, client, image)
+if err != nil {
+	return err
+}
+defer container.Delete(ctx, containerd.WithSnapshotCleanup)
+```
+
+We're removing the container right after it runs, similar to the `--rm` we used, the complete function looks like this:
+
+```go
+func createAPI () error {
+	client, err := containerd.New("/run/containerd/containerd.sock")
+	defer client.Close()
+	if err != nil {
+		return err
+	}
+
+	ctx := namespaces.WithNamespace(context.Background(), "lsantos")
+
+	image, err := client.Pull(ctx, "docker.io/khaosdoctor/simple-node-api:latest", containerd.WithPullUnpack)
+	if err != nil {
+		return err
+	}
+	log.Printf("Image %q pulled", image.Name())
+
+	container, err := createContainer(ctx, client, image)
+	if err != nil {
+		return err
+	}
+	defer container.Delete(ctx, containerd.WithSnapshotCleanup)
+
+	return nil
+}
+```
+
+You can see it all in action through the same `go build ./main.go` and `sudo ./main` commands:
+
+![](./image-14.png)
+
+### Tasks and containers
+
+An important segregation ContainerD makes is between containers and tasks.
+
+While a container is an object with several metadata fields and allocated resources, a task is an actual process running on the system. Every task **must be removed after it runs**, but containers can be reused and updated multiple times.
+
+Let's create a new `createTask` function so we can grab all the container's IO and print it to our terminal:
+
+```go
+func createIOTask (ctx context.Context, container containerd.Container) (containerd.Task, error) {
+	task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStdio))
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
+}
+```
+
+What we're doing here is importing the `github.com/containerd/containerd/cio` library to create a link that lets all of our container's output information flow into our `main.go` file, let's call it in our main function right below where we create the container:
+
+```go
+task, err := createIOTask(ctx, container)
+if err != nil {
+	return err
+}
+defer task.Delete(ctx)
+```
+
+Right now, our task is in the `created` status, meaning it's created but not started. Let's start it, but we have to be careful to always wait for it to finish before we can kill it. Let's add these lines to our main function, below where we call `defer task.Delete`:
+
+```go
+	exitStatus, err := task.Wait(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if err := task.Start(ctx); err != nil {
+		return err
+	}
+```
+
+This makes sure we'll wait for the task to finish before we're able to remove it.
+
+### Killing the process
+
+Since we're running a process that runs without ever finishing (_long-running process_), let's give it some time to run and show its logs, as well as enough time for us to hit our API and check everything.
+
+So far our function looks like this:
+
+```go
+func createAPI () error {
+	client, err := containerd.New("/run/containerd/containerd.sock")
+	defer client.Close()
+	if err != nil {
+		return err
+	}
+
+	ctx := namespaces.WithNamespace(context.Background(), "lsantos")
+
+	image, err := client.Pull(ctx, "docker.io/khaosdoctor/simple-node-api:latest", containerd.WithPullUnpack)
+	if err != nil {
+		return err
+	}
+	log.Printf("Image %q pulled", image.Name())
+
+	container, err := createContainer(ctx, client, image)
+	if err != nil {
+		return err
+	}
+	defer container.Delete(ctx, containerd.WithSnapshotCleanup)
+
+	task, err := createIOTask(ctx, container)
+	if err != nil {
+		return err
+	}
+	defer task.Delete(ctx)
+
+	exitStatus, err := task.Wait(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if err := task.Start(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+```
+
+Let's add the following lines before the `return nil`:
+
+```go
+time.Sleep(10 * time.Second)
+
+if err := task.Kill(ctx, syscall.SIGTERM); err != nil {
+	return err
+}
+
+status := <-exitStatus
+exitCode, _, err := status.Result()
+if err != nil {
+	return err
+}
+
+log.Printf("%q foi finalizado com status: %d\n", container.ID(), exitCode)
+```
+
+We're waiting 10 seconds (you can bump this up if needed) so we can send a `task.Kill` command, then we're waiting for the call's status to come back through a Channel so we can grab the result and print it to the screen.
+
+## Wrapping up
+
+We can now run our container normally, first we can use `go build ./main.go` and then `sudo ./main.go` to run the command and get the containers running:
+
+![](./image-15.png "Complete execution flow")
+
+If we try to hit the API through the browser within those 10 seconds we'll get the same result we got before:
+
+![](./image-16.png)
+
+And that's how we can manipulate containers programmatically using `runc` and `containerd`, while understanding a bit more about how the container ecosystem works!
+
+Our final file ended up like this:
+
+```go
+package main
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"log"
+	"syscall"
+	"time"
+
+	"github.com/containerd/containerd"
+	"github.com/containerd/containerd/cio"
+	"github.com/containerd/containerd/namespaces"
+	"github.com/containerd/containerd/oci"
+	"github.com/opencontainers/runtime-spec/specs-go"
+)
+
+func main() {
+	if err := createAPI(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func createAPI () error {
+	client, err := containerd.New("/run/containerd/containerd.sock")
+	defer client.Close()
+	if err != nil {
+		return err
+	}
+
+	ctx := namespaces.WithNamespace(context.Background(), "lsantos")
+
+	image, err := client.Pull(ctx, "docker.io/khaosdoctor/simple-node-api:latest", containerd.WithPullUnpack)
+	if err != nil {
+		return err
+	}
+	log.Printf("Image %q pulled", image.Name())
+
+	container, err := createContainer(ctx, client, image)
+	if err != nil {
+		return err
+	}
+	defer container.Delete(ctx, containerd.WithSnapshotCleanup)
+
+	task, err := createIOTask(ctx, container)
+	if err != nil {
+		return err
+	}
+	defer task.Delete(ctx)
+
+	exitStatus, err := task.Wait(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if err := task.Start(ctx); err != nil {
+		return err
+	}
+
+	time.Sleep(10 * time.Second)
+
+	if err := task.Kill(ctx, syscall.SIGTERM); err != nil {
+		return err
+	}
+
+	status := <-exitStatus
+	exitCode, _, err := status.Result()
+	if err != nil {
+		return err
+	}
+	log.Printf("%q foi finalizado com status: %d\n", container.ID(), exitCode)
+
+	return nil
+}
+
+func createContainer (
+	ctx context.Context,
+	client *containerd.Client,
+	image containerd.Image,
+) (containerd.Container, error) {
+
+	hasher := sha256.New()
+	hasher.Write([]byte(time.Now().String()))
+	salt := hex.EncodeToString(hasher.Sum(nil))[0:8]
+
+	containerName := "simple-api-" + salt
+	log.Printf("Creating a new container called %q", containerName)
+
+	imageSpecs := containerd.WithNewSpec(
+																			oci.WithDefaultSpec(),
+																			oci.WithImageConfig(image),
+																			oci.WithEnv([]string{"PORT=8080"}),
+																			oci.WithHostNamespace(specs.NetworkNamespace),
+																			oci.WithHostHostsFile,
+																			oci.WithHostResolvconf,
+																			)
+
+	container, err := client.NewContainer(
+		ctx,
+		containerName,
+		containerd.WithNewSnapshot(containerName + "-snapshot", image),
+		imageSpecs,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Created new container %q", containerName)
+	return container, nil
+}
+
+func createIOTask (ctx context.Context, container containerd.Container) (containerd.Task, error) {
+	task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStdio))
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
+}
+```

@@ -1,0 +1,128 @@
+---
+title: "A Deep Dive into Container Images - Part 1"
+pubDate: 2020-07-24T13:00:00.000Z
+updatedDate: 2026-07-16T16:28:31.000Z
+lang: en
+slug: "a-deep-dive-into-container-images-part-1"
+category: "infra"
+tags: ["containers", "docker", "development", "technology"]
+series: container-images
+seriesOrder: 1
+description: "Learn what every type of container image is for and how to pick the best image for your project!"
+machineTranslated: true
+draft: false
+---
+I recently read a series of articles by [Scott Coulton](https://itnext.io/@scott.coulton?source=post_page-----44b45e47a1f7----------------------)[^1][^2][^3] on Medium about how to pick base images for your containers. So I decided to write these articles so other people can also understand how to best choose where to start building their containers with Docker.
+
+[^1]: [I Chose You Container Image - Part 1](https://itnext.io/i-cho-cho-chose-you-container-image-part-1-fa6671d9ae1f)
+[^2]: [I Chose You Container Image - Part 2](https://itnext.io/i-cho-cho-choose-you-container-image-part-2-44b45e47a1f7)
+[^3]: [I Chose You Container Image - Part 3](https://itnext.io/i-cho-cho-choose-you-container-image-part-3-b4eadb4f1573)
+
+## Base Images
+
+When we start building our images, the first thing we have to worry about is: what base image are we going to use for our application?
+
+For example, I build a lot of images that use [Node.js](https://docs.microsoft.com/visualstudio/javascript/tutorial-nodejs?view=vs-2019&WT.mc_id=blog-personal-ludossan), so my natural choice would be to use a base image from Node itself, like `node:14`, which is an [official image](https://hub.docker.com/_/node) on [DockerHub](https://hub.docker.com).
+
+But I could just as easily build my own image with [Node](https://docs.microsoft.com/windows/nodejs/setup-on-wsl2?WT.mc_id=blog-personal-ludossan) installed as a tool instead of having it natively from my base image. To do that, I just need to pick a different base image that only contains the operating system. We could use the [Debian](https://hub.docker.com/_/debian) image and then write a `Dockerfile` like this one:
+
+```Dockerfile
+FROM debian:buster 
+RUN sudo apt update \ 
+    && sudo apt upgrade -y \ 
+    && sudo apt install -y curl \ 
+    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \ 
+    && sudo apt install -y nodejs
+```
+
+Which isn't too different from what's done [in the official image](https://github.com/nodejs/docker-node/blob/1d6a051d71e817f3947612a260ddcb02e48c2f74/14/stretch/Dockerfile). But are we actually building an image that has the basic requirements to be used by other people?
+
+What I'm getting at with this introduction is that we have to think way beyond the base image. Any [Docker](https://docs.microsoft.com/dotnet/architecture/microservices/container-docker-introduction/docker-defined?WT.mc_id=blog-personal-ludossan) image needs to be designed for the best possible scalability and usability. That comes down to the following requirements:
+
+-   The image size is small enough
+-   The application running inside the image performs well
+-   Security is guaranteed inside the base image
+
+To tackle all of these, we'll work with compiled languages, like Golang, in the next part of this article, and in the last part we'll work with dynamic languages, like JavaScript or Python.
+
+## Types of base images
+
+To leave the choice entirely up to you, the reader, I won't say one operating system is better than another. That's a completely personal choice. Instead, we'll work with three naming conventions:
+
+-   `full` images
+-   `slim` images
+-   `alpine` images
+
+### Full Images
+
+![departure from Euromax terminal, 400 meters long](./photo-1593967504874-a551dc10271c-5a5109.jpg "Photo of a ship loaded with containers by Andrey Sharpilo / Unsplash")
+
+`full` images (or complete images) are images that contain a full extent of an operating system. For example, a `debian-full` image is an image that has the entire Debian Linux distribution, with every package and module loaded.
+
+This type of image is the best type to start with, and probably the simplest way to get an application up and running. That's because it has every tool and package already installed by default. In this article we'll just compare the images and won't worry much about the applications we'll run inside them.
+
+One of the big problems with `full` images is that, since they have so many packages installed by default, that also means a lot of packages with known vulnerabilities come installed by default too. That opens the door for an attack to happen.
+
+Docker Hub itself has a [vulnerability scanning tool](https://docs.docker.com/docker-hub/official_images/#official-image-vulnerability-scanning) you can use straight from the site, through the `Tags` tab. As shown in the image below.
+
+![](./image-1.png "Docker Hub's vulnerability detection")
+
+As you can see, the image itself already has vulnerabilities you're "inheriting" before you've even deployed any of your own code.
+
+### Slim Images
+
+![](./photo-1540302469547-9cfb64e6523d-4a5694.jpg 'Photo of a label that reads "the slim" by Mat Reding / Unsplash')
+
+A _slim_ image is a somewhat smaller image. Every _slim_ image only has the packages the operating system needs to function, and you're expected to install any extra packages your application needs on top of it. Right now, only Debian has a _slim_ image.
+
+One direct benefit of using _slim_ images is that, with fewer packages, you have fewer dependencies that could be exposed to vulnerabilities. Take a look at an example.
+
+![](./image-2.png "Vulnerabilities of a slim image")
+
+Another interesting gain is that, precisely because they're "cleaner", _slim_ images are much smaller in size than a _full_ image. In more extreme cases, **a _slim_ image can be up to 50% smaller than a _full_ image.** Take a look at the comparison between `debian:buster` and `debian:buster-slim`.
+
+![](./image-5.png "Size of the slim image of Debian Buster")
+
+Now look at the size of the complete image
+
+![](./image-6.png "Size of the full image of Debian Buster")
+
+Notice that if we take the `amd64` architecture, which is the most common for 64-bit processors, and compare the full version at **48.06MB** against the **25.84MB** of the same image, only in the slim version, that's a **47%** reduction in image size. All of that just from removing unused packages.
+
+### Alpine Linux Images
+
+![](./photo-1532956694725-6f7f052fb7c7-60b35b.jpg "Photo of the Alps by Benni Asal / Unsplash")
+
+Alpine Linux images are the most optimized type of image out there. This kind of OS was built from the ground up to be a container-native operating system. The main difference between this type of image and a traditional image is that this system doesn't use `glibc`. Alpine relies on a different library called `musl libc`. On top of that, by default, Alpine only ships with the base packages installed, meaning anything else your application needs, you'll have to install manually.
+
+That might sound a bit complicated, but look at how much we cut down the number of vulnerabilities just by trimming the packages. Notice there isn't a single critical vulnerability.
+
+![](./image-7.png "Vulnerabilities of an Alpine image")
+
+On top of that, an `alpine` image is less than **6MB** in **total** size. With newer images, that size can get down to just over **2MB.** That's a reduction of more than **95%** in overall image size.
+
+![](./image-8.png "Size of an Alpine Linux image")
+
+The downside of working with an Alpine image is that it's a completely different system. You'll have to learn to work with its native package manager, and since it doesn't use the standard Linux libraries, chances are most of your software will need to be recompiled using Alpine's tools.
+
+## Scratch Images
+
+![](./photo-1556888335-23631cd2801a-3dd589.jpg "Photo of a black sheet of paper with nothing written on it and a white pencil on top by Kelly Sikkema / Unsplash")
+
+Finally, let's take a look at `scratch` type images. When we use `scratch` as a base image, we're telling [Docker](https://docs.microsoft.com/dotnet/architecture/microservices/container-docker-introduction/docker-defined?WT.mc_id=blog-personal-ludossan) that we want the next command in our `Dockerfile` to be the first layer of our filesystem inside that image.
+
+That means we don't have any package manager, not even packages. Just an empty filesystem. You can start by using `FROM scratch`, since this is a reserved namespace on DockerHub and doesn't have any kind of vulnerability or package installed.
+
+```Dockerfile
+FROM scratch
+ADD rootfs.tar.xz /
+CMD ["bash"]
+```
+
+Most operating system images start out this way, since most of them are considered empty images. They start from absolute zero.
+
+## Conclusion
+
+We'll explore a bit more about images and put these concepts into practice in the next articles, writing an application in Go.
+
+Stay tuned for more!

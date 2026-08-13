@@ -1,0 +1,91 @@
+---
+title: "What's New in Node 21!"
+pubDate: 2023-11-10T16:22:47.000Z
+updatedDate: 2026-07-16T15:55:22.000Z
+lang: en
+slug: "whats-new-in-node-21"
+category: "javascript"
+tags: ["nodejs", "javascript"]
+description: "Find out everything about the main new features in Node 21 and 21.1 arriving in Node.js!"
+machineTranslated: true
+draft: false
+---
+Another Node.js release just dropped! So let's talk about the main new features in this new version.
+
+Remember that odd releases are **not** recommended for production, they're experimental releases so you can test things out and give feedback to the team!
+
+![LTS Schedule](./schedule-98776e.svg)
+
+Right now we're on version 20 until October next year, Node 21 will be available until April 2024 and after that we'll get version 22, which will be the new LTS version!
+
+> [!NOTE] 💡
+> In this article we'll cover both [version 21](https://nodejs.org/en/blog/announcements/v21-release-announce) and [version 21.1](https://nodejs.org/en/blog/release/v21.1.0), which is the new version with bugfixes and updates.
+
+## Native websockets
+
+Version 21 opens with a very welcome addition! A browser-compatible websocket implementation was added in the new release as an experimental flag. To use it, just start your application with a `--experimental-websocket` flag.
+
+Right now the implementation lets you open and close connections, plus send data. It exposes four events: `open`, `close`, `message` and `error`. And this is great because soon we won't need implementations like Socket.io anymore just to make applications talk to each other over bidirectional channels.
+
+> Also, this discussion [has been going on since 2018](https://github.com/nodejs/node/issues/19308)
+
+More information is in the [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket).
+
+## Array grouping
+
+With the inclusion of V8 11.8, we now have the [array grouping methods](https://github.com/tc39/proposal-array-grouping), I already [wrote about them before](/array-groupby-stage-3/) here on the blog, but there's been a small change to the API: instead of being a method on the array [prototype](https://medium.com/trainingcenter/heran%C3%A7a-e-prot%C3%B3tipos-no-javascript-2c1e60e005a2), `groupBy` is now a static method that you use like this:
+
+```js
+const array = [1, 2, 3, 4, 5];
+
+Object.groupBy(array, (num, index) => {
+  return num % 2 === 0 ? 'par': 'impar';
+});
+// =>  { impar: [1, 3, 5], par: [2, 4] }
+```
+
+And the same goes for [maps](https://medium.com/trainingcenter/javascript-maps-entendendo-o-conceito-8654d5eb1314), the difference is that the result comes back as a Map keyed by whatever key you return, which is handy for grouping items by a key from some object:
+
+```js
+const par  = { odd: true };
+const impar = { even: true };
+Map.groupBy(array, (num, index) => {
+  return num % 2 === 0 ? par: impar;
+});
+// =>  Map { {odd: true}: [1, 3, 5], {even: true}: [2, 4] }
+```
+
+## writeFile Flush
+
+The addition of a new `{ flush: true }` property on the `writeFile` function now lets you force data being written to a file to actually be flushed to disk right after the write succeeds.
+
+This feature was added because, in some cases, it was possible that while we were reading a file, that read operation would get stale data that hadn't been written yet, due to the async nature of write operations.
+
+Now the following functions:
+
+-   `fileHandle.createWriteStream`
+-   `fsPromises.writeFile`
+-   `fs.createWriteStream`
+-   `fs.writeFile`
+-   `fs.writeFileSync`
+
+Can all take a property in the options object in `{ flush: true }` mode, but it doesn't come turned on by default.
+
+## Addition of window.navigator
+
+This release also includes a new global object called `navigator`, which is identical to the `window.navigator` we have in the browser. Node is walking more and more toward direct compatibility with the web and browsers.
+
+For now, `navigator` doesn't have much on it yet, but this opens up plenty of room for adding other properties down the line.
+
+## Automatic module detection
+
+A new flag called `--experimental-detect-module` was added and can be used to automatically detect whether a file is CommonJS or ESM. Finally, we don't need to specify the module type in our `package.json` anymore.
+
+But watch out, this flag causes a slower startup than normal, so if you maintain a library, it's still recommended that you include `type: module` in your package.json, because that way the application startup can be faster since Node won't need to check the module type.
+
+## Other changes
+
+-   Fetch and WebStreams are now stable!
+-   Performance improvements
+-   Addition of the `--experimental-default-type` flag, which lets you change the default module type to ESM (no more need for `type: module` in package.json)
+-   The test runner now supports globs

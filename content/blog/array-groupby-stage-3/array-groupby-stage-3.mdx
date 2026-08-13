@@ -1,0 +1,111 @@
+---
+title: "Grouping with Array.prototype.groupBy"
+pubDate: 2022-01-12T15:00:00.000Z
+updatedDate: 2026-07-16T16:11:06.000Z
+lang: en
+slug: "array-groupby-stage-3"
+category: "javascript"
+tags: ["javascript", "development", "ecmascript"]
+description: "No more manually grouping objects and keys or reaching for external libraries. JavaScript can now count on a native grouping method!"
+machineTranslated: true
+draft: false
+---
+> Cover photo by [Markus Spiske](https://unsplash.com/@markusspiske?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/s/photos/group?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText)
+
+Ever since I started programming, I've always found myself in situations where I needed a simple function that, at the same time, didn't exist in the languages I was working with.
+
+It was no different when I had to work with JavaScript and needed to do a simple grouping operation. In other words, I had to split my object or array into small groups according to the type of item they held.
+
+Fortunately, one of every dev's go-to moves when they need a very common function is to reach for a utility library, and the most famous one today is [LoDash](https://lodash.com), which happens to have a method called `groupBy`.
+
+But the days of downloading external libraries for these simple functions are coming to an end, because now we can have our own `groupBy`, except **native.**
+
+## Grouping
+
+Grouping functions fall into a class of functions I like to call _awesome and lazy_, because they're extremely useful for practically every kind of thing you can do in development, and at the same time they're quick and simple to implement, but they're so simple that it's almost not worth writing one from scratch.
+
+That's why a lot of people end up downloading an external library like LoDash to get the problem solved in a simple and practical way.
+
+I was never a big fan of downloading a library and creating a dependency on external code for such a simple function, especially if I'm only going to use it once in my code. So I'd rather write these functions by hand.
+
+There are endless ways to do a simple grouping, and by simple grouping I mean the ability to take a series of items in an array and organize them into categories. For example, splitting users in a system by their access level:
+
+```js
+const usuarios = [
+    { name: 'Lucas', role: 'admin' },
+    { name: 'Ana', role: 'reader' },
+    { name: 'Erick', role: 'reader' },
+    { name: 'Beatriz', role: 'writer' },
+    { name: 'Carla', role: 'admin' }
+]
+```
+
+The output I want looks something like this:
+
+```js
+const groups = {
+    admin: [
+        {name: 'Lucas', role: 'admin'}, 
+        {name: 'Carla', role: 'admin'}
+    ],
+    reader: [
+        { name: 'Ana', role: 'reader' },
+        { name: 'Erick', role: 'reader' },
+    ],
+    writer: [
+        { name: 'Beatriz', role: 'writer' }
+    ]
+}
+```
+
+So how do we write a function like this? The simplest way I can think of is with a `reduce`:
+
+```js
+function groupBy (array, key) {
+	return array.reduce((acc, item) => {
+    	if (!acc[item[key]]) acc[item[key]] = []
+        acc[item[key]].push(item)
+        return acc
+    }, {})
+}
+```
+
+There's another way to group things if we simplify the `reduce` a bit further to use the **spread operator**:
+
+```js
+function groupBy (array, key) {
+	return array.reduce((acc, item) => ({
+      ...acc,
+      [item[key]]: [...(acc[item[key]] ?? []), item],
+    }),
+  {})
+}
+```
+
+But there are [some articles](https://prateeksurana.me/blog/why-using-object-spread-with-reduce-bad-idea/) pointing out that using spread for this case might be a bad idea, since we end up with a "hidden" loop that can turn our function into one with [exponential complexity](https://pt.wikipedia.org/wiki/Complexidade_ciclomática).
+
+Then there's [lodash.groupBy](https://lodash.com/docs/4.17.15#groupBy), which is almost the same implementation, but with some types for compatibility and some stricter error handling. A function that, along with others like `intersect` and `difference`, is _awesome and lazy._
+
+## The native solution
+
+Recently the [TC39 committee](https://tc39.es/), the organization that maintains and steers JavaScript, announced that one of its [proposals](https://github.com/tc39/proposal-array-grouping), the one that will add the new `groupBy` method to `Array.prototype`, has already reached stage 3!
+
+> If you don't know how the JavaScript publishing and evolution process works, [this video](https://www.youtube.com/watch?v=hDQu3AvvDfg) will help you understand it all.
+
+This means that soon we might see an implementation exactly like this one in codebases around the world:
+
+```js
+const usuarios = [
+    { name: 'Lucas', role: 'admin' },
+    { name: 'Ana', role: 'reader' },
+    { name: 'Erick', role: 'reader' },
+    { name: 'Beatriz', role: 'writer' },
+    { name: 'Carla', role: 'admin' }
+]
+
+const grouped = usuarios.groupBy(({role}) => role)
+```
+
+The idea is that this feature ships as part of ES2022 this year and becomes a full part of browsers sometime after that.
+
+But if you're like me and want to test this feature as fast as possible, then you need an [implementation shim](https://github.com/es-shims/Array.prototype.groupBy), or you'll have to wait to use [babel](https://babeljs.io)'s `stage-3` preset so you can code the same way you already do today!

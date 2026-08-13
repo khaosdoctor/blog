@@ -1,0 +1,119 @@
+---
+title: "Hello, World!"
+pubDate: 2020-07-23T00:23:11.000Z
+updatedDate: 2026-07-16T16:28:42.000Z
+lang: en
+slug: "hello-world"
+category: "meta"
+tags: ["blog", "news", "info"]
+description: "After a few months of researching and working toward a new phase of content production, this blog is finally off the ground!"
+machineTranslated: true
+draft: false
+---
+Hi everyone! This is the **first article on this blog!**
+
+If you already know me and follow my work, you know I'm a big fan of written content and I've been writing about technology for a while now. Over the last 4 years I've written a lot for publications like [Medium](https://medium.com/@khaosdoctor) and [Dev.to](https://dev.to/khaosdoctor), but it's time to move into a **new phase of my career as a content creator**.
+
+In this post I'll go over everything that motivated me to create this blog, plus the technologies I used and what's new here. Let's dive in!
+
+## A new phase
+
+![The most powerful word in the world pops up everywhere. Ironically, this is on Sandown Pier on the Isle of Wight (UK) — a place that has not changed for 30 years.](./photo-1499244571948-7ccddb3583f1-f649ba.jpg 'Neon sign reading "change" by Ross Findon / Unsplash')
+
+For the past few years I've always thought about creating my own place to share my content. Not that I think the other publications aren't good enough, quite the opposite, they're excellent places to publish content in general. What made me change were two simple factors: **control and presence**
+
+### Control
+
+**Control**, for the simple reason that I like having control over my publications so I can build integrations, modify or migrate content, keep safe backups, and keep the content freely accessible. Beyond controlling the content itself, it's important for me to control the **medium** where I'm publishing.
+
+Platforms like Medium or Dev.to, as amazing as they are, are still limited in some cases. As an author, you have no control over what you can do with the system, nor over what integrations you can build. On top of that, all your content sits in the hands of whoever controls those networks, and if they ever want to, they can just disappear the same way they showed up.
+
+Having my own place to publish also means I can not only look for new ways to present that content, but also evolve the site with cool new features and apply my personal brand. And that brings us to **presence**.
+
+### Presence
+
+One of the things that bothered me the most was having to show people a whole list of social networks when I wanted them to find my content. That dilutes your presence and your impact, because it gets a lot harder for people to find you online.
+
+Another thing that pushed me to create this blog is that I could turn it into a place that really feels like me. Apply the brand that was lovingly built by [several people](https://twitter.com/_StaticVoid/status/1285626274225041409) who helped turn everything you're seeing here into reality. With control over the front-end and the ability to add new tools, I can build a different experience for a certain type of post, or even turn the blog into a hub or an aggregator. In short, I can do whatever I want!
+
+That's why I decided creating a blog was the best option. This way I can centralize my content so every article comes out from this one place, and I can ask people to find me here as well.
+
+## Now what? How's this going to work?
+
+From now on, all **new** content will be published here first. It'll also be automatically replicated on [my Dev.to](https://dev.to/khaosdoctor) through the [RSS feed](/rss.xml).
+
+All the old content **will keep existing wherever it always was**. The only thing that changes is that, from now on, all **new content** will be posted only here on my [blog](/?utm_source=hello_world_post&utm_medium=in_post_link&utm_campaign=hello_world).
+
+Having my own blog also let me create a dedicated page for anyone who wants to support my work and help me out with this venture through donations or contributions.
+
+### Just articles?
+
+Short answer: **NO** 😌
+
+Like I said, this is a new phase of content production, meaning that besides the blog I'll also be investing in other content formats. Right now the blog is the first step, but I'm already working on a [YouTube channel](https://www.youtube.com/channel/UCki-WnBzwzpvbBDk4swJniQ?sub_confirmation=1) and thinking about other ways to share quality content with even more people.
+
+Every video will be published on the channel and will get a dedicated post on the blog. That way it's easy to keep track of everything that happened. But that's not all. The idea is for the blog to become an archive of all my content, written and not written.
+
+So, all my future talks, which can already be found on my [SpeakerDeck](https://speakerdeck.com/khaosdoctor), will also be available here with a short description of how they went and the details about that particular event. In other words, all the content I've already taken part in or will take part in will be kept safe here so everyone can find it.
+
+## Always in the loop!
+
+One of the biggest reasons that pushed me to create a blog was the chance to have a _newsletter!_
+
+One of the things I miss most about written content is that you can't reliably reach the same people every time, staying in constant touch even after someone has already left the blog.
+
+My goal with this newsletter is to send out, monthly (or weekly, haven't decided yet), a summary of everything I've posted, highlight important posts, and let followers know about events, discount codes, and other cool things happening around here!
+
+So, if you're reading this, consider signing up for the mailing list and staying on top of everything new. You'll also get discount codes and exclusive content. I promise I won't flood your inbox!
+
+window.onload = () => document.querySelector('iframe').contentWindow.document.querySelectorAll('header, .line-wrapper').forEach(e => e.style.display = 'none')
+
+## Under the hood
+
+I bet you're probably a developer and want to know what technologies I used to build this site, right? Let's get into it then!
+
+### The quest for a CMS
+
+Ever since I started working in tech, WordPress has been one of the most used tools for building blogs. The problem is it's really heavy, and personally I don't like using it much, since I've had plenty of issues with it in the past.
+
+My first option was to build a simple blog using a static site generator called [Hugo](https://gohugo.io\(), which is written in Golang. The idea was simple: create the blog, write the content in markdown, and publish everything through GitHub Pages. I even set up a repository with a small proof of concept, but unfortunately I ended up not using it, precisely because I had bigger plans for this blog than just being a blog. And Hugo isn't exactly simple when it comes to building something more complex.
+
+I moved on to [Gatsby](https://gatsbyjs.com), which is essentially the same thing but written in JavaScript using React. The idea came up when I saw a project called [Ghost](https://ghost.org). That would solve all my problems!
+
+Ghost is a headless CMS, meaning you can plug any kind of front-end into it and just use its API to manage and create content. In short, it's like having a WordPress without the front-end, just the open API and the admin panel. So I'd get a post management dashboard, login and password, access control, the ability to have more than one person writing the same article, and a bunch of other features any CMS already ships with.
+
+But what really won me over was Ghost's native ability to integrate with a newsletter sending system, which was something I'd wanted to do for a while. I started building with Gatsby, but after digging into the theme I realized all Gatsby was doing was pulling Ghost's posts remotely, nothing more, nothing less.
+
+Ghost already came with a pre-installed theme called [Casper](https://github.com/TryGhost/Casper), and another theme with the newsletter already built in called [Lyra](https://github.com/TryGhost/lyra), so there was no need for yet another layer just to serve the front-end. I ended up dropping Gatsby and going with Ghost entirely
+
+### The infrastructure
+
+Ghost is the classic open source project with paid support. You can download and install it on your own machine for free, which is what I did, or pay to use their pre-installed cloud.
+
+My goal was to not spend any money keeping the blog running, so I used the [Azure](https://azure.microsoft.com/?WT.mc_id=personal-blog-ludossan) credits I have for having been a [Microsoft MVP](https://mvp.microsoft.com/?WT.mc_id=personal-blog-ludossan) to create the resources I needed in the cloud and install Ghost there.
+
+So, this blog runs exclusively on [Azure](https://mvp.microsoft.com/?WT.mc_id=personal-blog-ludossan).
+
+### The front-end
+
+I'm not a front-end person. It's actually one of the roles I perform least in the development world. So I don't have deep knowledge of frameworks like Vue, React, Angular, or anything else. So the idea was to keep it simple.
+
+I took the default theme, Lyra, as a starting point. I forked it into [a new repository](https://github.com/khaosdoctor/blog-theme) to hold just the blog theme and every change made to it.
+
+Ghost works with server-side rendered themes using Handlebars as the template engine. From there it was simple, I just had to tweak the HTML, CSS, and JavaScript of the pages to build my layout on top of the blog's default layout. And this is the result.
+
+## The future
+
+While this is the first of many articles that are going to show up here, it's not all this blog can be!
+
+For the future, I'm thinking about opening this content platform up so other people can write their own content here too. That would turn it into a hub for teaching and collaboration. But that's a story for another time!
+
+## Conclusion
+
+![](./photo-1549032305-e816fabf0dd2-93d1d1.jpg 'Card reading "thanks" by Kelly Sikkema / Unsplash')
+
+Thank you so much for stopping by and reading my content. If you have any feedback, about the content or about the site itself, please reach out to me on any of my social networks (which you can find in the menu and the footer) or through [my website](https://lsantos.dev/?utm_source=blog&utm_medium=hello_world_post&utm_campaign=hello_world). I'm always available to answer!
+
+If something broke for you while you were browsing around here, go to the [blog's issues page](https://github.com/khaosdoctor/blog-theme/issues/new?title=[BUG]:%20&labels=bug&assignees=khaosdoctor) and describe your problem, I'll try to fix it as fast as I can.
+
+Thank you so much for reading and believing in my content! 😍

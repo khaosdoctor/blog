@@ -1,0 +1,172 @@
+---
+title: "What's New in TypeScript 5.4"
+pubDate: 2024-02-14T11:00:19.000Z
+updatedDate: 2026-07-16T15:53:14.000Z
+lang: en
+slug: "whats-new-in-typescript-5-4-beta"
+category: "typescript"
+tags: ["typescript"]
+description: "Check out the main changes in the TypeScript 5.4 beta! Including the new NoInfer type with deep explanations!"
+machineTranslated: true
+draft: false
+---
+Another day, another TS version out in the wild! This time we're going to chat about the main changes in the TypeScript 5.4 beta.
+
+Remember that this is a beta, so it's possible not every feature makes it into the final release.
+
+## Better inference in closures
+
+One of the big problems TS had with inference (or type narrowing) was that, often, inside closures like `map` the type wouldn't get inferred correctly.
+
+A classic example of this is when we have a parameter that can be more than one type, but inside the function it gets narrowed down to a single type:
+
+```ts
+function uppercaseStrings(x: string | number) {
+    if (typeof x === "string") {
+        return x.toUpperCase();
+    }
+}
+```
+
+Here, TS knows the type is a string, because we're explicitly saying the type is string in the check, so if it got past there, it's a string.
+
+But when we use the same type after it's been narrowed, like in this example the TS team gave:
+
+```ts
+function getUrls(url: string | URL, names: string[]) {
+    if (typeof url === "string") {
+        url = new URL(url);
+    }
+
+    return names.map(name => {
+        url.searchParams.set("name", name)
+        //  ~~~~~~~~~~~~
+        // error!
+        // Property 'searchParams' does not exist on type 'string | URL'.
+
+        return url.toString();
+    });
+}
+```
+
+The problem is that, inside the `map` closure, TS wasn't correctly inferring that the URL type couldn't be anything other than a URL, since, had it been a string, it would already have been converted.
+
+> [!NOTE] 💡
+> To work around this problem, it's pretty common to create a new intermediate variable that receives the final value, like `let url = typeof url === 'string' ? new URL(url) : url`
+
+The thing is, inside the map, TypeScript figured this URL could be modified somewhere else, so it used the parameter's type instead, and that's where the error comes from. In the new version, TS is smarter and can infer types based on the variable's last assignment, as long as:
+
+1.  It's a parameter or a `let` variable
+2.  Those variables are used inside functions that aren't hoisted
+3.  TS looks at the last place that variable gets changed and infers the type from there
+
+But if you modify the variable anywhere else, even using the same value, that invalidates every type inference that comes after, because there's no way to know the type stays the same.
+
+## NoInfer\<T>
+
+A new utility type that showed up to stop TS from inferring generic arguments that get passed in. We talk about this a lot in the generics module of [**Formação TypeScript**](https://formacaots.com.br), there are two kinds of generics:
+
+1.  Explicit generics are the ones where you pass the type directly: `foo<string>('param')`
+2.  Implicit generics are inferred by TS, so if `foo` were something like `foo<T> (a: T)`, we could just do `foo('param')` and TS would infer our parameter as a string
+
+But this inference doesn't always work, especially for really complex types. The example the TS team gave here, though, is simple enough to help us understand what's going on:
+
+```ts
+function createStreetLight<C extends string>(colors: C[], defaultColor?: C) {
+    // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "red");
+```
+
+Here we have a function that takes a list of colors and an optional color, so if we call the function as expected, everything works fine:
+
+```ts
+function createStreetLight<C extends string>(colors: C[], defaultColor?: C) {
+    // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "red");
+```
+
+But when we use a color that isn't in the colors array, TS will infer that this color is also part of the original array:
+
+```ts
+// Here the generic C becomes red | yellow | green | blue
+createStreetLight(["red", "yellow", "green"], "blue");
+```
+
+There are currently two ways to fix this. The first is to create an enum or an object with the allowed colors:
+
+```ts
+
+const colors = ["red", "yellow", "green"] as const;
+function createStreetLight<C extends typeof colors[number]>(colors: C[], defaultColor?: C) {
+  // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "blue");
+// Blue will throw an error for not being allowed since it's not in the original array
+```
+
+But ideally we wouldn't need an external type at all and could just infer one type from another, so we usually create another generic that extends the first one:
+
+```ts
+function createStreetLight<C extends string, D extends C>(colors: C[], defaultColor?: D) {
+}
+
+createStreetLight(["red", "yellow", "green"], "blue");
+//                                            ~~~~~~
+// error!
+// Argument of type '"blue"' is not assignable to parameter of type '"red" | "yellow" | "green" | undefined'.
+```
+
+Notice that `D extends C` makes D get inferred based on the first generic, so the second parameter isn't tied to the first one. But even though that's not terrible, creating a whole new generic type just for this is a bit much, which is why we now have the new `NoInfer` type.
+
+That's exactly what it does. When we put `NoInfer` on a parameter, we're telling TS we don't want it to run a new inference on an original type, so it's basically saying "stop inferring the type here."
+
+```ts
+function createStreetLight<C extends string>(colors: C[], defaultColor?: NoInfer<C>) {
+    // ...
+}
+
+createStreetLight(["red", "yellow", "green"], "blue");
+//                                            ~~~~~~
+// error!
+// Argument of type '"blue"' is not assignable to parameter of type '"red" | "yellow" | "green" | undefined'.
+```
+
+Another way to think about it is as "don't use this parameter as a candidate for inference."
+
+## groupBy on Objects and Maps
+
+Following the grouping proposals (like the one for [Array](/array-groupby-stage-3/)), we now have the static methods `Object.groupBy` and `Map.groupBy`. Basically, these take an iterable and turn it into an object or a map grouped by a given function.
+
+> This proposal had been sitting in the TC39 proposal list for quite a while
+
+```ts
+const array = [0, 1, 2, 3, 4, 5];
+
+const myObj = Object.groupBy(array, (num, index) => {
+    return num % 2 === 0 ? "par": "impar";
+});
+```
+
+That gives us a final object:
+
+```ts
+const myObj = {
+    par: [0, 2, 4],
+    impar: [1, 3, 5],
+};
+```
+
+The same goes for `Map.groupBy`, except instead of producing an object at the end, we get a map.
+
+> [!CAUTION] ⚠️
+> It's worth pointing out these typings only work if you set `target` to `esnext` or adjust your `lib` settings to include them. In the future, though, these functions will land in an `es2024` target.
+
+## Other changes
+
+-   Import Attributes are now typed correctly
+-   Added quick fixes in the editor for missing parameters

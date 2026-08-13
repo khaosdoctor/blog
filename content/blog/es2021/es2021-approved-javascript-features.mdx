@@ -1,0 +1,108 @@
+---
+title: "ES2021 Approved: New JavaScript Features"
+pubDate: 2021-07-14T13:00:00.000Z
+updatedDate: 2026-07-16T16:13:28.000Z
+lang: en
+slug: "es2021-approved-javascript-features"
+category: "javascript"
+tags: ["javascript"]
+description: "Want to know what's coming in ES2021? Let's go through the new features one by one."
+machineTranslated: true
+draft: false
+---
+
+As you probably know, ECMA releases a list of new features every year for upcoming versions. These changes are based on proposals from the [TC39 repository](https://github.com/tc39/proposals), and they need approval before they land in any version of the language.
+
+Well, the 2021 version of the ECMA spec is ready and it's been approved! So we already know what's coming. Let's run through a quick list.
+
+## Logical Assignment Operators
+
+This proposal has been around for a while. I've [already written about it](https://imasters.com.br/javascript/operadores-de-atribuicao-logica-no-javascript). The basic idea is to add three new operators to the language: `&&=`, `||=`, and `??=`. What do they do?
+
+The core concept is replacing ternary operators. Instead of doing something like this:
+
+```js
+if (!user.id) user.id = 1
+```
+
+Or even something simpler:
+
+```js
+user.id = user.id || 1
+```
+
+We can now write:
+
+```js
+user.id ||= 1
+```
+
+The same goes for when you have a nullish coalescing operator like `??` and the _and_ operator with `&&`.
+
+## Numeric Separators
+
+This exists purely to give visual separation between numbers in your code. So now, we can use `_` in the middle of numbers to separate their digits without it counting as an operator or part of the code. I'll grab the example from the proposal itself:
+
+```js
+1_000_000_000           // Ah, so a billion
+101_475_938.38          // And this is hundreds of millions
+
+let fee = 123_00;       // $123 (12300 cents, apparently)
+let fee = 12_300;       // $12,300 (woah, that fee!)
+let amount = 12345_00;  // 12,345 (1234500 cents, apparently)
+let amount = 123_4500;  // 123.45 (4-fixed financial)
+let amount = 1_234_500; // 1,234,500
+```
+
+## Promise.any and AggregateError
+
+These are the two most interesting functions in the proposal. Let's start with `Promise.any`.
+
+This specification lets you do a variation of `Promise.all`. The difference is that with `Promise.all`, if one promise rejected, they all got rejected. But with `Promise.any`, if any of the promises resolves, you get a result.
+
+```js
+Promise.any([
+    fetch('https://existeenaofalha.com.br').then(()=>'home'),
+    fetch('https://existeefalha.com.br').then(()=>'erro')
+   ])
+    .then((first) => console.log('o primeiro resultado que vier'))
+	.catch((error) => console.error(error))
+```
+
+The `AggregateError` part is basically about convenience. How do you return a sequence of errors from multiple promises that might have failed? So a new error class was created so you can chain and add multiple errors into a single aggregated error.
+
+## String.prototype.replaceAll
+
+Back in the day, if you ran something like `'x'.replace('', '_')`, you'd only get a replacement for the first occurrence. If you wanted to do it across the whole string, you'd have to use a regex, like `'xxx'.replace(/(?:)/g, '_')` to get a full replacement.
+
+With `replaceAll`, we get the result of the second approach using the syntax of the first:
+
+```js
+'xxx'.replaceAll('', '_') //'_x_x_x_'
+```
+
+## WeakRefs and FinalizationRegistry
+
+These are two advanced APIs that should be avoided if possible. I won't dive into examples here, but I'll link straight to the official docs instead.
+
+The idea behind `WeakRefs` is to provide a weak reference to an object in memory. This reference allows those objects to be collected by the Garbage Collector freely, releasing the memory they're allocating as soon as any reference to them is removed.
+
+In a normal case, a strong reference like in listeners and other objects would prevent GC from collecting the memory to avoid any kind of future access error. Learn more in the [documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakRef).
+
+Finalizers can be used together with WeakRefs or on their own, and they provide a way to execute a function as soon as the GC collects those objects from memory. But not just weakly referenced objects, finalizers can be attached to **any** object to execute a callback as soon as they're collected and destroyed. Learn more [in the documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/FinalizationRegistry).
+
+```js
+let target = {};
+let wr = new WeakRef(target);
+
+// a WR and the target are not the same object
+
+// We create a new registry
+const registry = new FinalizationRegistry(value => {
+  // ....
+});
+
+registry.register(myObject, "valor", myObject);
+// ...if you don't call `myObject` again for a while...
+registry.unregister(myObject);
+```

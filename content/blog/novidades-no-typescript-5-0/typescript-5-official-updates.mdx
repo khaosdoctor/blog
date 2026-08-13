@@ -1,0 +1,97 @@
+---
+title: "Official TypeScript 5.0 News"
+pubDate: 2023-03-23T11:00:38.000Z
+updatedDate: 2026-07-16T16:03:10.000Z
+lang: en
+slug: "typescript-5-official-updates"
+category: "typescript"
+tags: ["typescript", "development", "technology"]
+description: "It's official! TypeScript released version 5.0 and I'm going to tell you everything that's new!"
+machineTranslated: true
+draft: false
+---
+It's official! In my [previous post](/typescript-5/) on this subject, I covered the semi-official release of TS 5.0. The beta version was almost ready but wasn't quite 100% there yet, so I'm covering a new release here with all the official features that shipped in the latest version of our blue buddy!
+
+The vast majority of the features stayed the same, so the [previous post](/typescript-5/) is still valid and I won't repeat myself here, but I'll show you the main differences from the RC beta and the official release.
+
+## Decorators
+
+The first change came in decorators. If you remember correctly, decorators are small functions that can be used as language constructs that will add behavior to an already existing function, for example, adding a debug log:
+
+```ts
+class Person {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    @loggedMethod
+    greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+}
+
+const p = new Person("Ron");
+p.greet();
+
+// Output:
+//
+//   LOG: Entering method.
+//   Hello, my name is Ron.
+//   LOG: Exiting method.
+```
+
+Decorators have their own syntax (with the `@`), but they're simple functions. The decorator we're calling on this function has the following implementation:
+
+```ts
+function loggedMethod(originalMethod: any, context: ClassMethodDecoratorContext) {
+    const methodName = String(context.name);
+
+    function replacementMethod(this: any, ...args: any[]) {
+        console.log(`LOG: Entering method '${methodName}'.`)
+        const result = originalMethod.call(this, ...args);
+        console.log(`LOG: Exiting method '${methodName}'.`)
+        return result;
+    }
+
+    return replacementMethod;
+}
+```
+
+Basically it's a function that returns a function. The difference between the RC and the final version is that decorators can now be used before declarations like `export` and `export default`. Before, you could only use a decorator on a direct declaration and then export the function.
+
+## Module Resolution = Bundler
+
+Another change that was introduced in TypeScript 5.0 is actually an addition to a modification created in 4.7. In that version, the `module` key received two new options, `node16` and `nodenext`, which precisely modeled how Node.js handles [ESModules](/os-ecmascript-modules-estao-aqui/). However, Node has several restrictions that don't exist in other tools. The main one being that imported files need to have the extension explicitly stated:
+
+```ts
+import * as utils from './utils.mjs'
+```
+
+This wasn't true for most bundlers or other tooling that have more relaxed module resolution, similar to what `node` already offered. But the other problem is that the implementation was outdated. So a new `moduleResolution` option was included: `bundler`.
+
+For this modification, the difference between the RC and the final version is that the `bundler` type can now only be used if the `module` flag is `esnext`. This was done, according to the team, to ensure that all `import`s aren't transformed into require before the bundler resolves the dependencies.
+
+## Compiler Changes
+
+While we had several cool modifications in this version, the compiler is where we got the most gains! The entire compiler was moved to modules, as [the team described here](https://devblogs.microsoft.com/typescript/typescripts-migration-to-modules/), and this resulted in a few things:
+
+-   TS now only runs on Node versions 12 and above, because that's the first version that supports ESM
+-   The package size was reduced by 46%
+-   Project build times increased by 10% to 25%
+
+These optimizations become even more evident when we look at [these charts](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/#speed-memory-and-package-size-optimizations) showing that the package went from 64mb to 37mb:
+
+![](./image-12.png)
+
+Beyond that, the migration to modules turned TS into a rocket, with the performance gains not only in execution but also in installation, as shown by the benchmark compared to the previous version:
+
+![](./image-13.png)
+
+## Conclusion
+
+All the other modifications stayed the same, so I strongly recommend that you read the original article about the changes that came in the RC, because they're very useful and can help you have more tools to build your applications.
+
+[TypeScript 5.0 Beta News](/typescript-5/)
+
+This was a short article, but worth highlighting, especially for the performance gains and notable modifications in the heart of TypeScript.

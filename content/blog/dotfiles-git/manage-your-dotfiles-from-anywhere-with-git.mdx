@@ -1,0 +1,107 @@
+---
+title: "Manage your dotfiles from anywhere with Git"
+pubDate: 2021-03-23T13:00:00.000Z
+updatedDate: 2026-07-16T16:17:37.000Z
+lang: en
+slug: "manage-your-dotfiles-from-anywhere-with-git"
+category: "infra"
+tags: ["github", "git", "cloud", "technology", "virtual machines", "tips"]
+description: "Setting up a computer is one of the most annoying tasks every developer has to go through when switching machines, but what if it got a lot easier?"
+machineTranslated: true
+draft: false
+---
+Setting up a new computer is one of those tasks that's simultaneously really cool and really annoying. All of us have probably had to switch computers and reconfigure every single one of our files at some point.
+
+That's a bit of work for everyone, but it's even more work for devs. We have a bunch of environment configuration files, variables, binary settings, and our precious shells that need to be set up exactly the way we want so we can be as productive as possible.
+
+Let's understand what dotfiles are and how you'll become a lot more productive (and your sanity will improve a ton) once you start versioning them with our beloved Git.
+
+## Dotfiles? Is that edible?
+
+Dotfiles is the name given to the set of [hidden files](https://en.wikipedia.org/wiki/Hidden_file_and_hidden_directory) used to store the state or preference configuration of a tool.
+
+The term "dotfiles" comes, like most things in computing, from the old unix kernels that adopted the practice of adding a `.` prefix in front of a file name to turn that file into a hidden file by default, meaning it wouldn't show up in an `ls` listing. For example, `/home/.hushlogin` is a common file on Linux nowadays used to remove the login message when you access a machine via SSH.
+
+Since any unix-based system has a very tight relationship with files, given that most modules and even devices or network interfaces are exposed as files inside the file system, they ended up becoming hugely important for software development.
+
+Nowadays, the vast majority of tools use dotfiles to keep their configuration:
+
+-   Bash: uses `.bashrc`
+-   Git: `.gitconfig`, `.gitexcludes`
+-   Vim: `.vimrc`
+
+And many others.
+
+## The problem with dotfiles
+
+The big problem with dotfiles is that they're local. That means every time you physically switch machines, you end up having to configure everything all over again.
+
+There are [several projects](https://dotfiles.github.io/utilities/) out there trying to solve the problem of keeping your dotfiles in sync across machines running the same operating system. Personally, I'm not a fan of any of them and prefer to do my setup manually, but it can be a great idea to have a tool that helps not just store your dotfiles, but also run and link all of them when it's time to put them to work.
+
+## Managing your dotfiles
+
+To get started, create a new repository on your GitHub, usually called `dotfiles`. You can also use [other people's repositories as inspiration](https://dotfiles.github.io/inspiration/), mine live [in this repository](https://github.com/khaosdoctor/dotfiles), though they're a bit outdated.
+
+> It's worth mentioning that if your files contain any kind of sensitive data, like passwords, keys and so on, you might need to manage them in a private repository, or use tutorials [like this one](https://abdullah.today/encrypted-dotfiles/) to get them encrypted.
+
+But then we run into the question: which dotfiles should we save? The answer is **all of them**. Every setting that can be turned into a file and saved in Git should be. In my case, I keep most of my Git, Vim and ZSH configuration files saved as settings in my repository.
+
+Also, on machines running MacOS, you can save your settings using a `.macos` file, which became super famous thanks to [Mathias Bynens](https://github.com/mathiasbynens/dotfiles/blob/main/.macos)'s dotfiles. These files let you have a consistent setup across several MacOS systems.
+
+Still on the Mac side, there's [Mackup](https://github.com/lra/mackup), a small tool that stores your application settings in a safe place and then lets you restore them on a new computer. There's also [BrewBundle](https://github.com/Homebrew/homebrew-bundle), a tool that lets you declaratively describe which apps are installed through HomeBrew.
+
+> For the next steps, we'll need to do some linking, so you **can't** keep your files in their original locations. So if you've already created the repository, it's better to **move** the files instead of copying them.
+
+## Hard and soft links
+
+After moving all your files into a structure you're happy with in your repository, you can use the _hard link_ feature from Unix-based systems to create a connection between your original file and the location where the dotfile is going to live.
+
+Here we get into a discussion about whether we should create a _[soft link](https://en.wikipedia.org/wiki/Symbolic_link)_ (or _symbolic link_) or a _[hard link](https://en.wikipedia.org/wiki/Hard_link)_. Personally (and also in [my dotfiles](https://github.com/khaosdoctor/dotfiles/blob/285921ad6ade624e038e549dc95863ffb26c4c37/bootstrap.sh#L25)) I go with a hard link between the files.
+
+The biggest difference between them, though, is that _hard links_ are a pointer to the file itself, meaning it's just a different name for the same original file that doesn't depend on any other system resource. It's as if we were saying that a file has multiple names.
+
+This makes life a lot easier when you need to back up these files, because hard links are direct pointers to the original file's content, so if you change the hard link, you change the original file too. You can test this out by doing the following:
+
+```bash
+export temp=$(mktemp -d)
+touch $temp/original
+ln $temp/original ~/hardlink
+```
+
+Now edit the file at `~/hardlink`, which is the link itself, and run `cat $temp/original`. Notice the content is there too.
+
+> Whenever you delete the original file, you'll also need to delete the link, so just running `rm -rf $temp` isn't enough, you also need to run `rm -rf ~/hardlink`.
+
+Soft links don't let you do this, since they're just files that point to other files. So for dotfiles I much prefer having a hardlink, which lets me edit my dotfile directly wherever it lives and have those changes reflected straight into my Git repository.
+
+## Creating the links
+
+Now that you've got the repository with your files, all that's left is to link them back to their original locations.
+
+> One thing I like to do when I organize my dotfiles is keep the original folder structure so I know where to put them back later. You can do that too if you want.
+
+For that we'll use the `ln` command, whose syntax is:
+
+```bash
+ln <original file> <link location>
+```
+
+It's worth mentioning that the link location may need to be an absolute path, meaning it can't be a path like `../` or `~/` on some systems.
+
+Create a hard link for each one of your dotfiles pointing to its original location, for example:
+
+```bash
+ln ~/my-dotfiles/home/.gitconfig ~/.gitconfig
+```
+
+The command doesn't print any output if everything went fine, so the way to check is by running `ls -la` on your destination directory and confirming the file is there too.
+
+> In the case of symbolic links, running a listing shows an output like `file -> original file`.
+
+## Conclusion
+
+Now, whenever you're on a new machine, all you need to do is clone the repository with your dotfiles and run the linking for each one of them.
+
+You can make this even easier with a [bootstrap script](https://github.com/khaosdoctor/dotfiles/blob/master/bootstrap.sh), or even [bootstrap tools](https://dotfiles.github.io/utilities/) that can go as far as downloading and installing dependent programs (like HomeBrew), so all you need to do is turn on the new machine, run a single command, and you'll never have to set up your preferences again.
+
+If you want to learn more about dotfiles, check out [this site](https://dotfiles.github.io/), which has a bunch of tools to help you get your dotfiles up and running safely with GitHub. Also check out articles like [this one](https://blog.clareglinka.com/2016/01/08/saving-dotfiles-with-symlinks-on-osx/), [this one](https://driesvints.com/blog/getting-started-with-dotfiles/) and [this one](https://zachholman.com/2010/08/dotfiles-are-meant-to-be-forked/) to get a sense of how you can organize and prepare your repositories to host your dotfiles in the best way possible.

@@ -1,0 +1,217 @@
+---
+title: "Using Mocks with the Node Test Runner"
+pubDate: 2024-06-05T11:00:45.000Z
+updatedDate: 2026-07-16T17:56:17.000Z
+lang: en
+slug: "using-mocks-with-the-node-test-runner"
+category: "javascript"
+tags: ["nodejs", "javascript", "typescript"]
+description: "How to use mocks, stubs and spies in your tests using Node.js' native Test Runner"
+machineTranslated: true
+draft: false
+---
+In the [previous article](/comecando-com-o-node-js-test-runner/) I showed how we can get started with the **Node.js Test Runner**. Now, how do we go beyond just "getting started" with the Node.js Test Runner?
+
+After some feedback from students and readers, a lot of people asked me to keep going because there isn't much content about the test runner out there, so let's keep going! I'll try to write several articles, not necessarily connected, about what I go through with the NTR and how we can solve some common cases using it.
+
+Today, let's talk about mocks!
+
+## About mocks, spies, stubs... blah blah blah
+
+First, if you're new to the testing world and/or don't know about the existence of **test doubles**, I'm not going to explain what they are here. But, back in 2017 I wrote two articles about testing that still hold up:
+
+-   [What tests are](https://medium.com/trainingcenter/testes-o-que-s%C3%A3o-aonde-vivem-4b8dfe12269e)
+-   [About mocks, spies, stubs and all the rest](https://medium.com/trainingcenter/testes-unit%C3%A1rios-mocks-stubs-spies-e-todas-essas-palavras-dif%C3%ADceis-f2765ac87cc8)
+
+Before starting this article, read one or both of those pieces because we're going to talk a lot about mocks here today!
+
+## Mocks in the Node.js Test Runner
+
+When the NTR shipped in Node 18, it had no native support for mocks, meaning you had to pull in a test doubles library like [Sinon](https://sinonjs.org) to use any kind of mock or spy.
+
+These days (as of this article, we're on version 22), the NTR already has some support for mocks, but it's still not complete. For example, we only have support for spies and stubs, but we can't (yet) mock entire modules or entire objects.
+
+> In these cases, where we're used to older projects like Jest, which already has its own mocking system, the simplest move is to go back to the roots and use Sinon to fill the gap, since both (NTR and Jest) are heavily inspired by Sinon.
+
+But even with all these limitations, we can still mock almost every test case we need. I'll walk through the mocking API we have in the Node Test Runner and how we can use each of its functions.
+
+## The Mocks API
+
+The `node:test` module has some mocks through an object called `mock`, which you can import directly from the package:
+
+```js
+import { mock, test } from 'node:test'
+```
+
+This mock has some methods you can use to create spies for a function or object using `mock.fn`. Let's imagine a running-sum function like this one:
+
+```js
+import { mock, test } from 'node:test'
+
+test('foo', () => {
+  const myFun = (...n) => n.reduce((acc, cur) => acc + cur, 0)
+})
+```
+
+How do we know if it was actually called? And with which parameters? We can wrap it in a spy object:
+
+```js
+import { mock, test } from 'node:test'
+import assert from 'node:assert'
+
+test('foo', () => {
+  const myFun = (...n) => n.reduce((acc, cur) => acc + cur, 0)
+  const myFunSpy = mock.fn(myFun)
+
+  assert.strictEqual(myFunSpy.mock.calls.length, 0) // not called yet
+  assert.strictEqual(myFun(1,5,7), 13)
+  assert.strictEqual(myFunSpy.callCount(), 1) // called
+})
+```
+
+You can see that everything related to the function's "meta-call" lives in the `mock` object inside `myFunSpy`. When we access that object, we get a bunch of properties:
+
+-   `callCount`: The number of times a function was called, similar to `.mock.calls.length`, but more efficient because it's a function that doesn't create a copy of the tester's internal array
+-   `resetCalls`: Resets the call count back to 0
+-   `mockImplementation`: Replaces the function's implementation with another one for the entire lifetime of the mock
+-   `mockImplementationOnce`: Same as above, but only once (equivalent to using `mockImplementation`, calling the function, and then `restore()`)
+-   `restore`: Restores the function's original behavior, the mock can still be used after that
+
+We also have the `calls` object, which is literally the tester's internal tracking array. This array holds the list of every call made to the function. So, for example, if we want to grab the first call, we can just do `mock.calls[0]`.
+
+Each call has a bunch of other properties:
+
+-   `arguments`: The array of positional arguments of the function, so `mock.calls[0].arguments[0]` for the call `myFun(1,10)` would be `1`.
+-   `error`: If the function threw an error, this value will hold the thrown error, otherwise it's `undefined`
+-   `result`: Likewise, if the function reached the end and returned a value, this is that returned value, otherwise it's `undefined`
+-   `stack`: The stack trace used to determine the error, if the `error` property exists
+-   `target`: If the mock is a class constructor, this property is the class being constructed
+-   `this`: The `this` value of the mocked object
+
+With these properties we can basically mock any function out there. For example, we can assert that our `myFun` function returned successfully and was called with the right arguments:
+
+```js
+import { mock, test } from 'node:test'
+import assert from 'node:assert'
+
+test('foo', () => {
+  const myFun = (...n) => n.reduce((acc, cur) => acc + cur, 0)
+  const myFunSpy = mock.fn(myFun)
+
+  assert.strictEqual(myFunSpy.mock.calls.length, 0) // not called yet
+  assert.strictEqual(myFun(1,5,7), 13)
+  assert.strictEqual(myFunSpy.callCount(), 1) // called
+
+  const lastCall = myFunSpy.mock.calls[0]
+  assert.deepStrictEqual(lastCall.arguments, [1,5,7])
+  assert.strictEqual(lastCall.result, 13)
+  assert.strictEqual(lastCall.error, undefined)
+})
+```
+
+We can also change the function's behavior so it always returns the same thing:
+
+```js
+import { mock, test } from 'node:test'
+import assert from 'node:assert'
+
+test('foo', () => {
+  const myFun = (...n) => n.reduce((acc, cur) => acc + cur, 0)
+  const myFunSpy = mock.fn(myFun, (...x) => 10) // the function now always returns 10
+
+  assert.strictEqual(myFunSpy.mock.calls.length, 0) // not called yet
+  assert.strictEqual(myFun(1,5,7), 10)
+  assert.strictEqual(myFunSpy.callCount(), 1) // called
+
+  const lastCall = myFunSpy.mock.calls[0]
+  assert.deepStrictEqual(lastCall.arguments, [1,5,7])
+  assert.strictEqual(lastCall.result, 10)
+  assert.strictEqual(lastCall.error, undefined)
+})
+```
+
+> [!NOTE] 💡
+> If we pass a third parameter to the function, we can say how many times the mock will hold, so if we pass `mock.fn(original, implementation, { times: 5 })` we'll mock `original` to return `implementation`'s result, but only for 5 calls
+
+### The `mock` object
+
+Besides the specific properties inside the spy function, we also have global properties on the mock itself. For example, we can mock an object's method using `mock.method`:
+
+```js
+import { mock, test } from 'node:test'
+import assert from 'node:assert'
+
+test('foo', () => {
+  const mathObj = {
+    spreadSum: (...n) => n.reduce((acc, cur) => acc + cur, 0),
+    sum: (a, b) => a+b,
+    max: (a, b) => Math.max(a, b) 
+  })
+
+  const maxMock = mock.method(mathObj, 'max')
+  assert.strictEqual(maxMock.callCount(), 0)
+  assert.strictEqual(mathObj.max(1, 3), 3)
+  assert.strictEqual(maxMock.callCount(), 1)
+})
+```
+
+The same way as before, we can pass a third parameter for the implementation, plus a fourth parameter that's an options object with the following properties:
+
+-   `getter`: If `true`, the mocked property is treated as a getter
+-   `setter`: If `true`, the mocked property will be treated as a setter (can't be used together with `getter: true`)
+-   `times`: How many times the implementation will be used
+
+> [!TIP] 💡
+> Besides `method`, we also have two shortcuts, `mock.getter` and `mock.setter`, which do the same thing as calling `mock.method` with the `getter` or `setter` property set to `true`.
+
+Another function we have directly on `mock` is `reset`, which resets every property of every mock created globally, and `restoreAll` which, as you'd guess, does the same as `restore` but at the global level.
+
+## Contexts
+
+Another thing worth mentioning is that the mock object can have two contexts: local and global.
+
+The global context is what we've been calling directly from the `node:test` module, while the local context is the one inside each individual test. This context is exposed through the (recently [exported](https://github.com/DefinitelyTyped/DefinitelyTyped/pull/69497) by yours truly) `TestContext` interface.
+
+Everything we've done so far uses the global context. To call it directly from within the context, we can use the parameter passed to the `test` or `it` function:
+
+```js
+import { test } from 'node:test'
+import assert from 'node:assert'
+
+test('local context', (ctx) => {
+  const myFun = (...n) => n.reduce((acc, cur) => acc + cur, 0)
+  const myFunSpy = ctx.mock.fn(myFun) // look at ctx here
+
+  assert.strictEqual(myFunSpy.mock.calls.length, 0)
+  assert.strictEqual(myFun(1,5,7), 10)
+  assert.strictEqual(myFunSpy.callCount(), 1)
+})
+```
+
+We can use it with `it`:
+
+```js
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
+
+describe('local context with it', () => {
+  it('test name', (ctx) => {
+    const myFun = (...n) => n.reduce((acc, cur) => acc + cur, 0)
+    const myFunSpy = ctx.mock.fn(myFun) // look at ctx
+  
+    assert.strictEqual(myFunSpy.mock.calls.length, 0)
+    assert.strictEqual(myFun(1,5,7), 10)
+    assert.strictEqual(myFunSpy.callCount(), 1)
+  })
+})
+```
+
+The big advantage (and the reason I recommend using the local context **always**) is that when a test finishes, it automatically cleans up and removes the mock, so one mock never interferes with another.
+
+> **Fun Fact:** We ran into this problem during one of the livestreams in our [Formação TS](https://formacaots.com.br?utm_source=personal-blog&utm_medium=post&utm_campaign=ntr-mocks&utm_id=fixed) community. While building the testing module with the Node.js Test Runner, we accidentally created a global mock that ended up interfering with every test in the project.
+
+## Conclusion
+
+The Node.js Test Runner is an incredible tool. It has a lot to offer even with some features still missing, and even with an incomplete mocks module, we can see it's possible to do everything we need using just the test runner.
+
+If you're interested in seeing a full test suite for a large project, check out our repository for [Formação TS's project number 3](https://github.dev/Formacao-Typescript/projeto-3/tree/node-test-runner), which I solve step by step with the students during the course!

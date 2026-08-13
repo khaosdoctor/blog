@@ -1,0 +1,485 @@
+---
+title: "Let's talk about Deno"
+pubDate: 2022-12-21T12:00:14.000Z
+updatedDate: 2026-07-16T16:04:43.000Z
+lang: en
+slug: "lets-talk-about-deno"
+category: "javascript"
+tags: ["deno", "javascript", "typescript"]
+description: "Is Node.js finally dying? Is this the moment to migrate to Deno? Let's understand everything about it in this article!"
+seoDescription: "Is Node finally dying? Is this the moment to migrate to Deno? Let's understand everything about it in this article!"
+machineTranslated: true
+draft: false
+---
+-   [What is Deno](#what-is-deno)
+    -   [Why it was created](#why-it-was-created)
+    -   [How it works](#how-it-works)
+    -   [Installation](#installation)
+-   [What makes it different](#what-makes-it-different)
+    -   [Security](#security)
+    -   [Web Standards](#web-standards)
+    -   [The Deno namespace](#the-deno-namespace)
+    -   [Standard Library](#standard-library)
+    -   [Development tools](#development-tools)
+        -   [Configuration file](#configuration-file)
+    -   [Decentralized packages](#decentralized-packages)
+        -   [Community packages](#community-packages)
+        -   [Deno compile](#deno-compile)
+    -   [Import maps](#import-maps)
+-   [NPM](#npm)
+-   [Should I switch from Node to Deno?](#should-i-switch-from-node-to-deno)
+-   [Conclusion](#conclusion)
+
+Every time I'm on some social network, I see someone commenting about Deno or asking if it's a good alternative to Node (in fact, it was [this thread](https://twitter.com/marcelgsantos/status/1599800850880532480) that pushed me to write this one), or even "Is Deno going to kill Node? 😱". Since I'm a huge Deno fan, I decided to write an article about it to explain what it is, how it works, and what makes it different from Node.
+
+The idea here is to show a bit of Deno's history, what the main differences are compared to Node, and why it was created. On top of that, I'll show some code examples so you can see how easy it is to get started with Deno, and I'll teach you how to install it so you can start playing around with this alternative that keeps gaining more traction.
+
+## What is Deno
+
+So, what is this Deno thing? I took part in a [Hipsters.tech episode](https://open.spotify.com/episode/1kXjNnp8qKpHRipeAriVDw?si=7026b6b892dd4b6c) back in 2020, talking about my impressions and a bit more about Deno's history, so if you want to know more, I recommend checking out the episode.
+
+![](https://open.spotify.com/episode/1kXjNnp8qKpHRipeAriVDw)
+
+But to sum it up, Deno (pronounced "Dino", hence the dinosaur mascot) is a runtime for JavaScript and TypeScript created by Ryan Dahl, the same guy who created Node.js (Deno is an anagram of Node, get the joke?). Deno's goal isn't to replace Node.js, but to be an alternative to it, with a few differences I'll get into further down.
+
+### Why it was created
+
+Instead of trying to explain everything piece by piece, there's a really interesting talk by Ryan Dahl himself at JSConf EU 2018, where he goes over the main things he regrets about Node.js, what he learned from it, and how he then introduced the solution to those problems in the shape of a new runtime called Deno. I recommend watching the video, but I'll try to sum up the main points here.
+
+![](https://www.youtube.com/watch?v=M3BM9TB-8yA)
+
+So this section doesn't run too long, let's break those points down into a list:
+
+-   **Not starting out with Promises**: as a lot of people know (and I [have heated discussions about this](https://twitter.com/_StaticVoid/status/1604132910768029700)), Node.js started out as callback heaven. The vast majority of libraries in the early ecosystem were callback based, and that ended up becoming a huge headache for developers who had to deal with the infamous "callback hell". What few people know is that Promise support was added in 2009 but removed in 2010, because Ryan Dahl thought Promises weren't a good idea at the time, since they added more complexity. He thought Promises were a solution to a problem that didn't exist, and that callbacks were the better solution. He ended up regretting that.
+-   **Security**: by default, Node.js lets every script you run access everything your system has access to. That's a problem, because if you have a script you downloaded from somewhere and it has a bug that lets it run commands on your system, it can end up wiping out everything on your computer. Even though V8 itself is very good with security, scripts still had access to the network, the filesystem, and so on, all of which sat outside V8's sandbox. The regret is that these permissions weren't granular. Linters, for example, don't need network access.
+-   **GYP**: Node's build system is GYP, a system that isn't bad in itself, but it has a weird UX and causes a lot of compatibility problems because of the lack of documentation in the project.
+-   **package.json and NPM**: the creation of NPM and `package.json` turned Node's package ecosystem into a closed, single space (we'll talk more about this in the next sections, but bundling NPM as Node's default binary turned that tool into the "official" package manager, even though it didn't have to be that way.
+-   **node\_modules**: using what's called "vendoring by default", meaning downloading dependencies internally into a standard directory, makes the module resolution algorithm more complicated than it needs to be.
+-   **Leaving out `.js` in require**: when we require a module, we can just write its name without specifying the extension, assuming every file would be `.js`, which isn't always true, and that complicates the module lookup algorithm quite a bit, on top of not being a web standard.
+-   **index.js**: Node.js assumes that if you import a directory, it'll look for a file called `index.js` inside it, which isn't a web standard either and also complicates the module lookup algorithm.
+
+With that said, he presents Deno as a solution to these problems, and also as a chance to learn from past mistakes and do things differently. The big difference here is that Deno isn't a fork of Node.js, it's a completely new project built on V8 and Rust, aiming to be a secure platform for running scripts as well as a command line tool for development. We'll get into more detail on the differences between the two further down, but for now let's focus on how Deno works.
+
+### How it works
+
+Deno is built using the same V8, but this time integrated with a runtime written in Rust. That lets Deno have a much safer and more performant runtime than Node.js, on top of letting Deno ship as a single binary, which makes installing and using it a lot easier. Libuv, the library Node.js uses to handle IO events, was also replaced with Tokio, a library written in Rust that plays the same role.
+
+> **Note:** if you don't understand how Node.js works under the hood, I have a (pretty long) series of articles on the topic [here](https://dev.to/_staticvoid/series/2080) that's worth a read.
+
+On top of that, Deno supports not just JavaScript but also TypeScript by default, which makes it **extremely attractive** for devs who like having more control over their codebase without needing all the TypeScript configuration on top of Node.js.
+
+### Installation
+
+Installing Deno is pretty simple, just head to the [project's releases page](https://deno.land/manual@v1.28.3/getting_started/installation) and download the binary for your OS. Deno ships as a single binary, so you don't need to install anything besides the binary itself, and it's distributed in a bunch of formats. The recommended way is to install it through a package manager like `apm`, `choco`, or `brew`. That said, you can also use version managers like `asdf` to install a Deno plugin and update the package internally.
+
+To install using a package manager, just run the command below on Linux or macOS:
+
+```bash
+curl -fsSL https://deno.land/x/install/install.sh | sh
+```
+
+You can also use Brew on macOS:
+
+```bash
+brew install deno
+```
+
+And Choco on Windows:
+
+```bash
+choco install deno
+```
+
+If you're using `asdf`, you can install the Deno plugin with the command below:
+
+```bash
+asdf plugin add deno
+```
+
+Then install whatever version you want with the command below:
+
+```bash
+asdf install deno latest
+```
+
+And set it globally with the command below:
+
+```bash
+asdf global deno latest
+```
+
+You'll end up with a binary and a `deno` command in your terminal that you can use to run scripts. Let's do a quick test? Create a file called `hello.ts` with the following content:
+
+```typescript
+console.log('Hello World')
+```
+
+And run the command below:
+
+```bash
+deno run hello.ts
+```
+
+If everything goes right, you'll see the `Hello World` message on your screen.
+
+## What makes it different
+
+Now that we've gone through Deno's history, let's talk a bit about how it differs from Node.js. Deno is a completely new project, so it doesn't share Node.js's codebase, but it does have a few differences worth pointing out. Keep in mind that a direct comparison isn't fair or even valid, since Deno is a newer project that benefits from newer coding techniques and also uses a different runtime than Node.js.
+
+### Security
+
+As we've seen before, Deno has a more granular permission system than Node.js. That means you can control which scripts get access to which permissions on your system. For example, we can write a script with no extra permissions at all, and it'll be denied any attempt to modify the system. Let's do a quick example with network permissions. Create a new file anywhere called `net.ts` and add the following content:
+
+```typescript
+const response = await fetch('https://jsonplaceholder.typicode.com/users')
+const users = await response.json()
+console.log(users[1])
+```
+
+When you run the script with `deno run ./net.ts`, Deno will ask if you want to grant it network access. If you answer `y`, it'll run the script and show the result. If you answer `n`, it'll deny access and show an error:
+
+```bash
+$ deno run ./net.ts
+⚠️  ┌ Deno requests net access to "jsonplaceholder.typicode.com".
+   ├ Requested by `fetch()` API
+   ├ Run again with --allow-net to bypass this prompt.
+   └ Allow? [y/n] (y = yes, allow; n = no, deny) >
+```
+
+You can also run the command with the `--allow-net` flag to grant the script network access:
+
+```bash
+$ deno run --allow-net ./net.ts
+```
+
+That gives the script full network access, but since we're only hitting one site, we can grant permission just for the domain we're accessing:
+
+```bash
+$ deno run --allow-net=jsonplaceholder.typicode.com ./net.ts
+```
+
+### Web Standards
+
+Another thing you probably noticed is that we can use `fetch` natively inside Deno without importing anything at all, on top of being able to use top-level awaits the same way we would in a script that follows the ESModules standard. That happens because Deno sticks closely to web standards, so you can use fetch, websockets, web workers, and so on without needing to import anything.
+
+For example, let's build an echo server, a websocket that replies with everything you send it. Create a file called `echo-server.ts` and add the following content:
+
+```typescript
+const port = 8080
+const conn = Deno.listen({ port })
+const httpConn = Deno.serveHttp(await conn.accept())
+const requestEvent = await httpConn.nextRequest()
+
+if (requestEvent) {
+  const { socket, response } = Deno.upgradeWebSocket(requestEvent.request)
+  socket.onopen = () => {
+    console.log('Client connected')
+    socket.send('Hello from Deno!')
+  }
+
+  socket.onmessage = (e) => {
+    socket.send('You said: ' + e.data)
+  }
+  socket.onclose = () => console.log('WebSocket has been closed.')
+  socket.onerror = (e) => console.error('WebSocket error:', e)
+  requestEvent.respondWith(response)
+}
+```
+
+This server listens for a single connection on port 8080 and replies with a websocket upgrade, then waits for a message from the client. Once the message arrives, it sends the same message back to the client. Now let's write the client to connect to the server, in a file called `echo-client.ts`:
+
+```typescript
+const ws = new WebSocket('ws://localhost:8080')
+
+ws.onmessage = (e) => {
+  console.log('Message from server:', e.data)
+  ws.close()
+  Deno.exit(0)
+}
+
+ws.onopen = () => {
+  let input
+  do {
+    input = prompt('Enter a message to send to the server: ')
+  } while (!input)
+  ws.send(input)
+}
+```
+
+When you run the server with `deno run --allow-net ./echo-server.ts` in one terminal, then run the client with `deno run --allow-net ./echo-client.ts` in another, you'll see the client connect to the server and ask which message you want to send. If you type a message and hit enter, the server replies with the same message and closes the connection.
+
+Notice we're not just using `fetch` or `webSocket`, we're also using `prompt`, which is another web API. We can even use the famous `alert`:
+
+```typescript
+alert('Hello from Deno!')
+```
+
+Run that code and you'll see the message show up in your terminal, waiting for an enter to continue.
+
+### The Deno namespace
+
+By default, Deno already ships with full TypeScript typings, meaning we get every interface Deno can offer natively, without installing anything. For example, if you open the `net.ts` file we created earlier, you'll see Deno already has full typing for `fetch` and `Response`.
+
+You saw that in the earlier examples we also used `Deno.listen` and `Deno.serveHttp`, but we never covered what they do. `Deno` is a namespace with a bunch of functions and interfaces you can use to do things like read and write files, listen for and send HTTP requests, and so on. You can check the full list of functions and interfaces Deno offers [here](https://doc.deno.land/builtin/stable).
+
+One of these interfaces handles reading files, and to see how it works, let's read a file using Deno and print its content to the screen. Create a file called `read-file.ts` and add the following content:
+
+```typescript
+const fileContent = await Deno.readFile('./net.ts')
+console.log(new TextDecoder().decode(fileContent))
+```
+
+We can run the file with `deno run --allow-read=./net.ts ./read-file.ts` and see the content of the `net.ts` file we created earlier printed to the screen.
+
+Notice we're using another web standard, [`TextDecoder`](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder/TextDecoder), a class whose job is decoding an array of bytes into a string.
+
+### Standard Library
+
+Unlike Node, which keeps every feature, basic or not, inside the runtime itself, Deno chose to move these features out into a standard library, the famous [Standard Library](https://deno.land/std). This library really matters because it has zero external dependencies and is maintained by the Deno team itself, guaranteeing it'll _always_ work on any version of Deno, at any time.
+
+One of its features is a native HTTP server. Let's build an HTTP server using the Standard Library. Create a file called `http-server.ts` and add the following content:
+
+```typescript
+import { serve } from 'https://deno.land/std/http/server.ts'
+
+serve(
+  (_req) => {
+    return new Response('Hello World')
+  },
+  { port: 3000 }
+)
+```
+
+Now run the file with `deno run --allow-net ./http-server.ts` and open `http://localhost:3000` in your browser, you'll see the `Hello World` message on screen.
+
+But if you're used to Node's way of doing things, no worries. Up to version `0.177.0`, the Standard Library also has a module with ports of Node.js features, so you can use Node's `http` and `https` inside Deno. Create a file called `http-server-node.ts` and add the following content:
+
+```typescript
+import { createServer } from 'https://deno.land/std@0.177.0/node/http.ts'
+
+const server = createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  res.end('Hello World')
+})
+
+server.listen(3000, () => console.log('Server running on port 3000'))
+```
+
+For this one, you'll need to run an older version of Deno for it to work. But starting with more recent versions, we can import Node modules natively using `node:` in the import!
+
+```typescript
+import { createServer } from 'node:http'
+
+const server = createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  res.end('Hello World')
+})
+
+server.listen(3000, () => console.log('Server running on port 3000'))
+```
+
+The result is the same as before, but now we're using Node's `http`.
+
+Another cool tool already in the Standard Library is `dotenv`, a library that reads environment variables from a `.env` file and puts them into `Deno.env`. Let's create a `.env` file with the following content:
+
+```bash
+PORT=3000
+```
+
+Now let's create a file called `env.ts`:
+
+```typescript
+import { config } from 'https://deno.land/std/dotenv/mod.ts'
+
+const configData = await config()
+const password = configData['PORT']
+
+console.log(port) // 3000
+```
+
+You'll need to run the file with `deno run --allow-env --allow-read ./env.ts` for it to be able to read the `.env` file.
+
+### Development tools
+
+Besides being a runtime, Deno also gives you a bunch of tools to help with development, available as CLI commands.
+
+It's worth saying these tools are already included in Deno from the moment you install it, so you don't need to install anything extra to get the full suite Deno offers.
+
+Something interesting to note is that Deno's idea was to follow a bit more of the Go and Ruby model, where you have a convention everyone follows instead of a pile of configuration for each person. So there are several commands that are "opinionated", so to speak.
+
+Here are a few of them:
+
+-   `deno lint`: runs a static analysis on the code and points out possible bad practices. You can, for example, run it on our `http-node.ts` file and see the result with `deno lint ./http-node.ts`
+-   `deno check`: just like `lint`, `check` runs a static type check on your code, the equivalent of running `tsc`, for example
+-   `deno fmt`: formats the code according to Deno's standard. You can run it on our `http-node.ts` file and see the result with `deno fmt ./http-node.ts`.
+-   `deno doc`: shows the documentation for a given module. If that module has documentation online, it fetches it from the original source. If not, it can extract documentation straight from the types in the code, as well as pull in JSDoc and other info.
+-   `deno test`: runs your code's tests using Deno's own test runner
+-   `deno bundle`: generates a single file with all the code needed to run that program. For example, if we run it on our `http.ts` file, it grabs all of Deno's runtime code and puts everything in the same file, which is really handy for distributing a program to other people without them needing to install dependencies. You still need Deno's runtime installed though, it's a lighter version of `deno compile`.
+-   `deno vendor`: this is one of the coolest commands. What it does is download dependencies locally and put them in the project's `vendor` directory, which is great for making sure the project works anywhere, without depending on an internet connection or a CDN. On top of that, it also creates an "import map", another web standard we'll cover in the next topic.
+-   `deno compile`: generates a single compiled binary with the whole runtime and your code baked in. It ends up a bit big, but it's amazing for sharing and running programs on other computers without installing anything extra (another idea borrowed from Go). We'll talk more about this command later, because it's really useful.
+
+#### Configuration file
+
+Deno has a standard config file called `Deno.json` or `Deno.jsonc` (JSON with comments). This file configures some things in Deno, like `tasks`, which are the equivalent of `package.json` scripts. Let's create a task to run our `net.ts` file.
+
+Create a file called `Deno.jsonc` and add the following content:
+
+```json
+{
+  "tasks": {
+    "net": "deno run --allow-net ./net.ts"
+  }
+}
+```
+
+Now run `deno task net` and you'll see the result of our HTTP call.
+
+This file isn't just for configuring Deno itself, you can also tweak small options, for example in the `fmt` command to set your preferences, or small adjustments to the TypeScript compilation, similar to `tsconfig.json`. For example, if we want to allow decorators in our code, we can add the following config:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true
+  }
+}
+```
+
+Check out the full configuration file reference [here](https://deno.land/manual@v1.29.1/getting_started/configuration_file).
+
+### Decentralized packages
+
+This is a pretty important point and deserves some space and attention, because it's by far the biggest difference between Deno and Node.js. As you probably saw in Ryan's talk at the start of this article, one of Node's problems is having a centralized package manager. If you're wondering what's wrong with that, I recommend watching this other fantastic video called [The Economics of Open Source](https://www.youtube.com/watch?v=JcZnqWYmBww):
+
+![](https://www.youtube.com/watch?v=MO8hZlgK5zc)
+
+In short, having centralized package management puts all the power in the hands of a single company. If that company decides something that goes against your principles or your community's, there's not much you can do about it. On the other hand, having a private company manage the packages guarantees better quality and security, you can be sure the system won't go down and that the packages will always be there to use, since integrity is guaranteed by the company.
+
+Deno solves this problem in a really smart way: using [ESModules](/os-ecmascript-modules-estao-aqui/), it doesn't have a centralized package manager, but rather a module import system based on URLs. That means you can import any module from anywhere that serves a valid TS or JS file. This was heavily inspired by how Go imports packages, which is also URL based, the difference being that this is possible here because of the ESM spec in JavaScript.
+
+On top of that, Deno doesn't have a `node_modules` folder where every module gets stored per project. What it does is closer to what Yarn 2 does: it downloads modules and puts them in a global cache, so you don't need to download modules again if you already downloaded them in another project. That global cache is the directory set in `$DENO_DIR`. You can also change where the cache gets stored per project, just set the `DENO_DIR` environment variable to whatever directory you want and run `deno cache <file>`.
+
+#### Community packages
+
+We already imported packages in the earlier examples, but they were all from the standard library. But what if we have modules from other people? For that, as we mentioned before, we can import directly from a URL (a CDN, for example), or use `deno.land/x`, a sort of mirror for community packages. Instead of storing the packages itself, it caches packages sent from another URL. You can check the details in the [add a module section](https://deno.land/add_module) of the site.
+
+Let's import a famous package, Oak, which is Deno's Express, in a new file called `oak.ts`:
+
+```ts
+import { Application, Router } from 'https://deno.land/x/oak@v11.1.0/mod.ts'
+
+const router = new Router()
+
+router.get('/hello/:name', (ctx) => {
+  ctx.response.body = `Hello ${ctx.params.name}!`
+})
+
+const app = new Application()
+app.use(router.routes())
+
+await app.listen({ port: 8000 })
+```
+
+Running the file with `deno run --allow-net ./oak.ts` and hitting `http://localhost:8000/hello/World`, we'll see the message `Hello World!` in the browser. Notice we're pinning the exact version of the package we want to download, which is really useful when we don't want our modules to break because the package author updated it and changed the API.
+
+We can also use the `deno cache` command if we want to download a file's whole dependency tree without running it. If we're going to distribute that file to other people, we can bundle all the program's dependencies into one place with `deno bundle ./oak-ts` and just send that single file to be run.
+
+#### Deno compile
+
+Deno has a really interesting command called `deno compile`. This command grabs every dependency, not just the program's own, but Deno's runtime too, and packs it all into a single executable binary with the permissions already predefined. That's a great way to distribute programs that use Deno to other people without needing to install Deno on every machine.
+
+We can run `deno compile --allow-net ./oak.ts` to generate a file called `oak` that we can run with just `./oak` and get the same result we had before.
+
+### Import maps
+
+Deno has a feature called import maps, a way of defining aliases for URLs. That's really useful when you want to import a package that isn't on `deno.land/x`, or when you want to import a package that lives in a private repository. For example, instead of typing `https://deno.land/x/oak/mod.ts` every single time we want to import Oak, we can set up an alias for it in the `import_map.json` file:
+
+```json
+{
+  "imports": {
+    "oak": "https://deno.land/x/oak/mod.ts"
+  }
+}
+```
+
+Now we can go back to our `oak.ts` file and change the Oak import to `import { Application, Router } from 'oak'`, then run the program with `deno run --allow-net --import-map=import_map.json ./oak.ts` and get the same result.
+
+If we want to be more concise and put the import map right in the `deno.jsonc` config file, we can do:
+
+```json
+{
+  "importMap": "import_map.json"
+}
+```
+
+And now we can run the program with `deno run --allow-net ./oak.ts` and get the same result.
+
+But we can go even more generic and set up the import map with an alias for Deno's `x/`, so we can import any community package without typing the full URL every time, just by changing `import_map.json`:
+
+```json
+{
+  "imports": {
+    "x/": "https://deno.land/x/"
+  }
+}
+```
+
+Then we can import Oak with `import { Application, Router } from 'x/oak/mod.ts'` and run the program with `deno run --allow-net --import-map=import_map.json ./oak.ts` and get the same result.
+
+## NPM
+
+Starting with Deno 1.28, it's now possible to natively import packages directly from NPM, without needing them to sit on an external CDN like before. The details of this implementation were announced in [a post on Deno's blog](https://deno.com/blog/v1.28) a while back, and there's more detail in [the docs](https://deno.land/manual@v1.28.3/node/npm_specifiers). Essentially, the idea is to add the `npm:` prefix before the package name and the version we want to import. For example, to import the `express` package at version `4.17.1` we can do: `import express from 'npm:express@4.17.1'`.
+
+Let's try that in a new file called `express.ts`:
+
+```ts
+import express from 'npm:express'
+const app = express()
+
+app.get('/', (_: any, res: any) => {
+  res.send('Hello World!')
+})
+
+app.listen(3000, () => {
+  console.log('Example app listening on port 3000!')
+})
+```
+
+Here we'll run into some TypeScript issues, because Deno doesn't have typings for the `express` package and `express` doesn't have typings for Deno. That's going to throw some errors, so we can import Express's typings separately with `@types/express`:
+
+```ts
+import express from 'npm:express'
+import { Request, Response } from 'npm:@types/express'
+const app = express()
+
+app.get('/', (_: Request, res: Response) => {
+  res.send('Hello World!')
+})
+
+app.listen(3000, () => {
+  console.log('Example app listening on port 3000!')
+})
+```
+
+Unfortunately Deno is still experimental with this kind of feature, meaning the permission system isn't 100% there yet and it ends up requesting more permissions than it should. So let's run it with `deno run -A ./express.ts`, where `-A` is shorthand for `--allow-all`, which grants Deno every permission.
+
+## Should I switch from Node to Deno?
+
+That's the million dollar question, right next to "Is Node going away!?". Unfortunately I can't answer the first one, but Node definitely isn't going away anytime soon.
+
+Deno is a new tool that's still under development, so it isn't here to replace Node, but rather to complement it, or even to be an alternative worth considering.
+
+Node's package community is still way bigger, even though most modules can be used in Deno too, so if you want to use a package that isn't on `deno.land/x`, you can use NPM to import it into Deno, like we just saw. Still, Node is a much older, much more stable project than Deno is today, even though Deno keeps getting better every day.
+
+Two things worth mentioning: it's possible to generate packages from Deno that work perfectly in Node.js using [DNT](https://github.com/denoland/dnt), a tool created by the Deno team itself to do exactly that, or [D2N](https://github.com/fromdeno/deno2node), which does the same thing.
+
+[GrammY](https://grammy.dev) is an example of a package built using Deno that works perfectly in Node.js through the migration with D2N.
+
+On top of that, Deno is part of a company heading toward becoming something like Vercel for backend applications. [Deno Deploy](https://deno.com) is a deployment platform for backend apps that uses Deno as its runtime, has a free tier for small applications, and is extremely simple to use, so it's worth checking out.
+
+## Conclusion
+
+Should you switch from Node to Deno today? Probably not, but it's well worth keeping more than one eye on it as it develops and becomes more stable.
+
+Is Node going to die? No, it isn't. Node is going to be around for a long time, but it's important for the community to know Deno exists and that it's a tool that can be useful in a lot of cases. Also, since it's much newer, it doesn't have nearly as many applications and dependencies as Node does, meaning the project's evolution could move faster than Node's.
+
+I plan on putting up more articles about Deno here on the blog, so stay tuned!

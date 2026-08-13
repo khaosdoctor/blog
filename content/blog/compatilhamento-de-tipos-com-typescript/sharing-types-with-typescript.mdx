@@ -1,0 +1,68 @@
+---
+title: "Sharing Types with TypeScript"
+pubDate: 2022-04-11T14:00:00.000Z
+updatedDate: 2026-07-16T16:09:54.000Z
+lang: en
+slug: "sharing-types-with-typescript"
+category: "typescript"
+tags: ["typescript", "development"]
+description: "One of the biggest problems we have in TypeScript projects is sharing types across multiple projects. Let's look at a few techniques to ease that pain!"
+seoDescription: "One of the biggest problems we have in TypeScript projects is sharing types across multiple projects. Let's learn how to make this better!"
+machineTranslated: true
+draft: false
+---
+When we talk about TypeScript, we automatically get two kinds of reactions: the person who loves it and wants to use it for everything, like me, and the person who dislikes it for several reasons.
+
+One of the main reasons I've heard people give when talking about TypeScript is that **sharing types across projects is counterintuitive**. And by "sharing" I mean the following:
+
+Imagine you have a project split between a backend and a frontend. The backend provides a service that is your API, and you need to consume that service on the frontend. It's essential that you have a simple, direct way of automatically keeping the data payload up to date without having to take any manual action.
+
+For that, there are a few pretty interesting ways to work with multiple repositories and shared types.
+
+## Creating external libraries
+
+This is the most common approach and probably the simplest of them all. We can create a separate external package, usually called `shared`. This external package would be another NPM package (public or private) that gets installed on both the frontend and the backend.
+
+The big advantage is that it's quite simple: if we're working on a project that isn't in a monorepo, we can use this technique to create a types library that can be installed through a public or private NPM package, or even using Node.js's `file:` protocol.
+
+The problem with this model is that you've just created another dependency. And whose dependency is it? The frontend team's or the backend team's? On top of that, we'd need to include this dependency in our publishing pipeline, since we'll need it in every case, and it will always have to be very well tested.
+
+Another important thing we have to keep in focus is that we can only share the part that's meant to be shared. In other words, we always have to stick to the object being transferred, which is called a DTO (Data Transfer Object), essentially the payload of our call, and never share business rules.
+
+## The BFF pattern
+
+The second way we can work with shared types is the so-called BFF pattern, which stands for **Back-end for Front-end**. The main idea behind this implementation isn't just a change in types, but a change in how your application behaves, because instead of having a single backend and a single frontend, we now have an intermediary service between them that acts as a data interface.
+
+This pattern is a great way to create a communication interface between the two sides without essentially having to share code. Because all you're creating is a mapper between the two services and the two data models.
+
+The big advantage of this model is that the backend can evolve completely independently of the frontend, as long as the interface stays the same. The frontend can receive updated data with little or no direct update from the backend.
+
+This is excellent for cases where we have many teams working on many separate clients that consume one or more APIs. This way you don't need to serve the same kind of data to every client, and you can have an initial representation in your backend but many different views of that data across different frontends.
+
+The biggest downside is that we're adding an entire service just to fix the data compatibility problem. On top of that, it's one more moving part to work with and include in your publishing pipeline.
+
+In my experience I've seen many projects using this pattern, including here at Klarna, where we use it extensively to give other teams more comfort working on their projects without us having to enforce strict consistency across every single one of them.
+
+This way, when we have a major version transition on the backend, we can keep backward compatibility with all our clients without needing every one of them to instantly update how they call their services.
+
+## Using gRPC
+
+Another option would be to use an external DTO through gRPC, as I already explained [in my series about gRPC](/guia-grpc-1/) here on the blog.
+
+gRPC working together with Protobuf lets us share types in the strictest way possible, since without that payload file, the service simply wouldn't work. However, this implies you need to implement a whole new pipeline just to handle protobuf itself and all its files.
+
+This pipeline would need to be able to compile the gRPC file and distribute it to both the client and the server. Updating the DTO would mean downloading the newest version of every protobuf file from the server and installing it on every client. Which, personally, I find a bit costly.
+
+## Implementing GraphQL
+
+Implementing GraphQL on the server side is a good way to keep types shared, since we can infer the API schema from what the API itself returns. Besides that, we can add fields to the schema without breaking existing clients, and change other fields while keeping backward compatibility with the API.
+
+The problem is that, generally, using GraphQL (or even protobuf, for that matter) also requires sharing the schema with other backend services or even other repositories, which brings us right back to the first solution.
+
+## Working with Monorepos
+
+The easiest and fastest way to share types with other projects is putting all those projects in the same repository. That way you could create a new shared types folder without needing any external dependency.
+
+The big problem with monorepos is that, in a very large project, it becomes completely unmanageable due to its sheer size, forcing you to break it into smaller pieces, which essentially adds complexity.
+
+That said, there are several well-established tools like [NPM](https://www.youtube.com/watch?v=vxES6rbrd-U&t=7s) and [Yarn](https://www.youtube.com/watch?v=vxES6rbrd-U&t=7s) Workspaces that promise to make working with monorepos easier in the long run. Some equally useful but older solutions, like Lerna, also make managing monorepos easier over time.

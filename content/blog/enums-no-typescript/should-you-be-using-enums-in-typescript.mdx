@@ -1,0 +1,383 @@
+---
+title: "Should You Be Using Enums in TypeScript?"
+pubDate: 2024-04-17T11:00:42.000Z
+updatedDate: 2026-07-16T17:56:58.000Z
+lang: en
+slug: "should-you-be-using-enums-in-typescript"
+category: "typescript"
+tags: ["typescript"]
+description: "You've probably heard someone say \"Don't use Enums\"... But why does nobody like enums in TypeScript? Does that even make sense?"
+machineTranslated: true
+draft: false
+---
+One of the most polemic conversations around TypeScript is the use of Enums. In this article I want to show the good and the bad sides of an enum, and my personal opinion on what I use and why.
+
+If you've been in the TS community for a while you already know there are two sides to this, just like Java lovers vs JavaScript lovers, but if you're just arriving now, let me explain what I'm talking about.
+
+## Enums and TypeScript
+
+In TS you can define enumerators, and these enumerators reflect a [proposal](https://github.com/rbuckton/proposal-enum) added to TC39 years ago, but actually, TS came before that. When TS was created, they believed there wouldn't be an idea to add an enumerator to the language, and enumerators are indeed useful in most typed languages.
+
+That's why, since the first version, TS already has support for enumerators by default. But what is an enumerator?
+
+I'm not going to explain 100% of what all this is here, but you can find plenty of content about it in the [documentation](https://www.typescriptlang.org/docs/handbook/enums.html), or I also talk about it a lot in my TypeScript training, [Formação TS](https://formacaots.com.br).
+
+Enums are enumerators of constants. When you want to give a name to a list of things, an enum is your way out. They can be computed automatically, like below:
+
+```ts
+enum Country {
+  Germany, // 0
+  Sweden, // 1
+  USA // 2
+}
+```
+
+Here each country gets a number associated automatically, starting from 0. Or you can have constant enumerators like this:
+
+```ts
+enum Country {
+  Germany = 'DE',
+  Sweden = 'SE',
+  USA = 'US',
+}
+```
+
+Enumerators work like objects at runtime and also as types, so you can pass something like:
+
+```ts
+function setCountry (country: Country) {}
+
+setCountry(Country.Germany)
+```
+
+And you can also get the keys using `Object.keys(Country)`, for example.
+
+And that's basically the gist of enums that we're going to need to know.
+
+## The enum controversy
+
+There's a growing community of people who don't like using enumerators in their code. For all sorts of reasons (which we're going to discuss here in a bit), it's not hard to find something on YouTube if you type "TypeScript Enums" into the search bar.
+
+But what I never liked was that, to me, none of those reasons was strong enough to just stop using enumerators altogether, but the arguments in favor weren't that great either, so what now?
+
+Since I always had this doubt myself, I'm now going to share with you both sides of this story to settle this once and for all.
+
+## Arguments against enums
+
+Let's start with the arguments against enumerators.
+
+### It's not something that exists in JavaScript
+
+This is an old take on why not to use enums: _"JavaScript doesn't ship with this out of the box"_.
+
+I understand why, considering TypeScript is basically JavaScript on steroids, meaning, with types. So, in theory, everything that's JavaScript should also be TypeScript.
+
+People tend to lean heavily on this argument:
+
+> If you strip all the types from a TypeScript codebase, what's left has to be plain JavaScript.
+
+And that even makes sense, but if we're going down that road of stripping TypeScript code, enums should go too. Besides, this argument isn't even that strong, for a few reasons:
+
+1.  There's a [proposal](https://github.com/rbuckton/proposal-enum) to add this to the language (it's kind of stalled and maybe forgotten, but it's there)
+2.  And it's not really our responsibility to do that, TS already has a compiler whose whole job is to remove the parts that aren't JS and make the code work
+
+### Enums generate code at runtime
+
+By default, TS shouldn't generate code at runtime, but there are a few things that break this rule, like [decorators](/javascript-decorators/) and enums.
+
+This means the code you see at the end isn't just stripping the enum away, each enum generates a JS object.
+
+So an enum like this:
+
+```ts
+enum X {
+    a,
+    b,
+    c
+}
+```
+
+Would generate this:
+
+```js
+var X;
+(function (X) {
+    X[X["a"] = 0] = "a";
+    X[X["b"] = 1] = "b";
+    X[X["c"] = 2] = "c";
+})(X || (X = {}));
+```
+
+One of the arguments for why we should care about what TSC generates in the end is that Babel and other compilers use plugins and this can confuse them, but that's not really an argument, because if those plugins don't account for a base language feature, they're not good plugins.
+
+### Enum objects don't behave the way we want
+
+When you have the enum from the paragraph above:
+
+```ts
+enum X {
+    a,
+    b,
+    c
+}
+```
+
+The final object ends up with a double-value object syntax:
+
+```js
+var X;
+(function (X) {
+    X[X["a"] = 0] = "a";
+    X[X["b"] = 1] = "b";
+    X[X["c"] = 2] = "c";
+})(X || (X = {}));
+```
+
+Which means `a` will have the value `0`, but also `X[0]` will have the value `a`, and that's true if you do a `console.log(Object.entries(X))`:
+
+```
+[["0", "a"], ["1", "b"], ["2", "c"], ["a", 0], ["b", 1], ["c", 2]]
+```
+
+This bugs people, because it's not what you'd expect from an object.
+
+But it was made this way so we can access `X.a` and get the value of `a` (which is 0), but also access it by index and get the key, so `X[0]` should be `a`.
+
+However, this **doesn't happen** if you use _string enums_. So if we have an HTTP Methods enum:
+
+```ts
+enum HTTPMethods {
+	GET = 'GET,
+	POST = 'POST'
+}
+```
+
+The final object would be:
+
+```ts
+"use strict";
+var HTTPMethods;
+(function (HTTPMethods) {
+    HTTPMethods["GET"] = "GET";
+    HTTPMethods["POST"] = "POST";
+})(HTTPMethods || (HTTPMethods = {}));
+```
+
+Which just assigns the string to the value and not to the index. So in our `Object.entries` we wouldn't see keys `[0, 1, 2]` because they don't exist.
+
+### Enums don't accept values that aren't part of the enum
+
+When you do something like:
+
+```ts
+enum LogLevel {
+	DEBUG = 'DEBUG', 
+	WARNING = 'WARNING',
+	ERROR = 'ERROR'
+}
+
+function log (msg: string, level: LogLevel) {}
+
+log('hey', 'DEBUG')
+```
+
+You get an error, because `level` can't be a member that doesn't exist in the enum, which apparently is what people expect, since both have the same value.
+
+There's something quite interesting here, because TypeScript uses a structural type system so it shouldn't care about the name, only the value, but enums kind of break that rule, because the types become nominal, so creating another enumerator `LogLevel2` and passing its value to the function would also error out.
+
+```ts
+enum LogLevel2 {
+	DEBUG = 'DEBUG', 
+	WARNING = 'WARNING',
+	ERROR = 'ERROR'
+}
+
+function log (msg: string, level: LogLevel) {}
+
+log('hey', LogLevel2.DEBUG) // Error
+```
+
+Because `LogLevel` and `LogLevel2` aren't the same thing.
+
+I get this point, especially coming from a language as open as JavaScript. But then again, what's the point of enumerating something if you can just pass anything anyway?
+
+To work around this, people use POJOs (_Plain Old JavaScript Objects_) to get around enums, like this:
+
+```ts
+const LogLevel = {
+	DEBUG: 'DEBUG', 
+	WARNING: 'WARNING',
+	ERROR: 'ERROR'
+} as const
+typeof LogLevel[keyof typeof LogLevel]
+
+function log (msg: string, level: LogLevel) {}
+
+log('hey', 'DEBUG')
+```
+
+Which lets you use the string `'DEBUG'` while still keeping intellisense, and also use the type directly via `LogLevel.DEBUG`, but you have to write twice as much text.
+
+### Computed enums can give you false if statements
+
+If you do:
+
+```ts
+enum A {
+  User,
+  Admin
+}
+
+if (A.User) {
+  // this won't run
+}
+```
+
+Because `User` is 0, so, avoid using computed enums.
+
+## Arguments in favor of enums
+
+Now let's get to the arguments in favor of enums.
+
+### Faster refactoring
+
+Say you need to replace the string `'POST'` in the enum we defined earlier:
+
+```ts
+enum HTTPMethods {
+	GET = 'GET,
+	POST = 'POST'
+}
+```
+
+We can just change the enum's value to `'post'` and we're done, nothing else needs to change since the value will be used by every member that consumes this enum.
+
+If we had a _union type_ like `GET | POST` and later decided to change it to `get | post`, every single place would now have a type error.
+
+I've personally heard things like:
+
+> This maintenance argument for enums isn't very strong. When we add a new member to an enum or union, it rarely changes after creation. If we use unions, it's true we might have to spend some time updating things in several places, but it's not a big deal because it rarely happens. Even when it does happen, type errors can show us exactly what to update.
+
+Which isn't really true, because if you're working on large projects, like we do here at Klarna, this isn't that "rare", and what's even less true is the part that says:
+
+> _"we might have to spend some time updating things in several places, but it's not a big deal because it rarely happens"_
+
+Because most of these people aren't making a change across 500 files with 1500 lines each. When a project is small, even medium sized, that's fine. But once you step into the realm of huge projects, all of that stops making sense and enums can absolutely save your refactor.
+
+### Strict strings and consistency
+
+You could argue that being more rigorous about the parameters you pass around is better than leaving them wide open. Since TypeScript's whole goal is to be type safe and bring safety to your code.
+
+You can make your code stricter by using _string enums_, which force you to use that enum to pass a value to an object, so you can't just pass plain strings.
+
+And there you have another argument in favor: **consistency**. When you use raw strings in your code, like we did with `'DEBUG'`, you end up thinking _"Where did this value come from? What is this?"_, which is what we call **magic strings**.
+
+That's terrible for maintenance, enums help keep your code consistent, strict and safe.
+
+## So, what's the verdict?
+
+The truth is there's no verdict. I personally side with the enum crowd, because they're more expressive than objects, and more semantic (for the same reason we use `<main>` instead of `<div>` in HTML).
+
+But I recognize all these problems with enumerators, so, to help out, I'll leave here some tips on how to work around enums if you don't want to use them, but the main tip is:
+
+> BE CONSISTENT
+
+If you're using enums, don't mix them with objects, if you're only using objects, don't mix them with enums. Know when to use an enum or not instead of using enums for everything.
+
+So if you don't want to use enums at all, instead of an enum, you can use a union type or a JavaScript object.
+
+```ts
+enum LogLevel {
+	DEBUG = 'DEBUG', 
+	WARNING = 'WARNING',
+	ERROR = 'ERROR'
+}
+```
+
+You could do this instead:
+
+```ts
+const LogLevel = {
+	DEBUG: 'DEBUG', 
+	WARNING: 'WARNING',
+	ERROR: 'ERROR'
+} as const
+
+// Keys
+type LogLevel = keyof typeof LogLevel
+// DEBUG | WARNING | ERROR
+
+// Values
+type LogLevelValue = typeof LogLevel[keyof typeof LogLevel]
+// 'DEBUG' | 'WARNING' | 'ERROR'
+```
+
+This way, you get both the object and the type for this value, the keys work as expected, you can pass strings for a value and everything.
+
+The downside is writing more and having to repeat yourself in the LogLevel object and in the type, so it's twice the writing.
+
+## Conclusions
+
+There are a few important conclusions from all this, the first one is:
+
+### Don't use computed enums
+
+Avoid using computed numeric enums, they're prone to a bunch of errors (as we've already seen), and you don't control the order of things.
+
+Instead, use enums defined like this:
+
+```ts
+enum Country {
+  Germany = 'DE',
+  Sweden = 'SE',
+  USA = 'US',
+}
+```
+
+They can be numbers (but avoid it), but always defined. Never do:
+
+```ts
+enum Country {
+  Germany,
+  Sweden,
+  USA
+}
+```
+
+### Always try to use string enums
+
+Following up on the previous point, always try to use string enums to avoid the false declaration error I showed earlier with the `if` case that would always be 0.
+
+### Use const enums whenever possible
+
+TypeScript has another type (which by the way is very well explained [in this article](https://robinpokorny.com/blog/typescript-enums-i-want-to-actually-use/) by a colleague of mine here at Klarna), which are **const enums**.
+
+```ts
+const enum Country {
+  Germany = 'DE',
+  Sweden = 'SE',
+  USA = 'US',
+}
+```
+
+Const enums **don't** generate code at runtime. So, adding:
+
+```ts
+const enum Country {
+  Germany = 'DE',
+  Sweden = 'SE',
+  USA = 'US',
+}
+```
+
+Won't generate any runtime code, but you also won't be able to use the enum as an object, meaning you won't be able to use them to extract keys or values, because they don't actually exist in the production code.
+
+## What I use
+
+I tend to follow an order of preference:
+
+1.  I always try to use _const string enums_ first, like we just saw above
+2.  If I'm going to use the keys, whether listing them or doing something with a list of the Enum's keys and values, I swap _const enums_ for string _enums_
+3.  If I really need to pass a string to a function, and converting or mapping the string to the enum is too complicated, I use POJOs (but I avoid this as much as possible)
+
+What about you? What are you using? Comment on this article for everyone to see and tell me on my [Twitter](https://twitter.lsantos.dev) what you think about this!

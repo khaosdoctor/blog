@@ -1,0 +1,100 @@
+---
+title: "Deno now has a native database"
+pubDate: 2023-04-19T11:00:53.000Z
+updatedDate: 2026-07-16T16:01:17.000Z
+lang: en
+slug: "deno-now-has-a-native-database"
+category: "typescript"
+tags: ["typescript", "deno", "development"]
+description: "Deno surprises us again with a native database implemented right in the global namespace! Let's understand how it works!"
+seoTitle: "Native key-value storage with Deno KV"
+machineTranslated: true
+draft: false
+---
+Another day, another update from the runtime that never stops surprising us! Deno announced that, as of version 1.32, it now ships with a native key-value database!
+
+## It's not that weird
+
+Before you think: "But why would anyone put a database inside a runtime? Wouldn't a lib be better for that?" Sure, having a native key-value database inside the runtime sounds like a lot for a standard lib to take on. But what if we had already been doing this for years without even noticing?
+
+The truth is that whenever we built small applications with Node, or even web servers, one of the fastest and most efficient ways to persist data without reaching for a full database solution was to use the computer's file system (the famous FS). And the easiest way to use the FS is through a key-value model.
+
+Before [maps came along](https://medium.com/trainingcenter/javascript-maps-entendendo-o-conceito-8654d5eb1314), someone might have said it's pretty complicated to implement a class that acts like a database, because you'd need something more complete like this:
+
+```javascript
+class Database {
+	insert () {}
+    search (query) {}
+    delete (id) {}
+    update (id, data) {}
+}
+```
+
+On top of that there's internal state management and concurrency for opening the same file at the same time, which can push you toward implementing `locks` or even a MUTEX.
+
+I've personally built several small databases using arrays and objects to store values on the FS whenever I wanted something quick and simple.
+
+Maps changed the way we think about this because they already had a lot of methods like `delete` built into the API natively. So building a database that way basically came down to serializing and deserializing an array into a file, which is still the hardest part.
+
+## Deno KV
+
+The Deno team [recently announced](https://deno.land/manual@v1.32.4/runtime/kv) that version 1.32 of the runtime now ships with a native implementation of a key-value store (KV), but in a much more evolved shape.
+
+To use it, you just open the database with `Deno.openKv()`, which optionally takes a path where the database will be saved.
+
+```typescript
+const kv = await Deno.openKv();
+```
+
+Now we have the four basic CRUD methods:
+
+-   Insert via the `kv.set` method
+-   Delete via the `kv.delete` method
+-   Read via the `kv.get` method
+-   And update can be done by re-inserting a record under the same key
+
+The change here is that, besides accepting simple keys, Deno KV also accepts prefixes and nested keys. Just pass an array as the key when setting a value, so if we wanted to create a "folder" called `users` holding every key related to users, we could do it like this:
+
+```typescript
+await kv.set(['users', 'lucas'], { name: 'Lucas' })
+```
+
+We can also fetch the value using the same notation:
+
+```typescript
+const valor = await kv.get(['users', 'lucas'])
+// valor.key -> ['users', 'lucas']
+// valor.value -> { name: 'Lucas' }
+```
+
+But beyond that, we can take advantage of generators and async iterators to read a whole set of keys sharing the same prefix with `kv.list`:
+
+```typescript
+for await (const entry of kv.list({ prefix: ["users"] })) {
+  console.log(entry.key);
+  console.log(entry.value);
+}
+```
+
+> The list method also accepts other [kinds of selectors,](https://deno.land/api@v1.32.4?unstable&s=Deno.Kv#method_list_0) like an alphanumeric range, along with several [options](https://deno.land/api@v1.32.4?s=Deno.KvListOptions&unstable=) to tweak how it behaves, such as `limit` and `cursor`
+
+### Versions
+
+If the same key gets overwritten using `kv.set`, Deno automatically keeps a version set called `versionstamp`, which is nothing more than a very large number representing the value of that version.
+
+Versions can be quite useful in file systems shared across many machines or applications, where multiple writes might happen at the same time. To make sure one write doesn't overwrite another, we can compare the version numbers before and after a write to guarantee they were applied in the order we want:
+
+```typescript
+const db = await Deno.openKv()
+const results = await db.getMany([['chave1'], ['chave2']])
+results[0].versionstamp // "00000000000000010000"
+results[1].versionstamp // null
+```
+
+## Conclusion
+
+Deno KV might not look like anything super interesting at first glance, but the way it's designed gives us a lot of convenience when building small and medium sized applications, mostly because everything is right there at hand.
+
+Not only that, but we can also take advantage of this system to build, for example, small non persistent local caches, which can be the difference between an application performing well or performing badly.
+
+That said, it's worth pointing out that **the Deno KV API is still experimental** and can change at any moment. For more information, I recommend [reading the API docs](https://deno.land/api@v1.32.4?s=Deno.Kv&unstable=) to get a better sense of everything it can do!

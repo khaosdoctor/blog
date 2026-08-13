@@ -1,0 +1,783 @@
+---
+title: "How I implemented the date mocks in Node.js core"
+pubDate: 2024-07-31T11:00:32.000Z
+updatedDate: 2026-07-16T17:54:23.000Z
+lang: en
+slug: "how-i-implemented-date-mocks-in-node-js-core"
+category: "javascript"
+tags: ["nodejs", "javascript", "open source"]
+description: "Have you ever wanted to contribute to an open source project? Let me tell you how I got my code into Node.js!"
+seoTitle: "Implementing Date Mocks in the Node Test Runner: A Story"
+machineTranslated: true
+draft: false
+---
+A little over a year ago, I had the great pleasure of working on [Node.js core](https://github.com/nodejs/node/pull/48638), and it was one of the most interesting experiences I've ever had (so if you're using Node today, there's code of mine in it!). So much so that I'm now getting back into working and helping the community grow around it too. But what I want to tell you here is how the [Date mocks](/node-test-runner-mocks/) work inside the [Node Test Runner](/comecando-com-o-node-js-test-runner/), piece by piece!
+
+The goal of this article is both to document what was done in this feature, but also to show that it's not that complex to understand the open source code out there, and that you too can contribute to the project you like the most.
+
+## The goal
+
+This all sounds nice, but what are mocks and what would we use something like this for?
+
+> I won't go into the concept of what mocks are here in detail, but you can learn more about them in this [article](https://medium.com/trainingcenter/testes-unit%C3%A1rios-mocks-stubs-spies-e-todas-essas-palavras-dif%C3%ADceis-f2765ac87cc8) (old, but relevant)
+
+I wanted to be able to do something like this:
+
+```js
+import assert from 'node:assert';
+import { test } from 'node:test';
+
+test('mocks Date.now to whatever value the user sets', (context) => {
+  const now = Date.now()
+  console.log(now) // current date, time keeps running
+
+  // we start the mocks
+  context.mock.timers.enable({ apis: ['Date'] });
+
+  // now the date is fixed at 1000ms after the initial epoch
+  context.mock.timers.setTime(1000)
+  assert.strictEqual(Date.now(), 1000) // true
+});
+```
+
+Basically, date mocks are heavily used to test features that are time sensitive, for example, a routine or cronjob that would run X days after an event. This was very common at Klarna (and it's also common at most companies) when we had to deal with credit card lifecycles, so, for example, every day we'd have to grab the cards that expired 30 days ago and run some process. How do you test that? By swapping the computer's date for your own, making Node think it's on a specific date.
+
+Thanks to JavaScript's dynamic nature, this isn't that complex, but I found out you have to know the spec pretty deeply to understand the consequences of what you can do.
+
+## The beginning
+
+To understand better how mocks work, we need to go back a bit to some earlier PRs. Work on my PR started with a tip from a great friend, [Erick Wendel](https://github.com/ErickWendel), who had made a [PR](https://github.com/nodejs/node/pull/47775) a few months earlier implementing mocks for timers (`setTimeout`, `setInterval` and so on).
+
+![](./image.png "Erick's original PR")
+
+When I started using the test runner in my projects, I quickly ran into a big problem: even though we could mock timers, I couldn't mock dates! In other words, I couldn't reset my test's clock and control how I wanted it to behave. Something had to be done.
+
+I suggested this idea to the folks first (I could have just done it, but I decided to ask first) and most people liked it. Since other test runners (Jest, Ava, Vitest, mocha, jasmine...) already had this feature, it would be interesting to have it implemented in the NTR too, that would bring more adoption to the platform.
+
+## The planning
+
+The idea is that the date mocks would behave pretty similarly to [Sinon's](https://github.com/sinonjs/fake-timers/blob/main/src/fake-timers-src.js?rgh-link-date=2023-07-02T19%3A29%3A31Z) implementation, which is also the implementation used in Jest, so that means it's an API people already know.
+
+I started researching what the main methods would be and how I could integrate this new API into the existing mocks API and I concluded it would be easier to implement only the `now` method of the date, which was simpler and could be more useful. This was the initial version of my PR:
+
+![](./image-1.png)
+
+Notice that I was already thinking maybe it'd be better to mock the whole date object, not just `now`, which is considerably more complex than just the module.
+
+> I won't go step by step through what I did here, but the initial context matters for understanding the decisions that came later.
+
+In the end, after a lot of comments, the integration with the timers API Erick had created before ended up looking like this:
+
+```js
+// Everything the API already had before
+MockTimers.reset()
+MockTimers.tick(100)
+MockTimers.runAll()
+
+// Implementations that were changed
+MockTimers.enable({ timersToEnable: ['setInterval', 'setTimeout', 'Date' ], now: 1000 })
+
+// New methods
+MockTimers.setTime(100)
+```
+
+I'd keep the main usage, since it was already in production, but change the `MockTimers.enable` parameter which used to be an array of strings, into an object, because now we could pass settings for the dates.
+
+Besides that, MockTimers would get a new `setTime` method, which would change the mocked date. But, as is customary in Node, the initial parameters of most APIs are optional, so I changed the idea so it would also work like this:
+
+```js
+MockTimers.enable({ now: 1000 }) // without a list, we'd mock every method
+
+// or
+
+MockTimers.enable() // starts at epoch 0
+```
+
+With the initial API decided, comes the main question: **How do I mock one of the language's main APIs without breaking anything?**
+
+## The code
+
+Believe it or not, the whole date mock addition in Node was done in a single [file](https://github.com/nodejs/node/blob/74ddce8853e8c3de90f1037940ee5dcf38201b65/lib/internal/test_runner/mock/mock_timers.js) called `mock_timers.js` inside `lib/internal/test_runner/mock`. This is a pretty common practice in older, established projects because it keeps PRs much smaller since the file is big but already has all the necessary changes.
+
+> There was a small change in another file, but I'll talk about that later.
+
+When I started coding this feature I thought: "How on earth do I create a mock". It's actually pretty simple, a mock is nothing more than an object with an interface **identical** to the original object, but with different behavior. So, for example, if you wanted to manually mock the `now` method of `Date`, you'd just do something like this:
+
+```js
+const original = Date.now
+Date.now = () => 0
+
+console.log(Date.now()) // 0
+console.log(original()) // 1720812736744
+```
+
+Of course a method isn't an object, so how do we do this? First, we have to create our new properties, in this case the initial date, which is going to be `0`, in a private property called `#now`:
+
+```js
+//https://github.com/nodejs/node/blob/bb7fc653e9199c5b65a7ed268f9e827d049d7a81/lib/internal/test_runner/mock/mock_timers.js#L123
+
+class MockTimers {
+  // ... beginning of the code here
+  #now = kInitialEpoch;
+}
+```
+
+`kInitialEpoch` is a constant (that's why it starts with `k`) defined on [line 50](https://github.com/nodejs/node/blob/bb7fc653e9199c5b65a7ed268f9e827d049d7a81/lib/internal/test_runner/mock/mock_timers.js#L50) as `0`.
+
+> Constants like this one are very common in Node core, especially when used with Symbols, since we have to guarantee internal non-enumerable properties, we'll see more about this here.
+
+Besides this property, just like we did in our manual mock, we have to save the original method, and inside MockTimers, Node already does this with several other private properties:
+
+```js
+// https://github.com/nodejs/node/blob/bb7fc653e9199c5b65a7ed268f9e827d049d7a81/lib/internal/test_runner/mock/mock_timers.js#L99
+class MockTimers {
+  #realSetTimeout;
+  #realClearTimeout;
+  #realSetInterval;
+  #realClearInterval;
+  #realSetImmediate;
+  #realClearImmediate;
+
+  #realPromisifiedSetTimeout;
+  #realPromisifiedSetInterval;
+
+  #realTimersSetTimeout;
+  #realTimersClearTimeout;
+  #realTimersSetInterval;
+  #realTimersClearInterval;
+  #realTimersSetImmediate;
+  #realTimersClearImmediate;
+  #realPromisifiedSetImmediate;
+}
+```
+
+They're here because, when we call `reset`, those mocks need to stop existing, that is, we have to restore them to their original methods. So the whole `MockTimers` is nothing more than a class that swaps `globalThis.<your object>` for an identical mock and keeps the original value until you tell it to restore it. Now things got simpler.
+
+Let's add another property there which will be the descriptor of the `Date` object:
+
+```js
+//https://github.com/nodejs/node/blob/bb7fc653e9199c5b65a7ed268f9e827d049d7a81/lib/internal/test_runner/mock/mock_timers.js#L118
+
+class MockTimers {
+  // ... beginning of the code here
+  #nativeDateDescriptor // L118
+  #now = kInitialEpoch; // L123
+}
+```
+
+> [!IMPORTANT] 💡
+> It's important to note that `Date` isn't a function, so we can't just store its value. Since it's an object, JavaScript will pass this variable by reference, so we have to store the descriptor we got with `Object.getOwnPropertyDescriptor`
+
+When I started looking at how the timeouts were implemented, I had an idea. Today they're each created by a function, like this:
+
+```js
+  #setTimeout = FunctionPrototypeBind(this.#createTimer, this, false);
+  #clearTimeout = FunctionPrototypeBind(this.#clearTimer, this);
+  #setInterval = FunctionPrototypeBind(this.#createTimer, this, true);
+  #clearInterval = FunctionPrototypeBind(this.#clearTimer, this);
+  #clearImmediate = FunctionPrototypeBind(this.#clearTimer, this);
+```
+
+> An important detail is that Node can't use [primordials](https://github.com/nodejs/node/blob/bb7fc653e9199c5b65a7ed268f9e827d049d7a81/typings/primordials.d.ts#L49) (like `someFunction.bind(this)` directly, since that's implemented by the engine. So there are internal functions that go straight to the root of where these methods are executed (down in V8) and do the same thing, but with a different name, so `bind` becomes `FunctionPrototypeBind`, but the idea is the same
+
+So I'd follow the same pattern, and that's where our story begins.
+
+### It's just a function
+
+Our function that creates a date object is relatively simple:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+}
+```
+
+We create two initial objects, the first one is a constant associated with a [Symbol](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mist%C3%A9rio-383e359e64e3) that will represent the whole mock object. We'll need this further down because we need to return the current timestamp when [it isn't used as a constructor](https://262.ecma-international.org/5.1/#sec-15.9.2) (like `Date()`, remember?), because we need to access the properties the user set, like `kInitialEpoch`. This property shows up right at the start, but it'll only be used at the very end of our function.
+
+The second one is the native Date constructor with no changes, because we're going to have to return some functions that don't need mocks, for example `toString`.
+
+Right after we create a function inside this function, the idea is that we can create our mock object inside this function and return it to the user. We only do this because it needs to be able to create the date as an instance with `new Date`, and that's only possible if we create a class or a function. Besides that, closures like this one let us encapsulate our internal mock code, keeping it private:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+      ...
+    }
+}
+```
+
+Inside it we already pull our new constant defined up above and create an object with its value.
+
+> This whole part about the Symbol and kMock will be explained in a separate section further down, so don't worry about understanding it here.
+
+Let's already handle the first and only different use case we have, when we call the static property `now`, meaning the date isn't an instance, and we need to be able to identify that.
+
+> [!NOTE] 🥵
+> This was one of the hardest parts to code in this whole thing because it's a kind of meta programming where we're looking at a property of an object as if we were the external agent, meaning the object itself has to know whether it was called as an instance or as a static method
+
+I looked a lot at [Sinon's implementation](https://github.com/sinonjs/fake-timers/blob/a4c757f80840829e45e0852ea1b17d87a998388e/src/fake-timers-src.js#L456) for this, along with two parts of the ECMA spec. First [ECMA 262 edition 5.2, Section 15.9.2](https://262.ecma-international.org/5.1/#sec-15.9.2) which basically describes the behavior when we call the function as `Date()`, it has to return **the full date, spelled out, in UTC**
+
+![](./image-4.png)
+
+Great, but how do I know it was called as a function? We could use `if (!(this instanceof MockDate))`, right? That should work because if the date isn't an instance of our mock object, then it's a function, which is the only other way to call it, and then we just implement our result, which is the date as a string:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!(this instanceof MockDate)) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+    }
+}
+```
+
+What we want is just to return the real date as a string, but at a specific epoch, the epoch we defined as the initial one or the `now` the user passes into the mock, that's why we need `kMock` and also `NativeDateConstructor`. That way we can grab the REAL date object and build it as if it were `new Date(Date.now())`, and then grab its string representation.
+
+[Too bad this doesn't work.](https://github.com/nodejs/node/pull/48638#discussion_r1255170017) For several reasons, inside our function we're going to have a big problem with `this` because it'll end up in an inconsistent state, but the most glaring issue is that `instanceof` [isn't reliable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof#:~:text=Note%20that%20the%20value%20of%20an%20instanceof%20test%20can%20change%20if%20constructor.prototype%20is%20re%2Dassigned%20after%20creating%20the%20object%20\(which%20is%20usually%20discouraged\).%20It%20can%20also%20be%20changed%20by%20changing%20object%27s%20prototype%20using%20Object.setPrototypeOf.). You can fake an object's instance if you swap its prototype for whatever you want.
+
+> This is actually one of more than a dozen comments where we discuss just this. And it was also the last problem I solved before merging the code, even though it's the first thing the function does.
+
+After a *LOT* of research I found another part of the more recent spec ([edition 14, section 21.4.2.1](https://262.ecma-international.org/14.0/#sec-date)) that says roughly how it should be implemented:
+
+![](./image-5.png)
+
+> Version 5.2 and version 14.0 of the spec are extensions of each other, version 14 is the newest one from 2023 while 5.2 is pretty old. Because of that all of 5.2's specs moved elsewhere, but all of 5.2's content exists in 14.
+
+Here we have a clue about what to do. What is `NewTarget`? It's exactly a native property of any function or class that lets us know the **execution context** of that object. It's represented as `new.target`, meaning it's the object standing in front of the `new` keyword. When we call Date as `new Date`, `new.target` will be a Date constructor. When we run `Date()` as a function, `new.target` is `undefined` because there's no `new` to have a target ([docs here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/new.target#syntax)). So now it's simple, let's just swap out our `instanceof`:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!new.target) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+    }
+  }
+```
+
+From here on the implementation gets considerably simpler. The next step is knowing which of the [11 ways to call Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date#syntax) we're using. For that I simply copied Sinon's implementation and made a few changes:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!(this instanceof MockDate)) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+      switch (arguments.length) {
+        case 0:
+          return new nativeDate(MockDate[kMock].#now);
+        case 1:
+          return new nativeDate(year);
+        case 2:
+          return new nativeDate(year, month);
+        case 3:
+          return new nativeDate(year, month, date);
+        case 4:
+          return new nativeDate(year, month, date, hours);
+        case 5:
+          return new nativeDate(year, month, date, hours, minutes);
+        case 6:
+          return new nativeDate(year, month, date, hours, minutes, seconds);
+        default:
+          return new nativeDate(year, month, date, hours, minutes, seconds, ms);
+      }
+    }
+}
+```
+
+Remember that we have to count the number of arguments and that they're all positional, and we only need to handle the specific arguments, because if the user is passing a specific date to us, we don't need to return the date they set, since they're creating a new object. So when we have 1 argument, that covers both creating an object from an object, like `new Date(new Date())`, or a string `new Date('2024-05-10')`, and anything else, because we're delegating the execution of that to the original date.
+
+Now that we've finished our `MockDate` function, we have to define all the extra properties Date has (`toString`, `toISOString`, etc) because they'll stay the same and I don't want to have to implement everything by hand. But our date object can't replace the prototype of our current object, so we're going to strip the prototype and attach only the properties:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!(this instanceof MockDate)) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+      
+      switch (arguments.length) {
+        case 0:
+          return new nativeDate(MockDate[kMock].#now);
+        case 1:
+          return new nativeDate(year);
+        case 2:
+          return new nativeDate(year, month);
+        case 3:
+          return new nativeDate(year, month, date);
+        case 4:
+          return new nativeDate(year, month, date, hours);
+        case 5:
+          return new nativeDate(year, month, date, hours, minutes);
+        case 6:
+          return new nativeDate(year, month, date, hours, minutes, seconds);
+        default:
+          return new nativeDate(year, month, date, hours, minutes, seconds, ms);
+      }
+  }
+
+    // we strip the prototype
+    const { prototype, ...dateProps } = ObjectGetOwnPropertyDescriptors(NativeDateConstructor);
+    // we attach the properties
+    ObjectDefineProperties(MockDate, dateProps);
+
+}
+```
+
+The only method we have to replace is `now`, which always has to return whatever the user set in the mock, but that's pretty simple because `now` is a static method so we can just do `MockDate.now = ...`:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!(this instanceof MockDate)) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+      
+      switch (arguments.length) {
+        case 0:
+          return new nativeDate(MockDate[kMock].#now);
+        case 1:
+          return new nativeDate(year);
+        case 2:
+          return new nativeDate(year, month);
+        case 3:
+          return new nativeDate(year, month, date);
+        case 4:
+          return new nativeDate(year, month, date, hours);
+        case 5:
+          return new nativeDate(year, month, date, hours, minutes);
+        case 6:
+          return new nativeDate(year, month, date, hours, minutes, seconds);
+        default:
+          return new nativeDate(year, month, date, hours, minutes, seconds, ms);
+      }
+  }
+
+  // we strip the prototype
+  const { prototype, ...dateProps } = ObjectGetOwnPropertyDescriptors(NativeDateConstructor);
+  // we attach the properties
+  ObjectDefineProperties(MockDate, dateProps);
+
+  // keeps the correct this inside the function
+  MockDate.now = function now() {
+    return MockDate[kMock].#now
+  }
+
+}
+```
+
+The next step is a small change to prevent you from getting the real native code, `'﻿﻿function Date() { [native code] }'`, when you call `Date.toString()`, instead of our mock implementation. Remember, it needs to be **INDISTINGUISHABLE** from a real Date. For that we override the `toString` function with the original code:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!(this instanceof MockDate)) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+      
+      switch (arguments.length) {
+        case 0:
+          return new nativeDate(MockDate[kMock].#now);
+        case 1:
+          return new nativeDate(year);
+        case 2:
+          return new nativeDate(year, month);
+        case 3:
+          return new nativeDate(year, month, date);
+        case 4:
+          return new nativeDate(year, month, date, hours);
+        case 5:
+          return new nativeDate(year, month, date, hours, minutes);
+        case 6:
+          return new nativeDate(year, month, date, hours, minutes, seconds);
+        default:
+          return new nativeDate(year, month, date, hours, minutes, seconds, ms);
+      }
+  }
+
+  // we strip the prototype
+  const { prototype, ...dateProps } = ObjectGetOwnPropertyDescriptors(NativeDateConstructor);
+  // we attach the properties
+  ObjectDefineProperties(MockDate, dateProps);
+
+  // keeps the correct this inside the function
+  MockDate.now = function now() {
+    return MockDate[kMock].#now
+  }
+  
+  MockDate.toString = function toString() {
+      return FunctionPrototypeToString(MockDate[kMock].#nativeDateDescriptor.value);
+    };
+
+}
+```
+
+We're getting to the end, what we need to do now is define the one property we've already used a lot but haven't defined yet, `kMock`. Did you catch that?
+
+### kMock
+
+`kMock` is a symbol inside our implementation that's basically a reference to our overall Mocks object so we can grab private properties like `#now` and the original date constructor. But it hasn't been defined yet, isn't that going to cause a serious problem?
+
+Actually no, because every time we call `MockDate[kMock]` we were inside a function, and `MockDate` won't exist until the end of our `#createDate` function, so it's safe for us to define it only at the end, especially since we need both MockDate and the symbol for it. We only defined the symbol up above to hold the reference we'll use, because now we can do this here:
+
+```js
+  ObjectDefineProperties(MockDate, {
+    __proto__: null,
+    [kMock]: {
+      __proto__: null,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: this,
+    },
+
+    isMock: {
+      __proto__: null,
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: true,
+    },
+  });
+```
+
+What we're doing here is two things: we're taking our `MockDate` function and creating properties on it, first setting its prototype to null to avoid inheritance issues, and then saying `[kMock]` is another object that isn't enumerable, isn't writable, and can't be configured, meaning it's completely immutable and points to `MockTimers`, which is `this` in the context of `#createDate`.
+
+Then we have another property, which is my personal touch on this code, a way to tell whether that date is an instance of a mock by calling `MockDaData.isMock`, this value is enumerable but can't be changed. This is sometimes necessary when we're dealing with tests that use multiple date mocks.
+
+So far our function looks like this:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!(this instanceof MockDate)) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+      
+      switch (arguments.length) {
+        case 0:
+          return new nativeDate(MockDate[kMock].#now);
+        case 1:
+          return new nativeDate(year);
+        case 2:
+          return new nativeDate(year, month);
+        case 3:
+          return new nativeDate(year, month, date);
+        case 4:
+          return new nativeDate(year, month, date, hours);
+        case 5:
+          return new nativeDate(year, month, date, hours, minutes);
+        case 6:
+          return new nativeDate(year, month, date, hours, minutes, seconds);
+        default:
+          return new nativeDate(year, month, date, hours, minutes, seconds, ms);
+      }
+  }
+
+  // we strip the prototype
+  const { prototype, ...dateProps } = ObjectGetOwnPropertyDescriptors(NativeDateConstructor);
+  // we attach the properties
+  ObjectDefineProperties(MockDate, dateProps);
+
+  // keeps the correct this inside the function
+  MockDate.now = function now() {
+    return MockDate[kMock].#now
+  }
+  
+  MockDate.toString = function toString() {
+      return FunctionPrototypeToString(MockDate[kMock].#nativeDateDescriptor.value);
+    };
+  
+  ObjectDefineProperties(MockDate, {
+    __proto__: null,
+    [kMock]: {
+      __proto__: null,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: this,
+    },
+
+    isMock: {
+      __proto__: null,
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: true,
+    },
+  });
+}
+```
+
+### Final touches
+
+The final touch is setting our `MockDate`'s prototype to Date's original prototype, that way we don't break applications that do `instanceof Date`. Besides that, we set the common global static methods that we're not going to replace, and return all our work:
+
+```js
+#createDate() { // L279
+    kMock ??= Symbol('MockTimers');
+    const NativeDateConstructor = this.#nativeDateDescriptor.value;
+    // Our function that will be the mock
+    function MockDate(year, month, date, hours, minutes, seconds, ms) {
+      const mockTimersSource = MockDate[kMock];
+      const nativeDate = mockTimersSource.#nativeDateDescriptor.value;
+
+      if (!(this instanceof MockDate)) {
+        return DatePrototypeToString(new nativeDate(mockTimersSource.#now))
+      }
+      
+      switch (arguments.length) {
+        case 0:
+          return new nativeDate(MockDate[kMock].#now);
+        case 1:
+          return new nativeDate(year);
+        case 2:
+          return new nativeDate(year, month);
+        case 3:
+          return new nativeDate(year, month, date);
+        case 4:
+          return new nativeDate(year, month, date, hours);
+        case 5:
+          return new nativeDate(year, month, date, hours, minutes);
+        case 6:
+          return new nativeDate(year, month, date, hours, minutes, seconds);
+        default:
+          return new nativeDate(year, month, date, hours, minutes, seconds, ms);
+      }
+  }
+
+  // we strip the prototype
+  const { prototype, ...dateProps } = ObjectGetOwnPropertyDescriptors(NativeDateConstructor);
+  // we attach the properties
+  ObjectDefineProperties(MockDate, dateProps);
+
+  // keeps the correct this inside the function
+  MockDate.now = function now() {
+    return MockDate[kMock].#now
+  }
+  
+  MockDate.toString = function toString() {
+      return FunctionPrototypeToString(MockDate[kMock].#nativeDateDescriptor.value);
+    };
+  
+  ObjectDefineProperties(MockDate, {
+    __proto__: null,
+    [kMock]: {
+      __proto__: null,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: this,
+    },
+
+    isMock: {
+      __proto__: null,
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: true,
+    },
+  });
+  
+  MockDate.prototype = NativeDateConstructor.prototype;
+  MockDate.parse = NativeDateConstructor.parse;
+  MockDate.UTC = NativeDateConstructor.UTC;
+  MockDate.prototype.toUTCString = NativeDateConstructor.prototype.toUTCString;
+  return MockDate;
+}
+```
+
+## Mock methods
+
+Now that we have the main mock, we can define the other functions that come with it. First we have to modify our [`enable`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L644) method, so it can also accept the new API. The change we're making here is basically validation:
+
+```js
+// we create `now` as a parameter in the options
+enable(options = { __proto__: null, apis: SUPPORTED_APIS, now: 0 }) {
+  // we clone the options object
+  const internalOptions = { __proto__: null, ...options };
+
+  // ... original code
+
+  // we set the value in case it doesn't exist
+  if (!internalOptions.now) {
+    internalOptions.now = 0;
+  }
+
+  // If APIs isn't passed, we enable all of them
+  if (!internalOptions.apis) {
+    internalOptions.apis = SUPPORTED_APIS;
+  }
+
+  // ... Original code
+
+  // Now could be a Date instance so we check for that
+  if (this.#isValidDateWithGetTime(internalOptions.now)) {
+    this.#now = DatePrototypeGetTime(internalOptions.now);
+  } 
+  // Otherwise it's a number
+  else if (validateNumber(internalOptions.now, 'initialTime') === undefined) {
+    this.#assertTimeArg(internalOptions.now);
+    this.#now = internalOptions.now;
+  }
+
+  this.#toggleEnableTimers(true);
+}
+```
+
+Our [`#isValidDateWithGetTime`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L512) function doesn't *really* check whether it's a Date instance, it actually only checks whether this object has a `getTime` property, which is what we need to use:
+
+```js
+#isValidDateWithGetTime(maybeDate) { // L512
+  try {
+    DatePrototypeGetTime(maybeDate);
+    return true;
+  } catch {
+    return false;
+  }
+}
+```
+
+Our [`#toggleEnableTimers`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L522) function is basically a big object with two properties: `toFake` and `toReal`, which hold the functions needed so we can convert the object into a mock and back to native:
+
+```js
+#toggleEnableTimers(activated) { // L522
+  const options = {
+    __proto__: null,
+    toFake: {
+      __proto__: null,
+      // ... original timers code
+      Date: () => {
+        this.#nativeDateDescriptor = ObjectGetOwnPropertyDescriptor(globalThis, 'Date')
+        // the magic happens here
+        globalThis.Date = this.createDate()
+      }
+    },
+    toReal: {
+      __proto__: null,
+      // ... timers
+      Date: () => {
+        ObjectDefineProperty(globalThis, 'Date', this.#nativeDateDescriptor)
+      }
+    }
+  }
+
+  const target = activate ? options.toFake : options.toReal
+  ArrayPrototypeForEach(this.#timersInContext, (timer) => target[timer]())
+  this.#isEnabled = activate
+}
+```
+
+Besides that we have three other time mock methods: `setTime`, which is exclusive to dates, `tick` and `runAll`.
+
+[`setTime`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L690C1-L696C4) is going to swap the value of `#now`, so it's pretty straightforward:
+
+```js
+setTime(time = kInitialEpoch) { // L690
+  validateNumber(time, 'time');
+  this.#assertTimeArg(time);
+  this.#assertTimersAreEnabled();
+
+  this.#now = time;
+}
+```
+
+[`tick`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L613) already existed, but we have to make a small change. This method advances time by a given number of milliseconds, so we have to advance `#now` as well:
+
+```js
+tick(time = 1) { // L613
+  // ... validation code 
+
+  this.#now += time;
+  
+  // ... rest of the code, unchanged
+}
+```
+
+The last method is [`runAll`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L728), which needed a small change in another file. The idea of this method is to run every scheduled timer. For that we use a structure called `PriorityQueue`, which is basically a queue ordered by time, meaning the timer with the smallest timeout is at the top and the one with the biggest timeout is at the bottom.
+
+The PriorityQueue is defined in `lib/internal/priority_queue.js`, it already had a method called `peek` that grabs the first item in the queue without removing it. We need to grab the last one, because now we have to know which timer has the biggest time, subtract the time that's already passed (our `#now`) and call the `tick` method with that difference. That way we run every timer without adding extra time to our date (because now `tick` is adding milliseconds to our `#now`). For that I created a method called [`peekBottom`](https://github.com/nodejs/node/pull/48638/files#diff-21786c167d9eed3034877e03e9bc8640bf6bcf2b7c5b33980226d76e3a69d4bdR41-R44).
+
+> I'm not going to include the PriorityQueue implementation here, but the [link](https://github.com/nodejs/node/pull/48638/files#diff-21786c167d9eed3034877e03e9bc8640bf6bcf2b7c5b33980226d76e3a69d4bdR41-R44) above will take you there
+
+The implementation itself is pretty direct:
+
+```js
+runAll() { // L728
+  this.#assertTimersAreEnabled();
+  const longestTimer = this.#executionQueue.peekBottom();
+  if (!longestTimer) return; // empty queue
+  // Advance time
+  this.tick(longestTimer.runAt - this.#now);
+}
+```
+
+## Does it end there?
+
+That was the end of the timers implementation, but the work wasn't over. Since this article is already long I won't post much more about it. The tests for this feature were a whole other chunk of time on their own. All in all I must have spent at least 13 hours on this project, plus about 3 months on comments, resolutions and everything else. In the end, this feature shipped in Node version 21.2 (there's even a [post](/node-21-2/) explaining how to use it).
+
+![](./image-8.png "You can tell I was pretty happy")
+
+Besides that, if you look at the PR history, you'll see I spent days fighting GitHub's CI because of the so-called *flaky tests*, which got fixed by Yagiz some time later.
+
+![](./image-7.png "I was already going crazy")
+
+Those flaky tests kept my PR from getting a green check, but the errors had nothing to do with the code I'd changed. That's exactly why it matters so much that contributors like us can help with test coverage and process verification.
+
+## Conclusion
+
+This was a long article, but I wanted to bring this content here because I want to show you that it really is possible to take part in big open source projects and make a difference even with small contributions like this one.
+
+The process of contributing to a big project is complex, it involves a ton of variables and many days and weeks of conversation with everyone involved, but it's extremely challenging and rewarding once it's all done!
+
+I hope you felt inspired to give contributing to Open Source a try!
+
+See you around!

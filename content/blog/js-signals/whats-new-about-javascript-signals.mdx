@@ -1,0 +1,225 @@
+---
+title: "What's New About JavaScript Signals"
+pubDate: 2024-08-21T11:00:14.000Z
+updatedDate: 2026-07-16T17:53:49.000Z
+lang: en
+slug: "whats-new-about-javascript-signals"
+category: "javascript"
+tags: ["javascript", "ecmascript", "development", "signals"]
+description: "What's the new JavaScript signals proposal about? How does it work and what is it for?"
+machineTranslated: true
+draft: false
+---
+Back in 2023 a TC39 member called [Rob Eisenberg](https://github.com/EisenbergEffect) said he wanted to create a common standard for _signals_, and that turned into an actual [proposal](https://github.com/tc39/proposal-signals) at TC39!
+
+But before anything else, what are signals? What do they do? What's the core idea? Let's get into all of that right now.
+
+## What signals are
+
+Signals are a kind of state machine. If you've written any React, you're probably used to something like this:
+
+```js
+const [state, setState] = useState()
+```
+
+The idea behind a state is that we have a single place where it gets set originally. Lots of places call that setter, meaning lots of places contribute to the final value of that state (these are called _sources_), and that value in turn feeds into the state of multiple subcomponents (called _sinks_).
+
+![](./image-16.png)
+
+A sink can also be a source for another state, or even for another sink, so in the big picture this all ends up being a directed acyclic graph pushing the data flow in a single direction:
+
+![](./image-17.png)
+
+If we translate that into code, it's as if we had an initial state that could be changed by several sources, and that could also change several sources itself. For example, in the proposed syntax itself we'd have this:
+
+```js
+const counter = new Signal.State(0) // useState(0)
+```
+
+`counter` would be our state. Unlike what React does with an array of options, one for the variable and one for the update function, `counter` has a `get()` method to fetch the current value and a `set()` to update it:
+
+```js
+counter.get() // 0
+counter.set(1)
+counter.get() // 1
+```
+
+Besides this kind of state, we can have a _sink_, meaning a value that depends on that original state, so `counter` acts as a _source_. A classic example is computed state, say, knowing whether the value inside `counter` is even.
+
+In React we'd have to reach for some kind of memoization:
+
+```js
+const [counter, setCounter] = useState(0)
+const isEven = useMemo(() => counter % 2 === 0, [counter])
+```
+
+With signals we could use the `computed` property instead:
+
+```js
+const counter = new Signal.State(0)
+const isEven = new Signal.Computed(() => counter.get() % 2 === 0)
+
+counter.get() // 0
+isEven.get() // true
+counter.set(1) // 1
+isEven.get() // false
+```
+
+Here our data flow only goes one way:
+
+![](./image-18.png)
+
+If we want to add another counter to print out the result, we can do this:
+
+```js
+const counter = new Signal.State(0)
+const isEven = new Signal.Computed(() => counter.get() % 2 === 0)
+const parity = new Signal.Computed(() => isEven.get() ? "even" : "odd")
+
+counter.get() // 0
+isEven.get() // true
+counter.set(1) // 1
+isEven.get() // false
+```
+
+Now `isEven` is both a source and a sink at the same time.
+
+![](./image-19.png)
+
+That means if we change the original source, `counter`, both sinks automatically update. That's basically the whole idea behind signals.
+
+## Clean/Dirty states
+
+It's pretty common in applications that use forms, for instance, to have a state called _clean_ and another called _dirty_. Clean means the form hasn't been touched, dirty means the user has already changed something in that form.
+
+> Angular.js also had another concept called **pristine**, which described the component right after it had been created. Once the user modified it, it became dirty, but if the field got cleared out, it went back to **clean**, meaning **pristine** could only ever be reached on the first load.
+
+Even though we could do everything we did above with plain function composition, and skip the graph entirely, we'd have to recalculate every single state all the time. For instance, when I changed the counter from `0` to `1`, we'd automatically recalculate the entire state.
+
+With this graph model, what we can do instead is send a signal to the _sinks_ saying "my value changed", and the sink marks that its source changed, sending the same kind of signal to its own sinks, and so on down the chain.
+
+![](./image-21.png)
+
+If we have other states with other sinks, we don't need to recalculate them, because they wouldn't have changed anyway. And we don't need to keep constantly checking for changes from the sinks all the way up to the sources either. What happens instead is that once the value of, say, `isEven` is requested with `isEven.get()`, we check whether it's _dirty_, run the computed function if so, and return the value. Otherwise, there's nothing to recalculate.
+
+Here's some sample code for what we want to do:
+
+```js
+let dirty = true
+let val
+
+function Computed(fn) {
+  if (dirty) {
+    val = fn()
+    dirty = false
+  }
+  return val
+}
+    
+```
+
+## Other uses for signals
+
+Beyond using them through basic APIs like these, Rob also proposes a few use cases in his article on [Signals](https://eisenbergeffect.medium.com/a-tc39-proposal-for-signals-f0bedd37a335). The first one is using signals to build a self-updating class:
+
+```js
+export class Counter {
+  #value = new Signal.State(0);
+
+  get value() {
+    return this.#value.get();
+  }
+
+  increment() {
+    this.#value.set(this.#value.get() + 1);
+  }
+
+  decrement() {
+    if (this.#value.get() > 0) {
+      this.#value.set(this.#value.get() - 1);
+    }
+  }
+}
+
+const c = new Counter();
+c.increment();
+console.log(c.value);
+```
+
+In this case I see little value in it, because we could write the exact same thing using:
+
+```js
+export class Counter {
+  #value = 0
+
+  get value() {
+    return this.#value
+  }
+
+  increment() {
+    this.#value = this.#value + 1;
+  }
+
+  decrement() {
+    if (this.#value > 0) {
+      this.#value = this.#value - 1;
+    }
+  }
+}
+
+const c = new Counter();
+c.increment();
+console.log(c.value);
+```
+
+We'd get exactly the same result. But sure, this is a simple example. When you have complex computations inside a class, it would make sense not to have to run them every single time.
+
+He also proposes using [decorators](/javascript-decorators/), creating a decorator called `signal`:
+
+```js
+export function signal(target) {
+  const { get } = target;
+
+  return {
+    get() {
+      return get.call(this).get();
+    },
+
+    set(value) {
+      get.call(this).set(value);
+    },
+    
+    init(value) {
+      return new Signal.State(value);
+    },
+  };
+}
+```
+
+And then using it on the class property:
+
+```js
+export class Counter {
+  @signal accessor #value = 0;
+
+  get value() {
+    return this.#value;
+  }
+
+  increment() {
+    this.#value++;
+  }
+
+  decrement() {
+    if (this.#value > 0) {
+      this.#value--;
+    }
+  }
+}
+```
+
+## Conclusion
+
+While the proposal is still at stage 1, I think it might make some progress by the end of next year (as I said in my [predictions](/js-2025/)). If that happens, React's entire state model could become obsolete, along with the state models of every other frontend framework, because JS would implement this natively.
+
+I'm particularly excited about this possibility. What about you? Let me know on my socials!

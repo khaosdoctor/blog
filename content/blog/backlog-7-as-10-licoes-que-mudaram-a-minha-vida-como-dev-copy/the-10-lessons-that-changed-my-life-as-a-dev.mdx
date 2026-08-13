@@ -1,0 +1,142 @@
+---
+title: "Backlog #7 - The 10 Lessons That Changed My Life as a Dev"
+pubDate: 2025-02-15T14:56:35.000Z
+updatedDate: 2026-07-16T17:48:28.000Z
+lang: en
+slug: "the-10-lessons-that-changed-my-life-as-a-dev"
+category: "opinion"
+tags: ["backlog-newsletter", "career", "opinion"]
+description: "For 13 years I've built a dev career I'm proud of. But I didn't do it alone. These were the 10 most important lessons I learned along the way."
+seoTitle: "The lessons that changed my life as a dev"
+machineTranslated: true
+draft: false
+---
+Another day, another backlog! Today I'm bringing something different: the 10 most important lessons I learned in 13 years as a dev.
+
+A lot of people have asked me about tips and essential lessons from my career. I admit I put this idea aside for a while, until I ran into a [post](https://www.linkedin.com/posts/jhonathansoares_10-anos-de-conselhos-sobre-programa%C3%A7%C3%A3o-em-activity-7275651115512135680-RIcm/?utm_source=share&utm_medium=member_desktop) at the end of the year that brought those questions back to mind.
+
+So today I want to talk about the 10 most important lessons I learned in 13 years of a career as a dev. Keep in mind these lessons are strictly about development, so everything I say here relates only to that.
+
+> [!NOTE] 😍
+> Keep in mind, if you liked (or didn't like) the content, leave [feedback here in the form](https://forms.gle/jTMhTyjq389xpDGVA)! It's really important for me to know what you're thinking and what you want to see here!
+
+---
+
+## 1 - Your code isn't yours: nothing will be the way you want it
+
+The first (and maybe the most important) lesson is that code will never be exactly the way you want it. The only way to do everything your way is working alone on a personal project. But on a team, you'll always need to give in and adapt.
+
+In the beginning, I wanted everything my way. When someone criticized my code, I took it as a personal attack. Over time, I realized I was wrong.
+
+The code isn't just yours. It needs to be easy to understand so other people can work on it in the future. What matters most isn't writing it the way you like, it's making sure the whole team can work well with it. Learning to accept feedback, talk through solutions, and put your pride aside are essential skills for a good programmer.
+
+## 2 - Elegance is for fashion, you need to be pragmatic
+
+How many times have you come across code that's impossible to understand? Or code so abstract it seems to try to predict every use case in the world? Or that "elegant" code that only its author understands?
+
+The truth is the code we write isn't for the machine, we solved that problem a long time ago with compilers. They optimize your code so the machine can read it as efficiently as possible. Your job is to write code that other people will read and maintain. A line that stuck with me was:
+
+> Most systems aren't good enough to become legacy.
+
+That's a brutal truth. Only well-designed, robust systems survive for years or decades. I talk about this a lot, but a good system, to me, rests on three pillars:
+
+-   Well-written documentation and code that's readable and commented
+-   That follows the team's current practices
+-   Has no complex abstractions and is simple enough for its scope
+
+I've been crucified plenty of times for talking about commenting code, or for saying loudly that I don't like functional programming because, besides being hard to read and understand, it demands a lot of prior knowledge. But these opinions are grounded in one simple line:
+
+> Never assume everyone is just like you
+
+Not everyone will immediately understand the code you wrote. Not everyone knows functional programming. And honestly, you yourself might not understand your own code a few months from now if you don't make it clear.
+
+Always prioritize ease of maintenance and alignment with the team's practices, instead of building "elegant" solutions that are hard to understand.
+
+## 3 - There's no such thing as planning
+
+How many times have I heard the line: "We need to ship this tomorrow, it's urgent!" But when everything is urgent, nothing is urgent, right? This was one of the most important lessons I learned working at startups:
+
+> What matters is what's happening right now
+
+You can plan your project and your system all you want, but if something more important shows up along the way, the whole plan gets tossed aside to chase that new goal, no question about it. Startups are basically founded on the idea of being small, fast boats, easy to turn and catch whatever wind is blowing hardest at that moment. That's why a solid plan rarely survives for long.
+
+In big companies, the problem is the opposite: too much planning. Everything takes months to happen, but at the same time, everything gets treated as top priority. The result? A lot of the time nobody knows exactly why something needs to be done, and once it ships, nobody knows who asked for it or what it's for.
+
+At the end of the day, I've always found it more effective to focus on goals instead of a rigid plan. Instead of trying to predict every step, the best move is to clearly define "what needs to be done" and keep a long-term view. That produces more consistent results and avoids wasting time on plans that quickly become obsolete.
+
+## 4 - Sometimes less is more
+
+How many times have we gotten so excited about an idea, a new framework, or a new concept that we wanted to apply so badly that we ended up building a [FizzBuzz Enterprise](https://github.com/EnterpriseQualityCoding/FizzBuzzEnterpriseEdition)?
+
+The big lesson here is that, a lot of the time, our project isn't big or critical enough to justify every technology and pattern we want to throw at it. Good architecture matters, but do you really need [K-anonymity](https://en.wikipedia.org/wiki/K-anonymity) and every design pattern that exists for a simple to-do list app? Does that little system with 10 customers really need to defend against every CVE ever registered, even when applying those fixes can be more trouble than it's worth?
+
+Sometimes less is more. Cutting things out of the project so it can move forward is the fastest way to find out whether you actually need to improve your system's architecture or not.
+
+## 5 - Technology is a trade-off
+
+The classic joke about the senior developer who answers everything with "it depends" has some truth to it. There's no silver bullet in technology that solves every problem. A professor of mine in college used to say:
+
+> Every decision that improves something in one place makes something worse somewhere else
+
+He compared programming to a pact: you always sacrifice something to get a solution, because every choice has side effects.
+
+What matters is remembering that you'll never make good decisions, you'll always make decisions that are good for one thing and bad for another. A classic example of this is security: the better and stronger the encryption algorithm, the slower it will be. Or, like I mentioned in my [article about RSA](/criptografia-assimetrica-com-rsa/), keys can be arbitrarily large, but there's a point where they're **enough**.
+
+The Swedes have a word called [**lagom**](https://en.wikipedia.org/wiki/Lagom#:~:text=Lagom%20\(pronounced%20%5Bˈlɑ̂ːɡɔm%5D%2C,\(in%20matter%20of%20amounts\).), which is a way of saying "just enough" or "not more, not less". This concept sums up this lesson nicely: the best choice is the one that balances needs without excess.
+
+## 6 - Technology comes and goes, fundamentals stay
+
+This is something every developer learns sooner or later. It's one of those fundamental lessons of the career.
+
+There comes a point where you get tired of learning something new every single day, of always chasing the trendy framework, the latest AI breakthrough, or the newest architecture pattern. If you base your knowledge only on tools, you're like a bricklayer who believes he can only hammer with a hammer, not realizing anything heavy enough can do the same job.
+
+Technology works the same way. Tools come and go. I started with Delphi and Visual Basic, which barely exist today. If my learning had been focused only on them, my career would already be over. What really matters is understanding the fundamentals, because they stay relevant no matter what technology you're using.
+
+Pay attention in your algorithms classes, cyclomatic complexity, even pseudocode. Maybe writing code on paper, the way the Maya and the Aztecs did, will already help you remember a lot.
+
+Because, when the hype around today's language fades, you'll know how to move on to the next one. But remember:
+
+> The market will always be hyped about something, that doesn't mean you have to surf every wave
+
+## 7 - Done is better than perfect?
+
+There was a line one of my CTOs used to say that used to drive me nuts: "Done is better than perfect". And that happened for two reasons:
+
+1.  I thought everything had to be perfect (see item 1)
+2.  I couldn't stand the idea of shipping things before they were finished
+
+It took me a long time to understand what that line really means. It's not that you need to ship things half-baked and any old way just to move the system forward. If someone's asking you to do that, you're completely right to refuse, but it's about knowing how to gauge what counts as **"GOOD ENOUGH"** (LAGOM).
+
+There's a really cool manifesto that describes everything I'm talking about here. It's called [_The cult of done_](https://medium.com/@bre/the-cult-of-done-manifesto-724ca1c2ff13) _(_[_video_](https://www.youtube.com/watch?v=bJQj1uKtnus)_):_
+
+![](https://www.youtube.com/watch?v=bJQj1uKtnus)
+
+## 8 - Be your own opponent
+
+For a long time, I watched other people talk about the awards they'd won and the achievements they'd reached. I looked at all of it with admiration, wanting to be in that same place. My big dream was always to build something useful, something people would actually use and love. I wanted to be the Ken Thompson, the Dennis Ritchie, or maybe the modern-day Bill Joy.
+
+Over time, I realized I was comparing myself to others way too much, always feeling less important for not having something grand to show. It was messing with my head. But when I stopped to think about it, I noticed the people who did incredible things had only one real opponent: themselves.
+
+You only need to compare yourself to who you were yesterday and try to be better than that version. Nobody else matters in that equation.
+
+Do something that makes sense to you. Everything else is a consequence.
+
+## 9 - Do what you love
+
+It sounds cliché until you're forced to do something you don't like. That happened to me at a job I once had. It was a company I really wanted to work at, but once I got in I realized I was doing something further and further from what I liked doing, from my reality, from what made me happy. And that hit not just my performance, but also the way I saw my own work.
+
+The truth is you need to steer your career toward something you actually like. There's no point sticking with front-end if your passion is back-end, or venturing into infrastructure when what really excites you is databases. Chasing what you love is essential, but it doesn't happen overnight. A lot of the time, you'll need to go through a stretch doing something that doesn't satisfy you to take the next step. It's the famous "one step back to take two steps forward".
+
+But don't get too comfortable with what you're doing either, and don't focus only on doing the things you like all the time, because nothing good happens inside your comfort zone.
+
+## 10 - Talk is cheap
+
+Over all these years, I've noticed the old saying "those who talk the most do the least" has become truer and truer (we even have [a whole issue just about this](/backlog-5-o-show-da-bolha/)). In today's world, this gets even more intense with the explosion of influencers and the flood of information dumped on us. **Don't believe influencers**, be your own influence.
+
+The point is you shouldn't believe only what people tell you, a lot of people talk too much, sell too much, but never actually get their hands dirty. Proof of that is most people who built incredible things don't even have social media, or if they do, they keep a super low profile.
+
+Find your own conclusions. It's fine to draw inspiration from other people, after all, nothing is born from nothing. But never let anyone steer your entire way of thinking. This lesson applies to everything in life, not just to development.
+
+---
+
+I want to know what lessons you've learned throughout your career! Comment over on [my socials](https://lsantos.dev)!

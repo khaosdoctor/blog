@@ -1,0 +1,170 @@
+---
+title: "Everything about Node running TypeScript natively!"
+pubDate: 2025-01-22T11:01:10.000Z
+updatedDate: 2026-07-16T17:49:09.000Z
+lang: en
+slug: "everything-about-node-running-typescript-natively"
+category: "typescript"
+tags: ["typescript", "nodejs"]
+description: "Node 22 natively supports TypeScript! But now what? Is that really it? Let's learn how you can run TS much more easily and what the main settings are!"
+machineTranslated: true
+draft: false
+---
+Finally, the article I've been promising for a while is out! And I'm really proud to be part of the team that helped implement this feature (even though I didn't contribute as much as I'd have liked).
+
+But what is this whole thing about Node.js running TypeScript?
+
+## Does Node run TS?
+
+In some [previous](/tsx-loader/) editions, I said it was possible to run TypeScript natively in Node using TSX. Historically, that was always the case, because there was no way to run any file other than JavaScript with Node. And we still can't, technically.
+
+What happens is that we can use _loaders_. Loaders are special hooks that let us change the behavior of the native _module loader_, used whenever we load any [ESM](/os-ecmascript-modules-estao-aqui/) module. These loaders are pretty powerful because, among other things, they let us act directly on the code that gets loaded into memory. Which is exactly how **TSX** behaves.
+
+But now that's no longer necessary! Starting with [Node 22.6](https://nodejs.org/en/blog/release/v22.6.0), two new experimental flags were added:
+
+-   `--experimental-strip-types`: This takes a TS file and completely strips out any type annotation that exists in it. It's the simplest form of transpiling, just removing what isn't native JavaScript. It's worth saying that features requiring code transformation, like `enum` and `namespace`, will **not** work.
+-   `--experimental-transform-types`: This implies the previous flag will be active too, meaning if you pass this flag, the other one gets passed automatically. And it enables type transformation, so we can use features that weren't enabled before, essentially giving us near complete TypeScript support.
+
+> The funny thing here is that this flag's name was supposed to be `enable-transformation`, and I [suggested](https://github.com/nodejs/node/pull/54283#discussion_r1711462259) we change it to something like `enable-type-transformation` to keep the semantics right.
+
+Essentially, now you can do something like this:
+
+```bash
+$ node --experimental-transform-types index.ts
+```
+
+And your file will run as if you were running it with TSX using:
+
+```bash
+$ node --loader=tsx index.ts
+```
+
+### Node v23
+
+Node 23 took this feature even further and made the `--experimental-strip-types` flag active at all times. In other words, the native TypeScript loader (which we'll get to further down) checks every file, and if it's a `.ts` file, it gets transpiled by stripping the types, the fastest process there is.
+
+That means, by default, you can run **simple** TypeScript files using:
+
+```bash
+node index.ts
+```
+
+But if the file has transformations, like `enums`, it still won't work, and you **need** to pass the `--experimental-transform-types` flag to the command.
+
+> Coming up, probably in the next LTS version (which should be 24), this flag will stop being experimental and will just become `--transform-types`.
+
+But how does all of this actually work?
+
+### Meet Amaro
+
+[Amaro](https://github.com/nodejs/amaro) is the name given to one of the native modules loaded by Node.js. It also ships as an NPM [package](https://www.npmjs.com/package/amaro), so you can use it separately from Node too. But this is the heart of everything happening under the hood.
+
+Amaro is really just a wrapper around the SWC parser for TypeScript in WASM. The module is called `@swc/wasm-typescript`, and it does one thing: transpile TypeScript into JavaScript.
+
+Since version 23, whenever any code gets imported, there's basically a [check](https://github.com/nodejs/node/commit/35f92d953c24d4f02f82ab397a61383103f9b796#diff-8f3520898daae8b61a84b558a2d31241031419b6dc2d25685d9f2c70b6ba2a45R26) to make sure the `--experimental-strip-types` option is active. If it is, we import amaro's [parser](https://github.com/nodejs/node/commit/35f92d953c24d4f02f82ab397a61383103f9b796#diff-fddf8a06747f8c9e83cd2a3ebee0f53dbd790567ce018044e70bd0ffbbcc815eR310) into global memory. If not, we just return the code as is.
+
+> It's worth saying that the code transformation happens [synchronously](https://github.com/nodejs/node/commit/35f92d953c24d4f02f82ab397a61383103f9b796#diff-fddf8a06747f8c9e83cd2a3ebee0f53dbd790567ce018044e70bd0ffbbcc815eR313), so there is indeed a small overhead when you have to load a lot of files.
+
+## Getting the best TS experience with Node
+
+As much as Node tried to support every native TypeScript setting, it was never going to support `tsconfig` natively (as [Marco Ippolito's article](https://satanacchio.hashnode.dev/everything-you-need-to-know-about-nodejs-type-stripping#heading-why-typescript) already pointed out), and it wouldn't even make sense for it to. So, a few settings are necessary to line up how TypeScript works with how Node.js works.
+
+> You can also check out the [Node docs article](https://nodejs.org/api/typescript.html) about this change.
+
+First of all, you need to set your `tsconfig` to use `esnext` as the `target` and `nodenext` as the `module`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext"
+  }
+}
+```
+
+Now let's look at a few other options you need to set to get the best experience.
+
+### Type imports need to be explicit
+
+When we import modules that are only types, meaning there's no actual code to run there, we can tell TypeScript not to try resolving any of them using the `type` keyword:
+
+```ts
+import type { MeuTipo, MeuOutroTipo } from 'meu-modulo'
+```
+
+This makes everything being imported inside the `{}` get stripped out during transpilation, avoiding unnecessary processing. We can do this for specific types too:
+
+```ts
+import { MinhaClasse, type MeuTipo } from 'meu-modulo'
+```
+
+Now we're only importing `MeuTipo` as a type, not the class.
+
+This seems trivial, if only because TS will naturally figure it out when you run the compiler, but for Node, it isn't.
+
+Since Node has no way of knowing which modules are types and which aren't, given that it doesn't do type checking, you **have to** add the `type` annotation. You can enforce this in your `tsconfig.json` using the `verbatimModuleSyntax` option and setting it to `true`. Then the compiler will warn you whenever you need a `type`.
+
+Your `tsconfig` file now looks like this:
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext",
+    "verbatimModuleSyntax": true
+  }
+}
+```
+
+### File imports need to be explicit
+
+Besides importing types, you can also import other `.ts` files in your code. Node not only supports this, it makes it a lot simpler and, at least in my opinion, a lot easier to read.
+
+When importing a local TS file, you **have to** add the `.ts` extension:
+
+```ts
+import { MyClass } from './meu-arquivo.ts'
+```
+
+If you're using Node's default ESM setup, you'll get a TypeScript error saying you can't import a `.ts` module unless `allowImportingTsExtensions` is set to `true` in your `tsconfig.json`. So that's what you need to do:
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext",
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true
+  }
+}
+```
+
+This happens because, in regular ESM, you have to explicitly state the file's extension to cut down on the overhead the module resolution system would otherwise spend figuring out what kind of file you're opening. And if you try to open a `.ts` file, that file doesn't exist, so you get a "File not found" error.
+
+### Rewriting extensions
+
+Another important option shipped with [TypeScript 5.7](https://devblogs.microsoft.com/typescript/announcing-typescript-5-7/#path-rewriting-for-relative-paths) and implemented by the TypeScript team specifically to support Node.js is `rewriteRelativeImportExtensions`, which will automatically swap `.ts` for `.js` in your files, letting you publish compiled code to NPM without needing any extra transpilation step.
+
+So, let's add it here too:
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext",
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "reqriteRelativeImportExtensions": true
+  }
+}
+```
+
+### Down the road
+
+Probably in version 5.8, the TS team is going to include a [flag](https://github.com/microsoft/TypeScript/issues/59601) called `--erasableSyntaxOnly` that will warn you if you're using types that can't be erased (if you're also running Node without `transform-types`).
+
+## What does this mean for TypeScript?
+
+A lot of people think this is the end of TypeScript, but it's actually the exact opposite: now TypeScript is going to be more present than ever! With every runtime supporting TS natively, it's gradually working its way toward becoming, probably, the standard language of the web.
+
+Sure, there are still some changes that need to happen, mainly to make the setup friendlier and less painful, but this change is the start of a small revolution that might, one day, replace JavaScript as the most used language on the Web.

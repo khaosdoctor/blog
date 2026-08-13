@@ -1,0 +1,185 @@
+---
+title: "Integrating Azure Active Directory with AKS"
+pubDate: 2021-04-06T13:00:00.000Z
+updatedDate: 2026-07-16T16:16:49.000Z
+lang: en
+slug: "integrating-azure-active-directory-with-aks"
+category: "infra"
+tags: ["aks", "kubernetes", "azure", "security", "cloud", "containers", "devops"]
+description: "Let's learn how to keep your cluster even more secure by integrating Azure AD with AKS, making it much easier to administer your cluster."
+machineTranslated: true
+draft: false
+---
+We've already gone through articles on [how to create users](/criando-e-gerenciando-usuarios-no-kubernetes/) and also how to assign [permissions to those users using RBAC](/dando-permissoes-a-usuarios-com-kubernetes/). But using Kubernetes to manage users, simple as it is, isn't that practical, precisely because of the distributed nature of clusters.
+
+When we create a cluster, there are two good security practices we should consider. The first is the control you have over Azure's own resources, like the cluster itself and every object inside its resource group. The other good practice is control over what your users can do and see inside that cluster.
+
+## Azure AD
+
+An amazing option, probably the best one for AKS, to centralize user management is Azure Active Directory (AAD). Essentially, this is an integration with Azure's native Active Directory, centralizing control.
+
+Using this option can be one of the best practices because we get full control over both the users and their roles and bindings in the same place, the Azure portal.
+
+AAD kicks in whenever the user requests the config file through the `az aks get-credentials` command. When that happens, there are two main roles sent back:
+
+-   Admin role: full access to every resource
+-   User role: restricted access to resources
+
+When AAD integration is enabled, during the first config download the user has to log in through the portal, and from there the matching profile gets downloaded.
+
+## How it works
+
+To understand AAD better, it helps to understand the full flow of how an Active Directory integration actually works.
+
+According to Microsoft's own documentation, AAD integration gives users and groups access to cluster resources regardless of whether they're inside a namespace or not.
+
+When a user logs in and downloads the kubeconfig file with the command we saw earlier, the first step of the flow is asking the user to authenticate through the portal.
+
+![](./image.png)
+
+After authenticating in the portal, the cluster checks Azure's AD server to see if the user exists and requests an access token for them, and that token is used to fill in the kubeconfig file.
+
+After downloading the config file, the user doesn't get permissions directly in the token, but they get plugged into AAD's webhook and into the API server. Every time the user runs any command in kubectl, a call interceptor uses this token to validate the user against Azure's servers and check whether they have permission to run the command.
+
+If both the JWT token and the result of the query against the MS Graph API show that the user exists and has permission, the call proceeds to the Kubernetes API, which uses its own Roles and Bindings to check whether the user has access.
+
+The full flow looks roughly like this:
+
+![](./image-1.png)
+
+## Integrating your cluster with AAD
+
+Before June 2020, we had to go through every step of setting up a standard AD server, which included creating a server application and a client inside the portal to integrate with the AAD application.
+
+Now everything is a lot simpler with **Azure Managed AAD Integration (Managed AAD)**. It basically abstracts away every command you would have had to run.
+
+> As simple as it is, this convenience comes with [some limitations](https://docs.microsoft.com/en-us/azure/aks/managed-aad?WT.mc_id=containers-12319-ludossan)
+
+The first step to enable Managed AAD on your cluster is installing the two most famous tools, `kubectl` and `kubelogin`. Luckily, both can be installed with the `az aks install-cli` command.
+
+We'll need an initial group and user to have admin privileges for the cluster's first user, so we can either use an existing group or create a new one with the following command:
+
+```bash
+az ad group create --display-name AKSAdminGroup --mail-nickname AKSAdminGroup
+```
+
+That returns a bunch of information, but the most important piece is the **ObjectID**. Copy it and keep it around, because we'll need it to add ourselves to the group. But for that, we first need to find our own ID:
+
+```bash
+az ad user show --id email@delogin.com --query objectId -o tsv
+```
+
+The information that comes back is your user ID. Keep it so we can add ourselves to the group. But there's a catch: your login email isn't necessarily the same email AD is using, so we need to find that email. For that, let's use the list users command:
+
+```bash
+az ad user list --query "[*].{name: displayName, id: userPrincipalName, objectId: objectId}" -o json
+```
+
+This returns a list of every user and their login IDs. You can filter through the `--id` key or just copy the ObjectID, since that's all we need to add ourselves to the group. So let's do that:
+
+```bash
+az ad group member add --group AKSAdminGroup --member-id seuobjectid
+```
+
+Now that we have our user inside the general permission group, let's create our AAD-enabled cluster:
+
+```bash
+az aks create \
+  -g aks-aad \
+  -n aad-cluster \
+  --enable-aad \
+  --aad-admin-group-object-ids objectIdDoGrupoAdmin
+```
+
+We grab the credentials with `az aks get-credentials -g aks-aad -n aad-cluster`. Now that we have the config file, try running any command in `kubectl`, like `kubectl get nodes`, and you'll see it ask you to log in through the portal.
+
+AAD is now working, and always starting from a *Zero Trust* principle, you'll never have any permission you didn't explicitly add.
+
+## Adding new users and groups
+
+Now that we have all the permissions set up, let's add new users and groups just like we did in the other articles. First we need our AKS cluster's ID:
+
+```bash
+AKSID=$(az aks show -g aks-aad -n aad-cluster --query id -o tsv)
+```
+
+Now let's create a read-only group called `AKSReadOnlyGroup` and save its ObjectID:
+
+```bash
+GROUPID=$(az ad group create \
+  --display-name AKSReadOnlyGroup \
+  --mail-nickname \
+  --query objectId -o tsv)
+ 
+```
+
+These users need to log in as regular users, not as admins. We can do that by adding this group to an existing AD role called "Azure Kubernetes Service Cluster User Role". As we saw before, this makes users log in as regular users instead of admins.
+
+The object that links a group to a role in Azure is called a **Role Assignment**. Let's create one to link the two together:
+
+```bash
+az role assignment create \
+  --assignee $GROUPID \
+  --role "Azure Kubernetes Service Cluster User Role" \
+  --scope $AKSID
+```
+
+Let's add a new user called Alice to the group we just created, and copy her ObjectID as we create her:
+
+```bash
+ALICE=$(az ad user create \
+  --display-name "Alice Doe" \
+  --user-principal-name alice@dominio.com \
+  --password S3gr3d0 \
+  --query objectid -o tsv)
+```
+
+> Remember: when creating a user we need a **valid** domain. To get this domain, run the following command and copy everything that comes after the "@": `az ad user list --query "[*].userPrincipalName" -o json`
+
+Let's add the user to the group:
+
+```bash
+az ad group member add --group AKSReadOnlyGroup --member-id $ALICE
+```
+
+Now that we have the user created in AD, let's create their role and binding in Kubernetes. As we saw before, AAD and Kubernetes RBAC work together to provide the full authentication solution.
+
+## Inside Kubernetes
+
+First let's create the role called `ReadOnlyRole`:
+
+```bash
+kubectl create clusterrole ReadOnlyRole --verb=get,list,watch --resource="*"
+```
+
+Now let's create the binding of this role to our AD group's ID:
+
+```bash
+kubectl create clusterrolebinding ReadOnlyBinding \
+  --clusterrole=ReadOnlyRole \
+  --group=$GROUPID
+```
+
+> We can also bind the role to a single user by using the user's ObjectID instead of the group's ObjectID in the command above.
+
+Now we can test these roles by downloading the config file again and overwriting the current one:
+
+```bash
+az aks get-credentials -g aks-aad -n aad-cluster --overwrite-existing
+```
+
+On the first call, you'll need to log in again with an email and password. Let's use Alice's email to do that (the same email you used when you created Alice's user), along with the password we set.
+
+After a successful login, try listing the pods in the `kube-system` namespace. You'll be able to, because Alice's user has permission to list every pod in every namespace, but if you try to create anything, like:
+
+```bash
+kubectl run nginx-dev --image nginx --namespace default
+```
+
+You'll get a "forbidden" message.
+
+## Conclusion
+
+We learned how to use even more of Azure's power to bring authentication and easier management into our AKS cluster. With this kind of integration, we can make our cluster even more secure.
+
+See you!

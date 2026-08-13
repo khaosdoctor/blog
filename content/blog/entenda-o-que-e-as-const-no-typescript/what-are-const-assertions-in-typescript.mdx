@@ -1,0 +1,125 @@
+---
+title: "What are 'const assertions' in TypeScript? The famous 'as const'"
+pubDate: 2024-04-24T11:00:59.000Z
+updatedDate: 2026-07-16T17:56:43.000Z
+lang: en
+slug: "what-are-const-assertions-in-typescript"
+category: "typescript"
+tags: ["typescript"]
+description: "What are const assertions? Do you know the difference between the odd 'const as const' and Object.freeze?"
+seoTitle: "What does 'as const' mean in TypeScript?"
+machineTranslated: true
+draft: false
+---
+This article is a companion to my video on the same topic! Check it out here:
+
+![](https://www.youtube.com/watch?v=CTGqhST9Fjc)
+
+If you're coding in TypeScript, you've probably run into a pretty strange type, the famous `const as const`, something like this:
+
+```ts
+const foo = {
+  bar: 'string'
+} as const
+```
+
+We even touched on it when we talked about [enums](/enums-no-typescript/) here on the blog. You might imagine that, since it has an `as` in it, this must be some kind of type casting, meaning we're swapping one type for another and forcing TS to accept it, which would be a bad practice. But no!
+
+This kind of technique is called [**const assertions**](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions) and, as the name says, it's an assertion, meaning we're giving TypeScript more information about a type. But what exactly are we telling it?
+
+## Objects and arrays
+
+This kind of assertion is generally used with objects and arrays, and it's also the simplest way to understand the concept. So imagine you have this object:
+
+```ts
+const args = [1, 2]
+const sum = (a, b) => a+b
+```
+
+All TS knows is that `args` is an array of numbers, so it'll type it as `number[]`, which is fine, because you could, for example, do an `array.push(0)` and it would accept it without any issues. In fact, in most cases that's exactly what happens. But there's one case where it doesn't.
+
+There are several functions in JavaScript that need an exact number of arguments, one example is the `Math.atan2` function, which takes exactly 2 parameters. Another example is our sum function. So this code doesn't work:
+
+```ts
+const args = [1, 2]
+const sum = (a, b) => a+b
+sum(...args)
+```
+
+That's because TS can't infer how many parameters `args` has, nor the total number of items in the array, precisely because we can add, remove, or change the array however we want.
+
+If we want to say that this array is immutable, a constant, we have to use a **const assertion**
+
+```ts
+const args = [1, 2] as const
+const sum = (a, b) => a+b
+sum(...args)
+```
+
+In this case, `args` is now typed as `readonly [1, 2]`, meaning we can't modify the array, and it has exactly two elements, 1 and 2. So we can pass it to the function because we told TS it'll always have two elements.
+
+The same applies to objects. If we pass an object like this:
+
+```ts
+const obj = {
+  foo: 1,
+  bar: 'formacaots.com.br'
+}
+```
+
+TypeScript will simply type it as an object like this:
+
+```ts
+const obj: {
+    foo: number;
+    bar: string;
+}
+```
+
+And we can add or remove keys, plus pass any string and any number, or even change the object's type. But if we use
+
+```ts
+const obj = {
+  foo: 1,
+  bar: 'formacaots.com.br'
+} as const
+```
+
+Our typing changes to:
+
+```ts
+const obj: {
+    readonly foo: 1;
+    readonly bar: "formacaots.com.br";
+}
+```
+
+Notice that now it's not only immutable, it also has literal types as its keys. And you might be asking yourself: _"What about `Object.freeze`? Doesn't it do the same thing? Isn't it even safer since it runs at runtime?"_
+
+There's a fundamental difference between `Object.freeze` and `as const`. While `Object.freeze` does make the object immutable at runtime, it only does that for the first level of keys, so nested and composed keys like this:
+
+```ts
+const foo = {
+  bar: {
+    baz: 1
+  }
+}
+```
+
+Don't work. If you use `Object.freeze(foo)`, that guarantees `bar` can't be replaced with a different object, but `foo.bar.baz` can still be changed normally. `as const`, on the other hand, would make the whole object immutable.
+
+## Conclusion
+
+**const assertions** do three things:
+
+-   On primitive types (string, number, boolean, etc), they remove the possibility of _type widening_, meaning a `'foo'` won't turn into `string`.
+-   Object properties become `readonly`
+-   Arrays become immutable tuples (`readonly`)
+
+You can even use `as const` on function returns, to make the function's inferred type always come out as the most static type possible:
+
+```ts
+function foo () {
+  return [1, 2] as const // returns a tuple
+}
+```

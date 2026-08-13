@@ -1,0 +1,153 @@
+---
+title: "What's new in TS 5.3"
+pubDate: 2023-08-30T09:00:30.000Z
+updatedDate: 2026-07-16T15:57:03.000Z
+lang: en
+slug: "whats-new-in-ts-5-3"
+category: "typescript"
+tags: ["typescript", "development", "nodejs", "javascript"]
+description: "Let's go through what might land in TS 5.3 with this awesome list of features!"
+machineTranslated: true
+draft: false
+---
+As usual, I want to bring you the main news on TS as it comes out! I recently got word that the TypeScript team is working on a [new version of the language](https://github.com/microsoft/TypeScript/issues/55486), and to do that, they put together what's called an **iteration plan**.
+
+The iteration plan isn't a document that shows exactly what's shipping in the language, but rather what could possibly land in the next versions. It's basically a document of the team's intentions for working on and improving the compiler.
+
+The beta version of TS 5.3 should come out in September (a bit before the launch of the first module of [Formação TS](https://formacaots.com.br)), and the final version should be out in November!
+
+Matt from Total TypeScript put together a rundown of what's in the document in [this other article](https://www.totaltypescript.com/typescript-5-3), and I'm going to take the chance to summarize and explain it too, tying it in with the [JavaScript](https://github.com/tc39/proposals) docs.
+
+## Import Attributes
+
+This is a [proposal](https://github.com/tc39/proposal-import-attributes) that's been open for a while, and the main goal is letting you specify some validation options for module imports. Right now we're only talking about validating the module's type, for example, to validate that a module is a JSON file:
+
+```ts
+import json from './foo.json' with { type: 'json' };
+```
+
+This is pretty useful when there's a security concern, for example, if a file is expected to be JSON but is actually JS.
+
+You can use these attributes on dynamic imports:
+
+```ts
+import("foo.json", { with: { type: "json" } });
+```
+
+Or even export a module with another validated type:
+
+```ts
+export { val } from './foo.js' with { type: "javascript" };
+```
+
+This also applies to WebAssembly or different workers:
+
+```ts
+new Worker("foo.wasm", {
+  type: "module",
+  with: { type: "webassembly" },
+});
+```
+
+Using `with` followed by `type` is a way of keeping this feature wide open, because it'll be possible to add more properties later on. Imagine being able to import a package by one of the properties in `package.json`, or even from the file itself.
+
+## Throw expressions
+
+This is a feature I'll talk about in a future video, but it's something that's been missing from JS for a long time. The [proposal](https://github.com/tc39/proposal-throw-expressions) for this is still at stage 2, which is odd for TS, since it usually implements most features once they're at stage 3.
+
+What might happen is that, as they mention in the plan, the team is going to be "championing" the proposal, which is a way of saying they're going to actively work on it and push it forward, to get it to stage 3 and 4 faster.
+
+The idea is that you'll be able to use `throw` outside a specific statement, for example, in a variable declaration:
+
+```ts
+const userName = user.name || throw new Error('Name is required')
+```
+
+Today, that's not possible.
+
+## Isolated Declarations
+
+There's a problem when working with monorepos in pretty much every language, but in TypeScript it's worse. Because when we have packages that depend on other packages, that invariably ends up generating an absurd amount of complexity, especially for TypeScript.
+
+If you have 10 levels of packages depending on each other, TS needs to infer every type of every package itself, starting from the bottom up, generating the [declaration files](/semana-ts-2/) for each package to import into the one above it. And that's really slow.
+
+And since there's no faster way to do this without changing the compiler, because other tools like esbuild or even swc aren't smart enough for this, it's left to TS to infer everything, and it's not necessarily the most demanding compiler out there.
+
+This [proposal](https://github.com/microsoft/TypeScript/pull/53463) adds a new TSConfig setting called `isolatedDeclarations`.
+
+```json
+{
+  "compilerOptions": {
+    "isolatedDeclarations": true
+  }
+}
+```
+
+What it does is turn on a stricter mode, where you need to, for example, add type annotations on function returns, especially for exported functions, so TS doesn't have to infer everything.
+
+## Narrowing generics in functions
+
+There's a [lingering problem](https://github.com/microsoft/TypeScript/issues/33014) in TypeScript, which is the fact that it won't do a _type narrowing_ on a generic type inside a function when we want to return something based on that type.
+
+Sounds complicated? Let's break it down. Picture this:
+
+```ts
+interface F {
+  "t": number,
+  "f": boolean,
+}
+
+function depLikeFun<T extends "t" | "f">(str: T): F[T] {
+  if (str === "t") {
+    return 1;
+  } else {
+    return true;
+  }
+}
+
+depLikeFun("t"); // number
+depLikeFun("f"); // boolean
+```
+
+That's exactly what we're talking about here. What we want is that, if we pass `t`, the return type is `number`, and if it's `f`, it's `boolean`. To pull this off, we need a `T` type passed as a generic to the function, and then we return the key of the `F` interface based on `T`.
+
+Except if we do this today, we get an error saying our returns aren't of type `never`. That's because TS doesn't narrow our generic `T` type. What it's actually doing, according to [this issue](https://github.com/microsoft/TypeScript/pull/30769), is that when we pass `F[T]`, we're saying "write F at key T", so it checks whether `F[T]` has a type that intersects both its possibilities (in this case `number` and `boolean`), and `number & boolean` is `never`.
+
+## Autocomplete on string types
+
+An interesting hack, one I found out about recently, is that you can create a _union type_ of strings and `string & {}`, and that way you get compiler autocomplete, while still being able to put any other string in there too:
+
+```ts
+type IconSize =
+  | "small"
+  | "medium"
+  | "large"
+  | (string & {});
+```
+
+So this would be totally valid:
+
+```ts
+const icons: IconSize[] = [
+  "small",
+  "medium",
+  "large",
+  "extra-large",
+];
+```
+
+In version 5.3, it might be possible to drop the `& {}` and just use string on its own to get the same result:
+
+```ts
+type IconSize =
+  | "small"
+  | "medium"
+  | "large"
+  | string;
+```
+
+## What's coming?
+
+This is a baseline article, we don't know whether these features will actually be added to TS or not, especially since the document is a work plan and not a guide to what's actually going to be included there.
+
+I'm hoping some of these features, especially the union types and the type narrowing, get added, because they'd solve a big headache for most people.

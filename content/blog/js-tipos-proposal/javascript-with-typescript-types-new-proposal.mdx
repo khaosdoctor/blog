@@ -1,0 +1,196 @@
+---
+title: "JavaScript with TypeScript Types? Here's Everything About the New Proposal!"
+pubDate: 2022-03-28T14:00:00.000Z
+updatedDate: 2026-07-16T16:10:18.000Z
+lang: en
+slug: "javascript-with-typescript-types-new-proposal"
+category: "javascript"
+tags: ["javascript", "typescript", "nodejs", "ecmascript"]
+description: "Everything about the TypeScript team's new proposal to embed native types into JavaScript's interpreter."
+machineTranslated: true
+draft: false
+---
+Recently, a [piece of news](https://devblogs.microsoft.com/typescript/a-proposal-for-type-syntax-in-javascript/) caused a huge stir in the JavaScript development community, with a special focus on TypeScript.
+
+The big news was the introduction of a [proposal](https://github.com/giltayar/proposal-types-as-comments/), coined by Gil Tayar, on how it could be possible to include TypeScript-like data types natively in JavaScript, essentially removing the TypeScript compilation step.
+
+This left a lot of people quite worked up, saying JavaScript should always be a dynamic language with no native types. Still, a large chunk of the community was in favor of the proposal too! Let's understand how all of this works!
+
+## Context
+
+To understand why this proposal is so important, we first need to understand the context it's based on and why it was created.
+
+### How it all started
+
+Over the last decade or so, a lot of people and companies have tried to add static typing to JavaScript, in an attempt to keep the development of more complex systems stable and scalable over time.
+
+Initially, _JSDoc_ did a great job explaining what was happening in the code, especially regarding the parameters coming into and out of a function. A lot of JSDoc's popularity comes from the fact that you don't need to do anything extra in your pipeline or runtime to include types: they were read as comments:
+
+```js
+/**
+* Function to add two numbers
+* 
+* @param {number} n1 First value to add
+* @param {number} n2 Second value to add
+* @returns {number} The sum of both values
+*/
+function add (n1, n2) {
+  return n1+n2
+}
+```
+
+The idea was great, but JSDoc suffered from two main problems:
+
+-   Native JSDoc support in text editors was scarce, and not many of them actually took the rules of those comments into account to really type the code. It worked as a nice way to generate documentation automatically, but the types weren't enforced, so runtime errors were still very common
+-   The documentation JSDoc generated wasn't part of the code, so you didn't actually need to update a JSDoc comment if you changed the function. In other words, the types ended up getting outdated pretty fast and, just like documentation in general, often became useless after too long without an update
+
+> There's a third problem. JSDoc doesn't allow for all the type conveniences and features that TypeScript supports, and on top of that, writing complex types with JSDoc is extremely verbose.  
+>   
+> If you want to know more, [this question](https://github.com/giltayar/proposal-types-as-comments/#why-not-stick-to-existing-js-comment-syntax) answers a bunch of doubts about JSDoc.
+
+The idea behind JSDoc was that you could just comment for documentation purposes, but it was never meant to enforce data types on any code.
+
+### Type systems
+
+As time went by, other companies like Google, Facebook and Microsoft started developing their own systems. That's how **Closure Compiler, Flow and TypeScript** came about, respectively. The latter being the one that got the most traction and success.
+
+These type systems, TypeScript especially, solved the two main problems JSDoc had, because now the types became part of the code. In other words, you couldn't update the types without updating the code and vice versa. Likewise, they were now enforced on the code you were writing, so there was no way to "cut corners" and return a different type than the one defined.
+
+While Closure Compiler and Flow took a less invasive approach to the language, TypeScript left all the old habits behind and effectively replaced JavaScript with its own syntax, becoming a **superset** of the original language. In other words, every JavaScript code is valid TypeScript code, but the reverse isn't always true.
+
+```js
+function add (n1, n2) {
+	return n1+n2
+} // Works in TypeScript
+
+function add (n1: number, n2: number): number {
+	return n1+n2
+} // Doesn't work in JavaScript
+```
+
+That alone caused a huge mess in the community, because now people would need to use the TypeScript compiler (`tsc`) to compile the code before running it, adding yet another step to the already complex JavaScript pipeline. But hey, that's fine!
+
+That wasn't much of a problem in 2012, because a lot of browsers didn't get constant updates, other browsers implemented their own versions of the JS compiler, and we still had the Internet Explorer problem, which I won't even get into. So compilation steps were normal: you had to compile your code to support N older versions of the current browser, and also whatever the latest Internet Explorer version happened to be at the time.
+
+So adding one more component to that compilation wasn't a big deal either. Bundling your code into a single, super optimized file was already common practice, so it was no problem to round out the pipeline with one more step that, for the most part, would just strip the types out of your code to turn it back into valid JavaScript.
+
+But as time went on, browsers started getting more stable and gained native support for [modules](/os-ecmascript-modules-estao-aqui/), so bundling became more of an optional optimization step than a required compatibility one. TypeScript ended up becoming the thorn in everyone's side, because now it added a step that maybe didn't need to exist anymore.
+
+This was mitigated by a feature TypeScript already had: checking types in JavaScript files too, without needing a file with a different extension, working more like a linter than a real type checker. So you could write code like this:
+
+```js
+/**
+* Function to add two numbers
+* 
+* @param {number} n1 First value to add
+* @param {number} n2 Second value to add
+* @returns {number} The sum of both values
+*/
+function add (n1, n2) {
+  return n1+n2
+}
+```
+
+And add a small `//@ts-check` comment at the top of the file to have TypeScript check your code for type inconsistencies. But if all you wanted was type support in your IDE, that was totally possible too, using VSCode.
+
+### Where we stand today
+
+As we can see in the [proposal](https://github.com/giltayar/proposal-types-as-comments/) itself, in 2020 and 2021 the [State of JS](https://stateofjs.com/) survey, the community's most important and far-reaching survey about the language, showed that the most requested feature in the language was static types.
+
+![](./image.png)
+
+On top of that, as the proposal itself also shows, TypeScript has been among the 10 most used "languages" in the world for several consecutive years.
+
+So why not have the best of both worlds? TypeScript's static typing as part of the code (syntax and all), without having to add anything to a new pipeline? What if JavaScript itself were capable of ignoring the types so you could run your code directly? All completely optional, of course.
+
+## What's the idea
+
+One of the big problems, which actually contributed to how long this proposal took, is that when devs had to answer the question "What should types in JavaScript look like?", some people simply said they should be completely ignorable, just comments, while others said they should carry some kind of meaning so the compiler could figure out how to best optimize the system.
+
+There were more radical ideas saying the type system should change the program's semantics and dictate what could or couldn't be done, turning JS into a strongly typed language.
+
+Over time, the community has been converging more and more on the idea of checking types at compile time, but ignoring them at runtime. In other words, types would work like comments in the code: they'd give whoever is developing an idea of what's going on, but they wouldn't be enforced in the browser, where they'd run just like regular JavaScript code. The image below explains this idea pretty well.
+
+![](./image-2.png)
+
+And then, for whoever **wanted** their types checked, they could use tools like TypeScript, same as today.
+
+![](./image-3.png)
+
+But now you're probably wondering: what's the advantage of all this? If the types are going to be optional anyway, why not just leave everything as it is today?
+
+The answer is that having native types in JavaScript can further lower the barrier devs face when getting into the language, without needing to understand what TypeScript even is later on. It would just feel natural to anyone writing JS that optional types exist, this was actually done before with PHP in version 7. Simply by not requiring people to learn something completely new, we dramatically lower the barrier to entry and use of the language.
+
+## How it's all going to work
+
+Since we're simply adding the possibility of turning type notation into something native to the language, but in the form of comments, we're essentially talking about the possibility of adding new tokenization and parsing rules to JavaScript. So this proposal basically comes down to giving JavaScript the ability to understand and ignore types in the code.
+
+To make that happen, some fundamental parts of TypeScript need to be added to the JavaScript engine:
+
+-   Support for syntax like type declarations with `:` on variables, arguments and functions
+-   The optionality modifier `?`, making an argument optional, for example `(arg?: number)`
+-   External type declarations with `interface` and `type`, as well as type utilities like `Pick`, `Omit` (unconfirmed)
+-   Support for generics, `export type T<G>`
+-   Assertion modifiers like `!` in `const a = foo!`, and `as` as in `const b = foo as string`
+
+And then we get into features that are a bit trickier to separate from the code, because they carry a deeper, broader meaning. For example, visibility modifiers like `private`, `public` and `protected`, and even abstract classes and methods with `abstract`.
+
+Those [are open for debate](https://github.com/giltayar/proposal-types-as-comments/#class-and-field-modifiers) on being included in the language's scope but, at least the way I see it, I don't see a good enough way to turn those structures into comments, since they're essentially adding more semantics to the code just by being there.
+
+### Unsupported types
+
+That said, some TypeScript types won't be able to be supported because they essentially carry code behavior, like `enum`, which essentially creates a new block of code by the end of compilation.
+
+Another unsupported type would be `namespaces`, since they create a separate scope outside the current scope of the function, or even the type.
+
+And the third unsupported type would be what's called parameter properties (_Parameter Properties_), which is the act of declaring properties that get initialized together with the class directly in the constructor. For example, in JavaScript, this:
+
+```js
+class foo {
+    #privado
+    publico
+
+	constructor (privado = 0, publico = 1) {
+    	this.#privado = privado
+        this.publico = publico
+    }
+}
+```
+
+Would be the equivalent of this in TypeScript:
+
+```typescript
+class foo {
+	constructor (
+    	private privado: number = 0,
+        public publico: number = 1
+    ) { }
+}
+```
+
+That said, field declarations inside classes using type annotations [are supported](https://github.com/giltayar/proposal-types-as-comments/#classes-as-type-declarations).
+
+> For a list of all supported types, take a look at [the official proposal](https://github.com/giltayar/proposal-types-as-comments/#type-annotations).
+
+### Types open for debate
+
+Some types are supported by the "types as comments" idea, but would considerably expand the proposal's original scope, so they're open for debate [in the official repository](https://github.com/giltayar/proposal-types-as-comments/#up-for-debate).
+
+-   **Ambient declarations** with `declare` are used to tell type checkers like TS that some types exist in scope, or even some module, even when that type or module has no declared types. These are the famous `.d.ts` files.
+-   [**Function overloads**](https://github.com/giltayar/proposal-types-as-comments/#function-overloads) are something that can be implemented in the type system by redeclaring the function's signature while omitting its body.
+
+## Conclusion
+
+While [the idea that JavaScript will accept checking types at runtime is unlikely](https://github.com/giltayar/proposal-types-as-comments/#how-could-runtime-checked-types-be-added-in-future), this proposal still creates some hope that we might, in the future, see some kind of native optional internal checking option.
+
+That said, even though [there's research](http://goto.ucsd.edu/~pvekris/docs/safets.pdf) showing that type checking in JavaScript adds a negligible amount of compute time, it still isn't in the language's nature, and (historically speaking) I don't believe this kind of feature will ever be available.
+
+To wrap up, I want to remind you that this is a **stage 0** proposal, meaning it's just a draft that can change at any moment.
+
+If you don't know how JavaScript evolves and want to understand a bit more about the proposal system, check out my video on the subject:
+
+![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
+
+Until it reaches at least **stage 3**, there's no way to say whether it will or won't happen in the future, and that answer can take **years**. Like, for example, the case of [the Temporal proposal](/temporal-api/), which has been open for at least 4 years.
+
+So all that's left for us to do is wait and, of course, comment and help out with the discussion of the proposal over on GitHub!

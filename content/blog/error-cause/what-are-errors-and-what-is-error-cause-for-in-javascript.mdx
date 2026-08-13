@@ -1,0 +1,343 @@
+---
+title: "What are errors and what is error.cause for in JavaScript?"
+pubDate: 2023-01-18T11:00:30.000Z
+updatedDate: 2026-07-16T16:04:10.000Z
+lang: "en"
+category: "javascript"
+tags: ["javascript", "ecmascript", "typescript", "development"]
+description: "Error handling is one of the most important and hardest skills for any dev. But almost nobody knows there's a much easier way to handle your errors."
+seoTitle: "What are errors in JavaScript and what is error.cause?"
+seoDescription: "Handling errors is one of the most important skills for any dev and app, but what a lot of people don't know is that there's a much easier way!"
+draft: false
+machineTranslated: true
+slug: "what-are-errors-and-what-is-error-cause-for-in-javascript"
+---
+Errors are probably the main construct of any programming language. They exist in all of them, and we have several names for them: bugs, errors, exceptions, etc.
+
+The idea of error handling isn't new, there are actually several guides, both new and old, that show pretty well how we can handle most of what we call exceptions. The idea for this article came from a [comment](https://www.linkedin.com/feed/update/urn:li:activity:7018656849465892864?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7018656849465892864%2C7018885043116765184%29) on a [post on my LinkedIn](https://www.linkedin.com/posts/lsantosdev_javascript-typescript-js-activity-7018656849465892864-6cmM?utm_source=share&utm_medium=member_desktop):
+
+![](./image.png "Many thanks to Lucas for bringing this content to light!")
+
+This became even more real when I saw the results from the [State of JS 2022](https://2022.stateofjs.com/en-US/features/) which showed that, of all the people who knew about the `error.cause` feature, only 27% of them had ever used it.
+
+![](./image-1.png)
+
+In other words, it's time we learn a lot more not only about `error.cause`, but about **errors in general.** So without wasting any more time, let's get into a **quick and practical guide on what errors are in JavaScript** and how you can improve your applications by making good use of them!
+
+## What errors REALLY are
+
+When we start programming, our biggest fears are about the famous _bugs_! Unexpected errors in the system. These errors are called **exceptions** in development, because they're a part of the code that wasn't _programmed_, so it's an exception to the original program.
+
+Ideally, all code would be tested in a way that no errors would occur, but unfortunately that's not possible. Not only because we're human and don't have the capacity to fully understand the scenario of some kind of problem, but also because, with the arrival of more modern computers, the speed and modularity of applications has outpaced even the computer's own capacity to predict errors that can happen. But it's important to understand that there's a difference between **error** and **exception**.
+
+An exception is an error that was raised by the running program through instructions like `throw`, meaning the error itself is the object that describes what happened, and the exception is the transport method we're going to use to deliver that error. In other words, the error contains something very important: the **context**, while the exception is a general description that may or may not contain that context.
+
+Since we can't get rid of errors, the best we can do is **live with them**, but just putting up with errors isn't enough, what matters most is knowing how to make good use of what's called _exception handling_, or **error handling**.
+
+JavaScript is notorious for its mediocre error handling, since it's a dynamic language that can accept virtually any type of value in its variables, it's quite hard to pin down a single error type, and it only gets worse when we throw the Web on top of it, for example:
+
+```js
+const obterValor = async (id) => {
+    try {
+        const result = await fetch(`https://url.com/${id}`)
+        return result.json()
+    } catch (error) {
+        // ...
+    }
+}
+
+obterValor(1).then(console.log).catch(console.error)
+```
+
+This is a simple example, but the `error` variable there can receive several types of errors, one of them could be a connection error with the site, another could be that the resource doesn't exist (which would be an HTTP error), we could have an error getting the content and turning it into JSON (which would be a parsing error), and so on.
+
+But this has existed for years, so how do we deal with most of these errors?
+
+### Handling multiple errors
+
+There are several ways to deal with these errors, one of the most common, so common that it's in the [MDN examples](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#differentiate_between_similar_errors), is handling the error message with a `switch`, like this one here:
+
+```js
+function doWork() {
+  try {
+    doFailSomeWay();
+  } catch (err) {
+    throw new Error("Failed in some way");
+  }
+  try {
+    doFailAnotherWay();
+  } catch (err) {
+    throw new Error("Failed in another way");
+  }
+}
+
+try {
+  doWork();
+} catch (err) {
+  switch (err.message) {
+    case "Failed in some way":
+      handleFailSomeWay(err);
+      break;
+    case "Failed in another way":
+      handleFailAnotherWay(err);
+      break;
+  }
+}
+```
+
+This is probably the **worst** possible way to handle distinct errors. That's because a single wrong comma or some kind of typo will drastically change your code, but unfortunately the message field is one of the few fields we have that can say something or differentiate one error from another, or is it?
+
+There's another way to handle errors that's a bit more elegant (and much less dependent on what you write in the error message), which is extending JavaScript's `Error` class and adding your own fields. This is my personally preferred model.
+
+Let's go back to our previous example, imagine that our API can return a user error, we can describe this error like this:
+
+```js
+class UserNotFoundError extends Error {
+    constructor (userId) {
+        super(`The user was not found`)
+        this.id = userId
+        this.status = 404
+        this.statusMessage = 'Not Found'
+    }
+}
+
+throw new UserNotFoundError(45)
+```
+
+And then we can check this error like this:
+
+```js
+const obterValor = async (id) => {
+    try {
+        const result = await fetch(`https://url.com/${id}`)
+        return result.json()
+    } catch (error) {
+        if (error instanceof UserNotFoundError) {
+            // return the error response with 404
+        }
+        // otherwise, we return the error normally
+    }
+}
+
+obterValor(1).then(console.log).catch(console.error)
+```
+
+But this is an HTTP call error, meaning we can have a lot more errors like this one. We can go even deeper and create a base class for all errors that are related to HTTP. This would make sense because all HTTP errors will have the same properties like `status` and `statusMessage`, so why not do it like this:
+
+```js
+class HTTPError extends Error {
+    constructor(message, status, statusMessage, context) {
+        super(message)
+        this.status = status
+        this.statusMessage = statusMessage
+        this.context = context
+    }
+}
+
+class UserNotFoundError extends HTTPError {
+    constructor (userId) {
+        super(`The user was not found`, 404, 'Not Found', {userId})
+    }
+}
+
+throw new UserNotFoundError(45)
+```
+
+This way we can create automatic handling for any HTTP error like this:
+
+```js
+const obterValor = async (id) => {
+    try {
+        const result = await fetch(`https://url.com/${id}`)
+        return result.json()
+    } catch (error) {
+        if (error instanceof HTTPError) {
+            res.status = error.status
+            res.json({ message: error.message, context: error.context })
+            return
+        }
+        // otherwise, we return the error normally
+    }
+}
+
+obterValor(1).then(console.log).catch(console.error)
+```
+
+We can extrapolate this model to create what we call `errorMappers`, which are essentially big `switch` statements that will give us the user response according to an input error, an example is [this file I made for the cover generator here on the blog](https://github.com/khaosdoctor/article-cover-creator/blob/main/src/presentation/api/utils/errorMapper.ts).
+
+When we're dealing with one error at a time, everything's fine, the problem is when we have to chain these errors, now what?
+
+## Context and chaining
+
+A word I brought up at the beginning of the article was **context**, but we haven't really talked much about it yet, and now is the time to say that **the most important part of an error is its context**.
+
+It's extremely hard to debug any kind of error when you don't have context about what's happening. Almost every dev has had to deal with someone saying "There's an error here", and then the first question is "Which error? What is it?", this is because most (if not all) errors are closely tied to some kind of context of their own that makes solving them 90% easier.
+
+Ideally, error messages should be fixed strings, and shouldn't contain any kind of dynamic information, like we did in the errors above, if you notice, our `HTTPError` and our `UserNotFoundError` both have a message field, and in the case of the child class `UserNotFoundError` the message isn't even editable.
+
+We also have extra fields like `statusCode`, `statusMessage` and `id` where we set the information related to that error's context, but how do we pass that forward? That's where `error.cause` comes in
+
+### Error.cause
+
+`error.cause` is a [relatively recent TC39 proposal](https://github.com/tc39/proposal-error-cause) that proposes standardizing the `Error` class by adding an optional extra field called `cause`, this field can be another `Error` instance or any kind of structured object. Now, the error class would have the following signature:
+
+```ts
+interface ErrorOptions {
+	cause?: Record<string, any> | Error
+}
+
+class Error {
+    constructor (
+    	public readonly message: string,
+        public readonly options: ErrorOptions
+    ) {}
+    
+    get cause () {
+    	return this.options.cause
+    }
+}
+```
+
+To understand why we have a new `cause` field in error classes, it's easier to give an example. Let's start simple, imagine we have an API that can give us 3 types of errors: the API's own error, an error specific to one type of resource, and another error specific to a different type of resource. The traditional way would be to do something like this:
+
+```js
+const apiFetch = async (objectName) => {
+  await fetch(url + "/" + objectName);
+};
+
+const main = async () => {
+  try {
+    await apiFetch(foo);
+  } catch (error) {
+    throw new Error("An error has occured while trying to fetch foo");
+  }
+
+  try {
+    await apiFetch(bar);
+  } catch (error) {
+    throw new Error("An error has occured while trying to fetch bar");
+  }
+};
+```
+
+This way we'd have a message for each type of error, but we'd lose the context of both, so how do we add the context object without changing the message? With `error.cause`:
+
+```js
+const apiFetch = async (objectName) => {
+  await fetch(url + "/" + objectName);
+};
+
+const main = async () => {
+  try {
+    await apiFetch(foo);
+  } catch (error) {
+    throw new Error("An error has occured while trying to fetch foo", { cause: error });
+  }
+
+  try {
+    await apiFetch(bar);
+  } catch (error) {
+    throw new Error("An error has occured while trying to fetch bar", { cause: error });
+  }
+};
+```
+
+Now we have, along with the error, a reason why that error happened, which can contain a `stackTrace` and other structured data we can pass. Our output will go from something like this:
+
+```
+Error: An error has occured while trying to fetch foo
+```
+
+To something like this:
+
+```
+ Error: An error has occured while trying to fetch foo
+   [cause]: Error: 401 - Unauthorized - Token Expired
+```
+
+See how it becomes much easier to understand what's happening? In this case we're passing the error instance itself in the `cause`, but we can pass any kind of structured object, as you can see [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#providing_structured_data_as_the_error_cause).
+
+But if we have both errors at the same time, we'd have to run the API twice to find out, since we're only throwing one error at a time, the idea here would be to chain the errors. And once again `cause` can be useful here, but we'll have to make a modification to our code:
+
+```js
+const apiFetch = async (objectName) => {
+  await fetch(url + "/" + objectName)
+}
+
+const main = async () => {
+  try {
+    let errors = []
+    try {
+      await apiFetch(foo)
+    } catch (error) {
+      errors.push(new Error("An error has occured while trying to fetch foo", { cause: error }))
+    }
+  
+    try {
+      await apiFetch(bar)
+    } catch (error) {
+      errors.push(new Error("An error has occured while trying to fetch bar", { cause: error }))
+    }
+
+    if (errors.length > 0) throw new Error("Error when fetching the API", { cause: errors })
+  } catch (err) {
+    errors.push(err)
+    throw new Error("Error when fetching the API", { cause: errors })
+  }
+}
+```
+
+Or even, more simplified:
+
+```js
+const apiFetch = async (objectName) => {
+  await fetch(url + '/' + objectName)
+}
+
+const main = async () => {
+  let errors = []
+  try {
+    await apiFetch(foo)
+  } catch (error) {
+    errors.push(new Error('An error has occured while trying to fetch foo', { cause: error }))
+  }
+
+  try {
+    await apiFetch(bar)
+  } catch (error) {
+    errors.push(new Error('An error has occured while trying to fetch bar', { cause: error }))
+  }
+
+  if (errors.length > 0) throw new Error('Error when fetching the API', { cause: errors })
+}
+```
+
+Now, when we print our message like this:
+
+```js
+main()
+.catch(e => console.log(e, { 
+  cause: e.cause.map(e => ({ message: e.message, cause: e.cause})) 
+}))
+```
+
+We'll get the following output, in case we have an error in our APIs:
+
+```
+[Error: Error when fetching the API] { 
+  cause: [ 
+     { message: 'An error has occured while trying to fetch foo',
+       cause: [ReferenceError: foo is not defined] },
+     { message: 'An error has occured while trying to fetch bar',
+       cause: [ReferenceError: bar is not defined] } 
+   ] 
+}
+```
+
+See how we have much more context and a much better idea of what happened in every part of the error, and not just what's happening in the latest errors. This is particularly useful when we're using **microservices**, since we can have an error in any part of a chain of calls, each of these errors should return a cause, so that we can chain together every error that happened and understand exactly where the error happened.
+
+## Conclusion
+
+Error handling in any language isn't something simple, and the hardest part is achieving the **consistency** needed to make all errors return the same way, that's why standardized error libraries like [Boom](https://github.com/hapijs/boom) are so important.
+
+I hope that, with this article, I managed to clear up a bit more about the uses of `error.cause` and also about error handling using JavaScript! See you next time!

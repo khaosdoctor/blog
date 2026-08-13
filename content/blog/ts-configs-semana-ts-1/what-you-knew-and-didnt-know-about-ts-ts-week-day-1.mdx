@@ -1,0 +1,176 @@
+---
+title: "What You Knew and Didn't Know About TS - TS Week Day 1"
+pubDate: 2023-04-03T11:00:04.000Z
+updatedDate: 2026-07-16T16:02:32.000Z
+lang: en
+slug: "what-you-knew-and-didnt-know-about-ts-ts-week-day-1"
+category: "typescript"
+tags: ["typescript", "javascript", "development"]
+series: typescript-week
+seriesOrder: 1
+description: "Learn everything about TypeScript and how you can take your first steps in this technology that keeps growing more and more!"
+machineTranslated: true
+draft: false
+---
+## TypeScript
+
+To start, there's nothing better than telling a bit of TypeScript's history, what it's for and what the purpose of this super useful tool in our lives is. This history is going to help you build a context around what TypeScript is and what problem it came to solve, then we'll dive head first into your first project and how each part of its configuration works!
+
+### Context and history
+
+TypeScript started as an internal Microsoft project in 2008, and was released to the public on October 1st, 2010. The basic idea behind TypeScript (and the problem it came to solve) was static typing for JavaScript code, mainly focused on developing larger applications, where JavaScript can't scale efficiently (we'll come back to this).
+
+TS isn't considered a language on its own, but what we call a _superset_ of JavaScript. But saying that didn't help much, did it? So let me give you a more practical example. It means TypeScript encompasses everything JavaScript already has and extends it even further, so **all JavaScript code is valid TypeScript code**, but the opposite isn't true, by definition.
+
+> We'll see throughout the week that TypeScript is basically entirely based on sets, so this concept is going to become clearer.
+
+Unlike other languages, TypeScript wasn't created to replace JavaScript, but rather to extend its use, the same way another tool called Flow had done before. That's why a lot of people say TypeScript itself isn't a language, but rather a type system implemented on top of JavaScript.
+
+> The definition of a "system" or a "superset" is correct, but it's a bit controversial since, by definition, a superset of a language should also be considered a language, because, at the very least, it has to contain the language inside it.
+
+But, unlike other type systems that came before it (yes, TS isn't the first, or even the second), TS is considered a [Turing-Complete](https://en.wikipedia.org/wiki/Turing_completeness) system, which means we can solve problems of any complexity using only the constructs it offers us.
+
+And that's true to the point where entire projects exist, like games, parsers and even small applications, built exclusively using TypeScript's type system. Of course, since it has no interface, people found pretty creative ways to display output to users.
+
+![](./image.png)
+
+One of these examples is [`TDungeon`](https://github.com/cassiozen/TDungeon), a text-based RPG game that's **entirely** built on TS's type system.
+
+Who knows what you'll be able to build with it after this week?
+
+An interesting fact is that one of TS's main designers and developers is a Danish software engineer named [Anders Hejlsberg](https://en.wikipedia.org/wiki/Anders_Hejlsberg), who's also the lead designer of C# and created other languages like Delphi and Turbo Pascal. That's why, at first glance, TS code looks a lot like C# code, especially in its structures.
+
+Today TS is one of the most used tools in the world and one of the most loved by any dev because, among many other things, it helps you keep your sanity on very large projects.
+
+### Why TypeScript?
+
+Now that we have the context of where it came from, let's understand the **why** behind its existence.
+
+During my career I've worked on small and large projects using JavaScript. The language itself isn't the problem, in fact, a lot of these projects were only possible because JavaScript is much simpler than other languages. The biggest problem by far is the scalability of these applications, which is a direct reflection of JavaScript having _dynamic typing_.
+
+> I've already talked a bit about static and dynamic typing in [my article series about Node.js under the hood](https://dev.to/_staticvoid/series/2080)
+
+Let's show some code. Imagine you have this application using Express with Node.js:
+
+![](./image_o-11-1451cbbc.png)
+
+In this example we only have three middlewares and we can already see we have a problem knowing what exists inside `res.locals`. In larger applications the number of middlewares can easily go past 30 per route (which is a really bad practice, but it happens), and in these cases it's going to be completely impossible to know what exists inside that variable, especially if the middlewares are defined in separate files.
+
+Another pretty interesting example is when we need to guarantee a specific type of data. Let's say we have this code:
+
+![](./image_o-10-ae86916c.png)
+
+In JavaScript we have two functions for canceling timeouts and intervals, `clearInterval` and `clearTimeout`, but they can only receive specific IDs from each of them. If we try to use `clearInterval(timeoutId)` we won't get any result, and that's where TypeScript is going to shine with something like:
+
+![](./image_o-9-ce30c3b8.png)
+
+Got the idea? TypeScript's goal is exactly its own slogan: "JavaScript that scales". Because, with it, it's possible to build huge applications, with lots of modules and lots of complexity, without losing track of every variable's types. Which is especially useful when you're working with a team, since the application's knowledge is spread across many people.
+
+Another pretty important factor is that TypeScript drastically reduces what we call the _bus factor_, an analogy for the number of people who can leave your project before it becomes unsustainable. This factor is usually very tied to those people who joined at the start of the project and, because of that, carry a huge amount of context on the business rules and the codebase itself, but if they leave your company the project is done, because nobody else knows anything. With TypeScript you can at least keep a much tighter grip on the codebase, making the handoff of knowledge a lot simpler.
+
+TypeScript also makes direct debugging easier, that is, the kind of debugging where you don't even need to run the code or a test suite to know something's wrong. That's because, if the typing is correct, you can solve complex problems without even running the code once. It also helps with documentation and with the application's architecture.
+
+Plus, the TypeScript compiler can also do several other tasks besides checking types. One of TypeScript's uses is also to break large projects into smaller ones and join everything together using a module model, which we'll get to in the next paragraphs.
+
+### First steps
+
+Did I convince you TS is worth it? Then let's learn how to install it and use every advantage it offers.
+
+> I'll be referencing this part in the following installments whenever we need to install TS to run our projects
+
+#### Setting up your environment
+
+TypeScript can run in any environment, and likewise, you can use any editor to create a TypeScript file. Nowadays the vast majority of editors support TS's type analysis.
+
+However, my personal recommendation is [VSCode](https://code.visualstudio.com), since it's the editor that was originally built to work with TypeScript. By default it already supports all of TS's features and even ships with its own bundled version in case you need to analyze a file and don't have it installed on your machine yet.
+
+> Honestly, TS support in VSCode is so good that you don't need any plugin or extension to make it work
+
+#### NPM packages
+
+TypeScript is written in TypeScript (how poetic) and published on NPM as a package, so to start using it in your first project you just need to create a new folder and run the command `npm init -y`, then install the TypeScript package with `npm install -D typescript`.
+
+> Always remember to add the `-D` flag, because TypeScript **isn't** a package that should go to production
+
+To help even more, we can install all of Node.js's typings, so TS will know everything about the environment we're running in. We can do that with the command `npm install -D @types/node`
+
+> `@types` is the scope of an organization called [DefinitelyTyped](https://github.com/definitelytyped) that holds types for lots of famous packages. We'll talk more about it in the coming days.
+
+#### Compiling
+
+When you install TypeScript, it gives you access to a binary called `tsc`, which stands for **T**ype**S**cript **C**ompiler. It's going to be responsible for _transpiling_ TypeScript into JavaScript, since no environment (not the browser, not Node.js) runs TypeScript natively.
+
+First things first, we need to initialize TypeScript in the folder, and we can do that with the command `npx tsc --init`. Notice that now we'll have a `tsconfig.json` file at the root, and that's what we're going to talk about on this first day.
+
+Create a `sum.ts` file and put this code in it:
+
+![](./image-8-1f4d1378.png)
+
+Now run `npx tsc ./sum.ts` and that should give you a `sum.js` file in the same folder. Try running that file with `node sum.js` and see the result!
+
+### TSConfig
+
+TypeScript's configuration file is called TS Config, and it's the heart of the entire project. The presence of the `tsconfig.json` file marks the root of a TS repository, and it's from there that TS is going to look for all the settings needed to compile the project.
+
+The same way we're used to with Node, when we invoke the TS compiler (`tsc`) with no arguments at all, it's going to look for the closest `tsconfig.json` file and read it to find the options. Besides that, you can also explicitly tell it which config file to use with `tsc -p <file>`
+
+You can also override any `tsconfig.json` properties directly on the [command line](https://www.typescriptlang.org/docs/handbook/compiler-options.html) using the options specified directly, which is pretty useful when you need to change something for one specific compilation.
+
+Today I want to walk through TSConfig's main settings and explain what each one is for! But first let's understand the file's structure:
+
+#### Root Fields
+
+It starts with what's called _root fields_, the keys that tell TS which files it should take into account:
+
+-   `files`: A list of file names that should be included in the program you're compiling, for example:
+
+![](./image_o-7-743c9bb3.png)
+
+-   `extends`: One of the most powerful features of tsconfig, which lets you extend other config files. TS even has [base files](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html#tsconfig-bases), ready made and configured config files that you can extend directly from the repository with `extends: "@tsconfig/node16/tsconfig.json"`. Another really useful application of this feature is when you're working with monorepos that hold many projects inside, so you can have the base file at the root and tweak it for each individual project. All the extra settings will be treated as modifications, and if an option exists in the base file and gets overridden in the second file, the most recent one wins!
+
+![](./image-6-eac0b6c4.png)
+
+-   `include` and `exclude`: The same way as `files`, `include` and `exclude` control which files you're going to include in the project, the difference being that these keys accept _globs_, that is, expressions that match one or more files. They're pretty useful when you have no way to specify a direct list of files with `files`
+
+![](./image_o-5-d970212e.png)
+
+#### Compiler Options
+
+This is the most important field in the file, the place where you define how the TypeScript compiler is going to behave. This section is extremely long and has [a lot of options](https://www.typescriptlang.org/tsconfig#compilerOptions), so I'm not going to list all of them here, but I'll talk about a few I consider the most important and best practices.
+
+-   `exactOptionalPropertyTypes`: An option that makes optional fields in interfaces like `{ color?: 'blue' | 'red' }` stricter. This code would normally resolve to `color: 'blue' | 'red' | undefined`. With this option turned on, `undefined` stops being an option, so either the field is there or it isn't.
+-   `noImplicitAny`: One of TS's most controversial options. The idea is that this option doesn't let TS automatically infer the `any` type, which is the scourge of every type in TS. In this case, when we have functions like `const f = (s) => s`, TS is going to complain that `s` is `any`. I strongly recommend keeping this option on, because it's the most efficient way to only leave the `any`s you actually want in your code.
+-   `noImplicitReturns`: Another option from the `noImplicit` family that I strongly recommend having on. In this case, this option is going to guarantee that every path you can take **must** return a value.
+-   `module`: Changes how TS is going to load modules. You usually won't touch this option, but each one behaves differently, changing the final output file. Here you can define whether you want the import style to be `CommonJS`, `UMD`, `AMD`, several flavors of `ES` like `ES2020`, and `node16`, which automatically adds ESModules support using the `mts` and `mjs` extensions.
+-   `paths`: An interesting option that lets you create your own import maps, telling TypeScript how it should load a file. For example, setting something like:
+
+![](./image_o-4-7d822573.png)
+
+Is going to let you write `import 'jquery'` directly, the same way using something like:
+
+![](./image_o-2-a0ae1f24.png)
+
+Is going to let you import your tests as `import '@tests/meu-arquivo.spec.ts'`.
+
+Unfortunately I won't be able to cover every option here, but besides these, you can also configure how editors behave, plugins and a lot more. The full documentation is [here](https://www.typescriptlang.org/tsconfig)
+
+## Wrapping up
+
+That was a pretty long read, but I hope you liked it! In the coming days we're going to have even more content, so stick around!
+
+One last thing! This is the first time I'm creating this kind of content, so your [feedback](https://forms.gle/vzrZBKGhLPc7cKDVA) is super important! It's really quick and it helps me a ton 🥰
+
+## For you to practice
+
+For today's challenges let's start light with the awesome [Type Challenges](https://github.com/type-challenges/type-challenges) repository so you can practice!
+
+Every day I'll send over the previous day's solution and walk through it, feel free to share your own solution with me on my [social media](https://lsantos.dev)! I'd love that 🤓
+
+Today's challenges are:
+
+-   [Hello World](https://www.typescriptlang.org/play#code/PQKgUABBCMDMEFoIAkCmAbdB7CB1LATugCaSIIWVkBGAnhAIIB2ALgBZZP0BiArhAAoAAgENWAM14BKCAGIA7iIIBbBLwAOYMrJ0QAir1QBnFgEtOWqGkxYANHkIkAhJYgBJJhAAqtdaggAwmwimKhMAObG9vL+vEb+7Am+-ka0JqjKEKYs8ejiECw4xDiJECJG8QRmnAB0rtyEBWymRhAAxsGhEaj2tFj88qaYEEyoqMQFOB1ikU3+4lg2gxHtWMQJOMoiANYJbAnGORDq5a0CTCXJ7ftt2xCoBASERlJ1ZAAGnzlkwMD3AB5+NoscaTCDUFIsAimCJkFhXazYfBECYAXjKXA+n1cn3e3ygvwgfX4Rg4vBIEC2uyaLQg8kI2zhVxBJgg6IAooDUMCADzsgCOvBCPMRWGRJHsJmhEQAfDKse9XAF0KZbnMIO8vDs9v4giF0GFIu9wbwWIVPIUICYlCxVsQYeEnCgROp1PRkCJbg6XGQZRAAGqmVDyCCcCAAcWyyF41AAXBA2Gb1EZY78ch0agArIw1QjhYBwMAgYBaUAQAD6lar1arEAAmv0CIE1v40AR-DXO5WIMWtPC-CgMEjHGiMfRCagucDQZaIWUrVCHaWQBWuzXvIdAuVjKu17Xe6ZlOpCLb+-4AN4QAVC9D2TlAlj2AByWBYzHoAF8IOInpkAORCGeCDTF0kRGMAppDEYf59lcbTbq06IANpkPe3IsDyL5vlwIpDmKI5yrYqFThh17CqK4rEJKi6yjKREALrLrue7lhAfBVPsTYAMogsmzF7j2JagL6EBccE7ZEo2VqLJBnApgmSYpmmRgZtmuYEPmcDAGIRgxAQImBsG0noLJTDyYmLDJqmwDpmwWY5nmBawMARgydUZkiQAsoQuqdAa3TmYp1m2fZ6nhEWJZAA): To start light, you have to make this code stop giving errors by turning `HelloWorld` into a `String`
+-   [If](https://www.typescriptlang.org/play#code/PQKgUABBBMBsAcEC0ECSAzSyk91gRgJ4QAKAhgG4CmANhAOI0CuAzgBYDWA9hRABQABAA5l2TAC4cAlBADEVUcVkSAljRZgss7RACKTKi3EquAO01RUAWyE0qVqqfERxbKhFV1xhIe4AGGAA8AMIANBAAKuEAYgB8fhAA7mwqAMZsEGSpqVRC4iwQqWYAJirGZhB+wX7hZC4AThJsxBRkzP4RNZmmxZkQ6G0sLW0GldF+AHSV1RAqBVQAHr6p4lS94lwQ+O5UZW71leKNVAlcB34D6idJKXaVnd29fuOFZKZb7m-E3r4TFhDRM4QRZkGx2ABc-z80PyWB+7gAghAALxodCBI4GcIAcjI2Jx+GxsSgwGAwKWVBWaxcm22EFx2LhPncACEUWjApcWFQcXiCUSIKTyctVutae5sYSsNC-P9iQA1FRURIQCr0MoACSY+HBEDY4nEQhY4NJ+XSEwAViwJmcAObAODwMAgYCaUAQAD6Xu9Pu9EAAmlwmAdglxiu4NVR6u5fbGvRAXZp4RywpEYsTUV83SBPXHfZFDM5gqJDLm837EyobGdnMmAN4QACiAEcmG1wo2KSsIABffr1LhWekCeFIdJtOymW2GYCeFiMsDJ1IlgqogDaWE7IsCLbbNECQUxPPpfPphNivKJF83XfEO9bbQP6K5x4Z4WgF5gsWvAF03WSRxYJBFhFYD6gHepF2ZYFwKBVEglMJgaBoS9+VibMy3LD0AWDVwowgABlVYjUw8sE1dUAsGJAi2DIaMIEIIMDhYLhmHKUxjT1A0jRNYAzTYS1rTtB0EGAN4WESKMqIgRVlQgFi2JMDjdX1Q1jVNFhzStG16ntR1gAU1QzA0KBiQAWTOdxglo5DHGnTjVJ4jStKE3TnVdIA): To make it a bit harder, implement a type called `If<C, T, F>` where `C` is the condition that should be either `true` or `false`, `T` is the true value and `F` is the false value, so for example:
+
+![](./image_o-1-dc58fde7.png)
+
+See you tomorrow! And don't forget to leave [your feedback](https://forms.gle/6hAqjVmah9uyR4by8) about the week [in this form](https://forms.gle/6hAqjVmah9uyR4by8)!

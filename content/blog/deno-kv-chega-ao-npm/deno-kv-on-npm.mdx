@@ -1,0 +1,123 @@
+---
+title: "Deno KV on NPM: The Database You Needed and Didn't Know It"
+pubDate: 2024-03-27T11:00:15.000Z
+updatedDate: 2026-07-16T17:57:36.000Z
+lang: en
+slug: "deno-kv-on-npm"
+category: "javascript"
+tags: ["deno", "typescript", "databases"]
+description: "The world's coolest database just landed on NPM for Node.js users."
+machineTranslated: true
+draft: false
+---
+
+We've talked about Deno KV before on this blog, but here's the big difference: this database only worked with Deno. Until now.
+
+The team just announced the [Deno KV package for NPM](https://www.npmjs.com/package/@deno/kv)! It means any Node.js user can now use the database too. And that's on top of the [standalone binary](https://github.com/denoland/denokv) the KV team already published.
+
+## What is KV
+
+I won't spend too much time on this since we've covered it before.
+
+Deno KV is a key-value database, meaning it stores keys as strings and values that can take different formats. You can store arrays, objects, and other primitives.
+
+The big advantage of Deno KV is that it's built into Deno, so you can create and access a database with:
+
+```ts
+const kv = await Deno.openKv()
+```
+
+And if you don't have a URL but your project runs on Deno Deploy, it'll automatically resolve the database and give you a fully replicated one.
+
+The catch? You're not on Deno.
+
+## Using KV in Node.js
+
+To use KV in Node, let's start with the simplest approach: an in-memory database. Just install the package:
+
+```bash
+npm install @deno/kv
+```
+
+Then create a JS or TS file with this:
+
+```ts
+import { openKv } from '@deno/kv'
+
+const kv = await openKv('')
+await kv.set(['key'], 'value')
+console.log(await kv.get(['key']))
+/**
+ * { key: [ 'key' ],
+    value: 'value',
+    versionstamp: '00000000000000010000' }
+ */
+```
+
+Running KV in memory is one of the cool things you can do with the Node.js package. You can use it instead of maps and other tools, for example to write automated tests or build local caches.
+
+### SQLite
+
+By default, when you run locally, KV creates a local SQLite instance. That's great for projects where you need persistence (you can also use KV for ephemeral data, like caches and nonces).
+
+To create a database with SQLite, just pass the database name as the first parameter:
+
+```ts
+import { openKv } from '@deno/kv'
+
+const kv = await openKv('sqlite.db')
+await kv.set(['key'], 'value')
+console.log(await kv.get(['key']))
+/**
+ * { key: [ 'key' ],
+    value: 'value',
+    versionstamp: '00000000000000010000' }
+ */
+```
+
+The only difference is that KV creates a local database file:
+
+![](./image-14.png)
+
+You can also self-host using [this project](https://github.com/denoland/denokv) to set up a database on your own infrastructure using the same API and backend as Deno KV, but with SQLite.
+
+### Connecting to an online instance
+
+You can also pass a connection to a web-hosted database. First, you'll need an access token. You can create one by following this documentation video:
+
+<Video src="/videos/deno-kv-chega-ao-npm/creating-a-deno-access-token.mp4" poster="https://img.spacergif.org/v1/1920x1080/0a/spacer.png" />
+
+Then create a database in a project. There are two ways to do this. The first is what the docs show, using a playground.
+
+You can create a blank project on [Deno Deploy](https://deno.com/deploy) by following this documentation video:
+
+<Video src="/videos/deno-kv-chega-ao-npm/creating-deno-kv-instance.mp4" poster="https://img.spacergif.org/v1/1710x1080/0a/spacer.png" caption="Creating a database (source: Deno Blog)" />
+
+The second way is by creating a regular project in the projects tab on [Deno Deploy](https://deno.com/deploy):
+
+![](./image-15.png)
+
+Then create a blank project:
+
+![](./image-16.png)
+
+Go to the address bar and add `/kv` to the URL, and you'll land on this page:
+
+![](./image-17.png)
+
+Just copy the command line here and paste it into your application, followed by your access token!
+
+```ts
+import { openKv } from '@deno/kv'
+
+const kv = await openKv("https://api.deno.com/databases/UUIDAQUI/connect", {accessToken: 'SEUTOKEN'});
+await kv.set(['key'], 'value')
+console.log(await kv.get(['key']))
+/**
+ * { key: [ 'key' ],
+    value: 'value',
+    versionstamp: '00000000000000010000' }
+ */
+```
+
+> It's safer to set an environment variable called `DENO_KV_ACCESS_TOKEN` with your token to avoid leaking it.

@@ -1,0 +1,298 @@
+---
+title: "Giving permissions to users with Kubernetes"
+pubDate: 2021-02-23T12:00:00.000Z
+updatedDate: 2026-07-16T16:18:12.000Z
+lang: en
+slug: "giving-permissions-to-users-with-kubernetes"
+category: "infra"
+tags: ["kubernetes", "aks", "azure", "containers", "devops", "technology"]
+description: "We already know how to create users in Kubernetes, now let's learn how to give them permissions defined with Roles and ClusterRoles!"
+seoDescription: "We already know how to create users in Kubernetes, let's learn how to give them permissions defined with Roles and ClusterRoles!"
+machineTranslated: true
+draft: false
+---
+In the [last article](/criando-e-gerenciando-usuarios-no-kubernetes/), we talked about how to create users in Kubernetes so we no longer have the problem of everyone having the same level of access across every namespace. But we didn't actually get into how to give out those permissions.
+
+Let's understand a bit more about how RBAC (Role Based Access Control) works and how we can take advantage of it to run our cluster more securely.
+
+## RBAC
+
+Kubernetes supports several authorization methods, and the most famous by far is RBAC, which stands for **Role Based Access Control**. Basically, what RBAC does is limit access to cluster resources through four Kubernetes _resources_: **Roles**, **RoleBindings**, **ClusterRoles**, and **ClusterRoleBindings**.
+
+Having access based on Roles instead of access based on profiles lets you share those Roles with several users, distributing permissions across the cluster so everyone gets the right access when they need it. A basic use case for this model is letting, for example, coordinators and area managers have access to their own namespaces to manage their own staff, avoiding escalating every problem to the cluster's operations team.
+
+To create these accesses, we're going to use a very special API group in Kubernetes, `rbac.authorization.k8s.io`. This means you can create and configure these access policies dynamically through the Kubernetes API and `kubectl`.
+
+Most clusters already ship with RBAC enabled by default, but you can start a new `kube-apiserver` with the `--authorization-mode=RBAC` flag for manual clusters, and, in Azure's case, you can enable RBAC on an AKS cluster directly from the portal:
+
+![](./image.png)
+
+### Naming
+
+In RBAC, users are called _**subjects**_, and the APIs and resources that users may or may not have access to are called **_resources_**. We also have _**verbs**_, which are the actions and operations that can be run on a **_resource_** by a **_subject_**.
+
+> Verbs are basically the calls a user can make against a given resource. For example, creating a Pod is the **verb** `create` on the **resource** `Pod`, done by the user.
+
+## Roles and ClusterRoles
+
+The foundation of every RBAC access policy is a native object called a **Role**. **Roles** are the rules that define access to a **resource**, meaning they're not the rules _applied_ to a **subject**, but rather the set of rules that can be reused across several users.
+
+Besides Roles, there are **ClusterRoles**, which, just like Roles, are access rules for one or more **resources**, except that while a Role object is scoped to its own namespace, a ClusterRole applies to the whole cluster, regardless of the namespace it's in. This lets you define global policies that apply cluster-wide, and define policies for Kubernetes resources that don't depend on namespaces at all, like Nodes.
+
+There are a few important rules to know before we get our hands dirty:
+
+-   There are no rules for "denying" a user access to a resource. As we mentioned before, just like Ingresses, Kubernetes works on a `deny-all` model, meaning every permission is denied by default and everything you create is an exception to that denial list.
+-   Roles **always** depend on a namespace, so when you create a new Role, you need to set which namespace it belongs to.
+-   ClusterRoles, on the other hand, don't need a namespace because they sit above that separation.
+
+## Defining our permissions
+
+In the [previous article](/criando-e-gerenciando-usuarios-no-kubernetes/) we created a user called Lucas, who's part of the development team. Let's imagine we also created other users in the system to fill out our team:
+
+-   Ana, who's the coordinator of the development area (leader of the `devs` group, which Lucas is part of)
+-   Thiago, who's the manager of the BI area (leader of the `bi` group)
+-   Fernanda, who's a BI analyst (part of the `bi` group)
+-   Amanda, who's one of the coordinators of the DevOps area and one of the cluster operators responsible for keeping several development projects running (part of the `devs` and `devops` groups)
+
+To build our scenario, let's imagine Lucas works on one of the many projects that exist inside the company's cluster, so to let the work get done, he needs access to his namespace. And, since the company has a fairly mature DevOps culture, every dev is responsible for deploying their own applications, so he needs full access to create resources.
+
+Ana, being the development lead, needs full access to every project in the development area.
+
+Thiago, in the same way, needs full read access to every object in the cluster, but Fernanda is working on the same project as Lucas, so she should only get read access in that one namespace.
+
+Amanda is the cluster coordinator, so she needs full access to every object in the cluster so she can act on them.
+
+### Creating the Roles
+
+Now that we have our stories defined, let's move on to building our permissions. To do that, we're going to create a base object called `developer`, which will apply to every dev inside the `projeto1` namespace, which is the project Lucas and Fernanda's team works on:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+  namespace: projeto1
+```
+
+So far we're defining that this Role lives inside the project's namespace, so every permission will be restricted to that namespace. Now let's define the rules:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+  namespace: projeto1
+rules:
+- apiGroups: ["", "autoscaling", "apps", "networking.k8s.io"]
+  verbs: ["get", "list", "create", "watch", "update"]
+  resources: ["*"]
+```
+
+What we're doing here is creating a Role that grants access to every resource present in the following APIs:
+
+-   `""`: means the Kubernetes `core` api, meaning any time we don't use any kind of FQDN before the `/` when creating a new workload. Pods, for example, are part of this api, since when we create a new Pod we use `apiVersion: v1`.
+-   `autoscaling`: the group that controls application scalability, `HorizontalPodAutoscalers` are part of this group
+-   `apps`: the group for `Deployments`, `DaemonSets`, and others
+-   `networking.k8s.io`: the group for `Ingresses`
+
+> You can find every API group [in the official docs](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#-strong-api-groups-strong-) and also by running `kubectl api-resources -o wide`, which will show you not just the groups, but also the names and available verbs.
+
+On top of that, we're granting access to almost every verb, except `delete`, for every _resource_ described by these APIs through the `*` wildcard.
+
+For the read-only Role, let's copy this Role and call it `developer-readonly`:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer-readonly
+  namespace: projeto1
+rules:
+- apiGroups: ["*"]
+  verbs: ["get", "list"]
+  resources: ["*"]
+```
+
+For the development area management Role, we need to create a permission that grants full access to every resource and verb inside the specific namespaces of the development area. Let's assume this area has only two projects, called `projeto1` and `projeto2`. In that case we'll have to create two identical Roles, one for each namespace, and we'll name them `developer-admin`:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer-admin
+  namespace: projeto1
+rules:
+- apiGroups: ["*"]
+  verbs: ["*"]
+  resources: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer-admin
+  namespace: projeto2
+rules:
+- apiGroups: ["*"]
+  verbs: ["*"]
+  resources: ["*"]
+```
+
+> We can also create Roles interactively with `kubectl create role <name> -n <namespace> --verb=verb1,verb2,verb3 --resource=resource1,resource2`
+
+### Creating ClusterRoles
+
+For the Role that will apply to Thiago, we need to let him read and list any resource in any namespace of the cluster. That would be a pain if we tried to do it with a regular Role, so let's create a ClusterRole so it can be applied automatically. We'll call this ClusterRole `readonly`:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: readonly
+rules:
+- apiGroups: ["*"]
+  verbs: ["get", "list", "watch"]
+  resources: ["*"]
+```
+
+Notice that ClusterRoles don't have a `namespace` key.
+
+For the last permission, let's create the object that will be given to Amanda. Since she's the cluster operator, she needs full access to every resource in every namespace of the cluster. Let's call this ClusterRole `cluster-operator`:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-operator
+rules:
+- apiGroups: ["*"]
+  verbs: ["*"]
+  resources: ["*"]
+```
+
+> Just like Roles, we can create ClusterRoles with `kubectl` using `kubectl create clusterrole <name> --verb=verb1,verb2 --resource=resource1,resource2`
+
+## Applying permissions with bindings
+
+As we mentioned, Roles and ClusterRoles are just permission definitions. Those definitions need to be applied to users through other "sibling" objects called **RoleBindings** and **ClusterRoleBindings**.
+
+Bindings grant the permissions defined in Roles and ClusterRoles to **_subjects_** _and **groups**._ In our case, we have a few groups but also some individual users we want to grant access to. On top of that, we can also grant access to a ServiceAccount.
+
+The differences between the two are basically the same as between Role and ClusterRole: a RoleBinding can be applied to either a Role or a ClusterRole, although, when done that way, **it will apply the ClusterRole's rules only to the namespace that RoleBinding belongs to**, while a ClusterRoleBinding can only be applied to a ClusterRole.
+
+Every binding needs a reference to an existing Role or ClusterRole. RoleBindings can only reference Roles within the same namespace, while ClusterRoleBindings can reference any ClusterRole.
+
+To create our first binding, let's look at the user Lucas, who'll have the `developer` Role attached to him:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: developer
+  namespace: projeto1
+subjects:
+  - kind: Group
+    name: devs
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  - kind: Role
+    name: developer
+    apiGroup: rbac.authorization.k8s.io
+```
+
+What we're doing here is creating a RoleBinding that will apply to every `subject` in the `subjects` array. In this case, a subject can have several `kinds`, like `User`, `Group`, and `ServiceAccount`.
+
+On top of that, in the `roleRef` key, we have the name of the Role we're going to apply to these subjects. Here we have two possible `kind` values, either `Role` or `ClusterRole`. And we're essentially saying we want the Role called `developer` to be applied to the subject whose `kind` is `Group`, in other words, a group of users, called `devs`.
+
+Now, to create Fernanda's, we'll do the same thing, just swapping the `roleRef` name:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: business-intelligence
+  namespace: projeto1
+subjects:
+  - kind: Group
+    name: bi
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  - kind: Role
+    name: readonly
+    apiGroup: rbac.authorization.k8s.io
+```
+
+Now let's create the binding for Ana. Just like we created two different Roles, we'll create two more bindings to make sure she gets access directly:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: developer-admin
+  namespace: projeto1
+subjects:
+  - kind: User
+    name: ana
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  - kind: Role
+    name: developer-admin
+    apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: developer-admin
+  namespace: projeto2
+subjects:
+  - kind: User
+    name: ana
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  - kind: Role
+    name: developer-admin
+    apiGroup: rbac.authorization.k8s.io
+```
+
+Now we need to create the last two bindings, which are ClusterRoleBindings, since we're going to grant access to the whole cluster. For Thiago's case, we need to be careful, because we can't apply the ClusterRole to the `bi` group, since Fernanda is also part of that group. So we'll apply it only to the user:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: readonly
+subjects:
+  - kind: User
+    name: thiago
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  - kind: ClusterRole
+    name: readonly
+    apiGroup: rbac.authorization.k8s.io
+```
+
+And, the same way, let's create Amanda's binding:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-operator
+subjects:
+  - kind: User
+    name: amanda
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  - kind: ClusterRole
+    name: cluster-operator
+    apiGroup: rbac.authorization.k8s.io
+```
+
+> We can also create RoleBindings and ClusterRoleBindings interactively with `kubectl create rolebinding <name> --[user|group|serviceaccount] <subject> --[role|clusterrole] <roleRef>`
+
+Now that the bindings are created, we can run commands as each user and each of them will have the permissions their team needs.
+
+## Conclusion
+
+Now we know how to create users and how to assign permissions to them. In the next articles, we'll see how to take our authentication model even further using Azure Managed AD with AKS!
+
+See you there!

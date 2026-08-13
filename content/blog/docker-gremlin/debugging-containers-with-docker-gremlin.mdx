@@ -1,0 +1,117 @@
+---
+title: "Debugging Containers with Docker Gremlin"
+pubDate: 2023-06-22T11:00:32.000Z
+updatedDate: 2026-07-16T15:59:53.000Z
+lang: en
+slug: "debugging-containers-with-docker-gremlin"
+category: "infra"
+tags: ["docker", "containers", "development", "devops"]
+description: "You've been debugging your Docker containers wrong all these years and I can prove it! Let's meet Gremlin, the extension that's going to change all of that!"
+seoDescription: "You've been debugging your Docker containers wrong and I can prove it! Let's meet Gremlin, the extension that's going to change all of that!"
+machineTranslated: true
+draft: false
+---
+It's been a while since I talked about Docker here, but this time I've got some awesome news, **Docker Gremlin**. An extension that changes quite a bit how you debug your containers.
+
+## The problem
+
+The big question here is: how do you debug Docker containers? Let's set up a scenario. Imagine you have the following container:
+
+```dockerfile
+FROM node:alpine
+
+COPY index.js package.json /src/app/
+WORKDIR /src/app
+
+ENTRYPOINT node index.js
+```
+
+To keep it simple, let's create some code that's a server and, in 50% of cases, throws an error at the user, and let's imagine we don't know why that error is happening. Code like this:
+
+```js
+const { createServer } = require('http')
+
+const server = createServer((req, res) => {
+  if (Math.random() > 0.5) {
+    res.writeHead(500, { 'Content-Type': 'text/plain' })
+    res.end('Oops')
+    return
+  }
+  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  res.end('Hello World\n')
+})
+
+server.listen(process.env.PORT || 3000)
+```
+
+When we build our image with `docker build -t server-node .` using our `Dockerfile` and run it with `docker run -p 3000:3000 server-node`, we get a server running on port 3000 that answers us with `Hello World` in 50% of cases.
+
+But if we want to know why this container isn't running successfully, even though it works fine on our machine, we're going to have to debug what's inside it.
+
+Personally, I like a tool called [Dive](https://github.com/wagoodman/dive), which lets you explore the layers you've created inside your container. That's great for building a mental picture of how the system works, but it doesn't help much when you need to actually read the files in there, since Dive doesn't let you do that.
+
+A technique a lot of people use is to just jump into the container with `docker exec -it <name> /bin/sh` and run their commands from inside, we can do that with our container too, but the moment we try, say, to edit the `index.js` file we put in our folder with `vim`, we're going to hit a classic error, the vim package isn't installed:
+
+![](./image.png)
+
+If we try any other tool, we'll see they don't exist either. And that's true for most, if not all, production containers. Even more so for containers built [from scratch](/um-mergulho-em-imagens-de-containers-parte-1/#imagens-scratch), which are images with no base operating system at all, they're basically a binary and nothing else, so we won't even be able to do that.
+
+That workaround is fine in most cases when we're about to replace the container anyway, but it's still one more way to "dirty" our environment. And that's where Gremlin comes in.
+
+## Docker Gremlin
+
+[Gremlin](https://hub.docker.com/extensions/docker/gremlin-extension) is an extension for [Docker Desktop](https://www.docker.com/products/docker-desktop/) that lets you get inside a container's layers through its own debug shell, with every tool you need, and if you can't find one, it can install it for you right in that same environment, without dirtying the container, and it stays available for the next environments too!
+
+To install Gremlin you need to have Docker Desktop installed, from there, just go to the bottom left corner and click "Add Extensions":
+
+![](./image-1.png)
+
+From there, search the search tab for `gremlin` and click the install button for the extension **built by Docker**, once it's installed, you'll see Gremlin listed like in the image above and the button will turn into **Open**, like below:
+
+![](./image-2.png)
+
+> There's a famous Chaos Engineering tool for DevOps called Gremlin, that's not the one we're looking for.
+
+From now on you'll have a command in your terminal called `gremlin`:
+
+![](./image-3.png)
+
+Right now it only has a single command, `attach`. This is the command you'll use to open a new shell in an already running container. Let's run our container locally with the command:
+
+```sh
+docker run -d --name server-node -p 3000:3000 server-node
+```
+
+Now you can run `gremlin attach server-node` and watch the magic happen:
+
+![](./image-4.png)
+
+Notice we're inside a shell separate from Docker's own, you can run every command we already know, but the real magic happens when we need external tools, let's try reading our file with vim using the command `vim /src/app/index.js`, remember we couldn't pull that off before because Vim wasn't installed.
+
+![](./image-5.png)
+
+In Gremlin, Vim comes installed by default and we can use it to read any file.
+
+## Installing new packages
+
+Let's say we want to know which ports we're exposing inside the container. There are several ways to do this, but I want to show that we can install packages like `nmap` to scan the network ports with the `install <package>` command.
+
+![](./image-6.png)
+
+Notice that before installing it, we got an error trying to run it, but afterward we managed to get nmap working. Now we just run `nmap localhost`:
+
+![](./image-7.png)
+
+When we want to uninstall it, we just run `uninstall <package>`. And to leave the Gremlin console, just type `exit`.
+
+## Scratch images
+
+Gremlin also works on scratch images. For example, [I have a Go image](https://hub.docker.com/r/khaosdoctor/go-vote-api) built as an example of a from-scratch image. We can run `docker run -d --name vote-api -p 80:8080 khaosdoctor/go-vote-api` and then `gremlin attach vote-api` and you'll see the same shell:
+
+![](./image-8.png)
+
+## Conclusion
+
+Gremlin is an interesting and genuinely useful tool you can use to debug your containers in a way that's a lot more practical than manually jumping in and dirtying them up.
+
+This was a short post about it, keep in mind it's still **experimental** and can change at any moment, as soon as changes happen just come back here, I'll post about them!
