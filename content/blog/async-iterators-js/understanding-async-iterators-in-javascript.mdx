@@ -1,28 +1,30 @@
 ---
-title: "Understanding Async Iterators In JavaScript"
+title: "Understanding Async Iterators in JavaScript"
 pubDate: 2019-07-28T03:00:00.000Z
 updatedDate: 2026-07-16T16:29:15.000Z
-lang: en
-slug: "understanding-async-iterators-in-javascript"
+lang: "en"
 category: "javascript"
 tags: ["javascript", "nodejs", "development"]
 description: "You already know synchronous iterators, but do you know async iterators?"
-machineTranslated: true
 draft: false
+machineTranslated: false
+slug: "understanding-async-iterators-in-javascript"
 ---
-A while back, I wrote [a post](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495) on my Medium where I talk about the Iterator protocol and its interface. But besides APIs like `Promise.finally`, ECMAScript 2018 brought us another way to handle our iterators: [_async iterators_](https://github.com/tc39/proposal-async-iteration).
+> Hey! If you're reading this now, note that some of the articles linked in this article are not in English, I'm doing my best to translate them and post them here as soon as possible and will update it when I do!
+
+A while ago, I made a [post](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495) on my Medium that I talked all about the Iterator protocol and its user interface. However, in addition to APIs like `Promise.finally`, ECMAScript 2018 has brought us another way of handling our iterators. The [async iterators](https://github.com/tc39/proposal-async-iteration).
 
 ## The problem
 
-Let's put ourselves in a pretty common situation. We're working with Node.js and we need to read a file, line by line. Node has an API for exactly this kind of thing called `readLine` (see the full documentation [here](https://nodejs.org/api/readline.html)), this API is a wrapper so you can read data from an input stream line by line instead of having to parse the input buffer yourself and split the text into small chunks.
+Let's put ourselves in a fairly common situation. We're working with Node.js and we have to read a file, line by line. Node has an API for this type of function called `readLine` (see the full documentation [here](https://nodejs.org/api/readline.html)). This API is a wrapper so that you can read data from an input stream line by line instead of having to *parse* the input buffer and break the text into small pieces.
 
-It exposes an event-based API, which you can listen to like this:
+It exposes an event API, which you can listen to like this:
 
 ```js
 const fs = require('fs')
 const readline = require('readline')
 const reader = readline.createInterface({
-  input: fs.createReadStream('./arquivo.txt'),
+  input: fs.createReadStream('./file.txt'),
   crlfDelay: Infinity
 })
 
@@ -31,82 +33,94 @@ reader.on('line', (line) => console.log(line))
 
 Imagine we have a simple file:
 
-```txt
-linha 1
-linha 2
-linha 3
+```js
+line 1
+line 2
+line 3
 ```
 
-If we run this code against the file we created, we'll get a line by line output in our console. However, working with events isn't exactly the best way to write maintainable code, since events are completely asynchronous and can break the flow of your code, given they fire out of order and the only way to attach an action to them is through a listener.
+If we run this code on the file we've created, we'll get a line-by-line output on our console. However, working with events is not one of the best ways to make maintainable code, because events are completely asynchronous and they can break the flow of the code, since they are fired out of order and you can only assign an action through a *listener*.
 
-## The Solution
+## The solution
 
-Besides the events API, `readline` also exposes an `async iterator`. This means that instead of reading each line through listeners on the `line` event, we're going to read each line through a new way of using the `for` keyword.
+In addition to the event API, `readline` also exposes an `async iterator`. This means that, instead of reading the line through listeners in the `line` event, we will read the line through a new way of using the `for` keyword.
 
-Today we have a few options for using a `for` loop, the first one being the most common model, using a counter and a condition:
+Today we have a few options for using a `for` loop. The first one is the most common model, using a counter and a condition:
 
 ```js
 for (let x = 0; x < array.length; x++) {
-  // Código aqui
+  // Code here 
 }
 ```
 
-We can also use the `for ... in` notation to read array indexes:
+We can also use the notation `for ... in` notation to read array indexes:
 
 ```js
 const a = [1,2,3,4,5,6]
-
 for (let index in a) {
   console.log(a[index])
 }
 ```
 
-In the case above, our `console.log` output will be the numbers 1 through 6, but if we use `console.log(index)` instead we'll log the array index, meaning the numbers 0 through 5.
+In the previous case, we will get as output in `console.log`, the numbers from 1 to 6, however if we use `console.log(index)` we will log the index of the array, that is, the numbers from 0 to 5.
 
-For the next case, we can use the `for ... of` notation to grab the array's enumerable properties directly, meaning its actual values:
+For the next case, we can use the `for ... of` notation to directly get the enumerable properties of the array, that is, its direct values:
 
 ```js
 const a = [1,2,3,4,5,6]
+
 
 for (let item of a) {
   console.log(item)
 }
 ```
 
-Notice that every form I've described so far is synchronous, so how do we read a sequence of promises in order? Imagine we have another interface that always returns a Promise, which resolves to the line of the file we care about. To resolve these promises in order, we'd have to do something like this:
+Notice that all the ways I've described are synchronous. So, how do we read a sequence of promises in order? 
+
+Imagine that we have another interface that always returns a Promise, which is resolved for our line of the file in question. To resolve these promises in order, we need to do something like this:
 
 ```js
 async function readLine (files) {
   for (const file of files) {
-    const line = await readFile(file) // Imagine que readFile é o nosso cursor
+    const line = await readFile(file) // Imagine readFile is our cursor
     console.log(line)
   }
 }
 ```
 
-But, thanks to the magic of async iterables (like `readline`), we can do the following:
+However, thanks to the magic of async iterables (like `readline`) we can do the following:
 
 ```js
-async function readLine (files) {
-  for (const file of files) {
-    const line = await readFile(file) // Imagine que readFile é o nosso cursor
+const fs = require('fs')
+const readline = require('readline')
+const reader = readline.createInterface({
+  input: fs.createReadStream('./xpto.txt'),
+  crlfDelay: Infinity
+})
+
+async function read () {
+  for await (const line of reader) {
     console.log(line)
   }
 }
+
+read()
 ```
 
-Notice that now we're using a new `for` definition, `for await (const x of y)`.
+Notice that we are now using a new definition of `for`, `for await (const x of y)`
 
 ## For Await and Node.js
 
-The `for await` notation is natively supported in the Node.js runtime from version 10.x. If you're using version 8.x or 9.x, you need to start your Javascript file with the `--harmony_async_iteration` flag. Unfortunately, async iterators aren't supported at all on Node.js 6 or 7.
+The `for await` notation is natively supported in the Node.js runtime from version 10.x. If you are using versions 8.x or 9.x then you need to start your Javascript file with the `--harmony_async_iteration` flag. Unfortunately, async iterators are not supported in Node.js versions 6 or 7.
 
-To understand the concept of async iterators, we need to recap what iterators themselves are. My previous article is a much deeper source on this, but in short, an Iterator is an object that exposes a `next()` function that returns another object with the shape `{value: any, done: boolean}`, where `value` is the value of the current iteration and `done` tells you whether there are more values left in the sequence or not. A simple example is an iterator that walks through every item in an array:
+In order to understand the concept of async iterators, we need to take a look at what iterators themselves are. My previous article is a great source of information, but in short, an Iterator is an object that exposes a `next()` function that returns another object with the notation `{value: any, done: boolean}` being `value` the value of the current iteration and `done` identifies whether or not there are any more values in the sequence. 
+
+A simple example is an iterator that goes through all the items in an array:
 
 ```js
 const array = [1,2,3]
 let index = 0
-
+	
 const iterator = {
   next: () => {
     if (index >= array.length) return { done: true }
@@ -118,24 +132,23 @@ const iterator = {
 }
 ```
 
-On its own, an iterator has no practical use, to actually get some value out of it we need an `iterable`. An `iterable` is an object that has a `Symbol.iterator` key that returns a function, which in turn returns our iterator:
+On its own, an iterator is of no practical use, so in order to get some use out of it, we need an `iterable`. An `iterable` is an object that has a `Symbol.iterator` key that returns a function, which returns our iterator:
 
 ```js
-// ... Código do iterador aqui ...
+// ... Iterator code here ...
 
 const iterable = {
-	[Symbol.iterator]: () => iterator
+  [Symbol.iterator]: () => iterator
 }
 ```
 
-Now we can use it normally, with `for (const x of iterable)`, and we'll get every value from `array` iterated one by one.
+Now we can use it normally, with `for (const x of iterable)`  and we'll have all the values in the `array`  being iterated one by one.
 
-> _If you want to know a bit more about **Symbols**, take a look at [_this other article I wrote just about the topic_](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mist%C3%A9rio-383e359e64e3)_
+> If you want to know a bit more about Symbols, take a look at this [other article I wrote only about it](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mistério-383e359e64e3).
 
-Under the hood, every array and object has a `Symbol.iterator` so we can do `for (let x of [1,2,3])` and get the values we want back.
+Under the hood, all arrays and objects have a `Symbol.iterator` so that we can do `for (let x of [1,2,3])` and return the values we want.
 
-As you'd expect, an async iterator is exactly the same as an iterator, except that instead of a `Symbol.iterator` we have a `Symbol.asyncIterator` on our iterable, and instead of an object that returns `{value, done}` we get a Promise that resolves to an object with the same shape.
-
+As you might expect, an async iterator is exactly the same as an iterator, except that instead of a `Symbol.iterator`, we have a `Symbol.asyncIterator` in our iterable and instead of an object that returns `{value, done}` we have a *Promise* that resolves to an object with the same signature.
 Let's turn our iterator above into an async iterator:
 
 ```js
@@ -144,8 +157,8 @@ let index = 0
 
 const asyncIterator = {
   next: () => {
-    if (index >= array.length) return Promise.resolve({done: true})
-    return Promise.resolve({value: array[index++], done: false})
+  if (index >= array.length) return Promise.resolve({done: true})
+  return Promise.resolve({value: array[index++], done: false})
   }
 }
 
@@ -156,13 +169,13 @@ const asyncIterable = {
 
 ## Iterating asynchronously
 
-We can iterate through any iterator manually, by calling the `next()` function:
+We can iterate any iterator manually by calling the `next()`function:
 
 ```js
-// ... Código do async iterator aqui ...
+// ... Async iterator Code here ...
 
 async function manual () {
-	const promise = asyncIterator.next() // Promise
+  const promise = asyncIterator.next() // Promise
   await p // Object { value: 1, done: false }
   await asyncIterator.next() // Object { value: 2, done: false }
   await asyncIterator.next() // Object { value: 3, done: false }
@@ -170,35 +183,37 @@ async function manual () {
 }
 ```
 
-To iterate through our async iterator, we have to use `for await`, but remember that the `await` keyword can only be used inside an `async function`, meaning we need something like this:
+In order to iterate through our async iterator, we have to use `for await`, but remember that the keyword `await`  can only be used inside an `async function`, it means that we have to have something like this:
 
 ```js
-// ... Código acima omitido ...
-
+// ... Code above ...
+	
 async function iterate () {
   for await (const num of asyncIterable) console.log(num) 
 }
-
+	
 iterate() // 1, 2, 3
 ```
 
-But, since async iterators aren't supported on Node 8.x or 9.x either, to use an async iterator on those versions we can just pull `next` out of the objects and iterate through them manually:
+But, as asynchronous iterators are not supported in Node 8.x or 9.x (super old I know), in order to use an async iterator in these versions, we can simply extract the `next` from your objects and iterate through them manually:
 
 ```js
-// ... Código acima omitido ...
+// ... Async Iterator Code here ...
 
 async function iterate () {
-  for await (const num of asyncIterable) console.log(num) 
+  const {next} = asyncIterable[Symbol.asyncIterator]() // we take the next iterator function
+ 
+  for (let {value, done} = await next(); !done; {value, done} = await next()) {
+    console.log(value)
+  }
 }
-
-iterate() // 1, 2, 3
 ```
 
-Notice how `for await` is much cleaner and much more concise, since it behaves like a regular loop, but it's also much simpler to understand and it checks for the end of the iterator on its own, through the `done` key.
+Note that `for await`  is much cleaner and much more concise because it behaves like a regular loop, but also, besides being much simpler to understand, it checks for the end of the iterator by itself, via the `done` key.
 
-### Handling errors
+## Handling errors
 
-What happens if our promise gets rejected inside our iterator? Well, like any rejected promise, we can catch its error with a plain `try/catch` (since we're using `await`):
+What happens if our promise is rejected within our iterator? Well, like any rejected promise, we can catch its error through a simple `try/catch` (since we're using `await`):
 
 ```js
 const asyncIterator = { next: () => Promise.reject('Error') }
@@ -206,7 +221,7 @@ const asyncIterable = { [Symbol.asyncIterator]: () => asyncIterator }
 
 async function iterate () {
   try {
-	  for await (const num of asyncIterable) {}
+    for await (const num of asyncIterable) {}
   } catch (e) {
     console.log(e.message)
   }
@@ -217,10 +232,9 @@ iterate()
 
 ## Fallbacks
 
-Something pretty interesting about async iterators is that they have a fallback for `Symbol.iterator`, meaning you can also use them with your regular iterators, for example an array of promises:
+Something quite interesting about async iterators is that they have a fallback for `Symbol.iterator`, which means that you can also use it with your regular iterators, for example, an array of promises:
 
 ```js
-const fetch = require('node-fetch')
 const promiseArray = [
   fetch('https://lsantos.dev'),
   fetch('https://lsantos.me')
@@ -235,28 +249,29 @@ iterate() // 200, 200
 
 ## Async Generators
 
-For the most part, iterators and async iterators can be built from [generators](https://medium.com/trainingcenter/javascript-entendendo-generators-408cbce9aee). Generators are functions whose execution can be paused and resumed, so you can run part of the function and then fetch the next value through a `next()` function.
+For the most part, iterators and async iterators can be created from [generators](https://medium.com/trainingcenter/javascript-entendendo-generators-408cbce9aee). 
 
-> _This is a heavily simplified description of generators, reading the article dedicated to them is a must if you want to understand generators quickly and in depth._
+Generators are functions that allow their executions to be paused and resumed, so that it is possible to perform an execution and then fetch a next value via a `next()`function.
 
-Async generators behave like an async iterator, except you have to implement the stopping mechanism yourself, for example, let's build a random git commit message generator to make your coworkers super happy about your contributions:
+> This is a very simplified description of generators, and it is essential to read the article that talks only about them so that you can understand generators quickly and in depth.
+
+Async generators behave like an async iterator, but you have to implement the stopping mechanism manually, for example, let's build a random message generator for git commits to make your colleagues super happy with their contributions:
 
 ```js
-const fetch = require('node-fetch')
 async function* gitCommitMessageGenerator () {
   const url = 'https://whatthecommit.com/index.txt'
 
   while (true) {
     const response = await fetch(url)
-    yield await response.text() // Retornamos o valor
+    yield await response.text() // We return the value
   }
 }
 ```
 
-Notice that we never return a `{value, done}` object at any point, so the loop has no way of knowing when execution is over. We can implement a function like this:
+Note that at no point are we returning a `{value, done}` object, so the loop has no way of knowing when execution has finished. We can implement a function like this:
 
 ```js
-// Código anterior omitido
+// Previous Code
 async function getCommitMessages (times) {
   let execution = 1
   for await (const message of gitCommitMessageGenerator()) {
@@ -273,17 +288,17 @@ getCommitMessages(5)
 // Ugh. Bad rebase.
 ```
 
-## A real use case
+## Usecases
 
-To make things a bit more interesting, let's build an async iterator for a real use case. The Oracle Database driver for Node.js currently supports a `resultSet` API, which runs a query against the database and returns a stream of records that can be read one by one through a `getRow()` method.
+For a more interesting example, let's build an async iterator for a real use case. Currently, the Oracle Database driver for Node.js supports a `resultSet` API, which executes a query on the database and returns a stream of records that can be read one by one using the `getRow()method`.
 
-To create this `resultSet` we need to run a query against the database, like this:
+To create this `resultSet`  we need to execute a query in the database, like this:
 
 ```js
 const oracle = require('oracledb')
 const options = {
-  user: 'usuario',
-  password: 'senha',
+  user: 'example',
+  password: 'example123',
   connectString: 'string'
 }
 
@@ -296,21 +311,21 @@ async function start () {
 start().then(console.log)
 ```
 
-Our `resultSet` has a method called `getRow()` that returns a Promise for the next row to be fetched from the database, which is a perfect use case for an async iterator, right? We can build a cursor that returns this `resultSet` row by row. Let's make it a bit more interesting by wrapping it in a `Cursor` class:
+Our `resultSet`  has a method called `getRow()` that returns us a *Promise* of the next row from the database to be fetched. That's a nice use case for an async iterator isn't it? We can create a cursor that returns this `resultSet` row by row. Let's make it a bit more complex by creating a Cursor class:
 
 ```js
 class Cursor {
-  constructor (resultSet) {
+  constructor(resultSet) {
     this.resultSet = resultSet
   }
 
-  getIterable () {
+  getIterable() {
     return {
       [Symbol.asyncIterator]: () => this._buildIterator()
     }
   }
 
-  _buildIterator () {
+  _buildIterator() {
     return {
       next: () => this.resultSet.getRow().then((row) => ({ value: row, done: row === undefined }))
     }
@@ -320,17 +335,16 @@ class Cursor {
 module.exports = Cursor
 ```
 
-Notice that the cursor takes in the `resultSet` it should work with and stores it as its current state. Now let's change our previous method so it returns the cursor instead of the `resultSet` all at once:
+See that the cursor receives the `resultSet`  that it should work on and stores it in its current state. So, let's change our previous method so that we return the cursor instead of the `resultSet` in one go:
 
 ```js
 const oracle = require('oracledb')
 const options = {
-  user: 'usuario',
-  password: 'senha',
+  user: 'example',
+  password: 'example123',
   connectString: 'string'
 }
-
-async function getResultSet () {
+async function getResultSet() {
   const connection = await oracle.getConnection(options)
   const { resultSet } = await connection.execute('query', [], { outFormat: oracle.OBJECT, resultSet: true })
   return resultSet
@@ -339,7 +353,7 @@ async function getResultSet () {
 async function start() {
   const resultSet = await getResultSet()
   const cursor = new Cursor(resultSet)
-  
+
   for await (const row of cursor.getIterable()) {
     console.log(row)
   }
@@ -348,10 +362,10 @@ async function start() {
 start()
 ```
 
-This way we can loop through every row we get back without having to resolve each Promise individually.
+This way we can loop through all our returned lines without needing an individual Promises resolution.
 
 ## Conclusion
 
-Async iterators are extremely powerful, especially in dynamic, asynchronous languages like Javascript, with them you can turn a complex piece of execution into simple code, hiding most of the complexity away from the user.
+Async iterators are extremely powerful, especially in dynamic and asynchronous languages like Javascript. With them you can turn a complex execution into simple code, hiding most of the complexity from the user.
 
-Make sure to keep following more of my content here on the blog!
+Be sure to follow more of my content on my blog and sign up for my newsletter to receive weekly news!

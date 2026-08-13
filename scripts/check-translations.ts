@@ -21,6 +21,7 @@
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { annotate, bold, count, dim, fail, heading, ok } from './lib/cli.ts'
 
 const DIR = 'content/blog'
 
@@ -85,6 +86,8 @@ function frontmatterOf(source: string): string {
   return match === null ? '' : match[1]
 }
 
+heading('check-translations: scanning machine-written translations for unsafe markup')
+
 try {
   statSync(DIR)
 } catch {
@@ -92,7 +95,7 @@ try {
   process.exit(0)
 }
 
-const problems: string[] = []
+const problems: { file: string; message: string }[] = []
 
 for (const file of walk(DIR)) {
   const raw = readFileSync(file, 'utf8')
@@ -100,22 +103,23 @@ for (const file of walk(DIR)) {
 
   // The folder is the pairing now: a translation must say which language it
   // is, and must not carry the old cross-collection key.
-  if (!/^lang:\s*\S/m.test(frontmatter)) problems.push(`${file}: translation is missing the lang frontmatter key`)
-  if (/^translationOf:\s*\S/m.test(frontmatter)) problems.push(`${file}: translationOf is gone from the schema, remove it`)
+  if (!/^lang:\s*\S/m.test(frontmatter)) problems.push({ file, message: 'translation is missing the lang frontmatter key' })
+  if (/^translationOf:\s*\S/m.test(frontmatter)) problems.push({ file, message: 'translationOf is gone from the schema, remove it' })
 
   const prose = withoutCode(raw)
   for (const [pattern, label] of BANNED) {
     const match = pattern.exec(prose)
-    if (match !== null) problems.push(`${file}: ${label} (${match[0].trim().slice(0, 40)})`)
+    if (match !== null) problems.push({ file, message: `${label} (${match[0].trim().slice(0, 40)})` })
   }
 }
 
 if (problems.length === 0) {
-  console.log('translations look clean')
+  ok('translations look clean')
   process.exit(0)
 }
 
-console.error(`\n${problems.length} problems in translated content:\n`)
-for (const problem of problems) console.error(`  ${problem}`)
-console.error('\nRefusing to commit. Model output is untrusted.')
+fail(`${count(problems.length, 'problem', 'problems')} in translated content`)
+for (const problem of problems) console.error(`  ${bold(problem.file)}${dim(':')} ${problem.message}`)
+for (const problem of problems) annotate('error', { file: problem.file, message: problem.message })
+console.error(`\n${dim('Refusing to commit. Model output is untrusted.')}`)
 process.exit(1)

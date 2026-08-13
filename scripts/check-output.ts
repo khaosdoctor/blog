@@ -9,14 +9,24 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
+import { annotate, bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
 
 const DIST = 'dist'
 const CONTENT = 'content/blog'
 
-type Failure = { check: string; detail: string }
+// The file each failure is annotated against. A dist page or a manifest file is
+// exact; a content slug falls back to its source post so the annotation still
+// lands somewhere a human can act on it.
+type Failure = { check: string; detail: string; file: string }
 
 const failures: Failure[] = []
 const warnings: string[] = []
+
+heading('check-output: verifying the build output')
+
+function contentFileFor(slug: string): string {
+  return ['index.mdx', 'index.md'].map((name) => join(CONTENT, slug, name)).find(existsSync) ?? join(CONTENT, slug)
+}
 
 function walk(dir: string): string[] {
   const found: string[] = []
@@ -46,13 +56,13 @@ if (files.includes(manifestPath)) {
       posts?: { slug?: string }[]
     }
     if (!Array.isArray(manifest.posts)) {
-      failures.push({ check: 'scheduled.json', detail: 'posts is not an array' })
+      failures.push({ check: 'scheduled.json', detail: 'posts is not an array', file: manifestPath })
     }
     for (const post of manifest.posts ?? []) {
       if (typeof post.slug === 'string') scheduled.add(post.slug)
     }
   } catch (error) {
-    failures.push({ check: 'scheduled.json', detail: `unparseable: ${(error as Error).message}` })
+    failures.push({ check: 'scheduled.json', detail: `unparseable: ${(error as Error).message}`, file: manifestPath })
   }
 }
 
@@ -74,11 +84,11 @@ const expected = postFolders.filter((slug) => !scheduled.has(slug))
 for (const slug of postFolders) {
   const hasPage = files.includes(join(DIST, slug, 'index.html'))
   if (scheduled.has(slug) && hasPage) {
-    failures.push({ check: 'post both published and still scheduled', detail: slug })
+    failures.push({ check: 'post both published and still scheduled', detail: slug, file: contentFileFor(slug) })
     continue
   }
   if (!scheduled.has(slug) && !hasPage) {
-    failures.push({ check: 'missing page', detail: slug })
+    failures.push({ check: 'missing page', detail: slug, file: contentFileFor(slug) })
   }
 }
 
@@ -113,10 +123,10 @@ function hostOf(url: string): string | null {
 
 for (const page of pages) {
   const html = readFileSync(page, 'utf8')
-  if (GHOST_CLASS.test(html)) failures.push({ check: 'leftover Ghost class', detail: page })
-  if (LEAKED_TAG.test(html)) failures.push({ check: 'unrendered component tag', detail: page })
-  if (html.includes('__GHOST_URL__')) failures.push({ check: 'unresolved Ghost URL', detail: page })
-  if (REMOTE_LOADER.test(html)) failures.push({ check: 'remote script loader in output', detail: page })
+  if (GHOST_CLASS.test(html)) failures.push({ check: 'leftover Ghost class', detail: page, file: page })
+  if (LEAKED_TAG.test(html)) failures.push({ check: 'unrendered component tag', detail: page, file: page })
+  if (html.includes('__GHOST_URL__')) failures.push({ check: 'unresolved Ghost URL', detail: page, file: page })
+  if (REMOTE_LOADER.test(html)) failures.push({ check: 'remote script loader in output', detail: page, file: page })
 
   for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {
     const host = hostOf(match[1])
@@ -124,6 +134,7 @@ for (const page of pages) {
       failures.push({
         check: 'script from an unapproved host',
         detail: `${host} in ${page}. If this is yours, add it to ${REGISTRY}`,
+        file: page,
       })
     }
   }
@@ -134,6 +145,7 @@ for (const page of pages) {
       failures.push({
         check: 'iframe from an unapproved host',
         detail: `${host} in ${page}. If this is yours, add it to ${REGISTRY} as a frame host`,
+        file: page,
       })
     }
   }
@@ -151,6 +163,7 @@ for (const page of pages) {
         failures.push({
           check: 'remote URL in inline script',
           detail: `${match[1]} in ${page}. If this is yours, add it to ${REGISTRY}`,
+          file: page,
         })
       }
     }
@@ -161,7 +174,7 @@ for (const page of pages) {
 // also parsed, at the top, because check 1 is written against it.
 for (const required of ['rss.xml', 'sitemap-index.xml', 'scheduled.json', '404.html', 'robots.txt']) {
   if (!files.includes(join(DIST, required))) {
-    failures.push({ check: 'missing artifact', detail: required })
+    failures.push({ check: 'missing artifact', detail: required, file: join(DIST, required) })
   }
 }
 
@@ -173,10 +186,10 @@ for (const manifestFile of files.filter((file) => file.endsWith('.webmanifest'))
     const manifest = JSON.parse(readFileSync(manifestFile, 'utf8')) as { icons?: { src: string }[] }
     for (const icon of manifest.icons ?? []) {
       const path = join(DIST, icon.src.replace(/^\//, ''))
-      if (!files.includes(path)) failures.push({ check: 'missing manifest icon', detail: icon.src })
+      if (!files.includes(path)) failures.push({ check: 'missing manifest icon', detail: icon.src, file: manifestFile })
     }
   } catch (error) {
-    failures.push({ check: manifestFile, detail: `unparseable: ${(error as Error).message}` })
+    failures.push({ check: manifestFile, detail: `unparseable: ${(error as Error).message}`, file: manifestFile })
   }
 }
 
@@ -189,7 +202,7 @@ for (const page of pages) {
     if (!files.includes(asset)) missingImages.add(match[1])
   }
 }
-for (const image of missingImages) failures.push({ check: 'missing built image', detail: image })
+for (const image of missingImages) failures.push({ check: 'missing built image', detail: image, file: join(DIST, image) })
 
 // 6. Pagefind ran. Not fatal on its own, but the search page is dead without it.
 if (!files.some((file) => file.startsWith(join(DIST, 'pagefind')))) {
@@ -203,24 +216,27 @@ for (const file of files) {
 }
 
 console.log(
-  `checked ${pages.length} pages, ${expected.length} published posts, ${scheduled.size} scheduled`,
+  `checked ${count(pages.length, 'page', 'pages')}, ${count(expected.length, 'published post', 'published posts')}, ${scheduled.size} scheduled`,
 )
-for (const warning of warnings) console.log(`warning: ${warning}`)
+for (const warning of warnings) warn(warning)
 
 if (failures.length === 0) {
-  console.log('output looks clean')
+  ok('output looks clean')
   process.exit(0)
 }
 
-const grouped = new Map<string, string[]>()
+fail(`${count(failures.length, 'failure', 'failures')} found`)
+
+const grouped = new Map<string, Failure[]>()
 for (const failure of failures) {
   const current = grouped.get(failure.check) ?? []
-  current.push(failure.detail)
+  current.push(failure)
   grouped.set(failure.check, current)
 }
-for (const [check, details] of grouped) {
-  console.error(`\n${check} (${details.length}):`)
-  for (const detail of details.slice(0, 10)) console.error(`  ${detail}`)
-  if (details.length > 10) console.error(`  ...and ${details.length - 10} more`)
+for (const [check, group] of grouped) {
+  console.error(`\n${bold(check)} ${dim(`(${group.length})`)}:`)
+  for (const failure of group.slice(0, 10)) console.error(`  ${failure.detail}`)
+  if (group.length > 10) console.error(`  ${dim(`...and ${group.length - 10} more`)}`)
 }
+for (const failure of failures) annotate('error', { file: failure.file, message: `${failure.check}: ${failure.detail}` })
 process.exit(1)

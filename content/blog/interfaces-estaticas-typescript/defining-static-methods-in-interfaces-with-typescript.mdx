@@ -1,0 +1,240 @@
+---
+title: "Defining static methods in interfaces with TypeScript"
+pubDate: 2023-10-17T22:00:33.000Z
+updatedDate: 2026-07-16T15:56:01.000Z
+lang: "en"
+category: "typescript"
+tags: ["typescript", "javascript", "development"]
+description: "Do you know how to type static methods and properties in TypeScript? Come here, I'll show you how!"
+draft: false
+machineTranslated: false
+slug: "defining-static-methods-in-interfaces-with-typescript"
+---
+Yesterday I was organizing the [TS Formation](https://formacaots.com.br/) classes, and I came across something quite interesting that I, myself, have struggled with for years (including yesterday).
+
+When we talk about object-oriented programming, one of the most difficult things to understand is the concept of static properties versus instance properties, and this is especially difficult when we try to type a dynamic language on top of static typing.
+
+I won't go into details about what static or non-static methods are in this article because there are many other contents on the Internet that you can consume that will be much more detailed than I can be here.
+
+But it's worth it refreshing your memory.
+
+## Static methods
+
+Static methods, or static attributes, are attributes that exist in any instance of a class, they are defined at the constructor level, that is, the class itself has these methods and therefore all instances of these classes will also have them.
+
+A common static method is when we are creating a domain object, or a database entity, for example:
+
+```ts
+class Person {
+  static fromObject (obj: Record<string, unknown>) {
+    const instance = new Person()
+    instance.prop = obj.prop
+    return instance
+  }
+
+  toObject () {
+    return {
+     prop: this.prop
+    }
+}
+```
+
+The `fromObject` method exists in all classes, it is above any instance and therefore cannot use the `this` keyword because `this` [has not yet been initialized](https://twitter.com/_StaticVoid/status/1708966256487911727), and because you are in a context above any instance that `this` could refer to.
+
+In this case, we are receiving an object and creating a new instance of the class directly with it. To execute this code, instead of doing something standard like:
+
+```ts
+const p = new Person()
+p.fromObject(etc) // error, the property does not exist in the instance
+```
+
+We need to call the method directly from the class constructor:
+
+```ts
+const p = Person.fromObject(etc)
+```
+
+# The problem
+
+Static methods are very common in strongly typed languages because you have a clear separation between the static moment of the class and the "dynamic" moment.
+
+But what happens when we need to type a dynamic language with static typing?
+
+In TypeScript we will have some errors when we try to declare, for example, that a class has dynamic and static methods and try to describe both in an interface:
+
+```ts
+interface Serializable {
+  fromObject (obj: Record<string, unknown>): Person
+  toObject (): Record<string, unknown>
+}
+
+class Person implements Serializable
+// Class 'Person' incorrectly implements interface 'Serializable'.
+// Property 'fromObject' is missing in type 'Person' but required in type
+// 'Serializable'.
+```
+
+This happens because interfaces in TypeScript act on the "[dynamic side](https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes)" of the class, so it is as if all interfaces were instances of the class in question, but not the class itself.
+
+Fortunately, TypeScript has a way to declare a class as a constructor, the so-called Constructor Signatures:
+
+```ts
+interface Serializable {
+  new (...args: any[]): any
+  fromObject(obj: Record<string, unknown>): Person
+  toObject(): Record<string, unknown>
+}
+```
+
+It should work now, right? Unfortunately not, because even if you implement the method manually, the class will still say that you have not implemented the `fromObject` method.
+
+## The problem of static reflection
+
+And the problem goes further, for example, if we wanted to make a database class that uses the entity name straight from the class to create a file, this is done through the `name` property in any class, this is a static property that exists in all instantiable objects:
+
+```ts
+interface Serializable {
+  toObject(): any
+}
+
+class DB {
+  constructor(entity: Serializable) {
+    const path = entity.name // name does not exist in the property
+  }
+}
+```
+
+Okay, so we can replace `entity.name` for `entity.constructor.name`, which works, but what about when we need to create a new entity from an object?
+
+```ts
+interface Serializable {
+  toObject(): any
+}
+
+class DB {
+  #entity: Serializable
+  constructor(entity: Serializable) {
+    const path = entity.constructor.name
+    this.#entity = entity
+  }
+
+  readFromFile() {
+    // we read from this file here
+    const object = 'file content as an object'
+    return this.#entity.fromObject(object) // fromObject does not exist
+  }
+}
+```
+
+So, we have a choice: either we prioritize the instance, or we prioritize the constructor...
+
+# The solution
+
+Fortunately, we have a solution to this problem. It is not very pretty, but there are some ideas in the TypeScript repository (like [this one](https://github.com/microsoft/TypeScript/issues/33892) and [this one](https://github.com/microsoft/TypeScript/issues/34516)) that have been analyzing the possibility of adding static definitions to interfaces [since 2017](https://github.com/microsoft/TypeScript/issues/13462).
+
+However, since this idea hasn't arrived yet, what we have is the definition of two parts of the interface, the static part and the instance part:
+
+```ts
+export interface SerializableStatic {
+  new (...args: any[]): any
+  fromObject(data: Record<string, unknown>): InstanceType<this>
+}
+
+export interface Serializable {
+  id: string
+  toJSON(): string
+}
+```
+
+> It is important to note that the constructor in `new(...args: any[]): any` **has** to be typed as `any` in the return, otherwise it becomes a circular reference
+
+With these two parts of the class typed, we can say that the class only implements the instance part:
+
+```ts
+class Person implements Serializable {
+  // ...
+}
+```
+
+Now, we can say that our database will receive two types of parameters, one will be the static part, which we will call `S`
+and the other one will be the dynamic (or instance) part, which we will call `I`, and `S` will always extend `SerializableStatic`
+and `I` will always extend `Serializable` and, by default, will be the type of an instance of `S` , which can be defined by the `InstanceType<S>` type utility:
+
+```ts
+class Database<S extends SerializableStatic, I extends Serializable = InstanceType<S>> {}
+```
+
+Now we can have our properties normally, for example:
+
+```ts
+class Database<S extends SerializableStatic, I extends Serializable = InstanceType<S>> {
+  #dbPath: string
+  #data: Map<string, I> = new Map()
+  #entity: S
+
+  constructor(entity: S) {
+    this.#dbPath = resolve(dirname(import.meta.url), `.data/${entity.name.toLowerCase()}.json`)
+    this.#entity = entity
+    this.#initialize()
+  }
+}
+```
+
+And in our `#initialize` method we will use the `fromObject` method to be able to read directly from the file and turn it into an instance of a class:
+
+```ts
+class Database<S extends SerializableStatic, I extends Serializable = InstanceType<S>> {
+  #dbPath: string
+  #data: Map<string, I> = new Map()
+  #entity: S
+
+  constructor(entity: S) {
+    this.#dbPath = resolve(dirname(import.meta.url), `.data/${entity.name.toLowerCase()}.json`)
+    this.#entity = entity
+    this.#initialize()
+  }
+
+  #initialize() {
+    if (existsSync(this.#dbPath)) {
+      const data: [string, Record<string, unknown>][] = JSON.parse(readFileSync(this.#dbPath, 'utf-8'))
+      for (const [key, value] of data) {
+        this.#data.set(key, this.#entity.fromObject(value))
+      }
+      return
+    }
+    this.#updateFile()
+  }
+}
+```
+
+Also, we can have methods like `get` and `getAll`, or even `save` that receive and return instances only.
+
+```ts
+get(id: string): I | undefined {
+  return this.#data.get(id)
+}
+
+getAll(): I[] {
+  return [...this.#data.values()]
+}
+
+save(entity: I): this {
+  this.#data.set(entity.id, entity)
+  return this.#updateFile()
+}
+```
+
+Now, when we use a database of this type like:
+
+```ts
+class Person implements Serializable {
+  // enter code here
+}
+
+const db = new DB(Person)
+const all = db.getAll() // Person[]
+const oneOrNone = db.get(1) // Person | undefined
+db.save(new Person()) // DB<Person>
+```
+
+If you enjoyed this content, come and learn more about TypeScript with me in **TS Formation**! Just go to [https://formacaots.com.br](https://formacaots.com.br/) and join over 250 students who are already enjoying it!
