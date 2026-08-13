@@ -1,0 +1,719 @@
+---
+title: "Best practices for HarperDB projects using TypeScript"
+pubDate: 2023-10-09T20:17:39.000Z
+lang: "en"
+slug: "best-practices-for-harperdb-projects-using-typescript"
+category: "typescript"
+tags: ["typescript", "harperdb", "databases", "nodejs"]
+description: "When you are working with HarperDB, you can use TypeScript to improve your development experience. Let's talk about folder structures, code best practices, and how to set up your project."
+draft: false
+machineTranslated: false
+---
+When you are working with HarperDB, you can use TypeScript to improve your development experience. This article will show you some best practices to use TypeScript with HarperDB. We'll talk about folder structures, best practices of code, and how to best set your project to make the most of HarperDB.
+
+## Before you start
+
+Make sure you hop into the [HarperDB Documentation](https://docs.harperdb.io/docs/install-harperdb) to know how to install it locally and get started. You can also use the [HarperDB Cloud](https://harperdb.io/) to get started quickly. But I'll assume you already have your instance running.
+
+> **Tip:** You can check some of my other tutorials [here](https://www.harperdb.io/author/lucas-santos) or [in this particular community article](https://www.harperdb.io/development/tutorials/harperdb-authentication-with-oauth) to know how to set up your infrastructure locally, with Kubernetes, or in the cloud.
+
+This repository is located at [the HarperDB Community GitHub](https://github.com/HarperDB-Add-Ons/hdb-typescript-best-practices). You can clone it and follow along with the article. We'll be using the cloud version of the database but, in the repository, you'll find a `docker-compose.yml` file that you can use to run it locally with `docker compose up`.
+
+### Setting up Node and TypeScript
+
+To use TypeScript you need Node.js installed, be sure to use the latest LTS version. You can check it by running `node -v` in your terminal. If you don't have it installed, you can download it [here](https://nodejs.org/en/download/), or use a version manager like [asdf](https://asdf-vm.com/#/core-manage-asdf-vm), [nvm](https://github.com/nvm-sh/nvm), or even [volta](https://volta.sh/).
+
+> I'm using version 20.7.0 of Node.js, but you can use any version above 18 at the time of writing this article.
+
+Let's create a new directory (you can name whatever you want) and, inside it, we'll run the command `npm init -y`. This will generate a new `package.json` file with the default values. Now, let's install TypeScript as a development dependency by running `npm install --save-dev typescript`. This will install the latest version of TypeScript in your project.
+
+> **Tip:** You can check the latest version of TypeScript [here](https://www.npmjs.com/package/typescript). I'm using version 5.2.2
+
+We'll also install the external types for Node.js by running `npm install --save-dev @types/node`. This will allow us to use the Node.js types in our project.
+
+Lastly, we will add a support package called [tsx](https://npm.im/tsx), which will allow us to develop our application without having to compile it every time we change something. We'll install it by running `npm install --save-dev tsx`.
+
+Let's then bootstrap typescript with `npx tsc --init`, this will generate a `tsconfig.json` file with all the definitions TS needs. We'll need to change some values there, though. So let's open it, remove all the values and leave it like this:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+We'll also be using ESModules, so this needs us to change the `type` key in our `package.json` file to `module`. This will allow us to use the `import` syntax in our code, let's also add a run script that will allow us to run our compiled code. Our `package.json` file will be like this:
+
+```json
+{
+  "name": "hdb-typescript-best-practices",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env dist/index.js",
+    "start:dev": "NODE_OPTIONS='--loader=tsx' node --env-file=.env src/index.ts"
+  },
+  "keywords": [],
+  "author": "Lucas Santos <hello@lsantos.dev> (https://lsantos.dev/)",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@types/node": "^20.7.1",
+    "tsx": "^3.13.0",
+    "typescript": "^5.2.2"
+  }
+}
+```
+
+### Testing the setup
+
+Now, let's create a `src` folder and a `index.ts` file inside it. This will be our entrypoint for the application. Let's also add a `dist` and `node_modules` folder to our `.gitignore` file (if you haven't added already), so we don't commit the compiled code.
+
+Node.js from version 20.6 up [had built-in env file support](https://nodejs.org/en/blog/release/v20.6.0), so we'll take advantage of this to store our secrets in a `.env` file, this is the first best practice:
+
+> **Best Practice:** Never commit secrets to your repository. Use a `.env` file to store them and add it to your `.gitignore` file.
+
+Let's create a `.env` file and add the following content:
+
+```ini
+EXAMPLE=Test environment
+```
+
+Now, let's add the following code to our `index.ts` file:
+
+```ts
+export async function main() {
+  console.log('Hello world!')
+  console.log(process.env.EXAMPLE)
+}
+
+await main()
+```
+
+Now run the setup with `npm run start:dev`, you should see the following output:
+
+```bash
+$ npm run start:dev
+Hello World!
+Test environment
+```
+
+This means that everything is correctly set up!
+
+> **Tip**: You can also run the file manually through compilation, to do this, you need to run `npx tsc` in the root directory, then run `node --env-file=.env dist/index.js`. This will have the same result. You can even add a `build` script that will have `tsc` as a command, so you can run `npm run build` and then `npm run start` to run the code.
+
+## Setting the environments and the database
+
+Now that we know everything is working, let's hop to the [HarperDB Studio](https://studio.harperdb.io) and create our schema. We'll create a new schema called `todo` and a table called `todo_items`. This will be our table that will store the to-do items.
+
+The `hash` of the table will be the `id` column:
+
+![](./1-i1xyaurjnxto45cigaxrxw-377a1c.webp)
+
+Harper has a malleable schema, so we don't need to define all the properties, just the initial hash property, all the others will be added as we create the objects.
+
+Let's set our environment variables in the `.env` file:
+
+```ini
+HDB_HOST=https://your-instance.harperdbcloud.com
+HDB_USERNAME=your username
+HDB_PASSWORD=your password
+HDB_SCHEMA=todo
+HDB_TABLE=todo_items
+```
+
+# Separating Layers
+
+For our application, we'll be creating the simple glorious to-do list application. This application will have the following features:
+
+- Create a new to-do item
+- List all to-do items
+- Mark a to-do item as done
+- Delete a to-do item
+
+It's a simple application, but it will allow us to explore some of the best practices of using TypeScript with HarperDB.
+
+We'll also use a layered architecture to separate our code. This will allow us to have a better separation of concerns and make our code more maintainable. Layered architectures allow TypeScript to shine because we can use interfaces to define our contracts and make sure that our code is following the correct structure.
+
+We will have at least three layers:
+
+- **Presentation layer**: This is the layer that interfaces with the user. It can be a CLI, a web application, or even a mobile application. This layer will be responsible for receiving the user input and sending it to the next layer. In our case, we'll have the API, which will be a REST API that will receive the user input and send it to the next layer. But this allows us to separate the real application logic from the presentation layer, which makes us able to shift the presentation layer to another technology without having to change the application logic. So we could add a CLI, a GraphQL endpoint, gRPC, or anything else without having to change the underlying structure.
+- **Domain or service layer**: This is the layer that will have the business logic of our application. It will be responsible for receiving the validated user input and acting upon it. It will also be responsible for receiving the data from the data layer and transforming it into the correct format for the presentation layer. This layer will be the one that will have the most logic, and can be separated in multiple parts. The domain layer can be accessed by any other layers as it's a core part of the system.
+- **Data layer**: As the name says, this is the layer that will be responsible for the data, data can come from any source, a database, an external client, etc. It will be responsible for receiving the data from the domain layer and transforming it into the correct format for the database. It will also be responsible for receiving the data from the database and transforming it into the correct format for the domain layer. This layer will be the one that will have the least logic, but it's the most important, because this is where we will add our database logic, and our database communication.
+
+This is pretty close to the famous [MVC Architecture](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller), but it takes a bit of the definitions from [Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design) and [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
+
+## The domain layer
+
+Before creating any layers, we need to model our domain object, which is the to-do item. This will allow us to have a better understanding of what we need to do and how we need to do it. It will allow us to understand what is the shape of our object and how we will manipulate it.
+
+Let's start with a domain folder inside `src`, there we will create a file called `TodoItem.ts`. This will be our domain object, so let's add the following code to it:
+
+```ts
+import { randomUUID } from 'node:crypto'
+
+export class TodoItem {
+  constructor(
+    public title: string,
+    public dueDate: Date,
+    readonly id: string = randomUUID(),
+    public completed: boolean = false,
+    readonly createdAt: Date = new Date()
+  ) {}
+}
+```
+
+This is a simple class that will represent our to-do item. It has a constructor that receives the title and due date, and sets the other properties. The `id` is a random UUID, the `completed` is false by default, and the `createdAt` is the current date.
+
+So we can now create a new to-do item by running `new TodoItem('My first to-do item', new Date())`. This will create a new to-do item with the title `My first to-do item` and the due date as the current date.
+
+> **Tip:** You can check the [Node.js documentation](https://nodejs.org/api/crypto.html#crypto_crypto_randomuuid_options) to know more about the `randomUUID` function.
+
+Let's add some features to our domain object to make it more useful. We'll add a `toJSON` method that will return the object as a JSON string, and a `fromObject` static method that will receive an object that matches out Data Object and return a new instance of the class.
+
+For this we will need to create a schema that we can compare and validate our object against, this is the perfect use case for [Zod](https://zod.dev)! Zod is a TypeScript-first schema validation library that allows us to create schemas and validate our objects against them. Let's install it by running `npm install --save zod`.
+
+To define the schema we have two options:
+
+1. We define it in a new file and import it in our domain object
+2. We define it inside the domain object
+
+I personally prefer the second option since both the schema and the domain object are tightly coupled and part of the same object, so it makes sense to have them in the same file. But you can choose the one that makes more sense to you.
+
+Let's add the following code to the top of our domain object:
+
+```ts
+import { z } from 'zod'
+
+const todoItemSchema = z.object({
+  title: z.string(),
+  dueDate: z.date(),
+  id: z.string().uuid(),
+  completed: z.boolean().default(false),
+  createdAt: z.date().default(new Date())
+})
+
+export type TodoObjectType = z.infer<typeof TodoObjectSchema>
+```
+
+> **Note**: It's also possible to somewhat mimic what we are doing in the `z.infer<typeof TodoObjectSchema>` by using the `InstanceType` utility type, but then we would need to strip out the methods from the type, so I prefer to use the `infer` method to also create a clear sense of separation of what is our domain object (the class) and also the data transfer object (the JSON)
+
+We will then use this schema to make sure our object is a valid to-do item. Let's change the `fromJSON` function in our domain object:
+
+```ts
+static fromObject(todoObject: TodoObjectType): InstanceType<typeof TodoItem> {
+  TodoObjectSchema.parse(todoObject) // This will throw an error if the object is not valid
+  return new TodoItem(todoObject.title, todoObject.dueDate, todoObject.id, todoObject.completed, todoObject.createdAt)
+}
+```
+
+This will parse the JSON string and return a new instance of the class. We can also add a `toObject` to turn the class into a serializable object, and a `toJSON` method that will return the JSON string, this will be useful when we need to send the object to the database. Let's add the following code to our domain object:
+
+```ts
+toObject() {
+  return JSON.stringify({
+    title: this.title,
+    dueDate: this.dueDate,
+    id: this.id,
+    completed: this.completed,
+    createdAt: this.createdAt
+  })
+}
+
+toJSON() {
+  return JSON.stringify(this.toObject())
+}
+```
+
+> **Tip**: One other thing that we can do here is to not use the `toObject` method and instead use the shorthand `{ ...item }`, which will automatically convert it into an object. But I prefer to have a method that I can call to make it more explicit. You can also return `{ ...this }`
+
+Our final domain object will look like this:
+
+```ts
+import { randomUUID } from 'node:crypto'
+import { z } from 'zod'
+
+const TodoObjectSchema = z
+  .object({
+    title: z.string(),
+    dueDate: z.date({ coerce: true }),
+    id: z.string().uuid().readonly(),
+    completed: z.boolean().default(false),
+    createdAt: z.date({ coerce: true }).default(new Date()).readonly()
+  })
+  .strip()
+export type TodoObjectType = z.infer<typeof TodoObjectSchema>
+
+export class TodoItem {
+  constructor(
+    public title: string,
+    public dueDate: Date,
+    readonly id: string = randomUUID(),
+    public completed: boolean = false,
+    readonly createdAt: Date = new Date()
+  ) {}
+
+  toObject() {
+    return JSON.stringify({
+      title: this.title,
+      dueDate: this.dueDate,
+      id: this.id,
+      completed: this.completed,
+      createdAt: this.createdAt
+    })
+  }
+
+  toJSON() {
+    return JSON.stringify(this.toObject())
+  }
+
+  static fromObject(todoObject: TodoObjectType): InstanceType<typeof TodoItem> {
+    TodoObjectSchema.parse(todoObject)
+    return new TodoItem(todoObject.title, todoObject.dueDate, todoObject.id, todoObject.completed, todoObject.createdAt)
+  }
+}
+```
+
+## The data layer
+
+Now that we have our domain object, we can start creating our data layer. This layer will be responsible for communicating with the database and transforming the data from the database into the correct format for the domain layer. It will also be responsible for transforming the data from the domain layer into the correct format for the database.
+
+Since we're using Harper, all our communication with the DB is done through an API! Which is extremely useful because we don't need to set up complicated drivers or anything like that. So let's create a new file in a `data` folder called `TodoItemClient.ts`. This will be our HarperDB client.
+
+> **Tip**: It's a best practice to name external APIs as 'clients', if we had any other data layer, let's say a queue system that's not connected through an API, we could just name it `queueAdapter` or `queue` and it would be fine. This is not a rule, but I personally think it's easier to understand what the file is doing, if an external agent or an internal driver.
+
+Our client is an HTTP API, so let's use the native `fetch` from node to communicate with it (remember that the fetch api is only available in node from version 18 and up). Let's add the following code to our `TodoItemClient.ts` file:
+
+```ts
+import { TodoItem, TodoObjectType } from '../domain/TodoItem.js'
+
+export class TodoItemClient {
+  #defaultHeaders: Record<string, string> = {
+    'Content-Type': 'application/json'
+  }
+  credentialsBuffer: Buffer
+
+  constructor(
+    private readonly url: string,
+    private readonly schema: string,
+    private readonly table: string,
+    credentials: { username: string; password: string }
+  ) {
+    this.credentialsBuffer = Buffer.from(`${credentials.username}:${credentials.password}`)
+    this.#defaultHeaders['Authorization'] = `Basic ${this.credentialsBuffer.toString('base64url')}`
+  }
+
+  async upsert(data: TodoItem) {
+    const payload = {
+      operation: 'upsert',
+      schema: this.schema,
+      table: this.table,
+      records: [data.toObject()]
+    }
+
+    const response = await fetch(this.url, {
+      method: 'POST',
+      headers: this.#defaultHeaders,
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    return data
+  }
+
+  async delete(id: string) {
+    const payload = {
+      operation: 'delete',
+      schema: this.schema,
+      table: this.table,
+      hash_values: [id]
+    }
+
+    const response = await fetch(this.url, {
+      method: 'POST',
+      headers: this.#defaultHeaders,
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+  }
+
+  async findOne(id: string) {
+    const payload = {
+      operation: 'search_by_hash',
+      schema: this.schema,
+      table: this.table,
+      hash_values: [id],
+      get_attributes: ['*']
+    }
+
+    const response = await fetch(this.url, {
+      method: 'POST',
+      headers: this.#defaultHeaders,
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    const data = (await response.json()) as TodoObjectType[]
+    if (data[0] && Object.keys(data[0]).length > 0) {
+      return TodoItem.fromObject(data[0])
+    }
+
+    return null
+  }
+
+  async listByStatus(completed = true) {
+    const payload = {
+      operation: 'search_by_value',
+      schema: this.schema,
+      table: this.table,
+      search_attribute: 'completed',
+      search_value: completed,
+      get_attributes: ['*']
+    }
+
+    const response = await fetch(this.url, {
+      method: 'POST',
+      headers: this.#defaultHeaders,
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    const data = (await response.json()) as TodoObjectType[]
+    return data.map((todoObject) => TodoItem.fromObject(todoObject))
+  }
+}
+```
+
+As you can see this has all the methods we need to communicate with the database. We have the `upsert` method that will create or update a record, the `delete` method that will delete a record, the `findOne` method that will find a record by its hash, and the `listByStatus` method that will list all the records that match a certain value.
+
+> **Tip**: You can check the [HarperDB documentation](https://api.harperdb.io/#25977fef-53e8-40bf-a26a-43369bc3721c) to know more about the operations.
+
+## The service layer
+
+The service layer will be the glue between all the other layers. In an application that's this simple, it's usually not very useful, but it's a good practice to have it, so we can add more logic to it later on. Let's create a new folder called `services` and a new file called `TodoItemService.ts`. This will be our service layer.
+
+The service layer will receive sanitized user input, perform any business logic and then send it to the data layer. It will also receive data from the data layer and transform it into the correct format for the presentation layer.
+
+Let's add the following code to our `TodoItemService.ts` file:
+
+```ts
+import { TodoItemClient } from '../data/TodoItemClient.js'
+import { TodoItem, TodoObjectType } from '../domain/TodoItem.js'
+
+export class TodoItemService {
+  #client: TodoItemClient
+  constructor(client: TodoItemClient) {
+    this.#client = client
+  }
+
+  async findOne(id: string) {
+    return this.#client.findOne(id)
+  }
+
+  async findAll() {
+    return [...(await this.findPending()), ...(await this.findCompleted())]
+  }
+
+  async findCompleted() {
+    return this.#client.listByStatus(true)
+  }
+
+  async findPending() {
+    return this.#client.listByStatus(false)
+  }
+
+  async create(todoItem: TodoObjectType) {
+    const todo = new TodoItem(todoItem.title, todoItem.dueDate)
+    return this.#client.upsert(todo)
+  }
+
+  async update(todoItem: TodoObjectUpdateType) {
+    const todo = await this.#client.findOne(todoItem.id ?? '')
+
+    if (!todo) {
+      throw new Error('Todo not found')
+    }
+
+    todo.completed = todoItem.completed ?? todo.completed
+    todo.dueDate = todoItem.dueDate ?? todo.dueDate
+    todo.title = todoItem.title ?? todo.title
+
+    return this.#client.upsert(todo)
+  }
+
+  async delete(id: string) {
+    return this.#client.delete(id)
+  }
+}
+```
+
+See that, while in the client implementation on a lower layer, we have a more generic logic which finds by status. In the service, we already separated the commands into finding pending and completed items.
+
+Also, we implemented a `findAll` method which calls the `listByStatus` method twice and then merges the results. This is a good example of how we can use the service layer to add more logic to our application without actually adding more logic to the data layer.
+
+Another important aspect to notice is how the service layer already assumes that all the data will be sanitized. This is a good practice because it allows us to have a better separation of concerns. The presentation layer should be the one validating the data in the route, and then sending it to the service layer. The service layer should assume that the data is already validated and sanitized.
+
+> **Tip**: In any case, we have already implemented another level of validations in our Domain object when we are receiving objects because TypeScript will only enforce them at the compile time, so we can be sure that the data is valid.
+
+The last thing to notice is that, now that we have moved up a level, the service layer is taking as a parameter, the layer below, which means that we need to pass an instance of the data layer client to the service layer. This is called **inversion of control** and it's a part of the [Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle).
+
+This principle states that the higher level layers should not depend on the lower level layers, but instead, they should depend on abstractions. In our case, the service layer depends on the data layer, but it doesn't depend on the implementation of the data layer, it depends on the abstraction of the data layer, which is the client.
+
+We will do the same with the presentation layer.
+
+## The presentation layer
+
+Now that we have our data layer, we can start creating our presentation layer. This layer will be responsible for receiving the user input and sending it to the next layer. In our case, we'll have the API, which will be a REST API that will receive the user input and send it to the next layer.
+
+Let's create a new folder called `presentation` and a new file called `restAPI.ts`. This will be our REST interface.
+
+Usually we use a web framework to avoid having to recreate everything. In this example we'll use a very fast framework called [Hono](https://hono.dev), just to be away from [Express](https://expressjs.com) for a while.
+
+Install it and then it's adapter for Node.js by running by running `npm install --save hono @hono/node-server`.
+
+The implementation of the service layer usually falls into the [Factory Pattern](https://en.wikipedia.org/wiki/Factory_method_pattern), which is a creational pattern that allows us to create objects without having to know the implementation details. In our case, we'll use a factory to create the Rest API client so we can receive (via dependency injection) the service layer.
+
+This translates to something like this:
+
+```ts
+import { Hono } from 'hono'
+import { TodoItemService } from '../services/TodoItemService.js'
+
+export async function restAPIFactory(service: TodoItemService) {
+  const app = new Hono()
+
+  app.get('/api/todos/:id', async (c) => {})
+  app.get('/api/todos', async (c) => {})
+  app.post('/api/todos', async (c) => {})
+  app.put('/api/todos/:id', async (c) => {})
+  app.delete('/api/todos/:id', async (c) => {})
+
+  return app
+}
+```
+
+This is a very simple factory that receives the service layer and returns a new instance of the Rest API client. We'll implement the routes in a moment, but first, we'll go back to our `index.ts` file in the `src` directory. This will be our entrypoint for the application.
+
+There we'll initiate the environment variables, as well as the database client and the service layer. Let's add the following code to our `index.ts` file:
+
+```ts
+import { z } from 'zod'
+import { TodoItemClient } from './data/TodoItemClient.js'
+import { TodoItemService } from './services/TodoItemService.js'
+import { restAPIFactory } from './presentation/api.js'
+import { serve } from '@hono/node-server'
+const conf = {
+  host: process.env.HDB_HOST,
+  credentials: {
+    username: process.env.HDB_USERNAME,
+    password: process.env.HDB_PASSWORD
+  },
+  schema: process.env.HDB_SCHEMA,
+  table: process.env.HDB_TABLE
+}
+
+const EnvironmentSchema = z.object({
+  host: z.string(),
+  credentials: z.object({
+    username: z.string(),
+    password: z.string()
+  }),
+  schema: z.string(),
+  table: z.string()
+})
+export type EnvironmentType = z.infer<typeof EnvironmentSchema>
+
+export default async function main() {
+  const parsedSchema = EnvironmentSchema.parse(conf)
+  const DataLayer = new TodoItemClient(
+    parsedSchema.host,
+    parsedSchema.schema,
+    parsedSchema.table,
+    parsedSchema.credentials
+  )
+  const ServiceLayer = new TodoItemService(DataLayer)
+  const app = await restAPIFactory(ServiceLayer)
+
+  serve({ port: 3000, fetch: app.fetch }, console.log)
+}
+
+await main()
+```
+
+> **Note**: We could have created another file called `config.ts` and moved both our `EnvironmentSchema` and `conf` object there, but since we are only using it in the `index.ts` file, I prefer to keep it there. However, if you receive that configuration somewhere else, you should create a `config.ts` file and move it there.
+
+Back to our `restAPI.ts` file, let's implement the routes. Most of them will only have path parameters, so I'll just put them here and explain the logic:
+
+```ts
+import { Hono } from 'hono'
+import { TodoItemService } from '../services/TodoItemService.js'
+
+export async function restAPIFactory(service: TodoItemService) {
+  const app = new Hono()
+
+  app.get('/api/todos/:id', async (c) => {
+    try {
+      const todo = await service.findOne(c.req.param('id'))
+      if (!todo) {
+        c.status(404)
+        return c.json({ error: 'Todo not found' })
+      }
+      c.json(todo.toObject())
+    } catch (err) {
+      c.status(500)
+      c.json({ error: err })
+    }
+  })
+
+  app.get('/api/todos', async (c) => {
+    try {
+      let data
+
+      if (c.req.query('completed')) {
+        data = await service.findCompleted()
+      } else if (c.req.query('pending')) {
+        data = await service.findPending()
+      } else {
+        data = await service.findAll()
+      }
+
+      c.json(data.map((todo) => todo.toObject()))
+    } catch (err) {
+      c.status(500)
+      c.json({ error: err })
+    }
+  })
+
+  app.post('/api/todos', async (c) => {})
+  app.put('/api/todos/:id', async (c) => {})
+
+  app.delete('/api/todos/:id', async (c) => {
+    try {
+      await service.delete(c.req.param('id'))
+      c.status(204)
+      return c.body(null)
+    } catch (err) {
+      c.status(500)
+      c.json({ error: err })
+    }
+  })
+
+  return app
+}
+```
+
+For the post and put routes, we will also need to validate the data coming in, Hono has a validator for Zod that we can use as a middleware, let's install it with `npm i @hono/zod-validator`.
+
+We can import `zValidator` from it and add it after our route name, but before our handler, like this:
+
+```ts
+app.post('/api/todos', zValidator('json', ourSchema) async (c) => {})
+```
+
+But we'll need a few things here, first, we'll need a new type to represent the creation type, and another one to represent the update type. Let's add the following code to our `TodoItem.ts` file:
+
+```ts
+export const TodoObjectCreationSchema = TodoObjectSchema.omit({ id: true, createdAt: true, completed: true }).extend({
+  dueDate: z.string().datetime()
+})
+export const TodoObjectUpdateSchema = TodoObjectSchema.omit({ createdAt: true }).partial().extend({
+  dueDate: z.string().datetime().optional()
+})
+
+export type TodoObjectType = z.infer<typeof TodoObjectSchema>
+export type TodoObjectCreationType = z.infer<typeof TodoObjectCreationSchema>
+export type TodoObjectUpdateType = z.infer<typeof TodoObjectUpdateSchema>
+```
+
+We are creating new narrower types from a wider type generated by Zod. We need to update this type in the service file:
+
+```ts
+async create(todoItem: TodoObjectCreationType) {
+  const todo = new TodoItem(todoItem.title, new Date(todoItem.dueDate))
+  return this.#client.upsert(todo)
+}
+
+async update(todoItem: TodoObjectUpdateType) {
+  const todo = await this.#client.findOne(todoItem.id ?? '')
+
+  if (!todo) {
+    throw new Error('Todo not found')
+  }
+
+  todo.completed = todoItem.completed ?? todo.completed
+  todo.dueDate = new Date(todoItem.dueDate ?? todo.dueDate)
+  todo.title = todoItem.title ?? todo.title
+
+  return this.#client.upsert(todo)
+}
+```
+
+Now we can use those types in the presentation layer. Let's add the following code to our `restAPI.ts` file:
+
+```ts
+app.post('/api/todos', zValidator('json', TodoObjectCreationSchema), async (c) => {
+  try {
+    const todoItemObject = await c.req.json<TodoObjectCreationType>()
+    const todo = await service.create(todoItemObject)
+    c.status(201)
+    c.json(todo.toObject())
+  } catch (err) {
+    c.status(500)
+    c.json({ error: err })
+  }
+})
+```
+
+Now for the update route:
+
+```ts
+app.put('/todos/:id', zValidator('json', TodoObjectUpdateSchema), async (c) => {
+  try {
+    const todoItemObject = await c.req.json<TodoObjectUpdateType>()
+    const todo = await service.update({ ...todoItemObject, id: c.req.param('id') })
+    c.status(200)
+    return c.json(todo.toObject())
+  } catch (err) {
+    c.status(500)
+    return c.json({ error: err })
+  }
+})
+```
+
+And that's it! We have our presentation layer ready to go!
+
+# Testing
+
+Testing our application is a matter of running `npm run start:dev` and making requests to it. To test it better I'll leave a [Hurl](https://hurl.dev) file in the repository that you can use to test the API. You can run it using `hurl --test ./collection.hurl`. This will run all the tests and make sure that everything is working as expected.
+
+![Our application is running](./1-eq-uhfn6-1aykg9a0m-qnw-202026.webp)
+
+You can also make requests yourself to the API using `curl` or any other tool you prefer. Then check your HarperDB studio to see if the data was correctly inserted.
+
+![](./1-8tcvxl3ajfrf6s-xaaauba-2404da.webp)
+
+# Conclusion
+
+In this article, we learned how to set up a TypeScript project with HarperDB, we learned how to separate our code into layers, and we learned how to test our application. We also learned some best practices along the way.
+
+The idea is that those layers are not set in stone, you can add more layers if you need to, or remove some layers if you don't need them. The important thing is to have a clear separation of concerns and to make sure that your code is maintainable.
