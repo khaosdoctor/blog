@@ -35,8 +35,12 @@ const BANNED: [RegExp, string][] = [
   [/\{[\s\S]*?\}/, 'MDX expression'],
   [/^import\s/m, 'import statement'],
   [/^export\s/m, 'export statement'],
-  [/javascript\s*:/i, 'javascript: URL'],
-  [/data:text\/html/i, 'data: HTML URL'],
+  // Only where a scheme can actually navigate: an attribute value, or a markdown
+  // link destination. Prose ends a sentence with "JavaScript:" all the time, and
+  // rejecting that trains everyone to ignore this script.
+  [/(?:href|src|action|formaction)\s*=\s*["']?\s*javascript\s*:/i, 'javascript: URL in an attribute'],
+  [/\]\(\s*<?\s*javascript\s*:/i, 'javascript: URL in a link'],
+  [/(?:href|src)\s*=\s*["']?\s*data:text\/html/i, 'data: HTML URL'],
   [/srcdoc\s*=/i, 'srcdoc attribute'],
   // Component tags are injected by the page, and only a known set exists. A new
   // one means the model invented markup.
@@ -59,8 +63,21 @@ function walk(dir: string): string[] {
   return found
 }
 
+/**
+ * What is left after removing everything that cannot execute: fenced and inline
+ * code, an escaped `\<` (which markdown renders as text, so `\<T>` and
+ * `\<leader>` are prose), a markdown link destination in angle brackets, and the
+ * attribute values of the components the page injects. That last one matters
+ * because RawEmbed carries a whole iframe inside its `html` attribute, which is
+ * the component's entire purpose and is checked by RawEmbed itself.
+ */
 function withoutCode(source: string): string {
-  return source.replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]*`/g, '')
+  return source
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`\n]*`/g, '')
+    .replace(/\\[<{}]/g, '')
+    .replace(/\]\(<[^>]*>\)/g, ']()')
+    .replace(/<(?:RawEmbed|Video|Figure|MissingImage|Tweet|Bookmark)\b[\s\S]*?\/>/g, '')
 }
 
 function frontmatterOf(source: string): string {
