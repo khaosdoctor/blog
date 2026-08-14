@@ -22,6 +22,8 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 
 **`scripts/migrate/` and `.migration/` are untracked on purpose.** One-shot Ghost tooling. The MDX is the source of truth now.
 
+**A retired lab candidate is archived, never deleted.** The labs at `/lab/` and `/theme-lab/` are the raw material for an article the owner intends to write about how the redesign was decided, so a candidate losing a decision is still worth keeping: the rejected options are the argument. When a decision is made, move the candidate's component and its explanatory prose into `content/blog/theme-lab-arquivo/`, a `noindex` post that exists to keep retired candidates rendering, and take it out of the live lab post so that page only shows what is still undecided. Moving beats copying to a folder outside `content/`, because a component under `content/blog/<post>/components/` still builds and still runs, and one parked in an archive directory is dead code that will rot without anyone noticing. Do not create that post until the first candidate actually retires.
+
 ## Before you finish
 
 Run these, in order:
