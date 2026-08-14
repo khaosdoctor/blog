@@ -1,0 +1,39 @@
+---
+title: "Laboratório de tema: os candidatos recusados"
+pubDate: 2026-08-14
+lang: "pt"
+category: "meta"
+tags: ["meta", "design"]
+description: "Os candidatos do laboratório de tema que perderam a decisão, guardados funcionando. Uma opção recusada é parte do argumento, não lixo."
+draft: false
+noindex: true
+---
+
+Isto é o arquivo do [[theme-lab]]. Cada bloco aqui é um candidato que perdeu uma decisão e continua funcionando, com os
+mesmos botões e sliders que tinha quando estava na página principal.
+
+Ele existe por um motivo prático: a página viva só deve mostrar o que ainda está em aberto, senão ela cresce até
+ninguém conseguir comparar nada. E existe por um motivo melhor: a opção recusada é metade do argumento. Um texto que
+diz "escolhi X" não vale nada; um que mostra o Y que foi testado, funcionando, e diz por que ele perdeu, vale a
+leitura. Quando eu escrever sobre como esse redesenho foi decidido, é daqui que vêm os exemplos.
+
+Nada foi apagado, então nada aqui é uma captura de tela morta. Os componentes moram em `components/` ao lado deste
+arquivo e continuam sendo compilados pelo build como qualquer outra ilha do site. Os controles compartilhados (os
+sliders, os seletores, a conta de contraste) continuam importados do laboratório vivo, para um candidato aposentado
+não virar motivo de duplicar código.
+
+## O sólido em ASCII
+
+O terceiro candidato de animação: um sólido girando, resolvido em caracteres pelo pipeline 3D do textmode.js, com
+malha, câmera e luz. A ideia era usar ele no 404, na página "sobre", ou como o único ornamento de um rodapé.
+
+Ele perdeu por uma decisão maior do que ele: o blog vai ter quase nenhuma animação, e o único lugar que ganha
+movimento constante é o logo. Um sólido girando não é um logo, e era o candidato mais caro dos três, um loop de WebGL2
+que nunca para sozinho. O que ficou no lugar são os candidatos de animação do logo, na seção 06 do laboratório vivo.
+
+Vale guardar porque ele é a demonstração mais completa do que a biblioteca faz além de pintar caracteres: aqui tem
+projeção, `perspective`, `camera`, luz ambiente e luz pontual. Também é o candidato que ensinou duas coisas por errar
+primeiro: `frameCount` é um getter e chamar como função derrubava a cena inteira, e sem `camera()` a biblioteca começa
+com o olho dentro do toro, o que renderizava a parede interna do tubo como um campo verde com um buraco preto no meio.
+
+<LabDemo src="./components/TmSolid.vue" client:visible />
