@@ -287,28 +287,22 @@ const tree = treeOf(flat)
       toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - GAP_REM * rem)}px`)
     }
 
-    /*
-     * Two frames late, deliberately. Reading the article's box in the same task
-     * that changed the body face returns the old layout: the observer callback ran
-     * with `left` at 296px while the settled value was 218px, so the panel stayed
-     * on screen at a width where it does not fit and covered the text until the
-     * next resize. One frame queues behind the style change, the second reads a
-     * finished layout.
-     */
-    const scheduleFit = (): void => {
-      requestAnimationFrame(() => requestAnimationFrame(fitMode))
-    }
-
     fitMode()
-    addEventListener('resize', scheduleFit, { passive: true })
-    // The body face is a reader preference and each face has its own size, so the
-    // column width changes with it, not only with the window.
-    new MutationObserver(scheduleFit).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-body-face'],
-    })
-    // A face that arrives after first paint reflows the column under the panel.
-    document.fonts?.ready.then(scheduleFit)
+
+    /*
+     * The column is watched, not the clock. Switching the body face reflows the
+     * article in two passes about 100ms apart, the new size first and the new
+     * font's metrics second, so anything that counts frames can read the
+     * intermediate width: two frames after the switch the column measured 858px
+     * on its way from 780px to 1014px, and the panel was placed from that middle
+     * number and stayed there. A ResizeObserver fires on each settled pass
+     * instead, so the last thing it sees is the final layout.
+     */
+    if (article !== null) new ResizeObserver(fitMode).observe(article)
+
+    // The window can change without the column changing: past the measure the
+    // article stops growing while the room beside it keeps shrinking.
+    addEventListener('resize', fitMode, { passive: true })
     // A heading level with the window top is already behind the reader, so the
     // line reads a little below it. Same figure as the heading scroll margin.
     const LOOKAHEAD = 120
