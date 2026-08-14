@@ -24,10 +24,10 @@ export const FACES: Face[] = [
     stack: "'Departure Mono', ui-monospace, monospace",
     name: 'Departure Mono',
     licence: 'OFL 1.1',
-    role: 'corpo',
+    role: 'título',
     mono: true,
     pixelStep: 0,
-    note: 'Pixel de verdade e vetorial, então escala em qualquer tamanho. Altura-x baixa: em 16px o texto corrido parece menor do que é.',
+    note: 'Decidida para título. Pixel de verdade e vetorial, então escala em qualquer tamanho. Altura-x baixa: em 16px o texto corrido parece menor do que é.',
   },
   {
     id: 'ibmvga',
@@ -37,7 +37,7 @@ export const FACES: Face[] = [
     role: 'título',
     mono: true,
     pixelStep: 16,
-    note: 'O DOS literal. Bitmap traçado: nítido em 16, 32 e 48px, borrado em qualquer valor no meio. Share-alike, então exige atribuição.',
+    note: 'Decidida para subtítulo. O DOS literal. Bitmap traçado: nítido em 16, 32 e 48px, borrado em qualquer valor no meio. Share-alike, então exige atribuição.',
   },
   {
     id: 'plex',
@@ -47,7 +47,7 @@ export const FACES: Face[] = [
     role: 'corpo',
     mono: true,
     pixelStep: 0,
-    note: 'A saída segura. Não é pixelada, é quadrada e industrial. Aguenta três mil palavras sem discussão.',
+    note: 'Lê bem e aguenta três mil palavras sem discussão. A dúvida é outra: por ser monoespaçada, um parágrafo inteiro nela pode se confundir com trecho de código no meio do post.',
   },
   {
     id: 'sharetech',
@@ -134,14 +134,74 @@ export const FACES: Face[] = [
     stack: "'Handjet', sans-serif",
     name: 'Handjet',
     licence: 'OFL 1.1',
-    role: 'título',
+    role: 'corpo',
     mono: false,
     pixelStep: 0,
-    note: 'Variável com eixos de grade e de forma do elemento: dá para transformar o mesmo texto de matriz de pontos em blocos quadrados com um slider.',
+    note: 'A segunda melhor opção de matriz de pontos para corpo, mas só nesse tamanho e espaçamento: abaixo disso a malha de pontos atropela a leitura.',
+  },
+  {
+    id: 'inter',
+    stack: "'Inter', ui-sans-serif, sans-serif",
+    name: 'Inter',
+    licence: 'OFL 1.1',
+    role: 'corpo',
+    mono: false,
+    pixelStep: 0,
+    note: 'Sem serifa desenhada para tela desde o início: altura-x grande, contraste baixo entre traços. O padrão de fato para interface, e um contraponto justo aos pixel fonts.',
+  },
+  {
+    id: 'roboto',
+    stack: "'Roboto', ui-sans-serif, sans-serif",
+    name: 'Roboto',
+    licence: 'Apache 2.0',
+    role: 'corpo',
+    mono: false,
+    pixelStep: 0,
+    note: 'A geométrica do Android, quase onipresente. Mais neutra que a Inter, com menos personalidade própria.',
+  },
+  {
+    id: 'sourceserif',
+    stack: "'Source Serif 4', ui-serif, Georgia, serif",
+    name: 'Source Serif 4',
+    licence: 'OFL 1.1',
+    role: 'corpo',
+    mono: false,
+    pixelStep: 0,
+    note: 'Serifa de livro, irmã da Source Sans. A opção que mais lembra tipografia impressa entre as fontes aqui.',
+  },
+  {
+    id: 'literata',
+    stack: "'Literata', ui-serif, Georgia, serif",
+    name: 'Literata',
+    licence: 'OFL 1.1',
+    role: 'corpo',
+    mono: false,
+    pixelStep: 0,
+    note: 'Desenhada pelo Google para o Play Books: serifa pensada especificamente para leitura longa em tela.',
+  },
+  {
+    id: 'atkinson',
+    stack: "'Atkinson Hyperlegible', ui-sans-serif, sans-serif",
+    name: 'Atkinson Hyperlegible',
+    licence: 'OFL 1.1',
+    role: 'corpo',
+    mono: false,
+    pixelStep: 0,
+    note: 'Encomendada pelo Braille Institute para leitores de baixa visão: cada letra desenhada para não se confundir com nenhuma outra. O oposto do risco que um pixel font corre.',
   },
 ]
 
-export const FACE_OPTIONS = FACES.map((face) => ({ id: face.id, name: `${face.name} (${face.role})` }))
+/** Faces decididas: título e subtítulo não têm mais candidato em disputa. */
+export const TITLE_FACE = faceById('departure')
+export const SUBHEAD_FACE = faceById('ibmvga')
+
+/** A única variável aberta: qual fonte aguenta o corpo de um post inteiro. */
+const BODY_FACE_IDS = ['plex', 'handjet', 'inter', 'roboto', 'sourceserif', 'literata', 'atkinson']
+
+export const BODY_FACE_OPTIONS = BODY_FACE_IDS.map((id) => faceById(id)).map((face) => ({
+  id: face.id,
+  name: `${face.name} · ${face.licence}`,
+}))
 
 export function faceById(id: string): Face {
   return FACES.find((face) => face.id === id) ?? FACES[0]

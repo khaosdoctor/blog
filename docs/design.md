@@ -20,13 +20,23 @@ All of them live in `src/styles/theme.css`. Components reference roles (`--fg`, 
 brand hexes, and nothing else in the codebase hardcodes a colour, a font stack, a radius or a duration.
 
 Palette, traced from the favicon: red `#e30613`, green `#45b384`, yellow `#f5b200`, blue `#0578be`. Those stay.
+Purple is `#4b15a8`, taken from the old Ghost theme rather than the favicon, which never had one.
 `--radius: 0` by default, because rounded corners fight a pixel grid.
+
+The two page grounds are decided: **`#000000` in dark**, true black so OLED pixels switch off, with the hint of purple
+in `--rule` instead of in the page; **`#f4efe0` in light**, a NieR Automata sepia with warm ink at `#332d23`. Full
+reasoning and the measured ratios are in `docs/theming.md`.
 
 ## Fonts
 
-Two stacks on purpose. A pixel face is right for chrome, labels and headings and punishing for a 3000 word article,
-so `--font-body` stays readable and `--font-display` is where the 8-bit face goes. All candidates below are free and
-self-hosted (CSP is `font-src 'self'`).
+Three stacks. A pixel face is right for chrome, labels and headings and punishing for a 3000 word article, so
+`--font-body` stays readable while `--font-display` and `--font-subtitle` carry the pixel faces. All candidates below
+are free and self-hosted (CSP is `font-src 'self'`).
+
+Decided: **`--font-display` is Departure Mono** (headings, weight 400 only) and **`--font-subtitle` is PxPlus IBM VGA8**
+(excerpts and section descriptions, flat 16px). `--font-body` is the one still open; the candidates now include five
+non-pixel faces (Inter, Roboto, Source Serif 4, Literata, Atkinson Hyperlegible) alongside IBM Plex Mono and Handjet
+at 22px.
 
 | Face | Licence | Good for | Watch out |
 |---|---|---|---|
@@ -93,14 +103,15 @@ Decided and implemented. Kept short on purpose; the code is the detail.
 
 ## Open decisions
 
-- Display face, and whether body copy goes mono too.
-- Cover and OG layout: flat brand background or generated art, what the card carries besides the title, how a
-  90 character title behaves. Covers are per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in.
+- Which of the three cover candidates wins. All three are built in `/theme-lab/` section 04 as SVG at the real
+  1200×630: a DOS window with a spaced double border, a full-bleed brand colour with a 75% rule, and a seeded plasma
+  with shadowed letters. Covers stay per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in. Colour
+  and seed derive from the slug rather than being random, so a rebuild cannot change an existing cover.
 - Whether the theme toggle becomes explicit. Today it is native `light-dark()` with no JS and no stored preference.
-- Where the reader settings live once there is a footer. Two already exist and have nowhere to sit: the
-  pinned-preview persistence checkbox and the code theme picker.
-- `--brand-purple` is provisional at `#6b4fbb`. Quotes are the only thing using it. Candidates: `#8a63d2` reads better
-  faded on a dark page, `#5b3e99` is the safest against light text.
+- Where the pinned-preview persistence checkbox lives. The code theme picker found its home on every code block, and
+  the footer already exists (name, version, typeface credits), but a checkbox among those links reads oddly; it may
+  want its own small settings popover, reusing the code-theme picker's pattern.
+- Which body face wins. Everything else about the type system is settled.
 - `--rule-core`: the lab page carries the colour and density options for the section break.
 - Whether the code language chip should still show when a filename tab is already present.
 - Which of his other domains count as internal for the link icon. `lsantos.dev` is the only one confirmed.

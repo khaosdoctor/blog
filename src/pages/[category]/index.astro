@@ -65,10 +65,14 @@ const description = described ?? t('pt', 'sectionDescription', category)
 </BaseLayout>
 
 <style>
+  /* The decided subtitle face, at a whole 16px: see --font-subtitle. */
   .about {
     margin-block: 0.5rem 1rem;
     color: var(--muted);
     max-inline-size: var(--measure);
+    font-family: var(--font-subtitle);
+    font-size: 16px;
+    line-height: 1.5;
   }
 
   .count {

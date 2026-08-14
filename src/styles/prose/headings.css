@@ -1,4 +1,10 @@
-/* Headings: a rule that fades, a glow on h1, and an anchor link. */
+/*
+ * Headings: a rule that fades, a glow on h1, and an anchor link.
+ *
+ * The display face is applied once, globally, in BaseLayout.astro, because the
+ * home page and the section pages have headings that live outside any <article>
+ * and need it too.
+ */
 
 /*
  * A rule that fades out instead of a border that stops dead, on the top three

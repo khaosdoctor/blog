@@ -14,40 +14,53 @@ reasoning behind the visual direction is in `docs/theming.md`.
 Nothing here is blocking a build. Everything works today; these are choices that were made provisionally, or that
 nobody but you can make.
 
-### 1. Rewrite the section descriptions
+### 1. Pick the body face
 
-`content/categories.json` describes each section, keyed by category then locale (`pt`, `en`). The text in there now is
-**mine, written in an impression of your voice**, in both languages. It renders on every section page and becomes that
-page's meta description, so it is public-facing prose with your name on it.
+The only type question left. Display and subtitle are decided and already applied site-wide (see **What was decided**);
+body copy is still the placeholder serif stack.
 
-A category with no entry falls back to a generated line, so deleting an entry is safe.
+`/theme-lab/`, section 01, renders every candidate as a real multi-paragraph Portuguese passage at the actual body size,
+because the question is whether a face survives 3000 words rather than whether it looks good in a specimen line. What is
+on the table:
 
-### 2. Pick the purple
+- **IBM Plex Mono** reads well but is monospaced, and you flagged the real risk yourself: on a blog about code, a
+  monospaced body face and inline code stop being distinguishable.
+- **Handjet at 22px with ~0.03em extra letter-spacing**, which is the only size it works at. Below that it closes up.
+- **Five non-pixel faces**, newly vendored so there is a normal book face to compare against: Inter, Roboto,
+  Source Serif 4, Literata, Atkinson Hyperlegible. All OFL or Apache-2.0, all self-hosted, all with full accent
+  coverage for Portuguese.
 
-`--brand-purple` is `#6b4fbb`, invented because quotes needed a purple and the brand has none. Quotes are the only
-thing using it. Candidates, if you want alternatives: `#8a63d2` reads better faded on a dark page, `#5b3e99` is safer
-against light text. Deferred to the full design pass, noted here so it does not become permanent by silence.
+The rejected pixel faces keep their names in `docs/theming.md` because you said you want them for something else.
 
-### 3. Two font questions the theming lab will put in front of you
+### 2. Pick a cover candidate
 
-The display face, and whether body copy goes monospaced too. `/theme-lab/` renders the candidates as real headings and
-real paragraphs, because the open question is whether a pixel face survives 3000 words, not whether it looks good in a
-specimen line. `docs/theming.md` has the reasoning; the licences matter, since this repo goes public and a
-share-alike face carries obligations that an OFL one does not.
+Three candidates are built, in `/theme-lab/` section 04, from your three descriptions:
 
-### 4. Cover and OG image layout
+1. **Janela DOS.** Black ground, double ANSI inset border with real space between the two frames, brand colour picked
+   per post, kicker and byline in that same colour, title ending in `.` plus a solid block cursor.
+2. **Sem moldura.** No border, the whole card in one brand colour, one thin rule from the left edge to about 75% of the
+   width between kicker and title.
+3. **Plasma.** A seeded field, unique per post, with a hard offset shadow behind the letters so the art never eats the
+   title.
 
-Still unstarted. You bake the post's title into the cover image because it lifts read-through, so covers are per
-locale: `cover.pt.png` and `cover.en.png`. What the card carries besides the title, and how a 90-character title
-behaves, are open. The generator exists (`npm run cover`).
+Each is an SVG at the real 1200×630, so whichever you pick ports into the generator without being redrawn. One thing
+was decided for you: the "random" colour and seed are derived from the post slug rather than being actually random,
+because a cover that changes on every build churns git and breaks social-card caches. Same post, same cover, forever.
 
-### 5. Where reader settings live
+The existing `scripts/cover.ts` is the old path: it calls Replicate for an AI background and hands off to an external
+Deno service. All three candidates are drawn locally from geometry and text, so picking any of them retires that
+script, the API token and the external dependency, and makes covers work offline like the rest of the build.
 
-Two settings now exist with nowhere to sit: keeping pinned hover previews after the tab closes, and the code theme.
-The code theme found a home on every code block. The pinned-preview toggle has not. It needs a settings surface, which
-probably means the footer, which does not exist yet in the new design.
+### 3. Where the pinned-preview toggle lives
 
-### 6. Small ones
+The footer does exist, contrary to what this file said before: it carries your name, the version link, and now the
+typeface credits. So the only thing still homeless is the **pinned-hover-preview toggle**. The code theme found its home
+on every code block; this one has nowhere to go, and a footer full of links is not obviously the right place for a
+checkbox. It may want a small settings popover of its own, reusing the pattern the code-theme picker already uses.
+
+The PxPlus attribution that was listed here is done, in the footer, in both languages.
+
+### 4. Small ones
 
 - Should the code language chip still show when a filename tab is already present? Both currently render.
 - Which of your other domains count as "internal" for the link icon. Only `lsantos.dev` is confirmed; everything else
@@ -55,7 +68,7 @@ probably means the footer, which does not exist yet in the new design.
 - Monokai, Dracula and Snazzy ship only one variant each in Shiki's bundle. There is no light Dracula to pair with the
   dark one without adding a theme package.
 
-### 7. Yours to do, not mine
+### 5. Yours to do, not mine
 
 - Test the Obsidian authoring flow end to end: write a post in the vault, publish it, confirm it lands.
 - Standalone pages (about, uses, whatever else) and where the author link points. You decided the personal site lives
@@ -68,6 +81,57 @@ probably means the footer, which does not exist yet in the new design.
 ## What was decided
 
 Newest first.
+
+### The palette: OLED black and NieR sepia
+
+`--bg` is `light-dark(#f4efe0, #000000)`.
+
+Dark is true `#000000`, not a very dark grey, because on an OLED panel those pixels are switched off and that is the
+whole reason to ask for pitch black. You wanted a hint of purple in it; that hint went into `--rule` (`#2b1f42`) and
+into the quote tints instead, because a `#05000b` page reads as black on every screen while giving up the one thing
+black buys. Moving it into the page itself is one value if you want it there anyway.
+
+Light is a faded sepia from NieR Automata's family rather than paper white. Its own ink is warm (`#332d23`) because a
+cool near-black on a warm ground reads as a mistake. NieR's real background is `#c8c3b4`, which is a game HUD and too
+dark to hold 3000 words, so this is that hue lightened until it works as a reading surface.
+
+Every value was measured rather than eyeballed: `--fg` 11.9:1 light and 15.4:1 dark, `--muted` 5.2:1 and 8.3:1,
+`--accent` 6.1:1 and 10.8:1, both rules at 1.28 and 1.38. `--accent` deepened to `#1a5c96` in light mode because the
+brand blue at `#0578be` was 4.12:1 on the sepia, under the minimum. `--table-edge` now points at `--fg` rather than
+repeating two hexes that were `--fg` before this change.
+
+The two places that cannot read a token, and so have to be edited by hand next time: the `theme-color` meta pair in
+`BaseLayout.astro` and `background_color`/`theme_color` in `src/lib/manifest.ts`.
+
+### The purple: the old theme's own
+
+`--brand-purple` is `#4b15a8`, lifted from the live Ghost site, where it was the accent over a near-black purple
+background (`#080016`, with `#210a47` and `#2f0f67` as the steps above it). The invented `#6b4fbb` is gone.
+
+It is 9.3:1 on the sepia page and 1.97:1 on the black one, so nothing uses it raw on dark: the quote tokens mix it
+toward white first, which comes out at 3.96:1, over the 3:1 a border needs and without becoming a neon the rest of
+this palette does not have.
+
+### Display face: Departure Mono. Subtitle face: PxPlus IBM VGA8
+
+Both applied site-wide, self-hosted, declared in `src/styles/fonts.css` (the site's own two faces) rather than in the
+lab's font file, which stays a menu of candidates and loads on that page alone.
+
+Headings are Departure Mono at weight 400, because the face ships one weight and asking for bold gets a synthesised
+smear. Being monospaced, a heading is wider than the same words in the body face and a long `h2` wraps sooner, which is
+a consequence of the choice rather than something to correct.
+
+Post excerpts and section descriptions are PxPlus IBM VGA8 at a flat `16px`, not a rem step. It is a 9×16 bitmap traced
+to outlines, so it is crisp at 16px and whole multiples of it, and muddy at 14px or 18px where its pixels straddle
+device pixels.
+
+**One obligation came with that second choice, and it is handled.** PxPlus IBM VGA 9x16 is **CC BY-SA 4.0** (VileR, The
+Oldschool PC Font Resource), unlike every other face here, so a credit line has to be reachable from the site. It is now
+in the footer on every page in both languages, crediting Departure Mono alongside it even though OFL asks for nothing.
+
+The other half of that licence is a standing constraint rather than a task: **the file must never be subset or re-hinted
+by a build step**, because a modified copy inherits the same share-alike terms. Anything added later to shrink the font
+payload automatically has to skip this one file.
 
 ### Post component styles: CSS modules, enforced
 

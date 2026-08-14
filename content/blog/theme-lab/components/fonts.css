@@ -101,3 +101,51 @@
   font-weight: 600;
   font-display: swap;
 }
+
+/*
+ * Body-face candidates: famous, non-pixelated, genuinely readable faces to
+ * compare against the pixel faces above. Variable-weight files, latin subset
+ * (Unicode 0000-00FF, which covers every accented character Portuguese uses).
+ */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-400-700.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-400-700.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('/fonts/SourceSerif4-400-700.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata-400-700.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('/fonts/AtkinsonHyperlegible-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('/fonts/AtkinsonHyperlegible-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}

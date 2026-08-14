@@ -77,6 +77,16 @@ E os botões, os cinco lado a lado para escolher olhando.
 
 <LabDemo src="./components/ChromeButton.vue" client:visible />
 
+## Seção 04 / A capa
+
+A capa é a imagem que aparece no card do Twitter, do Slack, do WhatsApp: 1200×630, com o título assado por cima. Três candidatos abaixo, todos `<svg>` de verdade, na mesma proporção da imagem final, porque é assim que o gerador de verdade vai rasterizar: `sharp` lendo o SVG no build, sem passar por canvas nem por WebGL.
+
+O primeiro é a janela DOS: fundo preto, moldura dupla de retângulos com um vão generoso entre as duas linhas (a primeira tentativa tinha as duas quase coladas, e ficava ilegível como moldura, só como risco duplo). O segundo tira a moldura inteira e põe a cor da marca a plena tinta atrás do texto, com o contraste invertido para continuar legível sobre um fundo claro como o amarelo. O terceiro é o mais arriscado: um campo de plasma gerado por senos somados, único por post, com o título carregando uma sombra rígida de poucos pixels para não se perder quando o campo passa por baixo dele numa cor clara.
+
+Nenhuma cor aqui vem de `Math.random()`. Tudo sai de um número inteiro — a "semente" — e no gerador de verdade essa semente é o hash do slug do post, então o mesmo post sempre bate a mesma capa. O knob de semente existe só para você embaralhar as cinco cores da marca e ver a variedade sem editar código. O comprimento do título tem os mesmos três tamanhos da Seção 00: o de noventa caracteres é o que decide se a quebra de linha aguenta um título ruim de verdade.
+
+<LabDemo src="./components/CoverLab.vue" client:visible />
+
 ## O que ainda não está aqui
 
 O ícone, porque a lista curta em `docs/design.md` já resolve e nenhuma opção dali precisa ser vista mexendo para ser escolhida.

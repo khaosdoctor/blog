@@ -156,9 +156,11 @@ None of this was verifiable in a browser. See section 10.
 
 ### Licences, because the repo goes public
 
-Twelve faces are vendored. Eleven are **OFL 1.1**, which permits serving a woff2 from a website with no attribution required on the page, as long as the licence text travels with the file and the font is not sold on its own. Full list with authors in `public/fonts/LICENSES.txt`.
+Seventeen faces are vendored: the original twelve, plus five non-pixel body candidates added once the body question narrowed (see the end of section 6). Fifteen are **OFL 1.1**, which permits serving a woff2 from a website with no attribution required on the page, as long as the licence text travels with the file and the font is not sold on its own. Roboto is **Apache-2.0**, which is equally permissive for this purpose. Full list with authors in `public/fonts/LICENSES.txt`.
 
 One is different and is called out separately in that file. **PxPlus IBM VGA 9x16 is CC BY-SA 4.0** (VileR, [The Oldschool PC Font Resource](https://int10h.org/oldschool-pc-fonts/)). That means attribution is required and reachable from the site, and any modified version of the font has to be released under the same licence. Practically: if this face is adopted, a credit line has to exist somewhere permanent, and nobody can subset or re-hint it without inheriting the obligation. Departure Mono carries none of that. If the two are close on merit, the licence is the tiebreaker.
+
+**This is no longer hypothetical.** PxPlus was adopted as the subtitle face, so the credit line is owed, and it is now in the site footer in both languages, naming Departure Mono beside it. The "do not subset" half is a standing constraint on anything added later to shrink the font payload automatically: this one file has to be excluded from it.
 
 A trap worth recording: **the `LICENSE` file at the root of the Departure Mono repository is MIT and covers the website code.** The font's own licence is the OFL 1.1 at `public/assets/LICENSE`. Anyone auditing this later will find the MIT file first.
 
@@ -167,6 +169,18 @@ Faces deliberately excluded on licence grounds: **Berkeley Mono** (commercial; t
 ### The brand palette is fixed
 
 Red `#e30613`, green `#45b384`, yellow `#f5b200`, blue `#0578be`. These stay, so the colour question is never "what palette" and always "what happens to this palette in a terminal register". That is what the palette lab is: the brand colours are one of seven registers, and the same live contrast arithmetic runs on all of them, so the brand can be compared to CGA and to phosphor on identical terms.
+
+Purple was the exception, since the brand never had one and quotes needed it. It now comes from the old Ghost theme, which painted its whole page in purple without ever putting one in the icon: `#4b15a8`, the accent it used over `#080016`, with `#210a47` and `#2f0f67` as the steps between. Recorded here because the source is a site that will stop existing at the DNS cutover.
+
+### The two page grounds, and why neither is grey
+
+Decided after the lab: **`#000000` in dark, a NieR Automata sepia in light.**
+
+The dark ground is true black rather than the near-black `#14161a` it replaced, because on an OLED panel a `#000000` pixel is switched off. That is the entire reason to ask for pitch black, and any lift, however small, gives it up. So when a hint of purple was wanted in the page, it went into `--rule` (`#2b1f42`) and into the quote tints instead of into `--bg`: at the lightness a "hint" implies, roughly `#05000b`, the page reads as black on every display anyway, so the token would have cost the OLED benefit and returned nothing visible. The hint belongs where a few points of lightness are actually perceivable, which is the chrome.
+
+The light ground is `#f4efe0`, warm and slightly down from white. Worth knowing before copying NieR's palette directly: its real background is about `#c8c3b4` with ink near `#4e4b42`, which is a game HUD designed to be read in glances and is too dark to hold 3000 words. What was taken is the hue, lightened until it works as a reading surface. Its ink is warm too (`#332d23`), because a cool near-black on a warm ground is the specific error that makes a sepia page look like a white page with a filter over it.
+
+One knock-on worth recording: the brand blue at `#0578be` measures 4.12:1 on that sepia, under the 4.5 minimum, so `--accent` deepens to `#1a5c96` (6.06:1) in light mode. A warmer ground costs contrast against a cool accent, and the arithmetic has to be redone rather than assumed when the ground moves.
 
 ---
 
@@ -217,6 +231,18 @@ Labels only, and honest about it:
 - **Silkscreen** (designed for 8 to 10px, its lowercase behaves as small caps), **Press Start 2P** (roughly double width per character; four words are gorgeous and forty are impossible), **Micro 5** (five pixels tall, ornament only), **Handjet** (variable with element-grid and element-shape axes, which makes it the most tweakable thing in the set and not a reading face).
 
 **The verdict.** Body copy in a pixel face is viable, but only for outline pixel faces and only with the spacing pushed up. It is not viable for a traced bitmap unless the site pins its body size to 16px forever and accepts that Safari may not cooperate. The two-stack plan already in `docs/design.md` survives contact with the evidence, and the interesting question shifts from "pixel or not" to "how far apart the two stacks should be": Departure Mono for both is a coherent site, Departure Mono for display over IBM Plex Mono for body is a safer site, and the specimen lets both be read side by side.
+
+### What the owner decided after reading the specimen
+
+**Display: Departure Mono.** Which is what section 6 argued for, and it is now applied to every heading site-wide at weight 400 (the face ships one weight; asking for bold synthesises a smear).
+
+**Subtitle: PxPlus IBM VGA8**, for post excerpts and section descriptions, at a flat `16px` rather than a rem step. This adopts the traced bitmap deliberately, in the one role where the grid warning above does not bite: a fixed 16px never leaves the whole-pixel grid. It does mean the CC BY-SA attribution obligation from the licence section is now live rather than hypothetical, and that the file must never be subset or re-hinted by a build step.
+
+**Body: still open**, and the shape of the question changed. The stated worry was not legibility but ambiguity: on a blog about code, a monospaced body face and inline code stop being distinguishable, which rules IBM Plex Mono out on a ground the specimen could not measure. Handjet was the next preference but only at 22px with roughly 0.03em added tracking, which is consistent with the spacing literature above and with its own description here as "not a reading face" at default settings.
+
+So five non-pixel faces were vendored to give the specimen a normal book face to argue against: **Inter**, **Roboto** (Apache-2.0), **Source Serif 4**, **Literata** and **Atkinson Hyperlegible** (the rest OFL). Atkinson is worth singling out: it was designed by the Braille Institute specifically to disambiguate confusable letterforms, which is the one accessibility claim in this area with a design rationale rather than a null result behind it.
+
+The pixel faces rejected for body keep their entries above on purpose, because the owner intends to use them for something else.
 
 ---
 

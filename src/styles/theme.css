@@ -18,25 +18,64 @@
   --brand-green: #45b384;
   --brand-yellow: #f5b200;
   --brand-blue: #0578be;
-  /* Not from the favicon: quotes need a purple and the brand has none. Provisional
-   * until the hex is picked, see the quotes question in docs/design.md. */
-  --brand-purple: #6b4fbb;
-
-  /* Roles. Components reference these, never the brand values above. */
-  --bg: light-dark(#fffdf9, #14161a);
-  --fg: light-dark(#1a1c20, #e6e4e0);
-  --muted: light-dark(#5d6169, #9a9ea6);
-  --accent: light-dark(#0b5ea8, #7cc0ff);
-  --rule: light-dark(#e4e0d8, #2a2d33);
+  /*
+   * Not from the favicon: the old Ghost theme painted the whole page in purple
+   * and never put one in the icon. This is that purple, lifted from the live
+   * site, where it was the accent against a near-black purple background
+   * (#080016, with #160731, #210a47 and #2f0f67 as the surface steps above it).
+   *
+   * It is 9.3:1 on the sepia page and 1.97:1 on the black one, so nothing uses
+   * it raw on dark: the quote tokens below and --qc-border mix it toward white
+   * first, which comes out at 3.96:1, over the 3:1 a border needs, without
+   * turning it into a neon that the rest of this palette does not have.
+   */
+  --brand-purple: #4b15a8;
 
   /*
-   * Two stacks, deliberately. A pixel font is right for chrome, labels and
+   * Roles. Components reference these, never the brand values above.
+   *
+   * Dark is true #000000, not a very dark grey: on an OLED panel those pixels
+   * are switched off, which is the point of asking for pitch black. The hint of
+   * purple therefore lives in --rule and in the quote tints below, where a few
+   * points of lightness are actually perceivable — a #05000b page would read as
+   * black on every screen while giving up the one thing black buys.
+   *
+   * Light is a faded sepia, NieR Automata's family rather than paper white. Its
+   * own ink is warm (#332d23, 11.9:1) because a cool near-black on a warm ground
+   * reads as a mistake. NieR's real background (#c8c3b4) is a game HUD and too
+   * dark to hold 3000 words, so this is that hue lightened until it is a reading
+   * surface.
+   *
+   * Every value here was measured, not eyeballed: fg 11.9:1 light / 15.4:1 dark,
+   * muted 5.2:1 / 8.3:1, accent 6.1:1 / 10.8:1. The rules come out at 1.28 and
+   * 1.38, which is a line you see without it shouting.
+   */
+  --bg: light-dark(#f4efe0, #000000);
+  --fg: light-dark(#332d23, #e0dcd4);
+  --muted: light-dark(#6b6353, #a8a29a);
+  --accent: light-dark(#1a5c96, #7cc0ff);
+  --rule: light-dark(#ddd4bd, #2b1f42);
+
+  /*
+   * Three stacks, deliberately. A pixel face is right for chrome, labels and
    * headings and punishing for a 3000 word article, so body copy keeps a
-   * readable face. --font-display is where an 8-bit face lands.
+   * readable face.
+   *
+   * --font-display and --font-subtitle are decided and self-hosted, see
+   * src/styles/fonts.css. --font-body is the one still open: the candidates are
+   * rendered as real multi-paragraph prose in /theme-lab/, because the question
+   * is whether a face survives 3000 words, not whether it looks good in a
+   * specimen line.
+   *
+   * PxPlus IBM VGA8 is a 9x16 bitmap face traced to outlines, so it is crisp at
+   * 16px and at whole multiples of it, and muddy at 14px or 18px where its
+   * pixels land on fractions of a device pixel. Size anything using it in whole
+   * multiples of 16px rather than in rem.
    */
   --font-body: ui-serif, Georgia, 'Times New Roman', serif;
   --font-mono: ui-monospace, SFMono-Regular, monospace;
-  --font-display: var(--font-mono);
+  --font-display: 'Departure Mono', ui-monospace, SFMono-Regular, monospace;
+  --font-subtitle: 'PxPlus IBM VGA8', ui-monospace, SFMono-Regular, monospace;
 
   --text-base: 1.05rem;
   --text-small: 0.9rem;
@@ -70,7 +109,8 @@
   /*
    * Italic is the same yellow as bold, as text rather than a wash. The brand
    * yellow is unreadable as text on a near-white page, so light mode drops to a
-   * dark amber of the same hue: #8a6400 against #fffdf9 is 4.9:1.
+   * dark amber of the same hue: #8a6400 against the sepia page is 4.68:1, which
+   * still clears 4.5 now that the page is warmer and slightly darker than white.
    */
   --em-italic-fg: light-dark(#8a6400, var(--brand-yellow));
   --em-italic-weight: 500;
@@ -86,7 +126,8 @@
   );
   --heading-glow-blur: 0.5em;
 
-  /* Quotes. The purple has no brand value yet, see --brand-purple. */
+  /* Quotes, and where the purple hint shows on the black page: mixing it into
+   * --bg at 22% is what tints a quote card without lifting the whole page. */
   --quote-bg: light-dark(
     color-mix(in oklab, var(--brand-purple) 12%, var(--bg)),
     color-mix(in oklab, var(--brand-purple) 22%, var(--bg))
@@ -101,7 +142,9 @@
   );
 
   /* Task list boxes: hollow square, green tick, no radius. */
-  --check-box: light-dark(#ffffff, transparent);
+  /* Just lighter than the sepia page, so the box reads as a box without a white
+   * chip punched into a warm ground. */
+  --check-box: light-dark(#fbf7ec, transparent);
   --check-edge: var(--fg);
   --check-tick: var(--brand-green);
 
@@ -131,7 +174,9 @@
   );
 
   /* Tables: every cell ruled, header tinted and bold, room around the text. */
-  --table-edge: light-dark(#1a1c20, #e6e4e0);
+  /* The ink itself, so a table's rules follow the palette rather than pinning
+   * two hexes that were --fg before the page went sepia and OLED black. */
+  --table-edge: var(--fg);
   /* A glimpse of a tint, nothing more: at 12% the header read as a filled band
    * and pulled the eye away from the rows, which are the content. */
   --table-head-bg: light-dark(
