@@ -105,7 +105,14 @@
    */
   --font-smoothing: none;
 
-  --measure: 68ch;
+  /*
+   * The reading column, in characters rather than pixels, so it follows whichever
+   * body face is active: `ch` is the width of that face's zero, which is 0.578em
+   * in Literata and 0.648em in Atkinson. 78ch is therefore about 812px in the
+   * serif at 18px and about 1010px in the sans at 20px, and the outline panel
+   * measures the room it has left rather than trusting a breakpoint.
+   */
+  --measure: 78ch;
   --gutter: 1.5rem;
 
   /* Square by default: rounded corners fight a pixel grid. */
