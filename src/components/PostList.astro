@@ -52,9 +52,18 @@ function categoryUrl(post: Post): string {
     margin-block-start: 2.5rem;
   }
 
+  /*
+   * A post title, so it takes the display face like every other title. It is a
+   * bare <a> rather than a heading, which is why the global heading rule in
+   * BaseLayout does not reach it and the face has to be named here.
+   *
+   * Weight 400, not 600: Departure Mono ships one weight and a browser asked for
+   * 600 synthesises it by smearing the glyphs sideways.
+   */
   .posts > li > a {
+    font-family: var(--font-display);
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 400;
   }
 
   .meta {
@@ -63,7 +72,7 @@ function categoryUrl(post: Post): string {
     gap: 0.5rem;
     margin-block: 0.2rem;
     color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
   }
 
@@ -71,7 +80,14 @@ function categoryUrl(post: Post): string {
     color: var(--muted);
   }
 
+  /*
+   * The decided subtitle face. 16px flat, not a rem step: PxPlus is a 9x16
+   * bitmap traced to outlines and only lands crisp on whole multiples of 16.
+   */
   .excerpt {
     margin-block-start: 0.3rem;
+    font-family: var(--font-subtitle);
+    font-size: 16px;
+    line-height: 1.5;
   }
 </style>

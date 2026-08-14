@@ -8,12 +8,12 @@
  * medida em que o post vive. Se você não consegue ler o terceiro parágrafo sem
  * apertar os olhos, a fonte já respondeu.
  */
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
 import Toggle from './Toggle.vue'
-import { FACE_OPTIONS, faceById } from './faces'
+import { BODY_FACE_OPTIONS, SUBHEAD_FACE, TITLE_FACE, faceById } from './faces'
 import { CODE_SAMPLE, DECK, DIACRITICS, HEADING, PARAGRAPHS } from './copy'
 import { parseHex, ratio } from './contrast'
 import './fonts.css'
@@ -25,26 +25,35 @@ const THEMES = {
   ambar: { bg: '#0a0704', fg: '#ffb000', muted: '#a67200' },
 }
 
-const face = ref('departure')
+/** Handjet só sobrevive no corpo neste tamanho e espaçamento; ver faces.ts. */
+const HANDJET_SIZE = 22
+const HANDJET_TRACKING = 3
+
+const face = ref('plex')
 const size = ref(17)
 const leading = ref(165)
 const tracking = ref(0)
 const words = ref(0)
 const measure = ref(68)
 const theme = ref<keyof typeof THEMES>('escuro')
-const displayFace = ref('departure')
 const crisp = ref(false)
 
 const chosen = computed(() => faceById(face.value))
-const display = computed(() => faceById(displayFace.value))
 const colours = computed(() => THEMES[theme.value])
 const contrast = computed(() => ratio(parseHex(colours.value.fg), parseHex(colours.value.bg)))
 const mutedContrast = computed(() => ratio(parseHex(colours.value.muted), parseHex(colours.value.bg)))
 
+// O veredito sobre Handjet é condicional: só em 22px com ~0,03em de entreletra.
+// Ao escolhê-la, o espécime pula direto para essa configuração.
+watch(face, (id) => {
+  if (id === 'handjet') {
+    size.value = HANDJET_SIZE
+    tracking.value = HANDJET_TRACKING
+  }
+})
+
 /** WCAG 1.4.12: entrelinha >= 1.5, entreletra >= 0.12em, entrepalavra >= 0.16em. */
 const spacingOk = computed(() => leading.value >= 150 && tracking.value >= 12 && words.value >= 16)
-
-const offGrid = computed(() => chosen.value.pixelStep > 0 && size.value % chosen.value.pixelStep !== 0)
 
 const bodyStyle = computed(() => ({
   fontFamily: chosen.value.stack,
@@ -58,29 +67,42 @@ const bodyStyle = computed(() => ({
     ? { WebkitFontSmoothing: 'none', fontSmooth: 'never', filter: 'contrast(100.00001%)' }
     : {}),
 }))
+
+const titleStyle = computed(() => ({
+  fontFamily: TITLE_FACE.stack,
+  color: colours.value.fg,
+  fontSize: `${size.value * 2.1}px`,
+  lineHeight: 1.15,
+}))
+
+const deckStyle = computed(() => ({
+  fontFamily: SUBHEAD_FACE.stack,
+  color: colours.value.muted,
+  fontSize: `${size.value * 1.15}px`,
+}))
 </script>
 
 <template>
   <div :class="$style.demo">
     <div :class="$style.stage" :style="{ background: colours.bg }">
-      <p :class="$style.kicker" :style="{ color: colours.muted, fontFamily: display.stack }">
-        SEÇÃO 03 / {{ chosen.name.toUpperCase() }}
+      <p :class="$style.kicker" :style="{ color: colours.muted, fontFamily: titleStyle.fontFamily }">
+        SEÇÃO 03 / CORPO EM TESTE: {{ chosen.name.toUpperCase() }}
       </p>
-      <h3
-        :class="$style.title"
-        :style="{ fontFamily: display.stack, color: colours.fg, fontSize: `${size * 2.1}px`, lineHeight: 1.15 }"
-      >
-        {{ HEADING }}
-      </h3>
-      <p :class="$style.deck" :style="{ ...bodyStyle, fontSize: `${size * 1.15}px`, color: colours.muted }">{{ DECK }}</p>
+      <h3 :class="$style.title" :style="titleStyle">{{ HEADING }}</h3>
+      <p :class="$style.deck" :style="deckStyle">{{ DECK }}</p>
       <p v-for="paragraph in PARAGRAPHS" :key="paragraph" :style="bodyStyle">{{ paragraph }}</p>
       <p :class="$style.diacritics" :style="{ ...bodyStyle, fontSize: `${size * 1.4}px` }">{{ DIACRITICS }}</p>
       <pre :class="$style.code" :style="{ ...bodyStyle, fontSize: `${size * 0.92}px` }">{{ CODE_SAMPLE }}</pre>
     </div>
 
+    <p :class="$style.decided">
+      Título e subtítulo já foram decididos: <strong>{{ TITLE_FACE.name }}</strong> ({{ TITLE_FACE.licence }}) no
+      título, <strong>{{ SUBHEAD_FACE.name }}</strong> ({{ SUBHEAD_FACE.licence }}) no subtítulo. O corpo abaixo é a
+      única variável ainda em aberto.
+    </p>
+
     <Panel label="tipo">
-      <Pick v-model="face" label="fonte do corpo" :options="FACE_OPTIONS" />
-      <Pick v-model="displayFace" label="fonte do título" :options="FACE_OPTIONS" />
+      <Pick v-model="face" label="fonte do corpo" :options="BODY_FACE_OPTIONS" />
       <Pick
         v-model="theme"
         label="fundo"
@@ -111,10 +133,6 @@ const bodyStyle = computed(() => ({
     </dl>
 
     <p :class="$style.note">{{ chosen.note }}</p>
-    <p v-if="offGrid" :class="$style.warn">
-      Fora do grid: esta é uma fonte de bitmap traçado e só fecha em múltiplos de {{ chosen.pixelStep }}px. Em
-      {{ size }}px ela está sendo interpolada, e é isso que você está vendo de borrado.
-    </p>
     <p :class="$style.note">
       A regra 1.4.12 do WCAG não pede que o texto já venha assim: pede que ele não quebre quando o leitor força
       entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em. Suba os três sliders até lá e veja se a coluna
@@ -191,12 +209,16 @@ const bodyStyle = computed(() => ({
   line-height: 1.6;
 }
 
-.warn {
-  margin: 0.7rem 0 0;
+.decided {
+  margin: 0.9rem 0 0;
   padding-inline-start: 0.6rem;
-  border-inline-start: 3px solid var(--brand-yellow);
-  color: var(--fg);
-  font-size: 0.7rem;
+  border-inline-start: 3px solid var(--brand-green);
+  color: var(--muted);
+  font-size: 0.72rem;
   line-height: 1.6;
+}
+
+.decided strong {
+  color: var(--fg);
 }
 </style>

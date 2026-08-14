@@ -50,6 +50,34 @@ font file.
   IBMPlexMono-400.woff2         IBM Plex Mono, Mike Abbink and Bold Monday
   IBMPlexMono-600.woff2         https://fonts.google.com/specimen/IBM+Plex+Mono
 
+  Inter-400-700.woff2           Inter, Rasmus Andersson (variable weight)
+                                https://fonts.google.com/specimen/Inter
+
+  SourceSerif4-400-700.woff2    Source Serif 4, Frank Grießhammer (variable weight)
+                                https://fonts.google.com/specimen/Source+Serif+4
+
+  Literata-400-700.woff2        Literata, Font Bureau + TypeTogether (variable weight)
+                                https://fonts.google.com/specimen/Literata
+
+  AtkinsonHyperlegible-400.woff2 Atkinson Hyperlegible, Braille Institute of America
+  AtkinsonHyperlegible-700.woff2 https://fonts.google.com/specimen/Atkinson+Hyperlegible
+                                Designed for maximum letterform distinction, commissioned
+                                for low-vision readers.
+
+--------------------------------------------------------------------------------
+Apache License, Version 2.0
+--------------------------------------------------------------------------------
+Redistribution is free, including in a commercial product, modified or not. The
+only real obligation is that the licence text and a notice of changes travel
+with the font file, which is what this file is for. No attribution is required
+on the page itself.
+
+  Roboto-400-700.woff2          Roboto, Christian Robertson (variable weight)
+                                https://fonts.google.com/specimen/Roboto
+                                Unlike most faces in this folder, Roboto ships under
+                                Apache-2.0, not OFL: Google keeps the name reserved
+                                differently, the practical effect for us is the same.
+
 --------------------------------------------------------------------------------
 Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)
 --------------------------------------------------------------------------------

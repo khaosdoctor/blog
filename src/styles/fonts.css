@@ -1,0 +1,42 @@
+/*
+ * The faces the site itself uses. Self-hosted from public/fonts/ because the CSP
+ * is `font-src 'self'`, which blocks a Google Fonts link outright.
+ *
+ * Only the two that are decided are here. Every other face is a candidate and
+ * lives in content/blog/theme-lab/components/fonts.css, which loads on that page
+ * alone: a candidate should cost nothing on a real post. The two files below are
+ * declared in both places, with the same URL, so the lab reuses the same cache
+ * entry rather than fetching a second copy.
+ *
+ * Licences are recorded in public/fonts/LICENSES.txt, and they are not the same
+ * kind. Departure Mono is OFL 1.1 and asks nothing of the page. PxPlus IBM VGA
+ * is CC BY-SA 4.0: attribution has to be reachable from the site, and any
+ * modified copy of the file inherits the same licence, so this one must not be
+ * subset or re-hinted by a build step. See docs/theming.md.
+ */
+
+/* Headings and titles. Departure Mono, Helena Zhang, SIL OFL 1.1. */
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('/fonts/DepartureMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Subheadings and descriptions. Web437 IBM VGA 9x16, VileR, The Oldschool PC
+ * Font Resource, CC BY-SA 4.0. A 9x16 bitmap traced to outlines, so size it in
+ * whole multiples of 16px: at 14px its pixels straddle device pixels and the
+ * whole thing goes soft.
+ *
+ * Still .woff rather than .woff2 because that is the format the pack ships; at
+ * 9.8 KB there is nothing to gain from recompressing it.
+ */
+@font-face {
+  font-family: 'PxPlus IBM VGA8';
+  src: url('/fonts/PxPlusIBMVGA8-9x16.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

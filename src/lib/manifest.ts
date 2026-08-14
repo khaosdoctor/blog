@@ -19,8 +19,10 @@ export function buildManifest(locale: Locale): string {
       start_url: locale === 'en' ? '/en/' : '/',
       scope: '/',
       display: 'standalone',
-      background_color: '#fffdf9',
-      theme_color: '#fffdf9',
+      // The light --bg from theme.css. A manifest cannot hold two colours for the
+      // two schemes, and the splash screen it paints should not be the black one.
+      background_color: '#f4efe0',
+      theme_color: '#f4efe0',
       icons: [
         { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
         { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },

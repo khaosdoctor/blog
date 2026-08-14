@@ -84,6 +84,7 @@ type UIKey =
   | 'skipToContent'
   | 'language'
   | 'version'
+  | 'typefaces'
   | 'keepPreviews'
   | 'previewLoading'
   | 'previewClose'
@@ -166,6 +167,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     skipToContent: 'Pular para o conteúdo',
     language: 'Idioma',
     version: 'Versão',
+    // A licença CC BY-SA da PxPlus IBM VGA exige atribuição alcançável do site.
+    typefaces: 'Tipografia',
     keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
     previewLoading: 'Carregando…',
     previewClose: 'Fechar prévia',
@@ -248,6 +251,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     skipToContent: 'Skip to content',
     language: 'Language',
     version: 'Version',
+    // PxPlus IBM VGA is CC BY-SA, which requires attribution reachable from the site.
+    typefaces: 'Typefaces',
     keepPreviews: 'Keep pinned previews after closing the tab',
     previewLoading: 'Loading…',
     previewClose: 'Close preview',
