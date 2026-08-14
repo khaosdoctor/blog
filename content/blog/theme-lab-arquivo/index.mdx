@@ -22,6 +22,23 @@ arquivo e continuam sendo compilados pelo build como qualquer outra ilha do site
 sliders, os seletores, a conta de contraste) continuam importados do laboratório vivo, para um candidato aposentado
 não virar motivo de duplicar código.
 
+## O título sobre o campo animado
+
+O primeiro candidato de todos, e o mais próximo da captura que começou este trabalho: um título de post sobre um campo
+de caracteres animado em WebGL2. O texto é HTML de verdade por cima do canvas, então continua selecionável, continua no
+leitor de tela e sobrevive se o WebGL não subir; o canvas só faz o fundo, e é `aria-hidden`.
+
+Perdeu pela mesma decisão que aposentou o sólido: o blog vai ter quase nenhuma animação, e o único lugar com movimento
+constante é o logo. Um campo animado atrás de cada título de post é o oposto disso.
+
+Vale guardar pelos quatro movimentos, que são bem diferentes entre si e cada um é uma referência: a onda concêntrica é
+a do exemplo oficial da biblioteca, a chuva de coluna é a herança óbvia do Matrix, o ruído perlin é uma névoa que não
+repete e a grade cruzada é a mais próxima de uma tela de BBS. A densidade em 0% apaga o campo inteiro, o que também era
+uma resposta válida à pergunta. Se algum dia uma página só, tipo a "sobre", quiser um fundo desses, o candidato está
+aqui pronto.
+
+<LabDemo src="./components/TmHeading.vue" client:visible />
+
 ## O sólido em ASCII
 
 O terceiro candidato de animação: um sólido girando, resolvido em caracteres pelo pipeline 3D do textmode.js, com

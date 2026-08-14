@@ -21,13 +21,12 @@ Nada que se mexe começa se mexendo para quem pediu `prefers-reduced-motion: red
 
 ## Seção 00 / A animação
 
-O primeiro candidato é o que você viu na captura: um título sobre um campo de caracteres animado. O texto continua sendo HTML de verdade por cima do canvas, então ele é selecionável, entra no leitor de tela e sobrevive se o WebGL não subir. O canvas só faz o fundo.
+Sobrou um candidato aqui. Os outros três estão em [[theme-lab-arquivo]], funcionando, cada um com o motivo de ter
+saído: o título sobre o campo de caracteres animado e o sólido girando saíram porque o blog vai ter quase nenhuma
+animação e o único lugar com movimento constante é o logo, que se decide na seção 06; e a reprodução em CSS da seção
+"What will you create?" saiu porque ela era a página da textmode.art e não este blog.
 
-Os quatro movimentos são bem diferentes entre si: a onda concêntrica é a do exemplo oficial da biblioteca, a chuva de coluna é a herança óbvia do Matrix, o ruído perlin é uma névoa que não repete, e a grade cruzada é a mais próxima de uma tela de BBS. A densidade em 0% apaga o campo inteiro, o que também é uma resposta válida.
-
-<LabDemo src="./components/TmHeading.vue" client:visible />
-
-Segundo candidato, mesma biblioteca, uso completamente diferente: a capa gerada. Aqui o textmode.js pinta o fundo de cada célula, que é como o ANSI fazia gradiente, e desenha uma moldura de caixa em volta. Uma capa é um PNG parado, então esta começa congelada e a animação existe só para você escolher o quadro. O seletor de comprimento do título responde à pergunta que está aberta em `docs/design.md`: um título de noventa caracteres continua cabendo.
+O que ficou é a capa gerada. Aqui o textmode.js pinta o fundo de cada célula, que é como o ANSI fazia gradiente, e desenha uma moldura de caixa em volta. Uma capa é um PNG parado, então esta começa congelada e a animação existe só para você escolher o quadro. O seletor de comprimento do título responde à pergunta que está aberta em `docs/design.md`: um título de noventa caracteres continua cabendo.
 
 <LabDemo src="./components/TmCover.vue" client:visible />
 
