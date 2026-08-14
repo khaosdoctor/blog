@@ -73,7 +73,20 @@ const colours = computed(() => PALETTE[palette.value])
 // A caixa por trás do texto agora é sempre preta (ver .card), então é contra
 // ela que o texto se lê, não contra o fundo da arte.
 const CARD_BG = '#000000'
-const inkContrast = computed(() => ratio(parseHex(colours.value.ink), parseHex(CARD_BG)))
+/** --fg do site no escuro, a saída quando a tinta da paleta não serve. */
+const SITE_INK = '#e0dcd4'
+
+// A tinta tem que vir do que está ATRÁS do texto, e o que está atrás é a caixa
+// preta. Cada paleta traz a tinta escolhida para o fundo da arte dela, e no
+// `amarelo cheio` essa tinta é escura de propósito, boa sobre amarelo: sobre a
+// caixa ela dava 1,54:1, ou seja, ilegível. Então a tinta da paleta só é usada
+// quando ela mesma passa dos 4,5:1 contra a caixa, o que mantém o fósforo e o
+// âmbar (verdes e amarelos claros, de terminal) e substitui só as que não dão.
+const cardInk = computed(() => {
+  const own = ratio(parseHex(colours.value.ink), parseHex(CARD_BG))
+  return own >= 4.5 ? colours.value.ink : SITE_INK
+})
+const inkContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(CARD_BG)))
 
 // A moldura é desenhada 1 célula para dentro da borda (linha em row/col 1), com
 // uma célula vazia antes dela. O texto precisa começar depois da própria linha,
@@ -86,8 +99,8 @@ const cardPadding = computed(() => `${cell.value * 2}px`)
 // razão 1 e a tinta ganha sempre, o que é o comportamento certo aqui.
 const ruleColour = computed(() => {
   const onBlack = ratio(parseHex('#000000'), parseHex(CARD_BG))
-  const onInk = ratio(parseHex(colours.value.ink), parseHex(CARD_BG))
-  return onBlack >= onInk ? '#000000' : colours.value.ink
+  const onInk = ratio(parseHex(cardInk.value), parseHex(CARD_BG))
+  return onBlack >= onInk ? '#000000' : cardInk.value
 })
 
 const ruleStyle = computed(() => ({
@@ -241,7 +254,7 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
   <div :class="$style.demo">
     <div ref="stage" :class="$style.stage" :style="{ background: colours.bg }">
       <canvas ref="canvas" aria-hidden="true"></canvas>
-      <div :class="$style.card" :style="{ color: colours.ink, padding: cardPadding, background: CARD_BG }">
+      <div :class="$style.card" :style="{ color: cardInk, padding: cardPadding, background: CARD_BG }">
         <p :class="$style.tag">BLOG.LSANTOS.DEV / META</p>
         <div :class="$style.rule" :style="ruleStyle"></div>
         <p :class="$style.title">{{ TITLES[titleSize] }}</p>
