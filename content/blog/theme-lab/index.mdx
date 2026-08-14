@@ -23,104 +23,117 @@ Nada que se mexe começa se mexendo para quem pediu `prefers-reduced-motion: red
 
 ## Seção 00 / Tipografia
 
-Esta é a decisão mais cara do redesenho, e é por isso que o espécime abaixo não mostra uma linha bonita: ele mostra quatro parágrafos de português de verdade, com toda a acentuação da língua, no tamanho e na medida em que o post vive. Se o terceiro parágrafo cansa, a fonte respondeu.
+Esta é a decisão mais cara do redesenho, e o painel abaixo não renderiza amostra nenhuma: ele só controla. O que ele muda, ao vivo, é o post de verdade dentro do próprio painel, que é markdown puro passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog. Troque a fonte e o post inteiro troca com ela, com as citações, os callouts, a tabela e as notas no lugar.
 
-São doze tipos, todos livres e hospedados aqui. O seletor de baixo troca a fonte do título independente da fonte do corpo, então dá para testar pares. Os sliders de espaçamento existem por causa da regra 1.4.12 do WCAG: o texto precisa aguentar entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em sem quebrar. Suba os três até lá e veja o que acontece.
+É por isso que a amostra é um post e não quatro parágrafos limpos: escolher fonte olhando prosa lisa esconde tudo que um texto publicado carrega no meio do caminho. Os sliders de espaçamento existem por causa da regra 1.4.12 do WCAG, que não pede que o texto já venha espaçado, e sim que ele não quebre quando o leitor força entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em. Suba os três até lá e veja se a coluna aguenta.
 
-<LabDemo src="./components/TypeSpecimen.vue" client:visible />
+<LabDemo src="./components/TypeSpecimen.vue" client:visible>
+
+<div id="lab-post">
+
+
+### Uma consulta DNS, do clique ao pacote
+
+Digitar um domínio na barra de endereço parece instantâneo, mas embaixo dele existe uma cadeia inteira de perguntas e respostas que a maioria dos programadores nunca vê. O **DNS** não guarda um mapa completo em lugar nenhum: ele guarda pedaços, cada um numa autoridade diferente, e monta a resposta perguntando de cima para baixo. É essa indireção, e não um banco de dados gigante, que faz o sistema aguentar bilhões de nomes sem cair.
+
+O primeiro lugar que o navegador olha é o próprio cache: o do processo, depois o do sistema operacional. Se o nome já foi resolvido há pouco, a resposta sai dali e nenhum pacote sai da máquina. Quando o cache está frio, a pergunta sobe para um resolvedor recursivo, quase sempre o do provedor de internet ou um público como `1.1.1.1`. É esse resolvedor que faz o trabalho pesado <u>em nome do cliente</u>, um passo de cada vez, e é por isso que ele se chama recursivo: ele não devolve uma resposta parcial, insiste até ter a definitiva.
+
+#### Os registros que valem a pena entender
+
+Nem todo registro DNS guarda o mesmo tipo de coisa, e confundir um pelo outro é o erro mais comum de quem configura um domínio pela primeira vez.
+
+| Tipo    | Guarda                              | Exemplo comum                  |
+| ------- | ------------------------------------ | ------------------------------- |
+| `A`     | Um endereço IPv4                     | apontar um domínio para um servidor |
+| `AAAA`  | Um endereço IPv6                     | o mesmo, na versão nova do IP  |
+| `CNAME` | Um apelido para outro nome           | `www` apontando para o domínio raiz |
+| `MX`    | Para onde vai o e-mail do domínio    | delegar e-mail a um terceiro   |
+| `TXT`   | Texto arbitrário                     | provar que você é dono do domínio |
+| `NS`    | Quem é a autoridade daquela zona     | delegar um subdomínio inteiro  |
+
+A consulta raramente para no primeiro registro encontrado. Um `CNAME` manda o resolvedor perguntar de novo pelo nome novo, e essa cadeia pode ter vários elos antes de chegar a um `A` de verdade.<Sidenote>Uma cadeia de `CNAME` longa demais é uma causa clássica de lentidão silenciosa: cada elo é uma volta extra ao resolvedor, mesmo que cada volta individual seja rápida.</Sidenote> Nenhum desses registros expira sozinho: quem decide por quanto tempo ele fica em cache é o `TTL`, um número em segundos que acompanha cada resposta.<MarginNote>Um `TTL` baixo demais multiplica o tráfego sobre a autoridade; um `TTL` alto demais atrasa qualquer correção depois de um erro de configuração. A prática comum é baixar o `TTL` horas antes de uma migração planejada e subir de volta depois que o novo endereço já se espalhou.</MarginNote>
+
+> A internet inteira funciona porque ninguém precisa saber o endereço de ninguém, só o nome.
+
+Essa ideia não é nova. Ela é, na prática, o mesmo argumento que David Wheeler fez sobre indireção em geral, décadas antes do DNS existir na forma atual:
+
+> [!quote] David Wheeler
+> Todo problema em ciência da computação pode ser resolvido com mais uma camada de indireção, exceto o problema de camadas demais.
+
+O DNS é essa camada aplicada a nomes: ~~um índice fixo~~ um sistema hierárquico e distribuído, e é exatamente por ser distribuído que ele sobrevive à queda de qualquer servidor isolado, inclusive um dos treze grupos de servidores raiz.
+
+Uma função mínima de resolução, só para deixar o fluxo concreto, cabe em poucas linhas:
+
+```ts
+// src/dns/resolve.ts
+export async function resolveA(hostname: string): Promise<string[]> {
+  const response = await fetch(`https://dns.example/resolve?name=${hostname}&type=A`)
+  const { answers } = await response.json()
+  return answers.map((record: { data: string }) => record.data)
+}
+```
+
+E o mesmo resultado, olhando pela linha de comando em vez de código, com a ferramenta que qualquer administrador de rede usa primeiro para depurar um domínio:
+
+```bash
+dig +noall +answer example.com A
+```
+
+> [!NOTE]
+> `dig` sem nenhuma opção já mostra a resposta completa; `+noall +answer` só corta o ruído do cabeçalho e da seção de autoridade.
+
+> [!TIP]
+> Rodar `dig` contra um resolvedor específico com `dig @1.1.1.1 example.com` é o jeito mais rápido de saber se o problema está no cache local ou na configuração real do domínio.
+
+> [!WARNING]
+> Um `TTL` de zero não é "sempre atual": é uma sobrecarga garantida no resolvedor, porque nenhuma resposta fica em cache nem por um segundo.
+
+> [!IMPORTANT]
+> O DNS não é criptografado por padrão. `DNS over HTTPS` e `DNS over TLS` existem justamente para esconder qual nome está sendo resolvido de quem está observando a rede no meio do caminho.
+
+> [!QUESTION]
+> Se o resolvedor do provedor já é rápido o bastante, vale a pena trocar para um público só por causa da privacidade, ou isso é otimizar o elo errado da corrente?
+
+Antes de apontar um domínio novo em produção, a checklist de sempre é curta, mas pular um item dela é a causa mais comum de incidente evitável:
+
+- [x] Conferir o `TTL` atual antes de mudar qualquer registro
+- [x] Confirmar que o `NS` da zona aponta para a autoridade certa
+- [ ] Testar a resolução a partir de uma rede fora do escritório
+- [ ] Esperar o `TTL` antigo expirar antes de considerar a migração terminada
+
+A imagem abaixo não tenta ilustrar nada disso: é só um retângulo no preto de fundo do site, para conferir se a legenda nasce do lugar certo.
+
+![](./placeholder.png "Uma consulta DNS, do clique ao pacote")
+
+O que fica desse passeio inteiro é uma lista curta do que já foi conferido nesta bancada:
+
+- Ênfase: negrito, itálico, riscado e sublinhado
+- Código inline e blocos cercados, com e sem nome de arquivo
+- Citação simples e citação com autor
+- Cinco tipos de callout, não só um
+- Nota de rodapé, nota lateral e nota de margem
+- Imagem com legenda vinda do título, não do texto alternativo
+
+---
+
+Se este parágrafo já cansou de ler, a fonte do corpo respondeu antes de qualquer slider precisar responder por ela. A hierarquia inteira do DNS existe porque ninguém confia num único ponto central, e o mesmo raciocínio vale para escolher uma fonte de corpo: nenhum julgamento vindo de uma linha só resolve a pergunta.[^1]
+
+
+
+</div>
+
+</LabDemo>
+
+[^1]: Mockapetris, P. *Domain Names, Concepts and Facilities*, RFC 1035, IETF, 1987.
 
 Uma fonte de bitmap só fica nítida em múltiplo inteiro do tamanho em que foi desenhada. Falar isso não convence ninguém, então aqui está a escada: a mesma palavra de 8 a 32px, com os tamanhos que fecham no grid marcados e os outros mostrando o borrão.
 
 <LabDemo src="./components/WholePixel.vue" client:visible />
 
-### Um post de verdade, do começo ao fim
-
-Os dois espécimes acima têm controle: você troca a fonte, arrasta o tamanho, sobe o espaçamento. Este não tem nenhum, e é de propósito, porque escolher fonte olhando quatro parágrafos limpos esconde tudo que um post de verdade carrega no meio do texto. A pergunta aqui é outra: como a fonte escolhida se comporta com uma citação, um bloco de código, uma nota na margem e uma tabela atravessando o caminho?
-
-O trecho abaixo é markdown puro, passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog, sem nenhuma marcação escrita à mão para simular o resultado. Ele fica nesta seção, e não numa própria, porque não é um candidato: é a régua contra a qual os candidatos de tipografia se medem.
-
-O adaptador **CGA** da IBM chegou em 1981 com uma fonte bitmap de oito por oito pixels e uma paleta de dezesseis cores que, na propaganda, prometia um mundo colorido. Na prática eram ~~dezesseis cores simultâneas~~ só quatro por vez, e a escolha das quatro dependia do modo de vídeo. O amarelo do modo texto, aquele que toda tela de BBS usava para chamar atenção, era na verdade um marrom escurecido que o próprio monitor decidia clarear: *um capricho de hardware, não uma cor deliberada*. Isso aqui é sublinhado: <u>a linha embaixo da palavra</u>, e ela é a única ênfase desta lista escrita como tag HTML direto no `.mdx`, porque markdown puro não tem sintaxe própria para sublinhar, então esta não passa pelo remark como o negrito e o itálico passam.
-
-O manual técnico do adaptador nunca precisou de mais que uma frase para deixar clara essa dependência do hardware:
-
-> Toda paleta fixa é uma promessa que o próximo monitor não vai cumprir.
-
-E é por isso que a frase de Steve Jobs sobre a aula de caligrafia que ele cursou por acaso na faculdade continua valendo para qualquer decisão de tipografia, inclusive a desta página:
-
-> [!quote] Steve Jobs
-> Se eu nunca tivesse cursado aquela única disciplina de caligrafia na faculdade, o Macintosh jamais teria tido múltiplas fontes ou espaçamento proporcional entre letras.
-
-A curiosidade é que dá para reproduzir o essencial do efeito CGA em qualquer terminal moderno com uma dúzia de linhas. O arquivo abaixo guarda as sequências de escape mais usadas e, por começar com um comentário que parece caminho de arquivo, o nome aparece na aba do bloco:
-
-```ts
-// src/lib/ansi.ts
-export const ESC = '\x1b['
-export const green = `${ESC}32m`
-export const reset = `${ESC}0m`
-```
-
-Chamar essas constantes de um script comum já é suficiente para colorir a saída, sem precisar de biblioteca nenhuma:
-
-```bash
-printf '%b\n' '\033[32mtexto verde\033[0m'
-```
-
-Testar essa reconstituição ao lado da paleta da Seção 01 rendeu observações que vale registrar enquanto estão frescas:
-
-> [!NOTE]
-> O amarelo do CGA nunca existiu como amarelo puro: é o marrom mais escuro da paleta, esticado pelo monitor.
-
-> [!TIP]
-> Simular o efeito não precisa de canvas: um fundo sólido e uma sombra de texto de poucos pixels já entregam o essencial.
-
-> [!WARNING]
-> Um verde fosforescente sobre preto passa no contraste da WCAG e ainda assim cansa a vista depois de duas telas de texto corrido.
-
-> [!CAUTION]
-> Trocar a paleta inteira depois que os posts antigos já foram publicados quebra qualquer captura de tela guardada nas notas de lançamento.
-
-> [!IMPORTANT]
-> O corpo do texto não é o título: ele precisa aguentar quatro parágrafos seguidos, não só uma linha de exemplo.
-
-> [!QUESTION]
-> Vale a pena reproduzir o marrom que vira amarelo do CGA, ou isso é nostalgia disfarçada de decisão de design?
-
-> [!EXAMPLE]
-> A Seção 01 desta página já faz exatamente essa conta: troque o registro para CGA canônico e veja quantas cores reprovam como texto.
-
-O detalhe do marrom que vira amarelo não é lenda de corredor: está documentado na própria referência técnica do adaptador, que lista os dezesseis registros de cor e marca o oitavo como marrom, não como amarelo escuro.[^1]
-
-O truque de rebaixar o amarelo para marrom sobrevive até hoje em qualquer emulador que tente ser fiel ao original.<Sidenote>Vários emuladores de terminal fazem isso por padrão, com uma opção para desligar quando o objetivo é exatidão de sinal e não nostalgia.</Sidenote> Nenhum monitor CRT reproduzia as dezesseis cores do jeito que a paleta prometia no papel.<MarginNote>A convergência dos três canhões de elétron nunca foi perfeita, e é esse desalinhamento que dá à imagem de CRT uma maciez que nenhum filtro de pós-processamento imita direito.</MarginNote>
-
-A imagem abaixo não tenta reconstituir nada disso: é só um retângulo no preto de fundo do site, para conferir se a legenda nasce do lugar certo.
-
-![](./placeholder.png "A legenda vem do título do markdown, nunca do texto alternativo da imagem")
-
-Fechando o inventário desta bancada, o que já foi conferido nesta seção é:
-
-- Ênfase: negrito, itálico, riscado e sublinhado
-- Código inline e blocos cercados, com e sem nome de arquivo
-- Citação simples e citação com autor
-- Sete tipos de callout, não só um
-- Nota de rodapé, nota lateral e nota de margem
-- Imagem com legenda vinda do título, não do texto alternativo
-
-E o que ainda depende de alguém confirmar de olho na tela renderizada:
-
-- [x] Lista comum e lista de tarefas, incluindo esta mesma lista
-- [x] Régua horizontal, logo abaixo
-- [ ] O corpo do texto aguentando o parágrafo mais longo desta página sem cansar
-- [ ] O sublinhado em HTML não destoando do resto da ênfase ao lado dele
-
----
-
-Se este parágrafo já cansou de ler, a fonte do corpo respondeu antes de qualquer slider precisar responder por ela.
-
-[^1]: IBM, *Personal Computer Hardware Reference Library: Color/Graphics Monitor Adapter*, 1983, tabela de registros de paleta.
 
 ## Seção 01 / Cor
 
-A paleta da marca em registro de terminal, com o contraste calculado ao vivo embaixo de cada amostra. O ponto não é escolher cores bonitas: é ver quais delas sobrevivem como texto. Troque o registro para a CGA canônica e repare quantas reprovam.
+A paleta é uma só: as cinco cores da marca mais as tintas que o próprio site já usa para texto, apagado, link e friso. Um bloco por cor, com uma amostra no fundo escuro do site e outra no claro, cada uma com o próprio seletor de tom, porque a cor certa num fundo não é a mesma no outro. O achado é que um ajuste único não serve: no fundo claro o vermelho pede uns 6% de escurecer para passar em 4.5:1, o amarelo pede uns 48%, oito vezes mais, e é por isso que cada cor e cada fundo têm o próprio seletor em vez de um slider geral. Isso já tem precedente no código: o amarelo da marca, escurecido do mesmo jeito, é a cor de itálico do modo claro.
 
 <LabDemo src="./components/PaletteLab.vue" client:visible />
 

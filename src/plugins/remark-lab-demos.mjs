@@ -116,7 +116,12 @@ export function remarkLabDemos() {
             ...withoutAttributes(node, ['src', ...clientAttrs.map((attr) => attr.name)]),
             attribute('name', name),
           ]
-          node.children = [jsxElement(identifier, clientAttrs), sourceSlot(path, contents)]
+          // Anything the post wrote inside the tag is kept, between the island
+          // and the source toggle. That is what lets a demo carry sample content
+          // in the same panel as its controls: the type specimen drives a real
+          // post rendered by this same markdown pipeline, and the post has to be
+          // inside the panel for the two to read as one thing.
+          node.children = [jsxElement(identifier, clientAttrs), ...node.children, sourceSlot(path, contents)]
         } else {
           node.attributes = [...withoutAttributes(node, ['src']), attribute('name', name), attribute('html', contents)]
           node.children = [sourceSlot(path, contents)]
