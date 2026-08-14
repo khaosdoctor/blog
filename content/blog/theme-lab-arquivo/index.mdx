@@ -22,6 +22,25 @@ arquivo e continuam sendo compilados pelo build como qualquer outra ilha do site
 sliders, os seletores, a conta de contraste) continuam importados do laboratório vivo, para um candidato aposentado
 não virar motivo de duplicar código.
 
+## A capa em textmode
+
+O segundo candidato de animação virou a primeira tentativa de capa: em vez de fundo ambiente, a biblioteca monta um
+cartão, pintando o fundo de cada célula (`cellColor`, que é a técnica de gradiente por sombreado do ANSI) e desenhando
+uma moldura `╔═╗` de caracteres em volta.
+
+Ele perdeu por ser a mesma decisão duas vezes. A seção da capa no laboratório vivo faz o mesmo trabalho em `<svg>` de
+verdade, na proporção final de 1200x630, que é o formato que o `sharp` rasteriza no build sem passar por canvas nem por
+WebGL. Ter duas bancadas de capa lado a lado só dividia a atenção, e a de SVG é a que vira código de produção.
+
+O que ele deixou de aprendizado está registrado aqui porque custou tempo: um `<canvas>` sem atributos mede 300x150, e a
+biblioteca usa um canvas externo como está, então o primeiro quadro nascia nesse tamanho e ficava impresso no canto como
+uma cópia menor da cena; a tela de abertura da biblioteca, se o loop parasse no meio do fade dela, deixava a moldura do
+splash impressa por cima; e a caixa preta atrás do texto, quando foi adicionada para o título parar de se perder na
+arte, deixou a tinta de uma paleta escolhida para fundo claro em 1,54:1, o que é pior do que o problema que ela
+resolvia. Os três são o mesmo tipo de erro: assumir o que está atrás do que você está desenhando.
+
+<LabDemo src="./components/TmCover.vue" client:visible />
+
 ## O título sobre o campo animado
 
 O primeiro candidato de todos, e o mais próximo da captura que começou este trabalho: um título de post sobre um campo

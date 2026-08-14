@@ -4,39 +4,24 @@ pubDate: 2026-08-14
 lang: "pt"
 category: "meta"
 tags: ["meta", "design"]
-description: "Uma bancada de candidatos interativos para o redesenho: a animação em textmode, tipografia pixel testada em texto corrido, a paleta da marca em registro de terminal e as peças de interface. Nada aqui está aplicado ao site."
+description: "Uma bancada de candidatos interativos para o redesenho: tipografia testada em texto corrido de verdade, a paleta da marca em registro de terminal, as peças de interface, a capa gerada e a animação do logo."
 draft: false
 noindex: true
 ---
 
-Esta página é um cardápio, não uma proposta. Nada aqui está aplicado ao site: cada bloco é um candidato vivo, com os botões e sliders do lado, para você mexer e escolher. Onde um valor é questão de gosto, ele virou slider. Onde ele é questão de leitura, o número do contraste está impresso embaixo.
+Esta página é um cardápio, não uma proposta. Cada bloco é um candidato vivo, com os botões e sliders do lado, para você mexer e escolher. Onde um valor é questão de gosto, ele virou slider. Onde ele é questão de leitura, o número do contraste está impresso embaixo.
 
-Três coisas que valem saber antes de descer:
+Quatro coisas que valem saber antes de descer:
 
 O raciocínio inteiro, com o que foi tentado e descartado, está em `docs/theming.md`. Esta página mostra; aquele arquivo explica.
 
-A biblioteca de animação é a [textmode.js](https://code.textmode.art), instalada como dependência e empacotada junto com o site. Ela não pode vir de CDN: a política de segurança do site só aceita script da própria origem, e uma tag apontando para o jsDelivr seria bloqueada em silêncio, com a demonstração ficando preta sem dizer por quê. Todas as fontes seguem a mesma regra e moram em `public/fonts/`.
+Nem tudo aqui continua em aberto. A paleta e as fontes de título e de subtítulo já foram decididas e já estão aplicadas no site, e onde isso vale a seção diz. O que sobrou de decisão é a fonte do corpo, a capa e a animação do logo.
+
+Os candidatos que perderam não foram apagados: estão em [[theme-lab-arquivo]], funcionando, cada um com o motivo. A [textmode.js](https://code.textmode.art) só é usada por eles agora, e continua instalada como dependência por causa disso. Nenhum candidato desta página precisa de WebGL: os que sobraram são SVG, CSS e DOM. Vale como resposta à pergunta que abriu o trabalho, porque a biblioteca custa cento e noventa quilobytes e nada do que ficou de pé precisou dela.
 
 Nada que se mexe começa se mexendo para quem pediu `prefers-reduced-motion: reduce`, e tudo que se mexe tem um interruptor para parar.
 
-## Seção 00 / A animação
-
-Sobrou um candidato aqui. Os outros três estão em [[theme-lab-arquivo]], funcionando, cada um com o motivo de ter
-saído: o título sobre o campo de caracteres animado e o sólido girando saíram porque o blog vai ter quase nenhuma
-animação e o único lugar com movimento constante é o logo, que se decide na seção 06; e a reprodução em CSS da seção
-"What will you create?" saiu porque ela era a página da textmode.art e não este blog.
-
-O que ficou é a capa gerada. Aqui o textmode.js pinta o fundo de cada célula, que é como o ANSI fazia gradiente, e desenha uma moldura de caixa em volta. Uma capa é um PNG parado, então esta começa congelada e a animação existe só para você escolher o quadro. O seletor de comprimento do título responde à pergunta que está aberta em `docs/design.md`: um título de noventa caracteres continua cabendo.
-
-<LabDemo src="./components/TmCover.vue" client:visible />
-
-Dois candidatos desta seção saíram, e os dois estão em [[theme-lab-arquivo]], funcionando, com o motivo de cada um: o
-sólido girando em caracteres, porque o blog vai ter quase nenhuma animação e o único lugar com movimento constante é o
-logo; e a reprodução em CSS da seção "What will you create?", porque ela era a página da textmode.art e não este blog.
-
-A animação que sobrou para decidir é a do logo, na seção 06.
-
-## Seção 01 / Tipografia
+## Seção 00 / Tipografia
 
 Esta é a decisão mais cara do redesenho, e é por isso que o espécime abaixo não mostra uma linha bonita: ele mostra quatro parágrafos de português de verdade, com toda a acentuação da língua, no tamanho e na medida em que o post vive. Se o terceiro parágrafo cansa, a fonte respondeu.
 
@@ -48,53 +33,11 @@ Uma fonte de bitmap só fica nítida em múltiplo inteiro do tamanho em que foi 
 
 <LabDemo src="./components/WholePixel.vue" client:visible />
 
-## Seção 02 / Cor
+### Um post de verdade, do começo ao fim
 
-A paleta da marca em registro de terminal, com o contraste calculado ao vivo embaixo de cada amostra. O ponto não é escolher cores bonitas: é ver quais delas sobrevivem como texto. Troque o registro para a CGA canônica e repare quantas reprovam.
+Os dois espécimes acima têm controle: você troca a fonte, arrasta o tamanho, sobe o espaçamento. Este não tem nenhum, e é de propósito, porque escolher fonte olhando quatro parágrafos limpos esconde tudo que um post de verdade carrega no meio do texto. A pergunta aqui é outra: como a fonte escolhida se comporta com uma citação, um bloco de código, uma nota na margem e uma tabela atravessando o caminho?
 
-<LabDemo src="./components/PaletteLab.vue" client:visible />
-
-E os efeitos de tubo, cada um com a conta do que custa. Tudo começa em zero de propósito, porque a pergunta não é quanto de scanline: é se scanline serve para alguma coisa. Suba o slider e olhe o número ao lado dele cair.
-
-Não existe curvatura de tela aqui, e não vai existir.
-
-<LabDemo src="./components/CrtEffects.vue" client:visible />
-
-## Seção 03 / Interface
-
-O cabeçalho, em cinco leituras da mesma direção. Nenhuma usa imagem ou ícone: é tudo caractere, o que significa que nada disso custa uma requisição.
-
-<LabDemo src="./components/ChromeHeader.vue" client:visible />
-
-A lista de posts, que é a página mais visitada do site depois dos posts. Quatro leituras, da mais densa à mais decorada.
-
-<LabDemo src="./components/ChromeList.vue" client:visible />
-
-E os botões, os cinco lado a lado para escolher olhando.
-
-<LabDemo src="./components/ChromeButton.vue" client:visible />
-
-## Seção 04 / A capa
-
-A capa é a imagem que aparece no card do Twitter, do Slack, do WhatsApp: 1200×630, com o título assado por cima. Três candidatos abaixo, todos `<svg>` de verdade, na mesma proporção da imagem final, porque é assim que o gerador de verdade vai rasterizar: `sharp` lendo o SVG no build, sem passar por canvas nem por WebGL.
-
-O primeiro é a janela DOS: fundo preto, moldura dupla de retângulos com um vão generoso entre as duas linhas (a primeira tentativa tinha as duas quase coladas, e ficava ilegível como moldura, só como risco duplo). O segundo tira a moldura inteira e põe a cor da marca a plena tinta atrás do texto, com o contraste invertido para continuar legível sobre um fundo claro como o amarelo. O terceiro é o mais arriscado: um campo de plasma gerado por senos somados, único por post, com o título carregando uma sombra rígida de poucos pixels para não se perder quando o campo passa por baixo dele numa cor clara.
-
-Nenhuma cor aqui vem de `Math.random()`. Tudo sai de um número inteiro — a "semente" — e no gerador de verdade essa semente é o hash do slug do post, então o mesmo post sempre bate a mesma capa. O knob de semente existe só para você embaralhar as cinco cores da marca e ver a variedade sem editar código. O comprimento do título tem os mesmos três tamanhos da Seção 00: o de noventa caracteres é o que decide se a quebra de linha aguenta um título ruim de verdade.
-
-<LabDemo src="./components/CoverLab.vue" client:visible />
-
-## O que ainda não está aqui
-
-O ícone, porque a lista curta em `docs/design.md` já resolve e nenhuma opção dali precisa ser vista mexendo para ser escolhida.
-
-O rodapé e o lugar das preferências do leitor, porque essa decisão depende de qual cabeçalho ganhar.
-
-Quatro tipos que a pesquisa encontrou e que valeria testar: Geist Pixel (Vercel, 2026, com eixo variável de forma do elemento), Bitcount (cinco eixos, incluindo cursivo), Doto e Workbench (que tem um eixo `SCAN` de scanline embutido na própria fonte, o que resolveria o problema de contraste da seção 02 de um jeito que nenhum overlay resolve). Todos são OFL e todos estão no Google Fonts. Eles não estão nesta página porque a rede da máquina onde ela foi montada parou de responder no meio do download, e não porque foram descartados.
-
-## Seção 05 / Texto de verdade
-
-As quatro seções acima mostram peças soltas: um slider, uma amostra, um componente isolado. Esta última não tem controle nenhum, só uma página de texto comum, porque a pergunta que sobra depois de escolher fonte e paleta é sempre a mesma: como fica um post publicado de verdade, com parágrafo atrás de parágrafo, uma citação, um bloco de código e uma nota de rodapé no meio do caminho? O trecho abaixo é markdown puro, passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog, sem nenhuma marcação escrita à mão para simular o resultado.
+O trecho abaixo é markdown puro, passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog, sem nenhuma marcação escrita à mão para simular o resultado. Ele fica nesta seção, e não numa própria, porque não é um candidato: é a régua contra a qual os candidatos de tipografia se medem.
 
 O adaptador **CGA** da IBM chegou em 1981 com uma fonte bitmap de oito por oito pixels e uma paleta de dezesseis cores que, na propaganda, prometia um mundo colorido. Na prática eram ~~dezesseis cores simultâneas~~ só quatro por vez, e a escolha das quatro dependia do modo de vídeo. O amarelo do modo texto, aquele que toda tela de BBS usava para chamar atenção, era na verdade um marrom escurecido que o próprio monitor decidia clarear: *um capricho de hardware, não uma cor deliberada*. Isso aqui é sublinhado: <u>a linha embaixo da palavra</u>, e ela é a única ênfase desta lista escrita como tag HTML direto no `.mdx`, porque markdown puro não tem sintaxe própria para sublinhar, então esta não passa pelo remark como o negrito e o itálico passam.
 
@@ -122,7 +65,7 @@ Chamar essas constantes de um script comum já é suficiente para colorir a saí
 printf '%b\n' '\033[32mtexto verde\033[0m'
 ```
 
-Testar essa reconstituição ao lado da paleta da Seção 02 rendeu observações que vale registrar enquanto estão frescas:
+Testar essa reconstituição ao lado da paleta da Seção 01 rendeu observações que vale registrar enquanto estão frescas:
 
 > [!NOTE]
 > O amarelo do CGA nunca existiu como amarelo puro: é o marrom mais escuro da paleta, esticado pelo monitor.
@@ -143,7 +86,7 @@ Testar essa reconstituição ao lado da paleta da Seção 02 rendeu observaçõe
 > Vale a pena reproduzir o marrom que vira amarelo do CGA, ou isso é nostalgia disfarçada de decisão de design?
 
 > [!EXAMPLE]
-> A Seção 02 desta página já faz exatamente essa conta: troque o registro para CGA canônico e veja quantas cores reprovam como texto.
+> A Seção 01 desta página já faz exatamente essa conta: troque o registro para CGA canônico e veja quantas cores reprovam como texto.
 
 O detalhe do marrom que vira amarelo não é lenda de corredor: está documentado na própria referência técnica do adaptador, que lista os dezesseis registros de cor e marca o oitavo como marrom, não como amarelo escuro.[^1]
 
@@ -175,7 +118,43 @@ Se este parágrafo já cansou de ler, a fonte do corpo respondeu antes de qualqu
 
 [^1]: IBM, *Personal Computer Hardware Reference Library: Color/Graphics Monitor Adapter*, 1983, tabela de registros de paleta.
 
-## Seção 06 / O logo animado
+## Seção 01 / Cor
+
+A paleta da marca em registro de terminal, com o contraste calculado ao vivo embaixo de cada amostra. O ponto não é escolher cores bonitas: é ver quais delas sobrevivem como texto. Troque o registro para a CGA canônica e repare quantas reprovam.
+
+<LabDemo src="./components/PaletteLab.vue" client:visible />
+
+E os efeitos de tubo, cada um com a conta do que custa. Tudo começa em zero de propósito, porque a pergunta não é quanto de scanline: é se scanline serve para alguma coisa. Suba o slider e olhe o número ao lado dele cair.
+
+Não existe curvatura de tela aqui, e não vai existir.
+
+<LabDemo src="./components/CrtEffects.vue" client:visible />
+
+## Seção 02 / Interface
+
+O cabeçalho, em cinco leituras da mesma direção. Nenhuma usa imagem ou ícone: é tudo caractere, o que significa que nada disso custa uma requisição.
+
+<LabDemo src="./components/ChromeHeader.vue" client:visible />
+
+A lista de posts, que é a página mais visitada do site depois dos posts. Quatro leituras, da mais densa à mais decorada.
+
+<LabDemo src="./components/ChromeList.vue" client:visible />
+
+E os botões, os cinco lado a lado para escolher olhando.
+
+<LabDemo src="./components/ChromeButton.vue" client:visible />
+
+## Seção 03 / A capa
+
+A capa é a imagem que aparece no card do Twitter, do Slack, do WhatsApp: 1200×630, com o título assado por cima. Três candidatos abaixo, todos `<svg>` de verdade, na mesma proporção da imagem final, porque é assim que o gerador de verdade vai rasterizar: `sharp` lendo o SVG no build, sem passar por canvas nem por WebGL.
+
+O primeiro é a janela DOS: fundo preto, moldura dupla de retângulos com um vão generoso entre as duas linhas (a primeira tentativa tinha as duas quase coladas, e ficava ilegível como moldura, só como risco duplo). O segundo tira a moldura inteira e põe a cor da marca a plena tinta atrás do texto, com o contraste invertido para continuar legível sobre um fundo claro como o amarelo. O terceiro é o mais arriscado: um campo de plasma gerado por senos somados, único por post, com o título carregando uma sombra rígida de poucos pixels para não se perder quando o campo passa por baixo dele numa cor clara.
+
+Nenhuma cor aqui vem de `Math.random()`. Tudo sai de um número inteiro — a "semente" — e no gerador de verdade essa semente é o hash do slug do post, então o mesmo post sempre bate a mesma capa. O knob de semente existe só para você embaralhar as cinco cores da marca e ver a variedade sem editar código. O comprimento do título tem os mesmos três tamanhos da Seção 00: o de noventa caracteres é o que decide se a quebra de linha aguenta um título ruim de verdade.
+
+<LabDemo src="./components/CoverLab.vue" client:visible />
+
+## Seção 04 / O logo animado
 
 A decisão que abre esta bancada inteira: o site vai ter quase nenhuma animação, e a única exceção é a marca do cabeçalho. Não o título, não a lista de posts, não os botões. Só ela, o tempo todo, baixinho, como um pulso de disco rígido: a coisa que prova que a página está viva sem competir com o texto por atenção.
 
@@ -184,3 +163,11 @@ O cabeçalho é uma linha só: a marca animada, e do lado "Lucas Santos" por ext
 A marca em si veio do `public/favicon.svg` deste repo, cinco retângulos com as cores oficiais. A arte de referência tem dezenove linhas de altura, mas o cabeçalho tem uma linha só, então cada candidato abaixo resolve essa compressão de um jeito: ou desenha os cinco retângulos de verdade, pequenos, ou rasteriza a marca numa grade de oito por oito células e perde a nuance do bloco amarelo, que já era pequeno para começar. Nenhuma variação usa 3D nem gira nada: essa direção já foi descartada antes desta página existir.
 
 <LabDemo src="./components/LogoLab.vue" client:visible />
+
+## O que ainda não está aqui
+
+O ícone, porque a lista curta em `docs/design.md` já resolve e nenhuma opção dali precisa ser vista mexendo para ser escolhida.
+
+O rodapé e o lugar das preferências do leitor, porque essa decisão depende de qual cabeçalho ganhar.
+
+Quatro tipos que a pesquisa encontrou e que valeria testar: Geist Pixel (Vercel, 2026, com eixo variável de forma do elemento), Bitcount (cinco eixos, incluindo cursivo), Doto e Workbench (que tem um eixo `SCAN` de scanline embutido na própria fonte, o que resolveria o problema de contraste da seção 01 de um jeito que nenhum overlay resolve). Todos são OFL e todos estão no Google Fonts. Eles não estão nesta página porque a rede da máquina onde ela foi montada parou de responder no meio do download, e não porque foram descartados.
