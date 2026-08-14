@@ -2,7 +2,7 @@
 
 The long version. `docs/design.md` is the short one, kept skimmable on purpose; this file is the opposite. It records what was looked at, what was tried, what was thrown away and why, and where the reasoning is still incomplete. Every candidate named here exists and is interactive at `/theme-lab/`, and everything at `/theme-lab/` is explained here.
 
-Nothing in here is applied to the site. `src/styles/` is untouched.
+This started as a pure exploration with nothing applied to the site, and that is no longer true. The parts that have since been adopted are marked as decided where they appear, and the short list of them lives in `docs/design.md`: the two page grounds, the brand purple, and the display and subtitle faces. Everything else here is still a candidate.
 
 ---
 

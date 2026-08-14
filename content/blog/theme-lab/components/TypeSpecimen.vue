@@ -18,9 +18,13 @@ import { CODE_SAMPLE, DECK, DIACRITICS, HEADING, PARAGRAPHS } from './copy'
 import { parseHex, ratio } from './contrast'
 import './fonts.css'
 
+// Os dois primeiros são os fundos de verdade do site, iguais aos tokens em
+// src/styles/theme.css: preto absoluto no escuro e o sépia no claro. Eram
+// #14161a e #fffdf9 antes da paleta ser decidida, o que fazia esta bancada medir
+// contraste contra fundos que o site não usa mais.
 const THEMES = {
-  escuro: { bg: '#14161a', fg: '#e6e4e0', muted: '#9a9ea6' },
-  claro: { bg: '#fffdf9', fg: '#1a1c20', muted: '#5d6169' },
+  escuro: { bg: '#000000', fg: '#e0dcd4', muted: '#a8a29a' },
+  claro: { bg: '#f4efe0', fg: '#332d23', muted: '#6b6353' },
   fosforo: { bg: '#000000', fg: '#20c20e', muted: '#118a08' },
   ambar: { bg: '#0a0704', fg: '#ffb000', muted: '#a67200' },
 }
