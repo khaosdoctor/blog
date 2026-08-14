@@ -51,6 +51,10 @@ verificou de ponta a ponta.
 
 Não são perguntas, são coisas em construção ou dívida conhecida. Ficam aqui para você não descobrir de surpresa.
 
+- **Índice fixo na margem esquerda.** Já no ar em todo post (`src/components/PostToc.astro`): moldura dupla ANSI,
+  indentação por nível, indicadores de dobra, a linha da seção atual pintada invertida de ponta a ponta, e um botão no
+  canto abaixo de 78rem. Falta uma decisão sua: se ele começa dobrado nos níveis h3 em post longo, e se entra como
+  chave no menu de preferências junto com as prévias de link.
 - **Menu de preferências na navbar.** Em construção: esquema de cor, animações, tamanho e face do corpo, alto contraste,
   tema fósforo e âmbar, prévias de link, posição das notas de rodapé e tema de código, todos num só lugar. Absorve o
   seletor de tema de código que hoje mora em cada bloco e o botão de prévias fixadas que não tinha casa.
