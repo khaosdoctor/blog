@@ -170,7 +170,7 @@ Faces deliberately excluded on licence grounds: **Berkeley Mono** (commercial; t
 
 Red `#e30613`, green `#45b384`, yellow `#f5b200`, blue `#0578be`. These stay, so the colour question is never "what palette" and always "what happens to this palette in a terminal register". That is what the palette lab is: the brand colours are one of seven registers, and the same live contrast arithmetic runs on all of them, so the brand can be compared to CGA and to phosphor on identical terms.
 
-Purple was the exception, since the brand never had one and quotes needed it. It now comes from the old Ghost theme, which painted its whole page in purple without ever putting one in the icon: `#4b15a8`, the accent it used over `#080016`, with `#210a47` and `#2f0f67` as the steps between. Recorded here because the source is a site that will stop existing at the DNS cutover.
+Purple was the exception, since the brand never had one and quotes needed it. It now comes from the old Ghost theme, which painted its whole page in purple without ever putting one in the icon: `#4b15a8`, the accent it used over a ramp of `#080016`, `#160731`, `#210a47` and `#2f0f67`. Recorded here because the source is a site that will stop existing at the DNS cutover.
 
 ### The two page grounds, and why neither is grey
 
@@ -186,7 +186,7 @@ One knock-on worth recording: the brand blue at `#0578be` measures 4.12:1 on tha
 
 ## 5. How the demos are built
 
-Eleven Vue islands in `content/blog/theme-lab/components/`, plus four shared files:
+Twelve Vue islands in `content/blog/theme-lab/components/`, plus four shared files:
 
 - `Knob.vue`, `Pick.vue`, `Toggle.vue`, `Panel.vue`. A slider, a select, a checkbox and a bordered control strip, styled in the site's own tokens.
 - `contrast.ts`. WCAG 2.1 relative luminance and ratio, plus `composite()` for alpha-blending an overlay over a colour, which is what makes the scanline arithmetic honest.
@@ -262,7 +262,7 @@ Cost: the most expensive of the three, and the readout says so.
 **4. CSS heading (`CssHeading.vue`).** The same screenshot with no WebGL at all. Kicker, heading with an accent word, terminal box with a `>_` prompt and a typewriter with a block cursor, tagline, bracketed button. Knobs: six faces, five accents including the reference's own periwinkle `#a8b1ff`, title size, tracking, glow, four border treatments, typing speed, brackets on/off, animation on/off.
 This exists so the 194KB of library has to justify itself against something that costs nothing. It is also the only one of the four that would work identically on a phone with a weak GPU.
 
-**5. Type specimen (`TypeSpecimen.vue`).** Twelve faces, four real paragraphs, a diacritics line, a code sample, four backgrounds (site dark, site light, phosphor, amber). Separate face pickers for display and body so pairings can be tested. Sliders for size, line height, letter spacing, word spacing and measure, with a live WCAG 1.4.12 verdict. Shows the chosen face's licence, role and width, and warns when the size is off a bitmap face's grid.
+**5. Type specimen (`TypeSpecimen.vue`).** Now that display and subtitle are decided, this demo picks up where section 6 below leaves off: the title renders in Departure Mono and the deck in PxPlus IBM VGA8, both fixed and labelled as already decided, and the one picker left chooses the body face, from the seven candidates still in play (IBM Plex Mono, Handjet, Inter, Roboto, Source Serif 4, Literata, Atkinson Hyperlegible). Four real paragraphs, a diacritics line, a code sample, four backgrounds (site dark, site light, phosphor, amber). Sliders for size, line height, letter spacing, word spacing and measure, with a live WCAG 1.4.12 verdict. Shows the chosen face's licence, role and width.
 
 **6. Whole-pixel ladder (`WholePixel.vue`).** Fifteen sizes from 8 to 32px, on-grid ones marked. Integer `zoom` magnifier, anti-aliasing kill switch, dark/light background.
 
@@ -271,6 +271,8 @@ This exists so the 194KB of library has to justify itself against something that
 **8. CRT effects (`CrtEffects.vue`).** Scanlines with a separate pitch control, glow, grain, vignette, flicker. **Everything starts at zero.** The readout shows the base contrast, the contrast on the dark scanline row, and the difference, recomputed as you drag. There is no curvature and there will not be. The grain is an inline `feTurbulence` SVG rather than a `data:` URI, which keeps it clear of the CSP with nothing to configure.
 
 **9, 10, 11. Chrome (`ChromeHeader.vue`, `ChromeList.vue`, `ChromeButton.vue`).** Five headers (box-drawing bar, inverted DOS status line, minimal dotted rule, Game Boy menu with a `▸` cursor, dense ledger with `SEÇÃO 00 / ÍNDICE` and a version string), four post lists (dense four-column table, ledger with dotted leaders, Game Boy menu, cards with the site's existing thick-left-edge idiom), five buttons (brackets, solid block, double frame, prompt prefix, menu cursor on hover). All character-only: no image, no icon, no request. Every one carries face, tracking, density and colour knobs, and the button demo reports the touch target height against the 44px minimum.
+
+**12. Cover candidates (`CoverLab.vue`).** Section 04, and a different problem from candidate 2 above: this is the actual OG/social card, 1200×630, that ships in `og:image`. Three real `<svg viewBox="0 0 1200 630">` elements, not canvas, because the real generator rasterises that same markup with `sharp` at build time, so what renders here matches exactly what the build will output. The first is a DOS window: black background, a double rectangle frame with the space between the two lines widened after an earlier pass came back too tight to read as a frame rather than a doubled line. The second drops the frame and floods the card in the brand colour at full strength, with a rule at 75% of the card's width under the kicker, and the ink changes to a dark colour only for the one brand hue, yellow, where light text on light would fail. The third is a plasma field from three summed sine waves, unique per post, with the title carrying a hard 3px shadow because the field underneath it can turn light enough to erase plain text. Nothing here calls `Math.random()`: a small string hash of the post's slug picks both the brand colour and the plasma's phase, so a rebuild of an existing post never changes its cover; the lab's own seed knob only adds to that hash so the five brand colours can be cycled through without touching code. Each candidate prints its own live title contrast, and the plasma's is marked as a worst case, since the background underneath it is the one card here that is not a flat colour.
 
 ---
 
@@ -372,6 +374,8 @@ One thing the lab does not yet handle and the real site will have to: `forced-co
 **Skip PxPlus IBM VGA.** It is the most authentic thing in the set and it is the wrong trade. Sixteen-pixel multiples only, a rendering behaviour Safari does not guarantee, and a share-alike licence on a repository that goes public. If the DOS register is wanted for one specific element, use it for one specific element and record the credit.
 
 **Animation: candidate 4, the CSS heading, as the default. Candidate 1, the textmode heading, on the home page only.** The typewriter and block cursor are the part of the reference that carries the feeling, and they cost nothing, work everywhere, and stop instantly for reduced motion. The WebGL character field is genuinely better looking and is worth one WebGL2 context on one page. Putting it on every post header means every article page carries 194KB and a render loop for an ornament above the title. Candidate 2, the cover generator, is the one that earns its weight outright, because it runs at build time and ships a PNG.
+
+**Since this was written, the cover question moved on from candidate 2.** The real generator does not use textmode.js at all: it draws the card as plain `<svg>` and rasterises it with `sharp` at build time, so the 194KB library argument above no longer applies to covers, only to the header animation. The three shapes that approach actually produces are section 04's `CoverLab.vue`, covered in section 7, and which of the three wins is still open in `docs/design.md`.
 
 **Scanlines: no.** Section 8 has the arithmetic. They are only safe where they are invisible, none of the modern references use them, and they are the fastest way to make this read as costume. If the texture is wanted, try Workbench's `SCAN` axis instead, which puts it in the letterform where it belongs.
 

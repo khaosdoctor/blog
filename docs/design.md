@@ -24,8 +24,9 @@ Purple is `#4b15a8`, taken from the old Ghost theme rather than the favicon, whi
 `--radius: 0` by default, because rounded corners fight a pixel grid.
 
 The two page grounds are decided: **`#000000` in dark**, true black so OLED pixels switch off, with the hint of purple
-in `--rule` instead of in the page; **`#f4efe0` in light**, a NieR Automata sepia with warm ink at `#332d23`. Full
-reasoning and the measured ratios are in `docs/theming.md`.
+in `--rule` instead of in the page; **`#f4efe0` in light**, a NieR Automata sepia with warm ink at `#332d23`. The brand
+blue had to move for the sepia too: it measured 4.12:1 there, under the 4.5 minimum, so `--accent` in light mode is
+`#1a5c96` instead of the raw brand hex. Full reasoning and the measured ratios are in `docs/theming.md`.
 
 ## Fonts
 
@@ -114,4 +115,5 @@ Decided and implemented. Kept short on purpose; the code is the detail.
 - Which body face wins. Everything else about the type system is settled.
 - `--rule-core`: the lab page carries the colour and density options for the section break.
 - Whether the code language chip should still show when a filename tab is already present.
-- Which of his other domains count as internal for the link icon. `lsantos.dev` is the only one confirmed.
+- Which of his other domains count as internal for the link icon. `lsantos.dev` and `lsantos.me` are confirmed now;
+  anything beyond those two is still open.
