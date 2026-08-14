@@ -254,3 +254,21 @@ just needs to stay legible for a 3000-word article and is the only one still ope
 
 The fonts are all hosted here, in `public/fonts/`, because the site's CSP is `font-src 'self'` and a link to
 Google Fonts gets blocked outright. The licenses are in `public/fonts/LICENSES.txt`.
+
+## The outline is a pinned panel in the left margin
+
+Every post carries `PostToc`, built from the headings Astro already collected while rendering, so it cannot
+disagree with the ids the heading anchors use. h1 is out (it is the page, not a section), anything below h4 is out,
+and the generated footnotes heading is out. A post with fewer than two headings shows nothing.
+
+The frame is a 3px `double` border rather than box-drawing characters: the ANSI look without a monospace grid to
+maintain, which also survives a font change. Full black on the sepia page and full white on the dark one, which is
+the one place on this site that ignores the muted greys, because chrome that fades into the page is chrome the
+reader has to hunt for. The line the reader is inside is painted edge to edge in the inverse.
+
+Where the reader is comes from the last heading above a 120px line, not an `IntersectionObserver`: a long section
+whose heading has scrolled far off the top intersects nothing while still being the section the reader is in.
+
+Below 78rem there is no free margin to pin anything to, so the panel becomes a handle at the bottom left and opens
+over the corner. Section jumps ease (`scroll-behavior: smooth` on `:root`), but only for readers who have not asked
+for reduced motion.
