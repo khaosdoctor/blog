@@ -8,8 +8,8 @@
 // This only renders the picker. Preventing a flash of the wrong theme needs the
 // blocking script in BaseLayout's <head>, which runs before any stylesheet.
 //
-// The four theme names are not translated: they are the themes' own names, the
-// way a font name is not translated either.
+// Theme names are not translated: they are the themes' own names, the way a
+// font name is not translated either.
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -24,18 +24,52 @@ const { locale } = Astro.props
   hidden
   data-label={t(locale, 'codeTheme')}
   data-auto={t(locale, 'codeThemeAuto')}
-  data-github-light="GitHub light"
-  data-github-dark="GitHub dark"
+  data-github-light="GitHub Light"
+  data-github-dark="GitHub Dark"
   data-monokai="Monokai"
-  data-solarized-dark="Solarized dark"
+  data-dracula="Dracula"
+  data-catppuccin-latte="Catppuccin Latte"
+  data-catppuccin-frappe="Catppuccin Frappé"
+  data-catppuccin-macchiato="Catppuccin Macchiato"
+  data-catppuccin-mocha="Catppuccin Mocha"
+  data-kanagawa-wave="Kanagawa Wave"
+  data-kanagawa-dragon="Kanagawa Dragon"
+  data-kanagawa-lotus="Kanagawa Lotus"
+  data-ayu-light="Ayu Light"
+  data-ayu-dark="Ayu Dark"
+  data-snazzy-light="Snazzy"
 >
   <label for="ct-theme"></label>
   <select id="ct-theme">
     <option value="auto"></option>
-    <option value="github-light"></option>
-    <option value="github-dark"></option>
-    <option value="monokai"></option>
-    <option value="solarized-dark"></option>
+    <optgroup label="GitHub">
+      <option value="github-light"></option>
+      <option value="github-dark"></option>
+    </optgroup>
+    <optgroup label="Monokai">
+      <option value="monokai"></option>
+    </optgroup>
+    <optgroup label="Dracula">
+      <option value="dracula"></option>
+    </optgroup>
+    <optgroup label="Catppuccin">
+      <option value="catppuccin-latte"></option>
+      <option value="catppuccin-frappe"></option>
+      <option value="catppuccin-macchiato"></option>
+      <option value="catppuccin-mocha"></option>
+    </optgroup>
+    <optgroup label="Kanagawa">
+      <option value="kanagawa-wave"></option>
+      <option value="kanagawa-dragon"></option>
+      <option value="kanagawa-lotus"></option>
+    </optgroup>
+    <optgroup label="Ayu">
+      <option value="ayu-light"></option>
+      <option value="ayu-dark"></option>
+    </optgroup>
+    <optgroup label="Snazzy">
+      <option value="snazzy-light"></option>
+    </optgroup>
   </select>
 </p>
 

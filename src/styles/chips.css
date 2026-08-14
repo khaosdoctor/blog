@@ -1,0 +1,56 @@
+/*
+ * Tags and categories, as chips.
+ *
+ * Same frame as every other card on the site, shrunk: a double rule, square
+ * corners, and text a shade darker than its own border so the two read as one
+ * object rather than a box with something in it. Hovering fills the chip solid
+ * in that colour and inverts the text.
+ *
+ * The colour comes from `--chip-color`, set per chip by the page that renders
+ * it, so a tag row can be many colours without a class per tag. The palette is
+ * picked from the tag's own name in src/lib/taxonomy.ts, which means the same
+ * tag is always the same colour and adding a tag needs no CSS.
+ */
+
+.chip {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border: 3px double var(--chip-color);
+  border-radius: var(--radius);
+  background: transparent;
+  /* Slightly darker than the border, per theme: on a light page that means
+     mixing toward black, on a dark page the border is already the bright end and
+     the text steps down from it. */
+  color: light-dark(
+    color-mix(in oklab, var(--chip-color) 78%, black),
+    color-mix(in oklab, var(--chip-color) 82%, black)
+  );
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition:
+    background-color var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+
+.chip:hover,
+.chip:focus-visible {
+  background: var(--chip-color);
+  /* Against a filled chip the page background is the readable side, whichever
+     theme is on: the chip colours are all mid-to-bright. */
+  color: var(--bg);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block-start: 3rem;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li::marker {
+  content: '';
+}

@@ -172,7 +172,11 @@ function buildAside(ref, definitions) {
   return {
     type: 'element',
     tagName: 'aside',
-    properties: { className: ['footnote-aside'], id: `${refId}-margin` },
+    // The hook src/components/FootnoteSidenotes.astro needs to pair this
+    // aside with its reference for the hover/focus highlight-and-grow: the
+    // reference's own id, not a fresh one, so the script resolves it with a
+    // plain getElementById instead of parsing anything at runtime.
+    properties: { className: ['footnote-aside'], id: `${refId}-margin`, dataFootnoteRefId: refId },
     children: clonedBody,
   }
 }

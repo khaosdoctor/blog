@@ -35,6 +35,19 @@
 }
 
 /*
+ * Hovering a link takes it to the foreground colour and thickens it.
+ *
+ * The weight comes from a text stroke rather than `font-weight: bold`, which
+ * would reflow the paragraph under the cursor: a bolder face is wider, so every
+ * word after the link would shift as the pointer crossed it.
+ */
+.prose a:hover,
+.prose a:focus-visible {
+  color: var(--fg);
+  -webkit-text-stroke: 0.02em currentColor;
+}
+
+/*
  * A wikilink to a post that is still a draft. Wikipedia's red link, in a red that
  * survives both themes, with the localised "not written yet" marker beside it
  * doing the work colour cannot.

@@ -5,12 +5,14 @@ import { localeFromPath, t } from '../i18n/ui'
  * A self-contained HTML page embedded in a post, with its source one click away.
  *
  * For a demo that is a whole page with its own script and style, which is what
- * most of the old ones are. The file lives next to the post it belongs to and is
- * imported as a string:
+ * most of the old ones are. A post never fills `html` or the `source` slot by
+ * hand: `remark-lab-demos.mjs` turns
  *
- *   import demo from './components/counter.html?raw'
+ *   <HtmlLab src="./components/counter.html" title="a counter in plain HTML" />
  *
- *   <HtmlLab html={demo} name="counter.html" title="a counter in plain HTML" />
+ * into this component's actual shape, reading the file once for the iframe and
+ * once for the highlighted `source` slot (a real markdown code block, so
+ * expressive-code highlights it the same as any fenced block in the post).
  *
  * `srcdoc` rather than a URL: the page stays in the post's own folder instead of
  * having to be copied into public/, and there is still an iframe boundary, so the
@@ -19,7 +21,7 @@ import { localeFromPath, t } from '../i18n/ui'
  * it cannot reach this site's storage or cookies either.
  */
 interface Props {
-  /** The page source, imported with Vite's `?raw`. */
+  /** The page source, read from disk by the remark plugin. */
   html: string
   /** Filename, shown on the source toggle. */
   name: string
@@ -37,7 +39,7 @@ const locale = localeFromPath(Astro.url.pathname)
   <iframe srcdoc={html} title={title} loading="lazy" sandbox="allow-scripts"></iframe>
   <details>
     <summary>{t(locale, 'showSource')} <code>{name}</code></summary>
-    <pre><code>{html.trim()}</code></pre>
+    <slot name="source" />
   </details>
 </figure>
 
@@ -78,13 +80,5 @@ const locale = localeFromPath(Astro.url.pathname)
 
   summary code {
     text-transform: none;
-  }
-
-  details pre {
-    margin: 0;
-    border: 0;
-    border-block-start: var(--border) solid var(--rule);
-    border-radius: 0;
-    font-size: 0.78rem;
   }
 </style>

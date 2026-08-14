@@ -4,28 +4,26 @@ import { localeFromPath, t } from '../i18n/ui'
 /**
  * An interactive demo with its own source one click away.
  *
- * Wraps whatever island a post drops in the slot, and takes that component's
- * source as a string so the reader can see what they are running:
+ * Wraps whatever island a post drops in the default slot. The `source` slot
+ * carries the component's own code as a real markdown code block, so
+ * expressive-code highlights it the same as any fenced block in the post. A
+ * post never fills either slot by hand: `remark-lab-demos.mjs` turns
  *
- *   import Counter from './components/Counter.vue'
- *   import source from './components/Counter.vue?raw'
+ *   <LabDemo src="./components/Counter.vue" client:visible />
  *
- *   <LabDemo source={source} name="Counter.vue">
- *     <Counter client:visible />
- *   </LabDemo>
+ * into this component's actual shape, importing the component for the client
+ * directive and reading the file for the `source` slot.
  *
  * `<details>` rather than a button and a script: it is a disclosure widget, which
  * is exactly what the element is for, so this costs no JavaScript and works with
  * a keyboard for free.
  */
 interface Props {
-  /** The component's own source, imported with Vite's `?raw`. */
-  source: string
   /** Filename, shown on the toggle so it is obvious whose source this is. */
   name: string
 }
 
-const { source, name } = Astro.props
+const { name } = Astro.props
 const locale = localeFromPath(Astro.url.pathname)
 ---
 
@@ -35,7 +33,7 @@ const locale = localeFromPath(Astro.url.pathname)
   </div>
   <details>
     <summary>{t(locale, 'showSource')} <code>{name}</code></summary>
-    <pre><code>{source.trim()}</code></pre>
+    <slot name="source" />
   </details>
 </figure>
 
@@ -72,13 +70,5 @@ const locale = localeFromPath(Astro.url.pathname)
 
   summary code {
     text-transform: none;
-  }
-
-  details pre {
-    margin: 0;
-    border: 0;
-    border-block-start: var(--border) solid var(--rule);
-    border-radius: 0;
-    font-size: 0.78rem;
   }
 </style>

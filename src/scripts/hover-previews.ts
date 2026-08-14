@@ -41,8 +41,19 @@ const PERSIST_KEY = 'hp-persist'
 
 // Labels for the runtime-built cards, from data attributes on .hp-settings (see
 // HoverPreviews.astro). The fallbacks only matter if that element is missing.
+// `unwritten` has no key in src/i18n/ui.ts yet (see the report this shipped
+// with for the previewUnwritten key + pt/en copy to add there); English is
+// the placeholder fallback until it does, the data attribute below is what
+// actually carries both locales meanwhile.
 const strings = {
-  ...{ loading: 'Carregando…', close: 'Fechar prévia', pin: 'Fixar', unpin: 'Soltar', drag: 'arraste para mover' },
+  ...{
+    loading: 'Carregando…',
+    close: 'Fechar prévia',
+    pin: 'Fixar',
+    unpin: 'Soltar',
+    drag: 'arraste para mover',
+    unwritten: 'not yet written, but soon!',
+  },
   ...(document.querySelector<HTMLElement>('.hp-settings')?.dataset ?? {}),
 }
 
@@ -75,6 +86,10 @@ function previewable(link: HTMLAnchorElement): boolean {
   // A bookmark card is already the preview: title, description and host, in a
   // card. Showing a hover card on top of one shows the same thing twice.
   if (!link.href || link.closest('.hp-card') || link.closest('.bookmark')) return false
+  // A link to a draft (remark-wikilinks.mjs, class="link-unwritten") gets its
+  // own card regardless of the origin/same-page checks below, see buildCard's
+  // unwritten branch.
+  if (link.classList.contains('link-unwritten')) return true
   // A footnote reference points down the same page, so it fails the
   // different-page check below on purpose. Give it a card anyway, built from
   // the note's own text (see getMeta / getFootnoteMeta).
@@ -368,10 +383,10 @@ function startDrag(event: PointerEvent, card: PopoverHTMLElement): void {
   addEventListener('pointercancel', up)
 }
 
-function buildCard(href: string): PopoverHTMLElement {
+function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   const card = document.createElement('div') as PopoverHTMLElement
   card.id = `hp-card-${++cardSeq}`
-  card.className = 'hp-card'
+  card.className = unwritten ? 'hp-card hp-unwritten' : 'hp-card'
   card.setAttribute('role', 'note')
   // Loading -> loaded is a content swap with no visible focus move, so
   // screen reader users get it announced instead of only a sighted user
@@ -404,7 +419,6 @@ function buildCard(href: string): PopoverHTMLElement {
   title.id = `${card.id}-title`
   title.className = 'hp-title'
   title.href = href
-  card.setAttribute('aria-labelledby', title.id)
 
   const desc = document.createElement('p')
   desc.className = 'hp-desc'
@@ -418,7 +432,26 @@ function buildCard(href: string): PopoverHTMLElement {
   hint.className = 'hp-hint'
   hint.textContent = strings.drag
 
-  card.append(pin, close, title, desc, host, hint)
+  if (unwritten) {
+    // A draft has nothing to preview and nowhere useful to send the reader
+    // from inside the card: the link itself still works (see previewable()
+    // and the cursor rule in the stylesheet), there is just no point fetching
+    // a page that was never built. title/desc/host stay in the DOM, hidden,
+    // so savePinned()/restorePinned() keep reading .hp-title's href as-is.
+    title.hidden = true
+    desc.hidden = true
+    host.hidden = true
+    const msg = document.createElement('p')
+    msg.id = `${card.id}-msg`
+    msg.className = 'hp-unwritten-msg'
+    msg.textContent = strings.unwritten
+    card.setAttribute('aria-labelledby', msg.id)
+    card.append(pin, close, title, desc, host, msg, hint)
+  } else {
+    card.setAttribute('aria-labelledby', title.id)
+    card.append(pin, close, title, desc, host, hint)
+  }
+
   card.addEventListener('pointerdown', (event) => startDrag(event, card))
   card.addEventListener('pointerenter', () => clearTimeout(closeTimer))
   card.addEventListener('pointerleave', scheduleClose)
@@ -434,7 +467,8 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
   if (current && !pinned.includes(current.card)) closeCard(current.card)
 
   const href = link.href
-  const card = buildCard(href)
+  const unwritten = link.classList.contains('link-unwritten')
+  const card = buildCard(href, unwritten)
   card.hpLink = link
   link.setAttribute('aria-expanded', 'true')
   link.setAttribute('aria-controls', card.id)
@@ -443,13 +477,17 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
 
   const title = card.querySelector('.hp-title') as HTMLAnchorElement
   const desc = card.querySelector('.hp-desc') as HTMLParagraphElement
-  title.textContent = strings.loading
+  if (!unwritten) title.textContent = strings.loading
 
   card.style.visibility = 'hidden'
   card.showPopover?.()
   place(card, link)
   card.style.visibility = ''
   requestAnimationFrame(() => card.classList.add('hp-open'))
+
+  // A draft has no page to fetch metadata from, and none is shown for it
+  // (see buildCard's unwritten branch above).
+  if (unwritten) return
 
   const meta = await getMeta(href, link.textContent ?? '')
   if (current?.card !== card && !pinned.includes(card)) return

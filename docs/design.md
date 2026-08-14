@@ -77,6 +77,17 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   collection globs `*/*.{md,mdx}`, so that folder is invisible to it. `LabDemo` wraps an island and reveals its source
   through a `<details>`; `HtmlLab` embeds a whole HTML page from the same folder via `srcdoc`.
 - **Version.** Commits since the last tag, as semver build metadata (`0.0.1+42`). No tag per change.
+- **Code themes.** 14 Shiki themes, picked from an icon on every code block, stored in `localStorage`, applied by a
+  blocking head script so a repeat visit never flashes the wrong one. `github-light` and `github-dark` stay first in
+  the list, so an unset reader and a reader with JS off get exactly the old `prefers-color-scheme` behaviour.
+  Monokai, Dracula and Snazzy ship only one variant each in Shiki's bundle, so they have no light/dark pair.
+  **Lazy loading was planned and then dropped**: all 14 themes together cost 35.6 KB raw, **6.2 KB gzipped**, measured.
+  The plan (a build-time integration emitting one stylesheet per theme, injected on demand, cached by the service
+  worker) was worth it against the 15–20 KB the list was assumed to cost, and is not worth the moving parts against
+  6.2 KB. Revisit only if the list grows several times over. Also rejected, on its own merits: keeping the CSS in
+  `localStorage` — applying it means injecting a `<style>` from the blocking script, so every page load pays a
+  synchronous read of tens of kilobytes before first paint, and the CSS then sits outside normal cache invalidation
+  with nothing to clear a stale copy. A plain `<link>` to a hashed asset already serves from cache with no network.
 
 ## Open decisions
 

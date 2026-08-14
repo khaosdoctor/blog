@@ -1,0 +1,62 @@
+---
+import { parseAuthors } from '../lib/authors'
+import { t, type Locale } from '../i18n/ui'
+
+/**
+ * Who wrote the post, above the text.
+ *
+ * `authors` is optional in the schema and almost always absent, because almost
+ * every post is the owner's. Absent means exactly that, so nothing here needs
+ * writing for a normal post.
+ *
+ * The links carry `no-preview`: a hover card would show the author's own site
+ * chrome, which says nothing the byline has not already said.
+ */
+interface Props {
+  authors: string[] | undefined
+  locale: Locale
+}
+
+const { authors, locale } = Astro.props
+const parsed = parseAuthors(authors)
+---
+
+{
+  parsed.length > 0 && (
+    <p class="authors">
+      <span class="by">{t(locale, 'writtenBy')}</span>
+      {parsed.map((author, index) => (
+        <>
+          {index > 0 && <span class="sep">,</span>}
+          {author.url === null ? (
+            <span>{author.name}</span>
+          ) : (
+            <a href={author.url} class="no-preview" rel="noopener">
+              {author.name}
+            </a>
+          )}
+        </>
+      ))}
+    </p>
+  )
+}
+
+<style>
+  .authors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-block: -1.5rem 2rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+  }
+
+  .by {
+    color: var(--muted);
+  }
+
+  .sep {
+    margin-inline-start: -0.3rem;
+    color: var(--muted);
+  }
+</style>

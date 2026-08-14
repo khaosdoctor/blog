@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro'
 import { render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
+import Authors from '../components/Authors.astro'
 import Bookmark from '../components/Bookmark.astro'
 import HoverPreviews from '../components/HoverPreviews.astro'
 import HtmlLab from '../components/HtmlLab.astro'
@@ -24,7 +25,7 @@ import {
   slugOf,
   urlOf,
 } from '../lib/posts'
-import { buildSeriesMap, getSeriesNavigation, slugify } from '../lib/taxonomy'
+import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
 import { t } from '../i18n/ui'
 
 /**
@@ -98,6 +99,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   section={{ name: post.data.category, url: `/${post.data.category}/` }}
   markdown={new URL(`${Astro.url.pathname}index.md`, Astro.site).href}
   noindex={post.data.noindex}
+  progress
 >
   <article>
     <h1>{post.data.title}</h1>
@@ -106,7 +108,13 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
         {formatDate(post.data.pubDate, post.data.lang)}
       </time>
       <span aria-hidden="true">·</span>
-      <a href={`/${post.data.category}/`}>{post.data.category}</a>
+      <a
+        href={`/${post.data.category}/`}
+        class="chip"
+        style={`--chip-color: ${chipColor(post.data.category)}`}
+      >
+        {post.data.category}
+      </a>
       {
         readingTime !== undefined && (
           <>
@@ -116,6 +124,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
         )
       }
     </p>
+    <Authors authors={post.data.authors} locale={post.data.lang} />
     {
       post.data.series && <SeriesToc series={post.data.series} current={post.id} locale={post.data.lang} />
     }
@@ -132,10 +141,12 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
     </div>
     {
       post.data.tags.length > 0 && (
-        <ul class="tags">
+        <ul class="chips">
           {post.data.tags.map((tag) => (
             <li>
-              <a href={`/tags/${slugify(tag)}/`}>{tag}</a>
+              <a href={`/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}`}>
+                {tag}
+              </a>
             </li>
           ))}
         </ul>
@@ -164,6 +175,9 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
 <style>
   .meta {
     display: flex;
+    /* Without this the chip is a stretched flex item and its text rides at the
+       top of a box as tall as the row. */
+    align-items: center;
     gap: 0.5rem;
     margin-block: -0.5rem 2.5rem;
     color: var(--muted);
@@ -176,30 +190,6 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
     border-inline-start: 3px solid var(--accent);
     background: color-mix(in oklab, var(--accent) 8%, transparent);
     font-size: 0.9rem;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-block-start: 3rem;
-    padding: 0;
-    list-style: none;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
-  }
-
-  .tags a {
-    padding: 0.15rem 0.5rem;
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    color: var(--muted);
-    text-decoration: none;
-  }
-
-  .tags a:hover {
-    border-color: var(--accent);
-    color: var(--accent);
   }
 
   .series-nav {

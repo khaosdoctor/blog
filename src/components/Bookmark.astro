@@ -56,8 +56,10 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     display: flex;
     container-type: inline-size;
     margin-block: 1.5rem;
-    border: var(--border) solid var(--rule);
-    border-inline-start-width: var(--border-card-edge);
+    /* House style: double rule on three edges, thick solid bar on the left.
+       `border-style: double` collapses to one line under 3px, hence the 4px. */
+    border: 4px double var(--rule);
+    border-inline-start: var(--border-card-edge) solid var(--rule);
     border-radius: var(--radius);
     color: inherit;
     text-decoration: none;

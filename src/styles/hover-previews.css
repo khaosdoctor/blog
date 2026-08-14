@@ -2,6 +2,33 @@
    targets DOM nodes created at runtime by hover-previews.ts, so this stays a
    plain global stylesheet instead of an Astro scoped <style>. */
 
+:root {
+  /*
+   * House style: every card on the site carries a double-rule border, and
+   * this is the one that gets it on all four edges instead of three plus a
+   * thick solid spine, since it floats over the page rather than sitting
+   * embedded in the article flow. 4px matches what the other double-rule
+   * cards settled on (--cc-frame-width in code-and-callouts.css,
+   * --qc-border-width in quotes.css): border-style: double collapses to a
+   * single line under 3px, and 4px is the first width that splits cleanly
+   * into line-gap-line. Bright white means --fg, not a literal white, so the
+   * frame still inverts correctly in light theme.
+   */
+  --hp-border-width: 4px;
+
+  /*
+   * The unwritten-link card's watermark: same technique as the quote card's
+   * `"` (see src/styles/variants/quotes.css), independent tokens since that
+   * file belongs to another pass. --fg rather than a literal black/white for
+   * the same reason as the border above.
+   */
+  --hp-glyph-size: 3.5rem;
+  --hp-glyph: light-dark(
+    color-mix(in oklab, var(--fg) 12%, transparent),
+    color-mix(in oklab, var(--fg) 18%, transparent)
+  );
+}
+
 .hp-settings {
   margin-block-start: 2.5rem;
   color: var(--muted);
@@ -24,8 +51,13 @@
   margin: 0;
   padding: 0.85rem 1rem;
   overflow: auto;
-  border: 1px solid var(--rule);
-  border-radius: 6px;
+  /* Double rule, all four sides, no thick left spine: see --hp-border-width.
+   * Square corners, matching the site's own --radius: 0 (this card hardcoded
+   * a rounded corner before, which a double-rule border renders poorly). */
+  border-style: double;
+  border-color: var(--fg);
+  border-width: var(--hp-border-width);
+  border-radius: 0;
   background: var(--bg);
   color: var(--fg);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -59,10 +91,12 @@
   width: 1.4rem;
   height: 1.4rem;
   padding: 0;
-  border: 0;
-  border-radius: 4px;
+  /* Solid, not double, same colour as the card frame: at this size a
+   * double rule would not have room to split into two visible lines. */
+  border: var(--border) solid var(--fg);
+  border-radius: 0;
   background: transparent;
-  color: var(--muted);
+  color: var(--fg);
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
@@ -153,6 +187,57 @@
 
 .hp-host:empty {
   display: none;
+}
+
+/* A link to a post that has not been written yet (remark-wikilinks.mjs,
+   class="link-unwritten"): the underlying <a> still resolves, it just looks
+   unavailable while hovered, see the cursor rule below. */
+a.link-unwritten {
+  cursor: not-allowed;
+}
+
+/* The unwritten-link card: no title/description/host, just a watermark and a
+   short note (see buildCard()'s unwritten branch in hover-previews.ts). The
+   usual three fields stay in the DOM, hidden, so savePinned()/restorePinned()
+   keep reading .hp-title's href unchanged. */
+.hp-card.hp-unwritten {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  min-height: 7rem;
+  padding-block-start: 1.75rem;
+  text-align: center;
+}
+
+.hp-card.hp-unwritten::before {
+  content: ';)';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: var(--hp-glyph-size);
+  line-height: 1;
+  color: var(--hp-glyph);
+  pointer-events: none;
+}
+
+.hp-unwritten-msg {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Only the stacking needs to change here: the hint keeps its own spacing and
+   colour rules above, it just has to paint above the watermark like the
+   message does. */
+.hp-card.hp-unwritten .hp-hint {
+  position: relative;
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

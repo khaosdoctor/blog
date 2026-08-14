@@ -33,6 +33,7 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "sharp": "^0.35.3",
+    "textmode.js": "^0.17.1",
     "vue": "^3.5.41"
   },
   "allowScripts": {
@@ -44,6 +45,7 @@
     "@cloudflare/workers-types": "^5.20260812.1",
     "@types/node": "^26.2.0",
     "@types/turndown": "^5.0.6",
+    "acorn": "^8.15.0",
     "pagefind": "^1.5.2",
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2",

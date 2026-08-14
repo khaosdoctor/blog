@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro'
 import { render } from 'astro:content'
 import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import Authors from '../../components/Authors.astro'
 import Bookmark from '../../components/Bookmark.astro'
 import HoverPreviews from '../../components/HoverPreviews.astro'
 import HtmlLab from '../../components/HtmlLab.astro'
@@ -16,6 +17,7 @@ import SpeakerDeck from '../../components/SpeakerDeck.astro'
 import Spotify from '../../components/Spotify.astro'
 import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
+import { chipColor } from '../../lib/taxonomy'
 import {
   folderOf,
   formatDate,
@@ -87,6 +89,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   series={post.data.series}
   section={{ name: post.data.category, url: `/${post.data.category}/` }}
   alternates={alternates}
+  progress
 >
   <article>
     <h1>{post.data.title}</h1>
@@ -95,8 +98,15 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
         {formatDate(post.data.pubDate, 'en')}
       </time>
       <span aria-hidden="true">·</span>
-      <span>{post.data.category}</span>
+      <a
+        href={`/${post.data.category}/`}
+        class="chip"
+        style={`--chip-color: ${chipColor(post.data.category)}`}
+      >
+        {post.data.category}
+      </a>
     </p>
+    <Authors authors={post.data.authors} locale={'en'} />
     {
       post.data.machineTranslated && sourcePath !== null && (
         <LangBanner lang="en" originalHref={sourcePath} />
@@ -112,6 +122,9 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
 <style>
   .meta {
     display: flex;
+    /* Without this the chip is a stretched flex item and its text rides at the
+       top of a box as tall as the row. */
+    align-items: center;
     gap: 0.5rem;
     margin-block: -0.5rem 2rem;
     color: var(--muted);
