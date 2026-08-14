@@ -240,30 +240,43 @@ function isKatexDisplay(node) {
   return Array.isArray(classes) && classes.includes('katex-display')
 }
 
-function makeCopyButton(ascii) {
+/**
+ * Both strings a reader can perceive. Kept here rather than in src/i18n/ui.ts
+ * because a rehype plugin cannot import from `astro:`-flavoured modules, the
+ * same reason rehype-footnote-sidenotes.mjs carries its own table. Mirrored
+ * against the real table by scripts/check-i18n.ts.
+ */
+const COPY_LABEL = { pt: 'copiar a fórmula como texto', en: 'copy formula as text' }
+const COPY_TEXT = { pt: 'copiar', en: 'copy' }
+
+function localeFromFile(file) {
+  return file?.data?.astro?.frontmatter?.lang === 'en' ? 'en' : 'pt'
+}
+
+function makeCopyButton(ascii, locale) {
   return {
     type: 'element',
     tagName: 'button',
     properties: {
       type: 'button',
       className: ['math-copy'],
-      'aria-label': 'copy formula as text',
+      'aria-label': COPY_LABEL[locale],
       'data-math-copy': '',
       'data-ascii': ascii,
     },
-    children: [{ type: 'text', value: 'copy' }],
+    children: [{ type: 'text', value: COPY_TEXT[locale] }],
   }
 }
 
 export function rehypeMathCopy() {
-  return (tree) => {
-    walk(tree)
+  return (tree, file) => {
+    walk(tree, localeFromFile(file))
   }
 }
 
-function walk(node) {
+function walk(node, locale) {
   if (Array.isArray(node.children)) {
-    for (const child of node.children) walk(child)
+    for (const child of node.children) walk(child, locale)
   }
 
   if (!isKatexDisplay(node)) return
@@ -274,7 +287,7 @@ function walk(node) {
   const ascii = latexToAscii(tex)
   if (ascii === '') return
 
-  node.children.push(makeCopyButton(ascii))
+  node.children.push(makeCopyButton(ascii, locale))
 }
 
 /**

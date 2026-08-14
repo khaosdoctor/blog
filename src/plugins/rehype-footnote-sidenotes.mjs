@@ -48,12 +48,20 @@ const BLOCK_TAGS = new Set(['p', 'li', 'td', 'th', 'dd'])
  */
 const FOOTNOTES_LABEL = { pt: 'Notas de rodapé', en: 'Footnotes' }
 
+/**
+ * GFM writes the back-arrow's label itself, in English, on every page. `%s` is
+ * the reference number, which the original carries as "Back to reference 1".
+ */
+const BACKREF_LABEL = { pt: 'Voltar para a referência %s', en: 'Back to reference %s' }
+
 export function rehypeFootnoteSidenotes() {
   return (tree, file) => {
     const section = findFootnoteSection(tree)
     if (!section) return
 
-    relabelHeading(section, localeFromFile(file))
+    const locale = localeFromFile(file)
+    relabelHeading(section, locale)
+    relabelBackrefs(section, locale)
 
     const definitions = new Map()
     for (const li of findListItems(section)) {
@@ -77,6 +85,24 @@ function relabelHeading(section, locale) {
   const heading = section.children.find((child) => child.type === 'element' && child.tagName === 'h2')
   const label = heading?.children.find((child) => child.type === 'text')
   if (label) label.value = FOOTNOTES_LABEL[locale]
+}
+
+/**
+ * Rewrites every back-arrow's aria-label in the page's own language, keeping
+ * whatever reference number GFM already put in it.
+ */
+function relabelBackrefs(node, locale) {
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) relabelBackrefs(child, locale)
+  }
+  if (node.type !== 'element' || node.properties?.dataFootnoteBackref === undefined) return
+
+  const current = node.properties['ariaLabel']
+  if (typeof current !== 'string') return
+  // The number is the only part worth keeping: everything else is English GFM
+  // hardcodes and cannot be configured.
+  const reference = /(\d+(?:[-:]\d+)*)\s*$/.exec(current)?.[1] ?? ''
+  node.properties['ariaLabel'] = BACKREF_LABEL[locale].replace('%s', reference)
 }
 
 function findFootnoteSection(node) {
