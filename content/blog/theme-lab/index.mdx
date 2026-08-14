@@ -15,7 +15,7 @@ Quatro coisas que valem saber antes de descer:
 
 O raciocínio inteiro, com o que foi tentado e descartado, está em `docs/theming.md`. Esta página mostra; aquele arquivo explica.
 
-Nem tudo aqui continua em aberto. A paleta e as fontes de título e de subtítulo já foram decididas e já estão aplicadas no site, e onde isso vale a seção diz. O que sobrou de decisão é a fonte do corpo, a capa e a animação do logo.
+Nem tudo aqui continua em aberto. A paleta e as quatro fontes já foram decididas e já estão aplicadas no site, e onde isso vale a seção diz. O que sobrou de decisão é a capa e a animação do logo.
 
 Os candidatos que perderam não foram apagados: estão em [[theme-lab-arquivo]], funcionando, cada um com o motivo. A [textmode.js](https://code.textmode.art) só é usada por eles agora, e continua instalada como dependência por causa disso. Nenhum candidato desta página precisa de WebGL: os que sobraram são SVG, CSS e DOM. Vale como resposta à pergunta que abriu o trabalho, porque a biblioteca custa cento e noventa quilobytes e nada do que ficou de pé precisou dela.
 
@@ -23,9 +23,13 @@ Nada que se mexe começa se mexendo para quem pediu `prefers-reduced-motion: red
 
 ## Seção 00 / Tipografia
 
-Esta é a decisão mais cara do redesenho, e o painel abaixo não renderiza amostra nenhuma: ele só controla. O que ele muda, ao vivo, é o post de verdade dentro do próprio painel, que é markdown puro passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog. Troque a fonte e o post inteiro troca com ela, com as citações, os callouts, a tabela e as notas no lugar.
+Decidido, e em duas fontes em vez de uma: **Literata** a 18px com 163% de entrelinha é o padrão do corpo, e **Atkinson Hyperlegible** a 20px com 153% é a opção sem serifa, porque o menu de preferências vai oferecer as duas. As duas estão aplicadas no site inteiro; trocar entre elas é o atributo `data-body-face="sans"` no `<html>` até o menu existir.
 
-É por isso que a amostra é um post e não quatro parágrafos limpos: escolher fonte olhando prosa lisa esconde tudo que um texto publicado carrega no meio do caminho. Os sliders de espaçamento existem por causa da regra 1.4.12 do WCAG, que não pede que o texto já venha espaçado, e sim que ele não quebre quando o leitor força entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em. Suba os três até lá e veja se a coluna aguenta.
+O painel abaixo não renderiza amostra nenhuma: ele só controla. O que ele muda, ao vivo, é o post de verdade dentro do próprio painel, que é markdown puro passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog. Troque a fonte e o post inteiro troca com ela, com as citações, os callouts, a tabela e as notas no lugar. Ele fica aqui porque ajustar essas medidas depois é mais fácil vendo o post mudar do que editando um token no escuro.
+
+É por isso que a amostra é um post e não quatro parágrafos limpos, e foi isso que derrubou a favorita: a IBM Plex Mono ganhava em prosa lisa e caiu no primeiro `trecho de código inline`, que numa fonte monoespaçada deixa de se distinguir do parágrafo em volta. As treze recusadas estão em [[theme-lab-arquivo]] com o motivo de cada uma.
+
+Os sliders de espaçamento existem por causa da regra 1.4.12 do WCAG, que não pede que o texto já venha espaçado, e sim que ele não quebre quando o leitor força entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em. Suba os três até lá e veja se a coluna aguenta.
 
 <LabDemo src="./components/TypeSpecimen.vue" client:visible>
 

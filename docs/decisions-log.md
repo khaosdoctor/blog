@@ -272,3 +272,31 @@ whose heading has scrolled far off the top intersects nothing while still being 
 Below 78rem there is no free margin to pin anything to, so the panel becomes a handle at the bottom left and opens
 over the corner. Section jumps ease (`scroll-behavior: smooth` on `:root`), but only for readers who have not asked
 for reduced motion.
+
+## Body copy is two faces, and the column follows the face
+
+Literata is the default (18px, 163% leading, 0.05em letter spacing, 0.15em word spacing) and Atkinson Hyperlegible is
+the sans (20px, 153% leading, no letter spacing). Both were chosen against a real post inside the lab panel, not against
+clean sample paragraphs, and each keeps the measurements it was chosen with: switching family alone would compare them
+wrongly, because Atkinson at 18px reads smaller than Literata at 18px.
+
+The sizes are written in rem (1.125rem, 1.25rem), not the 18px and 20px that were picked. An absolute body size
+overrides the reader's own browser font setting, and at the default 16px root these rem values are exactly the numbers
+chosen.
+
+`--font-body` is whichever face is active, so no rule on the site had to change. `data-body-face="sans"` on `<html>`
+switches; the preferences menu will be what writes it.
+
+Antialiasing is off (`-webkit-font-smoothing: none`), which is deliberate: smoothed type beside a traced bitmap heading
+reads as two different eras. The lab also used `filter: contrast(100.00001%)` to force the same effect in more engines,
+and that must never reach the site: a filter makes its element the containing block for every fixed descendant, which
+would unpin the outline panel, the progress bar and the sidenotes at once.
+
+The column is 78ch. In `ch`, not pixels, so it follows the active face, and the two differ more than they look:
+Literata's zero is 0.578em and Atkinson's is 0.648em, so 78ch is about 812px in the serif at 18px and about 1010px in
+the sans at 20px. That is exactly why `PostToc` measures the room left of the article instead of using a width
+breakpoint. A breakpoint would be right for one face and would put the panel on top of the text in the other.
+
+The thirteen rejected faces live in `content/blog/theme-lab-arquivo/`, each with the reason it lost. The one that
+matters: IBM Plex Mono was the favourite and lost on the first inline code span, because in a monospaced body a code
+span stops being distinguishable from the prose around it.

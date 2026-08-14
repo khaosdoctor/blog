@@ -10,25 +10,7 @@ Nada aqui impede o build. Tudo funciona hoje.
 
 ---
 
-## 1. Escolher a fonte do corpo
-
-A última pergunta de tipografia. Título (Departure Mono) e subtítulo (PxPlus IBM VGA8) estão decididos e aplicados no
-site inteiro. O corpo continua na pilha serif genérica que era placeholder.
-
-A seção 01 do `/theme-lab/` mostra cada candidata como texto corrido de verdade, em português, com vários parágrafos e no
-tamanho real do corpo, porque a pergunta é se a fonte aguenta 3000 palavras e não se ela é bonita numa linha de amostra:
-
-- **IBM Plex Mono**, com o risco que você mesmo apontou: num blog sobre código, uma fonte de corpo monoespaçada e o
-  código inline deixam de ser distinguíveis.
-- **Handjet a 22px com uns 0.03em de espaçamento extra**, que é o único tamanho em que ela funciona.
-- **Inter, Roboto, Source Serif 4, Literata e Atkinson Hyperlegible**, as cinco não pixeladas vendorizadas para existir
-  uma fonte de livro normal como comparação. Todas OFL ou Apache-2.0 e todas com os acentos do português conferidos no
-  cmap, não só baixadas.
-
-Escolher é trocar o valor de `--font-body` em `src/styles/theme.css` pela pilha da vencedora, que está em
-`content/blog/theme-lab/components/faces.ts`.
-
-## 2. Escolher uma capa
+## 1. Escolher uma capa
 
 As três candidatas estão na seção 04 do `/theme-lab/`, construídas a partir das suas descrições: **janela DOS** (fundo
 preto, borda dupla ANSI espaçada, cursor de bloco no fim do título), **sem moldura** (cartão inteiro numa cor da marca,
@@ -40,7 +22,7 @@ Escolher qualquer uma aposenta o `scripts/cover.ts` atual, que chama a Replicate
 serviço Deno externo. As três desenham localmente, só geometria e texto, então as capas passam a funcionar offline como
 o resto do build.
 
-## 3. Testar o fluxo de escrita no Obsidian
+## 2. Testar o fluxo de escrita no Obsidian
 
 Sua, não minha: escrever um post no vault, publicar e confirmar que ele aparece. É a única parte do sistema que ninguém
 verificou de ponta a ponta.
