@@ -67,6 +67,11 @@ blog/error-cause/
 - Being in the same folder is what pairs the two, so search engines get the `hreflang` links for free. There is no field to keep in sync.
 - Copy `category`, `tags`, `series` and `seriesOrder` verbatim: they are URL segments, not prose.
 
+## Emphasis
+
+Bold, italic and strikethrough are plain markdown: `**bold**`, `_italic_`, `~~strikethrough~~`. Underline has no
+markdown syntax of its own, so it is the one exception written as a raw tag: `<u>underlined</u>`.
+
 ## Images
 
 Drop the file in the post's own folder. Paste a screenshot in Obsidian and it lands there.
@@ -226,9 +231,14 @@ rather than rendering an empty box. The HTML one runs in a sandboxed frame, so i
 A Vue component's styles go in `<style module>`, never `<style scoped>` or a bare `<style>`, and the template refers
 to classes as `:class="$style.stage"`. The build renames every class to `Component__class__hash`, so a demo can call
 something `.tag` or `.title` without ever colliding with the site's own CSS. Two rules follow from how CSS modules
-work: every selector needs a class in it (a bare `button { }` would style every button on the page — nest it, e.g.
+work: every selector needs a class in it (a bare `button { }` would style every button on the page, so nest it, e.g.
 `.controls button`), and a static `class="x"` where `x` is defined in the style block matches nothing, because the
 rule was renamed and the attribute was not. `npm run check` fails on all three mistakes and says which.
+
+A demo does not disappear once you stop liking it. In `/lab/` and `/theme-lab/`, a candidate that loses gets moved
+into an archive post rather than deleted, so the rejected options stay around as the record of how the decision was
+made. Nothing to do differently while writing: this only changes what happens to a component after its post decides
+against it.
 
 ## Images from somewhere else
 

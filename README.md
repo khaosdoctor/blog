@@ -15,7 +15,8 @@ This file is the operating manual, and it is deliberately short. The rest lives 
 | `docs/theming.md` | the long version of `docs/design.md`, everything tried and thrown away, interactive at `/theme-lab/` |
 | `docs/seo.md` | what the build generates on its own, and the one thing left to decide |
 | `docs/translation-voice.md` | how the translation agent is told to write in English |
-| `docs/decisions.md` | what was decided, what was rejected, and the reasoning. **In Portuguese**, deliberately: it is the owner's own cold-start notes, unlike the rest of `docs/` |
+| `docs/decisions-log.md` | what was decided, and the reasoning. In English, since these are settled |
+| `docs/decisions.md` | the open questions only. **In Portuguese**, deliberately: it is the owner's own cold-start notes |
 | `AGENTS.md` | the rules an agent has to know before touching this repo |
 
 ## Running it
