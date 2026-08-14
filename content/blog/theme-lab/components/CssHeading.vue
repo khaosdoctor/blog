@@ -8,6 +8,7 @@
  * renderizado no servidor, e o `prefers-reduced-motion` aqui é uma linha.
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -62,11 +63,56 @@ const accentContrast = computed(() => ratio(parseHex(accentHex.value), parseHex(
 const inkContrast = computed(() => ratio(parseHex(INK), parseHex(BG)).toFixed(2))
 const promptContrast = computed(() => ratio(parseHex(accentHex.value), parseHex(SOFT)).toFixed(2))
 
+const decisionSettings = computed(() => [
+  { label: 'fonte', value: labelFor(FACE_OPTIONS, face.value) },
+  { label: 'destaque', value: `${labelFor(ACCENT_OPTIONS, accent.value)} (${accentHex.value})` },
+  { label: 'corpo do título', value: `${titleSize.value}px` },
+  { label: 'entreletra', value: `${tracking.value}/100em` },
+  { label: 'brilho', value: `${glow.value}%` },
+  { label: 'borda', value: labelFor(BORDER_OPTIONS, border.value) },
+  { label: 'digitação', value: `${typing.value}%` },
+  { label: 'colchetes [ ]', value: brackets.value ? 'sim' : 'não' },
+  { label: 'animar', value: animated.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(
+  () =>
+    `Título ${inkContrast.value}:1 · destaque ${accentContrast.value}:1 sobre ${BG} · prompt ${promptContrast.value}:1 sobre a caixa ${SOFT}.`,
+)
+
 const borders: Record<string, string> = {
   simples: `1px solid ${MUTED}44`,
   dupla: `4px double ${MUTED}66`,
   tracejada: `1px dashed ${MUTED}66`,
   nenhuma: '1px solid transparent',
+}
+
+const FACE_OPTIONS = [
+  { id: 'departure', name: 'Departure Mono' },
+  { id: 'ibmvga', name: 'PxPlus IBM VGA' },
+  { id: 'plex', name: 'IBM Plex Mono' },
+  { id: 'sharetech', name: 'Share Tech Mono' },
+  { id: 'vt323', name: 'VT323' },
+  { id: 'pixelify', name: 'Pixelify Sans' },
+]
+
+const ACCENT_OPTIONS = [
+  { id: 'verde', name: 'verde da marca' },
+  { id: 'amarelo', name: 'amarelo da marca' },
+  { id: 'azul', name: 'azul claro' },
+  { id: 'vermelho', name: 'vermelho claro' },
+  { id: 'periwinkle', name: 'periwinkle (a referência)' },
+]
+
+const BORDER_OPTIONS = [
+  { id: 'simples', name: '1px sólida' },
+  { id: 'dupla', name: '4px dupla' },
+  { id: 'tracejada', name: 'tracejada' },
+  { id: 'nenhuma', name: 'nenhuma' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
 }
 
 let timer: ReturnType<typeof setTimeout> | null = null
@@ -146,45 +192,15 @@ watch([animated, typing], start)
     </div>
 
     <Panel label="tipo e cor">
-      <Pick
-        v-model="face"
-        label="fonte"
-        :options="[
-          { id: 'departure', name: 'Departure Mono' },
-          { id: 'ibmvga', name: 'PxPlus IBM VGA' },
-          { id: 'plex', name: 'IBM Plex Mono' },
-          { id: 'sharetech', name: 'Share Tech Mono' },
-          { id: 'vt323', name: 'VT323' },
-          { id: 'pixelify', name: 'Pixelify Sans' },
-        ]"
-      />
-      <Pick
-        v-model="accent"
-        label="destaque"
-        :options="[
-          { id: 'verde', name: 'verde da marca' },
-          { id: 'amarelo', name: 'amarelo da marca' },
-          { id: 'azul', name: 'azul claro' },
-          { id: 'vermelho', name: 'vermelho claro' },
-          { id: 'periwinkle', name: 'periwinkle (a referência)' },
-        ]"
-      />
+      <Pick v-model="face" label="fonte" :options="FACE_OPTIONS" />
+      <Pick v-model="accent" label="destaque" :options="ACCENT_OPTIONS" />
       <Knob v-model="titleSize" label="corpo do título" :min="18" :max="56" unit="px" />
       <Knob v-model="tracking" label="entreletra" :min="-3" :max="20" unit="/100em" />
       <Knob v-model="glow" label="brilho" :min="0" :max="60" unit="%" />
     </Panel>
 
     <Panel label="caixa e movimento">
-      <Pick
-        v-model="border"
-        label="borda"
-        :options="[
-          { id: 'simples', name: '1px sólida' },
-          { id: 'dupla', name: '4px dupla' },
-          { id: 'tracejada', name: 'tracejada' },
-          { id: 'nenhuma', name: 'nenhuma' },
-        ]"
-      />
+      <Pick v-model="border" label="borda" :options="BORDER_OPTIONS" />
       <Knob v-model="typing" label="digitação" :min="0" :max="100" unit="%" />
       <Toggle v-model="brackets" label="colchetes [ ]" />
       <Toggle v-model="animated" label="animar" />
@@ -195,6 +211,13 @@ watch([animated, typing], start)
       sobre a caixa {{ SOFT }}. O brilho não muda o contraste medido, porque a medida é do núcleo da letra: ele
       espalha luz em volta e engorda o traço, o que ajuda em fonte fina e vira borrão em fonte pixel.
     </p>
+
+    <DecisionCopy
+      lab="título em CSS puro"
+      component="CssHeading.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 

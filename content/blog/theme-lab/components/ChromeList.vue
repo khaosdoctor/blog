@@ -4,6 +4,7 @@
  * Quatro leituras, do mais denso ao mais decorado.
  */
 import { computed, ref } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -31,6 +32,25 @@ const INK = '#e6e4e0'
 const MUTED = '#9a9ea6'
 const ACCENT = '#45b384'
 
+const SHAPE_OPTIONS = [
+  { id: 'tabela', name: 'tabela densa, 4 colunas' },
+  { id: 'razao', name: 'razão com pontilhado' },
+  { id: 'menu', name: 'menu de Game Boy ▸' },
+  { id: 'cartoes', name: 'cartões com aresta grossa' },
+]
+
+const LEADER_OPTIONS = [
+  { id: '·', name: '· ponto médio' },
+  { id: '.', name: '. ponto' },
+  { id: '─', name: '─ traço de caixa' },
+  { id: '╌', name: '╌ tracejado' },
+  { id: ' ', name: 'nenhum' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
+
 const shape = ref('razao')
 const face = ref('departure')
 const leader = ref('·')
@@ -49,6 +69,19 @@ const base = computed(() => ({
 }))
 
 const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
+
+const decisionSettings = computed(() => [
+  { label: 'candidato', value: labelFor(SHAPE_OPTIONS, shape.value) },
+  { label: 'fonte', value: face.value },
+  { label: 'pontilhado', value: labelFor(LEADER_OPTIONS, leader.value) },
+  { label: 'altura da linha', value: String(rows.value) },
+  { label: 'entreletra', value: `${tracking.value}/100em` },
+  { label: 'mostrar seção', value: showTag.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(
+  () => `Título ${inkContrast.value}:1 · data e seção ${mutedContrast.value}:1 sobre ${BG}.`,
+)
 </script>
 
 <template>
@@ -97,28 +130,9 @@ const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
     </div>
 
     <Panel label="lista">
-      <Pick
-        v-model="shape"
-        label="candidato"
-        :options="[
-          { id: 'tabela', name: 'tabela densa, 4 colunas' },
-          { id: 'razao', name: 'razão com pontilhado' },
-          { id: 'menu', name: 'menu de Game Boy ▸' },
-          { id: 'cartoes', name: 'cartões com aresta grossa' },
-        ]"
-      />
+      <Pick v-model="shape" label="candidato" :options="SHAPE_OPTIONS" />
       <Pick v-model="face" label="fonte" :options="Object.keys(STACKS).map((id) => ({ id, name: id }))" />
-      <Pick
-        v-model="leader"
-        label="pontilhado"
-        :options="[
-          { id: '·', name: '· ponto médio' },
-          { id: '.', name: '. ponto' },
-          { id: '─', name: '─ traço de caixa' },
-          { id: '╌', name: '╌ tracejado' },
-          { id: ' ', name: 'nenhum' },
-        ]"
-      />
+      <Pick v-model="leader" label="pontilhado" :options="LEADER_OPTIONS" />
       <Knob v-model="rows" label="altura da linha" :min="6" :max="40" />
       <Knob v-model="tracking" label="entreletra" :min="-2" :max="20" unit="/100em" />
       <Toggle v-model="showTag" label="mostrar seção" />
@@ -129,6 +143,13 @@ const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
       aguenta cem posts sem virar um muro, porque o olho corre pela coluna de títulos e o pontilhado leva até a
       data só quando o leitor procura por ela. O menu de Game Boy é o mais bonito e o que menos escala.
     </p>
+
+    <DecisionCopy
+      lab="lista de posts"
+      component="ChromeList.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 

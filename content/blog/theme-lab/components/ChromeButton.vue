@@ -5,6 +5,7 @@
  * de 12, que é o mínimo que a norma pede para um dedo.
  */
 import { computed, ref } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -30,6 +31,22 @@ const ACCENTS: Record<string, string> = {
 
 const BG = '#14161a'
 
+// Os cinco desenhos ficam lado a lado de propósito, para escolher olhando: não
+// existe um "candidato" que troque a vista, como nos outros labs. Este picker
+// não muda nada na tela, só nomeia qual dos cinco entra na decisão copiada.
+const STYLE_OPTIONS = [
+  { id: 'colchetes', name: 'colchetes [ ]' },
+  { id: 'bloco', name: 'bloco cheio' },
+  { id: 'dupla', name: 'moldura dupla' },
+  { id: 'prompt', name: 'prompt' },
+  { id: 'cursor', name: 'cursor de menu' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
+
+const chosenStyle = ref('colchetes')
 const face = ref('departure')
 const accent = ref('verde')
 const pad = ref(10)
@@ -41,6 +58,20 @@ const accentHex = computed(() => ACCENTS[accent.value])
 const onDark = computed(() => ratio(parseHex(accentHex.value), parseHex(BG)))
 const onSolid = computed(() => ratio(parseHex(BG), parseHex(accentHex.value)))
 const touch = computed(() => Math.round(pad.value * 1.6 + 20))
+
+const decisionSettings = computed(() => [
+  { label: 'estilo escolhido', value: labelFor(STYLE_OPTIONS, chosenStyle.value) },
+  { label: 'fonte', value: face.value },
+  { label: 'cor', value: `${accent.value} (${accentHex.value})` },
+  { label: 'respiro', value: String(pad.value) },
+  { label: 'entreletra', value: `${tracking.value}/100em` },
+  { label: 'texto branco no bloco cheio', value: solidText.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(
+  () =>
+    `Contorno ${onDark.value.toFixed(2)}:1 sobre ${BG} · bloco cheio ${onSolid.value.toFixed(2)}:1 · alvo de toque ~${touch.value}px (a norma pede 44).`,
+)
 
 const base = computed(() => ({
   fontFamily: STACKS[face.value],
@@ -95,6 +126,7 @@ const base = computed(() => ({
     </div>
 
     <Panel label="botão">
+      <Pick v-model="chosenStyle" label="estilo escolhido" :options="STYLE_OPTIONS" />
       <Pick v-model="face" label="fonte" :options="Object.keys(STACKS).map((id) => ({ id, name: id }))" />
       <Pick v-model="accent" label="cor" :options="Object.keys(ACCENTS).map((id) => ({ id, name: id }))" />
       <Knob v-model="pad" label="respiro" :min="4" :max="26" />
@@ -111,6 +143,13 @@ const base = computed(() => ({
       quebra: amarelo com texto branco reprova, amarelo com texto escuro passa. É a mesma regra que já vale para o
       negrito do site hoje.
     </p>
+
+    <DecisionCopy
+      lab="botão"
+      component="ChromeButton.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 

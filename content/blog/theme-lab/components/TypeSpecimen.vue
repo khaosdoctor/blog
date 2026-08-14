@@ -9,6 +9,7 @@
  * apertar os olhos, a fonte já respondeu.
  */
 import { computed, ref, watch } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -17,6 +18,17 @@ import { BODY_FACE_OPTIONS, SUBHEAD_FACE, TITLE_FACE, faceById } from './faces'
 import { CODE_SAMPLE, DECK, DIACRITICS, HEADING, PARAGRAPHS } from './copy'
 import { parseHex, ratio } from './contrast'
 import './fonts.css'
+
+const THEME_OPTIONS = [
+  { id: 'escuro', name: 'escuro do site' },
+  { id: 'claro', name: 'claro do site' },
+  { id: 'fosforo', name: 'fósforo P39' },
+  { id: 'ambar', name: 'âmbar' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
 
 // Os dois primeiros são os fundos de verdade do site, iguais aos tokens em
 // src/styles/theme.css: preto absoluto no escuro e o sépia no claro. Eram
@@ -58,6 +70,22 @@ watch(face, (id) => {
 
 /** WCAG 1.4.12: entrelinha >= 1.5, entreletra >= 0.12em, entrepalavra >= 0.16em. */
 const spacingOk = computed(() => leading.value >= 150 && tracking.value >= 12 && words.value >= 16)
+
+const decisionSettings = computed(() => [
+  { label: 'fonte do corpo', value: `${chosen.value.name} (${chosen.value.licence})` },
+  { label: 'fundo', value: labelFor(THEME_OPTIONS, theme.value) },
+  { label: 'sem antisserrilhado', value: crisp.value ? 'sim' : 'não' },
+  { label: 'corpo', value: `${size.value}px` },
+  { label: 'entrelinha', value: `${leading.value}%` },
+  { label: 'entreletra', value: `${tracking.value}/100em` },
+  { label: 'entrepalavra', value: `${words.value}/100em` },
+  { label: 'medida', value: `${measure.value}ch` },
+])
+
+const decisionContext = computed(
+  () =>
+    `Contraste ${contrast.value.toFixed(2)}:1 (secundário ${mutedContrast.value.toFixed(2)}:1) sobre ${colours.value.bg}. WCAG 1.4.12: ${spacingOk.value ? 'passa no espaçamento mínimo' : 'abaixo do mínimo de espaçamento'}.`,
+)
 
 const bodyStyle = computed(() => ({
   fontFamily: chosen.value.stack,
@@ -107,16 +135,7 @@ const deckStyle = computed(() => ({
 
     <Panel label="tipo">
       <Pick v-model="face" label="fonte do corpo" :options="BODY_FACE_OPTIONS" />
-      <Pick
-        v-model="theme"
-        label="fundo"
-        :options="[
-          { id: 'escuro', name: 'escuro do site' },
-          { id: 'claro', name: 'claro do site' },
-          { id: 'fosforo', name: 'fósforo P39' },
-          { id: 'ambar', name: 'âmbar' },
-        ]"
-      />
+      <Pick v-model="theme" label="fundo" :options="THEME_OPTIONS" />
       <Toggle v-model="crisp" label="sem antisserrilhado" />
     </Panel>
 
@@ -143,6 +162,13 @@ const deckStyle = computed(() => ({
       aguenta. Fonte pixel costuma melhorar com espaçamento, o que é a única coisa que a literatura sobre leitura
       e dislexia mostra de forma consistente.
     </p>
+
+    <DecisionCopy
+      lab="espécime de tipo (corpo)"
+      component="TypeSpecimen.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 
