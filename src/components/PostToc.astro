@@ -98,11 +98,15 @@ const tree = treeOf(flat)
        is when reading, and the one position that needs no scroll maths. */
     inset-block-start: 50%;
     transform: translateY(-50%);
-    /* Sits in whatever is left between the window edge and the reading column,
-       never over the text: the column is `--measure` wide and centred, so half
-       the window minus half the column is the free strip, and the outline takes
-       the inner 15rem of it. */
-    inset-inline-start: max(var(--gutter), calc(50vw - var(--measure) / 2 - 16rem));
+    /*
+     * `--toc-left` is written by the script from the article's real left edge.
+     * This must never be computed from `--measure`: that token is in `ch`, and
+     * `ch` resolves against the font of the element reading it, so `78ch` here is
+     * 936px in this panel's monospace and 1014px on the article in the sans body
+     * face. Placing the panel with the wrong one of those two numbers put it 39px
+     * too far right and printed the frame over the first characters of the text.
+     */
+    inset-inline-start: var(--toc-left, var(--gutter));
     z-index: 2;
     inline-size: 15rem;
     max-block-size: 70vh;
@@ -223,7 +227,7 @@ const tree = treeOf(flat)
   :root[data-toc-mode='panel'] .toc {
     inset-block-start: 50%;
     inset-block-end: auto;
-    inset-inline-start: max(var(--gutter), calc(50vw - var(--measure) / 2 - 16rem));
+    inset-inline-start: var(--toc-left, var(--gutter));
     transform: translateY(-50%);
     max-block-size: 70vh;
     display: block;
@@ -266,24 +270,45 @@ const tree = treeOf(flat)
      * 15rem is the panel, plus a gutter on the outside and a gap before the text.
      */
     const article = document.querySelector('article')
+    const PANEL_REM = 15
+    const GAP_REM = 1
 
     const fitMode = (): void => {
       if (article === null) return
       const room = article.getBoundingClientRect().left
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-      const needed = 15 * rem + 2.5 * rem
-      document.documentElement.dataset.tocMode = room >= needed ? 'panel' : 'handle'
+      const panel = PANEL_REM * rem
+      const gutter = 1.5 * rem
+      const fits = room >= panel + gutter + GAP_REM * rem
+      document.documentElement.dataset.tocMode = fits ? 'panel' : 'handle'
+      if (!fits) return
+      // Snug against the text rather than against the window edge, measured from
+      // the article itself, which is the only number that is right in both faces.
+      toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - GAP_REM * rem)}px`)
+    }
+
+    /*
+     * Two frames late, deliberately. Reading the article's box in the same task
+     * that changed the body face returns the old layout: the observer callback ran
+     * with `left` at 296px while the settled value was 218px, so the panel stayed
+     * on screen at a width where it does not fit and covered the text until the
+     * next resize. One frame queues behind the style change, the second reads a
+     * finished layout.
+     */
+    const scheduleFit = (): void => {
+      requestAnimationFrame(() => requestAnimationFrame(fitMode))
     }
 
     fitMode()
-    addEventListener('resize', fitMode, { passive: true })
-    // The body face is a reader preference, and switching it changes the column
-    // width, so the fit has to be recomputed when the attribute changes rather
-    // than only on resize.
-    new MutationObserver(fitMode).observe(document.documentElement, {
+    addEventListener('resize', scheduleFit, { passive: true })
+    // The body face is a reader preference and each face has its own size, so the
+    // column width changes with it, not only with the window.
+    new MutationObserver(scheduleFit).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-body-face'],
     })
+    // A face that arrives after first paint reflows the column under the panel.
+    document.fonts?.ready.then(scheduleFit)
     // A heading level with the window top is already behind the reader, so the
     // line reads a little below it. Same figure as the heading scroll margin.
     const LOOKAHEAD = 120
