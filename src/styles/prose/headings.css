@@ -34,6 +34,10 @@ article h1 {
  */
 article :is(h1, h2, h3, h4, h5, h6) {
   position: relative;
+  /* Jumping to a section from the outline or from a copied anchor link must not
+     park the heading under the reading-progress bar, and a heading flush with
+     the window edge reads as cut off even where there is no bar. */
+  scroll-margin-block-start: 1.5rem;
 }
 
 .heading-anchor {

@@ -199,3 +199,16 @@
     --duration: 0ms;
   }
 }
+
+/*
+ * Jumping to a section eases there instead of teleporting, so the reader keeps
+ * the thread of where the new position is relative to the old one. Declared only
+ * for readers who have not asked for less motion: a full-page animated scroll is
+ * the single most nauseating thing this site could do to someone with vestibular
+ * trouble, and the instant jump is the correct behaviour for them.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
+}
