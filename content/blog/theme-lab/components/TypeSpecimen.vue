@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
- * A pergunta aberta mais cara do redesenho: um tipo pixelado aguenta três mil
- * palavras? Este componente não tem amostra própria: ele é só os controles.
+ * A decisão mais cara do redesenho, agora fechada: Literata no corpo, Atkinson
+ * Hyperlegible como a opção sem serifa, cada uma com as medidas desta bancada.
+ * Este componente não tem amostra própria: ele é só os controles.
  *
  * O que muda quando você mexe num knob é o post de verdade que fica logo
  * abaixo desta bancada, `#lab-post`, o mesmo texto que passa pelo remark e
@@ -41,15 +42,11 @@ const THEMES = {
   ambar: { bg: '#0a0704', fg: '#ffb000', muted: '#a67200' },
 }
 
-/** Handjet só sobrevive no corpo neste tamanho e espaçamento; ver faces.ts. */
-const HANDJET_SIZE = 22
-const HANDJET_TRACKING = 3
-
-const face = ref('plex')
-const size = ref(17)
-const leading = ref(165)
-const tracking = ref(0)
-const words = ref(0)
+const face = ref('literata')
+const size = ref(18)
+const leading = ref(163)
+const tracking = ref(5)
+const words = ref(15)
 const measure = ref(68)
 const theme = ref<keyof typeof THEMES>('escuro')
 const crisp = ref(false)
@@ -59,13 +56,16 @@ const colours = computed(() => THEMES[theme.value])
 const contrast = computed(() => ratio(parseHex(colours.value.fg), parseHex(colours.value.bg)))
 const mutedContrast = computed(() => ratio(parseHex(colours.value.muted), parseHex(colours.value.bg)))
 
-// O veredito sobre Handjet é condicional: só em 22px com ~0,03em de entreletra.
-// Ao escolhê-la, o espécime pula direto para essa configuração.
+// As duas foram escolhidas com medidas diferentes, e comparar as duas com as
+// medidas de uma só é comparar errado: a Atkinson a 18px parece menor que a
+// Literata a 18px. Trocar a fonte traz as medidas dela junto, que são as mesmas
+// que o site aplica em src/styles/theme.css.
 watch(face, (id) => {
-  if (id === 'handjet') {
-    size.value = HANDJET_SIZE
-    tracking.value = HANDJET_TRACKING
-  }
+  const { metrics } = faceById(id)
+  size.value = metrics.size
+  leading.value = metrics.leading
+  tracking.value = metrics.tracking
+  words.value = metrics.words
 })
 
 /** WCAG 1.4.12: entrelinha >= 1.5, entreletra >= 0.12em, entrepalavra >= 0.16em. */

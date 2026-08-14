@@ -22,6 +22,27 @@ arquivo e continuam sendo compilados pelo build como qualquer outra ilha do site
 sliders, os seletores, a conta de contraste) continuam importados do laboratório vivo, para um candidato aposentado
 não virar motivo de duplicar código.
 
+## As fontes de corpo que perderam
+
+A decisão de tipografia fechou em duas fontes, não uma: Literata como padrão e Atkinson Hyperlegible como a opção sem
+serifa, porque o menu de preferências vai oferecer as duas. Treze fontes ficaram no caminho, e elas são o argumento
+inteiro deste arquivo.
+
+Cinco disputaram o corpo de verdade, medidas contra um post inteiro com citação, tabela, código e nota de rodapé, e não
+contra quatro parágrafos limpos. É essa diferença que derrubou a favorita: a IBM Plex Mono ganhava fácil em prosa lisa
+e caiu no primeiro trecho de código inline, porque num blog sobre código um parágrafo monoespaçado e um `trecho` deixam
+de ser distinguíveis. A Handjet caiu por ser condicional, só legível a 22px exatos. A Inter e a Roboto caíram para a
+Atkinson na mesma vaga, e a Source Serif 4 caiu para a Literata pelo motivo contrário: uma foi desenhada para papel, a
+outra para tela.
+
+As outras oito nunca disputaram o corpo. Foram o levantamento de fonte pixelada, e servem para mostrar onde um bitmap
+funciona (etiqueta, título curto) e onde ele desmonta (qualquer coisa com mais de quarenta palavras).
+
+Cada uma aqui renderiza de verdade, no tamanho em que foi julgada, sobre os dois fundos do site. Nenhuma tem slider: não
+há mais o que decidir, e um controle numa decisão fechada só convida a reabrir.
+
+<LabDemo src="./components/RetiredFaces.vue" client:visible />
+
 ## A capa em textmode
 
 O segundo candidato de animação virou a primeira tentativa de capa: em vez de fundo ambiente, a biblioteca monta um
