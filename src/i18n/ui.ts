@@ -1,4 +1,34 @@
-export type Locale = 'pt' | 'en'
+/**
+ * Every language the chrome speaks, source language first. Adding one is this
+ * array plus its table below, and `scripts/check-i18n.ts` reads this same
+ * constant, so the checker never needs a list of its own.
+ */
+export const LOCALES = ['pt', 'en'] as const
+
+export type Locale = (typeof LOCALES)[number]
+
+/**
+ * The language the site is written in. It keeps the bare path (`/slug/`) while
+ * every other language is prefixed (`/en/slug/`). `SOURCE_LANG` in
+ * src/lib/posts.ts is the same value, declared separately because that module
+ * imports `astro:content` and this one has to stay importable from a plain
+ * node script. The checker asserts the two agree.
+ */
+export const SOURCE_LOCALE: Locale = 'pt'
+
+/**
+ * What a locale is called in an `hreflang`. The region is what search engines
+ * match against, so Portuguese is announced as pt-BR rather than pt.
+ */
+export const HREFLANG: Record<Locale, string> = {
+  pt: 'pt-BR',
+  en: 'en',
+}
+
+/** Where a route shared by every language lives in one of them. */
+export function localePath(locale: Locale, path: string): string {
+  return locale === SOURCE_LOCALE ? path : `/${locale}${path}`
+}
 
 type UIKey =
   | 'tagline'
@@ -63,6 +93,8 @@ type UIKey =
   | 'previewUnwritten'
   | 'showNote'
   | 'showMarginNote'
+  | 'linkToNote'
+  | 'copyQuote'
   | 'imageGone'
   | 'imageGoneAlt'
   | 'imageGoneUnknownHost'
@@ -77,7 +109,7 @@ type UIKey =
   | 'appShortName'
   | 'appDescription'
 
-const ui: Record<Locale, Record<UIKey, string>> = {
+export const ui: Record<Locale, Record<UIKey, string>> = {
   pt: {
     tagline: 'Um blog sobre JavaScript, TypeScript, web e ferramentas',
     readMore: 'Ler mais',
@@ -143,6 +175,8 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     previewUnwritten: 'ainda não escrito, mas em breve!',
     showNote: 'mostrar nota',
     showMarginNote: 'mostrar nota lateral',
+    linkToNote: 'link para esta nota',
+    copyQuote: 'copiar esta citação',
     imageGone: 'Esta imagem não existe mais',
     imageGoneAlt: 'Imagem indisponível, hospedada em %s',
     imageGoneUnknownHost: 'um host que não a serve mais',
@@ -223,6 +257,8 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     previewUnwritten: 'not yet written, but soon!',
     showNote: 'show note',
     showMarginNote: 'show margin note',
+    linkToNote: 'link to this note',
+    copyQuote: 'copy this quote',
     imageGone: 'This image is gone',
     imageGoneAlt: 'Image unavailable, hosted at %s',
     imageGoneUnknownHost: 'a host that no longer serves it',
@@ -248,9 +284,11 @@ export function t(lang: Locale, key: UIKey, ...args: Array<string | number>): st
 
 /**
  * For components that render inside both page trees without a locale prop, such
- * as the ones injected into MDX. The English tree lives entirely under /en/, so
- * the path is the only signal available and it is a reliable one.
+ * as the ones injected into MDX. Every language but the source one lives under
+ * its own prefix, so the first path segment is the only signal available and it
+ * is a reliable one.
  */
 export function localeFromPath(pathname: string): Locale {
-  return pathname.startsWith('/en/') || pathname === '/en' ? 'en' : 'pt'
+  const segment = pathname.split('/')[1]
+  return LOCALES.find((locale) => locale === segment) ?? SOURCE_LOCALE
 }

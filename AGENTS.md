@@ -4,7 +4,7 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 
 ## The things that break if you do not know them
 
-**Posts are `.mdx` files containing plain markdown.** No imports, no component tags. Two remark plugins turn markdown into components at build time. This is deliberate: `content/` is an Obsidian vault, Obsidian cannot render component tags, and writing in Obsidian is the point of the whole rebuild. Do not "modernise" posts back into components.
+**Posts are `.mdx` files containing plain markdown.** Never an import. `remark-embeds`, `remark-figures` and `remark-lab-demos` turn ordinary markdown into components at build time, and the component set is injected into every post, so the handful of tags markdown has no syntax for (`<Video>`, `<Sidenote>`, `<MarginNote>`, `<LabDemo>`, `<HtmlLab>`) are written bare. This is deliberate: `content/` is an Obsidian vault, Obsidian renders almost none of that, and writing in Obsidian is the point of the whole rebuild. Do not "modernise" the rest of a post back into components.
 
 **A `.md` post silently loses content.** The plugins emit MDX nodes, and the plain markdown pipeline drops them without an error. Posts must be `.mdx`, translations included. That is why the translation guard, not the file extension, is what stops model-written code.
 
@@ -50,7 +50,7 @@ Conventional commits. The subject can be descriptive, **the body must be under a
 
 `feat` bumps the minor version, `fix` the patch, `!` or `BREAKING CHANGE` the major. Use `content:` when publishing or editing posts, which is ignored by the release tooling so writing never moves the version.
 
-Releases are manual, triggered from the Actions tab. Do not add automation that cuts a release on push.
+Releases start by hand, from the Actions tab: release-please opens a release PR, and merging it cuts the tag. `release.yml` does carry a `push` trigger, but it only matches that merge commit. Do not widen it so an ordinary push cuts a release.
 
 No attribution lines, no co-author trailers, no gitmoji.
 

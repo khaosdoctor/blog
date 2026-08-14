@@ -1,6 +1,7 @@
 ---
 import type { Post } from '../lib/posts'
 import { formatDate, urlOf } from '../lib/posts'
+import { localePath } from '../i18n/ui'
 
 interface Props {
   posts: Post[]
@@ -8,6 +9,13 @@ interface Props {
 }
 
 const { posts, showCategory = true } = Astro.props
+
+// The section index of the post's own language. This list renders inside both
+// page trees, and a bare /<category>/ sent an English reader from an English
+// listing to a Portuguese one.
+function categoryUrl(post: Post): string {
+  return localePath(post.data.lang, `/${post.data.category}/`)
+}
 ---
 
 <ul class="posts">
@@ -22,7 +30,7 @@ const { posts, showCategory = true } = Astro.props
           {showCategory && (
             <>
               <span aria-hidden="true">·</span>
-              <a href={`/${post.data.category}/`} class="category">
+              <a href={categoryUrl(post)} class="category">
                 {post.data.category}
               </a>
             </>

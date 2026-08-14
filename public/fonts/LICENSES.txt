@@ -13,9 +13,12 @@ the reserved name. Serving a woff2 from a website is exactly what it is for. No
 attribution is required on the page, though the licence text must travel with the
 font file.
 
-  DepartureMono-Regular.woff2   Departure Mono, Helena Zhang
+  DepartureMono-Regular.woff2   Departure Mono, Helena Zhang, copyright 2022-2024
                                 https://departuremono.com
                                 https://github.com/rektdeckard/departure-mono
+                                Careful: the LICENSE at the root of that repo is MIT
+                                and covers the website code. The font's own licence
+                                is the OFL 1.1 at public/assets/LICENSE.
 
   Silkscreen-400.woff2          Silkscreen, Jason Kottke
   Silkscreen-700.woff2          https://fonts.google.com/specimen/Silkscreen

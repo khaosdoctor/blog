@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { t } from '../i18n/ui'
-import { getPublishedPosts } from '../lib/posts'
+import { getPublishedPosts, urlOf } from '../lib/posts'
 
 const recent = (await getPublishedPosts()).slice(0, 5)
 ---
@@ -20,6 +20,6 @@ const recent = (await getPublishedPosts()).slice(0, 5)
   </p>
   <p>{t('pt', 'notFoundRecent')}</p>
   <ul>
-    {recent.map((post) => <li><a href={`/${post.id}/`}>{post.data.title}</a></li>)}
+    {recent.map((post) => <li><a href={urlOf(post)}>{post.data.title}</a></li>)}
   </ul>
 </BaseLayout>

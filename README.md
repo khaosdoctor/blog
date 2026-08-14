@@ -11,6 +11,7 @@ This file is the operating manual, and it is deliberately short. The rest lives 
 | `docs/architecture.md` | how the pieces fit and why, with diagrams. Read before changing any of them |
 | `docs/ci.md` | the workflows, the scheduler, the credentials |
 | `docs/design.md` | the visual direction, font and icon shortlists, open questions |
+| `docs/seo.md` | what the build generates on its own, and the one thing left to decide |
 | `docs/decisions.md` | what was decided, what was rejected, and the reasoning |
 | `AGENTS.md` | the rules an agent has to know before touching this repo |
 
@@ -58,10 +59,13 @@ draft: false
 ---
 ```
 
-Those are the required ones (`lang` defaults to `pt` and `draft` defaults to `true`, so forgetting a field cannot
-publish anything). Optional: `updatedDate`, `heroImage` with `heroImageAlt`, `series` / `seriesName` / `seriesOrder`,
-`epigraph` / `epigraphCite`, `noindex`, `seoTitle`, `seoDescription`, `visibility`, `slug`, `machineTranslated`. The full schema,
-with comments, is `src/content.config.ts`.
+`title`, `pubDate`, `category` and `description` are the required ones (`lang` defaults to `pt` and `draft` defaults
+to `true`, so forgetting a field cannot publish anything). Optional: `tags`, `updatedDate`, `heroImage` with
+`heroImageAlt`, `series` / `seriesName` / `seriesOrder`, `authors`, `noindex`, `seoTitle`, `seoDescription`,
+`visibility`, `slug`, `machineTranslated`. The full schema, with comments, is `src/content.config.ts`.
+
+`authors` is a list in git's own format, `Name <https://site>`, with the site part optional. Leave it out and the post
+is yours.
 
 `category` is the section and becomes `/<category>/`. In use today: `javascript`, `infra`, `typescript`, `opinion`,
 `career`, `meta`, `security`. Any new value creates a new section page. `tags` are many and free-form, each one gets
@@ -96,6 +100,7 @@ That is what turns on the series page and the prev/next navigation at the bottom
 | Command | What it does |
 |---|---|
 | `npm run dev` | local server |
+| `npm run check` | `astro check` plus `tsc -p worker`. Run it before you finish |
 | `npm run build` | build plus the Pagefind index |
 | `npm run preview` | serve `dist/` |
 | `node scripts/check-output.ts` | post-build checks, the same ones CI runs |
@@ -111,9 +116,10 @@ That is what turns on the series page and the prev/next navigation at the bottom
 | `content/blog/` | the posts, in the language they were written in |
 | `content/blog/<folder>/<slug>.mdx` | a translation of that post, identified by its `lang` |
 | `content/bookmarks.json`, `content/dead-images.json` | metadata captured at migration time so the build stays offline |
-| `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, `/en/` |
+| `content/categories.json` | what each section is about, per language. Shown on the section page |
+| `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, `/en/`, `/en/<category>/` |
 | `src/components/` | the component set posts can use |
-| `src/plugins/` | the remark plugins that turn markdown into figures and embeds |
+| `src/plugins/` | the remark and rehype plugins that turn markdown into figures, embeds and margin notes |
 | `worker/` | Cloudflare Worker that rebuilds the site the minute a scheduled post is due |
 | `.migration/` | migration reports and review lists (untracked) |
 

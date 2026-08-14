@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
-import { t, type Locale } from '../i18n/ui'
+import { SOURCE_LOCALE, t, type Locale } from '../i18n/ui'
 import { PUBLISH_CUTOFF, type Post, urlOf } from '../lib/posts'
 import { seriesTitle } from '../lib/taxonomy'
 
@@ -33,13 +33,18 @@ const isPublished = (part: Post) => !part.data.draft && part.data.pubDate <= PUB
 // (src/pages/series/[name].astro), so the heading links on exactly those terms.
 // One published post and two drafts used to render a link to a 404.
 const publishedCount = parts.filter(isPublished).length
+
+// That route is built for the source language only, so a page in any other
+// language shows the title as plain text rather than sending the reader into a
+// listing they cannot read.
+const linkHeading = publishedCount > 1 && locale === SOURCE_LOCALE
 ---
 
 {
   parts.length > 1 && (
     <nav class="series-toc" aria-label={t(locale, 'series')}>
       <p class="heading">
-        {publishedCount > 1 ? <a href={`/series/${series}/`}>{title}</a> : title} &middot;{' '}
+        {linkHeading ? <a href={`/series/${series}/`}>{title}</a> : title} &middot;{' '}
         {t(locale, 'seriesContents', parts.length)}
       </p>
       <ol>

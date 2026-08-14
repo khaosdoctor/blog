@@ -10,7 +10,10 @@ export const GET: APIRoute = async (context) => {
   return rss({
     title: 'Lucas Santos',
     description: t('en', 'homeDescription'),
-    site: context.site ?? 'https://blog.lsantos.dev',
+    // The English home, so the channel link takes a subscriber to the tree the
+    // feed is actually about. Item links are root-relative and resolve to the
+    // same absolute URLs either way.
+    site: new URL('/en/', context.site ?? 'https://blog.lsantos.dev'),
     trailingSlash: true,
     items: posts.map((post) => ({
       title: post.data.title,

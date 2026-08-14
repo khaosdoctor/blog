@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { getPublishedPosts } from '../lib/posts'
+import { getPublishedPosts, urlOf } from '../lib/posts'
 
 export const GET: APIRoute = async ({ site }) => {
   const posts = await getPublishedPosts()
@@ -28,7 +28,7 @@ export const GET: APIRoute = async ({ site }) => {
     lines.push(`## ${section}`, '')
     entries.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
     for (const post of entries) {
-      lines.push(`- [${post.data.title}](${absolute(`/${post.id}/index.md`)}): ${post.data.description}`)
+      lines.push(`- [${post.data.title}](${absolute(`${urlOf(post)}index.md`)}): ${post.data.description}`)
     }
     lines.push('')
   }

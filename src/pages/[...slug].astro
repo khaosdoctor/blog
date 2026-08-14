@@ -26,7 +26,7 @@ import {
   urlOf,
 } from '../lib/posts'
 import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
-import { t } from '../i18n/ui'
+import { HREFLANG, t } from '../i18n/ui'
 
 /**
  * Injected into every post so migrated MDX can use these tags with no import
@@ -67,8 +67,7 @@ export const getStaticPaths = (async () => {
       post,
       series: getSeriesNavigation(post, seriesMap),
       alternates: (byFolder.get(folderOf(post)) ?? [post]).map((entry) => ({
-        // pt-BR, not pt: the region is what search engines match against.
-        lang: entry.data.lang === 'pt' ? 'pt-BR' : entry.data.lang,
+        lang: HREFLANG[entry.data.lang],
         path: urlOf(entry),
       })),
     },
@@ -94,6 +93,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   updatedAt={post.data.updatedDate}
   tags={post.data.tags}
   series={post.data.series}
+  authors={post.data.authors}
   image={post.data.heroImage?.src}
   alternates={alternates}
   section={{ name: post.data.category, url: `/${post.data.category}/` }}
@@ -131,7 +131,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
     {
       series !== null && (
         <p class="series">
-          {t('pt', 'partOfSeriesNamed', series.index, series.total)}{' '}
+          {t(post.data.lang, 'partOfSeriesNamed', series.index, series.total)}{' '}
           <a href={`/series/${series.name}/`}>{series.title}</a>
         </p>
       )
@@ -154,7 +154,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
     }
     {
       series !== null && (
-        <nav class="series-nav" aria-label={t('pt', 'seriesNav')}>
+        <nav class="series-nav" aria-label={t(post.data.lang, 'seriesNav')}>
           {series.previous !== null && (
             <a href={urlOf(series.previous)} rel="prev">
               ← {series.previous.data.title}
@@ -169,7 +169,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
       )
     }
   </article>
-  <HoverPreviews locale="pt" />
+  <HoverPreviews locale={post.data.lang} />
 </BaseLayout>
 
 <style>
