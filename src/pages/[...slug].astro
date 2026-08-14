@@ -10,6 +10,7 @@ import HtmlLab from '../components/HtmlLab.astro'
 import LabDemo from '../components/LabDemo.astro'
 import MarginNote from '../components/MarginNote.astro'
 import MissingImage from '../components/MissingImage.astro'
+import PostToc from '../components/PostToc.astro'
 import RawEmbed from '../components/RawEmbed.astro'
 import SeriesToc from '../components/SeriesToc.astro'
 import Sidenote from '../components/Sidenote.astro'
@@ -75,7 +76,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths
 
 const { post, series, alternates: folderAlternates } = Astro.props
-const { Content, remarkPluginFrontmatter } = await render(post)
+const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
 
 const alternates = folderAlternates.map(({ lang, path }) => ({
@@ -101,6 +102,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   noindex={post.data.noindex}
   progress
 >
+  <PostToc headings={headings} locale={post.data.lang} />
   <article>
     <h1>{post.data.title}</h1>
     <p class="meta">
