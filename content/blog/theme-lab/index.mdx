@@ -177,3 +177,13 @@ E o que ainda depende de alguém confirmar de olho na tela renderizada:
 Se este parágrafo já cansou de ler, a fonte do corpo respondeu antes de qualquer slider precisar responder por ela.
 
 [^1]: IBM, *Personal Computer Hardware Reference Library: Color/Graphics Monitor Adapter*, 1983, tabela de registros de paleta.
+
+## Seção 06 / O logo animado
+
+A decisão que abre esta bancada inteira: o site vai ter quase nenhuma animação, e a única exceção é a marca do cabeçalho. Não o título, não a lista de posts, não os botões. Só ela, o tempo todo, baixinho, como um pulso de disco rígido: a coisa que prova que a página está viva sem competir com o texto por atenção.
+
+O cabeçalho é uma linha só: a marca animada, e do lado "Lucas Santos" por extenso. No carregamento o nome aparece inteiro. Depois de alguns segundos ele some para dentro da marca, letra por letra virando um caractere aleatório de um jogo pequeno de blocos antes de recolher, em vez de simplesmente desaparecer. É o mesmo efeito de scramble da documentação da textmode.js, só que sem a biblioteca: aqui é `setInterval` trocando o texto de cada letra por alguns quadros, junto com uma transição de CSS encolhendo a largura, a opacidade e a posição na direção da marca.
+
+A marca em si veio do `public/favicon.svg` deste repo, cinco retângulos com as cores oficiais. A arte de referência tem dezenove linhas de altura, mas o cabeçalho tem uma linha só, então cada candidato abaixo resolve essa compressão de um jeito: ou desenha os cinco retângulos de verdade, pequenos, ou rasteriza a marca numa grade de oito por oito células e perde a nuance do bloco amarelo, que já era pequeno para começar. Nenhuma variação usa 3D nem gira nada: essa direção já foi descartada antes desta página existir.
+
+<LabDemo src="./components/LogoLab.vue" client:visible />
