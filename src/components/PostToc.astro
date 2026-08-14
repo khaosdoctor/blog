@@ -96,7 +96,10 @@ const tree = treeOf(flat)
     position: fixed;
     /* Vertically centred on the window, which is roughly where the eye already
        is when reading, and the one position that needs no scroll maths. */
-    inset-block-start: 50%;
+    /* Held in the upper third rather than centred: centred, it drifts below the
+       line the eye actually reads from, and on a short window it collided with
+       the bottom of the screen before the top. */
+    inset-block-start: 33%;
     transform: translateY(-50%);
     /*
      * `--toc-left` is written by the script from the article's real left edge.
@@ -112,7 +115,7 @@ const tree = treeOf(flat)
     max-block-size: 70vh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 0.55rem 0.6rem;
+    padding: 1rem 0.7rem;
     /* ANSI double frame: the box-drawing look without box-drawing characters,
        which would need a monospace grid and would not survive a font change. */
     border: 3px double var(--toc-ink);
@@ -225,7 +228,7 @@ const tree = treeOf(flat)
 
   /* Measured room for the panel, whatever the media query guessed. */
   :root[data-toc-mode='panel'] .toc {
-    inset-block-start: 50%;
+    inset-block-start: 33%;
     inset-block-end: auto;
     inset-inline-start: var(--toc-left, var(--gutter));
     transform: translateY(-50%);
@@ -271,7 +274,10 @@ const tree = treeOf(flat)
      */
     const article = document.querySelector('article')
     const PANEL_REM = 15
-    const GAP_REM = 1
+    // The gap between the panel and the first character of the text. Wide enough
+    // that the frame reads as a separate object in the margin rather than as
+    // something attached to the paragraph beside it.
+    const GAP_REM = 2.5
 
     const fitMode = (): void => {
       if (article === null) return
