@@ -56,7 +56,7 @@ const blog = defineCollection({
       heroImageAlt: z.string().optional(),
       /**
        * Written the way git writes an author: `Lucas <https://lsantos.dev>`, the
-       * site part optional. Omitted means the blog's owner, so 191 migrated posts
+       * site part optional. Omitted means the blog's owner, so the migrated posts
        * need no edit; it is only worth writing for a guest post or a co-author.
        */
       authors: z.array(z.string()).optional(),
