@@ -37,3 +37,24 @@ primeiro: `frameCount` é um getter e chamar como função derrubava a cena inte
 com o olho dentro do toro, o que renderizava a parede interna do tubo como um campo verde com um buraco preto no meio.
 
 <LabDemo src="./components/TmSolid.vue" client:visible />
+
+## A seção "What will you create?" em CSS
+
+O quarto candidato de animação, e o mais útil dos recusados: exatamente o efeito da captura que começou este trabalho,
+a linha que se digita sozinha com um cursor de bloco, reproduzida sem WebGL nenhum, só DOM e CSS.
+
+Ele perdeu por não ser deste blog. É a página da textmode.art, com o prompt, o `[ ler o começo ]` entre colchetes e o
+título com uma palavra em destaque. Copiar o layout de outra pessoa é referência, não identidade, e a decisão de ter
+quase nenhuma animação tirou o pouco que restava de razão para ele existir aqui.
+
+Vale guardar por um motivo específico, e é o mais importante deste arquivo: ele é a prova de que o efeito da captura
+nunca precisou da biblioteca de WebGL. Ler o fonte da textmode.art mostrou que a linha digitada é um componente Vue de
+umas quarenta linhas, sem canvas nenhum, e este candidato existe para demonstrar isso lado a lado com o candidato que
+carrega cento e noventa quilobytes para chegar num resultado parecido. Quem for comparar custo com aparência num
+redesenho tem aqui os dois lados montados.
+
+Os colchetes em volta do texto do botão são `::before` e `::after`, então o botão continua sendo um botão, focável, e o
+leitor de tela não anuncia os colchetes como conteúdo. Esse detalhe sobreviveu à decisão e vale para qualquer botão do
+site.
+
+<LabDemo src="./components/CssHeading.vue" client:visible />
