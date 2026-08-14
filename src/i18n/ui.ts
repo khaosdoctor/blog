@@ -67,6 +67,9 @@ type UIKey =
   | 'codeThemePick'
   | 'writtenBy'
   | 'readingProgress'
+  | 'contents'
+  | 'openContents'
+  | 'foldSection'
   | 'notWrittenYet'
   | 'allPosts'
   | 'categories'
@@ -150,6 +153,9 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     codeThemePick: 'mudar o tema do código',
     writtenBy: 'por',
     readingProgress: 'progresso da leitura',
+    contents: 'Neste post',
+    openContents: 'abrir o índice',
+    foldSection: 'recolher ou expandir esta seção',
     notWrittenYet: 'ainda não escrito',
     allPosts: 'Todos os posts',
     categories: 'Categorias',
@@ -234,6 +240,9 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     codeThemePick: 'change the code theme',
     writtenBy: 'by',
     readingProgress: 'reading progress',
+    contents: 'In this post',
+    openContents: 'open the contents',
+    foldSection: 'fold or unfold this section',
     notWrittenYet: 'not written yet',
     allPosts: 'All posts',
     categories: 'Categories',

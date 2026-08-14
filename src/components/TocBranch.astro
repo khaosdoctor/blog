@@ -1,0 +1,151 @@
+---
+import { t, type Locale } from '../i18n/ui'
+
+/**
+ * One level of the outline, which renders itself for every level below it.
+ *
+ * Split out of PostToc only because a heading tree has no fixed depth: h2 > h3
+ * > h4 is the common shape, but nothing stops a post from going deeper, and
+ * `Astro.self` is the only way to render an unbounded nesting without writing
+ * one loop per level.
+ *
+ * The fold state is an attribute on the `<li>` (`data-folded`), not a class, so
+ * the script that opens the branch the reader is currently inside has exactly
+ * one thing to set and the CSS has exactly one thing to read.
+ */
+export interface TocItem {
+  slug: string
+  text: string
+  children: TocItem[]
+}
+
+interface Props {
+  items: TocItem[]
+  locale: Locale
+}
+
+const { items, locale } = Astro.props
+---
+
+<ul>
+  {
+    items.map((item) => (
+      <li data-slug={item.slug}>
+        <div class="row">
+          {item.children.length > 0 && (
+            <button
+              class="fold"
+              type="button"
+              aria-expanded="true"
+              aria-label={t(locale, 'foldSection')}
+            >
+              <span aria-hidden="true">▾</span>
+            </button>
+          )}
+          <a href={`#${item.slug}`}>{item.text}</a>
+        </div>
+        {item.children.length > 0 && (
+          <div class="sub">
+            <div>
+              <Astro.self items={item.children} locale={locale} />
+            </div>
+          </div>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Every nested level steps in by one character of the outline's own font, so
+     the indentation matches the tree the headings actually form. */
+  .sub > div > ul {
+    padding-inline-start: 1.1ch;
+  }
+
+  .row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.15rem;
+  }
+
+  /*
+   * The active row is painted from the box's inside edge to its inside edge,
+   * which is why the anchor is a block filling the row rather than a text run:
+   * a background on an inline anchor stops at the end of the words and reads as
+   * a highlighter mark instead of a selected line.
+   */
+  a {
+    display: block;
+    flex: 1;
+    padding: 0.1rem 0.3rem;
+    color: inherit;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    text-decoration: none;
+    /* Long headings truncate rather than wrap to four lines and push the rest of
+       the outline out of the box. The full text stays in the accessible name. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition:
+      background var(--duration) var(--ease),
+      color var(--duration) var(--ease);
+  }
+
+  a:hover {
+    background: color-mix(in oklab, var(--toc-ink) 14%, transparent);
+  }
+
+  /* Inverted, the whole line: black ground and light type on the sepia page,
+     the exact opposite in the dark. Set by the script as the reader scrolls. */
+  a[aria-current='location'] {
+    background: var(--toc-ink);
+    color: var(--toc-paper);
+  }
+
+  .fold {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--toc-ink);
+    font: inherit;
+    font-size: 0.6rem;
+    line-height: 1.5;
+    cursor: pointer;
+    /* The triangle turns; it is not swapped for a different glyph, so there is
+       nothing to reflow and the rotation is the whole animation. */
+    transition: transform var(--duration) var(--ease);
+  }
+
+  [data-folded] > .row > .fold {
+    transform: rotate(-90deg);
+  }
+
+  /*
+   * Folding animates from `1fr` to `0fr`, which is the only way to transition
+   * to an intrinsic height without measuring anything in JavaScript. A browser
+   * that cannot interpolate it snaps instead, which is the same behaviour the
+   * old `hidden` attribute would have given.
+   */
+  .sub {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows var(--duration) var(--ease);
+  }
+
+  .sub > div {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  [data-folded] > .sub {
+    grid-template-rows: 0fr;
+  }
+</style>
