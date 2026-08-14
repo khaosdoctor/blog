@@ -8,8 +8,11 @@ ASCII/ANSI, 8-bit, pixelated, terminal. Box drawing instead of borders where it 
 section markers like `SECTION 00 / INDEX`, dashed rules, information dense over decorated.
 
 References: [unix.foo](https://unix.foo), [xn--gckvb8fzb.com](https://xn--gckvb8fzb.com/),
-[tramoia.sh](https://tramoia.sh). Text animation via [textmode.js](https://code.textmode.art), WebGL2 to a canvas,
-zero dependencies, so it bundles locally and needs no CSP change.
+[tramoia.sh](https://tramoia.sh). Motion is decided now, and it is nearly absent: the site carries almost no
+animation, and the one exception is the header logo mark. [textmode.js](https://code.textmode.art), the WebGL2
+library the original brief pointed at, lost that decision along with the candidates that used it; it stays installed
+only because those retired candidates are kept working at `/theme-lab-arquivo/`. Every live candidate, including the
+logo mark, is plain SVG, CSS and DOM.
 
 The same treatment covers the generated images: post covers, OG cards and any background art share the palette and
 the pixel grid, so a share card looks like the site.
@@ -104,7 +107,7 @@ Decided and implemented. Kept short on purpose; the code is the detail.
 
 ## Open decisions
 
-- Which of the three cover candidates wins. All three are built in `/theme-lab/` section 04 as SVG at the real
+- Which of the three cover candidates wins. All three are built in `/theme-lab/` section 03 as SVG at the real
   1200×630: a DOS window with a spaced double border, a full-bleed brand colour with a 75% rule, and a seeded plasma
   with shadowed letters. Covers stay per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in. Colour
   and seed derive from the slug rather than being random, so a rebuild cannot change an existing cover.
@@ -117,3 +120,8 @@ Decided and implemented. Kept short on purpose; the code is the detail.
 - Whether the code language chip should still show when a filename tab is already present.
 - Which of his other domains count as internal for the link icon. `lsantos.dev` and `lsantos.me` are confirmed now;
   anything beyond those two is still open.
+- Which of the five logo animation candidates wins. All five are at `/theme-lab/` section 04: colour cycling through
+  the accents, a sliding brightness band, a character-ramp scramble, a sequential trace across the accents, and a pulse on
+  the accents. Alongside them, the "Lucas Santos" wordmark next to the mark scrambles away after a delay and collapses
+  into it rather than just disappearing. `prefers-reduced-motion` stops all five outright rather than just pausing
+  them, and a manual pause control covers WCAG 2.2.2 for whichever one ships.
