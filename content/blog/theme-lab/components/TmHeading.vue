@@ -116,6 +116,13 @@ onMounted(async () => {
     const element = canvas.value
     const box = stage.value
     if (!element || !box) return
+    // A biblioteca usa um canvas externo como está, e um <canvas> sem atributos
+    // mede 300×150: o primeiro quadro saía nesse tamanho e, com o loop parado,
+    // ficava impresso no canto como uma cópia menor da cena. Medir antes de
+    // criar faz o primeiro quadro já nascer no tamanho certo.
+    const first = box.getBoundingClientRect()
+    element.width = Math.round(first.width)
+    element.height = Math.round(first.height)
     // Sem a tela de abertura, e o noLoop só depois do setup: congelar no meio
     // do fade do splash deixava a moldura dele impressa por cima da cena.
     const tm = textmode.create({ canvas: element, fontSize: cell.value, loadingScreen: { transition: 'none' } })
@@ -130,6 +137,10 @@ onMounted(async () => {
     const observer = new ResizeObserver(() => {
       const rect = box.getBoundingClientRect()
       tm.resizeCanvas(Math.round(rect.width), Math.round(rect.height))
+      // Um redimensionamento com o loop parado compõe o quadro através de um
+      // buffer da medida antiga e deixa uma cópia menor da cena impressa no
+      // canto. Dois quadros extras assentam o pipeline.
+      if (frozen.value) tm.redraw(2)
     })
     observer.observe(box)
     stop = () => {
