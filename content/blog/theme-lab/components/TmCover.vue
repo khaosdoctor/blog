@@ -70,36 +70,49 @@ const failed = ref('')
 
 const colours = computed(() => PALETTE[palette.value])
 
-// A caixa por trás do texto agora é sempre preta (ver .card), então é contra
-// ela que o texto se lê, não contra o fundo da arte.
 const CARD_BG = '#000000'
 /** --fg do site no escuro, a saída quando a tinta da paleta não serve. */
 const SITE_INK = '#e0dcd4'
 
-// A tinta tem que vir do que está ATRÁS do texto, e o que está atrás é a caixa
-// preta. Cada paleta traz a tinta escolhida para o fundo da arte dela, e no
-// `amarelo cheio` essa tinta é escura de propósito, boa sobre amarelo: sobre a
-// caixa ela dava 1,54:1, ou seja, ilegível. Então a tinta da paleta só é usada
-// quando ela mesma passa dos 4,5:1 contra a caixa, o que mantém o fósforo e o
-// âmbar (verdes e amarelos claros, de terminal) e substitui só as que não dão.
+/**
+ * Uma paleta é "de fundo sólido" quando a arte e o fundo são a mesma cor, como o
+ * `amarelo cheio`: o cartão inteiro é uma cor da marca e não tem arte nenhuma
+ * atrás do texto. As outras desenham o campo de caracteres atrás das letras.
+ *
+ * Essa distinção decide duas coisas de uma vez, e é por isso que ela existe:
+ * só o fundo sólido leva a régua, e só o fundo com arte precisa da caixa preta.
+ */
+const solidGround = computed(() => colours.value.art === colours.value.bg)
+const boxed = computed(() => !solidGround.value)
+
+// Onde tem arte atrás, cada linha ganha a própria caixa preta justa (ver
+// .boxed), então é contra o preto que a letra se lê. Onde o fundo é sólido não
+// tem caixa, e vale a tinta que a paleta escolheu para aquela cor.
+//
+// A tinta da paleta só serve sobre a caixa se ela mesma passar de 4,5:1 ali: a
+// do `amarelo cheio` é escura de propósito, boa sobre amarelo, e dava 1,54:1
+// sobre preto. Fósforo e âmbar passam e continuam sendo as tintas de terminal.
 const cardInk = computed(() => {
+  if (solidGround.value) return colours.value.ink
   const own = ratio(parseHex(colours.value.ink), parseHex(CARD_BG))
   return own >= 4.5 ? colours.value.ink : SITE_INK
 })
-const inkContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(CARD_BG)))
+const inkContrast = computed(() =>
+  ratio(parseHex(cardInk.value), parseHex(solidGround.value ? colours.value.bg : CARD_BG)),
+)
 
 // A moldura é desenhada 1 célula para dentro da borda (linha em row/col 1), com
 // uma célula vazia antes dela. O texto precisa começar depois da própria linha,
 // então a folga do cartão é 2 células, na mesma unidade que o knob "célula".
 const cardPadding = computed(() => `${cell.value * 2}px`)
 
-// Mesma escolha genérica de CoverLab: preto puro se ele ler melhor do que a
-// tinta do cartão contra o fundo real da régua (a caixa preta), tinta caso
-// contrário. Como o fundo da régua agora é sempre preto, preto contra preto dá
-// razão 1 e a tinta ganha sempre, o que é o comportamento certo aqui.
+// A régua só existe no fundo sólido, então ela se mede contra aquela cor. Preto
+// puro é o pedido, e ele vale sempre que leia melhor ali do que a tinta do
+// cartão, o que é decidido pela conta e não por uma lista de nomes de paleta.
 const ruleColour = computed(() => {
-  const onBlack = ratio(parseHex('#000000'), parseHex(CARD_BG))
-  const onInk = ratio(parseHex(cardInk.value), parseHex(CARD_BG))
+  const ground = parseHex(colours.value.bg)
+  const onBlack = ratio(parseHex('#000000'), ground)
+  const onInk = ratio(parseHex(cardInk.value), ground)
   return onBlack >= onInk ? '#000000' : cardInk.value
 })
 
@@ -254,11 +267,11 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
   <div :class="$style.demo">
     <div ref="stage" :class="$style.stage" :style="{ background: colours.bg }">
       <canvas ref="canvas" aria-hidden="true"></canvas>
-      <div :class="$style.card" :style="{ color: cardInk, padding: cardPadding, background: CARD_BG }">
-        <p :class="$style.tag">BLOG.LSANTOS.DEV / META</p>
-        <div :class="$style.rule" :style="ruleStyle"></div>
-        <p :class="$style.title">{{ TITLES[titleSize] }}</p>
-        <p :class="$style.byline">Lucas Santos · 14 AGO 2026</p>
+      <div :class="$style.card" :style="{ color: cardInk, padding: cardPadding }">
+        <p :class="$style.tag"><span :class="boxed && $style.boxed">BLOG.LSANTOS.DEV / META</span></p>
+        <div v-if="solidGround" :class="$style.rule" :style="ruleStyle"></div>
+        <p :class="$style.title"><span :class="boxed && $style.boxed">{{ TITLES[titleSize] }}</span></p>
+        <p :class="$style.byline"><span :class="boxed && $style.boxed">Lucas Santos · 14 AGO 2026</span></p>
       </div>
     </div>
     <p v-if="failed" :class="$style.failed">WebGL2 não subiu: {{ failed }}</p>
@@ -282,10 +295,12 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
     </Panel>
 
     <p :class="$style.readout">
-      título {{ inkContrast.toFixed(2) }}:1 sobre a caixa preta atrás do texto (#000000), não sobre o fundo da arte:
-      é essa a superfície real onde a letra se lê agora. O "teto da arte" limita o quanto o sombreado chega perto
-      do branco: baixe-o e a arte fica mais escura, suba-o e ela come mais tela ao redor da caixa. Uma capa de
-      verdade seria gerada pelo `sharp` no build, com o mesmo cálculo.
+      título {{ inkContrast.toFixed(2) }}:1
+      {{ solidGround ? `sobre o fundo sólido (${colours.bg})` : 'sobre a caixa preta de cada linha (#000000)' }}. A
+      paleta decide as duas coisas: quando a arte e o fundo são a mesma cor, o cartão é uma cor cheia, cada linha
+      dispensa caixa e a régua aparece; quando tem campo de caracteres atrás do texto, cada linha ganha a própria
+      caixa justa e a régua sai, porque ela era pedida só para o fundo sólido. O "teto da arte" limita o quanto o
+      sombreado chega perto do branco. Uma capa de verdade seria gerada pelo `sharp` no build, com o mesmo cálculo.
     </p>
 
     <DecisionCopy lab="capa gerada" component="TmCover.vue" :settings="decisionSettings" :context="decisionContext" />
@@ -315,6 +330,22 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
 .card {
   position: relative;
   font-family: 'Departure Mono', ui-monospace, monospace;
+}
+
+/*
+ * Uma caixa preta por linha, justa no texto, não uma placa atrás do bloco todo:
+ * a placa cobria metade do cartão e empurrava a arte para uma faixa em cima.
+ *
+ * `display: inline` é o que faz a caixa parar onde a linha para, e
+ * `box-decoration-break: clone` é o que dá uma caixa por linha quando o título
+ * quebra em três, em vez de um retângulo só englobando as três.
+ */
+.boxed {
+  display: inline;
+  padding: 0.12em 0.3em;
+  background: #000000;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .rule {
