@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const field = (frontmatter, name) =>
+export const field = (frontmatter, name) =>
   new RegExp(`^${name}:\\s*(.+)$`, 'm').exec(frontmatter)?.[1].trim().replace(/^["']|["']$/g, '')
 
 /**
@@ -9,7 +9,7 @@ const field = (frontmatter, name) =>
  * an explicit `slug` wins, then the filename, and `index` means the folder.
  * Portuguese keeps the bare path, every other language gets a prefix.
  */
-function urlFor(folder, filename, frontmatter) {
+export function urlFor(folder, filename, frontmatter) {
   const name = filename.replace(/\.mdx?$/, '')
   const slug = field(frontmatter, 'slug') ?? (name === 'index' ? folder : name)
   const lang = field(frontmatter, 'lang') ?? 'pt'

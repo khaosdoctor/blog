@@ -11,6 +11,7 @@ import { join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
 import { annotate, bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
+import { urlFor } from '../src/lib/post-dates.mjs'
 
 const DIST = 'dist'
 const CONTENT = 'content/blog'
@@ -82,8 +83,24 @@ const postFolders = readdirSync(CONTENT, { withFileTypes: true })
     return !/^draft:\s*true/m.test(readFileSync(file, 'utf8'))
   })
 const expected = postFolders.filter((slug) => !scheduled.has(slug))
+
+/**
+ * Where a folder's own index actually renders. Almost always `/<folder>/`, but a
+ * folder whose index is English lands at `/en/<slug>/` instead: twelve drafts are
+ * already in that shape, and publishing one used to fail this check for a page
+ * that had built perfectly well. Same rule as everywhere else, imported rather
+ * than restated.
+ */
+function pageFor(slug: string): string {
+  const file = ['index.mdx', 'index.md'].map((name) => join(CONTENT, slug, name)).find(existsSync)
+  if (file === undefined) return join(DIST, slug, 'index.html')
+  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(file, 'utf8'))?.[1] ?? ''
+  const url = urlFor(slug, file.endsWith('.md') ? 'index.md' : 'index.mdx', frontmatter)
+  return join(DIST, url.replace(/^\/|\/$/g, ''), 'index.html')
+}
+
 for (const slug of postFolders) {
-  const hasPage = files.includes(join(DIST, slug, 'index.html'))
+  const hasPage = files.includes(pageFor(slug))
   if (scheduled.has(slug) && hasPage) {
     failures.push({ check: 'post both published and still scheduled', detail: slug, file: contentFileFor(slug) })
     continue

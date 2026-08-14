@@ -12,15 +12,27 @@
 
 const HEADINGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 
+/**
+ * The label a screen reader announces. Kept here rather than in src/i18n/ui.ts
+ * because a remark plugin cannot import from `astro:`-flavoured modules, the same
+ * reason rehype-footnote-sidenotes.mjs carries its own table. Both are mirrored
+ * against the real table by scripts/check-i18n.ts.
+ */
+const ANCHOR_LABEL = { pt: 'link para esta seção', en: 'link to this section' }
+
+function localeFromFile(file) {
+  return file?.data?.astro?.frontmatter?.lang === 'en' ? 'en' : 'pt'
+}
+
 export function rehypeHeadingAnchors() {
-  return (tree) => {
-    visit(tree)
+  return (tree, file) => {
+    visit(tree, ANCHOR_LABEL[localeFromFile(file)])
   }
 }
 
-function visit(node) {
+function visit(node, label) {
   if (Array.isArray(node.children)) {
-    for (const child of node.children) visit(child)
+    for (const child of node.children) visit(child, label)
   }
 
   if (node.type !== 'element' || !HEADINGS.has(node.tagName)) return
@@ -36,7 +48,7 @@ function visit(node) {
       href: `#${id}`,
       // The label has to be readable on its own: a screen reader announcing
       // "hash, link" six times a page is noise.
-      'aria-label': 'link to this section',
+      'aria-label': label,
       'data-copy-link': '',
     },
     children: [{ type: 'text', value: '#' }],
