@@ -223,6 +223,13 @@ No import to write and no filename repeated: the build reads the file, imports t
 source under a `see the code` toggle, syntax highlighted like any other code block. A typo in `src` breaks the build
 rather than rendering an empty box. The HTML one runs in a sandboxed frame, so its CSS cannot leak into the post.
 
+A Vue component's styles go in `<style module>`, never `<style scoped>` or a bare `<style>`, and the template refers
+to classes as `:class="$style.stage"`. The build renames every class to `Component__class__hash`, so a demo can call
+something `.tag` or `.title` without ever colliding with the site's own CSS. Two rules follow from how CSS modules
+work: every selector needs a class in it (a bare `button { }` would style every button on the page — nest it, e.g.
+`.controls button`), and a static `class="x"` where `x` is defined in the style block matches nothing, because the
+rule was renamed and the attribute was not. `npm run check` fails on all three mistakes and says which.
+
 ## Images from somewhere else
 
 Paste the remote URL and forget about it. `npm run build` runs `scripts/vendor-media.ts` first, which downloads any

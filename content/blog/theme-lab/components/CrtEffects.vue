@@ -64,11 +64,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="demo">
-    <div class="stage" :style="{ background: colours.bg }">
+  <div :class="$style.demo">
+    <div :class="$style.stage" :style="{ background: colours.bg }">
       <div
-        class="copy"
-        :class="{ flickering: flicker && !reduced }"
+        :class="[$style.copy, { [$style.flickering]: flicker && !reduced }]"
         :style="{
           color: colours.fg,
           textShadow: glow ? `0 0 ${glow / 8}em currentColor` : 'none',
@@ -77,14 +76,14 @@ onMounted(() => {
         <p v-for="paragraph in PARAGRAPHS.slice(0, 2)" :key="paragraph">{{ paragraph }}</p>
       </div>
 
-      <svg v-if="noise" class="grain" :style="{ opacity: noise / 100 }" aria-hidden="true">
+      <svg v-if="noise" :class="$style.grain" :style="{ opacity: noise / 100 }" aria-hidden="true">
         <filter id="theme-lab-grain">
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" />
         </filter>
         <rect width="100%" height="100%" filter="url(#theme-lab-grain)" />
       </svg>
-      <div v-if="vignette" class="layer" :style="vignetteStyle" aria-hidden="true"></div>
-      <div v-if="scanlines" class="layer" :style="scanStyle" aria-hidden="true"></div>
+      <div v-if="vignette" :class="$style.layer" :style="vignetteStyle" aria-hidden="true"></div>
+      <div v-if="scanlines" :class="$style.layer" :style="scanStyle" aria-hidden="true"></div>
     </div>
 
     <Panel label="efeitos, todos começando em zero">
@@ -101,23 +100,23 @@ onMounted(() => {
       <Toggle v-model="flicker" label="cintilação" />
     </Panel>
 
-    <p class="readout" :class="{ bad: effectiveRatio < 4.5 }">
+    <p :class="[$style.readout, { [$style.bad]: effectiveRatio < 4.5 }]">
       contraste sem efeito {{ baseRatio.toFixed(2) }}:1 · na linha escura da scanline
       {{ effectiveRatio.toFixed(2) }}:1 ({{ grade(effectiveRatio) }}) · custo {{ lost.toFixed(2) }}
     </p>
-    <p class="note">
+    <p :class="$style.note">
       Sobre preto absoluto o fundo não tem como escurecer mais, então a perda inteira cai no texto: 50% de
       scanline derruba âmbar sobre preto de 11,46:1 para 3,31:1, abaixo do mínimo de corpo de texto. A receita
       clássica de CSS usa 25%, o que dá 6,52:1. Um guia de 2026 recomenda 6%. A conclusão de bancada é que
       scanline só é segura numa faixa em que ela quase não aparece, e nessa faixa ela não está fazendo trabalho
       nenhum. É o argumento mais forte contra ela.
     </p>
-    <p class="note">
+    <p :class="$style.note">
       A cintilação é a única coisa desta página que pode disparar fotossensibilidade. O limite da norma é três
       mudanças por segundo; esta anima a 0,25 Hz, doze vezes abaixo. Ainda assim ela começa desligada e não liga
       para quem pediu <code>prefers-reduced-motion: reduce</code>.
     </p>
-    <p class="note">
+    <p :class="$style.note">
       O granulado é uma textura de <code>feTurbulence</code> desenhada pelo próprio navegador, sem imagem nenhuma
       no meio: um SVG inline, nada de arquivo, nada de <code>data:</code> URI. Isso importa porque a política de
       segurança do site é restritiva.
@@ -125,7 +124,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }

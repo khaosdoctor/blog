@@ -14,14 +14,14 @@ const value = defineModel<number>({ required: true })
 </script>
 
 <template>
-  <label class="knob">
-    <span class="knob-name">{{ label }}</span>
+  <label :class="$style.knob">
+    <span :class="$style['knob-name']">{{ label }}</span>
     <input v-model.number="value" type="range" :min="min" :max="max" :step="step" />
-    <output class="knob-value">{{ value }}{{ unit }}</output>
+    <output :class="$style['knob-value']">{{ value }}{{ unit }}</output>
   </label>
 </template>
 
-<style scoped>
+<style module>
 .knob {
   display: grid;
   grid-template-columns: 1fr;
@@ -50,7 +50,7 @@ const value = defineModel<number>({ required: true })
   grid-area: name;
 }
 
-input {
+.knob input {
   grid-area: input;
   inline-size: 100%;
   accent-color: var(--brand-green);

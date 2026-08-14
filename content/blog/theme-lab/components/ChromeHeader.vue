@@ -54,47 +54,47 @@ const base = computed(() => ({
 </script>
 
 <template>
-  <div class="demo">
-    <div class="stage" :style="{ background: BG }">
-      <header v-if="shape === 'barra'" class="bar" :style="base">
-        <span class="edge" :style="{ color: MUTED }">┌─</span>
-        <span class="brand" :style="{ color: accentHex }">lsantos.dev</span>
-        <span class="fill" :style="{ color: MUTED }">─────────────</span>
+  <div :class="$style.demo">
+    <div :class="$style.stage" :style="{ background: BG }">
+      <header v-if="shape === 'barra'" :class="$style.bar" :style="base">
+        <span :class="$style.edge" :style="{ color: MUTED }">┌─</span>
+        <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
+        <span :class="$style.fill" :style="{ color: MUTED }">─────────────</span>
         <nav>
-          <span v-for="item in NAV" :key="item" class="item">{{ item }}</span>
+          <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
         </nav>
-        <span class="edge" :style="{ color: MUTED }">─┐</span>
+        <span :class="$style.edge" :style="{ color: MUTED }">─┐</span>
       </header>
 
-      <header v-else-if="shape === 'dos'" class="dos" :style="base">
-        <span class="badge" :style="{ background: accentHex, color: BG }">C:\BLOG&gt;</span>
-        <span class="cursor" :style="{ background: INK }"></span>
-        <nav class="right">
-          <span v-for="item in NAV" :key="item" class="item">{{ item }}</span>
-        </nav>
-      </header>
-
-      <header v-else-if="shape === 'minimo'" class="minimo" :style="base">
-        <span class="brand" :style="{ color: accentHex }">lsantos.dev</span>
-        <nav class="right">
-          <span v-for="item in NAV" :key="item" class="item">{{ item }}</span>
+      <header v-else-if="shape === 'dos'" :class="$style.dos" :style="base">
+        <span :class="$style.badge" :style="{ background: accentHex, color: BG }">C:\BLOG&gt;</span>
+        <span :class="$style.cursor" :style="{ background: INK }"></span>
+        <nav :class="$style.right">
+          <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
         </nav>
       </header>
 
-      <header v-else-if="shape === 'menu'" class="menu" :style="base">
-        <div class="frame" :style="{ borderColor: MUTED }">
-          <span class="brand" :style="{ color: accentHex }">lsantos.dev</span>
+      <header v-else-if="shape === 'minimo'" :class="$style.minimo" :style="base">
+        <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
+        <nav :class="$style.right">
+          <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
+        </nav>
+      </header>
+
+      <header v-else-if="shape === 'menu'" :class="$style.menu" :style="base">
+        <div :class="$style.frame" :style="{ borderColor: MUTED }">
+          <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
           <nav>
-            <span v-for="(item, index) in NAV" :key="item" class="item row">
-              <span class="pointer" :style="{ color: index === 0 ? accentHex : 'transparent' }">▸</span>{{ item }}
+            <span v-for="(item, index) in NAV" :key="item" :class="[$style.item, $style.row]">
+              <span :class="$style.pointer" :style="{ color: index === 0 ? accentHex : 'transparent' }">▸</span>{{ item }}
             </span>
           </nav>
         </div>
       </header>
 
-      <header v-else class="ledger" :style="base">
-        <p class="line" :style="{ color: MUTED }">seção 00 / índice · v0.0.1+42 · 449 páginas</p>
-        <p class="brandline">
+      <header v-else :class="$style.ledger" :style="base">
+        <p :class="$style.line" :style="{ color: MUTED }">seção 00 / índice · v0.0.1+42 · 449 páginas</p>
+        <p :class="$style.brandline">
           <span :style="{ color: accentHex }">lsantos.dev</span>
           <span :style="{ color: MUTED }"> ······································ </span>
           <span>{{ NAV.join(' · ') }}</span>
@@ -129,7 +129,7 @@ const base = computed(() => ({
       <Toggle v-model="caps" label="caixa alta" />
     </Panel>
 
-    <p class="readout">
+    <p :class="$style.readout">
       texto {{ inkContrast }}:1 · secundário {{ mutedContrast }}:1 · destaque {{ accentContrast }}:1 sobre
       {{ BG }}. A entreletra é o que separa "terminal" de "costume": acima de 0,2em o cabeçalho vira fantasia e a
       leitura fica lenta.
@@ -137,7 +137,7 @@ const base = computed(() => ({
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -147,11 +147,11 @@ const base = computed(() => ({
   overflow-x: auto;
 }
 
-header {
+.stage header {
   font-size: 0.78rem;
 }
 
-nav {
+.stage nav {
   display: inline-flex;
   gap: 0.9rem;
 }

@@ -119,11 +119,11 @@ watch([shape, glyph, hue, size, lit], () => !spinning.value && instance.value?.r
 </script>
 
 <template>
-  <div class="demo">
-    <div ref="stage" class="stage">
+  <div :class="$style.demo">
+    <div ref="stage" :class="$style.stage">
       <canvas ref="canvas" role="img" aria-label="Um sólido girando, desenhado com caracteres"></canvas>
     </div>
-    <p v-if="failed" class="failed">WebGL2 não subiu: {{ failed }}</p>
+    <p v-if="failed" :class="$style.failed">WebGL2 não subiu: {{ failed }}</p>
 
     <Panel label="sólido">
       <Pick
@@ -154,7 +154,7 @@ watch([shape, glyph, hue, size, lit], () => !spinning.value && instance.value?.r
       <Toggle v-model="spinning" label="girando" />
     </Panel>
 
-    <p class="readout">
+    <p :class="$style.readout">
       {{ solidContrast() }}:1 sobre {{ BG }}. É decoração, não texto, então o número serve só para saber se a forma
       se lê. Com "girando" desmarcado o loop de WebGL2 para de verdade: nada de `requestAnimationFrame` rodando
       atrás. É esse o botão que a norma 2.2.2 exige de qualquer coisa que se mexe por mais de cinco segundos, e é
@@ -163,7 +163,7 @@ watch([shape, glyph, hue, size, lit], () => !spinning.value && instance.value?.r
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -174,7 +174,7 @@ watch([shape, glyph, hue, size, lit], () => !spinning.value && instance.value?.r
   background: v-bind(BG);
 }
 
-canvas {
+.stage canvas {
   position: absolute;
   inset: 0;
   inline-size: 100%;

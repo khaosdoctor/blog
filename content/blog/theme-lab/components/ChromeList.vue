@@ -52,46 +52,46 @@ const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
 </script>
 
 <template>
-  <div class="demo">
-    <div class="stage" :style="{ background: BG, ...base }">
-      <ol v-if="shape === 'tabela'" class="tabela">
+  <div :class="$style.demo">
+    <div :class="$style.stage" :style="{ background: BG, ...base }">
+      <ol v-if="shape === 'tabela'" :class="$style.tabela">
         <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
-          <span class="date" :style="{ color: MUTED }">{{ post.date }}</span>
-          <span class="title">{{ post.title }}</span>
-          <span v-if="showTag" class="tag" :style="{ color: ACCENT }">{{ post.tag }}</span>
-          <span class="read" :style="{ color: MUTED }">{{ post.read }}</span>
+          <span :class="$style.date" :style="{ color: MUTED }">{{ post.date }}</span>
+          <span :class="$style.title">{{ post.title }}</span>
+          <span v-if="showTag" :class="$style.tag" :style="{ color: ACCENT }">{{ post.tag }}</span>
+          <span :class="$style.read" :style="{ color: MUTED }">{{ post.read }}</span>
         </li>
       </ol>
 
-      <ol v-else-if="shape === 'razao'" class="razao">
+      <ol v-else-if="shape === 'razao'" :class="$style.razao">
         <li v-for="(post, index) in POSTS" :key="post.title" :style="rowStyle">
-          <span class="num" :style="{ color: MUTED }">{{ String(index).padStart(2, '0') }}</span>
-          <span class="title">{{ post.title }}</span>
-          <span class="dots" :style="{ color: MUTED }" aria-hidden="true">{{ leader.repeat(60) }}</span>
-          <span class="date" :style="{ color: MUTED }">{{ post.date }}</span>
+          <span :class="$style.num" :style="{ color: MUTED }">{{ String(index).padStart(2, '0') }}</span>
+          <span :class="$style.title">{{ post.title }}</span>
+          <span :class="$style.dots" :style="{ color: MUTED }" aria-hidden="true">{{ leader.repeat(60) }}</span>
+          <span :class="$style.date" :style="{ color: MUTED }">{{ post.date }}</span>
         </li>
       </ol>
 
-      <ol v-else-if="shape === 'menu'" class="menu">
+      <ol v-else-if="shape === 'menu'" :class="$style.menu">
         <li
           v-for="(post, index) in POSTS"
           :key="post.title"
           :style="rowStyle"
-          :class="{ on: index === selected }"
+          :class="{ [$style.on]: index === selected }"
           @mouseenter="selected = index"
         >
-          <span class="pointer" :style="{ color: index === selected ? ACCENT : 'transparent' }">▸</span>
-          <span class="title">{{ post.title }}</span>
-          <span v-if="showTag" class="tag" :style="{ color: MUTED }">{{ post.tag }}</span>
+          <span :class="$style.pointer" :style="{ color: index === selected ? ACCENT : 'transparent' }">▸</span>
+          <span :class="$style.title">{{ post.title }}</span>
+          <span v-if="showTag" :class="$style.tag" :style="{ color: MUTED }">{{ post.tag }}</span>
         </li>
       </ol>
 
-      <ol v-else class="cartoes">
+      <ol v-else :class="$style.cartoes">
         <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
-          <p class="meta" :style="{ color: MUTED }">
+          <p :class="$style.meta" :style="{ color: MUTED }">
             {{ post.date }} <template v-if="showTag">· {{ post.tag }}</template> · {{ post.read }}
           </p>
-          <p class="title">{{ post.title }}</p>
+          <p :class="$style.title">{{ post.title }}</p>
         </li>
       </ol>
     </div>
@@ -124,7 +124,7 @@ const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
       <Toggle v-model="showTag" label="mostrar seção" />
     </Panel>
 
-    <p class="readout">
+    <p :class="$style.readout">
       título {{ inkContrast }}:1 · data e seção {{ mutedContrast }}:1 sobre {{ BG }}. A "razão" é a única que
       aguenta cem posts sem virar um muro, porque o olho corre pela coluna de títulos e o pontilhado leva até a
       data só quando o leitor procura por ela. O menu de Game Boy é o mais bonito e o que menos escala.
@@ -132,7 +132,7 @@ const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -143,13 +143,13 @@ const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
   overflow-x: auto;
 }
 
-ol {
+.stage ol {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-li {
+.stage li {
   cursor: pointer;
 }
 

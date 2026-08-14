@@ -69,6 +69,15 @@ probably means the footer, which does not exist yet in the new design.
 
 Newest first.
 
+### Post component styles: CSS modules, enforced
+
+Every Vue component inside a post uses `<style module>` and `:class="$style.x"`. The build renames each class to
+`Component__class__hash` (the `generateScopedName` in `astro.config.mjs`), so a component class can never collide
+with a global one — which `scoped` cannot promise: it keeps the literal class name and only appends an attribute
+selector, and the dev server once injected one of those sheets unscoped, stretching every tag chip on the theme lab
+page. `scripts/check-component-css.ts` runs in `npm run check` and fails on a non-module style block, a selector
+with no class in it (CSS modules leave those global), or a static `class="x"` the renamer orphaned.
+
 ### Lazy-loading the code themes: planned, then dropped
 
 All 14 themes cost 35.6 KB raw, **6.2 KB gzipped**, measured, not estimated. The plan — a build-time integration

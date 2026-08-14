@@ -135,14 +135,14 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
 </script>
 
 <template>
-  <div class="demo">
-    <div class="stage" :style="{ background }">
-      <p class="path" :style="{ color: swatches[0]?.hex }">~/blog/content <span class="dim">$</span></p>
-      <div class="swatches">
-        <div v-for="swatch in swatches" :key="swatch.name" class="swatch">
-          <span class="swatch-bar" :style="{ background: swatch.hex }"></span>
-          <span class="text" :style="{ color: swatch.hex }">Abstração vaza</span>
-          <span class="meta" :class="{ bad: swatch.value < floor }">
+  <div :class="$style.demo">
+    <div :class="$style.stage" :style="{ background }">
+      <p :class="$style.path" :style="{ color: swatches[0]?.hex }">~/blog/content <span :class="$style.dim">$</span></p>
+      <div :class="$style.swatches">
+        <div v-for="swatch in swatches" :key="swatch.name" :class="$style.swatch">
+          <span :class="$style['swatch-bar']" :style="{ background: swatch.hex }"></span>
+          <span :class="$style.text" :style="{ color: swatch.hex }">Abstração vaza</span>
+          <span :class="[$style.meta, { [$style.bad]: swatch.value < floor }]">
             {{ swatch.hex }} · {{ swatch.value.toFixed(2) }}:1 · {{ swatch.verdict }}
           </span>
         </div>
@@ -170,11 +170,11 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
       <Toggle v-model="bigText" label="medir como texto grande (3:1)" />
     </Panel>
 
-    <p class="readout">
+    <p :class="$style.readout">
       Fundo {{ background }}. {{ failing }} de {{ swatches.length }} cores deste registro ficam abaixo de
       {{ floor }}:1 e não servem como texto corrido aí.
     </p>
-    <p class="note">
+    <p :class="$style.note">
       Dois números que valem guardar: o vermelho da CGA sobre preto dá 2,71:1 e o marrom dá 4,01:1, ou seja, o
       visual DOS autêntico reprova em texto. O verde e o amarelo da marca sobre o fundo escuro do site passam
       folgado; o vermelho da marca não passa, o que já é verdade hoje e é por isso que ele só aparece em link não
@@ -184,7 +184,7 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -216,9 +216,7 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
   align-items: center;
 }
 
-/* Not `.chip`: the site uses that class globally for tag and category
-   chips, and Vite injects a scoped style unscoped in dev, so this rule was
-   stretching every tag chip on this page to full width. */
+/* CSS modules rename this class, so it no longer collides with the global `.chip`. */
 .swatch-bar {
   block-size: 1rem;
   inline-size: 100%;

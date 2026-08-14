@@ -5,13 +5,13 @@ const value = defineModel<boolean>({ required: true })
 </script>
 
 <template>
-  <label class="toggle">
+  <label :class="$style.toggle">
     <input v-model="value" type="checkbox" />
     <span>{{ label }}</span>
   </label>
 </template>
 
-<style scoped>
+<style module>
 .toggle {
   display: flex;
   gap: 0.45rem;
@@ -23,7 +23,7 @@ const value = defineModel<boolean>({ required: true })
   text-transform: uppercase;
 }
 
-input {
+.toggle input {
   accent-color: var(--brand-green);
 }
 
