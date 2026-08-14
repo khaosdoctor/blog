@@ -18,8 +18,12 @@
   mask: var(--icon-internal) center / contain no-repeat;
 }
 
-/* Anything not on this site. The host list is a design question, see docs/design.md. */
-.prose a[href^='http']:not([href*='lsantos.dev'])::after {
+/*
+ * Anything not on one of the owner's own domains. Both are his, so a link
+ * between them is not "leaving": lsantos.dev (this blog and the personal site)
+ * and lsantos.me. Add a host here when another one becomes his.
+ */
+.prose a[href^='http']:not([href*='lsantos.dev']):not([href*='lsantos.me'])::after {
   mask-image: var(--icon-external);
 }
 
