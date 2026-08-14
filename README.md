@@ -10,9 +10,12 @@ This file is the operating manual, and it is deliberately short. The rest lives 
 | `content/WRITING.md` | everything a post can use, from an author's seat. The reference while writing |
 | `docs/architecture.md` | how the pieces fit and why, with diagrams. Read before changing any of them |
 | `docs/ci.md` | the workflows, the scheduler, the credentials |
+| `docs/i18n.md` | what pairs a post with its translation, what the i18n guard enforces, what a third language would cost |
 | `docs/design.md` | the visual direction, font and icon shortlists, open questions |
+| `docs/theming.md` | the long version of `docs/design.md`, everything tried and thrown away, interactive at `/theme-lab/` |
 | `docs/seo.md` | what the build generates on its own, and the one thing left to decide |
-| `docs/decisions.md` | what was decided, what was rejected, and the reasoning |
+| `docs/translation-voice.md` | how the translation agent is told to write in English |
+| `docs/decisions.md` | what was decided, what was rejected, and the reasoning. **In Portuguese**, deliberately: it is the owner's own cold-start notes, unlike the rest of `docs/` |
 | `AGENTS.md` | the rules an agent has to know before touching this repo |
 
 ## Running it
@@ -100,7 +103,7 @@ That is what turns on the series page and the prev/next navigation at the bottom
 | Command | What it does |
 |---|---|
 | `npm run dev` | local server |
-| `npm run check` | `astro check` plus `tsc -p worker`. Run it before you finish |
+| `npm run check` | `astro check`, `tsc -p worker`, the i18n guard and the component-css guard. Run it before you finish |
 | `npm run build` | build plus the Pagefind index |
 | `npm run preview` | serve `dist/` |
 | `node scripts/check-output.ts` | post-build checks, the same ones CI runs |

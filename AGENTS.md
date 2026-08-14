@@ -18,6 +18,8 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 
 **One line adds an embed host.** `src/lib/embed-hosts.ts` feeds both the CSP meta tag and the output guard. Never derive it from build output.
 
+**A lab component's styles are CSS modules, never `scoped` or bare.** `<style module>` and `:class="$style.x"` in the template, nothing else: `astro.config.mjs` renames every class to `Component__class__hash`, so a `scoped` block keeps a literal name that is one dev-server leak away from styling the whole page. `scripts/check-component-css.ts`, part of `npm run check`, fails the build on a non-module style block, a selector with no class in it, and a static `class="x"` the renamer orphaned.
+
 **`scripts/migrate/` and `.migration/` are untracked on purpose.** One-shot Ghost tooling. The MDX is the source of truth now.
 
 ## Before you finish
@@ -30,7 +32,7 @@ npm run build
 node scripts/check-output.ts
 ```
 
-`npm run check` is `astro check` plus `tsc -p worker`. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
+`npm run check` is `astro check`, `tsc -p worker`, `scripts/check-i18n.ts` and `scripts/check-component-css.ts`, in that order. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
 
 `check-output.ts` fails on a published post with no page, leftover Ghost markup, an unrendered component tag, a missing feed or manifest icon, an image that never reached the output, and any remote-script loader pattern. That last check exists because the old Ghost site served an injected script for a month before anyone noticed. Do not weaken it.
 
@@ -40,7 +42,7 @@ The author is strict about prose, in code comments as much as anywhere else.
 
 - **Comments are rare and say why, never what.** Only comment code a reader would otherwise stop at. Rationale belongs in `docs/`, not in a block above a function.
 - **No em-dashes.** Anywhere. Use a comma, parentheses, or a new sentence.
-- **Banned words**, in code and prose alike: land/lands/landed, sweep, gap, flip, surface as a verb, flag as a verb, gate/gated, sits, cheap, entirely, turns out, clobber, delve, leverage, utilize, seamless, crucial, showcase. The full list is at `~/.claude/skills/voice/references/banned-words.md`.
+- **Banned words**, in code and prose alike: land/lands/landed, sweep, gap, flip, surface as a verb, flag as a verb, gate/gated, sits, cheap, entirely, turns out, clobber, delve, leverage, utilize, seamless, crucial, showcase.
 - **No "it's X, not Y"** negated contrast, and no setting up a wrong reading to knock it down.
 - Plain and direct beats clever.
 
