@@ -87,7 +87,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   updatedAt={post.data.updatedDate}
   tags={post.data.tags}
   series={post.data.series}
-  section={{ name: post.data.category, url: `/${post.data.category}/` }}
+  section={{ name: post.data.category, url: `/en/${post.data.category}/` }}
   alternates={alternates}
   progress
 >
@@ -99,7 +99,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
       </time>
       <span aria-hidden="true">·</span>
       <a
-        href={`/${post.data.category}/`}
+        href={`/en/${post.data.category}/`}
         class="chip"
         style={`--chip-color: ${chipColor(post.data.category)}`}
       >

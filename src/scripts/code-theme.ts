@@ -106,9 +106,15 @@ function place(el: HTMLElement, anchor: HTMLElement): void {
 }
 
 function init(): void {
-  const wrapper = document.querySelector<HTMLElement>('.ct-settings')
-  const select = document.querySelector<HTMLSelectElement>('#ct-theme')
-  if (wrapper === null || select === null) return
+  const wrapperEl = document.querySelector<HTMLElement>('.ct-settings')
+  const selectEl = document.querySelector<HTMLSelectElement>('#ct-theme')
+  if (wrapperEl === null || selectEl === null) return
+  // Reassigned to plain consts: the nested functions below (openPicker,
+  // closePicker, injectOpeners) close over these, and TypeScript cannot carry
+  // the null check above into a closure that might run later, only into a
+  // binding it knows was never reassigned.
+  const wrapper = wrapperEl
+  const select = selectEl
 
   function openPicker(anchor: HTMLElement): void {
     wrapper.style.visibility = 'hidden'

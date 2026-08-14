@@ -24,11 +24,6 @@ interface Props {
 
 const { locale } = Astro.props
 
-// codeThemePick is not in src/i18n/ui.ts yet (see the report this shipped
-// with for the key + pt/en copy to add there); the two strings below are that
-// same copy, inlined here as a stopgap the way previewUnwritten's fallback
-// works in hover-previews.ts.
-const pickLabel = locale === 'en' ? 'change the code theme' : 'mudar o tema do código'
 ---
 
 <p
@@ -36,7 +31,7 @@ const pickLabel = locale === 'en' ? 'change the code theme' : 'mudar o tema do c
   hidden
   data-label={t(locale, 'codeTheme')}
   data-auto={t(locale, 'codeThemeAuto')}
-  data-pick={pickLabel}
+  data-pick={t(locale, 'codeThemePick')}
   data-github-light="GitHub Light"
   data-github-dark="GitHub Dark"
   data-monokai="Monokai"
