@@ -94,3 +94,86 @@ O ícone, porque a lista curta em `docs/design.md` já resolve e nenhuma opção
 O rodapé e o lugar das preferências do leitor, porque essa decisão depende de qual cabeçalho ganhar.
 
 Quatro tipos que a pesquisa encontrou e que valeria testar: Geist Pixel (Vercel, 2026, com eixo variável de forma do elemento), Bitcount (cinco eixos, incluindo cursivo), Doto e Workbench (que tem um eixo `SCAN` de scanline embutido na própria fonte, o que resolveria o problema de contraste da seção 02 de um jeito que nenhum overlay resolve). Todos são OFL e todos estão no Google Fonts. Eles não estão nesta página porque a rede da máquina onde ela foi montada parou de responder no meio do download, e não porque foram descartados.
+
+## Seção 05 / Texto de verdade
+
+As quatro seções acima mostram peças soltas: um slider, uma amostra, um componente isolado. Esta última não tem controle nenhum, só uma página de texto comum, porque a pergunta que sobra depois de escolher fonte e paleta é sempre a mesma: como fica um post publicado de verdade, com parágrafo atrás de parágrafo, uma citação, um bloco de código e uma nota de rodapé no meio do caminho? O trecho abaixo é markdown puro, passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog, sem nenhuma marcação escrita à mão para simular o resultado.
+
+O adaptador **CGA** da IBM chegou em 1981 com uma fonte bitmap de oito por oito pixels e uma paleta de dezesseis cores que, na propaganda, prometia um mundo colorido. Na prática eram ~~dezesseis cores simultâneas~~ só quatro por vez, e a escolha das quatro dependia do modo de vídeo. O amarelo do modo texto, aquele que toda tela de BBS usava para chamar atenção, era na verdade um marrom escurecido que o próprio monitor decidia clarear: *um capricho de hardware, não uma cor deliberada*. Isso aqui é sublinhado: <u>a linha embaixo da palavra</u>, e ela é a única ênfase desta lista escrita como tag HTML direto no `.mdx`, porque markdown puro não tem sintaxe própria para sublinhar, então esta não passa pelo remark como o negrito e o itálico passam.
+
+O manual técnico do adaptador nunca precisou de mais que uma frase para deixar clara essa dependência do hardware:
+
+> Toda paleta fixa é uma promessa que o próximo monitor não vai cumprir.
+
+E é por isso que a frase de Steve Jobs sobre a aula de caligrafia que ele cursou por acaso na faculdade continua valendo para qualquer decisão de tipografia, inclusive a desta página:
+
+> [!quote] Steve Jobs
+> Se eu nunca tivesse cursado aquela única disciplina de caligrafia na faculdade, o Macintosh jamais teria tido múltiplas fontes ou espaçamento proporcional entre letras.
+
+A curiosidade é que dá para reproduzir o essencial do efeito CGA em qualquer terminal moderno com uma dúzia de linhas. O arquivo abaixo guarda as sequências de escape mais usadas e, por começar com um comentário que parece caminho de arquivo, o nome aparece na aba do bloco:
+
+```ts
+// src/lib/ansi.ts
+export const ESC = '\x1b['
+export const green = `${ESC}32m`
+export const reset = `${ESC}0m`
+```
+
+Chamar essas constantes de um script comum já é suficiente para colorir a saída, sem precisar de biblioteca nenhuma:
+
+```bash
+printf '%b\n' '\033[32mtexto verde\033[0m'
+```
+
+Testar essa reconstituição ao lado da paleta da Seção 02 rendeu observações que vale registrar enquanto estão frescas:
+
+> [!NOTE]
+> O amarelo do CGA nunca existiu como amarelo puro: é o marrom mais escuro da paleta, esticado pelo monitor.
+
+> [!TIP]
+> Simular o efeito não precisa de canvas: um fundo sólido e uma sombra de texto de poucos pixels já entregam o essencial.
+
+> [!WARNING]
+> Um verde fosforescente sobre preto passa no contraste da WCAG e ainda assim cansa a vista depois de duas telas de texto corrido.
+
+> [!CAUTION]
+> Trocar a paleta inteira depois que os posts antigos já foram publicados quebra qualquer captura de tela guardada nas notas de lançamento.
+
+> [!IMPORTANT]
+> O corpo do texto não é o título: ele precisa aguentar quatro parágrafos seguidos, não só uma linha de exemplo.
+
+> [!QUESTION]
+> Vale a pena reproduzir o marrom que vira amarelo do CGA, ou isso é nostalgia disfarçada de decisão de design?
+
+> [!EXAMPLE]
+> A Seção 02 desta página já faz exatamente essa conta: troque o registro para CGA canônico e veja quantas cores reprovam como texto.
+
+O detalhe do marrom que vira amarelo não é lenda de corredor: está documentado na própria referência técnica do adaptador, que lista os dezesseis registros de cor e marca o oitavo como marrom, não como amarelo escuro.[^1]
+
+O truque de rebaixar o amarelo para marrom sobrevive até hoje em qualquer emulador que tente ser fiel ao original.<Sidenote>Vários emuladores de terminal fazem isso por padrão, com uma opção para desligar quando o objetivo é exatidão de sinal e não nostalgia.</Sidenote> Nenhum monitor CRT reproduzia as dezesseis cores do jeito que a paleta prometia no papel.<MarginNote>A convergência dos três canhões de elétron nunca foi perfeita, e é esse desalinhamento que dá à imagem de CRT uma maciez que nenhum filtro de pós-processamento imita direito.</MarginNote>
+
+A imagem abaixo não tenta reconstituir nada disso: é só um retângulo no preto de fundo do site, para conferir se a legenda nasce do lugar certo.
+
+![](./placeholder.png "A legenda vem do título do markdown, nunca do texto alternativo da imagem")
+
+Fechando o inventário desta bancada, o que já foi conferido nesta seção é:
+
+- Ênfase: negrito, itálico, riscado e sublinhado
+- Código inline e blocos cercados, com e sem nome de arquivo
+- Citação simples e citação com autor
+- Sete tipos de callout, não só um
+- Nota de rodapé, nota lateral e nota de margem
+- Imagem com legenda vinda do título, não do texto alternativo
+
+E o que ainda depende de alguém confirmar de olho na tela renderizada:
+
+- [x] Lista comum e lista de tarefas, incluindo esta mesma lista
+- [x] Régua horizontal, logo abaixo
+- [ ] O corpo do texto aguentando o parágrafo mais longo desta página sem cansar
+- [ ] O sublinhado em HTML não destoando do resto da ênfase ao lado dele
+
+---
+
+Se este parágrafo já cansou de ler, a fonte do corpo respondeu antes de qualquer slider precisar responder por ela.
+
+[^1]: IBM, *Personal Computer Hardware Reference Library: Color/Graphics Monitor Adapter*, 1983, tabela de registros de paleta.
