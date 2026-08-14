@@ -23,7 +23,21 @@ const REGISTERS: Record<string, { name: string; colours: Array<[string, string]>
       ['verde', '#45b384'],
       ['amarelo', '#f5b200'],
       ['azul', '#0578be'],
-      ['roxo', '#6b4fbb'],
+      ['roxo', '#4b15a8'],
+    ],
+  },
+  tintas: {
+    name: 'as tintas do site (texto, apagado, link, friso e roxo)',
+    colours: [
+      ['texto, claro', '#332d23'],
+      ['texto, escuro', '#e0dcd4'],
+      ['apagado, claro', '#6b6353'],
+      ['apagado, escuro', '#a8a29a'],
+      ['link, claro', '#1a5c96'],
+      ['link, escuro', '#7cc0ff'],
+      ['friso, claro', '#ddd4bd'],
+      ['friso, escuro', '#2b1f42'],
+      ['roxo da marca', '#4b15a8'],
     ],
   },
   cga: {
@@ -110,7 +124,9 @@ const register = ref('marca')
 const bgLightness = ref(8)
 const lift = ref(0)
 const bigText = ref(false)
-const bgHue = ref('neutro')
+// Default to the site's own dark ground: it's the real thing every colour
+// above has to survive against, not an approximation of it.
+const bgHue = ref('escuro')
 
 const BG_HUES: Record<string, Rgb> = {
   neutro: [255, 255, 255],
@@ -119,7 +135,21 @@ const BG_HUES: Record<string, Rgb> = {
   verde: [120, 255, 160],
 }
 
-const background = computed(() => toHex(composite(BG_HUES[bgHue.value], [0, 0, 0], bgLightness.value / 100)))
+// The blog's two page grounds, exact, not composited toward black like the
+// tinted registers below. Escuro is #000000 on purpose, so OLED pixels switch
+// off. Claro is the NieR Automata sepia the site actually reads on.
+const SITE_GROUNDS: Record<string, string> = {
+  escuro: '#000000',
+  claro: '#f4efe0',
+}
+
+const usingSiteGround = computed(() => Boolean(SITE_GROUNDS[bgHue.value]))
+
+const background = computed(() => {
+  const ground = SITE_GROUNDS[bgHue.value]
+  if (ground) return ground
+  return toHex(composite(BG_HUES[bgHue.value], [0, 0, 0], bgLightness.value / 100))
+})
 
 const swatches = computed(() =>
   REGISTERS[register.value].colours.map(([name, hex]) => {
@@ -159,13 +189,22 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
         v-model="bgHue"
         label="tom do fundo"
         :options="[
+          { id: 'escuro', name: 'fundo escuro do site (preto absoluto)' },
+          { id: 'claro', name: 'fundo claro do site (sépia)' },
           { id: 'neutro', name: 'neutro' },
           { id: 'frio', name: 'azulado' },
           { id: 'quente', name: 'quente' },
           { id: 'verde', name: 'esverdeado' },
         ]"
       />
-      <Knob v-model="bgLightness" label="claridade do fundo" :min="0" :max="100" unit="%" />
+      <Knob
+        v-if="!usingSiteGround"
+        v-model="bgLightness"
+        label="claridade do fundo"
+        :min="0"
+        :max="100"
+        unit="%"
+      />
       <Knob v-model="lift" label="clarear as cores" :min="0" :max="80" unit="%" />
       <Toggle v-model="bigText" label="medir como texto grande (3:1)" />
     </Panel>
