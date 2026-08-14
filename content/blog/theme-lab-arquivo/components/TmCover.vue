@@ -9,13 +9,13 @@
  * para você escolher o quadro.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
-import DecisionCopy from './DecisionCopy.vue'
-import Knob from './Knob.vue'
-import Panel from './Panel.vue'
-import Pick from './Pick.vue'
-import Toggle from './Toggle.vue'
-import { parseHex, ratio } from './contrast'
-import './fonts.css'
+import DecisionCopy from '../../theme-lab/components/DecisionCopy.vue'
+import Knob from '../../theme-lab/components/Knob.vue'
+import Panel from '../../theme-lab/components/Panel.vue'
+import Pick from '../../theme-lab/components/Pick.vue'
+import Toggle from '../../theme-lab/components/Toggle.vue'
+import { parseHex, ratio } from '../../theme-lab/components/contrast'
+import '../../theme-lab/components/fonts.css'
 
 const SHADES = ' ░▒▓█'
 const FRAME = { tl: '╔', tr: '╗', bl: '╚', br: '╝', h: '═', v: '║' }
