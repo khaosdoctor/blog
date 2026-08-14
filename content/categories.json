@@ -1,30 +1,30 @@
 {
   "javascript": {
-    "pt": "A linguagem que eu mais escrevo, e a que mais me surpreende. Runtime, especificação, e as partes que ninguém lê.",
-    "en": "The language I write most, and the one that still surprises me. Runtime, spec, and the parts nobody reads."
+    "pt": "A linguagem mais usada no mundo, e a que eu mais escrevo e tenho experiência. Também é a que todo mundo ama odiar.",
+    "en": "The most used language in the world, and the one I know and write the most. Also the one everyone loves to hate."
   },
   "typescript": {
-    "pt": "Tipos como ferramenta de projeto, não como imposto. O que o compilador consegue provar por você.",
-    "en": "Types as a design tool rather than a tax. What the compiler can prove on your behalf."
+    "pt": "Superset de JavaScript, minha especialização. Aqui falamos de tipos e muito mais!",
+    "en": "JavaScript with types, also my area of expertise within JS. Here we will talk about types and much more!"
   },
   "infra": {
-    "pt": "Containers, Kubernetes, deploy e as coisas que só quebram em produção.",
-    "en": "Containers, Kubernetes, deployment, and the things that only break in production."
+    "pt": "Containers, Kubernetes, deploy e essas coisas que a gente só percebe que quebraram no sábado a noite.",
+    "en": "Containers, Kubernetes, deployment, and the things that we only notice are broken on a Saturday evening."
   },
   "security": {
-    "pt": "Criptografia, autenticação e as maneiras criativas de perder uma chave.",
-    "en": "Cryptography, authentication, and the creative ways to lose a key."
+    "pt": "Criptografia, autenticação e as maneiras criativas de perder (ou não) uma chave.",
+    "en": "Cryptography, authentication, and the creative ways to lose a key, or not."
   },
   "career": {
-    "pt": "Carreira em engenharia, entrevistas, palestras e o que aprendi tropeçando.",
-    "en": "Engineering careers, interviews, talks, and what I learned by tripping over it."
+    "pt": "Carreira em engenharia, entrevistas, palestras e o que eu aprendi durante mais de uma década como dev.",
+    "en": "Engineering careers, interviews, talks, and what I learned in over a decade as a developer."
   },
   "opinion": {
-    "pt": "Opinião, sem pretensão de estar certo.",
-    "en": "Opinion, with no pretence of being right."
+    "pt": "Uma coleção das minhas opiniões e reclamações. Muito provavelmente bem erradas, mas minhas mesmo assim.",
+    "en": "A collection of my weird opinions, rants, and essays. Most likely wrong, but mine all the same."
   },
   "meta": {
-    "pt": "Sobre o blog em si: como ele é feito e por quê.",
-    "en": "About the blog itself: how it is built, and why."
+    "pt": "Sobre o blog em si. Escrevendo sobre a escrita.",
+    "en": "About the blog itself. Writing about writing."
   }
 }
