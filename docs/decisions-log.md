@@ -300,3 +300,20 @@ breakpoint. A breakpoint would be right for one face and would put the panel on 
 The thirteen rejected faces live in `content/blog/theme-lab-arquivo/`, each with the reason it lost. The one that
 matters: IBM Plex Mono was the favourite and lost on the first inline code span, because in a monospaced body a code
 span stops being distinguishable from the prose around it.
+
+## The outline is placed from the article's box, never from `--measure`
+
+Worth writing down because it cost two rounds of verification. `--measure` is in `ch`, and `ch` resolves against the
+font of whatever element reads it, so the same `78ch` is 936px inside the monospace outline panel and 1014px on the
+article in the sans body face. Positioning the panel from its own reading of the token put it 39px too far right and
+printed the frame over the first characters of the text for anyone using the sans. In the serif the identical mistake
+ran the other way and handed out 39px of accidental clearance, which is why it looked correct.
+
+The panel now takes its position from `article.getBoundingClientRect().left`, which is the only number that is right in
+both faces, and `--measure` appears nowhere in its CSS.
+
+The second half of the same bug: a face switch reflows the column in two passes about 100ms apart, the new size first
+and the new font's metrics second. Anything that counts frames reads the intermediate width (858px on the way from
+780px to 1014px) and keeps it. A `ResizeObserver` on the article fires on each settled pass instead, so the last thing
+it sees is the final layout. The window `resize` listener stays alongside it: past the measure the column stops growing
+while the room beside it keeps shrinking, and the observer never fires for that.
