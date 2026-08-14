@@ -21,7 +21,26 @@ draft: true                 # defaults to true, so you cannot publish by acciden
 
 Sections in use: `javascript`, `infra`, `typescript`, `career`, `opinion`, `meta`, `security`. A new value creates a new section page.
 
-Optional: `updatedDate`, `heroImage`, `heroImageAlt`, `epigraph`, `epigraphCite`, `seoTitle`, `seoDescription`, `noindex`, `lang`, `slug`.
+A section can describe itself. `content/categories.json` is a flat map of category to one or two sentences, which show
+on the section page and become its meta description:
+
+```json
+{ "javascript": "The language I write most, and the one that still surprises me." }
+```
+
+A category with no entry falls back to a generated line, so adding a section still needs nothing but a post.
+**The descriptions in there now are placeholders in your voice — rewrite them.**
+
+Optional: `updatedDate`, `heroImage`, `heroImageAlt`, `seoTitle`, `seoDescription`, `noindex`, `lang`, `slug`, `authors`.
+
+`authors` is a list, written the way git writes an author, and the site part is optional:
+
+```yaml
+authors: ["Lucas Santos <https://lsantos.dev>", "Someone Else"]
+```
+
+Leave it out and the post is yours: the byline shows your name and links to your site. It is only worth writing for a
+guest post or something co-authored.
 
 For a series: `series` is a short slug that becomes the URL (`grpc`), `seriesOrder` is the position, and `seriesName` goes on the first part only. The table of contents generates itself, including parts you have not written yet.
 
@@ -121,7 +140,21 @@ const z = 3
 ```
 ````
 
-Use a language the highlighter knows. `Dockerfile`, `output` and `ssh` are not in the bundle and render unhighlighted; use `dockerfile`, `text` and `bash`.
+Use a language the highlighter knows. A handful of labels the old posts used (`Dockerfile`, `output`, `ssh`, `fortran`)
+are aliased to real grammars in `astro.config.mjs`; anything else unknown renders unhighlighted, and the build says so.
+
+You do not have to write `title`. If the first line is a comment that looks like a file path, it becomes the tab and
+disappears from the code. A shebang does not, because a shebang is not a filename.
+
+```ts
+// src/index.ts
+export const x = 1
+```
+
+Every block carries line numbers. Turn them off for one block with `showLineNumbers=false` on the fence.
+
+The reader can change the syntax theme from an icon on any block, and the choice is remembered. Fourteen themes:
+GitHub, Monokai, Dracula, the four Catppuccins, three Kanagawas, Ayu light and dark, and Snazzy.
 
 ## Diagrams and maths
 
@@ -146,20 +179,42 @@ Inline content only: text, `**bold**`, `_italic_`, links, `code`. No headings, n
 
 On a narrow screen both collapse to a tap-to-reveal popover. No JavaScript either way.
 
-## An epigraph
+## A quote with an author
 
-Either in frontmatter, which renders above the title:
+Epigraphs are gone: they were quotes under another name. A quote with an author is a `quote` callout whose title is the
+author, which is what you already write in the vault, so it renders natively in Obsidian too.
 
-```yaml
-epigraph: "The quote."
-epigraphCite: "Who said it"
+```markdown
+> [!quote] Phil Karlton
+> There are only two hard things in computer science: cache invalidation and naming things.
 ```
 
-Or inline anywhere in the body:
+Without an author it is an ordinary blockquote and the card comes without the author row.
+
+```markdown
+> Every abstraction leaks, sooner or later.
+```
+
+Either way the body is italic, the card carries a large quote mark behind the text, and a copy button puts the whole
+thing on the clipboard as a citation ready to paste somewhere else.
+
+## An interactive demo
+
+A component that runs in the page lives in a `components/` folder next to the post, and takes one line:
 
 ```mdx
-<Epigraph cite="Who said it">The quote.</Epigraph>
+<LabDemo src="./components/Counter.vue" client:visible />
 ```
+
+For a demo that is already a whole HTML page, script and style included:
+
+```mdx
+<HtmlLab src="./components/counter.html" title="a counter in plain HTML" />
+```
+
+No import to write and no filename repeated: the build reads the file, imports the component for you, and shows its
+source under a `see the code` toggle, syntax highlighted like any other code block. A typo in `src` breaks the build
+rather than rendering an empty box. The HTML one runs in a sandboxed frame, so its CSS cannot leak into the post.
 
 ## Images from somewhere else
 
@@ -192,8 +247,9 @@ matches the heading text, accents included.
 
 - **A wikilink to a post that does not exist fails the build**, naming the file and the missing folder. That is
   deliberate: a typo cannot reach the site.
-- **A wikilink to a draft still links**, followed by a muted `(not written yet)`, the same treatment the series
-  table of contents gives an unwritten part.
+- **A wikilink to a draft still links**, in Wikipedia's red, with the words in a tooltip rather than in the sentence.
+  The series table of contents marks an unwritten part the same way, and hovering the link says so instead of showing
+  a preview.
 - **Code is never touched.** `[['a', 'b']]` in a snippet or inline code stays exactly that.
 - **Wikilinks work between posts only.** They cannot point at a note elsewhere in a vault, because that note has
   no URL here.

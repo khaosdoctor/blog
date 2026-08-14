@@ -1,0 +1,30 @@
+{
+  "javascript": {
+    "pt": "A linguagem que eu mais escrevo, e a que mais me surpreende. Runtime, especificação, e as partes que ninguém lê.",
+    "en": "The language I write most, and the one that still surprises me. Runtime, spec, and the parts nobody reads."
+  },
+  "typescript": {
+    "pt": "Tipos como ferramenta de projeto, não como imposto. O que o compilador consegue provar por você.",
+    "en": "Types as a design tool rather than a tax. What the compiler can prove on your behalf."
+  },
+  "infra": {
+    "pt": "Containers, Kubernetes, deploy e as coisas que só quebram em produção.",
+    "en": "Containers, Kubernetes, deployment, and the things that only break in production."
+  },
+  "security": {
+    "pt": "Criptografia, autenticação e as maneiras criativas de perder uma chave.",
+    "en": "Cryptography, authentication, and the creative ways to lose a key."
+  },
+  "career": {
+    "pt": "Carreira em engenharia, entrevistas, palestras e o que aprendi tropeçando.",
+    "en": "Engineering careers, interviews, talks, and what I learned by tripping over it."
+  },
+  "opinion": {
+    "pt": "Opinião, sem pretensão de estar certo.",
+    "en": "Opinion, with no pretence of being right."
+  },
+  "meta": {
+    "pt": "Sobre o blog em si: como ele é feito e por quê.",
+    "en": "About the blog itself: how it is built, and why."
+  }
+}

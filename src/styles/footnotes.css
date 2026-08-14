@@ -9,25 +9,34 @@
  *   - the reference mark in the text: bracketed "[1]", not a bare
  *     underlined number, so it reads as a citation and is never mistaken
  *     for src/components/Sidenote.astro's bordered, unbracketed marker.
- *   - the section at the foot of the post: `display: none`, not removed
- *     from the tree. The margin aside is the only place a reader now reads
- *     a footnote, but the foot-of-page copy still has to exist for the
- *     reference anchor to resolve to something, for a reader with CSS off,
- *     and for an RSS reader. `display: none` also drops it out of the
- *     accessibility tree, which is deliberate here (unlike the
- *     visually-hidden clip technique src/styles/sidenotes.css uses for
- *     `.note-text`): the margin aside below is the copy left reachable to
- *     assistive tech, and hiding this one the same way sighted readers see
- *     it hidden keeps exactly one copy accessible instead of two, or zero.
- *   - the aside itself: floated into the right margin on a wide viewport,
- *     hidden below it, where the reference's own hover-preview card
- *     (src/scripts/hover-previews.ts) already covers the same note by
- *     reading straight out of the (still-present, just invisible) section
- *     this hides, and is itself reachable by keyboard focus and touch
- *     long-press regardless of viewport width. Below the wide breakpoint
- *     that card is the only surface a footnote appears on; narrower than
- *     that used to also show the foot-of-page section, which is now gone
- *     everywhere.
+ *   - the section at the foot of the post: hidden only above the wide
+ *     breakpoint, where the margin aside is the reader's copy and the
+ *     reference's hover-preview card (src/scripts/hover-previews.ts) covers
+ *     the same note again on demand. Below that breakpoint neither of those
+ *     exists, so the section stays visible and the reference works as an
+ *     ordinary anchor down to it, the same as before this file existed.
+ *     Also forced visible at any width when printing (see the print rule
+ *     near the bottom), since neither the aside nor the hover card exists on
+ *     paper. Never removed from the tree, whatever the width: the reference
+ *     anchor still needs somewhere to resolve to, and a reader with CSS off
+ *     (a text browser, view-source, an RSS reader that strips stylesheets)
+ *     gets the notes at the foot of the post the way GFM always rendered
+ *     them.
+ *   - the aside itself: floated into the right margin above the wide
+ *     breakpoint, hidden below it and hidden again in print. Above the
+ *     breakpoint the reference's own hover-preview card
+ *     (src/scripts/hover-previews.ts) also covers the same note, reading
+ *     straight out of the (still-present, just invisible there) section
+ *     this file hides, and is itself reachable by keyboard focus and touch
+ *     long-press. Below the breakpoint hover-previews.ts turns that card off
+ *     for footnote references instead (`previewable()` checks the same
+ *     breakpoint, live, via `matchMedia`), a hover card being a poor primary
+ *     mechanism on a touch screen, and the foot-of-post section above is the
+ *     reader's copy there instead. The breakpoint lives once, in the
+ *     `--footnote-wide-breakpoint` custom property below; the media query
+ *     literal here and the `matchMedia` query hover-previews.ts builds from
+ *     that property both have to read the same value, see that property's
+ *     own comment.
  *   - the hover/focus pairing between the aside and its reference: unlike a
  *     Sidenote/MarginNote's bound text (src/styles/sidenotes.css), both ends
  *     here are real elements already, the `<sup>` in the running text and
@@ -47,6 +56,14 @@
  */
 
 :root {
+  /* Single source for the wide-screen breakpoint used below and in
+     hover-previews.ts. The `@media (min-width: 70rem)` block further down
+     still has to repeat the literal, a CSS media query cannot take a
+     `var()` for a dimension, but hover-previews.ts reads this property at
+     runtime instead of hardcoding a second `70rem`, so there is exactly one
+     number to keep in step by hand rather than two. */
+  --footnote-wide-breakpoint: 70rem;
+
   /* Narrower than a Sidenote's margin box (13rem, see sidenotes.css): a
      footnote is usually a short citation, and the narrower box is what
      leaves enough gutter to justify the lower wide-mode breakpoint below. */
@@ -82,20 +99,23 @@
 /* --------------------------------------------------------------- section */
 
 /*
- * The margin aside is now the only place a footnote is read (see the file
- * comment above), so the section GFM renders at the foot of the post is
- * hidden outright, unconditionally, including at print. It stays in the
- * tree on purpose: the reference anchor still needs somewhere to resolve
- * to, and a reader with CSS off (a text browser, view-source, an RSS reader
- * that strips stylesheets) still gets the notes at the foot of the post the
- * way GFM always rendered them. The colour/size rules below are for exactly
- * that reader; a CSS-on browser never paints them. Printing a post now
- * drops its footnotes along with everything else `display: none` hides,
- * which is a real loss with no fallback (the margin aside is not printed
- * either, see the aside rules below): worth a look if that matters.
+ * Above the wide breakpoint the margin aside is the reader's copy of a
+ * footnote (see the file comment above), so this section is hidden there,
+ * behind the same `@media (min-width: 70rem)` block the aside uses further
+ * down. Below that breakpoint there is no aside and, per
+ * hover-previews.ts's `previewable()`, no hover card either, so this stays
+ * visible and the reference works as an ordinary anchor down to it. Also
+ * forced visible at any width when printing (see the `@media print` block
+ * near the bottom), since neither the aside nor the hover card exists on
+ * paper.
+ *
+ * Never removed from the tree in any of these states, only hidden: the
+ * reference anchor still needs somewhere to resolve to, and a reader with
+ * CSS off (a text browser, view-source, an RSS reader that strips
+ * stylesheets) gets the notes at the foot of the post the way GFM always
+ * rendered them, at any width.
  */
 .prose section[data-footnotes] {
-  display: none;
   color: var(--muted);
   font-size: var(--text-small);
 }
@@ -206,6 +226,15 @@
    Not hover-triggered, so it does not compete with the card above: this one
    is a permanent margin note, that one an on-demand popup. */
 @media (min-width: 70rem) {
+  /* Hidden here rather than unconditionally: below this breakpoint it is
+     the reader's only copy of the note (see the rule's own comment above),
+     re-shown regardless of width in print (see the `@media print` block
+     below). Kept in step with `--footnote-wide-breakpoint` above by hand,
+     for the reason given on that property. */
+  .prose section[data-footnotes] {
+    display: none;
+  }
+
   .footnote-aside {
     display: block;
     float: right;
@@ -234,5 +263,32 @@
      * only defines when a Sidenote/MarginNote component is actually used.
      */
     border-inline-start: var(--border-card-edge) solid var(--fg);
+  }
+}
+
+/*
+ * Print: neither the margin aside nor the hover card exists on paper, so the
+ * foot-of-post section is the only way a footnote is readable there, forced
+ * visible regardless of the width query above. sidenotes.css takes the
+ * inline-parenthetical route for its own notes (its `.note-text` is real
+ * text already sitting next to the marker); a footnote's aside is a
+ * separate `<aside>` element, not inline text in the run, so that approach
+ * does not carry over cleanly here. This keeps the same outcome sidenotes.css
+ * gets, exactly one printed copy, by falling back to the section GFM
+ * already renders (numbered references plus a numbered list, the standard
+ * endnote shape) instead of inlining the aside into the running text.
+ *
+ * The aside is hidden here rather than left to the width query above:
+ * some browsers evaluate a print media query's width features against the
+ * screen's own width, not the page size, so a wide screen could otherwise
+ * print the aside and this section both, showing the same note twice.
+ */
+@media print {
+  .prose section[data-footnotes] {
+    display: block;
+  }
+
+  .footnote-aside {
+    display: none;
   }
 }

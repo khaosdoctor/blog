@@ -73,6 +73,20 @@ function loadExternalMeta(): NonNullable<typeof externalMeta> {
 
 const canPopover = 'popover' in HTMLElement.prototype
 
+// The breakpoint above which footnotes.css floats a margin aside and hides
+// section[data-footnotes] (see that file's --footnote-wide-breakpoint
+// comment for why the number lives there and not here). Read at runtime
+// rather than a second hardcoded 70rem, so one value can drift instead of
+// two; falls back to that same 70rem if the property is somehow missing
+// (an unset custom property reads back as ''), so a stylesheet load
+// failure degrades to the aside's own default rather than matching
+// nothing. Stored as a MediaQueryList, not a boolean read once here: its
+// `.matches` is live, so previewable() (below) sees a resize immediately
+// instead of the viewport width at module load.
+const footnoteWideMedia = matchMedia(
+  `(min-width: ${getComputedStyle(document.documentElement).getPropertyValue('--footnote-wide-breakpoint').trim() || '70rem'})`,
+)
+
 let current: { link: HTMLAnchorElement; card: PopoverHTMLElement } | null = null
 let openTimer = 0
 let closeTimer = 0
@@ -85,15 +99,25 @@ function samePath(a: URL, b: URL): boolean {
 function previewable(link: HTMLAnchorElement): boolean {
   // A bookmark card is already the preview: title, description and host, in a
   // card. Showing a hover card on top of one shows the same thing twice.
-  if (!link.href || link.closest('.hp-card') || link.closest('.bookmark')) return false
+  // `no-preview` is the general opt-out (Authors.astro's byline links carry
+  // it: a hover card there would just repeat the author's own site, which
+  // the byline text has already said): closest(), like the neighbouring
+  // checks, so it also catches a link nested inside a no-preview wrapper.
+  if (!link.href || link.closest('.hp-card') || link.closest('.bookmark') || link.closest('.no-preview')) return false
   // A link to a draft (remark-wikilinks.mjs, class="link-unwritten") gets its
   // own card regardless of the origin/same-page checks below, see buildCard's
   // unwritten branch.
   if (link.classList.contains('link-unwritten')) return true
   // A footnote reference points down the same page, so it fails the
   // different-page check below on purpose. Give it a card anyway, built from
-  // the note's own text (see getMeta / getFootnoteMeta).
-  if (link.hasAttribute('data-footnote-ref')) return true
+  // the note's own text (see getMeta / getFootnoteMeta), but only above the
+  // wide breakpoint: below it footnotes.css drops the margin aside and shows
+  // section[data-footnotes] instead, so the reference should behave like an
+  // ordinary anchor down to it rather than raising a card that duplicates
+  // what is now on the page itself. footnoteWideMedia.matches is read live
+  // (see its own comment above), so this answers correctly after a resize,
+  // not just at the viewport width the page happened to load at.
+  if (link.hasAttribute('data-footnote-ref')) return footnoteWideMedia.matches
   let url: URL
   try {
     url = new URL(link.href)
@@ -460,6 +484,10 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
 }
 
 async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
+  // The live re-check attach() defers here (see its own comment): for most
+  // links this repeats a decision already made once, harmless, but for a
+  // footnote reference this is what actually catches a resize.
+  if (!previewable(link)) return
   if (current?.link === link) {
     if (pin) pinCard(current.card)
     return
@@ -533,7 +561,12 @@ async function restorePinned(): Promise<void> {
 }
 
 function attach(link: HTMLAnchorElement): void {
-  if (!previewable(link)) return
+  // A footnote reference's previewable() answer can change after this runs
+  // once at page load (see footnoteWideMedia above), so its listeners are
+  // bound regardless of the width right now; show() below makes the live
+  // call that actually decides whether to raise a card. Every other kind of
+  // link's answer never changes, so the gate stays here for those.
+  if (!link.hasAttribute('data-footnote-ref') && !previewable(link)) return
 
   // Advertise the disclosure relationship up front; show()/closeCard() change
   // this to 'true' and set aria-controls once a card actually exists.

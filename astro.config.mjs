@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
 import { defineConfig } from 'astro/config'
 import expressiveCode from 'astro-expressive-code'
+import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 import mermaid from 'astro-mermaid'
 import rehypeCallouts from 'rehype-callouts'
 import rehypeKatex from 'rehype-katex'
@@ -37,6 +38,11 @@ export default defineConfig({
     vue(),
     // expressiveCode must precede mdx: it replaces the default Shiki setup.
     expressiveCode({
+      // Line numbers on every block, including the source a lab demo reveals:
+      // that source is emitted as an ordinary code node, so it goes through this
+      // same pass. A block that reads better without them can turn them off with
+      // `showLineNumbers=false` on the fence.
+      plugins: [pluginLineNumbers()],
       // github-light/github-dark keep the current look; the rest are the
       // picker's other options (see CodeTheme.astro), grouped by family:
       // Monokai (dark only, no light variant ships in the Shiki bundle),

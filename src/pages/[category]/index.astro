@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
 import { getPublishedPosts } from '../../lib/posts'
+import { categoryDescription } from '../../lib/categories'
 import { getCategories } from '../../lib/taxonomy'
 import { t } from '../../i18n/ui'
 
@@ -27,14 +28,18 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths
 
 const { category, posts } = Astro.props
+// A written description when there is one, otherwise the generated sentence.
+const described = categoryDescription(category)
+const description = described ?? t('pt', 'sectionDescription', category)
 ---
 
 <BaseLayout
   title={`${category} | Lucas Santos`}
-  description={t('pt', 'sectionDescription', category)}
+  description={description}
   section={{ name: category, url: `/${category}/` }}
 >
   <h1>{category}</h1>
+  {described !== null && <p class="about">{described}</p>}
   <p class="count">
     {posts.length} {t('pt', posts.length === 1 ? 'article' : 'articles')}
   </p>
@@ -42,6 +47,12 @@ const { category, posts } = Astro.props
 </BaseLayout>
 
 <style>
+  .about {
+    margin-block: 0.5rem 1rem;
+    color: var(--muted);
+    max-inline-size: var(--measure);
+  }
+
   .count {
     color: var(--muted);
     font-family: ui-monospace, SFMono-Regular, monospace;

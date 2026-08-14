@@ -1,0 +1,66 @@
+Fonts served from this folder, and what each one obliges us to do.
+
+Nothing here is applied to the site yet. Every file exists so /theme-lab/ can render
+it at a real size. Anything that does not get picked should be deleted, licence note
+and all.
+
+--------------------------------------------------------------------------------
+SIL Open Font License 1.1 (OFL)
+--------------------------------------------------------------------------------
+Redistribution is free, including in a commercial product, as long as the font file
+itself is not sold on its own and any derivative font keeps the OFL and does not use
+the reserved name. Serving a woff2 from a website is exactly what it is for. No
+attribution is required on the page, though the licence text must travel with the
+font file.
+
+  DepartureMono-Regular.woff2   Departure Mono, Helena Zhang
+                                https://departuremono.com
+                                https://github.com/rektdeckard/departure-mono
+
+  Silkscreen-400.woff2          Silkscreen, Jason Kottke
+  Silkscreen-700.woff2          https://fonts.google.com/specimen/Silkscreen
+
+  PixelifySans-400-700.woff2    Pixelify Sans, Stefie Justprince (variable weight)
+                                https://fonts.google.com/specimen/Pixelify+Sans
+
+  VT323-400.woff2               VT323, Peter Hull
+                                https://fonts.google.com/specimen/VT323
+
+  PressStart2P-400.woff2        Press Start 2P, CodeMan38
+                                https://fonts.google.com/specimen/Press+Start+2P
+
+  DotGothic16-400.woff2         DotGothic16, Fontworks
+                                https://fonts.google.com/specimen/DotGothic16
+
+  Micro5-400.woff2              Micro 5, Sunn Type
+                                https://fonts.google.com/specimen/Micro+5
+
+  Jersey10-400.woff2            Jersey 10, Sarah Cadigan-Fried
+                                https://fonts.google.com/specimen/Jersey+10
+
+  Handjet-100-900.woff2         Handjet, Rosetta (variable, ELGR/ELSH axes)
+                                https://fonts.google.com/specimen/Handjet
+
+  ShareTechMono-400.woff2       Share Tech Mono, Ralph Levien
+                                https://fonts.google.com/specimen/Share+Tech+Mono
+
+  IBMPlexMono-400.woff2         IBM Plex Mono, Mike Abbink and Bold Monday
+  IBMPlexMono-600.woff2         https://fonts.google.com/specimen/IBM+Plex+Mono
+
+--------------------------------------------------------------------------------
+Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)
+--------------------------------------------------------------------------------
+Different obligations, and the reason this face is called out separately.
+Attribution is required, and ShareAlike applies to anything derived from the font.
+Serving it as a webfont is fine, but the credit below has to stay reachable from the
+site, and a modified version of the font would have to be released under the same
+licence.
+
+  PxPlusIBMVGA8-9x16.woff       "Web437 IBM VGA 9x16", from The Oldschool PC Font
+                                Resource v2.2 by VileR.
+                                https://int10h.org/oldschool-pc-fonts/
+                                Licence: https://creativecommons.org/licenses/by-sa/4.0/
+
+                                This is a bitmap face traced to outlines. It is only
+                                crisp at whole multiples of 16px: 16, 32, 48. At 17px
+                                or 20px it blurs, which /theme-lab/ demonstrates.
