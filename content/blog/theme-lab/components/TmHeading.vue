@@ -153,18 +153,18 @@ watch([mode, ramp, density, hue, speed], () => frozen.value && instance.value?.r
 </script>
 
 <template>
-  <div class="demo">
-    <div ref="stage" class="stage" :style="{ background: BG }">
+  <div :class="$style.demo">
+    <div ref="stage" :class="$style.stage" :style="{ background: BG }">
       <canvas ref="canvas" aria-hidden="true"></canvas>
-      <div class="text" :style="{ fontFamily: stacks[face], letterSpacing: `${tracking / 100}em` }">
-        <p class="kicker">SEÇÃO 00 / TÍTULO</p>
-        <p class="title">
-          O que você vai <span class="accent" :style="{ color: PALETTE[accent] }">construir</span>?
+      <div :class="$style.text" :style="{ fontFamily: stacks[face], letterSpacing: `${tracking / 100}em` }">
+        <p :class="$style.kicker">SEÇÃO 00 / TÍTULO</p>
+        <p :class="$style.title">
+          O que você vai <span :class="$style.accent" :style="{ color: PALETTE[accent] }">construir</span>?
         </p>
-        <p class="deck">Cada post começa com um arquivo vazio.</p>
+        <p :class="$style.deck">Cada post começa com um arquivo vazio.</p>
       </div>
     </div>
-    <p v-if="failed" class="failed">WebGL2 não subiu: {{ failed }}</p>
+    <p v-if="failed" :class="$style.failed">WebGL2 não subiu: {{ failed }}</p>
 
     <Panel label="campo animado">
       <Pick
@@ -232,14 +232,14 @@ watch([mode, ramp, density, hue, speed], () => frozen.value && instance.value?.r
       <Knob v-model="tracking" label="entreletra" :min="-2" :max="20" unit="/100em" />
     </Panel>
 
-    <p class="readout">
+    <p :class="$style.readout">
       contraste sobre {{ BG }} · título {{ titleContrast }}:1 · destaque {{ accentContrast }}:1 · campo
       {{ fieldContrast }}:1 (decorativo, some atrás do texto)
     </p>
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -252,7 +252,7 @@ watch([mode, ramp, density, hue, speed], () => frozen.value && instance.value?.r
   overflow: hidden;
 }
 
-canvas {
+.stage canvas {
   position: absolute;
   inset: 0;
   inline-size: 100%;

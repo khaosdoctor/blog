@@ -5,15 +5,15 @@ const value = defineModel<string>({ required: true })
 </script>
 
 <template>
-  <label class="pick">
-    <span class="pick-name">{{ label }}</span>
+  <label :class="$style.pick">
+    <span :class="$style['pick-name']">{{ label }}</span>
     <select v-model="value">
       <option v-for="option in options" :key="option.id" :value="option.id">{{ option.name }}</option>
     </select>
   </label>
 </template>
 
-<style scoped>
+<style module>
 .pick {
   display: grid;
   gap: 0.1rem;
@@ -27,7 +27,7 @@ const value = defineModel<string>({ required: true })
   text-transform: uppercase;
 }
 
-select {
+.pick select {
   padding: 0.2rem 0.3rem;
   border: 1px solid var(--rule);
   border-radius: 0;
@@ -36,7 +36,7 @@ select {
   font: inherit;
 }
 
-select:focus-visible {
+.pick select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }

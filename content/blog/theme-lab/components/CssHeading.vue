@@ -109,18 +109,18 @@ watch([animated, typing], start)
 </script>
 
 <template>
-  <div class="demo">
+  <div :class="$style.demo">
     <div
-      class="stage"
+      :class="$style.stage"
       :style="{
         background: BG,
         fontFamily: STACKS[face],
         letterSpacing: `${tracking / 100}em`,
       }"
     >
-      <p class="kicker" :style="{ color: MUTED }">SEÇÃO 00 / ÍNDICE</p>
+      <p :class="$style.kicker" :style="{ color: MUTED }">SEÇÃO 00 / ÍNDICE</p>
       <p
-        class="title"
+        :class="$style.title"
         :style="{
           color: INK,
           fontSize: `${titleSize / 16}rem`,
@@ -130,16 +130,16 @@ watch([animated, typing], start)
         O que você vai <span :style="{ color: accentHex }">construir</span>?
       </p>
 
-      <div class="terminal" :style="{ background: SOFT, border: borders[border] }">
-        <span class="prompt" :style="{ color: accentHex, borderInlineEnd: `2px solid ${MUTED}44` }">&gt;_</span>
-        <span class="typed" :style="{ color: INK }"
-          >{{ typed }}<span class="caret" :style="{ background: accentHex, opacity: caret ? 1 : 0 }"></span
+      <div :class="$style.terminal" :style="{ background: SOFT, border: borders[border] }">
+        <span :class="$style.prompt" :style="{ color: accentHex, borderInlineEnd: `2px solid ${MUTED}44` }">&gt;_</span>
+        <span :class="$style.typed" :style="{ color: INK }"
+          >{{ typed }}<span :class="$style.caret" :style="{ background: accentHex, opacity: caret ? 1 : 0 }"></span
         ></span>
       </div>
 
-      <p class="tagline" :style="{ color: MUTED }">Todo post começa com um arquivo vazio.</p>
+      <p :class="$style.tagline" :style="{ color: MUTED }">Todo post começa com um arquivo vazio.</p>
 
-      <button class="cta" type="button" :style="{ color: accentHex, borderColor: `${MUTED}44` }">
+      <button :class="$style.cta" type="button" :style="{ color: accentHex, borderColor: `${MUTED}44` }">
         <template v-if="brackets">[ ler o começo ]</template>
         <template v-else>ler o começo</template>
       </button>
@@ -190,7 +190,7 @@ watch([animated, typing], start)
       <Toggle v-model="animated" label="animar" />
     </Panel>
 
-    <p class="readout">
+    <p :class="$style.readout">
       título {{ inkContrast }}:1 · destaque {{ accentContrast }}:1 sobre {{ BG }} · prompt {{ promptContrast }}:1
       sobre a caixa {{ SOFT }}. O brilho não muda o contraste medido, porque a medida é do núcleo da letra: ele
       espalha luz em volta e engorda o traço, o que ajuda em fonte fina e vira borrão em fonte pixel.
@@ -198,7 +198,7 @@ watch([animated, typing], start)
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }

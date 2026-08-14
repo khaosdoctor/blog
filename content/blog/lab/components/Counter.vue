@@ -5,9 +5,9 @@ const count = ref(0)
 </script>
 
 <template>
-  <div class="counter">
-    <output class="value" aria-live="polite">{{ count }}</output>
-    <div class="controls">
+  <div :class="$style.counter">
+    <output :class="$style.value" aria-live="polite">{{ count }}</output>
+    <div :class="$style.controls">
       <button type="button" title="Diminuir" @click="count -= 1">&minus;</button>
       <button type="button" title="Aumentar" @click="count += 1">+</button>
       <button type="button" title="Zerar" @click="count = 0">reset</button>
@@ -15,7 +15,7 @@ const count = ref(0)
   </div>
 </template>
 
-<style scoped>
+<style module>
 .counter {
   display: flex;
   align-items: center;
@@ -40,7 +40,7 @@ const count = ref(0)
   gap: 0.5rem;
 }
 
-button {
+.controls button {
   padding: 0.35rem 0.8rem;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
@@ -50,13 +50,13 @@ button {
   cursor: pointer;
 }
 
-button:hover,
-button:focus-visible {
+.controls button:hover,
+.controls button:focus-visible {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-button:focus-visible {
+.controls button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

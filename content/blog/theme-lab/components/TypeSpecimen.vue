@@ -61,21 +61,21 @@ const bodyStyle = computed(() => ({
 </script>
 
 <template>
-  <div class="demo">
-    <div class="stage" :style="{ background: colours.bg }">
-      <p class="kicker" :style="{ color: colours.muted, fontFamily: display.stack }">
+  <div :class="$style.demo">
+    <div :class="$style.stage" :style="{ background: colours.bg }">
+      <p :class="$style.kicker" :style="{ color: colours.muted, fontFamily: display.stack }">
         SEÇÃO 03 / {{ chosen.name.toUpperCase() }}
       </p>
       <h3
-        class="title"
+        :class="$style.title"
         :style="{ fontFamily: display.stack, color: colours.fg, fontSize: `${size * 2.1}px`, lineHeight: 1.15 }"
       >
         {{ HEADING }}
       </h3>
-      <p class="deck" :style="{ ...bodyStyle, fontSize: `${size * 1.15}px`, color: colours.muted }">{{ DECK }}</p>
+      <p :class="$style.deck" :style="{ ...bodyStyle, fontSize: `${size * 1.15}px`, color: colours.muted }">{{ DECK }}</p>
       <p v-for="paragraph in PARAGRAPHS" :key="paragraph" :style="bodyStyle">{{ paragraph }}</p>
-      <p class="diacritics" :style="{ ...bodyStyle, fontSize: `${size * 1.4}px` }">{{ DIACRITICS }}</p>
-      <pre class="code" :style="{ ...bodyStyle, fontSize: `${size * 0.92}px` }">{{ CODE_SAMPLE }}</pre>
+      <p :class="$style.diacritics" :style="{ ...bodyStyle, fontSize: `${size * 1.4}px` }">{{ DIACRITICS }}</p>
+      <pre :class="$style.code" :style="{ ...bodyStyle, fontSize: `${size * 0.92}px` }">{{ CODE_SAMPLE }}</pre>
     </div>
 
     <Panel label="tipo">
@@ -102,7 +102,7 @@ const bodyStyle = computed(() => ({
       <Knob v-model="measure" label="medida" :min="30" :max="100" unit="ch" />
     </Panel>
 
-    <dl class="facts">
+    <dl :class="$style.facts">
       <div><dt>licença</dt><dd>{{ chosen.licence }}</dd></div>
       <div><dt>papel</dt><dd>{{ chosen.role }}</dd></div>
       <div><dt>largura</dt><dd>{{ chosen.mono ? 'monoespaçada' : 'proporcional' }}</dd></div>
@@ -110,12 +110,12 @@ const bodyStyle = computed(() => ({
       <div><dt>WCAG 1.4.12</dt><dd>{{ spacingOk ? 'passa no espaçamento mínimo' : 'abaixo do mínimo de espaçamento' }}</dd></div>
     </dl>
 
-    <p class="note">{{ chosen.note }}</p>
-    <p v-if="offGrid" class="warn">
+    <p :class="$style.note">{{ chosen.note }}</p>
+    <p v-if="offGrid" :class="$style.warn">
       Fora do grid: esta é uma fonte de bitmap traçado e só fecha em múltiplos de {{ chosen.pixelStep }}px. Em
       {{ size }}px ela está sendo interpolada, e é isso que você está vendo de borrado.
     </p>
-    <p class="note">
+    <p :class="$style.note">
       A regra 1.4.12 do WCAG não pede que o texto já venha assim: pede que ele não quebre quando o leitor força
       entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em. Suba os três sliders até lá e veja se a coluna
       aguenta. Fonte pixel costuma melhorar com espaçamento, o que é a única coisa que a literatura sobre leitura
@@ -124,7 +124,7 @@ const bodyStyle = computed(() => ({
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -173,13 +173,13 @@ const bodyStyle = computed(() => ({
   gap: 0.5rem;
 }
 
-dt {
+.facts dt {
   color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-dd {
+.facts dd {
   margin: 0;
   color: var(--fg);
 }

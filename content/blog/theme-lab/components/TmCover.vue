@@ -160,16 +160,16 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
 </script>
 
 <template>
-  <div class="demo">
-    <div ref="stage" class="stage" :style="{ background: colours.bg }">
+  <div :class="$style.demo">
+    <div ref="stage" :class="$style.stage" :style="{ background: colours.bg }">
       <canvas ref="canvas" aria-hidden="true"></canvas>
-      <div class="card" :style="{ color: colours.ink }">
-        <p class="tag">BLOG.LSANTOS.DEV / META</p>
-        <p class="title">{{ TITLES[titleSize] }}</p>
-        <p class="byline">Lucas Santos · 14 AGO 2026</p>
+      <div :class="$style.card" :style="{ color: colours.ink }">
+        <p :class="$style.tag">BLOG.LSANTOS.DEV / META</p>
+        <p :class="$style.title">{{ TITLES[titleSize] }}</p>
+        <p :class="$style.byline">Lucas Santos · 14 AGO 2026</p>
       </div>
     </div>
-    <p v-if="failed" class="failed">WebGL2 não subiu: {{ failed }}</p>
+    <p v-if="failed" :class="$style.failed">WebGL2 não subiu: {{ failed }}</p>
 
     <Panel label="arte">
       <Pick
@@ -206,7 +206,7 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
       />
     </Panel>
 
-    <p class="readout">
+    <p :class="$style.readout">
       título {{ inkContrast.toFixed(2) }}:1 sobre {{ colours.bg }}. O "teto da arte" limita o quanto o sombreado
       chega perto do branco: baixe-o e o texto ganha contraste, suba-o e a arte come o cartão. Uma capa de verdade
       seria gerada pelo `sharp` no build, com o mesmo cálculo.
@@ -214,7 +214,7 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -227,7 +227,7 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
   overflow: hidden;
 }
 
-canvas {
+.stage canvas {
   position: absolute;
   inset: 0;
   inline-size: 100%;

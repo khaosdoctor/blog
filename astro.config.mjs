@@ -1,4 +1,5 @@
 // @ts-check
+import { createHash } from 'node:crypto'
 import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
@@ -164,5 +165,24 @@ export default defineConfig({
     // Real srcset/sizes for every <Image>. `constrained` fits this site's one
     // fixed reading column, which is what remark-figures wraps an image into.
     layout: 'constrained',
+  },
+  vite: {
+    css: {
+      modules: {
+        // A post component's <style module> classes get renamed to
+        // Component__class__hash, so a class can never collide with a global
+        // one even when the dev server injects the sheet without its scope
+        // (which is how a lab component once stretched every tag chip on its
+        // page). The hash comes from the file path, so two components that
+        // share a basename in different folders still get distinct names, and
+        // the same input always builds the same output.
+        generateScopedName(name, filename) {
+          const path = filename.replace(/\?.*$/, '')
+          const component = path.split('/').pop()?.replace(/\.(vue|module\.css)$/, '') ?? 'style'
+          const hash = createHash('sha256').update(path.replace(process.cwd(), '')).digest('base64url').slice(0, 4)
+          return `${component}__${name}__${hash}`
+        },
+      },
+    },
   },
 })

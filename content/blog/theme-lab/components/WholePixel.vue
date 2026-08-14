@@ -46,15 +46,15 @@ const crispStyle = computed(() =>
 </script>
 
 <template>
-  <div class="demo">
-    <div class="stage" :style="{ background: bg, color: fg }">
-      <div class="ladder" :style="{ zoom: zoom }">
-        <div v-for="size in SIZES" :key="size" class="row" :class="{ grid: onGrid(size) }">
-          <span class="size">{{ size }}px</span>
-          <span class="sample" :style="{ fontFamily: face.stack, fontSize: `${size}px`, lineHeight: 1, ...crispStyle }">
+  <div :class="$style.demo">
+    <div :class="$style.stage" :style="{ background: bg, color: fg }">
+      <div :class="$style.ladder" :style="{ zoom: zoom }">
+        <div v-for="size in SIZES" :key="size" :class="[$style.row, { [$style.grid]: onGrid(size) }]">
+          <span :class="$style.size">{{ size }}px</span>
+          <span :class="$style.sample" :style="{ fontFamily: face.stack, fontSize: `${size}px`, lineHeight: 1, ...crispStyle }">
             {{ WORD }}
           </span>
-          <span class="verdict">{{ onGrid(size) ? '✔ no grid' : '✕ interpolada' }}</span>
+          <span :class="$style.verdict">{{ onGrid(size) ? '✔ no grid' : '✕ interpolada' }}</span>
         </div>
       </div>
     </div>
@@ -70,12 +70,12 @@ const crispStyle = computed(() =>
       <Toggle v-model="dark" label="fundo escuro" />
     </Panel>
 
-    <p class="note">
+    <p :class="$style.note">
       A lupa usa `zoom`, que multiplica o tamanho em px por inteiro: o resultado continua nítido. Se ela usasse
       `transform: scale`, os mesmos 16px viravam 64px interpolados e tudo borrava, que é exatamente o problema que
       esta demonstração existe para mostrar.
     </p>
-    <p class="note">
+    <p :class="$style.note">
       O interruptor do antisserrilhado aplica a receita conhecida (`-webkit-font-smoothing: none` mais um
       `filter: contrast(100.00001%)` para desligar o subpixel). Ela funciona no Chrome e no Firefox em Linux e
       Windows, funciona no macOS, e no Safari o efeito é irregular porque ele informa uma densidade de pixel
@@ -86,7 +86,7 @@ const crispStyle = computed(() =>
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }

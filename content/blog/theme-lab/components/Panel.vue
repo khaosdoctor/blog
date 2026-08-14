@@ -3,13 +3,13 @@ defineProps<{ label?: string }>()
 </script>
 
 <template>
-  <div class="panel">
-    <p v-if="label" class="panel-label">{{ label }}</p>
-    <div class="panel-grid"><slot /></div>
+  <div :class="$style.panel">
+    <p v-if="label" :class="$style['panel-label']">{{ label }}</p>
+    <div :class="$style['panel-grid']"><slot /></div>
   </div>
 </template>
 
-<style scoped>
+<style module>
 .panel {
   margin-block-start: 0.9rem;
   padding-block-start: 0.6rem;

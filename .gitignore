@@ -46,3 +46,6 @@ QUESTIONS.md
 SECURITY-INCIDENT.md
 # scratch build output from review agents
 dist-review/
+.serena/
+.vscode/
+.claude/

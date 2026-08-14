@@ -50,11 +50,11 @@ const base = computed(() => ({
 </script>
 
 <template>
-  <div class="demo">
-    <div class="stage" :style="{ background: BG }">
-      <div class="rack">
+  <div :class="$style.demo">
+    <div :class="$style.stage" :style="{ background: BG }">
+      <div :class="$style.rack">
         <figure>
-          <button class="ghost" type="button" :style="{ ...base, color: accentHex, borderColor: '#ffffff29' }">
+          <button :class="$style.ghost" type="button" :style="{ ...base, color: accentHex, borderColor: '#ffffff29' }">
             [ {{ label }} ]
           </button>
           <figcaption>colchetes</figcaption>
@@ -62,7 +62,7 @@ const base = computed(() => ({
 
         <figure>
           <button
-            class="solid"
+            :class="$style.solid"
             type="button"
             :style="{ ...base, background: accentHex, color: solidText ? '#ffffff' : BG, borderColor: accentHex }"
           >
@@ -72,22 +72,22 @@ const base = computed(() => ({
         </figure>
 
         <figure>
-          <button class="double" type="button" :style="{ ...base, color: accentHex, borderColor: accentHex }">
+          <button :class="$style.double" type="button" :style="{ ...base, color: accentHex, borderColor: accentHex }">
             {{ label }}
           </button>
           <figcaption>moldura dupla</figcaption>
         </figure>
 
         <figure>
-          <button class="prompt" type="button" :style="{ ...base, color: accentHex }">
-            <span class="sign">&gt;</span>{{ label }}
+          <button :class="$style.prompt" type="button" :style="{ ...base, color: accentHex }">
+            <span :class="$style.sign">&gt;</span>{{ label }}
           </button>
           <figcaption>prompt</figcaption>
         </figure>
 
         <figure>
-          <button class="cursor" type="button" :style="{ ...base, color: '#e6e4e0' }">
-            <span class="pointer" :style="{ color: accentHex }">▸</span>{{ label }}
+          <button :class="$style.cursor" type="button" :style="{ ...base, color: '#e6e4e0' }">
+            <span :class="$style.pointer" :style="{ color: accentHex }">▸</span>{{ label }}
           </button>
           <figcaption>cursor de menu</figcaption>
         </figure>
@@ -102,11 +102,11 @@ const base = computed(() => ({
       <Toggle v-model="solidText" label="texto branco no bloco cheio" />
     </Panel>
 
-    <p class="readout" :class="{ bad: onSolid < 4.5 && !solidText }">
+    <p :class="[$style.readout, { [$style.bad]: onSolid < 4.5 && !solidText }]">
       contorno {{ onDark.toFixed(2) }}:1 sobre {{ BG }} · bloco cheio {{ onSolid.toFixed(2) }}:1 com texto escuro.
       Altura aproximada do alvo de toque: {{ touch }}px (a norma pede 44).
     </p>
-    <p class="note">
+    <p :class="$style.note">
       O bloco cheio é o único candidato em que a cor da marca precisa carregar texto por cima, e é onde ela
       quebra: amarelo com texto branco reprova, amarelo com texto escuro passa. É a mesma regra que já vale para o
       negrito do site hoje.
@@ -114,7 +114,7 @@ const base = computed(() => ({
   </div>
 </template>
 
-<style scoped>
+<style module>
 .demo {
   font-family: var(--font-mono);
 }
@@ -130,12 +130,12 @@ const base = computed(() => ({
   align-items: flex-start;
 }
 
-figure {
+.rack figure {
   margin: 0;
   text-align: center;
 }
 
-figcaption {
+.rack figcaption {
   margin-block-start: 0.5rem;
   color: #9a9ea6;
   font-family: var(--font-mono);
@@ -144,7 +144,7 @@ figcaption {
   text-transform: uppercase;
 }
 
-button {
+.rack button {
   border: 1px solid transparent;
   border-radius: 0;
   background: transparent;
@@ -154,7 +154,7 @@ button {
   transition: background 120ms ease, color 120ms ease;
 }
 
-button:focus-visible {
+.rack button:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
@@ -205,7 +205,7 @@ button:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  button,
+  .rack button,
   .pointer {
     transition: none;
   }
