@@ -2,7 +2,7 @@
 /**
  * <FootnoteSidenotes /> — the pieces of this feature CSS cannot do alone.
  *
- * Three independent, feature-detected behaviours, none depending on the
+ * Four independent, feature-detected behaviours, none depending on the
  * others working:
  *
  * 1. Hovering or focusing a Sidenote or MarginNote (src/components/Sidenote.astro,
@@ -53,6 +53,19 @@
  *    Feature-detected (bails out at the top if neither API exists) and
  *    wrapped, same as (1): a note that never grows is a cosmetic loss, not a
  *    broken page.
+ *
+ * 4. The same two-way pairing as (1) and (3), for a footnote instead of a
+ *    Sidenote/MarginNote. Simpler here: both ends are real elements already
+ *    (the `<sup>` around `<a data-footnote-ref>` in the text, and the
+ *    `<aside class="footnote-aside">` src/plugins/rehype-footnote-sidenotes.mjs
+ *    builds), so neither the Custom Highlight API nor pointer hit-testing is
+ *    needed, a class toggle and a CSS rule (src/styles/footnotes.css) do the
+ *    whole job. The plugin stamps the aside with `data-footnote-ref-id`, the
+ *    id of its reference, so this only ever needs `getElementById` (aside ->
+ *    reference) and a matching attribute selector (reference -> aside),
+ *    never runtime text parsing. No feature detection needed, `classList`
+ *    and `closest` are assumed everywhere this site runs; still wrapped, so
+ *    an unexpected DOM shape is a cosmetic loss, not a broken page.
  */
 import { localeFromPath, t } from '../i18n/ui'
 
@@ -185,6 +198,83 @@ const locale = localeFromPath(Astro.url.pathname)
       })
     } catch (_error) {
       // A note that never grows is a cosmetic loss, not a broken page.
+    }
+  })()
+</script>
+
+<script is:inline>
+  ;(function () {
+    try {
+      var HIGHLIGHT = 'footnote-ref-highlighted'
+      var GROW = 'footnote-aside-grow'
+      var highlighted = null
+      var grown = null
+
+      function setHighlighted(sup) {
+        if (sup === highlighted) return
+        if (highlighted) highlighted.classList.remove(HIGHLIGHT)
+        highlighted = sup
+        if (highlighted) highlighted.classList.add(HIGHLIGHT)
+      }
+
+      function setGrown(aside) {
+        if (aside === grown) return
+        if (grown) grown.classList.remove(GROW)
+        grown = aside
+        if (grown) grown.classList.add(GROW)
+      }
+
+      // aside -> reference: the plugin stamps the aside with the
+      // reference's own id (data-footnote-ref-id), so this is a plain
+      // lookup, no runtime text parsing.
+      function referenceSup(aside) {
+        var id = aside.dataset.footnoteRefId
+        var ref = id ? document.getElementById(id) : null
+        return ref ? ref.closest('sup') : null
+      }
+
+      // reference -> aside: the mirror lookup, by the same attribute.
+      function asideFor(anchor) {
+        return anchor.id ? document.querySelector('[data-footnote-ref-id="' + anchor.id + '"]') : null
+      }
+
+      function show(target) {
+        if (!target || typeof target.closest !== 'function') return
+
+        var aside = target.closest('.footnote-aside')
+        if (aside) {
+          setHighlighted(referenceSup(aside))
+          return
+        }
+
+        var anchor = target.closest('a[data-footnote-ref]')
+        if (anchor) setGrown(asideFor(anchor))
+      }
+
+      function clear(event) {
+        var related = event && event.relatedTarget
+        if (
+          related &&
+          typeof related.closest === 'function' &&
+          (related.closest('.footnote-aside') || related.closest('a[data-footnote-ref]'))
+        ) {
+          return
+        }
+        setHighlighted(null)
+        setGrown(null)
+      }
+
+      document.addEventListener('mouseover', function (event) {
+        show(event.target)
+      })
+      document.addEventListener('mouseout', clear)
+      document.addEventListener('focusin', function (event) {
+        show(event.target)
+      })
+      document.addEventListener('focusout', clear)
+    } catch (_error) {
+      // A footnote pairing that never highlights or grows is a cosmetic
+      // loss, not a broken page.
     }
   })()
 </script>

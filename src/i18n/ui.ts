@@ -34,6 +34,8 @@ type UIKey =
   | 'showSource'
   | 'codeTheme'
   | 'codeThemeAuto'
+  | 'writtenBy'
+  | 'readingProgress'
   | 'notWrittenYet'
   | 'allPosts'
   | 'categories'
@@ -57,6 +59,7 @@ type UIKey =
   | 'previewPin'
   | 'previewUnpin'
   | 'previewDrag'
+  | 'previewUnwritten'
   | 'showNote'
   | 'showMarginNote'
   | 'imageGone'
@@ -110,6 +113,8 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     showSource: 'ver o código',
     codeTheme: 'Tema do código',
     codeThemeAuto: 'Automático (segue o sistema)',
+    writtenBy: 'por',
+    readingProgress: 'progresso da leitura',
     notWrittenYet: 'ainda não escrito',
     allPosts: 'Todos os posts',
     categories: 'Categorias',
@@ -133,6 +138,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     previewPin: 'Fixar esta prévia',
     previewUnpin: 'Soltar esta prévia',
     previewDrag: 'arraste para mover',
+    previewUnwritten: 'ainda não escrito, mas em breve!',
     showNote: 'mostrar nota',
     showMarginNote: 'mostrar nota lateral',
     imageGone: 'Esta imagem não existe mais',
@@ -186,6 +192,8 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     showSource: 'show the source',
     codeTheme: 'Code theme',
     codeThemeAuto: 'Automatic (matches your system)',
+    writtenBy: 'by',
+    readingProgress: 'reading progress',
     notWrittenYet: 'not written yet',
     allPosts: 'All posts',
     categories: 'Categories',
@@ -209,6 +217,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     previewPin: 'Pin this preview',
     previewUnpin: 'Unpin this preview',
     previewDrag: 'drag to move',
+    previewUnwritten: 'not yet written, but soon!',
     showNote: 'show note',
     showMarginNote: 'show margin note',
     imageGone: 'This image is gone',

@@ -24,10 +24,14 @@ import '../styles/math.css'
 // Quote and epigraph treatments the lab page shows side by side. This file is a
 // menu, not a decision: the chosen variant moves into prose.css and the rest go.
 import '../styles/variants/quotes.css'
+// Tag and category chips, which live outside the prose wrapper.
+import '../styles/chips.css'
 import CodeTheme from '../components/CodeTheme.astro'
 import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
 import LangSwitcher from '../components/LangSwitcher.astro'
 import MathCopy from '../components/MathCopy.astro'
+import QuoteCopy from '../components/QuoteCopy.astro'
+import ReadingProgress from '../components/ReadingProgress.astro'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
@@ -50,6 +54,8 @@ interface Props {
   noindex?: boolean
   /** Passed through to the breadcrumb so it reads Home > section > post. */
   section?: { name: string; url: string }
+  /** Only a post gets the reading progress bar; an index has nothing to read through. */
+  progress?: boolean
 }
 
 const {
@@ -66,6 +72,7 @@ const {
   section,
   markdown,
   noindex,
+  progress = false,
 } = Astro.props
 
 const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
@@ -132,6 +139,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     />
   </head>
   <body>
+    {progress && <ReadingProgress locale={locale} />}
     <a href="#main-content" class="skip-link">{t(locale, 'skipToContent')}</a>
     <header>
       <a href={home} class="home">lsantos.dev</a>
@@ -151,6 +159,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     </footer>
     <MathCopy locale={locale} />
     <FootnoteSidenotes />
+    <QuoteCopy />
     <CodeTheme locale={locale} />
     {
       analyticsToken && (

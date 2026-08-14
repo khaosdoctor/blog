@@ -9,13 +9,9 @@ draft: false
 noindex: true
 ---
 
-import Counter from './components/Counter.vue'
-import counterSource from './components/Counter.vue?raw'
-import counterHtml from './components/counter.html?raw'
-
 Esta página existe para ser aberta no navegador. Cada seção abaixo nomeia um recurso, explica em uma ou duas frases para que ele serve, mostra o código exato que você digitaria e, logo em seguida, o resultado renderizado. Se algo aqui aparecer quebrado, o recurso está quebrado.
 
-As linhas de `import` no topo são a única exceção, e existem por causa das duas ilhas interativas do final: uma diretiva de cliente precisa de uma importação real, e o botão de ver o código precisa do arquivo como texto. Os dois arquivos moram em `components/`, dentro da pasta deste post. Nenhum post sem ilha importa nada, porque todos os outros componentes já são injetados em todos os posts.
+As duas ilhas interativas do final são a única seção sem um bloco de código igual ao que se digita: `<LabDemo>` e `<HtmlLab>` nomeiam o arquivo com `src`, e um plugin remark lê esse arquivo na hora do build, monta a importação que a diretiva de cliente precisa e injeta o próprio código-fonte destacado. Os dois arquivos moram em `components/`, dentro da pasta deste post. Nenhum post sem ilha importa nada, porque todos os outros componentes já são injetados em todos os posts.
 
 ## Frontmatter
 
@@ -147,116 +143,6 @@ Uma separação visual entre duas partes do texto que não merecem um título no
 ```
 
 ---
-
-### Escolha a cor e a densidade da régua
-
-A régua agora tem 150px, 1px de espessura, pontilhada, sem brilho, e desaparece nas duas pontas. O que falta escolher é a cor. Cada bloco abaixo é a mesma `---` com um valor diferente; o vencedor virá `--rule-core` em `theme.css` e o resto deste bloco sai.
-
-<div data-v="rule-fg-80">
-
-**texto a 80% (padrão atual)**
-
----
-
-</div>
-
-<div data-v="rule-fg-60">
-
-**texto a 60%**
-
----
-
-</div>
-
-<div data-v="rule-fg-40">
-
-**texto a 40%**
-
----
-
-</div>
-
-<div data-v="rule-fg-100">
-
-**texto a 100%**
-
----
-
-</div>
-
-<div data-v="rule-muted">
-
-**cor de texto secundário**
-
----
-
-</div>
-
-<div data-v="rule-green">
-
-**verde da marca a 80%**
-
----
-
-</div>
-
-<div data-v="rule-red">
-
-**vermelho da marca a 80%**
-
----
-
-</div>
-
-<div data-v="rule-yellow">
-
-**amarelo da marca a 80%**
-
----
-
-</div>
-
-<div data-v="rule-blue">
-
-**azul da marca a 80%**
-
----
-
-</div>
-
-<div data-v="rule-purple">
-
-**roxo a 80%**
-
----
-
-</div>
-
-E a mesma cor com outro ritmo de pontos, mais a versão sólida:
-
-<div data-v="rule-tight">
-
-**pontos juntos**
-
----
-
-</div>
-
-<div data-v="rule-loose">
-
-**pontos espaçados**
-
----
-
-</div>
-
-<div data-v="rule-solid">
-
-**sólida, sem pontos**
-
----
-
-</div>
 
 ## Notas de rodapé
 
@@ -630,20 +516,13 @@ O último aponta para um rascunho: o link continua funcionando, mas vem seguido 
 
 ## Uma ilha interativa em Vue
 
-O componente mora na pasta do próprio post, em `components/`, junto com as imagens. As duas linhas de `import` são o único lugar onde um `import` está certo em um post: uma diretiva de cliente precisa da importação real do componente, e a segunda traz o código-fonte como texto para o botão de ver o código. `client:visible` significa que o JavaScript do contador só é baixado quando ele entra na tela; o resto da página continua sendo HTML estático.
+O componente mora na pasta do próprio post, em `components/`, junto com as imagens. `src` aponta para o arquivo, e é a única coisa que se escreve à mão: o plugin resolve o caminho, importa o componente de verdade (é disso que a diretiva de cliente precisa) e mostra o arquivo em `ver o código`, destacado como qualquer outro bloco da página. `client:visible` significa que o JavaScript do contador só é baixado quando ele entra na tela; o resto da página continua sendo HTML estático.
 
 ```mdx
-import Counter from './components/Counter.vue'
-import counterSource from './components/Counter.vue?raw'
-
-<LabDemo source={counterSource} name="Counter.vue">
-  <Counter client:visible />
-</LabDemo>
+<LabDemo src="./components/Counter.vue" client:visible />
 ```
 
-<LabDemo source={counterSource} name="Counter.vue">
-  <Counter client:visible />
-</LabDemo>
+<LabDemo src="./components/Counter.vue" client:visible />
 
 Some, subtraia, zere, e navegue pelos três botões com Tab e Espaço para confirmar que a ilha hidratou. Abra `ver o código` para ver o arquivo inteiro.
 
@@ -652,11 +531,9 @@ Some, subtraia, zere, e navegue pelos três botões com Tab e Espaço para confi
 Quando a demonstração já é uma página HTML completa, com script e estilo próprios, ela entra inteira. O arquivo também mora em `components/` e é embutido em um iframe, então o CSS dele não briga com o do post e o script dele não vê nada desta página.
 
 ```mdx
-import counterHtml from './components/counter.html?raw'
-
-<HtmlLab html={counterHtml} name="counter.html" title="um contador em HTML puro" />
+<HtmlLab src="./components/counter.html" title="um contador em HTML puro" />
 ```
 
-<HtmlLab html={counterHtml} name="counter.html" title="um contador em HTML puro" />
+<HtmlLab src="./components/counter.html" title="um contador em HTML puro" />
 
 [^1]: A fonte, no pé da página. Note o link de volta para o ponto de origem no texto.

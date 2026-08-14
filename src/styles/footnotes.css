@@ -28,6 +28,22 @@
  *     that card is the only surface a footnote appears on; narrower than
  *     that used to also show the foot-of-page section, which is now gone
  *     everywhere.
+ *   - the hover/focus pairing between the aside and its reference: unlike a
+ *     Sidenote/MarginNote's bound text (src/styles/sidenotes.css), both ends
+ *     here are real elements already, the `<sup>` in the running text and
+ *     the `<aside>` itself, so no Custom Highlight API and no pointer
+ *     hit-testing is needed. src/plugins/rehype-footnote-sidenotes.mjs
+ *     stamps the aside with `data-footnote-ref-id`, the id of its
+ *     `<a data-footnote-ref>`; src/components/FootnoteSidenotes.astro pairs
+ *     the two on hover/focus and toggles the classes this file paints:
+ *     `.footnote-ref-highlighted` on the `<sup>` (same faded yellow as
+ *     `--note-highlight`, so there is one highlight colour on the site) and
+ *     `.footnote-aside-grow` on the aside (the same `--note-grow-duration`/
+ *     `--note-grow-ease` transition sidenotes.css defines for `.note-grow`).
+ *     Same trap as `--border-card-edge` below, though: this file is
+ *     imported globally, sidenotes.css only when a Sidenote/MarginNote is
+ *     actually used, so the three tokens are redeclared here rather than
+ *     trusted to already exist, same values, kept in step by hand.
  */
 
 :root {
@@ -36,6 +52,31 @@
      leaves enough gutter to justify the lower wide-mode breakpoint below. */
   --footnote-aside-width: 9rem;
   --footnote-aside-gap: 1.5rem;
+
+  /*
+   * Duplicated from sidenotes.css, not shared by reference: this file is
+   * imported globally (BaseLayout.astro), sidenotes.css only on a page that
+   * actually renders a Sidenote/MarginNote, so a footnote-only post cannot
+   * rely on sidenotes.css's `:root` having run. Same values, kept in step by
+   * hand: `--note-highlight` is the faded yellow bold/note-highlight tint
+   * (see sidenotes.css for the derivation), `--note-grow-duration`/
+   * `--note-grow-ease` the slow, custom-cubic-bezier nudge `.note-grow`
+   * uses. Harmless if both files do end up on the same page (a Sidenote or
+   * MarginNote next to a footnote, see /lab/): two identical `:root`
+   * declarations of the same custom property is not a conflict.
+   */
+  --note-highlight: light-dark(
+    color-mix(in oklab, var(--brand-yellow) 22%, transparent),
+    color-mix(in oklab, var(--brand-yellow) 30%, transparent)
+  );
+  --note-grow-duration: 700ms;
+  --note-grow-ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --note-grow-duration: 0ms;
+  }
 }
 
 /* --------------------------------------------------------------- section */
@@ -93,6 +134,19 @@
   text-decoration: none;
 }
 
+/*
+ * The other half of the aside/reference pairing (see the file comment
+ * above): FootnoteSidenotes.astro toggles this class on the `<sup>`, not the
+ * `<a>` inside it, so the background paints behind the bracket
+ * `::before`/`::after` pseudo-elements above too, not just the digit.
+ * `--note-highlight` is redeclared in this file's own `:root` above (see the
+ * comment there for why), same value as sidenotes.css's, so a footnote and a
+ * Sidenote/MarginNote still highlight the same colour.
+ */
+.prose sup.footnote-ref-highlighted {
+  background-color: var(--note-highlight);
+}
+
 /* ------------------------------------------------------------------ aside */
 
 /*
@@ -107,6 +161,20 @@
  */
 .footnote-aside {
   display: none;
+  /* .footnote-aside-grow (below) is what actually changes; the transition
+     lives here so it applies in every state, the same way sidenotes.css
+     keeps this property on .note-text rather than only on .note-grow. */
+  transition: transform var(--note-grow-duration) var(--note-grow-ease);
+}
+
+/* The mirror of the highlight above: hovering the reference (the `<sup>`,
+   see above) grows the aside it belongs to, the same nudge and the same
+   token .note-grow uses in sidenotes.css, so a footnote and a Sidenote/
+   MarginNote read as the same gesture. transform-origin points growth away
+   from whatever the aside floats under, same reasoning as .note-grow. */
+.footnote-aside.footnote-aside-grow {
+  transform: scale(1.02);
+  transform-origin: top left;
 }
 
 .footnote-aside p {

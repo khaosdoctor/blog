@@ -54,6 +54,12 @@ const blog = defineCollection({
       description: z.string(),
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
+      /**
+       * Written the way git writes an author: `Lucas <https://lsantos.dev>`, the
+       * site part optional. Omitted means the blog's owner, so 191 migrated posts
+       * need no edit; it is only worth writing for a guest post or a co-author.
+       */
+      authors: z.array(z.string()).optional(),
       draft: z.boolean().default(true),
       // Preserved from Ghost; everything renders public for now.
       visibility: z.enum(['public', 'members', 'paid']).default('public'),

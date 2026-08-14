@@ -97,6 +97,21 @@
      never lays out inside this padding, whether the note is one line or
      five. */
   --note-icon-gutter: 1.9rem;
+
+  /* The grow-on-hover nudge (.note-grow below, and footnotes.css's own
+     .footnote-aside-grow) used to animate on --duration/--ease, the site's
+     120ms general-purpose hover timing. A "slightly enlarge" cue reads as a
+     zoom at that speed; asked to read as a slow nudge instead, so it gets
+     its own token: a real cubic-bezier (easeInOutCubic) rather than the
+     plain ease-in-out keyword, and several times slower. Shared with
+     footnotes.css rather than redefined there, so a footnote aside and a
+     Sidenote/MarginNote grow at the same speed. --duration collapses to 0ms
+     under prefers-reduced-motion in theme.css, but that override only
+     touches --duration itself; this token is its own custom property, so it
+     repeats the same media query below instead of inheriting that for
+     free. */
+  --note-grow-duration: 700ms;
+  --note-grow-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .note {
@@ -281,7 +296,7 @@ main {
   white-space: nowrap;
   /* .note-grow (below) is what actually changes; the transition lives here
      so it applies in every state, not just the ones that currently use it. */
-  transition: transform var(--duration) ease-in-out;
+  transition: transform var(--note-grow-duration) var(--note-grow-ease);
 }
 
 /*
@@ -300,10 +315,12 @@ main {
  * from the note above rather than centering it, which keeps it clear of
  * that space for a typical short note; a very tall one, or a very tight
  * stack, could still touch. Kept to a few percent, on purpose, to keep that
- * headroom.
+ * headroom. Scale kept small on purpose, a nudge rather than a zoom: 1.04
+ * read as a jump once the transition above slowed down to match, so it
+ * dropped to 1.02.
  */
 .note.note-grow .note-text {
-  transform: scale(1.04);
+  transform: scale(1.02);
   transform-origin: top left;
 }
 
@@ -436,6 +453,10 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --note-grow-duration: 0ms;
+  }
+
   .note-text {
     transition: none;
   }

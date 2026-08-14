@@ -101,3 +101,25 @@ export function getSeriesNavigation(
 // Re-exported so existing callers keep importing it from here, while the
 // implementation stays reachable from a plain node script.
 export { slugify } from './slugify'
+
+/**
+ * A chip's colour, derived from its own label.
+ *
+ * The same tag is always the same colour, on every page, with no table to keep
+ * in step with the content and nothing to add when a new tag appears. A sum of
+ * character codes is a weak hash and that is fine here: the only cost of a
+ * collision is two tags sharing a colour.
+ */
+const CHIP_COLORS = [
+  'var(--brand-blue)',
+  'var(--brand-green)',
+  'var(--brand-yellow)',
+  'var(--brand-red)',
+  'var(--brand-purple)',
+]
+
+export function chipColor(label: string): string {
+  let sum = 0
+  for (const char of label) sum += char.codePointAt(0) ?? 0
+  return CHIP_COLORS[sum % CHIP_COLORS.length]
+}

@@ -16,6 +16,7 @@ import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import { rehypeFootnoteSidenotes } from './src/plugins/rehype-footnote-sidenotes.mjs'
 import { rehypeHeadingAnchors } from './src/plugins/rehype-heading-anchors.mjs'
 import { rehypeMathCopy } from './src/plugins/rehype-math-copy.mjs'
+import { remarkLabDemos } from './src/plugins/remark-lab-demos.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
 import { remarkWikilinks } from './src/plugins/remark-wikilinks.mjs'
 
@@ -36,19 +37,35 @@ export default defineConfig({
     vue(),
     // expressiveCode must precede mdx: it replaces the default Shiki setup.
     expressiveCode({
-      // github-light/github-dark keep the current look; monokai and
-      // solarized-dark are the picker's other two options (see
-      // CodeTheme.astro). Solarized was designed around the 16-color ANSI
-      // terminal palette, and monokai is the saturated, high-contrast look
-      // most terminal-retro editor themes borrow from, so both fit the
-      // ASCII/ANSI direction in theme.css better than the average Shiki theme.
-      themes: ['github-light', 'github-dark', 'monokai', 'solarized-dark'],
-      // Four themes turn this default off (it only defaults on for exactly one
-      // light and one dark theme), but a reader who has not picked anything
-      // yet still needs the same light/dark split as before, so it is turned
-      // back on explicitly. With github-light listed first and github-dark
-      // second, the generated media query is still exactly the old
-      // light-follows-system, dark-follows-system pair.
+      // github-light/github-dark keep the current look; the rest are the
+      // picker's other options (see CodeTheme.astro), grouped by family:
+      // Monokai (dark only, no light variant ships in the Shiki bundle),
+      // Dracula (same, dark only), all four Catppuccin variants, all three
+      // Kanagawa variants (two dark, one light), Ayu light/dark, and Snazzy
+      // (the bundle only ships a light Snazzy, despite the name).
+      themes: [
+        'github-light',
+        'github-dark',
+        'monokai',
+        'dracula',
+        'catppuccin-latte',
+        'catppuccin-frappe',
+        'catppuccin-macchiato',
+        'catppuccin-mocha',
+        'kanagawa-wave',
+        'kanagawa-dragon',
+        'kanagawa-lotus',
+        'ayu-light',
+        'ayu-dark',
+        'snazzy-light',
+      ],
+      // This default only turns on automatically for exactly one light and
+      // one dark theme, so with fourteen it needs to stay explicit. A reader
+      // who has not picked anything yet still needs the same light/dark
+      // split as before, which only depends on the first two entries above:
+      // github-light listed first and github-dark second keeps the generated
+      // media query exactly the old light-follows-system, dark-follows-system
+      // pair, regardless of how many themes follow.
       useDarkModeMediaQuery: true,
       // The default selector is `[data-theme='name']`; this site has no other
       // use of `data-theme`, but `data-code-theme` says what it is for and
@@ -107,7 +124,17 @@ export default defineConfig({
     // remarkWikilinks runs last: it turns [[slug]] into an ordinary link, and
     // running after the embed check keeps a wikilink alone in a paragraph from
     // being mistaken for something to embed.
-    remarkPlugins: [remarkReadingTime, remarkMath, remarkEmbeds, remarkFigures, remarkWikilinks],
+    remarkPlugins: [
+      remarkReadingTime,
+      remarkMath,
+      remarkEmbeds,
+      remarkFigures,
+      remarkWikilinks,
+      // Last: the only one that reads files off disk and injects synthesized
+      // content (an import node, and the demo's source as a code block), so it
+      // runs once everything else has settled the tree.
+      remarkLabDemos,
+    ],
     rehypePlugins: [
       // Obsidian's theme, not the plugin's github default: the vocabulary the
       // posts are written in is Obsidian's (quote, question, example and the

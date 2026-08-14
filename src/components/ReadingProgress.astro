@@ -1,0 +1,89 @@
+---
+import { t, type Locale } from '../i18n/ui'
+
+/**
+ * How far down the post you are, as a bar pinned to the top of the window.
+ *
+ * Drawn as discrete blocks rather than a smooth fill: the bar is a repeating
+ * gradient of solid segments with gaps, masked to the current percentage, so it
+ * fills one chunk at a time like a DOS install meter. That is the whole reason
+ * it is not a `<progress>` element, which no browser lets you segment.
+ *
+ * It is decoration for a mouse-and-eyes reader, so it is `aria-hidden`: a screen
+ * reader announcing a percentage on every scroll tick is noise, and the reader
+ * already knows where they are in the document.
+ */
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+---
+
+<div class="progress" aria-hidden="true" data-label={t(locale, 'readingProgress')}>
+  <div class="bar"></div>
+</div>
+
+<style>
+  .progress {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: 3;
+    block-size: var(--progress-height);
+    background: var(--progress-track);
+    /* Nothing to show before the script runs, and nothing at all without it. */
+    display: none;
+  }
+
+  .progress.ready {
+    display: block;
+  }
+
+  .bar {
+    block-size: 100%;
+    inline-size: 100%;
+    background: repeating-linear-gradient(
+      to right,
+      var(--progress-fill) 0 var(--progress-block),
+      transparent var(--progress-block) calc(var(--progress-block) + var(--progress-block-gap))
+    );
+    /* The mask is what advances: the blocks are always drawn across the full
+       width, and only as many as the reader has earned are revealed. Clipping in
+       whole blocks keeps the last visible block solid instead of half-painted. */
+    mask: linear-gradient(to right, black var(--progress), transparent 0);
+  }
+</style>
+
+<script>
+  // Scroll position as a fraction of the scrollable height, written to a custom
+  // property. rAF-throttled: a scroll listener that writes style on every event
+  // is the classic way to make a long post feel heavy.
+  const progress = document.querySelector<HTMLElement>('.progress')
+  const bar = progress?.querySelector<HTMLElement>('.bar')
+
+  if (progress !== null && bar != null) {
+    progress.classList.add('ready')
+
+    let queued = false
+
+    const update = (): void => {
+      queued = false
+      const max = document.documentElement.scrollHeight - innerHeight
+      // A post shorter than the window has nothing to scroll, so it is either
+      // entirely read or the question is meaningless. Either way: full.
+      const ratio = max <= 0 ? 1 : Math.min(Math.max(scrollY / max, 0), 1)
+      bar.style.setProperty('--progress', `${(ratio * 100).toFixed(1)}%`)
+    }
+
+    const schedule = (): void => {
+      if (queued) return
+      queued = true
+      requestAnimationFrame(update)
+    }
+
+    addEventListener('scroll', schedule, { passive: true })
+    addEventListener('resize', schedule, { passive: true })
+    update()
+  }
+</script>

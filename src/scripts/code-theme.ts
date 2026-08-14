@@ -14,22 +14,58 @@ export {}
 const STORAGE_KEY = 'code-theme'
 const ATTR = 'data-code-theme'
 
-type ThemeName = 'github-light' | 'github-dark' | 'monokai' | 'solarized-dark'
+type ThemeName =
+  | 'github-light'
+  | 'github-dark'
+  | 'monokai'
+  | 'dracula'
+  | 'catppuccin-latte'
+  | 'catppuccin-frappe'
+  | 'catppuccin-macchiato'
+  | 'catppuccin-mocha'
+  | 'kanagawa-wave'
+  | 'kanagawa-dragon'
+  | 'kanagawa-lotus'
+  | 'ayu-light'
+  | 'ayu-dark'
+  | 'snazzy-light'
 
-const THEMES: ThemeName[] = ['github-light', 'github-dark', 'monokai', 'solarized-dark']
+const THEMES: ThemeName[] = [
+  'github-light',
+  'github-dark',
+  'monokai',
+  'dracula',
+  'catppuccin-latte',
+  'catppuccin-frappe',
+  'catppuccin-macchiato',
+  'catppuccin-mocha',
+  'kanagawa-wave',
+  'kanagawa-dragon',
+  'kanagawa-lotus',
+  'ayu-light',
+  'ayu-dark',
+  'snazzy-light',
+]
 
 function isThemeName(value: string): value is ThemeName {
   return (THEMES as string[]).includes(value)
 }
 
-function storedTheme(): ThemeName | null {
+// Raw localStorage read, unvalidated: used once at startup to tell "nothing
+// stored" apart from "something stored that is no longer a real theme" (e.g.
+// solarized-dark, dropped from the list below), so the latter can be cleaned
+// up instead of quietly lingering.
+function rawStored(): string | null {
   try {
-    const value = localStorage.getItem(STORAGE_KEY)
-    return value !== null && isThemeName(value) ? value : null
+    return localStorage.getItem(STORAGE_KEY)
   } catch {
-    // Private mode, storage disabled: fall through to the auto/system option.
     return null
   }
+}
+
+function storedTheme(): ThemeName | null {
+  const value = rawStored()
+  return value !== null && isThemeName(value) ? value : null
 }
 
 function applyTheme(theme: ThemeName | null): void {
@@ -53,15 +89,45 @@ function init(): void {
     'github-light': strings.githubLight,
     'github-dark': strings.githubDark,
     monokai: strings.monokai,
-    'solarized-dark': strings.solarizedDark,
+    dracula: strings.dracula,
+    'catppuccin-latte': strings.catppuccinLatte,
+    'catppuccin-frappe': strings.catppuccinFrappe,
+    'catppuccin-macchiato': strings.catppuccinMacchiato,
+    'catppuccin-mocha': strings.catppuccinMocha,
+    'kanagawa-wave': strings.kanagawaWave,
+    'kanagawa-dragon': strings.kanagawaDragon,
+    'kanagawa-lotus': strings.kanagawaLotus,
+    'ayu-light': strings.ayuLight,
+    'ayu-dark': strings.ayuDark,
+    'snazzy-light': strings.snazzyLight,
   }
   for (const option of select.options) {
     option.textContent = captions[option.value] ?? option.value
   }
 
+  // A value stored before a theme was dropped from the list (solarized-dark,
+  // formerly) is neither "auto" nor a theme any CSS selector still matches.
+  // The blocking script in BaseLayout's <head> cannot tell the difference and
+  // may already have set that stale name as the attribute; since no
+  // `[data-code-theme='...']` rule matches it, the page silently falls back
+  // to the prefers-color-scheme default, but the stale name lingers in
+  // storage and would keep doing this on every visit. Once this module is
+  // able to validate it, it clears it and resets the attribute right below,
+  // exactly as if the reader had picked "auto".
+  const raw = rawStored()
+  const valid = storedTheme()
+  if (raw !== null && valid === null) {
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Nothing to clean up if storage was never available.
+    }
+  }
+  applyTheme(valid)
+
   // No stored choice selects "auto": the media query in astro.config.mjs
   // still decides, exactly like a first-time visitor with JavaScript off.
-  select.value = storedTheme() ?? 'auto'
+  select.value = valid ?? 'auto'
 
   select.addEventListener('change', () => {
     if (select.value === 'auto') {

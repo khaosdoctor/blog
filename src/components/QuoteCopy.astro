@@ -1,0 +1,105 @@
+---
+/**
+ * <QuoteCopy /> — appends a copy-as-citation button to every rendered quote
+ * card (src/styles/variants/quotes.css owns the look and the guarantee that
+ * this control never overlaps the quote text) and wires its click.
+ *
+ * Same shape as src/components/FootnoteSidenotes.astro's own copy control,
+ * `.note-copy-link`: a real `<button>`, an inline SVG mask icon so it takes
+ * currentColor, hidden until the card is hovered or the button itself is
+ * focused, and it reuses the site's one `.toast` confirmation with the same
+ * 2-second removal, rather than growing a second copy-confirmation pattern.
+ *
+ * Neither markup shape a quote can take (the callout, or the plain
+ * blockquote, see quotes.css's header comment for both) ever contains a copy
+ * button on its own, so this appends one at runtime instead of requiring an
+ * author to write it. One pass over every quote on the page, guarded against
+ * appending twice for the same reason every other script in this file is
+ * written defensively even though nothing today runs it more than once.
+ *
+ * The clipboard payload is built at click time from whatever text is on the
+ * page right then: `"body text" » Author` when the card has an author (the
+ * callout shape), or just `"body text"` when it does not (the plain
+ * blockquote). The » is the same ANSI-prompt glyph the author line already
+ * displays instead of an em dash (see quotes.css), not a new mark, chosen so
+ * a pasted citation matches the house style the rest of the site already
+ * committed to. Multiple paragraphs join with a single space, and all
+ * whitespace collapses, so a two-paragraph quote copies as one sentence-like
+ * unit rather than carrying its own line breaks. The author line's leading
+ * » is a CSS `content` value, never part of its text, and the watermark is
+ * the same, so neither actually needs stripping to keep them out, only
+ * defended against in case that ever changes.
+ */
+import { localeFromPath, t, type Locale } from '../i18n/ui'
+
+const locale = localeFromPath(Astro.url.pathname)
+
+// `copyQuote` is not a key in src/i18n/ui.ts yet: this component does not
+// touch that file (see the task that created it), so this is the fallback
+// until the main session adds the key there (pt "copiar esta citação", en
+// "copy this quote"). Swap for `t(locale, 'copyQuote')` once it exists.
+const copyLabel: Record<Locale, string> = {
+  en: 'copy this quote',
+  pt: 'copiar esta citação',
+}
+---
+
+<script is:inline define:vars={{ copyLabel: copyLabel[locale] }}>
+  ;(function () {
+    var SELECTOR = '.prose .callout[data-callout="quote"], .prose blockquote:not(.callout):not(.twitter-tweet)'
+    document.querySelectorAll(SELECTOR).forEach(function (card) {
+      if (card.querySelector(':scope > .qc-copy')) return
+      var button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'qc-copy'
+      button.setAttribute('aria-label', copyLabel)
+      card.append(button)
+    })
+  })()
+</script>
+
+<script is:inline define:vars={{ copiedLabel: t(locale, 'linkCopied') }}>
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.qc-copy')
+    if (button === null) return
+
+    const card = button.closest('.callout[data-callout="quote"], blockquote:not(.callout):not(.twitter-tweet)')
+    if (!card) return
+
+    // A container's own text, from its direct <p> children when it has any
+    // (both markup shapes normally do), falling back to the container's
+    // whole text otherwise, so a quote with no paragraph wrapper still
+    // copies something rather than an empty string.
+    function textOf(container) {
+      const paragraphs = container.querySelectorAll(':scope > p')
+      const nodes = paragraphs.length ? paragraphs : [container]
+      return Array.from(nodes)
+        .map((node) => node.textContent)
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+    }
+
+    const authorEl = card.querySelector(':scope > .callout-title .callout-title-text')
+    const bodyContainer = authorEl ? card.querySelector(':scope > .callout-content') : card
+    const body = bodyContainer ? textOf(bodyContainer) : ''
+    const author = authorEl ? authorEl.textContent.replace(/^\s*»\s*/, '').trim() : ''
+    const citation = author ? `"${body}" » ${author}` : `"${body}"`
+
+    try {
+      await navigator.clipboard.writeText(citation)
+    } catch {
+      // No clipboard permission, or an insecure origin. Silent, same as
+      // every other copy control on this site.
+      return
+    }
+
+    document.querySelector('.toast')?.remove()
+    const toast = document.createElement('div')
+    toast.className = 'toast'
+    toast.setAttribute('role', 'status')
+    toast.textContent = copiedLabel
+    document.body.append(toast)
+    setTimeout(() => toast.remove(), 2000)
+  })
+</script>
