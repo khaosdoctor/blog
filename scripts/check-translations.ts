@@ -22,8 +22,22 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { annotate, bold, count, dim, fail, heading, ok } from './lib/cli.ts'
+import { MDX_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
 
 const DIR = 'content/blog'
+
+/**
+ * Anything that is neither an injected component nor an ordinary HTML tag a post
+ * may legitimately write. The component half comes from
+ * src/lib/mdx-component-names.ts, so adding a component to the site does not
+ * silently make the guard reject every translation that uses it.
+ */
+const HTML_ELEMENTS =
+  'br|hr|figure|figcaption|em|strong|code|pre|kbd|sup|sub|abbr|del|ins|mark|span|a|img|p|ul|ol|li|blockquote|table|thead|tbody|tr|th|td|h[1-6]|details|summary|div'
+
+const UNKNOWN_ELEMENT = new RegExp(
+  `<(?!/)(?!${MDX_COMPONENT_PATTERN}|${HTML_ELEMENTS})[A-Za-z][A-Za-z0-9]*\\b`,
+)
 
 const BANNED: [RegExp, string][] = [
   [/<script\b/i, '<script> element'],
@@ -45,7 +59,7 @@ const BANNED: [RegExp, string][] = [
   [/srcdoc\s*=/i, 'srcdoc attribute'],
   // Component tags are injected by the page, and only a known set exists. A new
   // one means the model invented markup.
-  [/<(?!\/)(?!Figure|Video|Vimeo|YouTube|Bookmark|Tweet|Sidenote|MarginNote|Epigraph|RawEmbed|MissingImage|br|hr|figure|figcaption|em|strong|code|pre|kbd|sup|sub|abbr|del|ins|mark|span|a|img|p|ul|ol|li|blockquote|table|thead|tbody|tr|th|td|h[1-6]|details|summary|div)[A-Za-z][A-Za-z0-9]*\b/, 'unknown element or component'],
+  [UNKNOWN_ELEMENT, 'unknown element or component'],
 ]
 
 /** Every non-index .md/.mdx file one level under content/blog is a translation. */

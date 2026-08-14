@@ -30,21 +30,12 @@
  * the same, so neither actually needs stripping to keep them out, only
  * defended against in case that ever changes.
  */
-import { localeFromPath, t, type Locale } from '../i18n/ui'
+import { localeFromPath, t } from '../i18n/ui'
 
 const locale = localeFromPath(Astro.url.pathname)
-
-// `copyQuote` is not a key in src/i18n/ui.ts yet: this component does not
-// touch that file (see the task that created it), so this is the fallback
-// until the main session adds the key there (pt "copiar esta citação", en
-// "copy this quote"). Swap for `t(locale, 'copyQuote')` once it exists.
-const copyLabel: Record<Locale, string> = {
-  en: 'copy this quote',
-  pt: 'copiar esta citação',
-}
 ---
 
-<script is:inline define:vars={{ copyLabel: copyLabel[locale] }}>
+<script is:inline define:vars={{ copyLabel: t(locale, 'copyQuote') }}>
   ;(function () {
     var SELECTOR = '.prose .callout[data-callout="quote"], .prose blockquote:not(.callout):not(.twitter-tweet)'
     document.querySelectorAll(SELECTOR).forEach(function (card) {

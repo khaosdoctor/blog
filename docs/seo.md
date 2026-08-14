@@ -12,6 +12,7 @@ turn an automatic artifact into a manual one.
 | Canonical | Yes | `src/layouts/BaseLayout.astro` builds it from `Astro.url.pathname` + `Astro.site`; three Medium-first posts deliberately get none, see the comment in `src/components/SEO.astro` |
 | Hreflang alternates | Yes | `src/pages/[...slug].astro` groups every file in a post's folder by `lang`, so a translation gets picked up with no field to keep in sync |
 | Robots meta (`noindex`) | Yes, for posts | `noindex: true` in frontmatter flows through `BaseLayout` to `SEO.astro`'s `<meta name="robots">`; **not** wired for `/search/` and `/en/search/`, see below |
+| Section page description | Yes | `content/categories.json` via `categoryDescription()` in `src/lib/categories.ts`, per language, on both `/<category>/` and `/en/<category>/`. A section with no entry gets a generated line |
 | OpenGraph | Yes | `src/components/SEO.astro`; falls back to a per-section card (`sectionOgImage` in `src/lib/seo.ts`) when a post has no hero image |
 | Twitter card | Yes | Same component, `summary_large_image` always |
 | JSON-LD (Article/WebSite) | Yes | `buildPrimaryJsonLd` in `src/lib/seo.ts`, driven entirely by the props already passed to `SEO.astro` |

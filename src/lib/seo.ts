@@ -2,6 +2,8 @@
 // functions returning plain objects so they're easy to unit-test later and so
 // SEO.astro can just JSON.stringify() the result.
 
+import { parseAuthors } from './authors'
+
 export const SITE_NAME = 'lsantos.dev'
 export const AUTHOR_NAME = 'Lucas Santos'
 export const AUTHOR_GITHUB = 'https://github.com/khaosdoctor'
@@ -90,10 +92,13 @@ export interface JsonLdInput {
   updatedAt?: Date
   tags?: string[]
   series?: string
+  /** Raw `authors` frontmatter, git format. Absent means the site's owner. */
+  authors?: string[]
 }
 
 export function buildArticleJsonLd(input: JsonLdInput): Record<string, unknown> {
-  const { title, description, canonical, lang, image, publishedAt, updatedAt, tags, series } = input
+  const { title, description, canonical, lang, image, publishedAt, updatedAt, tags, series, authors } =
+    input
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -109,7 +114,15 @@ export function buildArticleJsonLd(input: JsonLdInput): Record<string, unknown> 
     // Series only gets a name here, no @id, this component has no
     // series URL to point at. Wire a real series page in when one exists.
     ...(series ? { isPartOf: { '@type': 'CreativeWorkSeries', name: series } } : {}),
-    author: { '@type': 'Person', name: AUTHOR_NAME, url: AUTHOR_GITHUB },
+    // Who actually wrote it, not who owns the site. A guest post carried the
+    // right visible byline and the wrong schema.org author, and the schema is
+    // the half machines read. `publisher` stays the owner either way: the byline
+    // says who wrote it, the publisher says whose site it appeared on.
+    author: parseAuthors(authors).map((person) => ({
+      '@type': 'Person',
+      name: person.name,
+      ...(person.url === null ? {} : { url: person.url }),
+    })),
     publisher: { '@type': 'Person', name: AUTHOR_NAME, url: AUTHOR_GITHUB },
   }
 }

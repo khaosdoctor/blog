@@ -4,11 +4,83 @@ pubDate: 2026-08-14
 lang: "pt"
 category: "meta"
 tags: ["meta", "design"]
-description: "Uma bancada de candidatos interativos para o redesenho: animação em textmode, tipografia pixel, cor em registro de terminal e as peças de interface. Nada aqui está aplicado ao site."
+description: "Uma bancada de candidatos interativos para o redesenho: a animação em textmode, tipografia pixel testada em texto corrido, a paleta da marca em registro de terminal e as peças de interface. Nada aqui está aplicado ao site."
 draft: false
 noindex: true
 ---
 
-Bancada em construção.
+Esta página é um cardápio, não uma proposta. Nada aqui está aplicado ao site: cada bloco é um candidato vivo, com os botões e sliders do lado, para você mexer e escolher. Onde um valor é questão de gosto, ele virou slider. Onde ele é questão de leitura, o número do contraste está impresso embaixo.
+
+Três coisas que valem saber antes de descer:
+
+O raciocínio inteiro, com o que foi tentado e descartado, está em `docs/theming.md`. Esta página mostra; aquele arquivo explica.
+
+A biblioteca de animação é a [textmode.js](https://code.textmode.art), instalada como dependência e empacotada junto com o site. Ela não pode vir de CDN: a política de segurança do site só aceita script da própria origem, e uma tag apontando para o jsDelivr seria bloqueada em silêncio, com a demonstração ficando preta sem dizer por quê. Todas as fontes seguem a mesma regra e moram em `public/fonts/`.
+
+Nada que se mexe começa se mexendo para quem pediu `prefers-reduced-motion: reduce`, e tudo que se mexe tem um interruptor para parar.
+
+## Seção 00 / A animação
+
+O primeiro candidato é o que você viu na captura: um título sobre um campo de caracteres animado. O texto continua sendo HTML de verdade por cima do canvas, então ele é selecionável, entra no leitor de tela e sobrevive se o WebGL não subir. O canvas só faz o fundo.
+
+Os quatro movimentos são bem diferentes entre si: a onda concêntrica é a do exemplo oficial da biblioteca, a chuva de coluna é a herança óbvia do Matrix, o ruído perlin é uma névoa que não repete, e a grade cruzada é a mais próxima de uma tela de BBS. A densidade em 0% apaga o campo inteiro, o que também é uma resposta válida.
 
 <LabDemo src="./components/TmHeading.vue" client:visible />
+
+Segundo candidato, mesma biblioteca, uso completamente diferente: a capa gerada. Aqui o textmode.js pinta o fundo de cada célula, que é como o ANSI fazia gradiente, e desenha uma moldura de caixa em volta. Uma capa é um PNG parado, então esta começa congelada e a animação existe só para você escolher o quadro. O seletor de comprimento do título responde à pergunta que está aberta em `docs/design.md`: um título de noventa caracteres continua cabendo.
+
+<LabDemo src="./components/TmCover.vue" client:visible />
+
+Terceiro, o mais distante dos dois: um sólido girando, resolvido em caracteres pelo pipeline 3D da biblioteca. Serve para o 404, para a página "sobre", ou como o único ornamento de um rodapé. É também o mais caro dos três, porque é um loop de WebGL2 que nunca para sozinho.
+
+<LabDemo src="./components/TmSolid.vue" client:visible />
+
+E o quarto candidato é o contraponto honesto: exatamente o mesmo efeito da captura, sem WebGL nenhum, só DOM e CSS. Custa zero de biblioteca, ligar e desligar o movimento é uma linha, e ele funciona em qualquer aparelho. Compare com o primeiro e decida se os cento e noventa quilobytes de biblioteca estão comprando alguma coisa.
+
+<LabDemo src="./components/CssHeading.vue" client:visible />
+
+## Seção 01 / Tipografia
+
+Esta é a decisão mais cara do redesenho, e é por isso que o espécime abaixo não mostra uma linha bonita: ele mostra quatro parágrafos de português de verdade, com toda a acentuação da língua, no tamanho e na medida em que o post vive. Se o terceiro parágrafo cansa, a fonte respondeu.
+
+São doze tipos, todos livres e hospedados aqui. O seletor de baixo troca a fonte do título independente da fonte do corpo, então dá para testar pares. Os sliders de espaçamento existem por causa da regra 1.4.12 do WCAG: o texto precisa aguentar entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em sem quebrar. Suba os três até lá e veja o que acontece.
+
+<LabDemo src="./components/TypeSpecimen.vue" client:visible />
+
+Uma fonte de bitmap só fica nítida em múltiplo inteiro do tamanho em que foi desenhada. Falar isso não convence ninguém, então aqui está a escada: a mesma palavra de 8 a 32px, com os tamanhos que fecham no grid marcados e os outros mostrando o borrão.
+
+<LabDemo src="./components/WholePixel.vue" client:visible />
+
+## Seção 02 / Cor
+
+A paleta da marca em registro de terminal, com o contraste calculado ao vivo embaixo de cada amostra. O ponto não é escolher cores bonitas: é ver quais delas sobrevivem como texto. Troque o registro para a CGA canônica e repare quantas reprovam.
+
+<LabDemo src="./components/PaletteLab.vue" client:visible />
+
+E os efeitos de tubo, cada um com a conta do que custa. Tudo começa em zero de propósito, porque a pergunta não é quanto de scanline: é se scanline serve para alguma coisa. Suba o slider e olhe o número ao lado dele cair.
+
+Não existe curvatura de tela aqui, e não vai existir.
+
+<LabDemo src="./components/CrtEffects.vue" client:visible />
+
+## Seção 03 / Interface
+
+O cabeçalho, em cinco leituras da mesma direção. Nenhuma usa imagem ou ícone: é tudo caractere, o que significa que nada disso custa uma requisição.
+
+<LabDemo src="./components/ChromeHeader.vue" client:visible />
+
+A lista de posts, que é a página mais visitada do site depois dos posts. Quatro leituras, da mais densa à mais decorada.
+
+<LabDemo src="./components/ChromeList.vue" client:visible />
+
+E os botões, os cinco lado a lado para escolher olhando.
+
+<LabDemo src="./components/ChromeButton.vue" client:visible />
+
+## O que ainda não está aqui
+
+O ícone, porque a lista curta em `docs/design.md` já resolve e nenhuma opção dali precisa ser vista mexendo para ser escolhida.
+
+O rodapé e o lugar das preferências do leitor, porque essa decisão depende de qual cabeçalho ganhar.
+
+Quatro tipos que a pesquisa encontrou e que valeria testar: Geist Pixel (Vercel, 2026, com eixo variável de forma do elemento), Bitcount (cinco eixos, incluindo cursivo), Doto e Workbench (que tem um eixo `SCAN` de scanline embutido na própria fonte, o que resolveria o problema de contraste da seção 02 de um jeito que nenhum overlay resolve). Todos são OFL e todos estão no Google Fonts. Eles não estão nesta página porque a rede da máquina onde ela foi montada parou de responder no meio do download, e não porque foram descartados.

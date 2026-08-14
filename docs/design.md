@@ -50,24 +50,26 @@ brackets without any icon at all.
 
 Keep whatever we adopt in `src/components/icons/` as one small `.astro` per icon, and only the ones actually used.
 
-Link icons (external-host vs. stays-on-the-blog) are inlined as data-URI SVG masks, not fetched — same shortlist
-as above, see [Link icons](#7-link-icons) below.
+Link icons (external-host vs. stays-on-the-blog) are already done this way: two data-URI SVG masks in
+`src/styles/prose/links.css`, taking `currentColor`, costing no request.
 
 ## Settled
 
 Decided and implemented. Kept short on purpose; the code is the detail.
 
 - **Quotes.** One look, no variants. No background fill. Body always italic. Author bold and underlined, with a `»`
-  prefix, on a dashed rule that starts halfway across the card and fades out to the right (`--qc-rule-start` is the one
-  value that changes its length). A `"` watermark at 160px, white 10% on dark and black 5% on light, behind the text and
-  clipped by the card on short quotes. Double frame, thick solid left edge.
+  prefix, under a dashed rule that runs from the left edge to halfway across the card and fades over its last third
+  (`--qc-rule-extent` is the one value that changes its length). A `"` watermark at 240px, white 6% on dark and black
+  3% on light, behind the text and clipped by the card on short quotes. Double frame, thick solid left edge.
 - **Rule.** 150px, 1px, dotted at 2px on / 8px off, foreground at full strength, no glow. The colour options stay on the
   lab page until one is picked; `--rule-core` is the single value.
 - **Headings.** `#` in the left margin on hover, no background tint. Glow on `h1` only.
 - **Emphasis.** Bold is a solid brand-yellow chip with dark text in both themes. Italic is yellow text, dropping to
   `#8a6400` in light where the brand yellow cannot be read.
-- **Footnotes.** No section at the foot of the post. The note is read in the margin, italic, muted, left edge only, with
-  its `[1]` repeated at the start. Hovering a reference raises the same card a link does.
+- **Footnotes.** Above 70rem the note is read in the margin, italic, muted, left edge only, with its `[1]` repeated at
+  the start, and the section at the foot of the post is hidden. Below that width, and in print, the section is the
+  reader's copy instead. Hidden, never removed, so the reference always has somewhere to resolve to. Hovering a
+  reference raises the same card a link does, above the breakpoint only.
 - **Captions.** From the markdown title only. Alt text is alt text and never becomes a caption.
 - **Unwritten links.** Red, no marker text. The words live in a `title` attribute for anyone who cannot see the colour.
   Two code paths carried this: the wikilink plugin and `SeriesToc.astro`.

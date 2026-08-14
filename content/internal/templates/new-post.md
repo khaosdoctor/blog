@@ -5,11 +5,15 @@
 // Images: paste a screenshot and it lands next to the post as ./image.png,
 // because attachmentFolderPath is "./".
 //
-// Categories: typescript, javascript, infra, security, career, newsletter,
-// meta. A new value creates a new section page.
+// Categories: javascript, typescript, infra, security, career, opinion, meta.
+// A new value creates a new section page, and content/categories.json is where
+// a section gets its description.
 //
-// Optional frontmatter: updatedDate, heroImage, epigraph, epigraphCite,
-// seoTitle, seoDescription, noindex, canonicalUrl.
+// Optional frontmatter: updatedDate, heroImage, heroImageAlt, seoTitle,
+// seoDescription, noindex, slug, authors.
+//
+// authors is a list in git's format, ["Name <https://site>"]. Leave it out and
+// the post is yours.
 //
 // Series: `series` is a short slug (grpc) and becomes the URL, `seriesOrder` is
 // the position, and `seriesName` goes on the first part only. The table of

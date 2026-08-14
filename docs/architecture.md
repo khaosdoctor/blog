@@ -25,9 +25,11 @@ content/blog/error-cause/
   migration kept flat URLs.
 - Images are `./image.png` from either file, because they are in the same folder.
 
-Posts are `.mdx` files whose content is **plain markdown**. No imports, no component tags. Obsidian cannot open `.mdx`
-and cannot render component tags, and Obsidian is the point of the rebuild, so two remark plugins turn markdown into
-components at build time instead. Do not "clean this up" by writing components in content.
+Posts are `.mdx` files whose content is **plain markdown**. Never an import, and a component tag only where markdown
+has no syntax at all (`<Video>`, `<Sidenote>`, `<MarginNote>`, `<LabDemo>`, `<HtmlLab>`; the whole set is injected
+into every post, which is why none of them is imported). Obsidian cannot open `.mdx` and cannot render component tags,
+and Obsidian is the point of the rebuild, so the remark chain turns markdown into components at build time instead.
+Do not "clean this up" by writing components in content.
 
 ```mermaid
 flowchart TD
@@ -40,7 +42,8 @@ flowchart TD
   E2 --> E3["embeds: bare URL or image syntax becomes a player"]
   E3 --> E4["figures: a lone image becomes a figure, title becomes caption"]
   E4 --> E5["wikilinks: [[folder]] resolves per locale"]
-  E5 --> F["rehype: callouts, KaTeX"]
+  E5 --> E6["lab demos: &lt;LabDemo&gt;/&lt;HtmlLab&gt; read the file beside the post"]
+  E6 --> F["rehype: callouts, KaTeX, maths copy,<br/>heading anchors, footnote sidenotes"]
   F --> G["page HTML"]
   D --> H["drafts and future pubDate held back"]
   H --> I["scheduled.json"]
@@ -55,10 +58,19 @@ Why each plugin exists, in the order they run:
 | `remark-embeds` | a bare URL or `![](url)` alone in a paragraph | `<YouTube>`, `<Vimeo>`, `<Tweet>`, `<SpeakerDeck>`, `<Spotify>`, `<Bookmark>` |
 | `remark-figures` | a lone image whose title is set | `<figure>` plus `<figcaption>` |
 | `remark-wikilinks` | `[[folder]]` | a link to that article in the reader's language |
-| `rehype-callouts` | `> [!note]` | a callout box |
+| `remark-lab-demos` | `<LabDemo src="./components/X.vue" />` | the island, its import, and its source as a highlighted block |
+| `rehype-callouts` | `> [!note]`, `> [!quote] Author` | a callout box, in Obsidian's own vocabulary |
+| `rehype-math-copy` | a rendered formula | the same formula, copyable as LaTeX |
+| `rehype-heading-anchors` | a heading | a `#` link to itself |
+| `rehype-footnote-sidenotes` | a GFM footnote | the same note repeated in the margin |
 
 `remark-embeds` runs before `remark-figures` because an image and a bare link are both "the only thing in a
 paragraph", and once a figure is wrapped the link check would have to look one level deeper for nothing.
+`remark-lab-demos` runs last because it is the only one that reads a file off disk and injects synthesized content.
+
+Code blocks go through expressive-code, which replaces Astro's default Shiki setup and so has to be listed before
+`mdx()` in `astro.config.mjs`. It carries the line numbers, the filename tab read from a first-line comment, and the
+fourteen themes the reader picks between.
 
 Both accept `![](url)` on purpose: Obsidian renders image syntax for YouTube and tweets as a live embed while you
 write, so a post previews correctly in the editor.
@@ -71,7 +83,7 @@ flowchart LR
   B --> C["astro build"]
   C --> D["astro:config:done<br/>integrations capture the site URL"]
   D --> E["render every route"]
-  E --> F["astro:build:done<br/>redirect-stubs.mjs writes 139 stubs"]
+  E --> F["astro:build:done<br/>redirect-stubs.mjs writes a stub per moved URL"]
   F --> G["postbuild<br/>pagefind indexes dist"]
   G --> H["check-output.ts<br/>guards the artefact"]
   H -->|clean| I["dist/ ready"]
@@ -88,6 +100,14 @@ What each step can fail on:
 - **`redirect-stubs.mjs`** fails if a redirect target is not in the output, so a stub can never point at a 404.
 - **`check-output.ts`** is the post-build guard, and it exists because the previous Ghost site served an injected
   script for a month with nobody noticing. See Checks below.
+
+The version in the footer is built during that render, by `src/lib/version.ts`: the semver from `package.json` plus
+the number of commits since the tag of that version, as semver build metadata (`0.0.1+42`). A plus rather than a
+dash, since in semver a dash would claim the release is a prerelease of the tag. It reads git, so CI checks out with
+`fetch-depth: 0`: a shallow clone cannot see the tag or the history behind it, and the number would quietly be wrong
+rather than failing anything. Outside a checkout entirely it renders the bare semver. With no tag cut yet, which is
+where the repo is today, it counts from the root commit and starts counting from the tag on its own the moment one
+exists.
 
 ## Publishing and scheduling
 
@@ -173,15 +193,18 @@ the build.
 4. A script, iframe, or URL inside an inline script pointing at a host that is not in the registry.
 5. A missing feed, sitemap, manifest, 404 or robots file.
 6. A manifest icon that does not exist in the output.
+7. An image a page references that never reached the output.
+8. A remote-script loader pattern: `new Function(`, `eval(await`, a raw gist URL.
 
 ## Layout
 
 ```
 content/blog/<folder>/       posts, translations and their images
+content/categories.json      what each section is about, per language. Read at build time
 content/internal/            Obsidian templates and snippets, ignored by the build
 src/pages/                   routes. [...slug] is Portuguese, en/[...slug] is English
 src/components/              rendering. Injected into MDX, so content needs no imports
-src/plugins/                 the remark chain
+src/plugins/                 the remark chain, and the rehype plugins after it
 src/integrations/            build hooks: redirect stubs
 src/lib/                     posts, taxonomy, seo, embed-hosts, version
 src/i18n/ui.ts               every string the chrome shows, both languages

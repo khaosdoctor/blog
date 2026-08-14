@@ -21,15 +21,20 @@ draft: true                 # defaults to true, so you cannot publish by acciden
 
 Sections in use: `javascript`, `infra`, `typescript`, `career`, `opinion`, `meta`, `security`. A new value creates a new section page.
 
-A section can describe itself. `content/categories.json` is a flat map of category to one or two sentences, which show
-on the section page and become its meta description:
+A section can describe itself. `content/categories.json` maps a category to one or two sentences per language, which
+show on the section page and become its meta description:
 
 ```json
-{ "javascript": "The language I write most, and the one that still surprises me." }
+{
+  "javascript": {
+    "pt": "A linguagem que eu mais escrevo, e a que mais me surpreende.",
+    "en": "The language I write most, and the one that still surprises me."
+  }
+}
 ```
 
-A category with no entry falls back to a generated line, so adding a section still needs nothing but a post.
-**The descriptions in there now are placeholders in your voice — rewrite them.**
+A bare string instead of the object is Portuguese, and English falls back to it. A category with no entry at all falls
+back to a generated line, so adding a section still needs nothing but a post.
 
 Optional: `updatedDate`, `heroImage`, `heroImageAlt`, `seoTitle`, `seoDescription`, `noindex`, `lang`, `slug`, `authors`.
 
@@ -126,7 +131,9 @@ Obsidian's own syntax:
 > Something that will bite you.
 ```
 
-`NOTE`, `TIP`, `WARNING`, `CAUTION`, `IMPORTANT`.
+Obsidian's whole vocabulary works, all twenty-odd types, `quote` included (see below). Each one keeps Obsidian's own
+colour, except `TIP`/`HINT`, which go brand green, and `CAUTION`/`IMPORTANT`, brand red: Obsidian paints those the
+same as `WARNING`, so four callouts read as two.
 
 ## Code
 
@@ -261,6 +268,10 @@ A claim that needs a source.[^1]
 
 [^1]: The source.
 ```
+
+On a wide screen the note is read in the margin, beside the paragraph that cites it, and the usual list at the foot of
+the post is hidden. On a narrow screen, and on paper, that list is what the reader gets instead. Nothing to write
+either way.
 
 ## Things to know
 

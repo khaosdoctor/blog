@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content'
+import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from './mdx-component-names'
 import { urlOf } from './posts'
 
 type Post = CollectionEntry<'blog'>
@@ -7,11 +8,15 @@ type Post = CollectionEntry<'blog'>
  * By name, never by shape. A catch-all `<[A-Z]...>` also eats `Promise<T>`,
  * `<C-l>` and `<Home />` quoted in prose, and its `[^>]*` crosses newlines, so a
  * multi-line generic argument took the rest of the snippet with it.
- * Superset of LEAKED_TAG in scripts/check-output.ts, which watches for the same
- * tags reaching the HTML; a component added there belongs here too.
+ * The names come from src/lib/mdx-component-names.ts, shared with both guards,
+ * so the three lists cannot drift apart again. Retired components are included:
+ * one resurrected by a migration or a translation should be stripped here rather
+ * than printed as literal tag text into the markdown twin.
  */
-const COMPONENT =
-  /<\/?(?:Figure|Video|Vimeo|YouTube|Bookmark|CourseCTA|RawEmbed|Sidenote|MarginNote|Tweet|Epigraph|MissingImage|SpeakerDeck|Spotify)\b[^>]*>/g
+const COMPONENT = new RegExp(
+  `</?(?:${MDX_COMPONENT_PATTERN}|${RETIRED_COMPONENT_PATTERN})\\b[^>]*>`,
+  'g',
+)
 
 /** Fenced blocks and inline spans, as one capture so split() hands them back. */
 const CODE = /(^```[\s\S]*?^```[^\n]*|`[^`\n]+`)/gm

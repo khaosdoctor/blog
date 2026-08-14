@@ -162,7 +162,7 @@ export default defineConfig({
     // The migration colocates images next to posts; they are all local files.
     responsiveStyles: true,
     // Real srcset/sizes for every <Image>. `constrained` fits this site's one
-    // fixed reading column (Figure.astro clamps the request width to it).
+    // fixed reading column, which is what remark-figures wraps an image into.
     layout: 'constrained',
   },
 })

@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { formatDate } from '../../lib/posts'
+import { formatDate, urlOf } from '../../lib/posts'
 import { getSeries, seriesTitle } from '../../lib/taxonomy'
 import { t } from '../../i18n/ui'
 
@@ -22,7 +22,7 @@ const { name, posts } = Astro.props
     {
       posts.map((post) => (
         <li>
-          <a href={`/${post.id}/`}>{post.data.title}</a>
+          <a href={urlOf(post)}>{post.data.title}</a>
           <time datetime={post.data.pubDate.toISOString()}>
             {formatDate(post.data.pubDate, post.data.lang)}
           </time>

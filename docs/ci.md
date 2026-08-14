@@ -26,8 +26,8 @@ flowchart TD
   A --> S["job: seo-audit<br/>continue-on-error: true"]
 ```
 
-`fetch-depth: 0` is required: the footer version counts posts published since the last release tag, which a shallow
-clone cannot see.
+`fetch-depth: 0` is required: the footer version is the semver plus the number of commits since that version's tag
+(`0.0.1+42`), and a shallow clone can see neither the tag nor the history behind it. See `src/lib/version.ts`.
 
 **seo-audit** runs after `build`, against the artifact `build` already produced (extracted from `artifact.tar`, not
 rebuilt). It audits `dist/` with Lighthouse ([treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action),
@@ -114,7 +114,7 @@ Manual, from the Actions tab. release-please opens the PR, merging it cuts the t
 | Secret | Used by | Without it |
 |---|---|---|
 | `CLAUDE_CODE_OAUTH_TOKEN` | Translate | the job exits clean and nothing is translated |
-| `PUBLIC_CF_ANALYTICS_TOKEN` | Build | no analytics beacon is rendered |
+| `PUBLIC_CF_ANALYTICS_TOKEN` | `BaseLayout.astro`, read at build time | no analytics beacon is rendered. `build.yml` does not pass it into the build yet, so setting the secret alone changes nothing |
 | Cloudflare account + a GitHub PAT with `contents:write` | the Worker | scheduled posts appear on the next push instead of on time |
 | `REPLICATE_API_TOKEN` | `scripts/cover.ts`, run by hand | no generated covers |
 

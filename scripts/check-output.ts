@@ -10,6 +10,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
 import { annotate, bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
+import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
 
 const DIST = 'dist'
 const CONTENT = 'content/blog'
@@ -95,7 +96,7 @@ for (const slug of postFolders) {
 // 2. No Ghost markup survived the conversion.
 // 3. No component tag leaked as literal text (a rule that never matched).
 const GHOST_CLASS = /\bkg-[a-z-]+\b/
-const LEAKED_TAG = /&#60;(?:Figure|Video|Vimeo|YouTube|Bookmark|RawEmbed|Sidenote|MarginNote|Tweet|Epigraph|MissingImage|SpeakerDeck|Spotify)\b/
+const LEAKED_TAG = new RegExp(`&#60;(?:${MDX_COMPONENT_PATTERN}|${RETIRED_COMPONENT_PATTERN})\\b`)
 
 const REMOTE_LOADER = /new Function\s*\(|gist\.githubusercontent|eval\s*\(\s*await/
 

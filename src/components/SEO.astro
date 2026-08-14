@@ -35,6 +35,8 @@ interface Props {
   imageAlt?: string
   tags?: string[]
   series?: string
+  /** Raw `authors` frontmatter, so the schema names who actually wrote it. */
+  authors?: string[]
   noindex?: boolean
   alternates?: Alternate[]
   /** Markdown twin of this page, for readers that are not browsers. */
@@ -55,6 +57,7 @@ const {
   imageAlt,
   tags,
   series,
+  authors,
   noindex = false,
   alternates = [],
   section,
@@ -81,6 +84,7 @@ const jsonLd = buildPrimaryJsonLd(type, {
   updatedAt,
   tags,
   series,
+  authors,
 })
 
 // Derived from Astro.site (astro.config.mjs) instead of a duplicate constant,

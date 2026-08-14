@@ -18,6 +18,7 @@ import Spotify from '../../components/Spotify.astro'
 import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
 import { chipColor } from '../../lib/taxonomy'
+import { HREFLANG } from '../../i18n/ui'
 import {
   folderOf,
   formatDate,
@@ -61,8 +62,7 @@ export const getStaticPaths = (async () => {
         // draft has nowhere to point, so the banner has to cope with null.
         sourcePath: source === undefined ? null : urlOf(source),
         alternates: siblings.map((entry) => ({
-          // pt-BR, not pt: the region is what search engines match against.
-          lang: entry.data.lang === 'pt' ? 'pt-BR' : entry.data.lang,
+          lang: HREFLANG[entry.data.lang],
           path: urlOf(entry),
         })),
       },
@@ -87,8 +87,11 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   updatedAt={post.data.updatedDate}
   tags={post.data.tags}
   series={post.data.series}
+  authors={post.data.authors}
   section={{ name: post.data.category, url: `/en/${post.data.category}/` }}
   alternates={alternates}
+  markdown={new URL(`${Astro.url.pathname}index.md`, Astro.site).href}
+  noindex={post.data.noindex}
   progress
 >
   <article>

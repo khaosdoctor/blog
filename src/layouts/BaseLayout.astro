@@ -49,6 +49,8 @@ interface Props {
   image?: string
   tags?: string[]
   series?: string
+  /** Raw `authors` frontmatter, passed through to the article schema. */
+  authors?: string[]
   alternates?: { lang: string; href: string }[]
   markdown?: string
   noindex?: boolean
@@ -68,6 +70,7 @@ const {
   image,
   tags,
   series,
+  authors,
   alternates,
   section,
   markdown,
@@ -132,6 +135,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
       image={image}
       tags={tags}
       series={series}
+      authors={authors}
       alternates={alternates}
       section={section}
       markdown={markdown}
