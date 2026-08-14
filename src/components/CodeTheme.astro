@@ -5,6 +5,12 @@
 // Option labels travel through data attributes for the same reason: that script
 // has no access to t().
 //
+// This single element is now the shared popover behind every code block's own
+// opener button (see code-theme.ts): code-theme.ts repositions and reveals it
+// next to whichever button was clicked, instead of it sitting permanently at
+// the foot of the page. There is still exactly one of it per page, however
+// many code blocks that page has.
+//
 // This only renders the picker. Preventing a flash of the wrong theme needs the
 // blocking script in BaseLayout's <head>, which runs before any stylesheet.
 //
@@ -17,6 +23,12 @@ interface Props {
 }
 
 const { locale } = Astro.props
+
+// codeThemePick is not in src/i18n/ui.ts yet (see the report this shipped
+// with for the key + pt/en copy to add there); the two strings below are that
+// same copy, inlined here as a stopgap the way previewUnwritten's fallback
+// works in hover-previews.ts.
+const pickLabel = locale === 'en' ? 'change the code theme' : 'mudar o tema do código'
 ---
 
 <p
@@ -24,6 +36,7 @@ const { locale } = Astro.props
   hidden
   data-label={t(locale, 'codeTheme')}
   data-auto={t(locale, 'codeThemeAuto')}
+  data-pick={pickLabel}
   data-github-light="GitHub Light"
   data-github-dark="GitHub Dark"
   data-monokai="Monokai"

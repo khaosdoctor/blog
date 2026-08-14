@@ -201,7 +201,10 @@ a.link-unwritten {
    usual three fields stay in the DOM, hidden, so savePinned()/restorePinned()
    keep reading .hp-title's href unchanged. */
 .hp-card.hp-unwritten {
-  position: relative;
+  /* NOT `position: relative`. The base card is `position: fixed` and place()
+     writes top/left onto it, so relaxing it here dropped the card back into the
+     document flow and it never appeared where the link was. `fixed` is already
+     a containing block for the absolutely positioned watermark below. */
   isolation: isolate;
   display: grid;
   place-items: center;
