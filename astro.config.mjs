@@ -167,6 +167,22 @@ export default defineConfig({
     layout: 'constrained',
   },
   vite: {
+    build: {
+      /*
+       * Never inline a font, whatever its size. Vite inlines any asset under 4 KB
+       * as a `data:` URI, and `KaTeX_Size3-Regular.woff2` is 3624 bytes, so it
+       * was being embedded in the built CSS. The site's CSP is `font-src 'self'`,
+       * which does not cover `data:`, so the browser blocked exactly that one
+       * font and display maths fell back for its largest delimiters. Found by
+       * reading the console of a built page, because nothing fails: the CSS is
+       * valid and the glyphs are simply wrong.
+       *
+       * Fixing it here rather than by adding `data:` to `font-src` keeps the
+       * policy tight. Returning undefined for everything else leaves Vite's own
+       * threshold in charge of the assets where inlining is a real win.
+       */
+      assetsInlineLimit: (filePath) => (/\.(woff2?|ttf|otf|eot)$/i.test(filePath) ? false : undefined),
+    },
     css: {
       modules: {
         // A post component's <style module> classes get renamed to

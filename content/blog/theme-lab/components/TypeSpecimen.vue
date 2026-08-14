@@ -1,21 +1,21 @@
 <script setup lang="ts">
 /**
  * A pergunta aberta mais cara do redesenho: um tipo pixelado aguenta três mil
- * palavras?
+ * palavras? Este componente não tem amostra própria: ele é só os controles.
  *
- * Por isso este espécime não mostra uma linha bonita. Mostra quatro parágrafos
- * de português de verdade, com toda a acentuação da língua, no tamanho e na
- * medida em que o post vive. Se você não consegue ler o terceiro parágrafo sem
- * apertar os olhos, a fonte já respondeu.
+ * O que muda quando você mexe num knob é o post de verdade que fica logo
+ * abaixo desta bancada, `#lab-post`, o mesmo texto que passa pelo remark e
+ * pelo rehype de qualquer post do blog. Escolher fonte olhando quatro
+ * parágrafos limpos escondia citação, bloco de código, nota de rodapé: tudo
+ * que um post carrega e que decide se a fonte aguenta ou não.
  */
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
 import Toggle from './Toggle.vue'
-import { BODY_FACE_OPTIONS, SUBHEAD_FACE, TITLE_FACE, faceById } from './faces'
-import { CODE_SAMPLE, DECK, DIACRITICS, HEADING, PARAGRAPHS } from './copy'
+import { BODY_FACE_OPTIONS, faceById } from './faces'
 import { parseHex, ratio } from './contrast'
 import './fonts.css'
 
@@ -87,7 +87,8 @@ const decisionContext = computed(
     `Contraste ${contrast.value.toFixed(2)}:1 (secundário ${mutedContrast.value.toFixed(2)}:1) sobre ${colours.value.bg}. WCAG 1.4.12: ${spacingOk.value ? 'passa no espaçamento mínimo' : 'abaixo do mínimo de espaçamento'}.`,
 )
 
-const bodyStyle = computed(() => ({
+/** O que é aplicado no post de verdade, não numa amostra local. */
+const targetStyle = computed(() => ({
   fontFamily: chosen.value.stack,
   fontSize: `${size.value}px`,
   lineHeight: String(leading.value / 100),
@@ -95,44 +96,47 @@ const bodyStyle = computed(() => ({
   wordSpacing: `${words.value / 100}em`,
   maxInlineSize: `${measure.value}ch`,
   color: colours.value.fg,
+  background: colours.value.bg,
   ...(crisp.value
     ? { WebkitFontSmoothing: 'none', fontSmooth: 'never', filter: 'contrast(100.00001%)' }
     : {}),
 }))
 
-const titleStyle = computed(() => ({
-  fontFamily: TITLE_FACE.stack,
-  color: colours.value.fg,
-  fontSize: `${size.value * 2.1}px`,
-  lineHeight: 1.15,
-}))
+function toStyleText(style: Record<string, string>): string {
+  return Object.entries(style)
+    .map(([prop, value]) => `${prop.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}: ${value}`)
+    .join('; ')
+}
 
-const deckStyle = computed(() => ({
-  fontFamily: SUBHEAD_FACE.stack,
-  color: colours.value.muted,
-  fontSize: `${size.value * 1.15}px`,
-}))
+// Nada aqui toca o DOM antes de montar, e nada fica aplicado depois que este
+// componente sai da página: o estilo original do post é guardado e devolvido
+// no unmount. Sem o elemento (uma página que renderiza o espécime sozinho,
+// sem o post abaixo), o watchEffect nunca é criado e nada quebra.
+let target: HTMLElement | null = null
+let baseStyleText = ''
+let stopApplying: (() => void) | null = null
+
+onMounted(() => {
+  target = document.getElementById('lab-post')
+  if (!target) return
+  baseStyleText = target.getAttribute('style') ?? ''
+  stopApplying = watchEffect(() => {
+    if (!target) return
+    const extra = toStyleText(targetStyle.value)
+    target.setAttribute('style', baseStyleText ? `${baseStyleText}; ${extra}` : extra)
+  })
+})
+
+onUnmounted(() => {
+  stopApplying?.()
+  if (!target) return
+  if (baseStyleText) target.setAttribute('style', baseStyleText)
+  else target.removeAttribute('style')
+})
 </script>
 
 <template>
   <div :class="$style.demo">
-    <div :class="$style.stage" :style="{ background: colours.bg }">
-      <p :class="$style.kicker" :style="{ color: colours.muted, fontFamily: titleStyle.fontFamily }">
-        SEÇÃO 03 / CORPO EM TESTE: {{ chosen.name.toUpperCase() }}
-      </p>
-      <h3 :class="$style.title" :style="titleStyle">{{ HEADING }}</h3>
-      <p :class="$style.deck" :style="deckStyle">{{ DECK }}</p>
-      <p v-for="paragraph in PARAGRAPHS" :key="paragraph" :style="bodyStyle">{{ paragraph }}</p>
-      <p :class="$style.diacritics" :style="{ ...bodyStyle, fontSize: `${size * 1.4}px` }">{{ DIACRITICS }}</p>
-      <pre :class="$style.code" :style="{ ...bodyStyle, fontSize: `${size * 0.92}px` }">{{ CODE_SAMPLE }}</pre>
-    </div>
-
-    <p :class="$style.decided">
-      Título e subtítulo já foram decididos: <strong>{{ TITLE_FACE.name }}</strong> ({{ TITLE_FACE.licence }}) no
-      título, <strong>{{ SUBHEAD_FACE.name }}</strong> ({{ SUBHEAD_FACE.licence }}) no subtítulo. O corpo abaixo é a
-      única variável ainda em aberto.
-    </p>
-
     <Panel label="tipo">
       <Pick v-model="face" label="fonte do corpo" :options="BODY_FACE_OPTIONS" />
       <Pick v-model="theme" label="fundo" :options="THEME_OPTIONS" />
@@ -177,33 +181,17 @@ const deckStyle = computed(() => ({
   font-family: var(--font-mono);
 }
 
-.stage {
-  padding: clamp(1.2rem, 5%, 2.2rem);
+.readout {
+  margin: 0 0 0.9rem;
+  padding-inline-start: 0.6rem;
+  border-inline-start: 3px solid var(--accent);
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
 }
 
-.kicker {
-  margin: 0 0 0.8rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.22em;
-}
-
-.title {
-  margin: 0 0 1rem;
-  text-wrap: balance;
-}
-
-.stage p {
-  margin: 0 0 1em;
-}
-
-.diacritics {
-  margin-block-start: 1.6em;
-  opacity: 0.9;
-}
-
-.code {
-  margin: 0;
-  white-space: pre-wrap;
+.readout code {
+  color: var(--fg);
 }
 
 .facts {
@@ -239,19 +227,10 @@ const deckStyle = computed(() => ({
   line-height: 1.6;
 }
 
-.decided {
-  margin: 0.9rem 0 0;
-  padding-inline-start: 0.6rem;
-  border-inline-start: 3px solid var(--brand-green);
-  color: var(--muted);
-  font-size: 0.72rem;
-  line-height: 1.6;
-}
-
 /*
- * Deliberately no `color` on the strong here. A bold run inside a post is a
- * chip: yellow background, dark ink, both from theme.css. Setting the colour to
- * --fg kept the yellow and put the near-white page ink on top of it, which is
- * 1.37:1 and unreadable.
+ * Nada aqui pode tocar na cor de um `strong`. O negrito dentro de um post é um
+ * chip de fundo amarelo com tinta escura, os dois vindos do theme.css, e trocar
+ * a cor mantinha o amarelo e punha a tinta clara da página em cima, o que dava
+ * 1,37:1. Vale em dobro agora que o post de verdade renderiza dentro do painel.
  */
 </style>
