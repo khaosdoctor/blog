@@ -9,14 +9,14 @@ turn an automatic artifact into a manual one.
 | Artifact | Automatic? | Where |
 |---|---|---|
 | Title / description | Yes | `post.data.seoTitle`/`seoDescription`, falling back to `title`/`description`, passed to `BaseLayout` from `src/pages/[...slug].astro` |
-| Canonical | Yes | `src/layouts/BaseLayout.astro` builds it from `Astro.url.pathname` + `Astro.site`; three Medium-first posts deliberately get none, see the comment in `src/components/SEO.astro` |
+| Canonical | Yes | `src/layouts/BaseLayout.astro` builds it from `Astro.url.pathname` + `Astro.site`; every page, including three Medium-first posts, points at itself rather than at Medium, see the comment in `src/components/SEO.astro` |
 | Hreflang alternates | Yes | `src/pages/[...slug].astro` groups every file in a post's folder by `lang`, so a translation gets picked up with no field to keep in sync |
 | Robots meta (`noindex`) | Yes, for posts | `noindex: true` in frontmatter flows through `BaseLayout` to `SEO.astro`'s `<meta name="robots">`; **not** wired for `/search/` and `/en/search/`, see below |
 | Section page description | Yes | `content/categories.json` via `categoryDescription()` in `src/lib/categories.ts`, per language, on both `/<category>/` and `/en/<category>/`. A section with no entry gets a generated line |
 | OpenGraph | Yes | `src/components/SEO.astro`; falls back to a per-section card (`sectionOgImage` in `src/lib/seo.ts`) when a post has no hero image |
 | Twitter card | Yes | Same component, `summary_large_image` always |
 | JSON-LD (Article/WebSite) | Yes | `buildPrimaryJsonLd` in `src/lib/seo.ts`, driven entirely by the props already passed to `SEO.astro` |
-| JSON-LD BreadcrumbList | Yes | `buildBreadcrumbJsonLd` in `SEO.astro`, built from `section` prop + canonical |
+| JSON-LD BreadcrumbList | Yes | `buildBreadcrumbJsonLd` in `src/lib/seo.ts`, called from `SEO.astro`, built from `section` prop + canonical |
 | JSON-LD Person | Yes | `buildPersonJsonLd` in `src/lib/seo.ts`, static author profile, same on every page |
 | Sitemap | Yes | `astro.config.mjs` sitemap integration, filters out `/search/`, `/offline/`, and anything in `noindexPaths` |
 | Sitemap `lastmod` | Yes | `astro.config.mjs` `serialize`, reads `lastModified` from `src/lib/post-dates.mjs` (frontmatter `updatedDate` or `pubDate`) |

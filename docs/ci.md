@@ -18,7 +18,7 @@ flowchart TD
   C["checkout, fetch-depth 0"] --> N["setup-node 24, npm cache"]
   N --> K["restore the Astro image cache"]
   K --> I["npm ci"]
-  I --> CH["npm run check<br/>astro check + tsc -p worker"]
+  I --> CH["npm run check<br/>astro check + tsc -p worker + check-i18n + check-component-css"]
   CH --> B["npm run build<br/>prebuild vendors media, then astro, then pagefind"]
   B --> G["node scripts/check-output.ts"]
   G --> A["upload-pages-artifact"]
@@ -121,7 +121,7 @@ Manual, from the Actions tab. release-please opens the PR, merging it cuts the t
 ## Running the same checks locally
 
 ```
-npm run check                      # astro check + tsc -p worker
+npm run check                      # astro check + tsc -p worker + check-i18n.ts + check-component-css.ts
 npm run build                      # prebuild vendors media, astro, pagefind
 node scripts/check-output.ts       # the artefact guard CI runs
 node scripts/check-translations.ts # the translation guard CI runs

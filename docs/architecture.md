@@ -1,7 +1,8 @@
 # Architecture
 
 How the site is built and why. `content/WRITING.md` is the authoring reference, `docs/decisions.md` records what was
-decided, `docs/design.md` holds the visual direction. This file is the machinery.
+decided (in Portuguese, being the owner's own notes), `docs/design.md` holds the visual direction. This file is the
+machinery.
 
 Astro 7, static output, no server, no database. Deployed to GitHub Pages. One author, writing in Obsidian.
 
