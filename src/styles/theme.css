@@ -57,31 +57,53 @@
   --rule: light-dark(#ddd4bd, #2b1f42);
 
   /*
-   * Three stacks, deliberately. A pixel face is right for chrome, labels and
-   * headings and punishing for a 3000 word article, so body copy keeps a
-   * readable face.
+   * A pixel face is right for chrome, labels and headings and punishing for a
+   * 3000 word article, so body copy keeps a readable face. All four are decided
+   * now and self-hosted, see src/styles/fonts.css.
    *
-   * --font-display and --font-subtitle are decided and self-hosted, see
-   * src/styles/fonts.css. --font-body is the one still open: the candidates are
-   * rendered as real multi-paragraph prose in /theme-lab/, because the question
-   * is whether a face survives 3000 words, not whether it looks good in a
-   * specimen line.
+   * Body copy has two faces, not one, because the reader picks: Literata is the
+   * default and Atkinson Hyperlegible is the sans. `--font-body` is whichever is
+   * active, so every rule on the site keeps reading one variable.
    *
    * PxPlus IBM VGA8 is a 9x16 bitmap face traced to outlines, so it is crisp at
    * 16px and at whole multiples of it, and muddy at 14px or 18px where its
    * pixels land on fractions of a device pixel. Size anything using it in whole
    * multiples of 16px rather than in rem.
    */
-  --font-body: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-body-serif: 'Literata', ui-serif, Georgia, serif;
+  --font-body-sans: 'Atkinson Hyperlegible', ui-sans-serif, sans-serif;
+  --font-body: var(--font-body-serif);
   --font-mono: ui-monospace, SFMono-Regular, monospace;
   --font-display: 'Departure Mono', ui-monospace, SFMono-Regular, monospace;
   --font-subtitle: 'PxPlus IBM VGA8', ui-monospace, SFMono-Regular, monospace;
 
-  --text-base: 1.05rem;
+  /*
+   * Literata's measurements, taken in the lab against a real post: 18px body,
+   * 163% leading, a touch of letter spacing and a wider word space. Written in
+   * rem rather than the 18px that was chosen, because an absolute body size
+   * overrides the reader's own browser font setting, and 1.125rem is exactly
+   * 18px for everyone who has not changed it.
+   */
+  --text-base: 1.125rem;
   --text-small: 0.9rem;
   --text-tiny: 0.75rem;
-  --leading: 1.65;
+  --leading: 1.63;
   --leading-tight: 1.25;
+  --tracking-body: 0.05em;
+  --word-spacing-body: 0.15em;
+
+  /*
+   * Antialiasing off, which is a deliberate look rather than an oversight: the
+   * whole site is pixel and terminal, and smoothed type beside a bitmap heading
+   * reads as two different eras. `font-smooth` is not standard CSS, so this only
+   * takes effect where the vendor property exists.
+   *
+   * The lab also used `filter: contrast(100.00001%)` to force the same thing in
+   * more engines. That must never come here: a filter on a container makes it
+   * the containing block for every fixed descendant, which would unpin the
+   * outline panel, the reading progress bar and the sidenotes all at once.
+   */
+  --font-smoothing: none;
 
   --measure: 68ch;
   --gutter: 1.5rem;
@@ -191,6 +213,23 @@
 
   --duration: 120ms;
   --ease: ease;
+}
+
+/*
+ * The sans reader. Set `data-body-face="sans"` on <html> and the whole site
+ * switches: the preferences menu will be the thing that writes it, and until
+ * that menu exists the attribute is the switch.
+ *
+ * It is not only the family that changes. Atkinson needs a larger body and a
+ * tighter leading than Literata to read at the same apparent size, and it wants
+ * no letter spacing at all, so each face carries the measurements it was chosen
+ * with instead of borrowing the other's.
+ */
+:root[data-body-face='sans'] {
+  --font-body: var(--font-body-sans);
+  --text-base: 1.25rem;
+  --leading: 1.53;
+  --tracking-body: 0em;
 }
 
 /* Motion is decoration everywhere on this site, so it can all go. */

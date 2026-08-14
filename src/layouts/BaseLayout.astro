@@ -258,6 +258,11 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     font-family: var(--font-body);
     font-size: var(--text-base);
     line-height: var(--leading);
+    /* Both spacings come from the chosen face's own block in theme.css, so
+       switching to the sans changes the spacing with it. */
+    letter-spacing: var(--tracking-body);
+    word-spacing: var(--word-spacing-body);
+    -webkit-font-smoothing: var(--font-smoothing);
     text-wrap: pretty;
   }
 
