@@ -147,7 +147,23 @@ export default defineConfig({
       // posts are written in is Obsidian's (quote, question, example and the
       // rest), and the github theme only knows five types, so anything else
       // rendered as a plain blockquote with a stray title line.
-      [rehypeCallouts, { theme: 'obsidian' }],
+      // `important` is red here (see code-and-callouts.css), and the theme's own
+      // icon for it is a flame, which reads as a fire hazard rather than "stop,
+      // this one matters". Lucide's octagon-alert is the stop-sign shape, the
+      // same silhouette a road sign uses, so the type is legible before the
+      // title is read. Every other type keeps its stock indicator.
+      [
+        rehypeCallouts,
+        {
+          theme: 'obsidian',
+          callouts: {
+            important: {
+              indicator:
+                '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+            },
+          },
+        },
+      ],
       rehypeKatex,
       rehypeMathCopy,
       // Astro adds the heading ids itself, but only after this list runs, and the

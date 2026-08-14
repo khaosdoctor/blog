@@ -96,6 +96,14 @@
   --callout-color: var(--brand-red);
 }
 
+/* Asking the reader something is not a warning, and the theme paints question,
+ * help and faq the same orange as warning, so a genuine caution and an open
+ * question were indistinguishable at a glance. Blue is the site's neutral
+ * "think about this" colour, already used by links and tables. */
+.callout:is([data-callout='question'], [data-callout='help'], [data-callout='faq']) {
+  --callout-color: var(--brand-blue);
+}
+
 /* The title band: a tint of the callout's colour, separated from the body by
  * a border in the same colour. Fixes the icon and text colour for dark mode
  * as a side effect, since the upstream rule only ever used the light value. */
