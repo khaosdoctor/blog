@@ -30,7 +30,7 @@ export function parseAuthor(raw: string): Author {
 
 /**
  * Whose blog this is. A post with no `authors` was written by him, which is all
- * but a handful of them, so the byline shows without 191 files having to say so.
+ * but a handful of them, so the byline shows without every file having to say so.
  * A guest post or a co-authored one overrides it by listing everyone.
  */
 export const SITE_AUTHOR = 'Lucas Santos <https://lsantos.dev>'

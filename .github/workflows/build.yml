@@ -68,7 +68,7 @@ jobs:
         with:
           path: dist
 
-  # Advisory only, never a release blocker: a broken link in one of 191
+  # Advisory only, never a release blocker: a broken link in one of the
   # migrated posts or a Lighthouse regression is worth knowing about, not
   # worth stopping a deploy over. continue-on-error keeps this job's outcome
   # from affecting the workflow conclusion no matter what it finds, and it
@@ -106,7 +106,7 @@ jobs:
 
       # --root-dir maps root-relative hrefs (the site uses only those) back to
       # dist/, so internal links resolve without a running server. External
-      # links are checked too since a lot of the 191 migrated posts still
+      # links are checked too since a lot of the migrated posts still
       # point at six-year-old URLs.
       - name: Check links
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
