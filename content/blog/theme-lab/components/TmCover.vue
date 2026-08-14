@@ -57,7 +57,7 @@ function paint(tm: any) {
   const [br, bg2, bb] = parseHex(bg)
   const cols = tm.grid.cols
   const rows = tm.grid.rows
-  const t = still.value ? seed.value : tm.frameCount() * 0.02 + seed.value
+  const t = still.value ? seed.value : tm.frameCount * 0.02 + seed.value
   const ceiling = contrastFloor.value / 100
 
   tm.background(br, bg2, bb)

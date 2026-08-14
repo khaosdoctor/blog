@@ -52,7 +52,7 @@ const solidContrast = () => ratio(parseHex(PALETTE[hue.value]), parseHex(BG)).to
 
 function paint(tm: any) {
   const [r, g, b] = parseHex(PALETTE[hue.value])
-  const angle = spinning.value ? tm.frameCount() * (speed.value / 100) : 45
+  const angle = spinning.value ? tm.frameCount * (speed.value / 100) : 45
 
   tm.background(0, 0, 0, 0)
   if (lit.value) {

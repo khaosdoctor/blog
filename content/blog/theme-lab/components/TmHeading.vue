@@ -67,7 +67,7 @@ const accentContrast = computed(() => ratio(parseHex(PALETTE[accent.value]), par
 function paint(tm: any) {
   const chars = RAMPS[ramp.value]
   const [r, g, b] = parseHex(PALETTE[hue.value])
-  const t = frozen.value ? 120 : tm.frameCount() * (speed.value / 1000)
+  const t = frozen.value ? 120 : tm.frameCount * (speed.value / 1000)
   const cols = tm.grid.cols
   const rows = tm.grid.rows
   const cut = 1 - density.value / 100
