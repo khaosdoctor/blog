@@ -1,46 +1,120 @@
 <script setup lang="ts">
 /**
- * A paleta da marca em registro de terminal, com o número do contraste embaixo de
- * cada amostra.
+ * A paleta é uma só: as cinco cores da marca mais as tintas que o site já usa
+ * para texto, apagado, link e friso. Um bloco por cor, cada um com duas
+ * amostras, uma no fundo escuro do site e outra no claro, porque a cor certa
+ * num fundo não é a mesma no outro.
  *
- * O ponto desta bancada não é escolher cores bonitas: é ver quais das cores que
- * já existem sobrevivem como texto. Metade da paleta CGA original reprova em
- * corpo de texto sobre preto, e é bom saber disso antes de adotar o visual dela.
+ * Cada amostra tem seu próprio seletor de tom, com uma rampa que escurece
+ * (fundo claro) ou clareia (fundo escuro) a partir da cor original. O rótulo
+ * de cada opção carrega o hex e o contraste medido, porque uma lista de
+ * amostras sem número só muda o lugar do chute. Cada seletor já abre no
+ * primeiro tom da rampa que passa em 4.5:1, porque a pergunta é "o que já
+ * funciona", não "e se eu mexer".
  */
-import { computed, ref } from 'vue'
+import { reactive } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
-import Knob from './Knob.vue'
-import Panel from './Panel.vue'
 import Pick from './Pick.vue'
-import Toggle from './Toggle.vue'
 import { composite, grade, parseHex, ratio, toHex, type Rgb } from './contrast'
 import './fonts.css'
 
-const REGISTERS: Record<string, { name: string; colours: Array<[string, string]> }> = {
-  marca: {
-    name: 'a marca, como está',
-    colours: [
-      ['vermelho', '#e30613'],
-      ['verde', '#45b384'],
-      ['amarelo', '#f5b200'],
-      ['azul', '#0578be'],
-      ['roxo', '#4b15a8'],
-    ],
-  },
-  tintas: {
-    name: 'as tintas do site (texto, apagado, link, friso e roxo)',
-    colours: [
-      ['texto, claro', '#332d23'],
-      ['texto, escuro', '#e0dcd4'],
-      ['apagado, claro', '#6b6353'],
-      ['apagado, escuro', '#a8a29a'],
-      ['link, claro', '#1a5c96'],
-      ['link, escuro', '#7cc0ff'],
-      ['friso, claro', '#ddd4bd'],
-      ['friso, escuro', '#2b1f42'],
-      ['roxo da marca', '#4b15a8'],
-    ],
-  },
+const FLOOR = 4.5
+const RAMP_STEP = 6
+const RAMP_MAX = 60
+
+const BG = { escuro: '#000000', claro: '#f4efe0' }
+
+// A cor de cada bloco, uma base por fundo. As cinco da marca partem do mesmo
+// hex nos dois fundos; as tintas do site (src/styles/theme.css: --fg, --muted,
+// --accent, --rule) já são um par por modo, então cada uma parte do próprio
+// valor existente naquele modo, não de uma base inventada.
+const MERGED_PALETTE: Array<{ name: string; escuro: string; claro: string }> = [
+  { name: 'vermelho', escuro: '#e30613', claro: '#e30613' },
+  { name: 'azul', escuro: '#0578be', claro: '#0578be' },
+  { name: 'roxo', escuro: '#4b15a8', claro: '#4b15a8' },
+  { name: 'verde', escuro: '#45b384', claro: '#45b384' },
+  { name: 'amarelo', escuro: '#f5b200', claro: '#f5b200' },
+  { name: 'texto', escuro: '#e0dcd4', claro: '#332d23' },
+  { name: 'apagado', escuro: '#a8a29a', claro: '#6b6353' },
+  { name: 'link', escuro: '#7cc0ff', claro: '#1a5c96' },
+  { name: 'friso', escuro: '#2b1f42', claro: '#ddd4bd' },
+]
+
+interface Shade {
+  id: string
+  name: string
+  hex: string
+  value: number
+}
+
+/** Rampa de 0% a RAMP_MAX%, escurecendo (`claro`) ou clareando (`escuro`) a partir de `base`. */
+function rampFor(base: Rgb, bg: Rgb, mode: 'escuro' | 'claro'): Shade[] {
+  const target: Rgb = mode === 'claro' ? [0, 0, 0] : [255, 255, 255]
+  const shades: Shade[] = []
+  for (let pct = 0; pct <= RAMP_MAX; pct += RAMP_STEP) {
+    const mixed = composite(target, base, pct / 100)
+    const value = ratio(mixed, bg)
+    const hex = toHex(mixed)
+    const pass = value >= FLOOR ? 'passa' : 'reprova'
+    shades.push({ id: String(pct), name: `${pct}% · ${hex} · ${value.toFixed(2)}:1 · ${pass}`, hex, value })
+  }
+  return shades
+}
+
+/** O primeiro tom da rampa que passa em FLOOR, ou o mais forte dela se nenhum passar. */
+function firstPassing(shades: Shade[]): string {
+  return (shades.find((shade) => shade.value >= FLOOR) ?? shades[shades.length - 1]).id
+}
+
+interface ColourBlock {
+  name: string
+  escuroOptions: Shade[]
+  claroOptions: Shade[]
+  escuroShade: string
+  claroShade: string
+}
+
+const blocks = reactive<ColourBlock[]>(
+  MERGED_PALETTE.map(({ name, escuro, claro }) => {
+    const escuroOptions = rampFor(parseHex(escuro), parseHex(BG.escuro), 'escuro')
+    const claroOptions = rampFor(parseHex(claro), parseHex(BG.claro), 'claro')
+    return {
+      name,
+      escuroOptions,
+      claroOptions,
+      escuroShade: firstPassing(escuroOptions),
+      claroShade: firstPassing(claroOptions),
+    }
+  }),
+)
+
+function currentShade(options: Shade[], id: string): Shade {
+  return options.find((shade) => shade.id === id) ?? options[0]
+}
+
+function decisionSettings() {
+  return blocks.flatMap((block) => {
+    const dark = currentShade(block.escuroOptions, block.escuroShade)
+    const light = currentShade(block.claroOptions, block.claroShade)
+    return [
+      { label: `${block.name}, escuro`, value: `${dark.hex} · ${dark.value.toFixed(2)}:1` },
+      { label: `${block.name}, claro`, value: `${light.hex} · ${light.value.toFixed(2)}:1` },
+    ]
+  })
+}
+
+const decisionContext =
+  `Fundo escuro ${BG.escuro}, fundo claro ${BG.claro}, medidos contra ${FLOOR}:1. Cada linha é o tom ` +
+  `escolhido naquele seletor, não a cor original da marca.`
+
+/*
+ * CGA canônica, CGA medida no IBM 5153, fósforo P39 e âmbar de terminal:
+ * pesquisa que já foi feita e não serve mais como opção de paleta aqui, mas o
+ * dono do blog quer um seletor de tema para o leitor (fósforo ou âmbar,
+ * trocando o site inteiro) separado desta bancada. Os valores ficam guardados
+ * aqui, sem uso nesta página, para esse seletor futuro os buscar.
+ */
+const FUTURE_READER_THEMES: Record<string, { name: string; colours: Array<[string, string]> }> = {
   cga: {
     name: 'CGA/EGA 16 canônica',
     colours: [
@@ -120,130 +194,68 @@ const REGISTERS: Record<string, { name: string; colours: Array<[string, string]>
     ],
   },
 }
-
-const register = ref('marca')
-const bgLightness = ref(8)
-const lift = ref(0)
-const bigText = ref(false)
-// Default to the site's own dark ground: it's the real thing every colour
-// above has to survive against, not an approximation of it.
-const bgHue = ref('escuro')
-
-const BG_HUES: Record<string, Rgb> = {
-  neutro: [255, 255, 255],
-  frio: [120, 160, 255],
-  quente: [255, 190, 120],
-  verde: [120, 255, 160],
-}
-
-// The blog's two page grounds, exact, not composited toward black like the
-// tinted registers below. Escuro is #000000 on purpose, so OLED pixels switch
-// off. Claro is the NieR Automata sepia the site actually reads on.
-const SITE_GROUNDS: Record<string, string> = {
-  escuro: '#000000',
-  claro: '#f4efe0',
-}
-
-const BG_HUE_OPTIONS = [
-  { id: 'escuro', name: 'fundo escuro do site (preto absoluto)' },
-  { id: 'claro', name: 'fundo claro do site (sépia)' },
-  { id: 'neutro', name: 'neutro' },
-  { id: 'frio', name: 'azulado' },
-  { id: 'quente', name: 'quente' },
-  { id: 'verde', name: 'esverdeado' },
-]
-
-function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
-  return options.find((option) => option.id === id)?.name ?? id
-}
-
-const usingSiteGround = computed(() => Boolean(SITE_GROUNDS[bgHue.value]))
-
-const background = computed(() => {
-  const ground = SITE_GROUNDS[bgHue.value]
-  if (ground) return ground
-  return toHex(composite(BG_HUES[bgHue.value], [0, 0, 0], bgLightness.value / 100))
-})
-
-const swatches = computed(() =>
-  REGISTERS[register.value].colours.map(([name, hex]) => {
-    const base = parseHex(hex)
-    const raised = composite([255, 255, 255], base, lift.value / 100)
-    const value = ratio(raised, parseHex(background.value))
-    return { name, hex: toHex(raised), value, verdict: grade(value) }
-  }),
-)
-
-const floor = computed(() => (bigText.value ? 3 : 4.5))
-const failing = computed(() => swatches.value.filter((s) => s.value < floor.value).length)
-
-const decisionSettings = computed(() => [
-  { label: 'paleta', value: REGISTERS[register.value].name },
-  { label: 'tom do fundo', value: `${labelFor(BG_HUE_OPTIONS, bgHue.value)} (${background.value})` },
-  {
-    label: 'claridade do fundo',
-    value: usingSiteGround.value ? 'usa o fundo do site, knob inativo' : `${bgLightness.value}%`,
-  },
-  { label: 'clarear as cores', value: `${lift.value}%` },
-  { label: 'medir como texto grande (3:1)', value: bigText.value ? 'sim' : 'não' },
-])
-
-const decisionContext = computed(
-  () =>
-    `Fundo ${background.value}. ${failing.value} de ${swatches.value.length} cores deste registro ficam abaixo de ${floor.value}:1 com essa configuração.`,
-)
+void FUTURE_READER_THEMES
 </script>
 
 <template>
   <div :class="$style.demo">
-    <div :class="$style.stage" :style="{ background }">
-      <p :class="$style.path" :style="{ color: swatches[0]?.hex }">~/blog/content <span :class="$style.dim">$</span></p>
-      <div :class="$style.swatches">
-        <div v-for="swatch in swatches" :key="swatch.name" :class="$style.swatch">
-          <span :class="$style['swatch-bar']" :style="{ background: swatch.hex }"></span>
-          <span :class="$style.text" :style="{ color: swatch.hex }">Abstração vaza</span>
-          <span :class="[$style.meta, { [$style.bad]: swatch.value < floor }]">
-            {{ swatch.hex }} · {{ swatch.value.toFixed(2) }}:1 · {{ swatch.verdict }}
-          </span>
+    <div :class="$style.grid">
+      <div v-for="block in blocks" :key="block.name" :class="$style.block">
+        <p :class="$style['block-name']">{{ block.name }}</p>
+
+        <div :class="$style.shade">
+          <div :class="$style.rect" :style="{ background: BG.escuro }">
+            <span
+              :class="$style['swatch-bar']"
+              :style="{ background: currentShade(block.escuroOptions, block.escuroShade).hex }"
+            ></span>
+            <span
+              :class="$style['rect-text']"
+              :style="{ color: currentShade(block.escuroOptions, block.escuroShade).hex }"
+            >
+              Abstração vaza aqui.
+            </span>
+          </div>
+          <div :class="$style.picker">
+            <Pick v-model="block.escuroShade" label="escuro" :options="block.escuroOptions" />
+          </div>
+        </div>
+
+        <div :class="$style.shade">
+          <div :class="$style.rect" :style="{ background: BG.claro }">
+            <span
+              :class="$style['swatch-bar']"
+              :style="{ background: currentShade(block.claroOptions, block.claroShade).hex }"
+            ></span>
+            <span
+              :class="$style['rect-text']"
+              :style="{ color: currentShade(block.claroOptions, block.claroShade).hex }"
+            >
+              Abstração vaza aqui.
+            </span>
+          </div>
+          <div :class="$style.picker">
+            <Pick v-model="block.claroShade" label="claro" :options="block.claroOptions" />
+          </div>
         </div>
       </div>
     </div>
 
-    <Panel label="registro">
-      <Pick
-        v-model="register"
-        label="paleta"
-        :options="Object.entries(REGISTERS).map(([id, value]) => ({ id, name: value.name }))"
-      />
-      <Pick v-model="bgHue" label="tom do fundo" :options="BG_HUE_OPTIONS" />
-      <Knob
-        v-if="!usingSiteGround"
-        v-model="bgLightness"
-        label="claridade do fundo"
-        :min="0"
-        :max="100"
-        unit="%"
-      />
-      <Knob v-model="lift" label="clarear as cores" :min="0" :max="80" unit="%" />
-      <Toggle v-model="bigText" label="medir como texto grande (3:1)" />
-    </Panel>
-
-    <p :class="$style.readout">
-      Fundo {{ background }}. {{ failing }} de {{ swatches.length }} cores deste registro ficam abaixo de
-      {{ floor }}:1 e não servem como texto corrido aí.
-    </p>
     <p :class="$style.note">
-      Dois números que valem guardar: o vermelho da CGA sobre preto dá 2,71:1 e o marrom dá 4,01:1, ou seja, o
-      visual DOS autêntico reprova em texto. O verde e o amarelo da marca sobre o fundo escuro do site passam
-      folgado; o vermelho da marca não passa, o que já é verdade hoje e é por isso que ele só aparece em link não
-      escrito. "Clarear as cores" é a saída barata: mistura branco na cor até o número subir, ao custo de tirar
-      saturação.
+      Um controle único não dava conta: o vermelho pede uns 6% de escurecer para passar no fundo claro, o amarelo
+      pede uns 48%, oito vezes mais. Por isso cada cor tem o próprio seletor, um por fundo, já aberto no primeiro
+      tom que passa em {{ FLOOR }}:1. Isso tem precedente no código: <code>--em-italic-fg</code> em
+      <code>src/styles/theme.css</code> já é <code>#8a6400</code> no modo claro, o amarelo da marca escurecido
+      perto desse mesmo tanto, porque esse amarelo não se sustenta como texto sobre uma página clara. A escolha de
+      cada seletor, cor por cor e fundo por fundo, é o que deveria virar token. O friso não é texto corrido, é o
+      traço fino de uma régua, então um tom que só passa escurecido ou clareado bem além do original não quer dizer
+      que o valor atual do site está errado, só que o piso de 4.5:1 é mais estrito do que o que ele precisa cumprir.
     </p>
 
     <DecisionCopy
-      lab="paleta em registro de terminal"
+      lab="paleta, tom por cor e por fundo"
       component="PaletteLab.vue"
-      :settings="decisionSettings"
+      :settings="decisionSettings()"
       :context="decisionContext"
     />
   </div>
@@ -254,58 +266,83 @@ const decisionContext = computed(
   font-family: var(--font-mono);
 }
 
-.stage {
-  padding: clamp(1rem, 4%, 1.8rem);
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
 }
 
-.path {
-  margin: 0 0 1rem;
-  font-family: 'Departure Mono', ui-monospace, monospace;
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
+.block {
+  display: grid;
+  gap: 0.7rem;
+  min-inline-size: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--rule);
+  background: transparent;
 }
 
-.dim {
-  opacity: 0.6;
+.block-name {
+  margin: 0;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
-.swatches {
+/* Uma amostra (retângulo + seletor), empilhada: escuro em cima, claro embaixo. */
+.shade {
+  display: grid;
+  gap: 0.4rem;
+  min-inline-size: 0;
+}
+
+.rect {
   display: grid;
   gap: 0.35rem;
-}
-
-.swatch {
-  display: grid;
-  grid-template-columns: 1.6rem minmax(8rem, 1fr) auto;
-  gap: 0.7rem;
-  align-items: center;
+  min-inline-size: 0;
+  padding: 0.5rem;
 }
 
 /* CSS modules rename this class, so it no longer collides with the global `.chip`. */
 .swatch-bar {
-  block-size: 1rem;
+  block-size: 0.5rem;
   inline-size: 100%;
 }
 
-.text {
-  font-family: 'Departure Mono', ui-monospace, monospace;
-  font-size: 0.95rem;
+.rect-text {
+  min-inline-size: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
 }
 
-.meta {
-  color: #8d9199;
-  font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  text-align: end;
+.picker {
+  inline-size: 100%;
+  min-inline-size: 0;
 }
 
-.meta.bad {
-  color: #ff8b93;
+/*
+ * O Pick.vue compartilhado fixa o próprio tamanho de fonte (0,72rem) no rótulo
+ * que envolve o select, então herdar um tamanho maior daqui não pega; o
+ * !important força a leitura maior sem editar um componente que não é desta
+ * bancada. inline-size e max-inline-size travam a largura do select no que o
+ * bloco tem disponível; sem isso, o texto comprido de cada opção empurra a
+ * caixa para fora da borda.
+ */
+.picker select {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  overflow: hidden;
+  font-size: 0.85rem !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.readout,
 .note {
-  margin: 0.7rem 0 0;
+  margin: 1rem 0 0;
   color: var(--muted);
   font-size: 0.7rem;
   line-height: 1.6;
