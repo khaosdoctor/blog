@@ -2,7 +2,7 @@
  * The faces the site itself uses. Self-hosted from public/fonts/ because the CSP
  * is `font-src 'self'`, which blocks a Google Fonts link outright.
  *
- * Only the two that are decided are here. Every other face is a candidate and
+ * Only the four that are decided are here. Every other face is a candidate and
  * lives in content/blog/theme-lab/components/fonts.css, which loads on that page
  * alone: a candidate should cost nothing on a real post. The two files below are
  * declared in both places, with the same URL, so the lab reuses the same cache
@@ -37,6 +37,46 @@
   font-family: 'PxPlus IBM VGA8';
   src: url('/fonts/PxPlusIBMVGA8-9x16.woff') format('woff');
   font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Body copy, two faces rather than one, because the reader chooses: Literata is
+ * the default and Atkinson Hyperlegible is the sans alternative. Both were
+ * picked in /theme-lab/ against real multi-paragraph prose, and each carries its
+ * own size and spacing in theme.css, since they were tuned separately.
+ *
+ * Literata (Google, SIL OFL 1.1) is one variable file covering 400 to 700, which
+ * is why bold costs no second request. Drawn for Play Books, so it is a screen
+ * serif rather than a print serif pressed into a screen.
+ */
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata-400-700.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Atkinson Hyperlegible (Braille Institute, SIL OFL 1.1). Two static files, not
+ * a variable one: that is what the project ships. Commissioned for readers with
+ * low vision, with every letter drawn so it cannot be confused with another,
+ * which makes it the honest counterweight to a site built out of pixel faces.
+ */
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('/fonts/AtkinsonHyperlegible-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('/fonts/AtkinsonHyperlegible-700.woff2') format('woff2');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
