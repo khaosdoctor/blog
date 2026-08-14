@@ -8,6 +8,7 @@
  * corpo de texto sobre preto, e é bom saber disso antes de adotar o visual dela.
  */
 import { computed, ref } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -143,6 +144,19 @@ const SITE_GROUNDS: Record<string, string> = {
   claro: '#f4efe0',
 }
 
+const BG_HUE_OPTIONS = [
+  { id: 'escuro', name: 'fundo escuro do site (preto absoluto)' },
+  { id: 'claro', name: 'fundo claro do site (sépia)' },
+  { id: 'neutro', name: 'neutro' },
+  { id: 'frio', name: 'azulado' },
+  { id: 'quente', name: 'quente' },
+  { id: 'verde', name: 'esverdeado' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
+
 const usingSiteGround = computed(() => Boolean(SITE_GROUNDS[bgHue.value]))
 
 const background = computed(() => {
@@ -162,6 +176,22 @@ const swatches = computed(() =>
 
 const floor = computed(() => (bigText.value ? 3 : 4.5))
 const failing = computed(() => swatches.value.filter((s) => s.value < floor.value).length)
+
+const decisionSettings = computed(() => [
+  { label: 'paleta', value: REGISTERS[register.value].name },
+  { label: 'tom do fundo', value: `${labelFor(BG_HUE_OPTIONS, bgHue.value)} (${background.value})` },
+  {
+    label: 'claridade do fundo',
+    value: usingSiteGround.value ? 'usa o fundo do site, knob inativo' : `${bgLightness.value}%`,
+  },
+  { label: 'clarear as cores', value: `${lift.value}%` },
+  { label: 'medir como texto grande (3:1)', value: bigText.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(
+  () =>
+    `Fundo ${background.value}. ${failing.value} de ${swatches.value.length} cores deste registro ficam abaixo de ${floor.value}:1 com essa configuração.`,
+)
 </script>
 
 <template>
@@ -185,18 +215,7 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
         label="paleta"
         :options="Object.entries(REGISTERS).map(([id, value]) => ({ id, name: value.name }))"
       />
-      <Pick
-        v-model="bgHue"
-        label="tom do fundo"
-        :options="[
-          { id: 'escuro', name: 'fundo escuro do site (preto absoluto)' },
-          { id: 'claro', name: 'fundo claro do site (sépia)' },
-          { id: 'neutro', name: 'neutro' },
-          { id: 'frio', name: 'azulado' },
-          { id: 'quente', name: 'quente' },
-          { id: 'verde', name: 'esverdeado' },
-        ]"
-      />
+      <Pick v-model="bgHue" label="tom do fundo" :options="BG_HUE_OPTIONS" />
       <Knob
         v-if="!usingSiteGround"
         v-model="bgLightness"
@@ -220,6 +239,13 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
       escrito. "Clarear as cores" é a saída barata: mistura branco na cor até o número subir, ao custo de tirar
       saturação.
     </p>
+
+    <DecisionCopy
+      lab="paleta em registro de terminal"
+      component="PaletteLab.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 

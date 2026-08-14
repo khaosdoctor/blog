@@ -9,6 +9,7 @@
  * para você escolher o quadro.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -19,11 +20,13 @@ import './fonts.css'
 const SHADES = ' ░▒▓█'
 const FRAME = { tl: '╔', tr: '╗', bl: '╚', br: '╝', h: '═', v: '║' }
 
+// ink #e0dcd4 e bg #000000 são --fg e --bg do site no escuro. O amarelo cheio é
+// fundo claro, então sua tinta é a #332d23 que o site usa como --fg no claro.
 const PALETTE: Record<string, { ink: string; art: string; bg: string; name: string }> = {
-  verde: { ink: '#e6e4e0', art: '#45b384', bg: '#14161a', name: 'verde da marca' },
-  azul: { ink: '#e6e4e0', art: '#0578be', bg: '#14161a', name: 'azul da marca' },
-  amarelo: { ink: '#14161a', art: '#f5b200', bg: '#f5b200', name: 'amarelo cheio' },
-  vermelho: { ink: '#e6e4e0', art: '#e30613', bg: '#14161a', name: 'vermelho da marca' },
+  verde: { ink: '#e0dcd4', art: '#45b384', bg: '#000000', name: 'verde da marca' },
+  azul: { ink: '#e0dcd4', art: '#0578be', bg: '#000000', name: 'azul da marca' },
+  amarelo: { ink: '#332d23', art: '#f5b200', bg: '#f5b200', name: 'amarelo cheio' },
+  vermelho: { ink: '#e0dcd4', art: '#e30613', bg: '#000000', name: 'vermelho da marca' },
   fosforo: { ink: '#20c20e', art: '#20c20e', bg: '#000000', name: 'fósforo P39 (IBM 5151)' },
   ambar: { ink: '#ffb000', art: '#ffb000', bg: '#000000', name: 'âmbar de terminal' },
 }
@@ -32,6 +35,23 @@ const TITLES: Record<string, string> = {
   curto: 'Quando a abstração vaza',
   medio: 'O que acontece quando você chama fetch e a rede some no meio',
   longo: 'Um título de noventa caracteres existe e vai chegar aqui um dia, então ele precisa caber',
+}
+
+const PATTERN_OPTIONS = [
+  { id: 'plasma', name: 'plasma (senos somados)' },
+  { id: 'dither', name: 'vinheta pontilhada' },
+  { id: 'grade', name: 'grade de terminal' },
+  { id: 'ruido', name: 'ruído perlin' },
+]
+
+const TITLE_SIZE_OPTIONS = [
+  { id: 'curto', name: '23 caracteres' },
+  { id: 'medio', name: '58 caracteres' },
+  { id: 'longo', name: '90 caracteres' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
 }
 
 const cell = ref(12)
@@ -49,7 +69,47 @@ const instance = shallowRef<any>(null)
 const failed = ref('')
 
 const colours = computed(() => PALETTE[palette.value])
-const inkContrast = computed(() => ratio(parseHex(colours.value.ink), parseHex(colours.value.bg)))
+
+// A caixa por trás do texto agora é sempre preta (ver .card), então é contra
+// ela que o texto se lê, não contra o fundo da arte.
+const CARD_BG = '#000000'
+const inkContrast = computed(() => ratio(parseHex(colours.value.ink), parseHex(CARD_BG)))
+
+// A moldura é desenhada 1 célula para dentro da borda (linha em row/col 1), com
+// uma célula vazia antes dela. O texto precisa começar depois da própria linha,
+// então a folga do cartão é 2 células, na mesma unidade que o knob "célula".
+const cardPadding = computed(() => `${cell.value * 2}px`)
+
+// Mesma escolha genérica de CoverLab: preto puro se ele ler melhor do que a
+// tinta do cartão contra o fundo real da régua (a caixa preta), tinta caso
+// contrário. Como o fundo da régua agora é sempre preto, preto contra preto dá
+// razão 1 e a tinta ganha sempre, o que é o comportamento certo aqui.
+const ruleColour = computed(() => {
+  const onBlack = ratio(parseHex('#000000'), parseHex(CARD_BG))
+  const onInk = ratio(parseHex(colours.value.ink), parseHex(CARD_BG))
+  return onBlack >= onInk ? '#000000' : colours.value.ink
+})
+
+const ruleStyle = computed(() => ({
+  marginInlineStart: `calc(-1 * ${cardPadding.value})`,
+  inlineSize: `calc(75% + (${cardPadding.value} * 1.5))`,
+  background: `linear-gradient(to right, ${ruleColour.value} 0%, transparent 100%)`,
+}))
+
+const decisionSettings = computed(() => [
+  { label: 'padrão', value: labelFor(PATTERN_OPTIONS, pattern.value) },
+  { label: 'paleta', value: `${colours.value.name} (arte ${colours.value.art}, fundo ${colours.value.bg}, tinta ${colours.value.ink})` },
+  { label: 'célula', value: `${cell.value}px` },
+  { label: 'semente', value: String(seed.value) },
+  { label: 'teto da arte', value: `${contrastFloor.value}%` },
+  { label: 'moldura ╔═╗', value: frame.value ? 'sim' : 'não' },
+  { label: 'parada', value: still.value ? 'sim' : 'não' },
+  { label: 'comprimento do título', value: labelFor(TITLE_SIZE_OPTIONS, titleSize.value) },
+])
+
+const decisionContext = computed(
+  () => `Título ${inkContrast.value.toFixed(2)}:1 sobre a caixa preta atrás do texto (#000000).`,
+)
 
 function paint(tm: any) {
   const { art, bg } = colours.value
@@ -181,8 +241,9 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
   <div :class="$style.demo">
     <div ref="stage" :class="$style.stage" :style="{ background: colours.bg }">
       <canvas ref="canvas" aria-hidden="true"></canvas>
-      <div :class="$style.card" :style="{ color: colours.ink }">
+      <div :class="$style.card" :style="{ color: colours.ink, padding: cardPadding, background: CARD_BG }">
         <p :class="$style.tag">BLOG.LSANTOS.DEV / META</p>
+        <div :class="$style.rule" :style="ruleStyle"></div>
         <p :class="$style.title">{{ TITLES[titleSize] }}</p>
         <p :class="$style.byline">Lucas Santos · 14 AGO 2026</p>
       </div>
@@ -190,16 +251,7 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
     <p v-if="failed" :class="$style.failed">WebGL2 não subiu: {{ failed }}</p>
 
     <Panel label="arte">
-      <Pick
-        v-model="pattern"
-        label="padrão"
-        :options="[
-          { id: 'plasma', name: 'plasma (senos somados)' },
-          { id: 'dither', name: 'vinheta pontilhada' },
-          { id: 'grade', name: 'grade de terminal' },
-          { id: 'ruido', name: 'ruído perlin' },
-        ]"
-      />
+      <Pick v-model="pattern" label="padrão" :options="PATTERN_OPTIONS" />
       <Pick
         v-model="palette"
         label="paleta"
@@ -213,22 +265,17 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
     </Panel>
 
     <Panel label="texto do cartão">
-      <Pick
-        v-model="titleSize"
-        label="comprimento do título"
-        :options="[
-          { id: 'curto', name: '23 caracteres' },
-          { id: 'medio', name: '58 caracteres' },
-          { id: 'longo', name: '90 caracteres' },
-        ]"
-      />
+      <Pick v-model="titleSize" label="comprimento do título" :options="TITLE_SIZE_OPTIONS" />
     </Panel>
 
     <p :class="$style.readout">
-      título {{ inkContrast.toFixed(2) }}:1 sobre {{ colours.bg }}. O "teto da arte" limita o quanto o sombreado
-      chega perto do branco: baixe-o e o texto ganha contraste, suba-o e a arte come o cartão. Uma capa de verdade
-      seria gerada pelo `sharp` no build, com o mesmo cálculo.
+      título {{ inkContrast.toFixed(2) }}:1 sobre a caixa preta atrás do texto (#000000), não sobre o fundo da arte:
+      é essa a superfície real onde a letra se lê agora. O "teto da arte" limita o quanto o sombreado chega perto
+      do branco: baixe-o e a arte fica mais escura, suba-o e ela come mais tela ao redor da caixa. Uma capa de
+      verdade seria gerada pelo `sharp` no build, com o mesmo cálculo.
     </p>
+
+    <DecisionCopy lab="capa gerada" component="TmCover.vue" :settings="decisionSettings" :context="decisionContext" />
   </div>
 </template>
 
@@ -254,8 +301,12 @@ watch([pattern, palette, seed, frame, contrastFloor], () => still.value && insta
 
 .card {
   position: relative;
-  padding: clamp(1rem, 4%, 2.5rem);
   font-family: 'Departure Mono', ui-monospace, monospace;
+}
+
+.rule {
+  margin-block: 0.6em 0.7em;
+  block-size: 4px;
 }
 
 .tag {

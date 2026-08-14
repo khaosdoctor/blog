@@ -13,6 +13,7 @@
  * hashear, o knob "semente" faz esse papel e soma-se ao hash do slug de exemplo.
  */
 import { computed, ref } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -58,6 +59,16 @@ const CATEGORIES = [
   { id: 'security', name: 'security' },
   { id: 'opinion', name: 'opinion' },
 ]
+
+const TITLE_SIZE_OPTIONS = [
+  { id: 'curto', name: '23 caracteres' },
+  { id: 'medio', name: '58 caracteres' },
+  { id: 'longo', name: '90 caracteres' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
 
 /**
  * Hash de string pequeno o bastante para caber num comentário: só precisa
@@ -204,6 +215,47 @@ const plasmaCells = computed(() => {
 const dosContrast = computed(() => ratio(parseHex('#e6e4e0'), parseHex('#000000')))
 const bleedContrast = computed(() => ratio(parseHex(bleedInk.value), parseHex(brand.value.hex)))
 const plasmaContrast = computed(() => ratio(parseHex(PLASMA_INK), parseHex(PLASMA_BG)))
+
+// Preto puro se ele ler melhor do que a tinta do candidato contra o fundo da
+// marca, tinta caso contrário. Decidido pela razão de contraste, não por uma
+// lista de nomes de paleta, então uma marca nova cai no lado certo sozinha.
+const bleedRuleColour = computed(() => {
+  const onBlack = ratio(parseHex('#000000'), parseHex(brand.value.hex))
+  const onInk = ratio(parseHex(bleedInk.value), parseHex(brand.value.hex))
+  return onBlack >= onInk ? '#000000' : bleedInk.value
+})
+
+// Os três candidatos compartilham semente, categoria, comprimento do título e
+// cursor: todos entram na cor, no rótulo e no texto dos três cartões. A célula
+// do plasma só existe no candidato 3, então só aparece na decisão dele.
+const sharedDecisionSettings = computed(() => [
+  { label: 'categoria', value: category.value },
+  { label: 'comprimento do título', value: labelFor(TITLE_SIZE_OPTIONS, titleSize.value) },
+  { label: 'cor da marca', value: `${brand.value.id} (${brand.value.hex})` },
+  { label: 'cursor sólido █', value: cursor.value ? 'sim' : 'não' },
+  { label: 'semente', value: String(seed.value) },
+])
+
+const plasmaDecisionSettings = computed(() => [
+  ...sharedDecisionSettings.value,
+  { label: 'célula do plasma', value: `${cellSize.value}px` },
+])
+
+const SVG_NOTE = 'A capa é um <svg viewBox="0 0 1200 630"> de verdade (1200x630), o mesmo SVG que o gerador rasteriza com sharp no build. Cor da marca e semente derivam de hashSlug(post.slug) + semente, nunca de Math.random(), para o cache do card social não estragar a cada build.'
+
+const dosDecisionContext = computed(
+  () => `${SVG_NOTE} Título ${dosContrast.value.toFixed(2)}:1 sobre #000000 (${grade(dosContrast.value)}).`,
+)
+
+const bleedDecisionContext = computed(
+  () =>
+    `${SVG_NOTE} Título ${bleedContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(bleedContrast.value)}).`,
+)
+
+const plasmaDecisionContext = computed(
+  () =>
+    `${SVG_NOTE} Título ${plasmaContrast.value.toFixed(2)}:1 sobre ${PLASMA_BG}, pior caso (${grade(plasmaContrast.value)}); por isso ele carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
+)
 </script>
 
 <template>
@@ -223,15 +275,7 @@ const plasmaContrast = computed(() => ratio(parseHex(PLASMA_INK), parseHex(PLASM
 
     <Panel label="conteúdo do cartão">
       <Knob v-model="seed" label="semente" :min="0" :max="200" />
-      <Pick
-        v-model="titleSize"
-        label="comprimento do título"
-        :options="[
-          { id: 'curto', name: '23 caracteres' },
-          { id: 'medio', name: '58 caracteres' },
-          { id: 'longo', name: '90 caracteres' },
-        ]"
-      />
+      <Pick v-model="titleSize" label="comprimento do título" :options="TITLE_SIZE_OPTIONS" />
       <Pick v-model="category" label="categoria" :options="CATEGORIES" />
       <Knob v-model="cellSize" label="célula do plasma" :min="16" :max="48" :step="2" unit="px" />
       <Toggle v-model="cursor" label="cursor sólido █" />
@@ -279,6 +323,12 @@ const plasmaContrast = computed(() => ratio(parseHex(PLASMA_INK), parseHex(PLASM
           </svg>
         </div>
         <p :class="$style.tiny">título {{ dosContrast.toFixed(2) }}:1 sobre #000000 · {{ grade(dosContrast) }}</p>
+        <DecisionCopy
+          lab="capa · janela DOS"
+          component="CoverLab.vue"
+          :settings="sharedDecisionSettings"
+          :context="dosDecisionContext"
+        />
       </div>
 
       <div v-if="view === 'todos' || view === 'bleed'" :class="$style.candidate">
@@ -290,6 +340,12 @@ const plasmaContrast = computed(() => ratio(parseHex(PLASMA_INK), parseHex(PLASM
             role="img"
             :aria-label="`Capa candidata, sem moldura, categoria ${category}`"
           >
+            <defs>
+              <linearGradient id="cover-lab-bleed-rule-fade" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" :stop-color="bleedRuleColour" stop-opacity="1" />
+                <stop offset="100%" :stop-color="bleedRuleColour" stop-opacity="0" />
+              </linearGradient>
+            </defs>
             <rect width="1200" height="630" :fill="brand.hex" />
             <text
               :x="bleedCard.padX"
@@ -301,13 +357,12 @@ const plasmaContrast = computed(() => ratio(parseHex(PLASMA_INK), parseHex(PLASM
               opacity="0.8"
             >{{ kickerText }}</text>
             <line
-              :x1="bleedCard.padX"
+              x1="0"
               :y1="bleedCard.ruleY"
-              :x2="bleedCard.padX + CARD_W * 0.75"
+              :x2="CARD_W * 0.75"
               :y2="bleedCard.ruleY"
-              :stroke="bleedInk"
-              stroke-width="2"
-              opacity="0.5"
+              stroke="url(#cover-lab-bleed-rule-fade)"
+              stroke-width="4"
             />
             <text
               v-for="(line, i) in bleedCard.lines"
@@ -330,6 +385,12 @@ const plasmaContrast = computed(() => ratio(parseHex(PLASMA_INK), parseHex(PLASM
           </svg>
         </div>
         <p :class="$style.tiny">título {{ bleedContrast.toFixed(2) }}:1 sobre {{ brand.hex }} · {{ grade(bleedContrast) }}</p>
+        <DecisionCopy
+          lab="capa · sem moldura"
+          component="CoverLab.vue"
+          :settings="sharedDecisionSettings"
+          :context="bleedDecisionContext"
+        />
       </div>
 
       <div v-if="view === 'todos' || view === 'plasma'" :class="$style.candidate">
@@ -403,6 +464,12 @@ const plasmaContrast = computed(() => ratio(parseHex(PLASMA_INK), parseHex(PLASM
           título {{ plasmaContrast.toFixed(2) }}:1 sobre {{ PLASMA_BG }} · {{ grade(plasmaContrast) }} · pior caso, a
           sombra rígida some com o resto
         </p>
+        <DecisionCopy
+          lab="capa · plasma"
+          component="CoverLab.vue"
+          :settings="plasmaDecisionSettings"
+          :context="plasmaDecisionContext"
+        />
       </div>
     </div>
 

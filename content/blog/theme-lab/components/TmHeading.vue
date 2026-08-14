@@ -9,6 +9,7 @@
  * título continua lá.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -33,7 +34,52 @@ const PALETTE: Record<string, string> = {
   ambar: '#ffb000',
 }
 
-const BG = '#14161a'
+// #000000: --bg do site no escuro, preto absoluto para o OLED apagar o pixel.
+const BG = '#000000'
+
+const MODE_OPTIONS = [
+  { id: 'onda', name: 'onda concêntrica' },
+  { id: 'chuva', name: 'chuva de coluna' },
+  { id: 'ruido', name: 'ruído perlin' },
+  { id: 'grade', name: 'grade cruzada' },
+]
+
+const RAMP_OPTIONS = [
+  { id: 'blocos', name: '░ ▒ ▓ █' },
+  { id: 'pontos', name: '. · : •' },
+  { id: 'ansi', name: '─ │ ┼ ╬' },
+  { id: 'binario', name: '0 1' },
+  { id: 'sinais', name: '. - + = * #' },
+]
+
+const HUE_OPTIONS = [
+  { id: 'verde', name: 'verde da marca' },
+  { id: 'azul', name: 'azul da marca' },
+  { id: 'amarelo', name: 'amarelo da marca' },
+  { id: 'vermelho', name: 'vermelho da marca' },
+  { id: 'fosforo', name: 'fósforo P1' },
+  { id: 'ambar', name: 'âmbar P3' },
+]
+
+const ACCENT_OPTIONS = [
+  { id: 'amarelo', name: 'amarelo' },
+  { id: 'verde', name: 'verde' },
+  { id: 'azul', name: 'azul' },
+  { id: 'vermelho', name: 'vermelho' },
+]
+
+const FACE_OPTIONS = [
+  { id: 'departure', name: 'Departure Mono' },
+  { id: 'ibmvga', name: 'PxPlus IBM VGA' },
+  { id: 'silkscreen', name: 'Silkscreen' },
+  { id: 'pixelify', name: 'Pixelify Sans' },
+  { id: 'jersey', name: 'Jersey 10' },
+  { id: 'plex', name: 'IBM Plex Mono' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
 
 const cell = ref(14)
 const speed = ref(60)
@@ -61,8 +107,27 @@ const instance = shallowRef<any>(null)
 const failed = ref('')
 
 const fieldContrast = computed(() => ratio(parseHex(PALETTE[hue.value]), parseHex(BG)).toFixed(2))
-const titleContrast = computed(() => ratio(parseHex('#e6e4e0'), parseHex(BG)).toFixed(2))
+// #e0dcd4: --fg do site no escuro.
+const titleContrast = computed(() => ratio(parseHex('#e0dcd4'), parseHex(BG)).toFixed(2))
 const accentContrast = computed(() => ratio(parseHex(PALETTE[accent.value]), parseHex(BG)).toFixed(2))
+
+const decisionSettings = computed(() => [
+  { label: 'movimento', value: labelFor(MODE_OPTIONS, mode.value) },
+  { label: 'conjunto', value: labelFor(RAMP_OPTIONS, ramp.value) },
+  { label: 'célula', value: `${cell.value}px` },
+  { label: 'velocidade', value: `${speed.value}%` },
+  { label: 'densidade', value: `${density.value}%` },
+  { label: 'congelar', value: frozen.value ? 'sim' : 'não' },
+  { label: 'campo', value: `${labelFor(HUE_OPTIONS, hue.value)} (${PALETTE[hue.value]})` },
+  { label: 'palavra em destaque', value: `${labelFor(ACCENT_OPTIONS, accent.value)} (${PALETTE[accent.value]})` },
+  { label: 'fonte do título', value: labelFor(FACE_OPTIONS, face.value) },
+  { label: 'entreletra', value: `${tracking.value}/100em` },
+])
+
+const decisionContext = computed(
+  () =>
+    `Contraste sobre ${BG}: título ${titleContrast.value}:1, destaque ${accentContrast.value}:1, campo ${fieldContrast.value}:1 (decorativo, some atrás do texto).`,
+)
 
 function paint(tm: any) {
   const chars = RAMPS[ramp.value]
@@ -184,27 +249,8 @@ watch([mode, ramp, density, hue, speed], () => frozen.value && instance.value?.r
     <p v-if="failed" :class="$style.failed">WebGL2 não subiu: {{ failed }}</p>
 
     <Panel label="campo animado">
-      <Pick
-        v-model="mode"
-        label="movimento"
-        :options="[
-          { id: 'onda', name: 'onda concêntrica' },
-          { id: 'chuva', name: 'chuva de coluna' },
-          { id: 'ruido', name: 'ruído perlin' },
-          { id: 'grade', name: 'grade cruzada' },
-        ]"
-      />
-      <Pick
-        v-model="ramp"
-        label="conjunto"
-        :options="[
-          { id: 'blocos', name: '░ ▒ ▓ █' },
-          { id: 'pontos', name: '. · : •' },
-          { id: 'ansi', name: '─ │ ┼ ╬' },
-          { id: 'binario', name: '0 1' },
-          { id: 'sinais', name: '. - + = * #' },
-        ]"
-      />
+      <Pick v-model="mode" label="movimento" :options="MODE_OPTIONS" />
+      <Pick v-model="ramp" label="conjunto" :options="RAMP_OPTIONS" />
       <Knob v-model="cell" label="célula" :min="6" :max="32" unit="px" />
       <Knob v-model="speed" label="velocidade" :min="0" :max="200" unit="%" />
       <Knob v-model="density" label="densidade" :min="0" :max="100" unit="%" />
@@ -212,40 +258,9 @@ watch([mode, ramp, density, hue, speed], () => frozen.value && instance.value?.r
     </Panel>
 
     <Panel label="cor e tipo">
-      <Pick
-        v-model="hue"
-        label="campo"
-        :options="[
-          { id: 'verde', name: 'verde da marca' },
-          { id: 'azul', name: 'azul da marca' },
-          { id: 'amarelo', name: 'amarelo da marca' },
-          { id: 'vermelho', name: 'vermelho da marca' },
-          { id: 'fosforo', name: 'fósforo P1' },
-          { id: 'ambar', name: 'âmbar P3' },
-        ]"
-      />
-      <Pick
-        v-model="accent"
-        label="palavra em destaque"
-        :options="[
-          { id: 'amarelo', name: 'amarelo' },
-          { id: 'verde', name: 'verde' },
-          { id: 'azul', name: 'azul' },
-          { id: 'vermelho', name: 'vermelho' },
-        ]"
-      />
-      <Pick
-        v-model="face"
-        label="fonte do título"
-        :options="[
-          { id: 'departure', name: 'Departure Mono' },
-          { id: 'ibmvga', name: 'PxPlus IBM VGA' },
-          { id: 'silkscreen', name: 'Silkscreen' },
-          { id: 'pixelify', name: 'Pixelify Sans' },
-          { id: 'jersey', name: 'Jersey 10' },
-          { id: 'plex', name: 'IBM Plex Mono' },
-        ]"
-      />
+      <Pick v-model="hue" label="campo" :options="HUE_OPTIONS" />
+      <Pick v-model="accent" label="palavra em destaque" :options="ACCENT_OPTIONS" />
+      <Pick v-model="face" label="fonte do título" :options="FACE_OPTIONS" />
       <Knob v-model="tracking" label="entreletra" :min="-2" :max="20" unit="/100em" />
     </Panel>
 
@@ -253,6 +268,13 @@ watch([mode, ramp, density, hue, speed], () => frozen.value && instance.value?.r
       contraste sobre {{ BG }} · título {{ titleContrast }}:1 · destaque {{ accentContrast }}:1 · campo
       {{ fieldContrast }}:1 (decorativo, some atrás do texto)
     </p>
+
+    <DecisionCopy
+      lab="campo animado (título)"
+      component="TmHeading.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 
@@ -279,7 +301,8 @@ watch([mode, ramp, density, hue, speed], () => frozen.value && instance.value?.r
 .text {
   position: relative;
   padding: 1.5rem;
-  color: #e6e4e0;
+  /* #e0dcd4: --fg do site no escuro. */
+  color: #e0dcd4;
   text-align: center;
 }
 

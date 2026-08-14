@@ -10,6 +10,7 @@
  * pixeladas, mas não são bitmap.
  */
 import { computed, ref } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -42,6 +43,19 @@ const crispStyle = computed(() =>
   crisp.value
     ? { WebkitFontSmoothing: 'none', MozOsxFontSmoothing: 'grayscale', fontSmooth: 'never', filter: 'contrast(100.00001%)' }
     : {},
+)
+
+const decisionSettings = computed(() => [
+  { label: 'fonte', value: face.value.name },
+  { label: 'lupa', value: `${zoom.value}×` },
+  { label: 'matar o antisserrilhado', value: crisp.value ? 'sim' : 'não' },
+  { label: 'fundo escuro', value: dark.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(() =>
+  face.value.step === 0
+    ? `${face.value.name} é vetorial: fica nítida em qualquer tamanho, não só em múltiplo de grid.`
+    : `${face.value.name} é bitmap: só fica nítida em múltiplo de ${face.value.step}px.`,
 )
 </script>
 
@@ -83,6 +97,13 @@ const crispStyle = computed(() =>
       um navegador não garante. Fonte vetorial pixelada não tem esse problema, e é o argumento mais forte a favor
       da Departure Mono.
     </p>
+
+    <DecisionCopy
+      lab="fonte de bitmap versus vetorial"
+      component="WholePixel.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 

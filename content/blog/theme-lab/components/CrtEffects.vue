@@ -10,6 +10,7 @@
  * Não existe curvatura de tela aqui, e não vai existir.
  */
 import { computed, onMounted, ref } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -48,6 +49,21 @@ const effectiveRatio = computed(() => {
 })
 
 const lost = computed(() => baseRatio.value - effectiveRatio.value)
+
+const decisionSettings = computed(() => [
+  { label: 'fundo', value: colours.value.name },
+  { label: 'scanline', value: `${scanlines.value}%` },
+  { label: 'passo da scanline', value: `${pitch.value}px` },
+  { label: 'brilho', value: `${glow.value}%` },
+  { label: 'granulado', value: `${noise.value}%` },
+  { label: 'vinheta', value: `${vignette.value}%` },
+  { label: 'cintilação', value: flicker.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(
+  () =>
+    `Contraste sem efeito ${baseRatio.value.toFixed(2)}:1, na linha escura da scanline ${effectiveRatio.value.toFixed(2)}:1 (${grade(effectiveRatio.value)}), custo ${lost.value.toFixed(2)}.`,
+)
 
 const scanStyle = computed(() => ({
   backgroundImage: `repeating-linear-gradient(to bottom, rgba(0,0,0,${scanlines.value / 100}) 0 1px, transparent 1px ${pitch.value}px)`,
@@ -121,6 +137,13 @@ onMounted(() => {
       no meio: um SVG inline, nada de arquivo, nada de <code>data:</code> URI. Isso importa porque a política de
       segurança do site é restritiva.
     </p>
+
+    <DecisionCopy
+      lab="efeitos de tubo (CRT)"
+      component="CrtEffects.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 

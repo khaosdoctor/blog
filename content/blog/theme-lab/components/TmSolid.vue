@@ -7,7 +7,8 @@
  * 404, para a página "sobre", ou como o único ornamento de um rodapé. É também o
  * candidato mais caro: é um loop de WebGL2 que nunca para sozinho.
  */
-import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -32,7 +33,20 @@ const PALETTE: Record<string, string> = {
   ambar: '#ffb000',
 }
 
-const BG = '#14161a'
+// #000000: --bg do site no escuro, preto absoluto para o OLED apagar o pixel.
+const BG = '#000000'
+
+const SHAPE_OPTIONS = [
+  { id: 'torus', name: 'toro (o donut)' },
+  { id: 'caixa', name: 'caixa' },
+  { id: 'esfera', name: 'esfera' },
+  { id: 'cone', name: 'cone' },
+  { id: 'cilindro', name: 'cilindro' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
 
 const shape = ref('torus')
 const glyph = ref('bloco')
@@ -49,6 +63,19 @@ const instance = shallowRef<any>(null)
 const failed = ref('')
 
 const solidContrast = () => ratio(parseHex(PALETTE[hue.value]), parseHex(BG)).toFixed(2)
+
+const decisionSettings = computed(() => [
+  { label: 'forma', value: labelFor(SHAPE_OPTIONS, shape.value) },
+  { label: 'caractere', value: `${glyph.value} (${GLYPHS[glyph.value]})` },
+  { label: 'cor', value: `${hue.value} (${PALETTE[hue.value]})` },
+  { label: 'célula', value: `${cell.value}px` },
+  { label: 'raio', value: `${size.value} células` },
+  { label: 'rotação', value: `${speed.value}%` },
+  { label: 'luz', value: lit.value ? 'sim' : 'não' },
+  { label: 'girando', value: spinning.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(() => `Contraste ${solidContrast()}:1 sobre ${BG} (decorativo, não é texto).`)
 
 function paint(tm: any) {
   const [r, g, b] = parseHex(PALETTE[hue.value])
@@ -148,17 +175,7 @@ watch([shape, glyph, hue, size, lit], () => !spinning.value && instance.value?.r
     <p v-if="failed" :class="$style.failed">WebGL2 não subiu: {{ failed }}</p>
 
     <Panel label="sólido">
-      <Pick
-        v-model="shape"
-        label="forma"
-        :options="[
-          { id: 'torus', name: 'toro (o donut)' },
-          { id: 'caixa', name: 'caixa' },
-          { id: 'esfera', name: 'esfera' },
-          { id: 'cone', name: 'cone' },
-          { id: 'cilindro', name: 'cilindro' },
-        ]"
-      />
+      <Pick v-model="shape" label="forma" :options="SHAPE_OPTIONS" />
       <Pick
         v-model="glyph"
         label="caractere"
@@ -182,6 +199,13 @@ watch([shape, glyph, hue, size, lit], () => !spinning.value && instance.value?.r
       atrás. É esse o botão que a norma 2.2.2 exige de qualquer coisa que se mexe por mais de cinco segundos, e é
       o estado inicial de quem pediu `prefers-reduced-motion: reduce`.
     </p>
+
+    <DecisionCopy
+      lab="sólido girando"
+      component="TmSolid.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 

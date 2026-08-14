@@ -4,6 +4,7 @@
  * nenhuma imagem, nenhum ícone, nada que precise de requisição.
  */
 import { computed, ref } from 'vue'
+import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -32,6 +33,18 @@ const MUTED = '#9a9ea6'
 
 const NAV = ['posts', 'séries', 'tags', 'busca', 'sobre']
 
+const SHAPE_OPTIONS = [
+  { id: 'barra', name: 'barra de caixa ┌─┐' },
+  { id: 'dos', name: 'linha de DOS invertida' },
+  { id: 'minimo', name: 'mínimo, só uma régua' },
+  { id: 'menu', name: 'menu de Game Boy ▸' },
+  { id: 'ledger', name: 'razão, SEÇÃO 00 / ÍNDICE' },
+]
+
+function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
+  return options.find((option) => option.id === id)?.name ?? id
+}
+
 const shape = ref('barra')
 const face = ref('departure')
 const accent = ref('verde')
@@ -43,6 +56,20 @@ const accentHex = computed(() => ACCENTS[accent.value])
 const inkContrast = computed(() => ratio(parseHex(INK), parseHex(BG)).toFixed(2))
 const mutedContrast = computed(() => ratio(parseHex(MUTED), parseHex(BG)).toFixed(2))
 const accentContrast = computed(() => ratio(parseHex(accentHex.value), parseHex(BG)).toFixed(2))
+
+const decisionSettings = computed(() => [
+  { label: 'candidato', value: labelFor(SHAPE_OPTIONS, shape.value) },
+  { label: 'fonte', value: face.value },
+  { label: 'destaque', value: `${accent.value} (${accentHex.value})` },
+  { label: 'entreletra', value: `${tracking.value}/100em` },
+  { label: 'respiro', value: String(density.value) },
+  { label: 'caixa alta', value: caps.value ? 'sim' : 'não' },
+])
+
+const decisionContext = computed(
+  () =>
+    `Texto ${inkContrast.value}:1 · secundário ${mutedContrast.value}:1 · destaque ${accentContrast.value}:1 sobre ${BG}.`,
+)
 
 const base = computed(() => ({
   fontFamily: STACKS[face.value],
@@ -103,17 +130,7 @@ const base = computed(() => ({
     </div>
 
     <Panel label="cabeçalho">
-      <Pick
-        v-model="shape"
-        label="candidato"
-        :options="[
-          { id: 'barra', name: 'barra de caixa ┌─┐' },
-          { id: 'dos', name: 'linha de DOS invertida' },
-          { id: 'minimo', name: 'mínimo, só uma régua' },
-          { id: 'menu', name: 'menu de Game Boy ▸' },
-          { id: 'ledger', name: 'razão, SEÇÃO 00 / ÍNDICE' },
-        ]"
-      />
+      <Pick v-model="shape" label="candidato" :options="SHAPE_OPTIONS" />
       <Pick
         v-model="face"
         label="fonte"
@@ -134,6 +151,13 @@ const base = computed(() => ({
       {{ BG }}. A entreletra é o que separa "terminal" de "costume": acima de 0,2em o cabeçalho vira fantasia e a
       leitura fica lenta.
     </p>
+
+    <DecisionCopy
+      lab="cabeçalho"
+      component="ChromeHeader.vue"
+      :settings="decisionSettings"
+      :context="decisionContext"
+    />
   </div>
 </template>
 
