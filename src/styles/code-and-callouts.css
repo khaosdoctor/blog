@@ -202,13 +202,19 @@
  * imposes `position: fixed` and top-layer stacking too; the rules here still
  * apply underneath that and are what the no-popover fallback relies on.
  */
+/*
+ * Deliberately NO `display` here. The browser hides a closed popover with
+ * `[popover]:not(:popover-open) { display: none }`, and hides the fallback with
+ * `[hidden]`, both from the UA stylesheet — which an author `display: flex`
+ * silently beats. That is exactly what happened: the picker sat visible in the
+ * top-left corner of every page, because a fixed element with no inset and no
+ * open state still paints. The two rules below turn it on only when it is
+ * actually open, on whichever of the two paths is in play.
+ */
 .ct-settings {
   position: fixed;
   z-index: 60;
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   border: var(--border) solid var(--rule);
   border-radius: var(--radius);
   background: var(--bg);
@@ -216,6 +222,13 @@
   color: var(--muted);
   font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: 0.8rem;
+}
+
+.ct-settings:popover-open,
+.ct-settings:not([popover]):not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .ct-settings select {

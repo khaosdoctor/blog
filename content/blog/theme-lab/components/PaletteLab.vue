@@ -140,7 +140,7 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
       <p class="path" :style="{ color: swatches[0]?.hex }">~/blog/content <span class="dim">$</span></p>
       <div class="swatches">
         <div v-for="swatch in swatches" :key="swatch.name" class="swatch">
-          <span class="chip" :style="{ background: swatch.hex }"></span>
+          <span class="swatch-bar" :style="{ background: swatch.hex }"></span>
           <span class="text" :style="{ color: swatch.hex }">Abstração vaza</span>
           <span class="meta" :class="{ bad: swatch.value < floor }">
             {{ swatch.hex }} · {{ swatch.value.toFixed(2) }}:1 · {{ swatch.verdict }}
@@ -216,7 +216,10 @@ const failing = computed(() => swatches.value.filter((s) => s.value < floor.valu
   align-items: center;
 }
 
-.chip {
+/* Not `.chip`: the site uses that class globally for tag and category
+   chips, and Vite injects a scoped style unscoped in dev, so this rule was
+   stretching every tag chip on this page to full width. */
+.swatch-bar {
   block-size: 1rem;
   inline-size: 100%;
 }
