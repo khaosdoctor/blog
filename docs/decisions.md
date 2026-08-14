@@ -1,129 +1,168 @@
 # Decisions
 
-Dated, newest first. What was decided, why, and what the alternative was. Anything still open lives in
-`QUESTIONS.md`, not here.
+Two parts. **What needs you** is the list of things blocked on a decision only you can make — read that first and it
+should be enough to pick the work back up cold. **What was decided** is the record of calls already made and why, so
+nothing gets relitigated by accident.
 
-## 2026-08-13, overnight
+Design decisions and their open questions live in `docs/design.md`, which is kept short deliberately. The long-form
+reasoning behind the visual direction is in `docs/theming.md`.
 
-### Two commits are unsigned and nothing is pushed past 31b80ef
+---
 
-The 1Password agent locked partway through the night, so `git` could neither sign nor authenticate over SSH:
-`1Password: failed to fill whole buffer`, then a push rejected for access rights. Every commit up to `31b80ef` is
-signed and on the remote. `06bae5d` onward exist locally and unsigned, since losing the work was the worse option.
+## What needs you
 
-Unlock 1Password, then either `git push` as is, or re-sign first:
+Nothing here is blocking a build. Everything works today; these are choices that were made provisionally, or that
+nobody but you can make.
 
-```
-git rebase --exec 'git commit --amend --no-edit -S' 31b80ef
-```
+### 1. Rewrite the section descriptions
 
-### Clutter audit: what I applied and what I rejected
+`content/categories.json` describes each section, keyed by category then locale (`pt`, `en`). The text in there now is
+**mine, written in an impression of your voice**, in both languages. It renders on every section page and becomes that
+page's meta description, so it is public-facing prose with your name on it.
 
-An Opus critic reviewed the whole repo under a "delete first" stance. Its two largest recommendations are rejected,
-because they are features you asked for in the same session it was reviewing. Its smaller findings are real and are
-being applied.
+A category with no entry falls back to a generated line, so deleting an entry is safe.
 
-**Rejected**
+### 2. Pick the purple
 
-- **Delete hover previews (~755 lines).** You asked for the pin button, the drag hint and the persistence setting
-  today, and asked where the checkbox should live once there is a footer. Requested feature, stays.
-- **Delete the wikilink plugin (~145 lines).** Zero uses in content, but you asked for the cross-locale resolution
-  rule tonight. Stays.
-- **Delete `MissingImage` and `dead-images.json` (~95 lines).** The `urls` array is empty, but 7 remote files are
-  already unreachable and listed in `.migration/unreachable-media.md`. This is the component that renders them when
-  one is finally declared dead. Stays.
-- **Delete the markdown twins and `llms.txt` (~120 lines).** You approved these as a feature. Stays.
-- **Take `vendor-media.ts` out of `prebuild`.** You asked for exactly a build step that vendors media before static
-  generation. Stays in `prebuild`. The critic's objection (a network call in the build path) is answered by the
-  script never failing the build and being a no-op once files are committed.
-- **Translations as plain `.md`.** A previous agent switched the collection to `.md` so model output could never be
-  MDX. Overruled: figures, embeds and the wikilink marker are produced by remark plugins that emit MDX nodes, and in
-  a `.md` file they vanish silently, which would strip every caption and video from a translation. The guard is the
-  defence instead, and it now rejects `{expressions}`, `import` and `export` lines.
+`--brand-purple` is `#6b4fbb`, invented because quotes needed a purple and the brand has none. Quotes are the only
+thing using it. Candidates, if you want alternatives: `#8a63d2` reads better faded on a dark page, `#5b3e99` is safer
+against light text. Deferred to the full design pass, noted here so it does not become permanent by silence.
 
-**Applied**
+### 3. Two font questions the theming lab will put in front of you
 
-- `LEAKED_TAG` in `check-output.ts` was missing `Spotify`, `SpeakerDeck`, `MissingImage`, `Tweet` and `Epigraph`, so
-  the check that exists to catch a leaked component tag could not see five of them. Real hole.
-- One exported component list, so `mdxComponents` in both page trees and the three regexes that name components stop
-  drifting. Two of those lists still named `CourseCTA`, deleted weeks ago.
-- `slugify` was duplicated byte for byte in `src/lib/taxonomy.ts` and `scripts/build-redirects.ts`. If they drift,
-  generated redirects point at tag pages that do not exist.
-- `.visually-hidden` was copied into two scoped stylesheets. Moved to the global block.
-- The "Part N of M" paragraph sat directly under the full series table of contents. Redundant, removed.
-- Comment trimming: the `embed-hosts.ts` header essay, the `PUBLISH_CUTOFF` paragraph repeated in three files, and
-  six comments that argue with a previous review pass. Those belong in commit messages.
-- `build-redirects.ts` reads slug lists from `.migration/`, which is gitignored, so a fresh clone silently produces a
-  redirect file with ~48 fewer rules. Inlined the lists.
+The display face, and whether body copy goes monospaced too. `/theme-lab/` renders the candidates as real headings and
+real paragraphs, because the open question is whether a pixel face survives 3000 words, not whether it looks good in a
+specimen line. `docs/theming.md` has the reasoning; the licences matter, since this repo goes public and a
+share-alike face carries obligations that an OFL one does not.
 
-**Open, for you**
+### 4. Cover and OG image layout
 
-- `Figure.astro`, `Epigraph.astro`, `Sidenote.astro`, `MarginNote.astro` and `sidenotes.css` (~490 lines) have zero
-  uses in 191 posts. `remark-figures` supersedes `Figure` entirely. They are documented in `WRITING.md` as available,
-  so deleting them removes authoring options you may want. Left in place, your call.
-- Two translation implementations exist: `scripts/translate.ts` (394 lines) and the `claude-code-action` prompt in
-  the workflow. The workflow is the live path. The script is now the dead one and should probably go.
+Still unstarted. You bake the post's title into the cover image because it lifts read-through, so covers are per
+locale: `cover.pt.png` and `cover.en.png`. What the card carries besides the title, and how a 90-character title
+behaves, are open. The generator exists (`npm run cover`).
 
-### Eight posts already have an English original
+### 5. Where reader settings live
 
-You wrote them yourself on dev.to, so a machine translation of the Portuguese would be strictly worse than your own
-text. Confirmed matches, all high confidence, one by identical publish timestamp:
+Two settings now exist with nowhere to sit: keeping pinned hover previews after the tab closes, and the code theme.
+The code theme found a home on every code block. The pinned-preview toggle has not. It needs a settings surface, which
+probably means the footer, which does not exist yet in the new design.
 
-| dev.to | post folder |
-|---|---|
-| Cryptography #0 - Essential Concepts | `criptografia-essencial` |
-| Understanding Async Iterators in JavaScript | `async-iterators-js` |
-| Defining Static Methods in Interfaces with TypeScript | `interfaces-estaticas-typescript` |
-| Why Devs Should Write Articles | `por-que-devs-deveriam-escrever-artigos` |
-| Using HarperDB with Kubernetes | `harperdb-kubernetes` |
-| How to Run TypeScript Natively in Node.js with TSX | `tsx-loader` |
-| Accessing .env Files Natively with Node.js | `dotenv-nodejs` |
-| Docker Image Deploy: from VSCode to Azure in a Click | `deploy-de-imagens-docker-do-vscode-para-a-azure` |
+### 6. Small ones
 
-Plan: let the machine translation land first, then replace the body and title of those eight with the dev.to text,
-keeping this repo's frontmatter contract and local image paths. Four more dev.to posts have no Portuguese counterpart
-at all (JavaScript Maps, and three HarperDB pieces), so they are candidates for importing as new posts, your call.
+- Should the code language chip still show when a filename tab is already present? Both currently render.
+- Which of your other domains count as "internal" for the link icon. Only `lsantos.dev` is confirmed; everything else
+  gets the external arrow.
+- Monokai, Dracula and Snazzy ship only one variant each in Shiki's bundle. There is no light Dracula to pair with the
+  dark one without adding a theme package.
 
-`docs/translation-voice.md` holds the extracted rules, from five of his English posts read in full. One useful
-finding: he never uses em-dashes in English either, so the blog's ban matches his own habit.
+### 7. Yours to do, not mine
 
-### Canonical URLs
+- Test the Obsidian authoring flow end to end: write a post in the vault, publish it, confirm it lands.
+- Standalone pages (about, uses, whatever else) and where the author link points. You decided the personal site lives
+  outside this repo; the byline currently points at `lsantos.dev`.
+- Seven media files in `.migration/unreachable-media.md` that no source still has. Two are genuinely gone (a
+  memegenerator image, one HarperDB Studio screenshot); the rest may respond to a browser when they refused a script.
 
-Every page self-canonicalises. The `canonicalUrl` field is deleted from the schema, the posts, the layout and
-`SEO.astro`. Three posts were on Medium first, and a canonical pointing there would hand Google the other domain.
-Your call, recorded: the traffic stays here.
+---
 
-### Translation layout
+## What was decided
 
-A translation lives in its source post's folder, named after its own slug, with `lang` deciding the language and an
-optional `slug` overriding the URL. `content/translated/` is gone, and so is `translationOf`: the folder is the
-pairing. One collection, one schema. Images are `./image.png` for both languages because they are in the same folder.
+Newest first.
 
-### Theme tokens
+### Lazy-loading the code themes: planned, then dropped
 
-Every colour, font stack, size and duration now lives in `src/styles/theme.css`. Two font stacks on purpose:
-`--font-display` is where an 8-bit face goes, `--font-body` stays readable for a 3000 word article. See
-`docs/design.md`.
+All 14 themes cost 35.6 KB raw, **6.2 KB gzipped**, measured, not estimated. The plan — a build-time integration
+emitting one stylesheet per theme, injected on demand, cached by the service worker — was proportionate against the
+15–20 KB the list was assumed to cost, and is not proportionate against 6.2 KB. Dropped, with the reasoning in
+`docs/design.md`. Revisit if the list grows several times over.
+
+Also rejected on its own merits: holding the CSS in `localStorage`. Applying it means injecting a `<style>` from the
+blocking head script, so every page load pays a synchronous read of tens of kilobytes before first paint, and the CSS
+then sits outside normal cache invalidation with nothing to clear a stale copy. A `<link>` to a hashed asset already
+serves from cache with no network on a repeat visit.
+
+### Category descriptions: one file, category as the root key
+
+`content/categories.json`, shaped `{ "javascript": { "pt": "…", "en": "…" } }`. A flat string still means Portuguese
+only.
+
+The alternative — language as the root key, or one file per language — loses on the failure mode that actually
+happens: you rewrite one language and the other quietly rots. With the category as root, both sit on adjacent lines,
+so editing one puts the other in your eye. Language-root wins when you add languages often; you have two. Seven
+categories means adding a third language is seven small edits, once.
+
+Not i18n keys either: these are prose you write and rewrite, and prose belongs in `content/` where you edit it, not in
+a TypeScript table of interface labels.
+
+### Epigraphs removed entirely
+
+They were quotes under another name. A quote with an author is now `> [!quote] Author Name`, an Obsidian callout, which
+renders natively in the vault and needs no component. The `Epigraph` component, both frontmatter fields and their
+styles are gone. Nothing in the content used them except the lab page.
+
+### Captions come from the markdown title only
+
+Never from alt text. The two say different things: a caption is text everyone reads, alt text describes the image for
+someone who cannot see it. Falling back to alt when there was no title gave every image with alt text a caption that
+was really a description.
+
+### Version: commits since the last tag
+
+`0.0.1+42`, as semver build metadata. It used to count posts published since the tag, which left every change that was
+not a post invisible. Tags stay hand-cut for releases that mean something. With no tag yet, it counts from the root
+commit so the number moves immediately.
+
+### Footnotes: margin on wide screens, foot of the post on narrow ones and on paper
+
+Above 70rem the note is read in the margin and the foot-of-post section is hidden; hovering the reference raises a
+card. Below that, no aside and no card — the ordinary numbered list at the foot of the post, which is the boring thing
+that always works, especially on a touch screen. Printing gets the same list and hides the aside, so paper carries
+exactly one copy. The breakpoint lives in one custom property that the script reads at runtime, so the CSS and the JS
+cannot drift.
+
+### Interactive demos are automatic
+
+`<LabDemo src="./components/Counter.vue" client:visible />` and `<HtmlLab src="./components/x.html" title="…" />`. The
+component lives in a `components/` folder beside the post. A remark plugin resolves the path, reads the file, injects
+the import the client directive needs, and emits the source as an ordinary code block — so it is highlighted by the
+same pass as every other block on the site and follows the reader's theme choice. A typo in `src` fails the build.
+
+### Astro 7 deprecation of `markdown.remarkPlugins`: deliberately not migrated
+
+Every build warns that `remarkPlugins`, `rehypePlugins` and `remarkRehype` should move to `unified({...})`. The whole
+content pipeline rides on those arrays.
+
+Not migrated, because `astro-mermaid` appends its own rehype plugin to `markdown.rehypePlugins` from inside its
+integration hook. Moving our side to `unified()` risks its plugin landing in an array nothing reads any more, which
+fails as a diagram silently rendering as a code block rather than as an error. The deprecated form still works in 7.x.
+
+Do it when `astro-mermaid` supports `unified()`, or when Astro 8 forces it. The check afterwards is the lab page: it
+has a mermaid diagram and LaTeX, so a broken pipeline is visible in one screenshot.
 
 ### Callouts had no stylesheet
 
-`rehype-callouts` emits the markup and the inline icons but ships its themes as opt-in CSS files, which nothing
-imported. All five callout types rendered as plain paragraphs with a stray title line, in every post, since the day the
-plugin went in. `BaseLayout.astro` now imports `rehype-callouts/theme/github`, the plugin's own default, which is the
-theme the emitted class names already match. The ASCII redesign replaces that stylesheet; the callout syntax in posts
-does not change.
+`rehype-callouts` emits the markup and the icons but ships its themes as opt-in CSS that nothing imported. All five
+callout types rendered as plain paragraphs with a stray title line, in every post, since the day the plugin went in.
+Found by building the lab page, which is the argument for having it. Now on the Obsidian theme, matching the
+vocabulary the posts are written in — the GitHub theme only knows five types.
 
-Found by building the lab page, which is the argument for having it.
+### Canonical URLs point here
 
-### Astro 7 deprecation: markdown.remarkPlugins, deliberately not migrated yet
+Every post is canonical to `blog.lsantos.dev`, including the ones that appeared on Medium or dev.to first. The traffic
+stays here.
 
-Every build prints: `markdown.remarkPlugins`, `markdown.rehypePlugins` and `markdown.remarkRehype` are deprecated in
-favour of `unified({...})` from `@astrojs/markdown-remark`. The whole content pipeline rides on those two arrays.
+### Translation layout: the folder is the pairing
 
-Not migrated, because `astro-mermaid` appends its own rehype plugin to `markdown.rehypePlugins` from inside its
-integration hook (its build log says so: "Existing rehype plugins"). Moving our side to `unified()` risks that plugin
-landing in an array nothing reads any more, which fails as a diagram silently rendering as a code block rather than as
-an error. The deprecated form still works in 7.x.
+A translation lives in its source post's folder, named after its own slug, with `lang` deciding the language and an
+optional `slug` overriding the URL. `content/translated/` is gone, and so is `translationOf`. One collection, one
+schema. Images are `./image.png` for both languages because they are in the same folder.
 
-Do it when `astro-mermaid` supports `unified()`, or when Astro 8 forces it. The check afterwards is the lab page: it has
-a mermaid diagram and nine LaTeX formulas, so a broken pipeline is visible in one screenshot.
+### Eight posts already had an English original
+
+Eight posts were written in English first and translated to Portuguese, not the other way round. Those use your own
+English text rather than a machine translation of the Portuguese, and are marked `machineTranslated: false`.
+
+### Theme tokens
+
+Every colour, font stack, size and duration lives in `src/styles/theme.css`. Two font stacks on purpose:
+`--font-display` is where an 8-bit face goes, `--font-body` stays readable for a 3000-word article.

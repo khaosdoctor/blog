@@ -116,25 +116,45 @@ function init(): void {
   const wrapper = wrapperEl
   const select = selectEl
 
+  // Tracked here rather than read back off the element: `:popover-open` and the
+  // `hidden` attribute are two different sources of truth, and the close paths
+  // below have to work the same way whichever one is in play.
+  let open = false
+
   function openPicker(anchor: HTMLElement): void {
     wrapper.style.visibility = 'hidden'
     if (canPopover) {
-      // No-op if it was already closed: this is what lets a click on a
-      // different block's button reposition the same popover instead of
-      // erroring on an already-open one.
-      wrapper.hidePopover?.()
-      wrapper.showPopover?.()
+      // Hide first: showing an already-shown popover throws, and a click on a
+      // second block's button should reposition this one rather than fail.
+      try {
+        wrapper.hidePopover?.()
+        wrapper.showPopover?.()
+      } catch {
+        // Some engine disagreed about the state. Fall back to the attribute so
+        // the picker still opens rather than silently doing nothing.
+        wrapper.hidden = false
+      }
     } else {
       wrapper.hidden = false
     }
+    open = true
     place(wrapper, anchor)
     wrapper.style.visibility = ''
     select.focus()
   }
 
   function closePicker(): void {
-    if (canPopover) wrapper.hidePopover?.()
-    else wrapper.hidden = true
+    open = false
+    // Both paths, every time. The popover API's light-dismiss is supposed to
+    // handle an outside click on its own, and when it does this is a no-op; when
+    // it does not, this is the only thing that closes the picker, which is
+    // exactly the bug it was reported with.
+    try {
+      wrapper.hidePopover?.()
+    } catch {
+      // Not currently showing as a popover. The attribute below still applies.
+    }
+    if (!canPopover) wrapper.hidden = true
   }
 
   // One button per code block, injected here rather than shipped in the
@@ -247,20 +267,24 @@ function init(): void {
   injectOpeners(wrapper.dataset.pick ?? 'change the code theme')
 
   document.addEventListener('click', (event) => {
-    const opener = (event.target as Element).closest<HTMLElement>('[data-ct-open]')
+    const target = event.target as Element
+    const opener = target.closest<HTMLElement>('[data-ct-open]')
     if (opener) {
-      openPicker(opener)
+      // A second click on the same button closes it, which is what a reader
+      // expects of a control that opened on click.
+      if (open) closePicker()
+      else openPicker(opener)
       return
     }
-    // The popover API's own light-dismiss handles an outside click when
-    // canPopover is true; the fallback path has no such thing, so it is done
-    // by hand here.
-    if (!canPopover && !wrapper.hidden && !wrapper.contains(event.target as Node)) closePicker()
+    if (open && !wrapper.contains(target)) closePicker()
   })
 
-  if (!canPopover) {
+  {
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !wrapper.hidden) closePicker()
+      // Escape closes it on both paths: the popover API does this itself, but
+      // only while focus is inside the popover, and the select swallows some
+      // key handling of its own.
+      if (event.key === 'Escape' && open) closePicker()
     })
   }
 }
