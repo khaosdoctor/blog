@@ -1,0 +1,64 @@
+---
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PostList from '../../../components/PostList.astro'
+import { getPublishedPosts } from '../../../lib/posts'
+import { categoryDescription } from '../../../lib/categories'
+import { t } from '../../../i18n/ui'
+
+/**
+ * The English half of the section pages.
+ *
+ * Without these, an English post's category linked to the Portuguese section
+ * page, which listed Portuguese posts: the reader was dropped out of their own
+ * language by clicking the label on the article they were reading.
+ *
+ * Built from the English posts alone, so a section with no translated post yet
+ * simply has no English page rather than an empty one.
+ */
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts('en')
+  const byCategory = new Map<string, typeof posts>()
+  for (const post of posts) {
+    const existing = byCategory.get(post.data.category)
+    if (existing === undefined) byCategory.set(post.data.category, [post])
+    else existing.push(post)
+  }
+  return [...byCategory.entries()].map(([category, categoryPosts]) => ({
+    params: { category },
+    props: { category, posts: categoryPosts },
+  }))
+}) satisfies GetStaticPaths
+
+const { category, posts } = Astro.props
+const described = categoryDescription(category, 'en')
+const description = described ?? t('en', 'sectionDescription', category)
+---
+
+<BaseLayout
+  title={`${category} | Lucas Santos`}
+  description={description}
+  lang="en"
+  section={{ name: category, url: `/en/${category}/` }}
+>
+  <h1>{category}</h1>
+  {described !== null && <p class="about">{described}</p>}
+  <p class="count">
+    {posts.length} {t('en', posts.length === 1 ? 'article' : 'articles')}
+  </p>
+  <PostList posts={posts} />
+</BaseLayout>
+
+<style>
+  .about {
+    margin-block: 0.5rem 1rem;
+    color: var(--muted);
+    max-inline-size: var(--measure);
+  }
+
+  .count {
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+</style>

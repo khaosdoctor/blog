@@ -34,6 +34,7 @@ type UIKey =
   | 'showSource'
   | 'codeTheme'
   | 'codeThemeAuto'
+  | 'codeThemePick'
   | 'writtenBy'
   | 'readingProgress'
   | 'notWrittenYet'
@@ -113,6 +114,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     showSource: 'ver o código',
     codeTheme: 'Tema do código',
     codeThemeAuto: 'Automático (segue o sistema)',
+    codeThemePick: 'mudar o tema do código',
     writtenBy: 'por',
     readingProgress: 'progresso da leitura',
     notWrittenYet: 'ainda não escrito',
@@ -192,6 +194,7 @@ const ui: Record<Locale, Record<UIKey, string>> = {
     showSource: 'show the source',
     codeTheme: 'Code theme',
     codeThemeAuto: 'Automatic (matches your system)',
+    codeThemePick: 'change the code theme',
     writtenBy: 'by',
     readingProgress: 'reading progress',
     notWrittenYet: 'not written yet',
