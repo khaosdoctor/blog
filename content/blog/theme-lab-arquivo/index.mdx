@@ -86,7 +86,7 @@ malha, câmera e luz. A ideia era usar ele no 404, na página "sobre", ou como o
 
 Ele perdeu por uma decisão maior do que ele: o blog vai ter quase nenhuma animação, e o único lugar que ganha
 movimento constante é o logo. Um sólido girando não é um logo, e era o candidato mais caro dos três, um loop de WebGL2
-que nunca para sozinho. O que ficou no lugar são os candidatos de animação do logo, na seção 06 do laboratório vivo.
+que nunca para sozinho. O que ficou no lugar são os candidatos de animação do logo, na seção 04 do laboratório vivo.
 
 Vale guardar porque ele é a demonstração mais completa do que a biblioteca faz além de pintar caracteres: aqui tem
 projeção, `perspective`, `camera`, luz ambiente e luz pontual. Também é o candidato que ensinou duas coisas por errar
@@ -115,3 +115,117 @@ leitor de tela não anuncia os colchetes como conteúdo. Esse detalhe sobreviveu
 site.
 
 <LabDemo src="./components/CssHeading.vue" client:visible />
+
+## A bancada de tipografia, com as duas que ganharam
+
+A decisão do corpo fechou em Literata para o padrão e Atkinson Hyperlegible para a opção sem serifa, com as medidas de cada uma aplicadas no site (`src/styles/theme.css`). O painel saiu do laboratório vivo porque não sobrou pergunta nele, e continua aqui inteiro, funcionando.
+
+Vale guardar por uma razão que não é a fonte: este é o único candidato do redesenho que não renderiza amostra nenhuma. O que ele controla é o post de verdade dentro do próprio painel, markdown puro passando pelo mesmo remark e pelo mesmo rehype de qualquer post do blog, com citação, callout, tabela, código, nota lateral e nota de rodapé no lugar. Mexer num slider muda o post, não uma maquete dele.
+
+Foi essa diferença que decidiu a disputa, e é o argumento inteiro: a IBM Plex Mono ganhava com folga enquanto a amostra era prosa lisa, e caiu no primeiro `trecho de código inline`, que numa fonte monoespaçada deixa de se distinguir do parágrafo em volta. Nenhuma amostra de quatro parágrafos limpos mostraria isso. As treze recusadas estão logo acima.
+
+Os sliders de espaçamento existem por causa da regra 1.4.12 do WCAG, que não pede que o texto já venha espaçado, e sim que ele não quebre quando o leitor força entrelinha 1,5, entreletra 0,12em e entrepalavra 0,16em.
+
+<LabDemo src="./components/TypeSpecimen.vue" client:visible>
+
+<div id="lab-post">
+
+
+### Uma consulta DNS, do clique ao pacote
+
+Digitar um domínio na barra de endereço parece instantâneo, mas embaixo dele existe uma cadeia inteira de perguntas e respostas que a maioria dos programadores nunca vê. O **DNS** não guarda um mapa completo em lugar nenhum: ele guarda pedaços, cada um numa autoridade diferente, e monta a resposta perguntando de cima para baixo. É essa indireção, e não um banco de dados gigante, que faz o sistema aguentar bilhões de nomes sem cair.
+
+O primeiro lugar que o navegador olha é o próprio cache: o do processo, depois o do sistema operacional. Se o nome já foi resolvido há pouco, a resposta sai dali e nenhum pacote sai da máquina. Quando o cache está frio, a pergunta sobe para um resolvedor recursivo, quase sempre o do provedor de internet ou um público como `1.1.1.1`. É esse resolvedor que faz o trabalho pesado <u>em nome do cliente</u>, um passo de cada vez, e é por isso que ele se chama recursivo: ele não devolve uma resposta parcial, insiste até ter a definitiva.
+
+#### Os registros que valem a pena entender
+
+Nem todo registro DNS guarda o mesmo tipo de coisa, e confundir um pelo outro é o erro mais comum de quem configura um domínio pela primeira vez.
+
+| Tipo    | Guarda                              | Exemplo comum                  |
+| ------- | ------------------------------------ | ------------------------------- |
+| `A`     | Um endereço IPv4                     | apontar um domínio para um servidor |
+| `AAAA`  | Um endereço IPv6                     | o mesmo, na versão nova do IP  |
+| `CNAME` | Um apelido para outro nome           | `www` apontando para o domínio raiz |
+| `MX`    | Para onde vai o e-mail do domínio    | delegar e-mail a um terceiro   |
+| `TXT`   | Texto arbitrário                     | provar que você é dono do domínio |
+| `NS`    | Quem é a autoridade daquela zona     | delegar um subdomínio inteiro  |
+
+A consulta raramente para no primeiro registro encontrado. Um `CNAME` manda o resolvedor perguntar de novo pelo nome novo, e essa cadeia pode ter vários elos antes de chegar a um `A` de verdade.<Sidenote>Uma cadeia de `CNAME` longa demais é uma causa clássica de lentidão silenciosa: cada elo é uma volta extra ao resolvedor, mesmo que cada volta individual seja rápida.</Sidenote> Nenhum desses registros expira sozinho: quem decide por quanto tempo ele fica em cache é o `TTL`, um número em segundos que acompanha cada resposta.<MarginNote>Um `TTL` baixo demais multiplica o tráfego sobre a autoridade; um `TTL` alto demais atrasa qualquer correção depois de um erro de configuração. A prática comum é baixar o `TTL` horas antes de uma migração planejada e subir de volta depois que o novo endereço já se espalhou.</MarginNote>
+
+> A internet inteira funciona porque ninguém precisa saber o endereço de ninguém, só o nome.
+
+Essa ideia não é nova. Ela é, na prática, o mesmo argumento que David Wheeler fez sobre indireção em geral, décadas antes do DNS existir na forma atual:
+
+> [!quote] David Wheeler
+> Todo problema em ciência da computação pode ser resolvido com mais uma camada de indireção, exceto o problema de camadas demais.
+
+O DNS é essa camada aplicada a nomes: ~~um índice fixo~~ um sistema hierárquico e distribuído, e é exatamente por ser distribuído que ele sobrevive à queda de qualquer servidor isolado, inclusive um dos treze grupos de servidores raiz.
+
+Uma função mínima de resolução, só para deixar o fluxo concreto, cabe em poucas linhas:
+
+```ts
+// src/dns/resolve.ts
+export async function resolveA(hostname: string): Promise<string[]> {
+  const response = await fetch(`https://dns.example/resolve?name=${hostname}&type=A`)
+  const { answers } = await response.json()
+  return answers.map((record: { data: string }) => record.data)
+}
+```
+
+E o mesmo resultado, olhando pela linha de comando em vez de código, com a ferramenta que qualquer administrador de rede usa primeiro para depurar um domínio:
+
+```bash
+dig +noall +answer example.com A
+```
+
+> [!NOTE]
+> `dig` sem nenhuma opção já mostra a resposta completa; `+noall +answer` só corta o ruído do cabeçalho e da seção de autoridade.
+
+> [!TIP]
+> Rodar `dig` contra um resolvedor específico com `dig @1.1.1.1 example.com` é o jeito mais rápido de saber se o problema está no cache local ou na configuração real do domínio.
+
+> [!WARNING]
+> Um `TTL` de zero não é "sempre atual": é uma sobrecarga garantida no resolvedor, porque nenhuma resposta fica em cache nem por um segundo.
+
+> [!IMPORTANT]
+> O DNS não é criptografado por padrão. `DNS over HTTPS` e `DNS over TLS` existem justamente para esconder qual nome está sendo resolvido de quem está observando a rede no meio do caminho.
+
+> [!QUESTION]
+> Se o resolvedor do provedor já é rápido o bastante, vale a pena trocar para um público só por causa da privacidade, ou isso é otimizar o elo errado da corrente?
+
+Antes de apontar um domínio novo em produção, a checklist de sempre é curta, mas pular um item dela é a causa mais comum de incidente evitável:
+
+- [x] Conferir o `TTL` atual antes de mudar qualquer registro
+- [x] Confirmar que o `NS` da zona aponta para a autoridade certa
+- [ ] Testar a resolução a partir de uma rede fora do escritório
+- [ ] Esperar o `TTL` antigo expirar antes de considerar a migração terminada
+
+A imagem abaixo não tenta ilustrar nada disso: é só um retângulo no preto de fundo do site, para conferir se a legenda nasce do lugar certo.
+
+![](../theme-lab/placeholder.png "Uma consulta DNS, do clique ao pacote")
+
+O que fica desse passeio inteiro é uma lista curta do que já foi conferido nesta bancada:
+
+- Ênfase: negrito, itálico, riscado e sublinhado
+- Código inline e blocos cercados, com e sem nome de arquivo
+- Citação simples e citação com autor
+- Cinco tipos de callout, não só um
+- Nota de rodapé, nota lateral e nota de margem
+- Imagem com legenda vinda do título, não do texto alternativo
+
+---
+
+Se este parágrafo já cansou de ler, a fonte do corpo respondeu antes de qualquer slider precisar responder por ela. A hierarquia inteira do DNS existe porque ninguém confia num único ponto central, e o mesmo raciocínio vale para escolher uma fonte de corpo: nenhum julgamento vindo de uma linha só resolve a pergunta.[^1]
+
+
+
+</div>
+
+</LabDemo>
+
+[^1]: Mockapetris, P. *Domain Names, Concepts and Facilities*, RFC 1035, IETF, 1987.
+
+Uma fonte de bitmap só fica nítida em múltiplo inteiro do tamanho em que foi desenhada. Falar isso não convence ninguém, então aqui está a escada: a mesma palavra de 8 a 32px, com os tamanhos que fecham no grid marcados e os outros mostrando o borrão.
+
+<LabDemo src="./components/WholePixel.vue" client:visible />
+
