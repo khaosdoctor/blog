@@ -39,7 +39,8 @@ import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
 // Baked in at build time: the semver the release workflow last tagged, plus a
-// count of posts published since. See src/lib/version.ts.
+// count of commits since that tag. See src/lib/version.ts. It counted posts
+// once, which left every change that was not a post invisible.
 import { commitShort, commitUrl, siteVersion as version } from '../lib/version'
 
 interface Props {

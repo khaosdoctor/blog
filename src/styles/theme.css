@@ -105,7 +105,11 @@
    * dark-on-yellow is the only legible pairing.
    */
   --em-bold-bg: var(--brand-yellow);
-  --em-bold-fg: #1a1c20;
+  /* The page's warm ink rather than the cool near-black this used to be, so the
+   * chip belongs to the sepia palette. 7.30:1 on the brand yellow. Fixed in both
+   * themes, because the chip is the same yellow in both and dark-on-yellow is the
+   * only legible pairing. */
+  --em-bold-fg: #332d23;
   /*
    * Italic is the same yellow as bold, as text rather than a wash. The brand
    * yellow is unreadable as text on a near-white page, so light mode drops to a

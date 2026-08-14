@@ -218,7 +218,10 @@ const deckStyle = computed(() => ({
   line-height: 1.6;
 }
 
-.decided strong {
-  color: var(--fg);
-}
+/*
+ * Deliberately no `color` on the strong here. A bold run inside a post is a
+ * chip: yellow background, dark ink, both from theme.css. Setting the colour to
+ * --fg kept the yellow and put the near-white page ink on top of it, which is
+ * 1.37:1 and unreadable.
+ */
 </style>
