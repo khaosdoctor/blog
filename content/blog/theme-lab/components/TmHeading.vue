@@ -116,10 +116,16 @@ onMounted(async () => {
     const element = canvas.value
     const box = stage.value
     if (!element || !box) return
-    const tm = textmode.create({ canvas: element, fontSize: cell.value })
+    // Sem a tela de abertura, e o noLoop só depois do setup: congelar no meio
+    // do fade do splash deixava a moldura dele impressa por cima da cena.
+    const tm = textmode.create({ canvas: element, fontSize: cell.value, loadingScreen: { transition: 'none' } })
     instance.value = tm
     tm.draw(() => paint(tm))
-    if (frozen.value) tm.noLoop()
+    tm.setup(() => {
+      if (!frozen.value) return
+      tm.noLoop()
+      tm.redraw(1)
+    })
 
     const observer = new ResizeObserver(() => {
       const rect = box.getBoundingClientRect()
