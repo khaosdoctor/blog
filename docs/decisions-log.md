@@ -287,10 +287,19 @@ chosen.
 `--font-body` is whichever face is active, so no rule on the site had to change. `data-body-face="sans"` on `<html>`
 switches; the preferences menu will be what writes it.
 
-Antialiasing is off (`-webkit-font-smoothing: none`), which is deliberate: smoothed type beside a traced bitmap heading
-reads as two different eras. The lab also used `filter: contrast(100.00001%)` to force the same effect in more engines,
-and that must never reach the site: a filter makes its element the containing block for every fixed descendant, which
-would unpin the outline panel, the progress bar and the sidenotes at once.
+Antialiasing was off (`-webkit-font-smoothing: none`), on the argument that smoothed type beside a traced bitmap
+heading reads as two different eras. **That was reversed after reading the site on a 1x monitor**, and the token is
+`antialiased` now. With smoothing off every stem rounds up to a whole device pixel, so the same page that looks pixel
+sharp at 2x comes out heavy and blocky at 1x, and which monitor the reader owns is not something this design gets to
+pick. Grayscale rather than the platform default, which keeps the type lighter than subpixel rendering does.
+
+A resolution query was tried first, keeping `none` above 1.5dppx and smoothing only the 1x case. It was dropped: two
+different renderings of the same page is a harder thing to reason about than one, and the pixel era is already carried
+by the faces themselves.
+
+The lab also used `filter: contrast(100.00001%)` to force the unsmoothed effect in more engines, and that must never
+reach the site: a filter makes its element the containing block for every fixed descendant, which would unpin the
+outline panel, the progress bar and the sidenotes at once.
 
 The column is 78ch. In `ch`, not pixels, so it follows the active face, and the two differ more than they look:
 Literata's zero is 0.578em and Atkinson's is 0.648em, so 78ch is about 812px in the serif at 18px and about 1010px in

@@ -93,20 +93,21 @@
   --word-spacing-body: 0.15em;
 
   /*
-   * Antialiasing off, which is a deliberate look rather than an oversight: the
-   * whole site is pixel and terminal, and smoothed type beside a bitmap heading
-   * reads as two different eras. `font-smooth` is not standard CSS, so this only
-   * takes effect where the vendor property exists.
+   * Antialiasing was off here, on the argument that smoothed type beside a
+   * bitmap heading reads as two different eras. It was tried and it lost: with
+   * no smoothing every stem rounds up to a whole device pixel, so on a 1x screen
+   * the body comes out heavy and blocky, and a reader's monitor is not something
+   * the design gets to choose. Grayscale rather than the platform default, which
+   * keeps the type lighter than subpixel rendering would.
    *
-   * The lab also used `filter: contrast(100.00001%)` to force the same thing in
-   * more engines. That must never come here: a filter on a container makes it
-   * the containing block for every fixed descendant, which would unpin the
-   * outline panel, the reading progress bar and the sidenotes all at once.
-   *
-   * This value is for a 2x screen. The block after this rule turns smoothing
-   * back on at 1x, where the same setting reads as heavy rather than as pixel.
+   * `font-smooth` is not standard CSS, so this only takes effect where the
+   * vendor property exists. The lab also used `filter: contrast(100.00001%)` to
+   * force the same thing in more engines, and that must never come here: a
+   * filter on a container makes it the containing block for every fixed
+   * descendant, which would unpin the outline panel, the reading progress bar
+   * and the sidenotes all at once.
    */
-  --font-smoothing: none;
+  --font-smoothing: antialiased;
 
   /*
    * The reading column, in characters rather than pixels, so it follows whichever
@@ -240,22 +241,6 @@
   --text-base: 1.25rem;
   --leading: 1.53;
   --tracking-body: 0em;
-}
-
-/*
- * A one-device-pixel screen, which is most external monitors. Turning
- * antialiasing off there rounds every stem up to a whole pixel, so the body text
- * comes out heavy and blocky rather than pixel-crisp: the look only holds where
- * a device pixel is small enough to be invisible. Verified on a non-retina
- * display against the same page on a 2x one.
- *
- * Written as `max-resolution` rather than a `-webkit-min-device-pixel-ratio`
- * query because this is the standard property and it reads as what it is.
- */
-@media (max-resolution: 1.5dppx) {
-  :root {
-    --font-smoothing: antialiased;
-  }
 }
 
 /* Motion is decoration everywhere on this site, so it can all go. */
