@@ -102,6 +102,9 @@
    * more engines. That must never come here: a filter on a container makes it
    * the containing block for every fixed descendant, which would unpin the
    * outline panel, the reading progress bar and the sidenotes all at once.
+   *
+   * This value is for a 2x screen. The block after this rule turns smoothing
+   * back on at 1x, where the same setting reads as heavy rather than as pixel.
    */
   --font-smoothing: none;
 
@@ -237,6 +240,22 @@
   --text-base: 1.25rem;
   --leading: 1.53;
   --tracking-body: 0em;
+}
+
+/*
+ * A one-device-pixel screen, which is most external monitors. Turning
+ * antialiasing off there rounds every stem up to a whole pixel, so the body text
+ * comes out heavy and blocky rather than pixel-crisp: the look only holds where
+ * a device pixel is small enough to be invisible. Verified on a non-retina
+ * display against the same page on a 2x one.
+ *
+ * Written as `max-resolution` rather than a `-webkit-min-device-pixel-ratio`
+ * query because this is the standard property and it reads as what it is.
+ */
+@media (max-resolution: 1.5dppx) {
+  :root {
+    --font-smoothing: antialiased;
+  }
 }
 
 /* Motion is decoration everywhere on this site, so it can all go. */
