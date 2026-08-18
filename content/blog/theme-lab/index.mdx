@@ -96,6 +96,15 @@ por mais de cinco segundos ao lado de outro conteúdo. A taxa de geração por p
 bem abaixo do limite de três trocas de luminância por segundo que WCAG 2.3.1 usa para definir uma pisca
 perigosa, e cada célula troca uma área pequena demais para entrar na exceção de área daquela mesma regra.
 
+A maioria das sementes aleatórias não sobrevive sozinha: vira still life ou apaga em poucas gerações. Por isso
+o campo é alimentado, não se sustenta por conta própria: a cada N segundos (slider, quatro por padrão, com uma
+posição zero que desliga a alimentação e deixa ver o campo esvaziar sozinho) entra um planador novo, em posição
+e rotação aleatórias entre as quatro possíveis, nunca dentro da caixa do artigo nem mais perto da borda da grade
+do que a folga mínima, pra não nascer cortado atrás do texto nem andar pra fora da tela em poucas gerações. Quem
+decide alimentar ou não é o mesmo laço de `requestAnimationFrame` que já para para pausa manual,
+`prefers-reduced-motion` e aba escondida; não existe um `setInterval` à parte que continuaria batendo com o
+campo parado.
+
 O custo: o próprio componente mede, ao vivo, gerações por segundo, células vivas e milissegundos por geração, e
 imprime os três embaixo do palco, porque um número medido enquanto a coisa roda vale mais que um número
 lembrado depois. A aba escondida cancela o laço (`visibilitychange` chamando `cancelAnimationFrame`), o que

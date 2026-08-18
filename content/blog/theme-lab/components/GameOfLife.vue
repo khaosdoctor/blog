@@ -26,14 +26,28 @@ const CLICK_MODES: Array<{ id: string; name: string }> = [
   { id: 'planador', name: 'planador (glider)' },
 ]
 
-/** Deslocamentos do planador clássico, a partir da célula clicada. */
-const GLIDER: Array<[number, number]> = [
+/** Deslocamentos do planador clássico, a partir da célula clicada, numa caixa 3x3. */
+const GLIDER_BASE: Array<[number, number]> = [
   [1, 0],
   [2, 1],
   [0, 2],
   [1, 2],
   [2, 2],
 ]
+
+/** Gira uma forma 90° dentro de uma caixa `size`x`size`, para não repetir a mesma direção sempre. */
+function rotate90(cells: Array<[number, number]>, size: number): Array<[number, number]> {
+  return cells.map(([c, r]) => [size - 1 - r, c])
+}
+
+/** As quatro rotações do planador, uma por diagonal: sem isso todo planador andaria para o mesmo lado. */
+const GLIDER_ORIENTATIONS: Array<Array<[number, number]>> = [GLIDER_BASE]
+for (let i = 0; i < 3; i++) GLIDER_ORIENTATIONS.push(rotate90(GLIDER_ORIENTATIONS[GLIDER_ORIENTATIONS.length - 1], 3))
+
+/** Células de folga entre o planador e a borda da grade, para não nascer e sair da tela em poucas gerações. */
+const EDGE_MARGIN = 3
+/** O planador cabe numa caixa 3x3 em qualquer uma das quatro rotações. */
+const GLIDER_BOX = 3
 
 const ground = ref('escuro')
 const cellSize = ref(18)
@@ -44,6 +58,8 @@ const clickMode = ref('celula')
 const columnCh = ref(46)
 const manualPause = ref(false)
 const simulateReduced = ref(false)
+/** Segundos entre planadores automáticos. 0 é a posição desligada: sem alimentação, o campo só esvazia. */
+const autoSeedSeconds = ref(4)
 
 const stageRef = ref<HTMLDivElement | null>(null)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -54,6 +70,8 @@ const rows = ref(0)
 const generation = ref(0)
 const aliveCount = ref(0)
 const costMs = ref(0)
+/** Quantos planadores automáticos já entraram no campo, para o leitor ver a alimentação acontecendo. */
+const autoFedCount = ref(0)
 
 // Estado do grid vive fora da reatividade do Vue: uma célula é lida e escrita
 // milhares de vezes por geração, e um Proxy nesse caminho custa mais do que o
@@ -201,9 +219,18 @@ function recordCost(ms: number): void {
 
 let rafId: number | null = null
 let lastStep = 0
+let lastAutoSeed = 0
 
 function tick(timestamp: number): void {
   rafId = requestAnimationFrame(tick)
+
+  // Mesmo laço que já para para pausa manual, prefers-reduced-motion e aba escondida: um
+  // setInterval à parte continuaria batendo com o campo parado, e ninguém o cancelaria.
+  if (autoSeedSeconds.value > 0 && timestamp - lastAutoSeed >= autoSeedSeconds.value * 1000) {
+    lastAutoSeed = timestamp
+    feedGlider()
+  }
+
   const interval = 1000 / gps.value
   if (timestamp - lastStep < interval) return
   lastStep = timestamp
@@ -216,6 +243,7 @@ function tick(timestamp: number): void {
 function startLoop(): void {
   stopLoop()
   lastStep = 0
+  lastAutoSeed = 0
   rafId = requestAnimationFrame(tick)
 }
 
@@ -224,14 +252,53 @@ function stopLoop(): void {
   rafId = null
 }
 
-function placeGlider(col: number, row: number): void {
-  for (const [dc, dr] of GLIDER) {
+/** `orientation` por padrão é a forma clássica: o clique do leitor sempre planta a mesma, previsível. */
+function placeGlider(col: number, row: number, orientation: Array<[number, number]> = GLIDER_BASE): void {
+  for (const [dc, dr] of orientation) {
     const c = col + dc
     const r = row + dr
     if (c < 0 || c >= cols.value || r < 0 || r >= rows.value) continue
     const idx = indexOf(c, r)
     if (excluded[idx] === 1) continue
     grid[idx] = 1
+  }
+}
+
+/** Testa a caixa `GLIDER_BOX`x`GLIDER_BOX` inteira contra a máscara de exclusão, não célula por
+ * célula: um planador automático que nascesse parcialmente atrás do texto nasceria cortado e
+ * morreria sozinho na próxima geração, o oposto do que a alimentação deveria fazer. */
+function boxOverlapsExclusion(col: number, row: number): boolean {
+  for (let dr = 0; dr < GLIDER_BOX; dr++) {
+    for (let dc = 0; dc < GLIDER_BOX; dc++) {
+      if (excluded[indexOf(col + dc, row + dr)] === 1) return true
+    }
+  }
+  return false
+}
+
+/**
+ * Alimenta o campo: um planador novo, em posição e rotação aleatórias, para o campo raramente
+ * morrer de vez sozinho, já que a maioria das sementes aleatórias vira still life ou apaga.
+ * `Math.random()` aqui é decoração de execução (posição e rotação de um efeito visual ao vivo), não
+ * a semente determinística que a capa do site exige; não precisa da mesma restrição.
+ */
+function feedGlider(): void {
+  const c = cols.value
+  const r = rows.value
+  const colSpan = c - EDGE_MARGIN * 2 - GLIDER_BOX
+  const rowSpan = r - EDGE_MARGIN * 2 - GLIDER_BOX
+  if (colSpan < 0 || rowSpan < 0) return // grade pequena demais pra caber um planador com folga
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const col = EDGE_MARGIN + Math.floor(Math.random() * (colSpan + 1))
+    const row = EDGE_MARGIN + Math.floor(Math.random() * (rowSpan + 1))
+    if (boxOverlapsExclusion(col, row)) continue
+    const orientation = GLIDER_ORIENTATIONS[Math.floor(Math.random() * GLIDER_ORIENTATIONS.length)]
+    placeGlider(col, row, orientation)
+    autoFedCount.value++
+    aliveCount.value = grid.reduce((sum, v) => sum + v, 0)
+    draw()
+    return
   }
 }
 
@@ -291,6 +358,10 @@ const decisionSettings = computed(() => [
   { label: 'clique adiciona', value: CLICK_MODES.find((m) => m.id === clickMode.value)?.name ?? clickMode.value },
   { label: 'medida da coluna simulada', value: `${columnCh.value}ch` },
   { label: 'contraste da célula acesa contra o fundo', value: `${cellContrast.value.toFixed(2)}:1 (${cellGrade.value})` },
+  {
+    label: 'alimentação automática',
+    value: autoSeedSeconds.value === 0 ? 'desligada, o campo só esvazia' : `um planador a cada ${autoSeedSeconds.value}s`,
+  },
 ])
 
 const decisionContext =
@@ -348,6 +419,13 @@ onUnmounted(() => {
       <Knob v-model="densityPct" label="densidade da semente" :min="1" :max="20" unit="%" />
       <Knob v-model="gps" label="gerações por segundo" :min="0.5" :max="8" :step="0.5" unit="/s" />
       <Knob v-model="dimnessPct" label="apagamento da célula" :min="2" :max="30" unit="%" />
+      <Knob
+        v-model="autoSeedSeconds"
+        label="alimentação: segundos por planador novo (0 desliga)"
+        :min="0"
+        :max="20"
+        unit="s"
+      />
     </Panel>
 
     <Panel label="clique e coluna">
@@ -369,6 +447,11 @@ onUnmounted(() => {
           : running
             ? 'Rodando.'
             : 'Pausado.'
+      }}
+      {{
+        autoSeedSeconds === 0
+          ? 'Alimentação automática desligada: o campo só esvazia daqui pra frente, sem planador novo entrando.'
+          : `Campo alimentado: um planador novo a cada ${autoSeedSeconds}s, em posição e rotação aleatórias, nunca dentro da coluna de leitura nem perto da borda. ${autoFedCount} entraram até agora.`
       }}
       A aba escondida cancela o laço (visibilitychange + cancelAnimationFrame), mas isso não foi visto rodando de
       verdade nesta máquina, que não tem navegador; o mesmo vale para bateria e para o efeito numa rolagem longa de
