@@ -121,13 +121,11 @@ export default defineConfig({
     redirectStubs(),
   ],
   markdown: {
-    // `markdown.remarkPlugins` / `markdown.rehypePlugins` are deprecated in
-    // favor of a processor set here, so both arrays move inside `unified()`
-    // (the remark/rehype pipeline this site's plugins are all written for).
-    // astro-mermaid reads `markdown.processor.name` to decide where to add its
-    // own rehype plugin; leaving a processor unset here is what used to send
-    // it into a plugin array nobody read, and that failure shows up as a
-    // diagram silently rendering as a code block, not as an error.
+    // `markdown.remarkPlugins` and `markdown.rehypePlugins` are deprecated, and
+    // Astro's own notice points here: the same arrays, passed to `unified()` from
+    // `@astrojs/markdown-remark` and set as the processor. Not `satteri()`, whose
+    // `mdastPlugins`/`hastPlugins` are a different API that every plugin below
+    // would have to be rewritten against.
     processor: unified({
       // Posts are plain markdown even though the files are .mdx: these two plugins
       // are what turn that markdown into components, so nothing in content/ needs

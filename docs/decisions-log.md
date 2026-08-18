@@ -194,28 +194,35 @@ injects the import the client directive needs, and emits the source code as an o
 highlighted by the same step as every other block on the site and follows whichever theme the reader picked. A
 wrong `src` breaks the build.
 
-## Deprecation of `markdown.remarkPlugins`: the reason not to migrate is gone
+## Deprecation of `markdown.remarkPlugins`: migrated, and an earlier version of this entry named the wrong target
 
-**This entry changed status.** It used to say "not migrated on purpose" and is now unblocked technical debt, not a
-standing decision. Worth reading before touching the pipeline.
+**Done.** `astro.config.mjs` now passes both plugin arrays into `unified({ remarkPlugins, rehypePlugins })` from
+`@astrojs/markdown-remark`, set as `markdown.processor`. Every plugin kept its order and its own options; nothing
+in `src/lib/` or `content/` changed.
 
-What is still true: `astro.config.mjs` still uses the deprecated arrays, and every build warns that they should
-become `unified({...})`. The entire content pipeline depends on them.
+**A previous version of this entry said Astro 7 wants `satteri()`. That was wrong**, and it is worth correcting here
+rather than leaving it to be rediscovered. Astro's own deprecation notice (the `@deprecated` tag on both
+`markdown.remarkPlugins` and `markdown.rehypePlugins` in `node_modules/astro/dist/types/public/config.d.ts`) says to
+pass the plugins to `unified({ ... })` from `@astrojs/markdown-remark` and set that as `markdown.processor`, not to
+`@astrojs/markdown-satteri`. Sätteri's processor takes `mdastPlugins` / `hastPlugins`, typed against its own plugin
+shape, a different API from remark/rehype's `remarkPlugins` / `rehypePlugins`. Moving to it would mean rewriting
+every one of this repo's remark and rehype plugins, not reusing them as-is.
 
-The original reason not to migrate was `astro-mermaid`, which added its rehype plugin to `markdown.rehypePlugins`
-from inside its own integration hook; moving our side would risk its plugin falling into an array nobody reads
-anymore, and that failure shows up as a diagram silently rendering as a code block, not as an error.
+`astro-mermaid@2.1.0` proves the two processors are not interchangeable, not just differently named: it ships a
+`remarkMermaidPlugin` / `rehypeMermaidPlugin` pair for the `unified()` branch and a separate `satteriMermaidPlugin`
+for the Sätteri branch (`node_modules/astro-mermaid/astro-mermaid-integration.js`), and reads
+`config.markdown.processor.name` to decide which pair to add its own plugin to.
 
-**That reason no longer exists.** The installed version, `astro-mermaid@2.1.0`, decides what to do by checking
-`config.markdown.processor.name` and already supports both modern processors: `unified()` (Astro 6.4+) and
-`satteri()` (Astro 7+, which is our case). It only falls back to the deprecated arrays when no processor exists at
-all. The code is in `node_modules/astro-mermaid/astro-mermaid-integration.js`, around line 296.
+The original reason not to migrate was real at the time, then stopped applying: astro-mermaid added its rehype
+plugin to `markdown.rehypePlugins` from inside its own integration hook, and moving our side risked its plugin
+falling into an array nobody reads anymore, a failure that shows up as a diagram silently rendering as a code
+block, not as an error. Once astro-mermaid started reading `processor.name` itself and supporting `unified()`
+directly, that risk was gone, which is what made this migration safe to do.
 
-In other words: the condition this entry set has already been met, and nobody noticed because the build warning is
-the same one as before.
-
-When this gets done, note that Astro 7 wants `satteri()`, not `unified()`. The check is the lab page: it has a
-mermaid diagram and LaTeX, so a broken pipeline shows up in a screenshot, on top of the `npm run check` guards.
+**Verified**: `npm run check` clean. Page output for `/theme-lab/`, `/lab/` and `/error-cause/` compared before and
+after the change, with identical counts for katex (6, 8, 6), callouts (184), footnote sidenotes (108), heading
+anchors (72), figures (74), and a byte-identical `<pre class="mermaid">graph TD` marker. Not verified: that mermaid
+actually renders as an SVG in a real browser, since that happens client-side.
 
 ## The callouts had no stylesheet
 
@@ -326,3 +333,55 @@ and the new font's metrics second. Anything that counts frames reads the interme
 780px to 1014px) and keeps it. A `ResizeObserver` on the article fires on each settled pass instead, so the last thing
 it sees is the final layout. The window `resize` listener stays alongside it: past the measure the column stops growing
 while the room beside it keeps shrinking, and the observer never fires for that.
+
+## Chip ink mixes toward the readable end of the page, not always toward black
+
+`--chip-ink` in `src/styles/chips.css` is each chip's own colour carried toward whichever end of the page is
+readable: black on the sepia page, white on the black one. Both directions used to mix toward black, so on the dark
+page the ink moved toward the background instead of away from it. The brand red chip is where this showed: 2.71:1
+against black to start, 2.82:1 after the old mix, a red outline with something unreadable inside it. The frame and
+the hover fill now read `--chip-ink` too, rather than the raw brand colour, which is also why the purple chip stops
+drawing a 1.97:1 border on black.
+
+Measured in oklab, the same space the browser mixes in. Dark: blue 8.27, green 11.59, yellow 14.21, red 8.12,
+purple 5.19. Light: blue 10.45, green 7.24, yellow 5.70, red 10.69, purple 15.12. Worth noting: the old light mix,
+at 78% toward black, left green at 4.23 and yellow at 3.11, both under the 4.5 minimum, so light mode was quietly
+failing the same test, just less visibly than dark.
+
+## The outline's title reads at full ink, and its last section claims the highlight at the end of a post
+
+Two fixes to `PostToc.astro`, both found by reading the built page rather than the code.
+
+The title was 0.66rem at 75% opacity. Departure Mono ships one weight only, so alpha was the only thing making the
+label read lighter than the rest of the panel, and the result was a ghost of the title rather than a lighter
+version of it. It is now 0.75rem at full ink, matching the panel's own inverse-video convention (full black on
+sepia, full white on dark).
+
+Second: `update()` picks the current section by testing each heading's position against a 120px reading line, the
+last heading whose top has crossed that line. A post whose final section is shorter than the remaining scroll room
+finishes the page before that heading ever crosses the line, so the outline stayed on an earlier section for the
+rest of the article. `update()` now also checks whether the document is scrolled to its end
+(`scrollHeight - innerHeight - scrollY <= 2`) and, when it is, forces the last section current regardless of where
+its heading falls.
+
+## Theme toggle: an explicit light, dark or system choice, stored as one attribute
+
+New `ThemeToggle.astro` plus `src/scripts/theme-toggle.ts`, placed in the header next to `LangSwitcher`, where the
+planned preferences popover (see `docs/design.md`) will also go.
+
+Three choices: light, dark, system. System is the default and means exactly today's behaviour: no attribute on
+`<html>`, nothing in `localStorage`. An explicit choice is stored under the `color-scheme` key and applied before
+first paint by a blocking script in `BaseLayout`'s `<head>`, the same shape as the code-theme picker's; the script
+sets `data-theme` on `<html>`, and `theme.css` narrows the `color-scheme` property from `light dark` down to one
+keyword. Every existing `light-dark()` token keeps resolving against that same property, unmodified, so no palette
+value changed for this feature.
+
+`BaseLayout` ships two hardcoded `<meta name="theme-color">` tags, one per `prefers-color-scheme` value, because a
+meta tag cannot read a CSS custom property. Those two tags cannot agree with an explicit override on their own, so
+`theme-toggle.ts`'s `syncThemeColor()` rewrites both to the resolved colour whenever the choice is explicit, and
+restores their own per-scheme colour once the choice goes back to system.
+
+The control renders `hidden` and is revealed only once `theme-toggle.ts` confirms it can run, the same
+progressive-enhancement precedent `CodeTheme.astro` set first.
+
+Four new i18n keys (`themeToggle`, `themeLight`, `themeDark`, `themeSystem`) in both language tables.

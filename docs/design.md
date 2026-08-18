@@ -111,7 +111,19 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   the default and means today's behaviour exactly: no attribute, nothing in `localStorage`. Stored under
   `color-scheme`, applied by a blocking head script the same shape as the code theme's, so a repeat visit never
   flashes the wrong ground. `ThemeToggle.astro` follows `CodeTheme.astro`'s progressive-enhancement precedent: the
-  control renders `hidden` and only appears once `theme-toggle.ts` confirms it can run.
+  control renders `hidden` and only appears once `theme-toggle.ts` confirms it can run. `BaseLayout`'s two hardcoded
+  `theme-color` meta tags cannot read a custom property, so an explicit choice would otherwise leave them disagreeing
+  with the page; the script rewrites both to the resolved colour and restores their own per-scheme colour when the
+  choice goes back to system. Placed next to `LangSwitcher` on purpose: that is also where the still-open preferences
+  popover below is meant to grow into, so the two controls end up as neighbours rather than being placed
+  independently later.
+- **Chip ink.** `--chip-ink` mixes each chip's own colour toward whichever end of the page is readable, black on the
+  sepia page and white on the black one, instead of always toward black. The old dark-mode mix moved the ink toward
+  the background it was supposed to stand out from: the brand red measured 2.82:1, unreadable. Measured in oklab,
+  the same space the browser mixes in: dark blue 8.27, green 11.59, yellow 14.21, red 8.12, purple 5.19; light blue
+  10.45, green 7.24, yellow 5.70, red 10.69, purple 15.12. The frame and the hover fill read the same token, which
+  also fixes the purple chip's 1.97:1 border on black. The old light-mode mix was failing quietly too: green at
+  4.23, yellow at 3.11, both under the 4.5 minimum.
 
 ## Open decisions
 
