@@ -180,17 +180,12 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
       <p>Lucas Santos</p>
       {/*
         Required, not decorative: PxPlus IBM VGA is CC BY-SA 4.0, which asks for
-        attribution reachable from the site. Departure Mono is OFL and asks for
-        nothing, but naming both is more honest than crediting only the one that
-        makes us. See docs/theming.md.
+        attribution reachable from the site. This link is that attribution now;
+        /oss/ names the font, its author and the licence, with a link to the
+        licence text. See docs/theming.md.
       */}
       <p class="credits">
-        {t(locale, 'typefaces')}:{' '}
-        <a href="https://departuremono.com" rel="noopener">Departure Mono</a>
-        {' · '}
-        <a href="https://int10h.org/oldschool-pc-fonts/" rel="noopener">PxPlus IBM VGA</a>{' '}
-        (VileR,{' '}
-        <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener license">CC BY-SA 4.0</a>)
+        <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
       </p>
       <p class="version">
         <a href={commitUrl} rel="noopener">{t(locale, 'version')}: {version}</a>

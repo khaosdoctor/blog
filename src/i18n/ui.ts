@@ -91,7 +91,6 @@ type UIKey =
   | 'skipToContent'
   | 'language'
   | 'version'
-  | 'typefaces'
   | 'keepPreviews'
   | 'previewLoading'
   | 'previewClose'
@@ -116,6 +115,15 @@ type UIKey =
   | 'appName'
   | 'appShortName'
   | 'appDescription'
+  | 'credits'
+  | 'ossTitle'
+  | 'ossDescription'
+  | 'ossIntro'
+  | 'ossFontsHeading'
+  | 'ossDependenciesHeading'
+  | 'ossMarkdownHeading'
+  | 'ossSearchHeading'
+  | 'ossHostingHeading'
 
 export const ui: Record<Locale, Record<UIKey, string>> = {
   pt: {
@@ -182,7 +190,16 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Idioma',
     version: 'Versão',
     // A licença CC BY-SA da PxPlus IBM VGA exige atribuição alcançável do site.
-    typefaces: 'Tipografia',
+    // A página /oss/ é essa atribuição hoje; veja docs/theming.md.
+    credits: 'Créditos',
+    ossTitle: 'Código aberto',
+    ossDescription: 'Cada projeto de código aberto, fonte e ferramenta usados para construir este site, com um link para cada um.',
+    ossIntro: 'Este site é construído sobre o trabalho de muita gente. Aqui está cada projeto, fonte e ferramenta usados, com um link para cada um.',
+    ossFontsHeading: 'Tipografia',
+    ossDependenciesHeading: 'Framework e dependências',
+    ossMarkdownHeading: 'Pipeline de markdown',
+    ossSearchHeading: 'Índice de busca',
+    ossHostingHeading: 'Hospedagem',
     keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
     previewLoading: 'Carregando…',
     previewClose: 'Fechar prévia',
@@ -272,8 +289,17 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     skipToContent: 'Skip to content',
     language: 'Language',
     version: 'Version',
-    // PxPlus IBM VGA is CC BY-SA, which requires attribution reachable from the site.
-    typefaces: 'Typefaces',
+    // PxPlus IBM VGA is CC BY-SA, which requires attribution reachable from the
+    // site. /en/oss/ is that attribution today; see docs/theming.md.
+    credits: 'Credits',
+    ossTitle: 'Open source',
+    ossDescription: 'Every open source project, typeface and tool this site is built on, with a link to each.',
+    ossIntro: 'This site is built on the work of a lot of people. Here is every project, typeface and tool used, with a link to each.',
+    ossFontsHeading: 'Typefaces',
+    ossDependenciesHeading: 'Framework and dependencies',
+    ossMarkdownHeading: 'Markdown pipeline',
+    ossSearchHeading: 'Search index',
+    ossHostingHeading: 'Hosting',
     keepPreviews: 'Keep pinned previews after closing the tab',
     previewLoading: 'Loading…',
     previewClose: 'Close preview',
