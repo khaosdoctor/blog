@@ -13,23 +13,37 @@
 :root {
   color-scheme: light dark;
 
-  /* Brand, from the favicon. Fixed points, not themeable. */
-  --brand-red: #e30613;
-  --brand-green: #45b384;
-  --brand-yellow: #f5b200;
-  --brand-blue: #0578be;
+  /*
+   * Brand, from the favicon. Each colour now carries a tone per ground rather
+   * than one hex for both: the palette lab (PaletteLab.vue, section 01 of
+   * /theme-lab/, archived once decided) measured every candidate as text
+   * against both real grounds, and a single blue that cleared black came out
+   * under 4.5:1 on the sepia one, so the arithmetic has to be redone per
+   * ground rather than assumed. Every consumer keeps reading one name, only
+   * this block changed shape.
+   *
+   * Measured against #000000 dark / #f4efe0 light, WCAG 2.1, 4.5:1 the floor:
+   * red 4.67 / 4.72, blue 4.90 / 4.56, green 8.03 / 3.29, yellow 11.25 / 3.23.
+   * Green and yellow fail on the sepia ground. That is the owner's own call,
+   * made with the numbers in front of him: see the report for exactly where
+   * each is used today and whether that use is text.
+   */
+  --brand-red: light-dark(#d50612, #e6242f);
+  --brand-blue: light-dark(#0571b3, #1480c2);
+  --brand-yellow: light-dark(#ac7d00, #f5b200);
+  --brand-green: light-dark(#39936c, #45b384);
   /*
    * Not from the favicon: the old Ghost theme painted the whole page in purple
    * and never put one in the icon. This is that purple, lifted from the live
    * site, where it was the accent against a near-black purple background
    * (#080016, with #160731, #210a47 and #2f0f67 as the surface steps above it).
    *
-   * It is 9.3:1 on the sepia page and 1.97:1 on the black one, so nothing uses
-   * it raw on dark: the quote tokens below and --qc-border mix it toward white
-   * first, which comes out at 3.96:1, over the 3:1 a border needs, without
-   * turning it into a neon that the rest of this palette does not have.
+   * 9.27:1 on the sepia page, chosen unchanged; 4.22:1 on the black one, under
+   * the 4.5 floor, also the owner's own call. Nothing uses the dark tone raw as
+   * text: the quote tokens below and --qc-border mix it toward white first,
+   * which comes out at 6.72:1, over the 3:1 a border needs.
    */
-  --brand-purple: #4b15a8;
+  --brand-purple: light-dark(#4b15a8, #815bc2);
 
   /*
    * Roles. Components reference these, never the brand values above.
@@ -37,24 +51,25 @@
    * Dark is true #000000, not a very dark grey: on an OLED panel those pixels
    * are switched off, which is the point of asking for pitch black. The hint of
    * purple therefore lives in --rule and in the quote tints below, where a few
-   * points of lightness are actually perceivable — a #05000b page would read as
-   * black on every screen while giving up the one thing black buys.
+   * points of lightness are actually perceivable (a #05000b page would read as
+   * black on every screen while giving up the one thing black buys).
    *
    * Light is a faded sepia, NieR Automata's family rather than paper white. Its
-   * own ink is warm (#332d23, 11.9:1) because a cool near-black on a warm ground
-   * reads as a mistake. NieR's real background (#c8c3b4) is a game HUD and too
-   * dark to hold 3000 words, so this is that hue lightened until it is a reading
-   * surface.
+   * own ink is warm (#14120e, 16.26:1) because a cool near-black on a warm
+   * ground reads as a mistake. NieR's real background (#c8c3b4) is a game HUD
+   * and too dark to hold 3000 words, so this is that hue lightened until it is
+   * a reading surface.
    *
-   * Every value here was measured, not eyeballed: fg 11.9:1 light / 15.4:1 dark,
-   * muted 5.2:1 / 8.3:1, accent 6.1:1 / 10.8:1. The rules come out at 1.28 and
-   * 1.38, which is a line you see without it shouting.
+   * Every value here was measured, not eyeballed: fg 16.26:1 light / 18.61:1
+   * dark, muted 5.17:1 / 8.30:1, accent 6.06:1 / 10.84:1. The rule moved from a
+   * barely-there hint to an actual 3:1-class border, 4.41:1 light / 3.66:1
+   * dark, a border only needs 3:1, so both pass on their own terms.
    */
   --bg: light-dark(#f4efe0, #000000);
-  --fg: light-dark(#332d23, #e0dcd4);
+  --fg: light-dark(#14120e, #f3f1ee);
   --muted: light-dark(#6b6353, #a8a29a);
   --accent: light-dark(#1a5c96, #7cc0ff);
-  --rule: light-dark(#ddd4bd, #2b1f42);
+  --rule: light-dark(#736e62, #6b627b);
 
   /*
    * A pixel face is right for chrome, labels and headings and punishing for a
@@ -145,12 +160,18 @@
    * a tint of the yellow read as a smudge rather than a marker. The text on it is
    * dark in both themes, because the chip itself is the same yellow in both and
    * dark-on-yellow is the only legible pairing.
+   *
+   * --brand-yellow now carries a tone per ground, so the chip itself is no
+   * longer the same yellow in both themes: 7.30:1 in dark, unchanged, but only
+   * 3.69:1 in light now that the chip is the darker sepia-ground amber rather
+   * than the raw brand tone. That is a real failure of running text, not a
+   * decorative one: reported rather than fixed here, since --em-bold-fg's own
+   * value was never part of the owner's palette decision.
    */
   --em-bold-bg: var(--brand-yellow);
   /* The page's warm ink rather than the cool near-black this used to be, so the
-   * chip belongs to the sepia palette. 7.30:1 on the brand yellow. Fixed in both
-   * themes, because the chip is the same yellow in both and dark-on-yellow is the
-   * only legible pairing. */
+   * chip belongs to the sepia palette. Fixed in both themes, because
+   * dark-on-yellow is the only legible pairing; see the ratio note above. */
   --em-bold-fg: #332d23;
   /*
    * Italic is the same yellow as bold, as text rather than a wash. The brand
@@ -161,7 +182,9 @@
   --em-italic-fg: light-dark(#8a6400, var(--brand-yellow));
   --em-italic-weight: 500;
 
-  /* Wikipedia's red link: a post linked before it was written. */
+  /* Wikipedia's red link: a post linked before it was written. A separately
+   * tuned red, chosen before the palette pass and left as it was: 6.39:1
+   * light, 9.37:1 dark, both against --bg. */
   --link-unwritten: light-dark(#a4232e, #ff8b93);
 
   /* Headings: a rule that fades out, and a glow behind h1. */
@@ -243,6 +266,39 @@
    */
   --code-shadow-offset: 4px;
   --code-shadow-color: light-dark(#000000, #ffffff);
+
+  /*
+   * Buttons: brackets, Departure Mono, brand yellow, decided on ChromeButton.vue
+   * (section 02 of /theme-lab/, archived once decided). An outline variant for
+   * every ordinary action (transparent fill, border and text in --brand-yellow)
+   * and a solid block reserved for one primary action per page (docs/theming.md
+   * section 11), fill --brand-yellow with --em-bold-fg's ink rather than white,
+   * the owner's own toggle in the demo.
+   *
+   * His readout measured 9.70:1 for both variants against #14161a, the dark
+   * ground from before the palette decision. Recomputed against the real
+   * grounds: outline text is --brand-yellow itself, so it is the same 11.25:1
+   * dark / 3.23:1 light the brand table already gives, the light case a real
+   * failure of the button label's own text. Solid block text is --em-bold-fg
+   * on --brand-yellow, the same pairing --em-bold-bg/--em-bold-fg above already
+   * measures: 7.30:1 dark, 3.69:1 light, the same new failure. Applied as
+   * decided; the smallest fix that would clear the light case without changing
+   * the look is the move --em-italic-fg already made for yellow-as-text on this
+   * ground, a darker amber (#8a6400 clears 4.68:1) in place of the raw tone.
+   *
+   * No control on the site today matches the solid block's "one primary
+   * action" bar, so only the outline variant is wired up (Search.astro); these
+   * two solid tokens are declared for when one appears, per this file's own
+   * rule that a token comes before the component that needs it.
+   */
+  --btn-face: var(--font-display);
+  --btn-tracking: 0em;
+  --btn-pad-block: 0.6875rem; /* 11px, his own respiro knob */
+  --btn-pad-inline: 1.25rem;
+  --btn-touch-min: 2.75rem; /* 44px WCAG target; his demo measured ~38px at this padding alone */
+  --btn-fg: var(--brand-yellow);
+  --btn-solid-bg: var(--brand-yellow);
+  --btn-solid-fg: var(--em-bold-fg);
 
   --duration: 120ms;
   --ease: ease;

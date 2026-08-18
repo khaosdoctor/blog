@@ -103,7 +103,11 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   progress
 >
   <PostToc headings={headings} locale={post.data.lang} />
-  <article>
+  {/* The hover-invert colour every link inside gets (prose/links.css),
+      hashed from the slug the same way chipColor already colours tag
+      chips: the same post is always the same colour, nothing to keep
+      in step with the content. */}
+  <article style={`--post-accent: ${chipColor(slugOf(post))}`}>
     <h1>{post.data.title}</h1>
     <p class="meta">
       <time datetime={post.data.pubDate.toISOString()}>
