@@ -1,196 +1,219 @@
 <script setup lang="ts">
 /**
- * A única animação constante do site inteiro é a marca no cabeçalho. Esta
- * bancada existe para escolher qual. Cinco candidatos, cada um respeitando
- * `prefers-reduced-motion`, com o nome acessível preso ao link (não ao texto
- * que some) e um jeito de parar o movimento, porque WCAG 2.2.2 cobra isso de
- * qualquer coisa que se mexa por mais de cinco segundos.
+ * A marca, redesenhada depois do retorno do dono: os cinco candidatos
+ * antigos coloriam ou recortavam os mesmos cinco retângulos do favicon, e por
+ * isso liam como uma imagem. Os seis daqui desenham a mesma silhueta (ver
+ * `logoMarks.ts`) inteira em caractere e célula: contorno vetorial, grade de
+ * `+`, malha ciano, retrato em ramp, dither de dois tons, pixel glitched.
+ *
+ * O movimento também mudou de lugar. Os candidatos antigos giravam cor nos
+ * acentos (ciclo, varredura, traço, pulso) porque a marca em si era a única
+ * animação constante do site. Uma marca desenhada como wireframe ou lattice
+ * não pede esse tipo de giro de cor, ele brigaria com o próprio desenho; o
+ * lugar do movimento baixo e constante passou para o wordmark ao lado, que
+ * agora digita e apaga como um terminal em vez de sumir com um fade.
  */
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { composite, grade, parseHex, ratio } from './contrast'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
+import { labelForMark, MARK_CANDIDATES, type MarkCandidateId } from './logoMarks'
+import LogoMark from './LogoMark.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
 import Toggle from './Toggle.vue'
 
 /**
- * MARCA PROVISÓRIA. A fonte real (o vetor da marca) não está acessível desta
- * máquina, então isto é o `public/favicon.svg` deste mesmo repo, copiado
- * retângulo por retângulo (mesmo viewBox 64x64, mesmas cinco formas, mesmas
- * cores da marca). Trocar pela arte definitiva é editar só este array.
+ * Hex espelhando os tokens do site em modo escuro (`src/styles/theme.css`),
+ * só para a matemática de contraste: o desenho de verdade usa `var(--fg)` etc,
+ * isto existe porque `parseHex()` precisa de um hex de verdade para calcular.
  */
-const MARK_RECTS = [
-  { role: 'l', x: 0, y: 0, w: 14, h: 31 }, // L, haste vertical
-  { role: 'l', x: 0, y: 31, w: 37, h: 15 }, // L, pé
-  { role: 'green', x: 26, y: 5, w: 38, h: 14 }, // barra verde
-  { role: 'yellow', x: 53, y: 31, w: 11, h: 15 }, // bloco amarelo
-  { role: 'blue', x: 11, y: 59, w: 53, h: 5 }, // sublinhado azul
-] as const
+const BG_DARK = '#000000'
+const FG_DARK = '#f3f1ee'
+const MUTED_DARK = '#a8a29a'
+const ACCENT_DARK = '#7cc0ff'
+const RED_DARK = '#e6242f'
+const BLUE_DARK = '#1480c2'
 
-const ROLE_COLOR: Record<string, string> = {
-  l: 'var(--brand-red)',
-  green: 'var(--brand-green)',
-  yellow: 'var(--brand-yellow)',
-  blue: 'var(--brand-blue)',
+const markCandidate = ref<MarkCandidateId>('fio')
+
+const inkContrast = computed<{ label: string; num: number }>(() => {
+  if (markCandidate.value === 'mesh') {
+    const tintedGround = composite(parseHex(BLUE_DARK), parseHex(BG_DARK), 0.35)
+    return { label: 'malha (var(--accent)) sobre o fundo azulado', num: ratio(parseHex(ACCENT_DARK), tintedGround) }
+  }
+  if (markCandidate.value === 'lattice' || markCandidate.value === 'glitch') {
+    return { label: 'cor mais fraca da marca (vermelho)', num: ratio(parseHex(RED_DARK), parseHex(BG_DARK)) }
+  }
+  if (markCandidate.value === 'dither') {
+    return { label: 'tom mais fraco do dither (var(--muted))', num: ratio(parseHex(MUTED_DARK), parseHex(BG_DARK)) }
+  }
+  return { label: 'traço (var(--fg))', num: ratio(parseHex(FG_DARK), parseHex(BG_DARK)) }
+})
+
+// --- o wordmark: digita, para, apaga com backspace, para vazio, repete ---
+const WORD = 'Lucas Santos'
+const CHAR_MS = ref(90)
+const HOLD_SECONDS = ref(1.6)
+const visibleCount = ref(0)
+
+let stepTimer: ReturnType<typeof setInterval> | null = null
+let holdTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearStepTimer(): void {
+  if (stepTimer) clearInterval(stepTimer)
+  stepTimer = null
+}
+
+function clearHoldTimer(): void {
+  if (holdTimer) clearTimeout(holdTimer)
+  holdTimer = null
+}
+
+function eraseBackward(): void {
+  clearStepTimer()
+  clearHoldTimer()
+  stepTimer = setInterval(() => {
+    visibleCount.value--
+    if (visibleCount.value <= 0) {
+      visibleCount.value = 0
+      clearStepTimer()
+      holdTimer = setTimeout(typeForward, HOLD_SECONDS.value * 500)
+    }
+  }, CHAR_MS.value)
+}
+
+function typeForward(): void {
+  clearStepTimer()
+  clearHoldTimer()
+  stepTimer = setInterval(() => {
+    visibleCount.value++
+    if (visibleCount.value >= WORD.length) {
+      clearStepTimer()
+      holdTimer = setTimeout(eraseBackward, HOLD_SECONDS.value * 1000)
+    }
+  }, CHAR_MS.value)
+}
+
+function stopWordLoop(): void {
+  clearStepTimer()
+  clearHoldTimer()
+  visibleCount.value = WORD.length // quadro estático do prefers-reduced-motion: o nome inteiro, parado
+}
+
+function replay(): void {
+  if (animationsFrozen.value) return
+  clearGlitch()
+  visibleCount.value = 0
+  typeForward()
+  scheduleGlitch()
+}
+
+// --- cursor de bloco, baixa taxa de quadro, sem suavização ---
+/**
+ * 530ms por fase (sem easing, alternando de uma vez): o dobro dos 228,6ms do
+ * cursor do menu do Doom (8 tics a 35 tics/s, docs/theming.md seção 3), porque
+ * o mesmo trecho registra que um cursor de terminal pisca mais devagar que um
+ * menu de jogo. É o mesmo número que o candidato "linha de DOS invertida" já
+ * usa em `ChromeHeader.vue` (`1.06s steps(2, end)`), só que aqui dirigido por
+ * `setInterval` para poder parar de vez sob `prefers-reduced-motion`.
+ */
+const CURSOR_MS = 530
+const cursorOn = ref(true)
+let cursorTimer: ReturnType<typeof setInterval> | null = null
+
+function startCursor(): void {
+  if (cursorTimer) clearInterval(cursorTimer)
+  cursorTimer = setInterval(() => {
+    cursorOn.value = !cursorOn.value
+  }, CURSOR_MS)
+}
+
+function stopCursor(): void {
+  if (cursorTimer) clearInterval(cursorTimer)
+  cursorTimer = null
+  cursorOn.value = true
+}
+
+// --- glitch: um caractere errado, um deslocamento de linha ou um rasgo de coluna, nunca os três juntos ---
+const GLITCH_GLYPHS = ['#', '%', '&', '$', '@', '?', '~']
+const glitchIndex = ref<number | null>(null)
+const glitchGlyph = ref('')
+const lineShift = ref(0)
+const tearActive = ref(false)
+const tearColumn = ref(0)
+let glitchTimer: ReturnType<typeof setTimeout> | null = null
+let glitchResetTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearGlitch(): void {
+  if (glitchTimer) clearTimeout(glitchTimer)
+  if (glitchResetTimer) clearTimeout(glitchResetTimer)
+  glitchTimer = null
+  glitchResetTimer = null
+  glitchIndex.value = null
+  lineShift.value = 0
+  tearActive.value = false
+}
+
+function scheduleGlitch(): void {
+  if (glitchTimer) clearTimeout(glitchTimer)
+  glitchTimer = setTimeout(runGlitch, 2200 + Math.random() * 1800)
 }
 
 /**
- * Mesma marca, rasterizada a mão numa grade 8x8 (uma célula por 8 unidades do
- * viewBox de 64), para o candidato "ramp de caracteres". Cada letra é a cor
- * majoritária daquela célula segundo os retângulos acima (limiar de ~20% de
- * área para contar, senão fica em branco); é uma aproximação grosseira e
- * assume-se isso: o bloco amarelo, que já é pequeno na marca real, encolhe
- * para uma faixa de duas células, e os vãos entre as formas viram uma coluna
- * ou linha em branco só, sem gradação.
+ * Cada disparo troca no máximo uma letra, ou desloca a linha inteira em 1ch,
+ * ou rasga uma coluna em 1px: uma área de uma única célula de caractere, bem
+ * menor que a isenção de área da WCAG 2.3.1, e uma frequência de menos de
+ * meia troca por segundo, bem abaixo do limite de três da mesma regra.
+ * `Math.random()` aqui é decoração de execução (quando e qual glitch), não a
+ * semente determinística que a capa do site exige.
  */
-const MARK_GRID = ['RR.GGGGG', 'RR.GGGGG', 'RR.GGGGG', 'RR......', 'RRRRR.YY', 'RRRRR.YY', '........', '.BBBBBBB']
-const GRID_ROLE: Record<string, string> = { R: 'l', G: 'green', Y: 'yellow', B: 'blue' }
-
-/** Pequeno conjunto de blocos e símbolos, o mesmo espírito do scramble do textmode.js. */
-const SCRAMBLE_RAMP = ['▓', '▒', '░', '▚', '▞', '▪', '▫']
-
-function randomGlyph(): string {
-  return SCRAMBLE_RAMP[Math.floor(Math.random() * SCRAMBLE_RAMP.length)]
+function runGlitch(): void {
+  if (animationsFrozen.value || visibleCount.value === 0) {
+    scheduleGlitch()
+    return
+  }
+  const kind = Math.floor(Math.random() * 3)
+  if (kind === 0) {
+    glitchIndex.value = Math.floor(Math.random() * visibleCount.value)
+    glitchGlyph.value = GLITCH_GLYPHS[Math.floor(Math.random() * GLITCH_GLYPHS.length)]
+  } else if (kind === 1) {
+    lineShift.value = Math.random() < 0.5 ? -1 : 1
+  } else {
+    tearColumn.value = Math.floor(Math.random() * visibleCount.value)
+    tearActive.value = true
+  }
+  glitchResetTimer = setTimeout(() => {
+    glitchIndex.value = null
+    lineShift.value = 0
+    tearActive.value = false
+    scheduleGlitch()
+  }, 180)
 }
 
-const CANDIDATES = [
-  { id: 'ciclo', name: 'ciclo de cor nos acentos' },
-  { id: 'varredura', name: 'varredura de brilho' },
-  { id: 'ramp', name: 'ramp de caracteres' },
-  { id: 'traco', name: 'traço em sequência' },
-  { id: 'pulso', name: 'pulso dos acentos' },
-] as const
-type CandidateId = (typeof CANDIDATES)[number]['id']
-
-function labelFor(id: string): string {
-  return CANDIDATES.find((candidate) => candidate.id === id)?.name ?? id
-}
-
-const candidate = ref<CandidateId>('ciclo')
-const cycleSeconds = ref(3.4)
-const sweepWidth = ref(12)
-const shuffleFrames = ref(6)
-const staggerMs = ref(160)
-const minOpacityPct = ref(35)
+// --- prefers-reduced-motion e pausa manual: a mesma regra forte do resto da bancada ---
 const manualPause = ref(false)
 const simulateReduced = ref(false)
-const delaySeconds = ref(5)
-
 const osReduced = ref(false)
 let mediaQuery: MediaQueryList | null = null
-function syncOsReduced(event: MediaQueryListEvent | MediaQueryList) {
+
+function syncOsReduced(event: MediaQueryListEvent | MediaQueryList): void {
   osReduced.value = event.matches
 }
 
 const reducedMotionActive = computed(() => osReduced.value || simulateReduced.value)
 const animationsFrozen = computed(() => reducedMotionActive.value || manualPause.value)
 
-const markStyle = computed(() => ({
-  '--cycle-dur': `${cycleSeconds.value}s`,
-  '--stagger': `${staggerMs.value}ms`,
-  '--min-opacity': String(minOpacityPct.value / 100),
-}))
-
-// --- candidato "ramp de caracteres": rajadas periódicas de embaralhar ---
-const burstActive = ref(false)
-const burstFrame = ref(0)
-let burstTimer: ReturnType<typeof setInterval> | null = null
-let cycleTimer: ReturnType<typeof setInterval> | null = null
-
-function stopShuffleTimers() {
-  if (burstTimer) clearInterval(burstTimer)
-  if (cycleTimer) clearInterval(cycleTimer)
-  burstTimer = null
-  cycleTimer = null
-  burstActive.value = false
-  burstFrame.value = 0
-}
-
-function runBurst() {
-  burstActive.value = true
-  burstFrame.value = 0
-  if (burstTimer) clearInterval(burstTimer)
-  burstTimer = setInterval(() => {
-    burstFrame.value++
-    if (burstFrame.value >= shuffleFrames.value) {
-      if (burstTimer) clearInterval(burstTimer)
-      burstTimer = null
-      burstActive.value = false
-    }
-  }, 55)
-}
-
-function startShuffleLoop() {
-  stopShuffleTimers()
-  cycleTimer = setInterval(() => {
-    if (animationsFrozen.value || candidate.value !== 'ramp') return
-    runBurst()
-  }, cycleSeconds.value * 1000)
-}
-
-function glyphAt(row: number, col: number): string {
-  if (!burstActive.value) return '█'
-  const seed = row * 8 + col + burstFrame.value * 13
-  return SCRAMBLE_RAMP[seed % SCRAMBLE_RAMP.length]
-}
-
-watch([candidate, cycleSeconds], startShuffleLoop)
 watch(animationsFrozen, (frozen) => {
-  if (frozen) stopShuffleTimers()
-})
-
-// --- o wordmark "Lucas Santos": some sozinho, some para dentro da marca ---
-const WORD = 'Lucas Santos'
-const letters = ref<string[]>([...WORD])
-const wordCollapsed = ref(false)
-let scrambleTimer: ReturnType<typeof setInterval> | null = null
-let hideTimer: ReturnType<typeof setTimeout> | null = null
-
-function stopWordTimers() {
-  if (scrambleTimer) clearInterval(scrambleTimer)
-  if (hideTimer) clearTimeout(hideTimer)
-  scrambleTimer = null
-  hideTimer = null
-}
-
-function collapseWord() {
-  wordCollapsed.value = true
-  let ticks = 0
-  const maxTicks = 7
-  scrambleTimer = setInterval(() => {
-    ticks++
-    letters.value = letters.value.map((ch) => (ch === ' ' ? ' ' : randomGlyph()))
-    if (ticks >= maxTicks && scrambleTimer) {
-      clearInterval(scrambleTimer)
-      scrambleTimer = null
-    }
-  }, 55)
-}
-
-function scheduleCollapse() {
-  if (hideTimer) clearTimeout(hideTimer)
-  hideTimer = setTimeout(collapseWord, delaySeconds.value * 1000)
-}
-
-function replay() {
-  if (reducedMotionActive.value) return
-  stopWordTimers()
-  letters.value = [...WORD]
-  wordCollapsed.value = false
-  scheduleCollapse()
-}
-
-watch(delaySeconds, () => {
-  if (!wordCollapsed.value && !reducedMotionActive.value) scheduleCollapse()
-})
-
-watch(reducedMotionActive, (isReduced) => {
-  if (isReduced) {
-    stopWordTimers()
-    letters.value = [...WORD]
-    wordCollapsed.value = false
-  } else if (!hideTimer) {
-    scheduleCollapse()
+  if (frozen) {
+    stopWordLoop()
+    stopCursor()
+    clearGlitch()
+  } else {
+    visibleCount.value = 0
+    typeForward()
+    startCursor()
+    scheduleGlitch()
   }
 })
 
@@ -198,109 +221,95 @@ onMounted(() => {
   mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   osReduced.value = mediaQuery.matches
   mediaQuery.addEventListener('change', syncOsReduced)
-  if (!reducedMotionActive.value) scheduleCollapse()
-  startShuffleLoop()
+  if (animationsFrozen.value) {
+    stopWordLoop()
+  } else {
+    typeForward()
+    startCursor()
+    scheduleGlitch()
+  }
 })
 
 onUnmounted(() => {
   mediaQuery?.removeEventListener('change', syncOsReduced)
-  stopWordTimers()
-  stopShuffleTimers()
+  clearStepTimer()
+  clearHoldTimer()
+  stopCursor()
+  clearGlitch()
 })
 
-const decisionSettings = computed(() => {
-  const settings = [
-    { label: 'candidato', value: labelFor(candidate.value) },
-    { label: 'velocidade do ciclo', value: `${cycleSeconds.value}s` },
-    { label: 'atraso do wordmark', value: `${delaySeconds.value}s` },
-  ]
-  if (candidate.value === 'varredura') settings.push({ label: 'largura do feixe', value: `${sweepWidth.value}/64` })
-  if (candidate.value === 'ramp') settings.push({ label: 'quadros de embaralhar', value: String(shuffleFrames.value) })
-  if (candidate.value === 'traco') settings.push({ label: 'espaçamento entre acentos', value: `${staggerMs.value}ms` })
-  if (candidate.value === 'pulso') settings.push({ label: 'opacidade mínima', value: `${minOpacityPct.value}%` })
-  return settings
-})
+const decisionSettings = computed(() => [
+  { label: 'marca', value: labelForMark(markCandidate.value) },
+  { label: 'velocidade da digitação', value: `${CHAR_MS.value}ms/caractere` },
+  { label: 'repouso antes de apagar', value: `${HOLD_SECONDS.value}s` },
+  { label: 'taxa do cursor', value: `${CURSOR_MS}ms por fase, fixo (mesmo número do candidato DOS em ChromeHeader.vue)` },
+  { label: `contraste (${inkContrast.value.label})`, value: `${inkContrast.value.num.toFixed(2)}:1 (${grade(inkContrast.value.num)})` },
+])
 
 const decisionContext =
-  'prefers-reduced-motion trava tudo num estado de repouso, com o wordmark simplesmente parado. ' +
-  'O nome acessível vem de aria-label no link, não do texto que some. O botão de pausa desta bancada ' +
-  'é provisório: no cabeçalho de verdade ele precisa estar preso à preferência de desligar animação do ' +
-  'leitor, que ainda não existe.'
+  'prefers-reduced-motion trava num quadro estático (o nome inteiro, parado) e o laço nunca começa, a mesma regra ' +
+  'forte do resto da bancada. O botão de pausa cobre WCAG 2.2.2. O nome acessível ("Lucas Santos") mora no ' +
+  'aria-label do link, nunca no texto que digita e apaga; a marca e o wordmark visual são aria-hidden. Nenhuma ' +
+  'transição usa opacidade, desfoque ou escala: isso foi removido de propósito, porque o dono pediu backspace no ' +
+  'lugar de fade. O glitch troca no máximo uma letra, ou desloca a linha em 1ch, ou rasga uma coluna em 1px, a cada ' +
+  '2,2 a 4 segundos, uma área de uma célula de caractere por vez, bem abaixo do limite de três trocas por segundo ' +
+  'e da isenção de área da WCAG 2.3.1.'
 </script>
 
 <template>
   <div :class="$style.demo">
-    <p :class="$style.stageLabel">cabeçalho em tamanho real</p>
+    <p :class="$style.stageLabel">
+      a marca dentro de um cabeçalho de verdade (linha de DOS invertida, o candidato que o dono já pediu para manter)
+    </p>
     <div :class="$style.stage">
-      <a href="#" aria-label="Lucas Santos" :class="$style.brand" @click.prevent>
-        <span :class="[$style.markBox, animationsFrozen && $style.frozen]" :style="markStyle" aria-hidden="true">
-          <svg v-if="candidate !== 'ramp'" viewBox="0 0 64 64" :class="$style.svg">
-            <rect
-              v-for="(rect, index) in MARK_RECTS"
-              :key="index"
-              :x="rect.x"
-              :y="rect.y"
-              :width="rect.w"
-              :height="rect.h"
-              :fill="ROLE_COLOR[rect.role]"
-              :class="[
-                $style.part,
-                rect.role !== 'l' && $style[`part-${rect.role}`],
-                rect.role !== 'l' && $style[`anim-${candidate}`],
-              ]"
-              :style="candidate === 'traco' && rect.role !== 'l' ? { animationDelay: `calc(var(--stagger) * ${index - 2})` } : undefined"
-            />
-            <rect
-              v-if="candidate === 'varredura'"
-              :x="-sweepWidth"
-              y="0"
-              :width="sweepWidth"
-              height="64"
-              :class="$style.sweep"
-            />
-          </svg>
-          <div v-else :class="$style.grid">
-            <template v-for="(row, r) in MARK_GRID" :key="r">
-              <span
-                v-for="(cell, c) in row.split('')"
-                :key="c"
-                :class="$style.cell"
-                :style="{ color: cell === '.' ? 'transparent' : ROLE_COLOR[GRID_ROLE[cell]] }"
-                >{{ cell === '.' ? '' : GRID_ROLE[cell] === 'l' ? '█' : glyphAt(r, c) }}</span
-              >
-            </template>
-          </div>
-        </span>
-        <span :class="[$style.word, wordCollapsed && $style.collapsed]" aria-hidden="true">
-          <span v-for="(ch, i) in letters" :key="i">{{ ch === ' ' ? ' ' : ch }}</span>
-        </span>
-      </a>
+      <header :class="$style.miniHeader">
+        <span :class="$style.miniBadge">C:\LSANTOS&gt;</span>
+        <a href="#" aria-label="Lucas Santos" :class="$style.brand" @click.prevent>
+          <LogoMark :candidate="markCandidate" size="1.5em" />
+          <span :class="$style.word" aria-hidden="true" :style="{ transform: `translateX(${lineShift}ch)` }">
+            <span
+              v-for="(ch, i) in WORD.split('')"
+              :key="i"
+              :class="[$style.letter, tearActive && i >= tearColumn && $style.torn]"
+              >{{ i < visibleCount ? (i === glitchIndex ? glitchGlyph : ch) : '' }}</span
+            >
+            <span :class="[$style.cursor, cursorOn && $style.cursorOn]"></span>
+          </span>
+        </a>
+        <nav :class="$style.miniNav" aria-hidden="true">
+          <span :class="$style.navItem">posts</span>
+          <span :class="$style.navItem">séries</span>
+        </nav>
+      </header>
     </div>
 
-    <Panel label="candidato">
-      <Pick v-model="candidate" label="candidato" :options="CANDIDATES.map((c) => ({ id: c.id, name: c.name }))" />
-      <Knob v-model="cycleSeconds" label="velocidade do ciclo" :min="0.8" :max="8" :step="0.2" unit="s" />
-      <Knob v-if="candidate === 'varredura'" v-model="sweepWidth" label="largura do feixe" :min="4" :max="28" unit="/64" />
-      <Knob v-if="candidate === 'ramp'" v-model="shuffleFrames" label="quadros de embaralhar" :min="2" :max="14" />
-      <Knob v-if="candidate === 'traco'" v-model="staggerMs" label="espaçamento entre acentos" :min="40" :max="500" :step="10" unit="ms" />
-      <Knob v-if="candidate === 'pulso'" v-model="minOpacityPct" label="opacidade mínima" :min="0" :max="90" unit="%" />
+    <Panel label="marca">
+      <Pick v-model="markCandidate" label="candidato" :options="MARK_CANDIDATES.map((c) => ({ id: c.id, name: c.name }))" />
       <Toggle v-model="manualPause" label="pausar animação (WCAG 2.2.2)" />
     </Panel>
 
     <Panel label="wordmark">
-      <Knob v-model="delaySeconds" label="atraso antes de sumir" :min="1" :max="10" :step="0.5" unit="s" />
-      <button type="button" :class="$style.replay" :disabled="reducedMotionActive" @click="replay">
-        repetir agora
-      </button>
+      <Knob v-model="CHAR_MS" label="velocidade da digitação" :min="40" :max="220" :step="10" unit="ms" />
+      <Knob v-model="HOLD_SECONDS" label="repouso antes de apagar" :min="0.5" :max="4" :step="0.1" unit="s" />
+      <button type="button" :class="$style.replay" :disabled="animationsFrozen" @click="replay">digitar de novo</button>
       <Toggle v-model="simulateReduced" label="simular prefers-reduced-motion" />
     </Panel>
 
     <p :class="$style.readout">
-      {{ reducedMotionActive ? 'Movimento reduzido: a marca está parada e o wordmark não some.' : 'Movimento ligado.' }}
-      O nome acessível ("Lucas Santos") está no <code>aria-label</code> do link, então sobrevive ao texto sumindo:
-      a marca e o wordmark visual estão marcados <code>aria-hidden</code>. O botão de pausa aqui é o WCAG 2.2.2
-      pedindo um jeito de parar; no cabeçalho de verdade ele ainda precisa ser ligado à preferência de animação do
-      leitor, que está planejada e não existe ainda.
+      {{
+        reducedMotionActive
+          ? 'Movimento reduzido: o nome fica parado por extenso, e o laço nunca começa.'
+          : manualPause
+            ? 'Pausado.'
+            : 'Rodando.'
+      }}
+      Contraste do candidato "{{ labelForMark(markCandidate) }}": {{ inkContrast.num.toFixed(2) }}:1 ({{ grade(inkContrast.num) }}),
+      medido contra o fundo escuro do site. O nome acessível ("Lucas Santos") mora no <code>aria-label</code> do
+      link, não no texto que digita e apaga: a marca e o wordmark visual estão <code>aria-hidden</code>. O cursor
+      pisca a cada {{ CURSOR_MS }}ms por fase, sem suavização, o dobro da taxa do menu do Doom (228,6ms), porque um
+      terminal pisca mais devagar que um jogo. O glitch troca no máximo uma letra por vez, desloca a linha inteira
+      em 1ch, ou rasga uma coluna em 1px, a cada 2,2 a 4 segundos: bem abaixo do limite de três trocas por segundo
+      da WCAG 2.3.1, numa área de uma única célula de caractere.
     </p>
 
     <DecisionCopy lab="logo" component="LogoLab.vue" :settings="decisionSettings" :context="decisionContext" />
@@ -327,13 +336,28 @@ const decisionContext =
   overflow-x: auto;
 }
 
+.miniHeader {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.miniBadge {
+  margin-inline-end: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+}
+
 .brand {
   display: inline-flex;
-  gap: 0.55rem;
   align-items: center;
   color: var(--fg);
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   text-decoration: none;
 }
 
@@ -342,159 +366,43 @@ const decisionContext =
   outline-offset: 3px;
 }
 
-.markBox {
-  --mark-size: 1.5em;
-  display: inline-block;
-  inline-size: var(--mark-size);
-  block-size: var(--mark-size);
-  flex-shrink: 0;
-}
-
-.svg {
-  inline-size: 100%;
-  block-size: 100%;
-  overflow: hidden;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
-  inline-size: 100%;
-  block-size: 100%;
-  font-size: calc(var(--mark-size) / 7);
-  line-height: 1;
-}
-
-.cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sweep {
-  fill: white;
-  opacity: 0.45;
-  mix-blend-mode: overlay;
-  animation: sweep var(--cycle-dur) linear infinite;
-}
-
-.frozen .sweep {
-  animation: none !important;
-  opacity: 0;
-}
-
-.frozen .part {
-  animation: none !important;
-  opacity: 1 !important;
-  filter: none !important;
-  clip-path: none !important;
-}
-
-@keyframes sweep {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(84px);
-  }
-}
-
-.anim-ciclo.part-green {
-  --c1: var(--brand-green);
-  --c2: var(--brand-yellow);
-  --c3: var(--brand-blue);
-  animation: colorCycle var(--cycle-dur) linear infinite;
-}
-
-.anim-ciclo.part-yellow {
-  --c1: var(--brand-yellow);
-  --c2: var(--brand-blue);
-  --c3: var(--brand-green);
-  animation: colorCycle var(--cycle-dur) linear infinite;
-  animation-delay: calc(var(--cycle-dur) / -3);
-}
-
-.anim-ciclo.part-blue {
-  --c1: var(--brand-blue);
-  --c2: var(--brand-green);
-  --c3: var(--brand-yellow);
-  animation: colorCycle var(--cycle-dur) linear infinite;
-  animation-delay: calc(var(--cycle-dur) / -3 * 2);
-}
-
-@keyframes colorCycle {
-  0%,
-  100% {
-    fill: var(--c1);
-  }
-  33% {
-    fill: var(--c2);
-  }
-  66% {
-    fill: var(--c3);
-  }
-}
-
-.anim-traco {
-  animation: drawIn var(--cycle-dur) ease-in-out infinite;
-}
-
-@keyframes drawIn {
-  0% {
-    clip-path: inset(0 100% 0 0);
-  }
-  35%,
-  60% {
-    clip-path: inset(0 0 0 0);
-  }
-  100% {
-    clip-path: inset(0 100% 0 0);
-  }
-}
-
-.anim-pulso {
-  animation: pulse var(--cycle-dur) ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: var(--min-opacity);
-  }
-}
-
 .word {
+  position: relative;
   display: inline-flex;
-  max-inline-size: 14ch;
-  overflow: hidden;
-  white-space: nowrap;
-  opacity: 1;
-  filter: blur(0);
-  transform: translateX(0) scale(1);
-  transform-origin: left center;
-  transition:
-    max-inline-size 0.55s ease-in,
-    opacity 0.5s ease-in,
-    transform 0.55s ease-in,
-    filter 0.5s ease-in;
+  min-inline-size: 9ch;
+  margin-inline-start: 0.55rem;
 }
 
-.word.collapsed {
-  max-inline-size: 0;
-  opacity: 0;
-  transform: translateX(-0.8em) scale(0.4);
-  filter: blur(3px);
+.letter {
+  display: inline-block;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .part,
-  .sweep {
-    animation: none !important;
-  }
+.torn {
+  transform: translateY(1px);
+}
+
+.cursor {
+  display: inline-block;
+  inline-size: 0.55em;
+  block-size: 1.1em;
+  margin-inline-start: 1px;
+  background: transparent;
+  vertical-align: text-bottom;
+}
+
+.cursor.cursorOn {
+  background: var(--fg);
+}
+
+.miniNav {
+  display: inline-flex;
+  margin-inline-start: auto;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.navItem:not(:first-child) {
+  margin-inline-start: 0.8rem;
 }
 
 .replay {
