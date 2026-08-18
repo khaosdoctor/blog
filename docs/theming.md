@@ -2,7 +2,7 @@
 
 The long version. `docs/design.md` is the short one, kept skimmable on purpose; this file is the opposite. It records what was looked at, what was tried, what was thrown away and why, and where the reasoning is still incomplete. Every candidate named here exists and is interactive at `/theme-lab/`, and everything at `/theme-lab/` is explained here.
 
-This started as a pure exploration with nothing applied to the site, and that is no longer true. The parts that have since been adopted are marked as decided where they appear, and the short list of them lives in `docs/design.md`: the two page grounds, the brand purple, and the display and subtitle faces. Everything else here is still a candidate.
+This started as a pure exploration with nothing applied to the site, and that is no longer true. The parts that have since been adopted are marked as decided where they appear, and the short list of them lives in `docs/design.md`: the two page grounds, the full palette with a tone per colour per ground, the display and subtitle faces, and no CRT scanline effect. Everything else here is still a candidate.
 
 ---
 
@@ -166,11 +166,25 @@ A trap worth recording: **the `LICENSE` file at the root of the Departure Mono r
 
 Faces deliberately excluded on licence grounds: **Berkeley Mono** (commercial; the $75 Developer tier is personal use only), **Perfect DOS VGA 437** (informal "free to use", no formal grant), **Half Bold Pixel-7** and **Minecraftia** (personal use only), **Pixel Operator** (conflicting OFL and CC0 claims across mirrors, source repo returns 404).
 
-### The brand palette is fixed
+### The brand palette is not fixed. Each colour has a tone per ground
 
-Red `#e30613`, green `#45b384`, yellow `#f5b200`, blue `#0578be`. These stay, so the colour question is never "what palette" and always "what happens to this palette in a terminal register". That is what the palette lab is: the brand colours are one of seven registers, and the same live contrast arithmetic runs on all of them, so the brand can be compared to CGA and to phosphor on identical terms.
+This changed. Every colour used to be one hex shared by both grounds, with only the neutral roles (`--fg`, `--muted`, `--accent`, `--rule`) going through `light-dark()`. The palette lab (section 01 of `/theme-lab/`, `PaletteLab.vue`) put a ramp behind every swatch, one per colour per ground, and the finding was that a single adjustment never holds: red needs about 6% darkening to clear 4.5:1 on the sepia ground, yellow needs about 48%, eight times more. So every colour now carries its own tone per ground, chosen against `#000000` dark and `#f4efe0` light, the same two grounds as before:
 
-Purple was the exception, since the brand never had one and quotes needed it. It now comes from the old Ghost theme, which painted its whole page in purple without ever putting one in the icon: `#4b15a8`, the accent it used over a ramp of `#080016`, `#160731`, `#210a47` and `#2f0f67`. Recorded here because the source is a site that will stop existing at the DNS cutover.
+| role | dark | ratio | light | ratio |
+|---|---|---|---|---|
+| red | `#e6242f` | 4.67 | `#d50612` | 4.72 |
+| blue | `#1480c2` | 4.90 | `#0571b3` | 4.56 |
+| purple | `#815bc2` | 4.22 | `#4b15a8` | 9.27 |
+| green | `#45b384` | 8.03 | `#39936c` | 3.29 |
+| yellow | `#f5b200` | 11.25 | `#ac7d00` | 3.23 |
+| text | `#f3f1ee` | 18.61 | `#14120e` | 16.26 |
+| muted | `#a8a29a` | 8.30 | `#6b6353` | 5.17 |
+| link | `#7cc0ff` | 10.84 | `#1a5c96` | 6.06 |
+| rule | `#6b627b` | 3.66 | `#736e62` | 4.41 |
+
+Five of these do not clear 4.5:1, and that is decided rather than missed: green light 3.29, yellow light 3.23, purple dark 4.22, rule dark 3.66, rule light 4.41. The two rule values are a border, where the bar is 3:1, not 4.5:1, so they pass on the terms that apply to them. The other three, green light, yellow light and purple dark, were chosen with the ratio on screen rather than by accident. **What each of those three tones paints on the live site is still being worked out** by the styling pass applying this palette; record it here once that answer exists rather than guessing at it now.
+
+Purple was already the one exception to "traced from the favicon", since the brand never had one and quotes needed it. It still comes from the old Ghost theme, which painted its whole page in purple without ever putting one in the icon: `#4b15a8`, the accent it used over a ramp of `#080016`, `#160731`, `#210a47` and `#2f0f67`. Recorded here because the source is a site that will stop existing at the DNS cutover. That value is now the *light-ground* purple tone (9.27:1); dark ground gets its own tone, `#815bc2` (4.22:1), rather than reusing the light one at 1.97:1 on black as before.
 
 ### The two page grounds, and why neither is grey
 
@@ -180,7 +194,7 @@ The dark ground is true black rather than the near-black `#14161a` it replaced, 
 
 The light ground is `#f4efe0`, warm and slightly down from white. Worth knowing before copying NieR's palette directly: its real background is about `#c8c3b4` with ink near `#4e4b42`, which is a game HUD designed to be read in glances and is too dark to hold 3000 words. What was taken is the hue, lightened until it works as a reading surface. Its ink is warm too (`#332d23`), because a cool near-black on a warm ground is the specific error that makes a sepia page look like a white page with a filter over it.
 
-One knock-on worth recording: the brand blue at `#0578be` measures 4.12:1 on that sepia, under the 4.5 minimum, so `--accent` deepens to `#1a5c96` (6.06:1) in light mode. A warmer ground costs contrast against a cool accent, and the arithmetic has to be redone rather than assumed when the ground moves.
+One knock-on worth recording, and the first case that made the case for the per-ground table above: a single blue measured 4.12:1 on that sepia, under the 4.5 minimum, so the link colour deepens to `#1a5c96` (6.06:1) in light mode rather than staying the same hex both grounds get. A warmer ground costs contrast against a cool colour, and the arithmetic has to be redone rather than assumed when the ground moves; that is now true of all nine roles in the table above, not only links.
 
 ---
 
@@ -304,7 +318,7 @@ The palette lab shows these live, but the ones worth having written down:
 
 The authentic DOS palette contains colours that cannot legally carry body text. That is not an argument against the aesthetic, it is a constraint on which two or three of those sixteen colours are allowed to be text and which are allowed only to be decoration. The brand palette has the same shape of problem: green and yellow clear the bar comfortably on the site's dark background, and the brand red does not, which is already true today and is why red is reserved for the unwritten-link marker.
 
-### Scanlines, and why the honest answer is no
+### Scanlines: decided, none. `CrtEffects.vue` is archived
 
 Black scanline rows at alpha A, with the loss falling on both text and background:
 
@@ -322,6 +336,8 @@ That is the whole argument in one sentence: **scanlines are only safe in a range
 There is a second reason, unrelated to contrast. Of the five modern terminal-aesthetic products looked at, **none uses scanlines**, and Ghostty, which literally ships a scanline shader, keeps it out of its own marketing site. Scanlines are the single element that reads as costume rather than design, which is the exact line the brief drew.
 
 If the CRT texture is wanted anyway, the better route is **Workbench**, a Google Fonts face with a `SCAN` variable axis that builds the scanline into the letterforms themselves. That puts the effect inside the glyph, where it is part of the type design and is not an overlay reducing the contrast of everything underneath it. It is not vendored yet (section 10).
+
+**This is no longer a recommendation.** The owner ran the bench (`CrtEffects.vue`) at ground light, scanline 0%, pitch 2px, glow 0%, grain 0%, vignette 0%, flicker off, and read 16.79:1 with the effect off and 16.79:1 on the dark scanline row, AAA, cost 0.00. Every knob started at zero, and after dragging them he ended on the setting he started from. The site carries none of these effects. `CrtEffects.vue` is retired to `content/blog/theme-lab-arquivo/` along with its prose, kept rather than deleted because the rejected settings are the argument for the article the owner intends to write about how this was decided.
 
 ### Motion
 
@@ -386,9 +402,9 @@ One thing the lab does not yet handle and the real site will have to: `forced-co
 
 **Since this was written, both halves of this recommendation were overtaken by more decisive answers.** The cover question moved past candidate 2: the real generator does not use textmode.js at all, it draws the card as plain `<svg>` and rasterises it with `sharp` at build time, so the 194KB library argument above no longer applies to covers. The three shapes that approach produces are section 03's `CoverLab.vue`, covered in section 7, and which of the three wins is still open in `docs/design.md`. The animation question went further than this recommendation dared: rather than choosing between candidate 1 and candidate 4, the actual decision keeps almost no animation at all, on any post, anywhere, with one exception, the header logo mark. Candidates 1, 2 and 3 (the WebGL field, the WebGL cover, and the rotating solid) and candidate 4 (the CSS heading) all lost to that decision and are archived in section 7; the logo's own five candidates are section 04's `LogoLab.vue`, and nothing left standing on the live page needs WebGL or the library this file opened with in section 1.
 
-**Scanlines: no.** Section 8 has the arithmetic. They are only safe where they are invisible, none of the modern references use them, and they are the fastest way to make this read as costume. If the texture is wanted, try Workbench's `SCAN` axis instead, which puts it in the letterform where it belongs.
+**Scanlines: no, and this one is now decided rather than recommended.** Section 8 has the arithmetic and the owner's own bench numbers. They are only safe where they are invisible, none of the modern references use them, and they are the fastest way to make this read as costume. If the texture is wanted later, try Workbench's `SCAN` axis instead, which puts it in the letterform where it belongs.
 
-**Colour: the brand palette, unchanged, with the terminal register expressed through background and tracking rather than through hue.** The palette lab makes the case for itself: green and yellow already clear AAA on the site's dark background, and swapping to phosphor green or amber buys atmosphere at the cost of the site no longer looking like this site. This recommendation first pointed at a near-black background; the dark ground decided in section 4 went further, to true `#000000` for the OLED benefit, which only strengthens the point. Brand green as the single accent, and everything else in the neutral ramp gets to the same place without spending the brand.
+**Colour: the brand palette, with the terminal register expressed through background and tracking rather than through hue, and with a tone per ground now that section 4 has moved past "one hex for both grounds."** The palette lab makes the case for itself: green and yellow already clear AAA on the site's dark background, and swapping to phosphor green or amber buys atmosphere at the cost of the site no longer looking like this site. This recommendation first pointed at a near-black background; the dark ground decided in section 4 went further, to true `#000000` for the OLED benefit, which only strengthens the point. Brand green as the single accent, and everything else in the neutral ramp gets to the same place without spending the brand.
 
 **Chrome: the ledger header and the ledger post list.** `SEÇÃO 00 / ÍNDICE`, dotted leaders, a version string, uppercase labels tracked to about 0.12em. It is the densest of the options and the only one that still works with a hundred posts in the list. The Game Boy menu is the prettiest thing on the page and it is the one that stops scaling first; it would be a good treatment for a small fixed menu, like reader settings in a footer, and a bad one for an index. Buttons: brackets, with the block-fill reserved for the one primary action per page.
 

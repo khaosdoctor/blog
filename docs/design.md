@@ -22,14 +22,30 @@ the pixel grid, so a share card looks like the site.
 All of them live in `src/styles/theme.css`. Components reference roles (`--fg`, `--accent`, `--rule`), never the
 brand hexes, and nothing else in the codebase hardcodes a colour, a font stack, a radius or a duration.
 
-Palette, traced from the favicon: red `#e30613`, green `#45b384`, yellow `#f5b200`, blue `#0578be`. Those stay.
-Purple is `#4b15a8`, taken from the old Ghost theme rather than the favicon, which never had one.
-`--radius: 0` by default, because rounded corners fight a pixel grid.
+Palette, traced from the favicon: red, green, yellow, blue. Purple is taken from the old Ghost theme rather than the
+favicon, which never had one. **Each colour now carries its own tone per ground rather than one hex shared by both**:
+a single adjustment never held, since red needs about 6% darkening to clear 4.5:1 on the sepia ground and yellow needs
+about 48%, eight times more. `--radius: 0` by default, because rounded corners fight a pixel grid.
 
 The two page grounds are decided: **`#000000` in dark**, true black so OLED pixels switch off, with the hint of purple
-in `--rule` instead of in the page; **`#f4efe0` in light**, a NieR Automata sepia with warm ink at `#332d23`. The brand
-blue had to move for the sepia too: it measured 4.12:1 there, under the 4.5 minimum, so `--accent` in light mode is
-`#1a5c96` instead of the raw brand hex. Full reasoning and the measured ratios are in `docs/theming.md`.
+in `--rule` instead of in the page; **`#f4efe0` in light**, a NieR Automata sepia with warm ink at `#332d23`.
+
+| role | dark | ratio | light | ratio |
+|---|---|---|---|---|
+| red | `#e6242f` | 4.67 | `#d50612` | 4.72 |
+| blue | `#1480c2` | 4.90 | `#0571b3` | 4.56 |
+| purple | `#815bc2` | 4.22 | `#4b15a8` | 9.27 |
+| green | `#45b384` | 8.03 | `#39936c` | 3.29 |
+| yellow | `#f5b200` | 11.25 | `#ac7d00` | 3.23 |
+| text | `#f3f1ee` | 18.61 | `#14120e` | 16.26 |
+| muted | `#a8a29a` | 8.30 | `#6b6353` | 5.17 |
+| link | `#7cc0ff` | 10.84 | `#1a5c96` | 6.06 |
+| rule | `#6b627b` | 3.66 | `#736e62` | 4.41 |
+
+Five of these sit under 4.5:1, on purpose: green light 3.29, yellow light 3.23, purple dark 4.22, rule dark 3.66, rule
+light 4.41. The two rules are a border, where 3:1 is the bar, so they pass on their own terms. The other three were
+chosen with the ratio on screen; what each of them paints on the live site is still open, to be recorded once the
+styling pass applying this table is done. Full reasoning is in `docs/theming.md`.
 
 ## Fonts
 
@@ -124,6 +140,12 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   10.45, green 7.24, yellow 5.70, red 10.69, purple 15.12. The frame and the hover fill read the same token, which
   also fixes the purple chip's 1.97:1 border on black. The old light-mode mix was failing quietly too: green at
   4.23, yellow at 3.11, both under the 4.5 minimum.
+- **No CRT scanline effect.** The bench (`CrtEffects.vue`, section 01 of `/theme-lab/`) starts every knob at zero and
+  prints the contrast cost next to each slider. The owner's own setting: ground light, scanline 0%, pitch 2px, glow
+  0%, grain 0%, vignette 0%, flicker off, reading 16.79:1 with the effect off and 16.79:1 on the dark scanline row,
+  AAA, cost 0.00, the same setting the bench opens on. The site carries none of this. `CrtEffects.vue` is archived to
+  `content/blog/theme-lab-arquivo/`, kept rather than deleted because the rejected settings are the argument for the
+  article the owner intends to write about how the redesign was decided.
 
 ## Open decisions
 

@@ -9,6 +9,24 @@ Portuguese, since it holds only the open questions you still have to answer, and
 
 ---
 
+## CRT scanlines: none, and the bench is archived
+
+`CrtEffects.vue`, section 01 of `/theme-lab/`, put every scanline knob at zero and printed the contrast cost next to
+each slider, so the question was never "how much scanline" but whether scanline earns its place at all.
+
+The owner ran it and settled on the setting the bench opens on: ground light, scanline 0%, pitch 2px, glow 0%, grain
+0%, vignette 0%, flicker off. The readout at that setting is 16.79:1 with the effect off and 16.79:1 on the dark
+scanline row, AAA, cost 0.00. Every knob started at zero, and after dragging them he ended where he started.
+
+`docs/theming.md` section 8 has the wider arithmetic (amber and green on black losing 3 to 5 points of contrast per
+step of scanline alpha) and a second reason that has nothing to do with contrast: none of the modern terminal-flavoured
+products looked at use scanlines, and Ghostty, which ships a scanline shader of its own, keeps it out of its own
+marketing site.
+
+The site carries none of this effect. `CrtEffects.vue` and its prose are archived to
+`content/blog/theme-lab-arquivo/`, kept rather than deleted under the standing rule for a retired lab candidate: the
+rejected settings are the argument for the article the owner intends to write about how this redesign was decided.
+
 ## The palette: OLED black and NieR sepia
 
 `--bg` is `light-dark(#f4efe0, #000000)`.
@@ -24,14 +42,39 @@ directly: its actual background is roughly `#c8c3b4` with ink at `#4e4b42`, whic
 glances and is too dark to hold up over 3000 words. What was kept is the hue, lightened until it became a reading
 surface.
 
-All the values were measured, not eyeballed: `--fg` 11.9:1 in light mode and 15.4:1 in dark mode, `--muted` 5.2:1
-and 8.3:1, `--accent` 6.1:1 and 10.8:1, and the two rules at 1.28 and 1.38.
+All the values were measured, not eyeballed, and this is the superseded version of that measurement: `--fg` 11.9:1
+in light mode and 15.4:1 in dark mode, `--muted` 5.2:1 and 8.3:1, `--accent` 6.1:1 and 10.8:1, and the two rules at
+1.28 and 1.38. **These ratios are now out of date.** The palette lab (`PaletteLab.vue`, section 01 of `/theme-lab/`)
+found that one hex per colour, shared by both grounds, never holds: a single adjustment that clears 4.5:1 on one
+ground is nowhere near enough or far more than enough on the other. Red needs about 6% darkening to clear 4.5:1 on
+the sepia ground; yellow needs about 48%, eight times more. So every colour now carries its own tone per ground,
+against the same two grounds below:
 
-Measuring caught a real problem: the brand blue at `#0578be` gives 4.12:1 against the sepia, below the minimum, so
-light mode's `--accent` darkened to `#1a5c96`. A warmer background costs contrast against a cool accent, and the
-math has to be redone rather than assumed whenever the background changes. `--table-edge` now points to `--fg`
-instead of repeating two hex values that were the old `--fg`, and `--em-bold-fg` (the ink for the bold chip over
-the yellow) became `#332d23`, the warm ink, for 7.30:1.
+| role | dark | ratio | light | ratio |
+|---|---|---|---|---|
+| red | `#e6242f` | 4.67 | `#d50612` | 4.72 |
+| blue | `#1480c2` | 4.90 | `#0571b3` | 4.56 |
+| purple | `#815bc2` | 4.22 | `#4b15a8` | 9.27 |
+| green | `#45b384` | 8.03 | `#39936c` | 3.29 |
+| yellow | `#f5b200` | 11.25 | `#ac7d00` | 3.23 |
+| text | `#f3f1ee` | 18.61 | `#14120e` | 16.26 |
+| muted | `#a8a29a` | 8.30 | `#6b6353` | 5.17 |
+| link | `#7cc0ff` | 10.84 | `#1a5c96` | 6.06 |
+| rule | `#6b627b` | 3.66 | `#736e62` | 4.41 |
+
+Five of these do not clear 4.5:1, and each one is a decision rather than an oversight: green light 3.29, yellow
+light 3.23, purple dark 4.22, rule dark 3.66, rule light 4.41. The two rule values are a border, where the bar is
+3:1 rather than 4.5:1, so they pass on the terms that actually apply to them. The other three, green light, yellow
+light and purple dark, were chosen with the ratio on screen. What each of those three tones paints on the live site
+is still being worked out by the styling pass applying this table; this entry gets that answer once it exists
+rather than a guess now.
+
+Measuring the earlier, single-hex version of the palette had already caught a real problem: the brand blue at
+`#0578be` gave 4.12:1 against the sepia, below the minimum, so light mode's link colour darkened to `#1a5c96`. A
+warmer background costs contrast against a cool colour, and the math has to be redone rather than assumed whenever
+the background changes; that finding is what led to the table above, where the same is now true of every colour
+rather than only the link. `--table-edge` now points to `--fg` instead of repeating two hex values that were the old
+`--fg`, and `--em-bold-fg` (the ink for the bold chip over the yellow) became `#332d23`, the warm ink, for 7.30:1.
 
 The two places that cannot read a token, and therefore need to be edited by hand on the next palette change: the
 pair of `theme-color` meta tags in `BaseLayout.astro` and the `background_color`/`theme_color` in
@@ -43,9 +86,11 @@ pair of `theme-color` meta tags in `BaseLayout.astro` and the `background_color`
 near-black purple background (`#080016`, with `#160731`, `#210a47` and `#2f0f67` as the steps above it). The
 invented `#6b4fbb` is gone.
 
-It gives 9.3:1 on the sepia page and 1.97:1 on the black one, so nothing uses it pure in dark mode: the quote
-tokens mix it with white first, which comes out to 3.96:1, above the 3:1 a border needs, without turning into a
-neon that the rest of this palette does not have.
+It gives 9.3:1 on the sepia page. On the black page it used to give 1.97:1, so nothing used it pure in dark mode:
+the quote tokens mixed it with white first, which came out to 3.96:1, above the 3:1 a border needs. **Superseded**:
+now that every colour carries its own tone per ground (see the previous entry), dark mode gets its own purple,
+`#815bc2`, at 4.22:1 rather than reusing the light-mode hex at 1.97:1. `#4b15a8` stays as the light-mode tone at
+9.27:1.
 
 The old theme's entire ramp is recorded in `docs/theming.md`, because that site stops existing once the DNS
 switches over, and after that there will be nowhere left to pull these values from.
