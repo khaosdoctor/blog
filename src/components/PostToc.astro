@@ -356,9 +356,11 @@ const tree = treeOf(flat)
        * runs out before their headings ever reach the reading line and the
        * outline stays stuck on whichever one did. At the end of the page the
        * reader is in the last section by definition, whatever the geometry says.
+       * This only applies when the document is actually taller than the window;
+       * on a page shorter than the viewport the bottom is always near from the start.
        */
       const bottom = document.documentElement.scrollHeight - innerHeight - scrollY
-      if (bottom <= 2) found = sections.at(-1)?.link ?? found
+      if (bottom <= 2 && document.documentElement.scrollHeight > innerHeight) found = sections.at(-1)?.link ?? found
 
       if (found === current) return
       current?.removeAttribute('aria-current')
