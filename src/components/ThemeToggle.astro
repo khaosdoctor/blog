@@ -96,13 +96,20 @@ const { locale } = Astro.props
 
   /*
    * Sized from .tt-open's own font-size above; only the current one is
-   * unhidden. `display` only applies on `:not([hidden])`, the same reason
-   * `.theme-toggle` above is scoped that way: an unconditional `display`
-   * here would beat the UA sheet's `[hidden] { display: none }` regardless
-   * of the attribute, showing all three icons at once.
+   * unhidden, which the script does by moving the `hidden` attribute.
+   *
+   * The second rule is the one that does the hiding, and it has to exist: the
+   * UA stylesheet declares `@namespace url(http://www.w3.org/1999/xhtml)`, so
+   * its `[hidden] { display: none }` never matches an `<svg>`, which is in the
+   * SVG namespace. Without this the attribute is inert and all three glyphs
+   * draw at once.
    */
   .tt-icon:not([hidden]) {
     display: block;
+  }
+
+  .tt-icon[hidden] {
+    display: none;
   }
 
   .tt-open:hover,
