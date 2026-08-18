@@ -229,3 +229,41 @@ Uma fonte de bitmap só fica nítida em múltiplo inteiro do tamanho em que foi 
 
 <LabDemo src="./components/WholePixel.vue" client:visible />
 
+## A paleta, com o tom decidido por cor e por fundo
+
+A disputa da seção 01 nunca foi sobre quais cores usar: as cinco da marca já estavam certas desde o início. Era sobre o tom certo de cada uma, por fundo, porque a cor que passa em contraste no escuro não é a mesma que passa no claro: o vermelho pede uns 6% de escurecer para passar em 4.5:1 no fundo claro, o amarelo pede uns 48%, oito vezes mais. É por isso que cada cor e cada fundo ganharam o próprio seletor em vez de um ajuste geral, e é essa diferença que fechou a decisão: o tom de cada cor, por fundo, está aplicado em `src/styles/theme.css`. O painel saiu do laboratório vivo porque não sobrou pergunta nele.
+
+Vale guardar por um motivo que não é a cor final: a rampa de cada seletor já abre no primeiro tom que passa em 4.5:1, então o que está impresso aqui é a mesma leitura que qualquer pessoa veria abrindo o painel sem mexer em nada. E o achado tinha precedente independente no próprio código antes desta bancada existir: `--em-italic-fg`, em `src/styles/theme.css`, já escurecia o amarelo da marca perto desse mesmo tanto para o itálico do modo claro.
+
+<LabDemo src="./components/PaletteLab.vue" client:visible />
+
+## Os efeitos de tubo, que voltaram para onde começaram
+
+Scanline com passo separado, brilho, granulado, vinheta e cintilação, tudo começando em zero de propósito: a pergunta da bancada nunca foi quanto de scanline usar, foi se scanline serve para alguma coisa. O dono arrastou os seis controles e terminou onde tinha começado: fundo claro, scanline 0%, passo 2px, brilho 0%, granulado 0%, vinheta 0%, cintilação desligada. A leitura nesse ponto: 16,79:1 sem o efeito, 16,79:1 na linha escura da scanline, AAA, custo 0,00. O próprio ajuste já é o veredito.
+
+A conta em `docs/theming.md` explica por que ele não sobreviveu a nenhum valor acima de zero. Uma linha de scanline preta cobre texto e fundo por igual, e sobre um fundo já escuro a perda inteira cai no texto: âmbar sobre preto cai de 11,46:1 para 6,52:1 na receita clássica de CSS (`rgba(0,0,0,0.25)` a cada 2px) e para 3,31:1 a 50% de alfa, abaixo do piso de corpo de texto. Um guia de estilo de 2026 recomenda 0,06 de alfa, faixa em que o efeito quase não aparece. É a mesma conclusão dos dois lados: scanline só é segura numa faixa em que ela não está fazendo trabalho nenhum; fora dela, ela come contraste.
+
+Tem uma segunda razão, e não é sobre contraste. Das referências modernas de estética de terminal olhadas nesta pesquisa, nenhuma usa scanline, nem o Ghostty, que embarca um shader de scanline no próprio terminal e o mantém fora do site de divulgação dele. De tudo que foi olhado, scanline é o único elemento que lê como fantasia em vez de projeto de tipo, exatamente a linha que o brief original tinha traçado ao chamar scanline de talvez.
+
+<LabDemo src="./components/CrtEffects.vue" client:visible />
+
+## O botão, com os colchetes decididos
+
+Cinco desenhos escondidos atrás do mesmo componente, porque a comparação pedia ver os cinco lado a lado, não julgar um candidato de cada vez: colchetes `[ ]`, bloco cheio, moldura dupla, prompt (sublinhado pontilhado com um `>` na frente) e cursor de menu (`▸` que aparece no hover e no foco). Ganharam os colchetes: Departure Mono, amarelo, respiro 11, sem entreletra, sem texto branco no bloco cheio.
+
+Colchetes não custam nada: são `::before` e `::after`, então o botão continua um `<button>` de verdade, focável, e o leitor de tela nunca anuncia os dois caracteres como conteúdo. E seguem funcionando numa fonte sem variação de peso, o que os outros quatro tratamentos não têm de graça: o bloco cheio depende de uma cor sólida atrás do texto, a moldura dupla depende de espessura de traço, o prompt e o cursor de menu dependem de um detalhe extra (o sinal `>` ou a seta) que o `[ ]` não precisa.
+
+Os números que fecharam a decisão, medidos no painel: contorno 9,70:1, bloco cheio 9,70:1 com texto escuro, alvo de toque de uns 38px. Duas coisas honestas em vez de arrumadas: os dois primeiros números foram medidos contra o fundo antigo `#14161a` e o amarelo antigo da marca, o par que a decisão de cor acima já substituiu, então a leitura de produção é outra; e 38px fica abaixo do mínimo de 44px que a norma pede para um alvo de toque, motivo pelo qual a versão aplicada no site não usa o mesmo respiro do painel.
+
+<LabDemo src="./components/ChromeButton.vue" client:visible />
+
+## O link em prosa, com o bloco invertido decidido
+
+Seis leituras do mesmo parágrafo, lado a lado, porque a decisão é sobre link dentro de frase corrida, não sobre uma palavra isolada testada sozinha. O candidato 0 é o que o site tem hoje e nunca foi uma escolha: sem regra de cor nem de sublinhado em `.prose a`, quem decide azul e traço é o navegador. O candidato 1 é a receita real do bpaulino.com, lida do CSS compilado do site dele: sublinhado de 1px na cor accent a 40% de opacidade, 2px de distância do texto, subindo para opacidade cheia no hover. O candidato 2 é o tracejado grosso de terminal, mais afastado do texto que o normal; o traço dele sobrevive no candidato que ganhou. O candidato 3 troca sublinhado por colchetes de texto real em volta do link, sem depender de cor nenhuma como sinal: é o teste mais duro da WCAG 1.4.1 nesta bancada, porque prova que a moldura sozinha já marca o link mesmo com a cor do link igual à do corpo. O candidato 5 é um marcador de prompt (`❯`, `>` ou `_`) antes do link, reaproveitando o desenho do botão "prompt" arquivado acima.
+
+Ganhou o candidato 4, o bloco que inverte no hover como a seleção de um terminal: em repouso quase nada, no hover o fundo vira a cor do link e o texto vira a cor do fundo da página. A decisão aplicada é um híbrido de dois candidatos: o repouso ficou com o sublinhado tracejado do candidato 2 em vez do pontilhado fino original do candidato 4, e o respiro do bloco foi para zero. Medido nesse ajuste: 10,84:1 no escuro, 6,06:1 no claro, na cor `--accent`.
+
+O motivo de ele ter ganhado não é só o contraste, que os outros também alcançavam: é ser o único dos seis com um sinal que não é cor nos dois estados, sublinhado em repouso e inversão cheia no hover, e essa inversão é a linguagem de seleção de um terminal, não o tingimento de hover comum da web. O painel inteiro, com os seis candidatos e o número de contraste de cada um, está abaixo, ainda funcionando.
+
+<LabDemo src="./components/LinkLab.vue" client:visible />
+
