@@ -16,32 +16,45 @@
   --link-underline-style: dashed;
   --link-underline-thickness: 2px;
   --link-underline-offset: 4px;
+
+  /*
+   * The hover block's own fill, derived the way chips.css derives --chip-ink,
+   * except read the other way round: there the mixed colour is TEXT against
+   * the ground, here it is the FILL with the ground colour as the text on
+   * top, so the floor check is the same pair asked in reverse. Read as text,
+   * three of the five brand colours fail one ground (green 3.29 and yellow
+   * 3.23 light, purple 4.22 dark, see theme.css), so the raw colour cannot
+   * be the fill directly.
+   *
+   * Scanned in 1% steps with the mixing script: dark needs at most 4% white
+   * mixed in for the worst of the five (purple) to clear 4.5:1; light needs
+   * at most 14% black for the worst (yellow) to clear it. Rounded down to 5%
+   * / 15% for a small margin rather than the exact float, still barely a
+   * tint: dark red 5.10 blue 5.34 green 8.48 yellow 11.65 purple 4.64; light
+   * red 6.62 blue 6.40 green 4.80 yellow 4.71 purple 11.44. Every one clears
+   * 4.5:1, and none of the five reads as washed out at this small a mix.
+   * --accent falls through the same formula when --post-accent is unset,
+   * which only raises its own already-safe 6.06/10.84 further.
+   */
+  --post-accent-fill: light-dark(
+    color-mix(in oklab, var(--post-accent, var(--accent)) 85%, black),
+    color-mix(in oklab, var(--post-accent, var(--accent)) 95%, white)
+  );
 }
 
 /*
  * Rest: --accent with the terminal dashed underline above. Hover/focus: the
  * whole run inverts into a solid block, candidate 4's choice, background
- * --post-accent (the post's own colour, hashed from its slug the same way
- * src/lib/taxonomy.ts's chipColor() already colours tag chips, written onto
- * the article element by the page) with the page ground as the text on top,
- * falling back to --accent on every page that never sets --post-accent (a
- * post has one, an index page does not).
+ * --post-accent-fill (the post's own colour, hashed from its slug the same
+ * way src/lib/taxonomy.ts's chipColor() already colours tag chips, written
+ * onto the article element by the page, then mixed toward legibility as a
+ * fill, see the token above) with the page ground as the text on top.
  *
  * Zero padding-inline, his own knob left at 0: background, color and
  * text-decoration-line are the only properties this changes, none of which
  * affect box size, so there is nothing to reflow. A link that wraps across
  * two lines gets one background fragment per line (the box's default
  * decoration break), which is the expected look, not a bug to work around.
- *
- * The ratio is the same pairing measured the other way round, contrast being
- * symmetric: --accent already clears 10.84:1 dark / 6.06:1 light as text on
- * the ground, so the inverted block clears the same. The other four brand
- * colours were each measured as text on their own ground, not as a block a
- * ground colour goes under, and three of five fail read that way: green
- * 3.29 and yellow 3.23 on the sepia ground, purple 4.22 on black. An article
- * whose slug hashes to one of those loses AA on its own links' hover state.
- * See the report for the options; nothing here restricts the rotation or
- * lifts a colour on its own.
  */
 .prose a {
   color: var(--accent);
@@ -83,7 +96,7 @@
 
 .prose a:hover,
 .prose a:focus-visible {
-  background: var(--post-accent, var(--accent));
+  background: var(--post-accent-fill);
   color: var(--bg);
   text-decoration-line: none;
 }
