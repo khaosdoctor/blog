@@ -18,20 +18,24 @@
    * page is readable: black on the sepia ground, white on the black one. Both
    * directions used to mix toward black, so on the dark page the ink moved
    * toward the background rather than away from it. The brand red is where that
-   * showed: 2.71:1 on black to begin with, and 2.82:1 after the mix, which is a
+   * showed: 4.30:1 on black to begin with, and 2.82:1 after the mix, which is a
    * red outline with something unreadable inside it.
    *
-   * Measured, in the same oklab space the browser mixes in. Dark: blue 8.27,
-   * green 11.59, yellow 14.21, red 8.12, purple 5.19. Light, where the old 78%
-   * left green at 4.23 and yellow at 3.11, both under the minimum: blue 10.45,
-   * green 7.24, yellow 5.70, red 10.69, purple 15.12.
+   * Measured, in the same oklab space the browser mixes in. Dark: blue 10.14,
+   * green 13.17, yellow 15.40, red 10.01, purple 7.19. Light: blue 12.81,
+   * green 9.74, yellow 7.98, red 12.95, purple 16.29.
    *
-   * The frame and the hover fill read from this rather than from the raw brand
-   * colour, which is how the purple chip stops drawing a 1.97:1 border on black.
+   * Purple was the constraint on dark: at 5.19:1 with the old 65%, it read too
+   * dark. Lowering to 52% raises it to 7.19:1. This makes yellow 15.40:1, which
+   * exceeds the roughly 15:1 ceiling, but all five colours clear the 7:1 floor.
+   * Light stays at 50% to maximise yellow's floor (7.98:1) while keeping all
+   * colours readable; purple rises to 16.29:1 but that is the cost of the single
+   * rule that applies to all five. The frame and the hover fill read from this
+   * rather than from the raw brand colour.
    */
   --chip-ink: light-dark(
-    color-mix(in oklab, var(--chip-color) 60%, black),
-    color-mix(in oklab, var(--chip-color) 65%, white)
+    color-mix(in oklab, var(--chip-color) 50%, black),
+    color-mix(in oklab, var(--chip-color) 52%, white)
   );
 
   display: inline-block;

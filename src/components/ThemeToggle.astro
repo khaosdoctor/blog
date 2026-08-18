@@ -7,7 +7,15 @@
 //
 // Applying a stored choice before first paint is the blocking script in
 // BaseLayout's <head>; this component only renders the control itself.
+//
+// A native <select> was considered for the menu, the same element
+// CodeTheme.astro's picker uses, since it would delete the open/place/
+// outside-click/Escape machinery below for free. Rejected: the owner asked
+// for an icon beside each choice, and an <option> cannot hold one.
 import { t, type Locale } from '../i18n/ui'
+import Sun from './icons/Sun.astro'
+import Moon from './icons/Moon.astro'
+import Monitor from './icons/Monitor.astro'
 
 interface Props {
   locale: Locale
@@ -24,11 +32,26 @@ const { locale } = Astro.props
   data-dark={t(locale, 'themeDark')}
   data-system={t(locale, 'themeSystem')}
 >
-  <button type="button" class="tt-open" aria-haspopup="true" aria-expanded="false" aria-controls="tt-menu"></button>
+  <button type="button" class="tt-open" aria-haspopup="true" aria-expanded="false" aria-controls="tt-menu">
+    {/* One icon per scheme, all hidden until theme-toggle.ts un-hides the
+       current one: the button shows what is on, without opening anything. */}
+    <Sun class="tt-icon" data-value="light" hidden />
+    <Moon class="tt-icon" data-value="dark" hidden />
+    <Monitor class="tt-icon" data-value="system" hidden />
+  </button>
   <div id="tt-menu" class="tt-menu" hidden>
-    <button type="button" class="tt-option" data-value="light"></button>
-    <button type="button" class="tt-option" data-value="dark"></button>
-    <button type="button" class="tt-option" data-value="system"></button>
+    <button type="button" class="tt-option" data-value="light">
+      <Sun class="tt-option-icon" />
+      <span class="tt-option-label"></span>
+    </button>
+    <button type="button" class="tt-option" data-value="dark">
+      <Moon class="tt-option-icon" />
+      <span class="tt-option-label"></span>
+    </button>
+    <button type="button" class="tt-option" data-value="system">
+      <Monitor class="tt-option-icon" />
+      <span class="tt-option-label"></span>
+    </button>
   </div>
 </div>
 
@@ -39,20 +62,41 @@ const { locale } = Astro.props
 <style>
   .theme-toggle {
     position: relative;
+  }
+
+  /*
+   * Author CSS beats the UA sheet's `[hidden] { display: none }` regardless of
+   * specificity, so `display` only ever applies here, on the `:not([hidden])`
+   * state: a reader with JS off, who never gets past the wrapper's own
+   * `hidden`, would otherwise see a dead control anyway.
+   */
+  .theme-toggle:not([hidden]) {
     display: inline-flex;
   }
 
+  /*
+   * Icon-only now, so the touch target comes from padding around a small
+   * glyph rather than from a bigger glyph: min-inline/block-size holds the
+   * WCAG 44px floor even though the SVG itself renders far smaller.
+   */
   .tt-open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
     border: var(--border) solid var(--rule);
     border-radius: var(--radius);
     background: var(--bg);
     color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.3rem 0.6rem;
+    font-size: 1.2rem;
+    padding: 0.5rem;
     cursor: pointer;
+  }
+
+  /* Sized from .tt-open's own font-size above; only the current one is unhidden. */
+  .tt-icon {
+    display: block;
   }
 
   .tt-open:hover,
@@ -92,6 +136,9 @@ const { locale } = Astro.props
   }
 
   .tt-option {
+    display: flex;
+    align-items: center;
+    min-block-size: 2.75rem;
     border: 0;
     border-block-end: var(--border) solid var(--rule);
     background: transparent;
@@ -103,6 +150,15 @@ const { locale } = Astro.props
     text-align: start;
     padding: 0.4rem 0.7rem;
     cursor: pointer;
+  }
+
+  /* An icon alone in a menu leaves the reader guessing, so the label stays;
+     the icon only speeds up the visual match and inherits the option's own
+     0.75rem. Spaced from the label with margin, not a row property, to avoid
+     a three-letter CSS keyword the author has banned from this codebase. */
+  .tt-option-icon {
+    flex-shrink: 0;
+    margin-inline-end: 0.5rem;
   }
 
   .tt-option:last-child {
