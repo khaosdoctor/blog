@@ -1,7 +1,9 @@
 <script setup lang="ts">
 /**
  * A lista de posts, que é a página mais visitada do site depois dos posts em si.
- * Quatro leituras, do mais denso ao mais decorado.
+ * Seis leituras: quatro só de texto, do mais denso ao mais decorado, mais duas
+ * que carregam uma miniatura da capa (grade em proporção nativa, lista com
+ * miniatura quadrada) para comparar o que uma imagem por linha custa em altura.
  */
 import { computed, ref } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
@@ -37,7 +39,54 @@ const SHAPE_OPTIONS = [
   { id: 'razao', name: 'razão com pontilhado' },
   { id: 'menu', name: 'menu de Game Boy ▸' },
   { id: 'cartoes', name: 'cartões com aresta grossa' },
+  { id: 'grade', name: 'grade com capa, proporção nativa' },
+  { id: 'miniatura', name: 'lista com miniatura quadrada' },
 ]
+
+/**
+ * As duas cores vêm de CoverLab.vue: a capa real é um `<svg viewBox="0 0 1200
+ * 630">` com a cor da marca tirada de um hash do slug, para o mesmo post
+ * sempre bater a mesma capa. Aqui não existe post de verdade nem slug, então o
+ * hash cai sobre o título, mas a forma é a mesma de chipColor() em
+ * src/lib/taxonomy.ts: soma dos code points, resto pela quantidade de cores,
+ * sem tabela de post para cor.
+ *
+ * Diferente da capa OG de CoverLab (que precisa de cor literal porque o sharp
+ * rasteriza um arquivo estático fora do navegador), esta miniatura vive dentro
+ * do HTML da página: o `<svg>` fica no DOM, então `var(--brand-*)` resolve ao
+ * vivo e a miniatura já nasce no tema do leitor em vez de congelar um dos dois.
+ */
+const BRAND_TOKENS = [
+  'var(--brand-blue)',
+  'var(--brand-green)',
+  'var(--brand-yellow)',
+  'var(--brand-red)',
+  'var(--brand-purple)',
+]
+
+// Só para o número de contraste ao vivo abaixo: os tokens acima resolvem para
+// isto no tema escuro (src/styles/theme.css), que é o fundo fixo que esta
+// bancada já assume (BG não muda com o tema do site, igual às outras quatro
+// listas). No tema claro o valor real muda e este número não acompanha.
+const BRAND_DARK_HEX: Record<string, string> = {
+  'var(--brand-blue)': '#1480c2',
+  'var(--brand-green)': '#45b384',
+  'var(--brand-yellow)': '#f5b200',
+  'var(--brand-red)': '#e6242f',
+  'var(--brand-purple)': '#815bc2',
+}
+
+function coverColour(title: string): string {
+  let sum = 0
+  for (const char of title) sum += char.codePointAt(0) ?? 0
+  return BRAND_TOKENS[sum % BRAND_TOKENS.length]
+}
+
+// O amarelo dos tokens é claro demais para tinta clara por cima, igual em
+// CoverLab: só ele pede a tinta escura da própria bancada (BG).
+function inkForCover(token: string): string {
+  return token === 'var(--brand-yellow)' ? BG : INK
+}
 
 const LEADER_OPTIONS = [
   { id: '·', name: '· ponto médio' },
@@ -58,9 +107,21 @@ const rows = ref(14)
 const tracking = ref(2)
 const showTag = ref(true)
 const selected = ref(0)
+// Largura da capa na grade, lado do quadrado na miniatura: o mesmo knob muda
+// de papel conforme o candidato, porque as duas formas de recorte pedem
+// unidades diferentes, não porque o valor em si seja outro.
+const thumbSize = ref(96)
 
 const inkContrast = computed(() => ratio(parseHex(INK), parseHex(BG)).toFixed(2))
 const mutedContrast = computed(() => ratio(parseHex(MUTED), parseHex(BG)).toFixed(2))
+
+// Pior caso entre as cinco cores de marca: o monograma é a única letra que a
+// miniatura carrega, então é ele que precisa continuar legível.
+const thumbContrast = computed(() =>
+  Math.min(
+    ...BRAND_TOKENS.map((token) => ratio(parseHex(inkForCover(token)), parseHex(BRAND_DARK_HEX[token]))),
+  ),
+)
 
 const base = computed(() => ({
   fontFamily: STACKS[face.value],
@@ -70,6 +131,27 @@ const base = computed(() => ({
 
 const rowStyle = computed(() => ({ paddingBlock: `${rows.value / 20}rem` }))
 
+// As constantes abaixo espelham os valores literais do CSS logo adiante
+// (margens entre legenda e capa), para o número impresso não inventar um
+// layout diferente do que a página de fato desenha. 16px por rem é o padrão
+// do navegador, igual ao resto da conta de `rowStyle`.
+const REM = 16
+const GRADE_CAPTION_H = 44 // duas linhas de legenda (meta + título) mais as duas margens de 0.4rem entre elas
+const GRADE_ROW_SPACING = 1.1 * REM // margem entre um cartão da grade e o próximo
+const MINIATURA_TEXT_H = 18 // uma linha de título no tamanho de fonte da bancada
+
+/** Quantas linhas cabem numa janela de 900px, o número de que a decisão de recorte depende. */
+const rowsIn900Grade = computed(() => {
+  const coverHeight = thumbSize.value * (630 / 1200)
+  const padding = (rows.value / 20) * REM * 2
+  return Math.floor(900 / (coverHeight + GRADE_CAPTION_H + GRADE_ROW_SPACING + padding))
+})
+
+const rowsIn900Miniatura = computed(() => {
+  const padding = (rows.value / 20) * REM * 2
+  return Math.floor(900 / (Math.max(thumbSize.value, MINIATURA_TEXT_H) + padding))
+})
+
 const decisionSettings = computed(() => [
   { label: 'candidato', value: labelFor(SHAPE_OPTIONS, shape.value) },
   { label: 'fonte', value: face.value },
@@ -77,11 +159,27 @@ const decisionSettings = computed(() => [
   { label: 'altura da linha', value: String(rows.value) },
   { label: 'entreletra', value: `${tracking.value}/100em` },
   { label: 'mostrar seção', value: showTag.value ? 'sim' : 'não' },
+  { label: 'tamanho da miniatura', value: `${thumbSize.value}px` },
 ])
 
-const decisionContext = computed(
-  () => `Título ${inkContrast.value}:1 · data e seção ${mutedContrast.value}:1 sobre ${BG}.`,
-)
+const decisionContext = computed(() => {
+  const contrastText = `Título ${inkContrast.value}:1 · data e seção ${mutedContrast.value}:1 sobre ${BG}.`
+  if (shape.value === 'grade') {
+    return (
+      `${contrastText} Capa na proporção nativa 1200x630, sem recorte, então cada cartão custa mais altura. ` +
+      `Monograma ${thumbContrast.value.toFixed(2)}:1 no pior caso entre as cinco cores. ` +
+      `Com miniatura de ${thumbSize.value}px, cabem ${rowsIn900Grade.value} linhas numa janela de 900px.`
+    )
+  }
+  if (shape.value === 'miniatura') {
+    return (
+      `${contrastText} Capa recortada num quadrado, perde as bordas do cartão real para caber numa linha só. ` +
+      `Monograma ${thumbContrast.value.toFixed(2)}:1 no pior caso entre as cinco cores. ` +
+      `Com miniatura de ${thumbSize.value}px, cabem ${rowsIn900Miniatura.value} linhas numa janela de 900px.`
+    )
+  }
+  return contrastText
+})
 </script>
 
 <template>
@@ -119,12 +217,74 @@ const decisionContext = computed(
         </li>
       </ol>
 
-      <ol v-else :class="$style.cartoes">
+      <ol v-else-if="shape === 'cartoes'" :class="$style.cartoes">
         <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
           <p :class="$style.meta" :style="{ color: MUTED }">
             {{ post.date }} <template v-if="showTag">· {{ post.tag }}</template> · {{ post.read }}
           </p>
           <p :class="$style.title">{{ post.title }}</p>
+        </li>
+      </ol>
+
+      <!--
+        A grade guarda a proporção 1200x630 da capa de verdade: a caixa da capa
+        tem a mesma razão, então o SVG cai por padrão (preserveAspectRatio
+        "meet") e não sobra nem falta pixel para recortar. O custo é a altura:
+        cada linha da grade cabe poucos cartões numa janela de 900px, o que faz
+        dela um candidato para uma frente curada, não para cem posts.
+      -->
+      <ol v-else-if="shape === 'grade'" :class="$style.grade" :style="{ '--capa-largura': `${thumbSize}px` }">
+        <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
+          <div :class="$style.capa">
+            <svg viewBox="0 0 1200 630" :class="$style.capaSvg" role="img" :aria-label="`Capa de ${post.title}`">
+              <rect width="1200" height="630" :fill="coverColour(post.title)" />
+              <text
+                x="600"
+                y="345"
+                text-anchor="middle"
+                font-size="360"
+                :fill="inkForCover(coverColour(post.title))"
+                opacity="0.9"
+              >{{ post.title.charAt(0).toUpperCase() }}</text>
+            </svg>
+          </div>
+          <p :class="$style.meta" :style="{ color: MUTED }">
+            {{ post.date }} <template v-if="showTag">· {{ post.tag }}</template>
+          </p>
+          <p :class="$style.title">{{ post.title }}</p>
+        </li>
+      </ol>
+
+      <!--
+        A miniatura recorta a mesma capa num quadrado (preserveAspectRatio
+        "slice"): perde as bordas do cartão real, mas a cor e o monograma
+        centrais sobrevivem ao corte, e a linha continua do tamanho de uma
+        linha de texto, então é este o candidato que aguenta cem posts.
+      -->
+      <ol v-else-if="shape === 'miniatura'" :class="$style.miniatura">
+        <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
+          <div :class="$style.chip" :style="{ '--chip-lado': `${thumbSize}px` }">
+            <svg
+              viewBox="0 0 1200 630"
+              preserveAspectRatio="xMidYMid slice"
+              :class="$style.chipSvg"
+              role="img"
+              :aria-label="`Capa de ${post.title}`"
+            >
+              <rect width="1200" height="630" :fill="coverColour(post.title)" />
+              <text
+                x="600"
+                y="420"
+                text-anchor="middle"
+                font-size="480"
+                :fill="inkForCover(coverColour(post.title))"
+                opacity="0.9"
+              >{{ post.title.charAt(0).toUpperCase() }}</text>
+            </svg>
+          </div>
+          <span :class="$style.title">{{ post.title }}</span>
+          <span v-if="showTag" :class="$style.tag" :style="{ color: ACCENT }">{{ post.tag }}</span>
+          <span :class="$style.date" :style="{ color: MUTED }">{{ post.date }}</span>
         </li>
       </ol>
     </div>
@@ -136,12 +296,25 @@ const decisionContext = computed(
       <Knob v-model="rows" label="altura da linha" :min="6" :max="40" />
       <Knob v-model="tracking" label="entreletra" :min="-2" :max="20" unit="/100em" />
       <Toggle v-model="showTag" label="mostrar seção" />
+      <Knob v-model="thumbSize" label="tamanho da miniatura" :min="32" :max="220" :step="4" unit="px" />
     </Panel>
 
     <p :class="$style.readout">
       título {{ inkContrast }}:1 · data e seção {{ mutedContrast }}:1 sobre {{ BG }}. A "razão" é a única que
       aguenta cem posts sem virar um muro, porque o olho corre pela coluna de títulos e o pontilhado leva até a
       data só quando o leitor procura por ela. O menu de Game Boy é o mais bonito e o que menos escala.
+    </p>
+
+    <p v-if="shape === 'grade'" :class="$style.readout">
+      capa em 1200x630 nativa, sem recorte · monograma {{ thumbContrast.toFixed(2) }}:1 no pior caso · com
+      miniatura de {{ thumbSize }}px cabem {{ rowsIn900Grade }} linhas numa janela de 900px. Boa para uma frente
+      curada de dez posts, ruim para uma lista de cem: a altura da capa custa tela que a "razão" nem gasta.
+    </p>
+
+    <p v-else-if="shape === 'miniatura'" :class="$style.readout">
+      capa recortada num quadrado de {{ thumbSize }}px · monograma {{ thumbContrast.toFixed(2) }}:1 no pior caso ·
+      cabem {{ rowsIn900Miniatura }} linhas numa janela de 900px. Numa tela estreita o quadrado encolhe com o
+      knob (min() contra a largura da janela) e o título trunca com reticências antes de forçar rolagem lateral.
     </p>
 
     <DecisionCopy
@@ -243,6 +416,92 @@ const decisionContext = computed(
   font-size: 0.66rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* Grade: cada item carrega sua própria margem em vez de um vão do contêiner,
+   com o contêiner puxado de volta pela mesma medida, para as bordas externas
+   da grade não ficarem com o dobro de respiro das internas. */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--capa-largura, 160px), 100%), 1fr));
+  margin: -0.55rem;
+}
+
+.grade li {
+  margin: 0.55rem;
+}
+
+.grade p {
+  margin: 0;
+}
+
+.grade .capa {
+  margin-block-end: 0.4rem;
+}
+
+.grade .meta {
+  margin-block-end: 0.4rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.capa {
+  inline-size: 100%;
+  aspect-ratio: 1200 / 630;
+  overflow: hidden;
+  border: 1px solid #ffffff1f;
+}
+
+.capaSvg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.miniatura li {
+  display: flex;
+  align-items: center;
+}
+
+.miniatura .chip {
+  flex: none;
+  margin-inline-end: 0.7rem;
+}
+
+.miniatura .title {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-inline-end: 0.7rem;
+}
+
+.miniatura .tag {
+  flex: none;
+  margin-inline-end: 0.7rem;
+  font-size: 0.72rem;
+}
+
+.miniatura .date {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* min() prende o quadrado a 18% da largura da janela: numa tela estreita ele
+   encolhe sozinho antes de empurrar o título para fora da coluna. */
+.chip {
+  inline-size: min(var(--chip-lado, 56px), 18vw);
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid #ffffff1f;
+}
+
+.chipSvg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 .title:hover {
