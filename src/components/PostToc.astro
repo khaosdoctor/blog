@@ -125,14 +125,19 @@ const tree = treeOf(flat)
     scrollbar-width: thin;
   }
 
+  /*
+   * Full ink at 0.75rem. It was 0.66rem at 75% opacity, which on a single-weight
+   * display face is the only way a label can go thin: there is no lighter weight
+   * to fall back to, so the alpha was doing all of it and the words read as a
+   * ghost of the frame around them.
+   */
   .title {
     margin: 0 0 0.35rem;
     padding-inline-start: 0.3rem;
     font-family: var(--font-display);
-    font-size: 0.66rem;
+    font-size: 0.75rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    opacity: 0.75;
   }
 
   .handle {
@@ -345,6 +350,15 @@ const tree = treeOf(flat)
         if (heading.getBoundingClientRect().top > LOOKAHEAD) break
         found = link
       }
+
+      /*
+       * The last sections of a post are shorter than the window, so the scroll
+       * runs out before their headings ever reach the reading line and the
+       * outline stays stuck on whichever one did. At the end of the page the
+       * reader is in the last section by definition, whatever the geometry says.
+       */
+      const bottom = document.documentElement.scrollHeight - innerHeight - scrollY
+      if (bottom <= 2) found = sections.at(-1)?.link ?? found
 
       if (found === current) return
       current?.removeAttribute('aria-current')
