@@ -6,6 +6,8 @@
 import { computed, ref } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
+import { labelForMark, MARK_CANDIDATES, type MarkCandidateId } from './logoMarks'
+import LogoMark from './LogoMark.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
 import Toggle from './Toggle.vue'
@@ -45,6 +47,15 @@ function labelFor(options: Array<{ id: string; name: string }>, id: string): str
   return options.find((option) => option.id === id)?.name ?? id
 }
 
+/**
+ * A marca de verdade, escolhida na Seção 03 (`LogoLab.vue`), agora aparece
+ * dentro de cada leitura de cabeçalho: julgar um cabeçalho sem a marca dentro
+ * dele era julgar metade da decisão. As duas bancadas leem a mesma lista de
+ * candidatos de `logoMarks.ts`, então trocar aqui e trocar lá são a mesma
+ * escolha vista de dois ângulos.
+ */
+const markCandidate = ref<MarkCandidateId>('fio')
+
 const shape = ref('barra')
 const face = ref('departure')
 const accent = ref('verde')
@@ -59,6 +70,7 @@ const accentContrast = computed(() => ratio(parseHex(accentHex.value), parseHex(
 
 const decisionSettings = computed(() => [
   { label: 'candidato', value: labelFor(SHAPE_OPTIONS, shape.value) },
+  { label: 'marca', value: labelForMark(markCandidate.value) },
   { label: 'fonte', value: face.value },
   { label: 'destaque', value: `${accent.value} (${accentHex.value})` },
   { label: 'entreletra', value: `${tracking.value}/100em` },
@@ -85,6 +97,7 @@ const base = computed(() => ({
     <div :class="$style.stage" :style="{ background: BG }">
       <header v-if="shape === 'barra'" :class="$style.bar" :style="base">
         <span :class="$style.edge" :style="{ color: MUTED }">┌─</span>
+        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
         <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
         <span :class="$style.fill" :style="{ color: MUTED }">─────────────</span>
         <nav>
@@ -95,6 +108,7 @@ const base = computed(() => ({
 
       <header v-else-if="shape === 'dos'" :class="$style.dos" :style="base">
         <span :class="$style.badge" :style="{ background: accentHex, color: BG }">C:\BLOG&gt;</span>
+        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
         <span :class="$style.cursor" :style="{ background: INK }"></span>
         <nav :class="$style.right">
           <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
@@ -102,6 +116,7 @@ const base = computed(() => ({
       </header>
 
       <header v-else-if="shape === 'minimo'" :class="$style.minimo" :style="base">
+        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
         <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
         <nav :class="$style.right">
           <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
@@ -110,7 +125,10 @@ const base = computed(() => ({
 
       <header v-else-if="shape === 'menu'" :class="$style.menu" :style="base">
         <div :class="$style.frame" :style="{ borderColor: MUTED }">
-          <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
+          <span :class="$style.brandRow">
+            <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
+            <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
+          </span>
           <nav>
             <span v-for="(item, index) in NAV" :key="item" :class="[$style.item, $style.row]">
               <span :class="$style.pointer" :style="{ color: index === 0 ? accentHex : 'transparent' }">▸</span>{{ item }}
@@ -122,6 +140,7 @@ const base = computed(() => ({
       <header v-else :class="$style.ledger" :style="base">
         <p :class="$style.line" :style="{ color: MUTED }">seção 00 / índice · v0.0.1+42 · 449 páginas</p>
         <p :class="$style.brandline">
+          <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
           <span :style="{ color: accentHex }">lsantos.dev</span>
           <span :style="{ color: MUTED }"> ······································ </span>
           <span>{{ NAV.join(' · ') }}</span>
@@ -131,6 +150,7 @@ const base = computed(() => ({
 
     <Panel label="cabeçalho">
       <Pick v-model="shape" label="candidato" :options="SHAPE_OPTIONS" />
+      <Pick v-model="markCandidate" label="marca" :options="MARK_CANDIDATES.map((c) => ({ id: c.id, name: c.name }))" />
       <Pick
         v-model="face"
         label="fonte"
@@ -178,6 +198,17 @@ const base = computed(() => ({
 .stage nav {
   display: inline-flex;
   gap: 0.9rem;
+}
+
+.markSlot {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-end: 0.5rem;
+}
+
+.brandRow {
+  display: inline-flex;
+  align-items: center;
 }
 
 .item {
