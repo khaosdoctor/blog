@@ -21,17 +21,14 @@
    * showed: 4.30:1 on black to begin with, and 2.82:1 after the mix, which is a
    * red outline with something unreadable inside it.
    *
-   * Measured, in the same oklab space the browser mixes in. Dark: blue 10.14,
-   * green 13.17, yellow 15.40, red 10.01, purple 7.19. Light: blue 12.81,
-   * green 9.74, yellow 7.98, red 12.95, purple 16.29.
-   *
-   * Purple was the constraint on dark: at 5.19:1 with the old 65%, it read too
-   * dark. Lowering to 52% raises it to 7.19:1. This makes yellow 15.40:1, which
-   * exceeds the roughly 15:1 ceiling, but all five colours clear the 7:1 floor.
-   * Light stays at 50% to maximise yellow's floor (7.98:1) while keeping all
-   * colours readable; purple rises to 16.29:1 but that is the cost of the single
-   * rule that applies to all five. The frame and the hover fill read from this
-   * rather than from the raw brand colour.
+   * Recomputed for the per-ground brand tones now in theme.css, same oklab
+   * mixing. Dark: blue 10.58, green 13.16, yellow 15.44, red 10.35, purple
+   * 9.92. Light: blue 13.26, green 11.63, yellow 11.52, red 13.45, purple
+   * 16.29. Every one still clears the 7:1 floor this mix was chosen for,
+   * purple with more headroom than before now that its dark tone lightened,
+   * yellow's light floor with much more too now that its own tone darkened.
+   * The frame and the hover fill read from this rather than from the raw
+   * brand colour.
    */
   --chip-ink: light-dark(
     color-mix(in oklab, var(--chip-color) 50%, black),

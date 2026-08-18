@@ -218,24 +218,45 @@ const { action = '/search/', locale = 'pt' } = Astro.props
     outline-offset: 1px;
   }
 
+  /*
+   * The site's chosen button treatment (ChromeButton.vue, decided): brackets
+   * as pseudo-elements, never text, so the label stays the only thing a
+   * screen reader announces. Outline variant, the one the search form's
+   * single action calls for; see theme.css for the touch-target and contrast
+   * numbers behind these tokens.
+   */
   button {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    background: var(--bg);
-    color: var(--fg);
-    font: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: var(--btn-touch-min);
+    padding: var(--btn-pad-block) var(--btn-pad-inline);
+    border: var(--border) solid var(--btn-fg);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--btn-fg);
+    font-family: var(--btn-face);
     font-size: 1rem;
+    letter-spacing: var(--btn-tracking);
     cursor: pointer;
   }
 
+  button::before {
+    content: '[';
+    margin-inline-end: 0.4em;
+  }
+
+  button::after {
+    content: ']';
+    margin-inline-start: 0.4em;
+  }
+
   button:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    background: color-mix(in oklab, var(--btn-fg) 12%, transparent);
   }
 
   button:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--btn-fg);
     outline-offset: 1px;
   }
 

@@ -8,6 +8,49 @@
   --icon-internal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 6v5a3 3 0 0 0 3 3h11'/%3E%3Cpath d='M15 10l4 4-4 4'/%3E%3C/svg%3E");
 }
 
+:root {
+  /* Rest-state underline, the exact values candidate 2 measured in the lab
+   * (LinkLab.vue, section 06 of /theme-lab/, archived once decided): dashed,
+   * 2px thick, 4px offset from the baseline, kept from that candidate rather
+   * than candidate 4's own thin dotted rest state. */
+  --link-underline-style: dashed;
+  --link-underline-thickness: 2px;
+  --link-underline-offset: 4px;
+}
+
+/*
+ * Rest: --accent with the terminal dashed underline above. Hover/focus: the
+ * whole run inverts into a solid block, candidate 4's choice, background
+ * --post-accent (the post's own colour, hashed from its slug the same way
+ * src/lib/taxonomy.ts's chipColor() already colours tag chips, written onto
+ * the article element by the page) with the page ground as the text on top,
+ * falling back to --accent on every page that never sets --post-accent (a
+ * post has one, an index page does not).
+ *
+ * Zero padding-inline, his own knob left at 0: background, color and
+ * text-decoration-line are the only properties this changes, none of which
+ * affect box size, so there is nothing to reflow. A link that wraps across
+ * two lines gets one background fragment per line (the box's default
+ * decoration break), which is the expected look, not a bug to work around.
+ *
+ * The ratio is the same pairing measured the other way round, contrast being
+ * symmetric: --accent already clears 10.84:1 dark / 6.06:1 light as text on
+ * the ground, so the inverted block clears the same. The other four brand
+ * colours were each measured as text on their own ground, not as a block a
+ * ground colour goes under, and three of five fail read that way: green
+ * 3.29 and yellow 3.23 on the sepia ground, purple 4.22 on black. An article
+ * whose slug hashes to one of those loses AA on its own links' hover state.
+ * See the report for the options; nothing here restricts the rotation or
+ * lifts a colour on its own.
+ */
+.prose a {
+  color: var(--accent);
+  text-decoration-line: underline;
+  text-decoration-style: var(--link-underline-style);
+  text-decoration-thickness: var(--link-underline-thickness);
+  text-underline-offset: var(--link-underline-offset);
+}
+
 .prose a::after {
   content: '';
   display: inline-block;
@@ -38,17 +81,11 @@
   content: none;
 }
 
-/*
- * Hovering a link takes it to the foreground colour and thickens it.
- *
- * The weight comes from a text stroke rather than `font-weight: bold`, which
- * would reflow the paragraph under the cursor: a bolder face is wider, so every
- * word after the link would shift as the pointer crossed it.
- */
 .prose a:hover,
 .prose a:focus-visible {
-  color: var(--fg);
-  -webkit-text-stroke: 0.02em currentColor;
+  background: var(--post-accent, var(--accent));
+  color: var(--bg);
+  text-decoration-line: none;
 }
 
 /*
@@ -58,6 +95,17 @@
  */
 .prose a.link-unwritten {
   color: var(--link-unwritten);
+}
+
+/*
+ * A separate inversion from the run above: whether a post is missing has
+ * nothing to do with which article links to it, so this stays red rather
+ * than picking up the hash colour of whichever page it happens to appear on.
+ */
+.prose a.link-unwritten:hover,
+.prose a.link-unwritten:focus-visible {
+  background: var(--link-unwritten);
+  color: var(--bg);
 }
 
 .prose .draft-note {
