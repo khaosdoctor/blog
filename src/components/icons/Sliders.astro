@@ -1,0 +1,29 @@
+---
+// Pixelarticons `sliders.svg` (MIT), github.com/halfmage/pixelarticons, path
+// data unchanged. Built for the preferences button beside the theme toggle;
+// unused until that button and its menu exist, so nothing imports this yet.
+// `currentColor` and `1em` sizing so the glyph takes the colour and scale of
+// whatever button places it, with no token of its own.
+interface Props {
+  class?: string
+  [key: string]: unknown
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width="1em"
+  height="1em"
+  fill="currentColor"
+  aria-hidden="true"
+  focusable="false"
+  class={className}
+  {...rest}
+>
+  <path
+    d="M8 14H7v6H5v-6H2v-2h6v2Zm5 6h-2V10h2v10Zm9-2h-3v2h-2v-2h-1v-2h6v2Zm-3-4h-2V4h2v10ZM7 10H5V4h2v6Zm6-4h2v2H9V6h2V4h2v2Z"
+  ></path>
+</svg>

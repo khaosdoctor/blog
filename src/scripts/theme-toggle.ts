@@ -41,16 +41,25 @@ function applyScheme(scheme: Scheme | null): void {
 // get the resolved colour: whichever one the browser's media query still
 // matches, the colour it reports is now the page's actual one. Restored to
 // their own per-scheme colour when the choice goes back to "system".
-const BG_LIGHT = '#f4efe0'
-const BG_DARK = '#000000'
+//
+// Each meta's own `content`, as BaseLayout wrote it, already is that scheme's
+// colour, so it is read off the DOM rather than repeated here as a third copy
+// of theme.css's two hexes. Cached on first read, before this function ever
+// overwrites it, since a later call would otherwise cache its own overwrite.
+let ownLight: string | null = null
+let ownDark: string | null = null
 
 function syncThemeColor(scheme: Scheme | null): void {
   const light = document.querySelector('meta[name="theme-color"][media*="light"]')
   const dark = document.querySelector('meta[name="theme-color"][media*="dark"]')
   if (light === null || dark === null) return
-  const resolved = scheme === null ? null : scheme === 'dark' ? BG_DARK : BG_LIGHT
-  light.setAttribute('content', resolved ?? BG_LIGHT)
-  dark.setAttribute('content', resolved ?? BG_DARK)
+  ownLight ??= light.getAttribute('content')
+  ownDark ??= dark.getAttribute('content')
+  const resolved = scheme === null ? null : scheme === 'dark' ? ownDark : ownLight
+  if (resolved !== null) light.setAttribute('content', resolved)
+  else if (ownLight !== null) light.setAttribute('content', ownLight)
+  if (resolved !== null) dark.setAttribute('content', resolved)
+  else if (ownDark !== null) dark.setAttribute('content', ownDark)
 }
 
 // Same feature check as code-theme.ts's canPopover: true wherever the native
@@ -133,13 +142,16 @@ function init(): void {
     if (returnFocus) opener.focus()
   }
 
-  // Static buttons ship with no text: the labels come from data attributes
-  // (see ThemeToggle.astro) since this plain module has no access to t().
+  // The opener carries only icons now (see ThemeToggle.astro), so its
+  // accessible name lives only in aria-label; there is no text node left to
+  // duplicate it. The menu itself gets none: it is a plain div with no ARIA
+  // role, and a role-less element's aria-label is ignored by every screen
+  // reader, so each option's own visible text is what actually names it, and
+  // that text comes from data attributes since this plain module has no
+  // access to t().
   const strings = wrapper.dataset
   const label = strings.label ?? 'Theme'
-  opener.textContent = label
   opener.setAttribute('aria-label', label)
-  menu.setAttribute('aria-label', label)
 
   const captions: Record<'light' | 'dark' | 'system', string | undefined> = {
     light: strings.light,
@@ -150,12 +162,22 @@ function init(): void {
   const options = [...menu.querySelectorAll<HTMLButtonElement>('.tt-option')]
   for (const option of options) {
     const value = option.dataset.value as 'light' | 'dark' | 'system'
-    option.textContent = captions[value] ?? value
+    const labelEl = option.querySelector<HTMLElement>('.tt-option-label')
+    if (labelEl !== null) labelEl.textContent = captions[value] ?? value
   }
+
+  // The opener's three icons (see ThemeToggle.astro), one per scheme, only
+  // one ever unhidden: the button then shows what is on without opening
+  // anything.
+  const openerIcons = [...opener.querySelectorAll<SVGElement>('.tt-icon')]
 
   function markCurrent(scheme: Scheme | null): void {
     const value = scheme ?? 'system'
     for (const option of options) option.setAttribute('aria-current', String(option.dataset.value === value))
+    for (const icon of openerIcons) {
+      if (icon.dataset.value === value) icon.removeAttribute('hidden')
+      else icon.setAttribute('hidden', '')
+    }
   }
 
   const initial = storedScheme()
