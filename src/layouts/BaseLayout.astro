@@ -36,6 +36,7 @@ import MathCopy from '../components/MathCopy.astro'
 import QuoteCopy from '../components/QuoteCopy.astro'
 import ReadingProgress from '../components/ReadingProgress.astro'
 import SEO from '../components/SEO.astro'
+import ThemeToggle from '../components/ThemeToggle.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
 // Baked in at build time: the semver the release workflow last tagged, plus a
@@ -96,8 +97,21 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    {/* Ahead of every stylesheet on purpose: the reader's chosen code theme has
+    {/* Ahead of every stylesheet on purpose: an explicit light/dark choice has
         to be on <html> before the first paint, or every page flashes the
+        system-default ground first. Nothing stored means no attribute, and
+        the color-scheme: light dark on :root (theme.css) decides, which is
+        exactly today's behaviour with no toggle at all. */}
+    <script is:inline>
+      try {
+        const stored = localStorage.getItem('color-scheme')
+        if (stored === 'light' || stored === 'dark') document.documentElement.setAttribute('data-theme', stored)
+      } catch {
+        // Private mode, or storage disabled. color-scheme: light dark still applies.
+      }
+    </script>
+    {/* Same shape, one key over: the reader's chosen code theme has to be on
+        <html> before the first paint too, or every page flashes the
         system-default theme first. Nothing stored means no attribute, and the
         prefers-color-scheme media query in expressive-code's own CSS decides,
         which is exactly the behaviour before there was a picker. */}
@@ -157,6 +171,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
         <a href={locale === 'en' ? '/en/search/' : '/search/'}>{t(locale, 'search')}</a>
       </nav>
       <LangSwitcher locale={locale} alternates={alternates} />
+      <ThemeToggle locale={locale} />
     </header>
     <main id="main-content">
       <slot />
@@ -242,8 +257,9 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 
 <style is:global>
   /* Tokens live in src/styles/theme.css, imported above. Theming is native
-     light-dark() + color-scheme, so there is no toggle and no JS; a manual
-     toggle needs a stored preference and arrives with the real design. */
+     light-dark() + color-scheme; ThemeToggle.astro narrows color-scheme to
+     one keyword on an explicit choice, and every light-dark() token here
+     follows without being rewritten. */
   *,
   *::before,
   *::after {

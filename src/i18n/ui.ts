@@ -65,6 +65,10 @@ type UIKey =
   | 'codeTheme'
   | 'codeThemeAuto'
   | 'codeThemePick'
+  | 'themeToggle'
+  | 'themeLight'
+  | 'themeDark'
+  | 'themeSystem'
   | 'writtenBy'
   | 'readingProgress'
   | 'contents'
@@ -151,6 +155,10 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     codeTheme: 'Tema do código',
     codeThemeAuto: 'Automático (segue o sistema)',
     codeThemePick: 'mudar o tema do código',
+    themeToggle: 'Tema',
+    themeLight: 'Claro',
+    themeDark: 'Escuro',
+    themeSystem: 'Sistema',
     writtenBy: 'por',
     readingProgress: 'progresso da leitura',
     contents: 'Neste post',
@@ -238,6 +246,10 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     codeTheme: 'Code theme',
     codeThemeAuto: 'Automatic (matches your system)',
     codeThemePick: 'change the code theme',
+    themeToggle: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSystem: 'System',
     writtenBy: 'by',
     readingProgress: 'reading progress',
     contents: 'In this post',

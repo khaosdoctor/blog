@@ -105,13 +105,20 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   synchronous read of tens of kilobytes before first paint, and the CSS then sits outside normal cache invalidation
   with nothing to clear a stale copy. A plain `<link>` to a hashed asset already serves from cache with no network.
 
+- **Theme toggle.** Explicit now: a button beside `LangSwitcher` in the header opens a small menu of light, dark and
+  system. The mechanism is one attribute, `data-theme` on `<html>`, narrowing `color-scheme` from `light dark` to one
+  keyword in `theme.css`; every existing `light-dark()` token resolves against that without being rewritten. System is
+  the default and means today's behaviour exactly: no attribute, nothing in `localStorage`. Stored under
+  `color-scheme`, applied by a blocking head script the same shape as the code theme's, so a repeat visit never
+  flashes the wrong ground. `ThemeToggle.astro` follows `CodeTheme.astro`'s progressive-enhancement precedent: the
+  control renders `hidden` and only appears once `theme-toggle.ts` confirms it can run.
+
 ## Open decisions
 
 - Which of the three cover candidates wins. All three are built in `/theme-lab/` section 03 as SVG at the real
   1200×630: a DOS window with a spaced double border, a full-bleed brand colour with a 75% rule, and a seeded plasma
   with shadowed letters. Covers stay per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in. Colour
   and seed derive from the slug rather than being random, so a rebuild cannot change an existing cover.
-- Whether the theme toggle becomes explicit. Today it is native `light-dark()` with no JS and no stored preference.
 - Where the pinned-preview persistence checkbox lives. The code theme picker found its home on every code block, and
   the footer already exists (name, version, typeface credits), but a checkbox among those links reads oddly; it may
   want its own small settings popover, reusing the code-theme picker's pattern.
