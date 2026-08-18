@@ -37,15 +37,15 @@ Não existe curvatura de tela aqui, e não vai existir.
 
 O cabeçalho, em cinco leituras da mesma direção. Nenhuma usa imagem ou ícone: é tudo caractere, o que significa que nada disso custa uma requisição.
 
-<LabDemo src="./components/ChromeHeader.vue" client:visible />
+<LabDemo src="./components/ChromeHeader.vue" client:load />
 
 A lista de posts, que é a página mais visitada do site depois dos posts. Quatro leituras, da mais densa à mais decorada.
 
-<LabDemo src="./components/ChromeList.vue" client:visible />
+<LabDemo src="./components/ChromeList.vue" client:load />
 
 E os botões, os cinco lado a lado para escolher olhando.
 
-<LabDemo src="./components/ChromeButton.vue" client:visible />
+<LabDemo src="./components/ChromeButton.vue" client:load />
 
 ## Seção 03 / A capa
 
@@ -55,7 +55,7 @@ O primeiro é a janela DOS: fundo preto, moldura dupla de retângulos com um vã
 
 Nenhuma cor aqui vem de `Math.random()`. Tudo sai de um número inteiro — a "semente" — e no gerador de verdade essa semente é o hash do slug do post, então o mesmo post sempre bate a mesma capa. O knob de semente existe só para você embaralhar as cinco cores da marca e ver a variedade sem editar código. O comprimento do título tem três tamanhos: o de noventa caracteres é o que decide se a quebra de linha aguenta um título ruim de verdade.
 
-<LabDemo src="./components/CoverLab.vue" client:visible />
+<LabDemo src="./components/CoverLab.vue" client:load />
 
 ## Seção 04 / O logo animado
 
