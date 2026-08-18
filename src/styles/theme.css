@@ -161,17 +161,20 @@
    * dark in both themes, because the chip itself is the same yellow in both and
    * dark-on-yellow is the only legible pairing.
    *
-   * --brand-yellow now carries a tone per ground, so the chip itself is no
-   * longer the same yellow in both themes: 7.30:1 in dark, unchanged, but only
-   * 3.69:1 in light now that the chip is the darker sepia-ground amber rather
-   * than the raw brand tone. That is a real failure of running text, not a
-   * decorative one: reported rather than fixed here, since --em-bold-fg's own
-   * value was never part of the owner's palette decision.
+   * --brand-yellow now carries a tone per ground, tuned for yellow as TEXT
+   * against each ground, which this chip is not: it is a filled background.
+   * Following the light tone down measured 3.69:1 for --em-bold-fg on it,
+   * under the 4.5 floor for running text, and bold body text failing that
+   * floor is not something a preference can decide. Fixed here at the bright
+   * tone in both themes instead, the value --brand-yellow's own dark branch
+   * already carries, which keeps this chip's whole reason for being (one
+   * yellow, two themes, dark ink the only legible pairing) intact and holds
+   * --em-bold-fg at 7.30:1 on both grounds.
    */
-  --em-bold-bg: var(--brand-yellow);
+  --em-bold-bg: #f5b200;
   /* The page's warm ink rather than the cool near-black this used to be, so the
    * chip belongs to the sepia palette. Fixed in both themes, because
-   * dark-on-yellow is the only legible pairing; see the ratio note above. */
+   * dark-on-yellow is the only legible pairing; 7.30:1, see the note above. */
   --em-bold-fg: #332d23;
   /*
    * Italic is the same yellow as bold, as text rather than a wash. The brand
@@ -279,12 +282,16 @@
    * ground from before the palette decision. Recomputed against the real
    * grounds: outline text is --brand-yellow itself, so it is the same 11.25:1
    * dark / 3.23:1 light the brand table already gives, the light case a real
-   * failure of the button label's own text. Solid block text is --em-bold-fg
-   * on --brand-yellow, the same pairing --em-bold-bg/--em-bold-fg above already
-   * measures: 7.30:1 dark, 3.69:1 light, the same new failure. Applied as
-   * decided; the smallest fix that would clear the light case without changing
-   * the look is the move --em-italic-fg already made for yellow-as-text on this
-   * ground, a darker amber (#8a6400 clears 4.68:1) in place of the raw tone.
+   * failure of the button label's own text, applied as decided since that
+   * text-on-ground pairing is exactly what the brand table measured. The
+   * smallest fix that would clear it without changing the look is the move
+   * --em-italic-fg already made for yellow-as-text on this ground, a darker
+   * amber (#8a6400 clears 4.68:1) in place of the raw tone.
+   *
+   * Solid block fill is --em-bold-bg, not --brand-yellow: a filled background
+   * has the same shape of problem the bold chip had, and the same fix, the
+   * fixed bright tone rather than the per-ground one. Text is --em-bold-fg,
+   * so this holds the same 7.30:1 on both grounds as the chip.
    *
    * No control on the site today matches the solid block's "one primary
    * action" bar, so only the outline variant is wired up (Search.astro); these
@@ -297,7 +304,7 @@
   --btn-pad-inline: 1.25rem;
   --btn-touch-min: 2.75rem; /* 44px WCAG target; his demo measured ~38px at this padding alone */
   --btn-fg: var(--brand-yellow);
-  --btn-solid-bg: var(--brand-yellow);
+  --btn-solid-bg: var(--em-bold-bg);
   --btn-solid-fg: var(--em-bold-fg);
 
   --duration: 120ms;
