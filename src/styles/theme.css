@@ -119,6 +119,15 @@
   --measure: 78ch;
   --gutter: 1.5rem;
 
+  /*
+   * The minimum vertical space between two block-level prose children of the
+   * same kind, two code frames or two figures, when they come one after
+   * another with nothing between them, so margin collapsing gives no minimum
+   * on its own. Figures already used this value on their own margin-block in
+   * BaseLayout; code frames now share it so two of either kind never touch.
+   */
+  --block-spacing: 2rem;
+
   /* Square by default: rounded corners fight a pixel grid. */
   --radius: 0;
   --border: 1px;
@@ -221,6 +230,19 @@
     color-mix(in oklab, var(--brand-blue) 8%, transparent)
   );
   --table-cell-pad: 0.45rem 0.7rem;
+
+  /*
+   * Code block shadow: a hard offset block, no blur, the way a DOS window
+   * drops one. Same 4px as the frame's own border width (--cc-frame-width in
+   * code-and-callouts.css), so the shadow reads as part of the same pixel
+   * grid rather than a soft one from another era. Colour follows the theme
+   * through light-dark(): black on the sepia page, white on the black one.
+   * The minimum space between two stacked code blocks (--block-spacing
+   * above) is 2rem, well past this 4px offset, so the shadow of one block
+   * never reaches into the next.
+   */
+  --code-shadow-offset: 4px;
+  --code-shadow-color: light-dark(#000000, #ffffff);
 
   --duration: 120ms;
   --ease: ease;
