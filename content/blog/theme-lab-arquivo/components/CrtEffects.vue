@@ -10,14 +10,14 @@
  * Não existe curvatura de tela aqui, e não vai existir.
  */
 import { computed, onMounted, ref } from 'vue'
-import DecisionCopy from './DecisionCopy.vue'
-import Knob from './Knob.vue'
-import Panel from './Panel.vue'
-import Pick from './Pick.vue'
-import Toggle from './Toggle.vue'
-import { PARAGRAPHS } from './copy'
-import { composite, grade, parseHex, ratio } from './contrast'
-import './fonts.css'
+import DecisionCopy from '../../theme-lab/components/DecisionCopy.vue'
+import Knob from '../../theme-lab/components/Knob.vue'
+import Panel from '../../theme-lab/components/Panel.vue'
+import Pick from '../../theme-lab/components/Pick.vue'
+import Toggle from '../../theme-lab/components/Toggle.vue'
+import { PARAGRAPHS } from '../../theme-lab/components/copy'
+import { composite, grade, parseHex, ratio } from '../../theme-lab/components/contrast'
+import '../../theme-lab/components/fonts.css'
 
 const SKINS: Record<string, { name: string; bg: string; fg: string }> = {
   site: { name: 'o escuro do site', bg: '#14161a', fg: '#e6e4e0' },

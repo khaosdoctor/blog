@@ -4,7 +4,7 @@ pubDate: 2026-08-14
 lang: "pt"
 category: "meta"
 tags: ["meta", "design"]
-description: "Uma bancada de candidatos interativos para o redesenho: a paleta da marca em registro de terminal, as peças de interface, a capa gerada e a animação do logo."
+description: "Uma bancada de candidatos interativos para o redesenho: as peças de interface, a capa gerada e a animação do logo."
 draft: false
 noindex: true
 ---
@@ -21,19 +21,7 @@ Os candidatos que perderam não foram apagados: estão em [[theme-lab-arquivo]],
 
 Nada que se mexe começa se mexendo para quem pediu `prefers-reduced-motion: reduce`, e tudo que se mexe tem um interruptor para parar.
 
-## Seção 01 / Cor
-
-A paleta é uma só: as cinco cores da marca mais as tintas que o próprio site já usa para texto, apagado, link e friso. Um bloco por cor, com uma amostra no fundo escuro do site e outra no claro, cada uma com o próprio seletor de tom, porque a cor certa num fundo não é a mesma no outro. O achado é que um ajuste único não serve: no fundo claro o vermelho pede uns 6% de escurecer para passar em 4.5:1, o amarelo pede uns 48%, oito vezes mais, e é por isso que cada cor e cada fundo têm o próprio seletor em vez de um slider geral. Isso já tem precedente no código: o amarelo da marca, escurecido do mesmo jeito, é a cor de itálico do modo claro.
-
-<LabDemo src="./components/PaletteLab.vue" client:visible />
-
-E os efeitos de tubo, cada um com a conta do que custa. Tudo começa em zero de propósito, porque a pergunta não é quanto de scanline: é se scanline serve para alguma coisa. Suba o slider e olhe o número ao lado dele cair.
-
-Não existe curvatura de tela aqui, e não vai existir.
-
-<LabDemo src="./components/CrtEffects.vue" client:visible />
-
-## Seção 02 / Interface
+## Seção 01 / Interface
 
 O cabeçalho, em cinco leituras da mesma direção. Nenhuma usa imagem ou ícone: é tudo caractere, o que significa que nada disso custa uma requisição.
 
@@ -43,11 +31,9 @@ A lista de posts, que é a página mais visitada do site depois dos posts. Quatr
 
 <LabDemo src="./components/ChromeList.vue" client:load />
 
-E os botões, os cinco lado a lado para escolher olhando.
+O botão já foi decidido: colchetes `[ ]`, em Departure Mono, amarelo, respiro 11, sem entreletra e sem texto branco no bloco cheio. Ele venceu por custar zero (os colchetes são `::before`/`::after`, o botão continua um `<button>` focável e o leitor de tela nunca os anuncia como conteúdo) e por seguir funcionando numa fonte sem variação de peso. O painel que comparava os cinco lado a lado saiu do laboratório vivo e está inteiro em [[theme-lab-arquivo]], com o motivo de cada um dos quatro que perderam.
 
-<LabDemo src="./components/ChromeButton.vue" client:load />
-
-## Seção 03 / A capa
+## Seção 02 / A capa
 
 A capa é a imagem que aparece no card do Twitter, do Slack, do WhatsApp: 1200×630, com o título assado por cima. Três candidatos abaixo, todos `<svg>` de verdade, na mesma proporção da imagem final, porque é assim que o gerador de verdade vai rasterizar: `sharp` lendo o SVG no build, sem passar por canvas nem por WebGL.
 
@@ -57,7 +43,7 @@ Nenhuma cor aqui vem de `Math.random()`. Tudo sai de um número inteiro — a "s
 
 <LabDemo src="./components/CoverLab.vue" client:load />
 
-## Seção 04 / O logo animado
+## Seção 03 / O logo animado
 
 A decisão que abre esta bancada inteira: o site vai ter quase nenhuma animação, e a única exceção é a marca do cabeçalho. Não o título, não a lista de posts, não os botões. Só ela, o tempo todo, baixinho, como um pulso de disco rígido: a coisa que prova que a página está viva sem competir com o texto por atenção.
 
@@ -67,7 +53,7 @@ A marca em si veio do `public/favicon.svg` deste repo, cinco retângulos com as 
 
 <LabDemo src="./components/LogoLab.vue" client:visible />
 
-## Seção 05 / Segundo plano vivo
+## Seção 04 / Segundo plano vivo
 
 Este candidato pega o pedido de frente: um Jogo da Vida de Conway rodando atrás da página inteira, bem apagado,
 bem espalhado, um pouco ampliado (células grandes), nunca atrás do texto de um post, e um clique em qualquer
@@ -119,39 +105,12 @@ textura das células inteira. Não existe correção aqui, só o registro de que
 
 <LabDemo src="./components/GameOfLife.vue" client:visible />
 
-## Seção 06 / Links
-
-O dono do blog não está convencido de que azul com sublinhado seja bonito, mas também não tem uma opção melhor em
-mente. O candidato 0 abaixo é o que existe hoje: não é uma escolha, é o navegador decidindo sozinho, porque não há
-regra de cor nem de sublinhado em `.prose a` neste site. Os outros cinco vieram de uma pesquisa pequena, não uma
-revisão completa: como sites de terminal, ASCII e fonte monoespaçada tratam link dentro de texto corrido, mais
-[bpaulino.com](https://bpaulino.com), que o dono pediu especificamente como referência por estar perto do visual dele
-com escolhas gerais que agradaram.
-
-O que bpaulino.com faz de verdade, lido direto do CSS compilado do site (não de uma captura de tela): a cor do link
-é um roxo periwinkle (`--color-accent-lift`, `#c2adfa`), sem sublinhado fora de texto corrido; dentro de `.prose` e de
-qualquer `<p>`, ganha `text-decoration: underline 1px` com a cor do traço num tom translúcido do mesmo roxo
-(`--color-line-accent`, o accent a uns 40% de opacidade) e `text-underline-offset: 2px`. No hover, o traço sobe para
-opacidade cheia; a troca de cor do texto para o `--color-ink` quase branco vem de uma regra geral de `a:hover`, não
-de um tratamento pensado para o link em prosa especificamente. Não existe `:visited`. O candidato 1 abaixo é essa
-ideia, com a cor levada para os tokens deste site (`--accent`, `--brand-green` ou `--brand-purple`) e a espessura, a
-distância e a opacidade em repouso viradas slider.
-
-Os candidatos 2 a 5 vêm do outro lado da pesquisa: tracejado grosso e afastado do texto (comum em site de terminal e
-monoespaçado, a mesma ideia que já está no botão "prompt" de `ChromeButton.vue`), colchetes de texto em volta do link
-em vez de sublinhado (a referência do textmode.js em docs/theming.md faz isso com `::before`/`::after` num botão; aqui
-os colchetes são texto real, porque o `::after` de cada link em prosa já está ocupado pelo ícone de âncora
-externa/interna), o bloco que inverte no hover como a seleção de um terminal, e um marcador `>`/`❯`/`_` antes do link
-como um prompt. A WCAG 1.4.1 diz que cor sozinha nunca pode ser o único sinal de que um trecho de texto é um link;
-cada candidato imprime se depende só de cor ou não, e o candidato 3 é o teste mais duro disso, porque ele deixa a cor
-igual à do corpo de propósito e prova que a moldura de caracteres já basta.
-
-Todos os seis usam o mesmo parágrafo real (o segundo de `copy.ts`), com o mesmo link não escrito, o mesmo link interno
-e o mesmo link externo dentro dele, porque a decisão é sobre link dentro de frase, não sobre uma palavra solta. O
-vermelho do link não escrito e o ícone de âncora externa/interna, os dois já existentes no site hoje, continuam
-funcionando em todos os candidatos sem precisar de nenhum tratamento especial.
-
-<LabDemo src="./components/LinkLab.vue" client:visible />
+O link em prosa também já foi decidido: candidato 4, o bloco que inverte no hover como a seleção de um terminal, em
+`--accent`, com o sublinhado tracejado do candidato 2 em repouso em vez do pontilhado fino original (um híbrido dos
+dois) e respiro zero no bloco. Contraste medido: 10,84:1 no escuro, 6,06:1 no claro. Ele venceu por ser o único
+candidato com um sinal que não é cor nos dois estados, sublinhado em repouso e inversão cheia no hover, a ideia de
+seleção de terminal em vez do tingimento de hover comum na web. O painel com os seis candidatos lado a lado saiu do
+laboratório vivo e está inteiro em [[theme-lab-arquivo]], com o motivo de cada um dos cinco que perderam.
 
 ## O que ainda não está aqui
 
@@ -159,4 +118,4 @@ O ícone, porque a lista curta em `docs/design.md` já resolve e nenhuma opção
 
 O rodapé e o lugar das preferências do leitor, porque essa decisão depende de qual cabeçalho ganhar.
 
-Quatro tipos que a pesquisa encontrou e que valeria testar: Geist Pixel (Vercel, 2026, com eixo variável de forma do elemento), Bitcount (cinco eixos, incluindo cursivo), Doto e Workbench (que tem um eixo `SCAN` de scanline embutido na própria fonte, o que resolveria o problema de contraste da seção 01 de um jeito que nenhum overlay resolve). Todos são OFL e todos estão no Google Fonts. Eles não estão nesta página porque a rede da máquina onde ela foi montada parou de responder no meio do download, e não porque foram descartados.
+Quatro tipos que a pesquisa encontrou e que valeria testar: Geist Pixel (Vercel, 2026, com eixo variável de forma do elemento), Bitcount (cinco eixos, incluindo cursivo), Doto e Workbench (que tem um eixo `SCAN` de scanline embutido na própria fonte, o que resolveria o mesmo problema de contraste dos efeitos de tubo arquivados em [[theme-lab-arquivo]] de um jeito que nenhum overlay resolve). Todos são OFL e todos estão no Google Fonts. Eles não estão nesta página porque a rede da máquina onde ela foi montada parou de responder no meio do download, e não porque foram descartados.
