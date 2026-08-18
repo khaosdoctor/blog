@@ -72,6 +72,7 @@ const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
   'llms.txt.ts': 'source-only',
   'manifest.webmanifest.ts': 'per-locale',
   'offline.astro': 'shared',
+  'oss.astro': 'per-locale',
   'robots.txt.ts': 'shared',
   'rss.xml.ts': 'per-locale',
   'scheduled.json.ts': 'shared',
