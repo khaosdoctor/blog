@@ -94,8 +94,14 @@ const { locale } = Astro.props
     cursor: pointer;
   }
 
-  /* Sized from .tt-open's own font-size above; only the current one is unhidden. */
-  .tt-icon {
+  /*
+   * Sized from .tt-open's own font-size above; only the current one is
+   * unhidden. `display` only applies on `:not([hidden])`, the same reason
+   * `.theme-toggle` above is scoped that way: an unconditional `display`
+   * here would beat the UA sheet's `[hidden] { display: none }` regardless
+   * of the attribute, showing all three icons at once.
+   */
+  .tt-icon:not([hidden]) {
     display: block;
   }
 
