@@ -67,6 +67,83 @@ A marca em si veio do `public/favicon.svg` deste repo, cinco retângulos com as 
 
 <LabDemo src="./components/LogoLab.vue" client:visible />
 
+## Seção 05 / Segundo plano vivo
+
+Este candidato pega o pedido de frente: um Jogo da Vida de Conway rodando atrás da página inteira, bem apagado,
+bem espalhado, um pouco ampliado (células grandes), nunca atrás do texto de um post, e um clique em qualquer
+lugar acende uma célula. É o pedido exato do dono do site, testado aqui antes de virar decisão.
+
+Só que isso contradiz de frente algo que já está escrito em `docs/design.md`: o site carrega quase nenhuma
+animação, e a marca do cabeçalho é a única exceção registrada. Um segundo plano vivo, mexendo o tempo inteiro
+atrás de cada página, não é uma exceção pequena, é uma segunda fonte constante de movimento na tela. Este
+candidato não finge que essa tensão não existe. Ele só coloca a coisa na frente do dono para a decisão ser dele
+de novo, com o efeito rodando ao vivo em vez de descrito de memória.
+
+A zona de exclusão vem da caixa real do artigo, medida em tempo de execução, do mesmo jeito que
+`src/components/PostToc.astro` já faz para posicionar o próprio índice: um `ResizeObserver` no elemento do
+artigo, porque a coluna de leitura é dimensionada em `ch` e o mesmo valor em `ch` vira uma largura em pixels
+diferente a cada fonte de corpo escolhida. Nesta bancada, o slider "medida da coluna simulada" empurra a caixa
+de texto para reproduzir essa troca de fonte, e a máscara se ajusta sozinha.
+
+O clique atrás do texto ainda seleciona texto, e um clique na margem ainda acende célula, sem nenhum
+`pointer-events: none` no meio: o `<canvas>` ocupa o palco inteiro por baixo, o artigo fica por cima dele com a
+própria caixa, e o navegador entrega o clique ao elemento mais alto embaixo do cursor. Dentro da caixa do
+artigo esse elemento é o parágrafo; fora dela não existe nada no caminho, e o clique cai direto no canvas.
+
+`prefers-reduced-motion: reduce` trava num quadro só e nunca inicia o laço, a mesma regra forte que a animação
+do logo segue. Existe um controle de pausa manual, que é o que WCAG 2.2.2 pede de qualquer coisa que se mexa
+por mais de cinco segundos ao lado de outro conteúdo. A taxa de geração por padrão fica em duas por segundo,
+bem abaixo do limite de três trocas de luminância por segundo que WCAG 2.3.1 usa para definir uma pisca
+perigosa, e cada célula troca uma área pequena demais para entrar na exceção de área daquela mesma regra.
+
+O custo: o próprio componente mede, ao vivo, gerações por segundo, células vivas e milissegundos por geração, e
+imprime os três embaixo do palco, porque um número medido enquanto a coisa roda vale mais que um número
+lembrado depois. A aba escondida cancela o laço (`visibilitychange` chamando `cancelAnimationFrame`), o que
+esta bancada implementa mas não tem como confirmar rodando de verdade: a máquina onde isso foi montado não tem
+navegador. O mesmo vale para o efeito numa rolagem longa de post e para o consumo de bateria de um laptop: o
+raciocínio está aqui, o número não. E a interação é só de mouse: o canvas não recebe foco de teclado, então
+quem navega só com teclado não acende nenhuma célula, uma limitação real deste candidato.
+
+Um ponto que este candidato também não resolve, do mesmo jeito que a seção de movimento de `docs/theming.md`
+já admite em aberto: `forced-colors: active` troca as cores do autor pelas do sistema, e isso apagaria a
+textura das células inteira. Não existe correção aqui, só o registro de que falta.
+
+<LabDemo src="./components/GameOfLife.vue" client:visible />
+
+## Seção 06 / Links
+
+O dono do blog não está convencido de que azul com sublinhado seja bonito, mas também não tem uma opção melhor em
+mente. O candidato 0 abaixo é o que existe hoje: não é uma escolha, é o navegador decidindo sozinho, porque não há
+regra de cor nem de sublinhado em `.prose a` neste site. Os outros cinco vieram de uma pesquisa pequena, não uma
+revisão completa: como sites de terminal, ASCII e fonte monoespaçada tratam link dentro de texto corrido, mais
+[bpaulino.com](https://bpaulino.com), que o dono pediu especificamente como referência por estar perto do visual dele
+com escolhas gerais que agradaram.
+
+O que bpaulino.com faz de verdade, lido direto do CSS compilado do site (não de uma captura de tela): a cor do link
+é um roxo periwinkle (`--color-accent-lift`, `#c2adfa`), sem sublinhado fora de texto corrido; dentro de `.prose` e de
+qualquer `<p>`, ganha `text-decoration: underline 1px` com a cor do traço num tom translúcido do mesmo roxo
+(`--color-line-accent`, o accent a uns 40% de opacidade) e `text-underline-offset: 2px`. No hover, o traço sobe para
+opacidade cheia; a troca de cor do texto para o `--color-ink` quase branco vem de uma regra geral de `a:hover`, não
+de um tratamento pensado para o link em prosa especificamente. Não existe `:visited`. O candidato 1 abaixo é essa
+ideia, com a cor levada para os tokens deste site (`--accent`, `--brand-green` ou `--brand-purple`) e a espessura, a
+distância e a opacidade em repouso viradas slider.
+
+Os candidatos 2 a 5 vêm do outro lado da pesquisa: tracejado grosso e afastado do texto (comum em site de terminal e
+monoespaçado, a mesma ideia que já está no botão "prompt" de `ChromeButton.vue`), colchetes de texto em volta do link
+em vez de sublinhado (a referência do textmode.js em docs/theming.md faz isso com `::before`/`::after` num botão; aqui
+os colchetes são texto real, porque o `::after` de cada link em prosa já está ocupado pelo ícone de âncora
+externa/interna), o bloco que inverte no hover como a seleção de um terminal, e um marcador `>`/`❯`/`_` antes do link
+como um prompt. A WCAG 1.4.1 diz que cor sozinha nunca pode ser o único sinal de que um trecho de texto é um link;
+cada candidato imprime se depende só de cor ou não, e o candidato 3 é o teste mais duro disso, porque ele deixa a cor
+igual à do corpo de propósito e prova que a moldura de caracteres já basta.
+
+Todos os seis usam o mesmo parágrafo real (o segundo de `copy.ts`), com o mesmo link não escrito, o mesmo link interno
+e o mesmo link externo dentro dele, porque a decisão é sobre link dentro de frase, não sobre uma palavra solta. O
+vermelho do link não escrito e o ícone de âncora externa/interna, os dois já existentes no site hoje, continuam
+funcionando em todos os candidatos sem precisar de nenhum tratamento especial.
+
+<LabDemo src="./components/LinkLab.vue" client:visible />
+
 ## O que ainda não está aqui
 
 O ícone, porque a lista curta em `docs/design.md` já resolve e nenhuma opção dali precisa ser vista mexendo para ser escolhida.
