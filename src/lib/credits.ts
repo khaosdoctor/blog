@@ -12,7 +12,7 @@
  * is that attribution, so its entry carries `licenseUrl` and must not be
  * removed. See docs/theming.md and the footer in BaseLayout.astro.
  */
-export type CreditKind = 'font' | 'dependency' | 'markdown' | 'search' | 'hosting'
+export type CreditKind = 'font' | 'icon' | 'dependency' | 'markdown' | 'search'
 
 export interface Credit {
   name: string
@@ -27,9 +27,14 @@ export interface Credit {
 }
 
 export const credits: Credit[] = [
-  // Fonts. Every one vendored in public/fonts/, whether or not it made it
-  // into the live pages: docs/design.md's type lab renders the rest at a
-  // real size, and public/fonts/LICENSES.txt is the source for all of it.
+  // Fonts. Only the four decided faces, declared in src/styles/fonts.css and
+  // applied to the live site. Everything else in public/fonts/ is a lab
+  // candidate that loads only on /theme-lab/, through
+  // content/blog/theme-lab/components/fonts.css, and is not credited here:
+  // this page is for what the site is built on, not every candidate a
+  // decision was made from. public/fonts/LICENSES.txt still lists all of
+  // them, since the files stay in the repo and their licences travel with
+  // them.
   {
     name: 'Departure Mono',
     url: 'https://departuremono.com',
@@ -63,109 +68,15 @@ export const credits: Credit[] = [
     note: 'Subtitle face for post excerpts and section descriptions, at a fixed 16px.',
     kind: 'font',
   },
+
+  // Icons, kept as plain SVG in src/components/icons/ rather than installed.
   {
-    name: 'Silkscreen',
-    url: 'https://fonts.google.com/specimen/Silkscreen',
-    license: 'OFL 1.1',
-    author: 'Jason Kottke',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Pixelify Sans',
-    url: 'https://fonts.google.com/specimen/Pixelify+Sans',
-    license: 'OFL 1.1',
-    author: 'Stefie Justprince',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'VT323',
-    url: 'https://fonts.google.com/specimen/VT323',
-    license: 'OFL 1.1',
-    author: 'Peter Hull',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Press Start 2P',
-    url: 'https://fonts.google.com/specimen/Press+Start+2P',
-    license: 'OFL 1.1',
-    author: 'CodeMan38',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'DotGothic16',
-    url: 'https://fonts.google.com/specimen/DotGothic16',
-    license: 'OFL 1.1',
-    author: 'Fontworks',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Micro 5',
-    url: 'https://fonts.google.com/specimen/Micro+5',
-    license: 'OFL 1.1',
-    author: 'Sunn Type',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Jersey 10',
-    url: 'https://fonts.google.com/specimen/Jersey+10',
-    license: 'OFL 1.1',
-    author: 'Sarah Cadigan-Fried',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Handjet',
-    url: 'https://fonts.google.com/specimen/Handjet',
-    license: 'OFL 1.1',
-    author: 'Rosetta',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Share Tech Mono',
-    url: 'https://fonts.google.com/specimen/Share+Tech+Mono',
-    license: 'OFL 1.1',
-    author: 'Ralph Levien',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'IBM Plex Mono',
-    url: 'https://fonts.google.com/specimen/IBM+Plex+Mono',
-    license: 'OFL 1.1',
-    author: 'Mike Abbink and Bold Monday',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Inter',
-    url: 'https://fonts.google.com/specimen/Inter',
-    license: 'OFL 1.1',
-    author: 'Rasmus Andersson',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Source Serif 4',
-    url: 'https://fonts.google.com/specimen/Source+Serif+4',
-    license: 'OFL 1.1',
-    author: 'Frank Grießhammer',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
-  },
-  {
-    name: 'Roboto',
-    url: 'https://fonts.google.com/specimen/Roboto',
-    license: 'Apache License 2.0',
-    author: 'Christian Robertson',
-    note: 'Vendored for the type specimen at /theme-lab/, not applied to the live pages.',
-    kind: 'font',
+    name: 'Pixelarticons',
+    url: 'https://pixelarticons.com',
+    license: 'MIT',
+    author: 'halfmage',
+    note: 'Source of the theme and preferences icons in src/components/icons/.',
+    kind: 'icon',
   },
 
   // Framework and dependencies, from package.json.
@@ -223,13 +134,6 @@ export const credits: Credit[] = [
     url: 'https://sharp.pixelplumbing.com',
     license: 'Apache License 2.0',
     note: 'Resizes post images at build time and rasterises the generated cover art.',
-    kind: 'dependency',
-  },
-  {
-    name: 'textmode.js',
-    url: 'https://github.com/humanbydefinition/textmode.js-dev',
-    license: 'MIT',
-    note: 'Kept installed because the retired candidates at /theme-lab-arquivo/ still import it; nothing live on the site uses it.',
     kind: 'dependency',
   },
   {
@@ -341,21 +245,5 @@ export const credits: Credit[] = [
     license: 'MIT',
     note: "Builds the search index after the site builds, and runs the search itself in the reader's browser.",
     kind: 'search',
-  },
-
-  // Hosting and the scheduler.
-  {
-    name: 'GitHub Pages',
-    url: 'https://pages.github.com',
-    license: 'n/a',
-    note: 'Serves the built site.',
-    kind: 'hosting',
-  },
-  {
-    name: 'Cloudflare Workers',
-    url: 'https://workers.cloudflare.com',
-    license: 'n/a',
-    note: 'Runs the scheduler that polls for a post whose publish date has arrived and triggers a rebuild.',
-    kind: 'hosting',
   },
 ]

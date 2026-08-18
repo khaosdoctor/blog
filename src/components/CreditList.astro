@@ -12,14 +12,14 @@ interface Props {
 const { locale } = Astro.props
 
 // Fixed order, not the array's own order: fonts first since one of them is
-// the reason this page exists, hosting last since it is the least specific.
-const KIND_ORDER: CreditKind[] = ['font', 'dependency', 'markdown', 'search', 'hosting']
+// the reason this page exists.
+const KIND_ORDER: CreditKind[] = ['font', 'icon', 'dependency', 'markdown', 'search']
 const KIND_HEADING: Record<CreditKind, Parameters<typeof t>[1]> = {
   font: 'ossFontsHeading',
+  icon: 'ossIconsHeading',
   dependency: 'ossDependenciesHeading',
   markdown: 'ossMarkdownHeading',
   search: 'ossSearchHeading',
-  hosting: 'ossHostingHeading',
 }
 const groups = KIND_ORDER.map((kind) => ({
   kind,
