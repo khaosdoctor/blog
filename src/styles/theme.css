@@ -227,6 +227,23 @@
 }
 
 /*
+ * The explicit colour-scheme choice. `color-scheme: light dark` on :root
+ * already lets every `light-dark()` token above follow the OS; narrowing it
+ * to one keyword is the whole mechanism, since a `light-dark()` call resolves
+ * against the nearest `color-scheme` in effect and nothing else about it
+ * changes. Set by the blocking script in BaseLayout's <head> so the right
+ * ground is already painted at first paint, and by ThemeToggle.astro's script
+ * afterwards. No attribute means "system", which is `light dark` above.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/*
  * The sans reader. Set `data-body-face="sans"` on <html> and the whole site
  * switches: the preferences menu will be the thing that writes it, and until
  * that menu exists the attribute is the switch.
