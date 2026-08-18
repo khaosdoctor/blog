@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
 import { defineConfig } from 'astro/config'
+import { unified } from '@astrojs/markdown-remark'
 import expressiveCode from 'astro-expressive-code'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 import mermaid from 'astro-mermaid'
@@ -120,60 +121,69 @@ export default defineConfig({
     redirectStubs(),
   ],
   markdown: {
-    // Posts are plain markdown even though the files are .mdx: these two plugins
-    // are what turn that markdown into components, so nothing in content/ needs
-    // an import or a tag and Obsidian renders every post natively.
-    //
-    // remarkEmbeds must run before remarkFigures: an image and a bare link are
-    // both "the only thing in a paragraph", and once a figure is wrapped the
-    // link check would have to look one level deeper for no benefit.
-    //
-    // remarkWikilinks runs last: it turns [[slug]] into an ordinary link, and
-    // running after the embed check keeps a wikilink alone in a paragraph from
-    // being mistaken for something to embed.
-    remarkPlugins: [
-      remarkReadingTime,
-      remarkMath,
-      remarkEmbeds,
-      remarkFigures,
-      remarkWikilinks,
-      // Last: the only one that reads files off disk and injects synthesized
-      // content (an import node, and the demo's source as a code block), so it
-      // runs once everything else has settled the tree.
-      remarkLabDemos,
-    ],
-    rehypePlugins: [
-      // Obsidian's theme, not the plugin's github default: the vocabulary the
-      // posts are written in is Obsidian's (quote, question, example and the
-      // rest), and the github theme only knows five types, so anything else
-      // rendered as a plain blockquote with a stray title line.
-      // `important` is red here (see code-and-callouts.css), and the theme's own
-      // icon for it is a flame, which reads as a fire hazard rather than "stop,
-      // this one matters". Lucide's octagon-alert is the stop-sign shape, the
-      // same silhouette a road sign uses, so the type is legible before the
-      // title is read. Every other type keeps its stock indicator.
-      [
-        rehypeCallouts,
-        {
-          theme: 'obsidian',
-          callouts: {
-            important: {
-              indicator:
-                '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+    // `markdown.remarkPlugins` / `markdown.rehypePlugins` are deprecated in
+    // favor of a processor set here, so both arrays move inside `unified()`
+    // (the remark/rehype pipeline this site's plugins are all written for).
+    // astro-mermaid reads `markdown.processor.name` to decide where to add its
+    // own rehype plugin; leaving a processor unset here is what used to send
+    // it into a plugin array nobody read, and that failure shows up as a
+    // diagram silently rendering as a code block, not as an error.
+    processor: unified({
+      // Posts are plain markdown even though the files are .mdx: these two plugins
+      // are what turn that markdown into components, so nothing in content/ needs
+      // an import or a tag and Obsidian renders every post natively.
+      //
+      // remarkEmbeds must run before remarkFigures: an image and a bare link are
+      // both "the only thing in a paragraph", and once a figure is wrapped the
+      // link check would have to look one level deeper for no benefit.
+      //
+      // remarkWikilinks runs last: it turns [[slug]] into an ordinary link, and
+      // running after the embed check keeps a wikilink alone in a paragraph from
+      // being mistaken for something to embed.
+      remarkPlugins: [
+        remarkReadingTime,
+        remarkMath,
+        remarkEmbeds,
+        remarkFigures,
+        remarkWikilinks,
+        // Last: the only one that reads files off disk and injects synthesized
+        // content (an import node, and the demo's source as a code block), so it
+        // runs once everything else has settled the tree.
+        remarkLabDemos,
+      ],
+      rehypePlugins: [
+        // Obsidian's theme, not the plugin's github default: the vocabulary the
+        // posts are written in is Obsidian's (quote, question, example and the
+        // rest), and the github theme only knows five types, so anything else
+        // rendered as a plain blockquote with a stray title line.
+        // `important` is red here (see code-and-callouts.css), and the theme's own
+        // icon for it is a flame, which reads as a fire hazard rather than "stop,
+        // this one matters". Lucide's octagon-alert is the stop-sign shape, the
+        // same silhouette a road sign uses, so the type is legible before the
+        // title is read. Every other type keeps its stock indicator.
+        [
+          rehypeCallouts,
+          {
+            theme: 'obsidian',
+            callouts: {
+              important: {
+                indicator:
+                  '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+              },
             },
           },
-        },
+        ],
+        rehypeKatex,
+        rehypeMathCopy,
+        // Astro adds the heading ids itself, but only after this list runs, and the
+        // anchor plugin refuses to invent an id that would be the only one of its
+        // kind on the site. Running it explicitly here puts the ids in place first;
+        // Astro's own pass then finds every heading already has one.
+        rehypeHeadingIds,
+        rehypeHeadingAnchors,
+        rehypeFootnoteSidenotes,
       ],
-      rehypeKatex,
-      rehypeMathCopy,
-      // Astro adds the heading ids itself, but only after this list runs, and the
-      // anchor plugin refuses to invent an id that would be the only one of its
-      // kind on the site. Running it explicitly here puts the ids in place first;
-      // Astro's own pass then finds every heading already has one.
-      rehypeHeadingIds,
-      rehypeHeadingAnchors,
-      rehypeFootnoteSidenotes,
-    ],
+    }),
   },
   image: {
     // The migration colocates images next to posts; they are all local files.
