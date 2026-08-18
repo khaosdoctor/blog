@@ -150,6 +150,17 @@
 }
 
 /*
+ * A hard drop shadow on the frame itself, not on .expressive-code: the
+ * plugin already reads its own --ec-frm-frameBoxShdCssVal for a soft one on
+ * .frame, so setting box-shadow here at one more selector's specificity
+ * than that rule replaces it outright rather than fighting the custom
+ * property through however many code-theme variants set it.
+ */
+.prose .expressive-code .frame {
+  box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color);
+}
+
+/*
  * A filename on the first line of a code block (e.g. `// src/thing.ts`) is
  * already detected natively by the frames plugin, which promotes it to the
  * frame's title and deletes the comment line; nothing here does that

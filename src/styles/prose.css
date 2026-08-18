@@ -22,3 +22,15 @@
 @import './prose/tables.css';
 @import './prose/links.css';
 @import './prose/code.css';
+
+/*
+ * Two block-level children of the same visual weight, a figure or a code
+ * frame, touch when one follows the other directly: neither carries a
+ * bottom margin the next one's top margin can collapse against, so nothing
+ * separates them. This only applies to that adjacency, so a code block or
+ * figure next to a paragraph, heading or callout keeps the spacing it
+ * already has.
+ */
+.prose :is(figure, .expressive-code) + :is(figure, .expressive-code) {
+  margin-block-start: var(--block-spacing);
+}
