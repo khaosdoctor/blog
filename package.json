@@ -43,7 +43,7 @@
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
     "@astrojs/check": "^0.9.10",
-    "@cloudflare/workers-types": "^5.20260812.1",
+    "@cloudflare/workers-types": "^5.20260815.1",
     "@types/node": "^26.2.0",
     "@types/turndown": "^5.0.6",
     "acorn": "^8.15.0",
