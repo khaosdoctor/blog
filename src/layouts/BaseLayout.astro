@@ -521,7 +521,11 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
   footer .rule {
     display: flex;
     align-items: center;
-    margin-block-end: 1rem;
+    /* 10px, the owner's own number, not 1rem: a rem here would move with the
+       reader's text-size setting, and the distance between a drawn rule and
+       the line under it is a fixed optical relationship rather than something
+       that should scale with the type. */
+    margin-block-end: 10px;
   }
 
   footer .rule-edge {
@@ -565,15 +569,39 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     text-align: center;
   }
 
-  /* Centred under the version and smaller than it: the quietest line in the
-     footer, which is what a licence attribution can be once it is reachable.
-     It keeps the site-wide link treatment rather than opting out the way
-     `.version a` does, since this one is meant to read as a link a reader
-     might follow. */
+  /*
+   * Centred right under the version, 2pt smaller, and reading as the same dim
+   * text rather than as a link: the quietest line in the footer, which is what
+   * a licence attribution can be once it is reachable at all.
+   *
+   * `pt` is an absolute CSS length (1pt = 1/72in), so subtracting it from the
+   * version's own size gives the owner's "2pt smaller" literally rather than a
+   * rem guess standing in for it. The same technique the nav links use for
+   * their own 2pt.
+   */
   footer .credits {
-    margin-block-start: 0.35rem;
-    font-size: var(--text-tiny);
+    margin-block-start: 0.15rem;
+    font-size: calc(0.75rem - 2pt);
     text-align: center;
+  }
+
+  /* Same opt-out as `.version a` above, for the same reason and with the same
+     hover and focus cues kept: no underline, no accent, inheriting the dim
+     colour of its own line, but still discoverable by pointer and reachable by
+     keyboard. Both are named exceptions in prose/links.css's own list. */
+  footer .credits a {
+    color: inherit;
+    text-decoration: none;
+    background: none;
+  }
+
+  footer .credits a:hover {
+    text-decoration: underline dotted;
+  }
+
+  footer .credits a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   /* Reads as the dim text around it, not as a link: no underline, no accent,
