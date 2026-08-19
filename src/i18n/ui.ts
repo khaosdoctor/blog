@@ -69,6 +69,19 @@ type UIKey =
   | 'themeLight'
   | 'themeDark'
   | 'themeSystem'
+  | 'settingsPanel'
+  | 'motionLabel'
+  | 'motionReduce'
+  | 'motionAllow'
+  | 'motionSystem'
+  | 'backgroundLife'
+  | 'conwayKnobs'
+  | 'conwaySeedDensity'
+  | 'conwayGenerationsPerSecond'
+  | 'conwayAutoFeed'
+  | 'conwayPause'
+  | 'conwayResume'
+  | 'conwayReseed'
   | 'writtenBy'
   | 'readingProgress'
   | 'contents'
@@ -90,6 +103,7 @@ type UIKey =
   | 'translatedIndexNotice'
   | 'skipToContent'
   | 'language'
+  | 'switchLanguage'
   | 'version'
   | 'keepPreviews'
   | 'previewLoading'
@@ -167,6 +181,19 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     themeLight: 'Claro',
     themeDark: 'Escuro',
     themeSystem: 'Sistema',
+    settingsPanel: 'Preferências',
+    motionLabel: 'Movimento',
+    motionReduce: 'Reduzido',
+    motionAllow: 'Sempre ativo',
+    motionSystem: 'Sistema',
+    backgroundLife: 'Campo de fundo (jogo da vida)',
+    conwayKnobs: 'Ajustes do campo',
+    conwaySeedDensity: 'Densidade da semente',
+    conwayGenerationsPerSecond: 'Gerações por segundo',
+    conwayAutoFeed: 'Alimentação automática (s, 0 desliga)',
+    conwayPause: 'Pausar',
+    conwayResume: 'Retomar',
+    conwayReseed: 'Semear de novo',
     writtenBy: 'por',
     readingProgress: 'progresso da leitura',
     contents: 'Neste post',
@@ -188,6 +215,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     translatedIndexNotice: 'Estes artigos foram escritos em português e traduzidos automaticamente.',
     skipToContent: 'Pular para o conteúdo',
     language: 'Idioma',
+    switchLanguage: 'Mudar para %s',
     version: 'Versão',
     // A licença CC BY-SA da PxPlus IBM VGA exige atribuição alcançável do site.
     // A página /oss/ é essa atribuição hoje; veja docs/theming.md.
@@ -267,6 +295,19 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     themeLight: 'Light',
     themeDark: 'Dark',
     themeSystem: 'System',
+    settingsPanel: 'Preferences',
+    motionLabel: 'Motion',
+    motionReduce: 'Reduced',
+    motionAllow: 'Always on',
+    motionSystem: 'System',
+    backgroundLife: 'Background field (game of life)',
+    conwayKnobs: 'Field settings',
+    conwaySeedDensity: 'Seed density',
+    conwayGenerationsPerSecond: 'Generations per second',
+    conwayAutoFeed: 'Auto-feed (s, 0 disables)',
+    conwayPause: 'Pause',
+    conwayResume: 'Resume',
+    conwayReseed: 'Reseed',
     writtenBy: 'by',
     readingProgress: 'reading progress',
     contents: 'In this post',
@@ -288,6 +329,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     translatedIndexNotice: 'These articles are written in Portuguese and translated automatically.',
     skipToContent: 'Skip to content',
     language: 'Language',
+    switchLanguage: 'Switch to %s',
     version: 'Version',
     // PxPlus IBM VGA is CC BY-SA, which requires attribution reachable from the
     // site. /en/oss/ is that attribution today; see docs/theming.md.

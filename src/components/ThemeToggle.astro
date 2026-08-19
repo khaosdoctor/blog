@@ -75,23 +75,44 @@ const { locale } = Astro.props
   }
 
   /*
-   * Icon-only now, so the touch target comes from padding around a small
-   * glyph rather than from a bigger glyph: min-inline/block-size holds the
-   * WCAG 44px floor even though the SVG itself renders far smaller.
+   * Icon-only, so the touch target comes from the button's own box rather
+   * than from a bigger glyph: min-inline/block-size holds --icon-btn-hit (the
+   * WCAG 44px floor, theme.css) regardless of how small the drawn chip below
+   * gets. The button itself carries no border or background any more; both
+   * moved to ::before, sized at --icon-btn-chip, so the *visible* square can
+   * shrink independently of the box a pointer actually has to reach.
    */
   .tt-open {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-inline-size: 2.75rem;
-    min-block-size: 2.75rem;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: var(--icon-btn-glyph);
+    padding: 0;
+    cursor: pointer;
+  }
+
+  /*
+   * The chip a reader actually sees: centred inside .tt-open by that button's
+   * own flex centring, sized at --icon-btn-chip rather than the full hit box.
+   * pointer-events: none so a click anywhere in the real (larger) button box
+   * still reaches .tt-open itself rather than being swallowed by this
+   * decoration.
+   */
+  .tt-open::before {
+    content: '';
+    position: absolute;
+    inline-size: var(--icon-btn-chip);
+    block-size: var(--icon-btn-chip);
     border: var(--border) solid var(--rule);
     border-radius: var(--radius);
     background: var(--bg);
-    color: var(--muted);
-    font-size: 1.2rem;
-    padding: 0.5rem;
-    cursor: pointer;
+    pointer-events: none;
   }
 
   /*
@@ -116,9 +137,16 @@ const { locale } = Astro.props
   .tt-open:focus-visible,
   .tt-open[aria-expanded='true'] {
     color: var(--accent);
+  }
+
+  .tt-open:hover::before,
+  .tt-open:focus-visible::before,
+  .tt-open[aria-expanded='true']::before {
     border-color: var(--accent);
   }
 
+  /* Drawn on the real (larger) hit box, not the chip, so focus shows the
+     whole area a keyboard or switch-access user can actually activate. */
   .tt-open:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;

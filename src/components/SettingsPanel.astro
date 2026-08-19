@@ -1,0 +1,323 @@
+---
+// The reader preferences panel: one sliders button beside ThemeToggle,
+// opening a menu that holds the four things docs/design.md settles into one
+// place rather than four scattered controls. Same shape as ThemeToggle.astro
+// on purpose (docs/design.md asked for this component to grow right where
+// ThemeToggle already sits): a button and a menu do nothing without a script
+// to wire them up, so both stay hidden until settings-panel.ts confirms it
+// can run.
+//
+// What lives here, in order: the motion override (mirrors ThemeToggle's own
+// light/dark/system three-way, one key over), the Conway background on/off
+// switch, a disclosure for its reader-adjustable knobs, the code theme
+// picker (moved here from every code block, see CodeTheme.astro), and the
+// pinned-preview persistence checkbox (moved here from HoverPreviews.astro,
+// closing the open decision docs/design.md recorded for it).
+//
+// Static labels are rendered directly through t(), the same way
+// HoverPreviews.astro's own checkbox label always has been: this is an Astro
+// component with full access to t() at render time, unlike the plain script
+// modules that wire the controls up afterwards. Dataset attributes are kept
+// only for the one label that genuinely changes at runtime (the pause
+// button's own text swapping to "resume").
+import Sliders from './icons/Sliders.astro'
+import CodeTheme from './CodeTheme.astro'
+import { t, type Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+---
+
+<div class="settings-panel" hidden data-label={t(locale, 'settingsPanel')}>
+  <button type="button" class="sp-open" aria-haspopup="true" aria-expanded="false" aria-controls="sp-menu">
+    <Sliders class="sp-icon" />
+  </button>
+
+  <div id="sp-menu" class="sp-menu" hidden>
+    <p class="sp-heading">{t(locale, 'settingsPanel')}</p>
+
+    <fieldset class="sp-motion">
+      <legend>{t(locale, 'motionLabel')}</legend>
+      <button type="button" class="sp-motion-option" data-value="reduce">{t(locale, 'motionReduce')}</button>
+      <button type="button" class="sp-motion-option" data-value="allow">{t(locale, 'motionAllow')}</button>
+      <button type="button" class="sp-motion-option" data-value="system">{t(locale, 'motionSystem')}</button>
+    </fieldset>
+
+    <label class="sp-row">
+      <input type="checkbox" id="sp-bg-life" />
+      {t(locale, 'backgroundLife')}
+    </label>
+
+    <details class="sp-conway-details">
+      <summary>{t(locale, 'conwayKnobs')}</summary>
+      <div class="sp-conway-knobs">
+        <label class="sp-knob">
+          <span>{t(locale, 'conwaySeedDensity')}</span>
+          <input type="range" id="sp-density" min="1" max="20" step="1" />
+        </label>
+        <label class="sp-knob">
+          <span>{t(locale, 'conwayGenerationsPerSecond')}</span>
+          <input type="range" id="sp-gps" min="0.5" max="8" step="0.5" />
+        </label>
+        <label class="sp-knob">
+          <span>{t(locale, 'conwayAutoFeed')}</span>
+          <input type="range" id="sp-autofeed" min="0" max="20" step="1" />
+        </label>
+        <div class="sp-conway-actions">
+          <button type="button" id="sp-pause" data-pause={t(locale, 'conwayPause')} data-resume={t(locale, 'conwayResume')}>
+            {t(locale, 'conwayPause')}
+          </button>
+          <button type="button" id="sp-reseed">{t(locale, 'conwayReseed')}</button>
+        </div>
+      </div>
+    </details>
+
+    <hr class="sp-rule" />
+
+    <CodeTheme locale={locale} />
+
+    <label class="sp-row">
+      <input type="checkbox" id="hp-persist" />
+      {t(locale, 'keepPreviews')}
+    </label>
+  </div>
+</div>
+
+<script>
+  import '../scripts/settings-panel'
+</script>
+
+<style>
+  .settings-panel {
+    position: relative;
+  }
+
+  /* Same reasoning as ThemeToggle's own rule: the UA `[hidden] { display:
+     none }` sheet is namespaced to XHTML and never matches an <svg>, so a
+     hidden icon inside this button would still draw unless CSS says so
+     itself. Nothing in this panel currently hides an SVG conditionally (the
+     sliders icon is the only one and it is never swapped), but the rule
+     stays here as the same guard ThemeToggle carries, since the next icon
+     added to this row is the likeliest place for that trap to reappear. */
+  .settings-panel:not([hidden]) {
+    display: inline-flex;
+  }
+
+  .sp-icon[hidden] {
+    display: none;
+  }
+
+  /*
+   * Identical footprint to ThemeToggle's .tt-open, both reading the same
+   * three tokens (theme.css): --icon-btn-hit is the real hit target, the
+   * border and background move to ::before at --icon-btn-chip so the
+   * visible square can be smaller than the box a pointer has to reach, and
+   * --icon-btn-glyph sizes the icon itself.
+   */
+  .sp-open {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: var(--icon-btn-glyph);
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .sp-open::before {
+    content: '';
+    position: absolute;
+    inline-size: var(--icon-btn-chip);
+    block-size: var(--icon-btn-chip);
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg);
+    pointer-events: none;
+  }
+
+  .sp-open:hover,
+  .sp-open:focus-visible,
+  .sp-open[aria-expanded='true'] {
+    color: var(--accent);
+  }
+
+  .sp-open:hover::before,
+  .sp-open:focus-visible::before,
+  .sp-open[aria-expanded='true']::before {
+    border-color: var(--accent);
+  }
+
+  .sp-open:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Same no-`display`-here rule ThemeToggle's own menu carries: the browser
+     already hides a closed popover and the no-popover `hidden` fallback, and
+     an author `display` here would beat both. */
+  .sp-menu {
+    position: fixed;
+    z-index: 60;
+    margin: 0;
+    inline-size: 18rem;
+    max-block-size: 80vh;
+    overflow-y: auto;
+    border: 3px double var(--fg);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+  }
+
+  .sp-menu:popover-open,
+  .sp-menu:not([popover]):not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .sp-heading {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .sp-motion {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .sp-motion legend {
+    inline-size: 100%;
+    margin-block-end: 0.3rem;
+    padding: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+  }
+
+  .sp-motion-option {
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .sp-motion-option[aria-current='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .sp-motion-option:hover,
+  .sp-motion-option:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .sp-motion-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .sp-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fg);
+  }
+
+  .sp-conway-details summary {
+    color: var(--fg);
+    cursor: pointer;
+  }
+
+  .sp-conway-knobs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-block-start: 0.6rem;
+  }
+
+  .sp-knob {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    color: var(--muted);
+  }
+
+  .sp-knob input[type='range'] {
+    inline-size: 100%;
+  }
+
+  .sp-conway-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .sp-conway-actions button {
+    flex: 1 1 auto;
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
+  }
+
+  .sp-conway-actions button:hover,
+  .sp-conway-actions button:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .sp-rule {
+    border: 0;
+    border-block-start: var(--border) solid var(--rule);
+    margin: 0;
+  }
+
+  /* The code theme row, moved in from CodeTheme.astro, drops its own
+     `hidden` once code-theme.ts confirms it can run; no popover machinery of
+     its own is needed any more since it now sits inline inside this one. */
+  .settings-panel :global(.ct-settings) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    color: var(--fg);
+  }
+
+  .settings-panel :global(.ct-settings select) {
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    background: var(--bg);
+    color: var(--fg);
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    padding: 0.3rem;
+  }
+</style>
