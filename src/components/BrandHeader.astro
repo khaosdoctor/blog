@@ -166,11 +166,32 @@ const CELLS = markCells()
     align-items: center;
   }
 
-  .controls > * {
+  /*
+   * `.controls > *` used to read as a plain child combinator, but every
+   * direct child here (SearchPalette, NavLinks, LangSwitcher, ThemeToggle,
+   * SettingsPanel) is a SEPARATE component's own root element, not something
+   * written in this file's own template. Astro scopes a selector by pairing
+   * it with this component's own `data-astro-cid`, on BOTH sides of a
+   * combinator, so the compiled rule was
+   * `.controls[data-astro-cid-X] > [data-astro-cid-X]`: it could only ever
+   * match a child that also carried BrandHeader's own cid, and none of these
+   * five do (each carries its own file's cid instead). The rule was
+   * therefore a silent no-op the whole time, verified by reading the actual
+   * compiled CSS and the actual rendered attributes side by side: every one
+   * of the five controls sat flush against its neighbour with zero margin,
+   * which is exactly what Lucas reported (search touching POSTS, SOBRE
+   * touching PT). `:global()` on the wildcard is Astro's own escape hatch
+   * for "a child from another component": it keeps `.controls` itself
+   * scoped (a real element written in this file) while leaving the `*` an
+   * actual wildcard again, so the existing 0.5rem is what now finally
+   * reaches every pair, `.chrome > *` never had this problem, since edge/
+   * brand/fill/controls are all written directly in this file's own markup.
+   */
+  .controls > :global(*) {
     margin-inline-end: 0.5rem;
   }
 
-  .controls > *:last-child {
+  .controls > :global(*:last-child) {
     margin-inline-end: 0;
   }
 
