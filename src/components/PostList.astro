@@ -161,7 +161,11 @@ const LEADER = '·'.repeat(200)
      * that read as coloured against the dim white of the row's own text.
      */
     border-block-end: 0;
-    background-image: repeating-linear-gradient(to right, var(--muted) 0 10px, transparent 10px 16px);
+    background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--muted) 45%, transparent) 0 10px,
+      transparent 10px 16px
+    );
     background-repeat: no-repeat;
     background-position: bottom left;
     background-size: 100% 1px;
