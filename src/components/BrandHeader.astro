@@ -180,9 +180,24 @@ const CELLS = markCells()
     align-content: flex-start;
     line-height: 1;
     font-family: var(--font-mono);
-    font-weight: 700;
+    font-weight: 900;
   }
 
+  /*
+   * At 36px (4.5px per cell, logo-mark.ts's own MARK_MIN_PX notes the 72px
+   * floor this is knowingly under), the box-drawing glyphs (┌┐└┘─│) read as a
+   * faint smudge at the font's own regular stroke width, and font-weight
+   * alone is not a reliable fix: a system monospace stack's bold variant is
+   * not guaranteed to touch box-drawing glyphs at all (bumped to 900 above
+   * regardless, since it costs nothing where it does help). `-webkit-text-
+   * stroke` is the part doing the real work: it adds stroke width around
+   * each glyph's own path independent of whatever weight variants the font
+   * ships, which is what actually thickens a hairline character at this
+   * size. `currentColor` picks up each cell's own inline `color` (its brand
+   * role, set server-side in the template), so the stroke matches the fill
+   * rather than a second flat colour. Widely supported (Chrome, Safari,
+   * Firefox 49+).
+   */
   .mark-cell {
     display: flex;
     flex: 0 0 12.5%;
@@ -191,6 +206,7 @@ const CELLS = markCells()
     align-items: center;
     justify-content: center;
     font-size: 4.5px;
+    -webkit-text-stroke: 0.5px currentColor;
   }
 
   .mark-solid {
