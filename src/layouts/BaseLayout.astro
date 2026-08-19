@@ -566,6 +566,10 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
 
   footer .version {
     margin-block-start: 0.75rem;
+    /* Zero, so the only space between this line and the credits under it is
+       the one the credits set. Both are `<p>`, and the UA sheet's own bottom
+       margin was adding a full line of its own on top of that. */
+    margin-block-end: 0;
     text-align: center;
   }
 
@@ -580,7 +584,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
    * their own 2pt.
    */
   footer .credits {
-    margin-block-start: 0.15rem;
+    margin-block: 2px 0;
     font-size: calc(0.75rem - 2pt);
     text-align: center;
   }

@@ -1,8 +1,7 @@
 ---
 import type { Post } from '../lib/posts'
-import { estimateReadingTime, urlOf } from '../lib/posts'
+import { estimateReadingTime, formatDate, urlOf } from '../lib/posts'
 import { localePath } from '../i18n/ui'
-import DateCopy from './DateCopy.astro'
 
 /**
  * The decided candidate from the theme lab (content/blog/theme-lab/components/
@@ -41,11 +40,12 @@ function categoryUrl(post: Post): string {
   return localePath(post.data.lang, `/${post.data.category}/`)
 }
 
-// The bench's own leader character, "─" (a box-drawing dash, not a hyphen):
-// repeated wide enough to fill the widest row this list ever draws, clipped
-// by .leader's own overflow:hidden to whatever room is actually left between
-// the title and the trailing columns.
-const LEADER = '─'.repeat(120)
+// The bench's own leader was "─" (a box-drawing dash), a solid run that read
+// as a hard rule once titles could wrap: see .leader's own comment below for
+// why this is now a short, fixed-width, dimmed run of dots instead. 24 of
+// them at this font-size overflows any width .leader is ever given, clipped
+// by its own overflow:hidden the same way the old run was.
+const LEADER = '·'.repeat(24)
 ---
 
 <ol class="posts">
@@ -53,7 +53,7 @@ const LEADER = '─'.repeat(120)
     posts.map((post) => (
       <li>
         <span class="date">
-          <DateCopy date={post.data.pubDate} lang={post.data.lang} />
+          <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, post.data.lang)}</time>
         </span>
         <a href={urlOf(post)} class="title">
           {post.data.title}
@@ -83,17 +83,41 @@ const LEADER = '─'.repeat(120)
   /*
    * Tracking -1/100em, the row height (13, as rows.value / 20 in rem) and the
    * muted mono baseline every column but the title and the section keeps:
-   * set here, on the real elements this file renders, rather than on
-   * `.date-copy` or any other class <DateCopy> renders itself. Astro scopes
-   * a component's CSS to the exact elements it authors, so a selector
-   * written here for a child component's own class would compile against an
-   * attribute that child's markup never carries, and match nothing. Plain
-   * CSS inheritance still reaches into it fine, which is what this relies on.
+   * set here, on the real elements this file renders. DateCopy used to be
+   * one of them, a child component with its own class this file could only
+   * reach through plain inheritance; it is gone now, and <time> is a plain
+   * child of `.date` instead, so that inheritance is all this ever needed.
    */
   .posts {
     padding: 0;
     list-style: none;
     letter-spacing: -0.01em;
+  }
+
+  /*
+   * Past the same 70rem breakpoint BrandHeader's `.chrome` and the footer
+   * already widen at (theme.css/BaseLayout.astro), this list does too: below
+   * this it measured `var(--measure)` (78ch), `main`'s own default width and
+   * exactly the column a post's own prose reads at, which made a table of
+   * many posts read as a strip of running text rather than the header's own
+   * wider row above it. `main` itself keeps `--measure` (a real post's
+   * reading column still wants that), so the list breaks out of it instead
+   * of `main` changing: `main` is this box's containing block, and margin
+   * percentages resolve against a containing block's width regardless of
+   * what that width actually is, so `margin-inline-start: 50%` always puts
+   * this box's start edge at `main`'s own horizontal centre. `main` and
+   * `body` are both centred and equally padded, so that centre is the
+   * viewport's centre too; translateX(-40vw), half this box's own 80vw
+   * width, pulls the box back so its centre ends up there instead of its
+   * edge. The same full-bleed trick every CSS framework already uses for
+   * 100vw/50vw, generalised to 80vw/40vw.
+   */
+  @media (min-width: 70rem) {
+    .posts {
+      inline-size: 80vw;
+      margin-inline-start: 50%;
+      transform: translateX(-40vw);
+    }
   }
 
   .posts li {
@@ -105,7 +129,18 @@ const LEADER = '─'.repeat(120)
      * smaller item off-centre inside the row's own (equal top and bottom)
      * padding-block. Centring keeps every item in the middle of the line
      * regardless of its own font-size, which is what reads as one row
-     * centred in its own box rather than sitting closer to the rule above.
+     * centred in its own box rather than closer to the rule above.
+     *
+     * This still holds once the title wraps to two or three lines: the row's
+     * own height grows to match, and centring puts the date/category/read
+     * cluster in the middle of that taller box rather than pinned to its
+     * top. flex-start was tried first and rejected: it aligns every item to
+     * the title's own first line, which looks right for a one-line title but
+     * re-introduces exactly the "smaller item reads as misplaced" problem
+     * the comment above already solved, only against the title's cap-height
+     * instead of its baseline. Centring is the one rule that already
+     * generalises to both a one-line and a wrapped title without a second
+     * special case.
      */
     align-items: center;
     color: var(--muted);
@@ -121,6 +156,10 @@ const LEADER = '─'.repeat(120)
 
   .date {
     flex: none;
+    /* Departure Mono, not the inherited system mono stack: the reader asked
+       for the same face the page numbers now use to reach the dates and
+       reading times in this list too. */
+    font-family: var(--font-display);
   }
 
   /*
@@ -137,18 +176,30 @@ const LEADER = '─'.repeat(120)
    * Weight 400, not 600: Departure Mono ships one weight and a browser asked
    * for 600 synthesises it by smearing the glyphs sideways.
    */
+  /*
+   * flex-grow: 1, not 0: the title is now the row's one growing item, so its
+   * assigned width is the row's own width minus whatever its flex: none
+   * siblings (date, category, read) and the leader's own fixed width
+   * actually reserve, a fixed number this box's content cannot inflate.
+   * Titles that don't fit that width on one line wrap onto as many as they
+   * need instead of the ellipsis this used to clip to: reading every title in
+   * full is the one thing a list whose whole job is letting someone scan
+   * titles cannot compromise on. min-inline-size: 0 is still what lets a flex
+   * item shrink (and here, wrap) below its own content's natural one-line
+   * width in the first place; flex-basis: auto would fight that by handing
+   * shrink/wrap pressure to whichever item the algorithm favours instead of
+   * a size decided by layout the way this one now is.
+   */
   .title {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     min-inline-size: 0;
     margin-inline-start: 0.9rem;
-    overflow: hidden;
     color: var(--fg);
     font-family: var(--font-display);
     font-size: 1.05rem;
     font-weight: 400;
     text-decoration: none;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
   }
 
   /*
@@ -162,11 +213,37 @@ const LEADER = '─'.repeat(120)
     color: var(--bg);
   }
 
+  /*
+   * The bench's own leader was a solid box-drawing run (flex: 1 1 auto,
+   * stretching to whatever the row had left after a single-line, ellipsis-
+   * clipped title), which read as a hard rule once dimmed, and made no sense
+   * once the title above could wrap to two or three lines: there is no one
+   * line left for a full-width leader to run from and clip against, and a
+   * rule drawn mid-way down a wrapped title, at the row's own vertical
+   * centre, would connect to neither. Rather than invent a per-line leader
+   * (unreachable in CSS without measuring rendered text), this is now a
+   * short, fixed-width run of dots: flex: none, not flex: 1, so the title
+   * (now the row's one growing item) is what claims the freed space instead.
+   * A small width is enough for it to still read as connective punctuation
+   * between the title and the date/category/read cluster, in both the
+   * one-line and the wrapped case.
+   *
+   * Dimmed past `--muted` itself (5.17:1 light / 8.30:1 dark against `--bg`,
+   * theme.css) via opacity, the same mechanism Pagination.astro's own
+   * disabled prev/next already use for "present but not the point". A
+   * decorative rule like this one carries no required information (the row
+   * still reads in full through its date, title, category and read-time text
+   * alone), so WCAG 1.4.11's exemption for purely decorative graphics applies
+   * and there is no 3:1 floor to hold it to the way a meaningful border or
+   * icon would be.
+   */
   .leader {
-    flex: 1 1 auto;
-    margin-inline: 0.7rem;
+    flex: none;
+    inline-size: 1.75rem;
+    margin-inline: 0.6rem;
     overflow: hidden;
     white-space: nowrap;
+    opacity: 0.5;
   }
 
   /*
@@ -196,6 +273,8 @@ const LEADER = '─'.repeat(120)
     flex: none;
     margin-inline-start: 0.7rem;
     font-variant-numeric: tabular-nums;
+    /* Departure Mono, matching .date above: same reader ask, same reason. */
+    font-family: var(--font-display);
   }
 
   @media (max-width: 34rem) {
@@ -208,7 +287,6 @@ const LEADER = '─'.repeat(120)
       flex-basis: 100%;
       margin-inline-start: 0;
       margin-block-end: 0.3rem;
-      white-space: normal;
     }
 
     .leader {

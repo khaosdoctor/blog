@@ -5,7 +5,6 @@ import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Authors from '../components/Authors.astro'
 import Bookmark from '../components/Bookmark.astro'
-import DateCopy from '../components/DateCopy.astro'
 import HoverPreviews from '../components/HoverPreviews.astro'
 import HtmlLab from '../components/HtmlLab.astro'
 import LabDemo from '../components/LabDemo.astro'
@@ -19,7 +18,7 @@ import SpeakerDeck from '../components/SpeakerDeck.astro'
 import Spotify from '../components/Spotify.astro'
 import Tweet from '../components/Tweet.astro'
 import Video from '../components/Video.astro'
-import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
+import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
 import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
 import { HREFLANG, t } from '../i18n/ui'
 
@@ -104,7 +103,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   <article style={`--post-accent: ${chipColor(slugOf(post))}`}>
     <h1>{post.data.title}</h1>
     <p class="meta">
-      <DateCopy date={post.data.pubDate} lang={post.data.lang} />
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, post.data.lang)}</time>
       <span aria-hidden="true">·</span>
       <a
         href={`/${post.data.category}/`}
