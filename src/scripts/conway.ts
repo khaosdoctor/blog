@@ -43,14 +43,21 @@ const DEFAULT_DENSITY = 10
 const DEFAULT_GPS = 8
 const DEFAULT_AUTOFEED = 4
 /*
- * One fade per ground, not one shared value: 16% reads as the same faint
- * texture on true black that 3% reads on the sepia page, because the two
+ * One fade per ground, not one shared value: the dark page needs a higher
+ * number than the sepia one to read as the same faint texture, because the two
  * grounds start from opposite ends of the lightness scale. Measured lit-cell
- * contrast against its own ground is 1.05:1 either way, a deliberate failure
- * of the 3:1 non-text-contrast criterion: it reads as texture rather than
- * content, on purpose.
+ * contrast against its own ground is around 1.05:1 either way, a deliberate
+ * failure of the 3:1 non-text-contrast criterion: it reads as texture rather
+ * than content, on purpose.
+ *
+ * The dark value was 16% while the field was invisible for an unrelated reason
+ * (the fill colour resolved to black on black, see `currentFg()` below). Once
+ * that was fixed and the field could actually be seen, 16% read as too present
+ * and the owner asked for 5% off it, so the dark ground is 11% now. The light
+ * ground is untouched: it was never part of that report and 3% is already at
+ * the edge of visible.
  */
-const FADE_DARK = 0.16
+const FADE_DARK = 0.11
 const FADE_LIGHT = 0.03
 /* Cells of slack around a glider so it does not spawn already touching the
    viewport edge and die within a few generations. */

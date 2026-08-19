@@ -155,7 +155,7 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   `BaseLayout`, same as `color-scheme` and `code-theme` already were.
 - **The Conway "game of life" background.** Settled off the bench (`GameOfLife.vue`, `/theme-lab/`): cell size
   12px, seed density 10%, 8 generations per second, click adds a glider, one glider fed automatically every 4
-  seconds. Cell fade is per ground rather than one shared value, 16% on the dark page and 3% on the sepia one,
+  seconds. Cell fade is per ground rather than one shared value, 11% on the dark page and 3% on the sepia one,
   reading as the same faint texture from opposite ends of the lightness scale; the site reads whichever value
   matches the active ground with no reader action. The bench's simulated reading-column knob does not travel to
   the real site, which already has a real column (`main`) to keep clear of instead. Measured lit-cell contrast
@@ -165,7 +165,7 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   control covers WCAG 2.2.2. On WCAG 2.3.1: at 8 generations per second the cells change faster than three times a
   second, so the bench's own "well below the threshold" framing does not hold up read literally, and the honest
   reading is different: 2.3.1 defines a flash by a paired luminance change of 10% or more over an area of roughly
-  21,824px², and a single 12px cell at 3-16% alpha clears neither the luminance nor the area floor, and cells do
+  21,824px², and a single 12px cell at 3-11% alpha clears neither the luminance nor the area floor, and cells do
   not change in the same instant across the field, so no reader sees anything that meets the technical definition
   of a flash regardless of the generation rate. 8/s stays the shipped value on that basis. This reopens the
   "almost no animation" position from Direction above; see that paragraph for the reopened framing and

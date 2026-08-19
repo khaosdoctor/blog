@@ -22,7 +22,7 @@ spot `docs/design.md` already reserved for it since the theme toggle shipped.
 Generations per second 8, reader-adjustable from 0.5-8. Click always adds a glider; the bench's other click mode
 (a single cell) does not travel to the real site and is not reader-adjustable. One glider fed automatically every
 4 seconds, reader-adjustable from 0-20s, 0 disables auto-feed. Cell fade splits per ground rather than sharing one
-value: 16% on the dark page, 3% on the sepia one, both fixed, not reader knobs, chosen so the same faint texture
+value: 11% on the dark page, 3% on the sepia one, both fixed, not reader knobs, chosen so the same faint texture
 reads the same from opposite ends of the lightness scale. The bench's simulated reading-column width does not
 travel either: the real site already has a real column (`main`) to keep the field clear of.
 
