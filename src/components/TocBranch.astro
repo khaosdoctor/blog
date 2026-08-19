@@ -99,12 +99,24 @@ const { items, locale } = Astro.props
       color var(--duration) var(--ease);
   }
 
-  a:hover {
-    background: color-mix(in oklab, var(--toc-ink) 14%, transparent);
-  }
-
-  /* Inverted, the whole line: black ground and light type on the sepia page,
-     the exact opposite in the dark. Set by the script as the reader scrolls. */
+  /*
+   * Hover and focus invert the line exactly the way the current heading does,
+   * rather than washing it with a tint.
+   *
+   * This used to paint `color-mix(in oklab, var(--toc-ink) 14%, transparent)`
+   * behind unchanged full-strength ink. On the dark page that reads as white
+   * type on a dark grey band, and beside a fully inverted current line it looks
+   * muddy rather than lighter, which is what the owner reported. A 14% wash is
+   * also the weakest possible signal: it is the one state a reader produces
+   * deliberately, so it should be the clearest.
+   *
+   * The cost is that a hovered line and the current line now look identical.
+   * That is the intent: this is a four-item outline where the pointer is its
+   * own answer to "which one is this", and the current line is never in doubt
+   * once the pointer leaves.
+   */
+  a:hover,
+  a:focus-visible,
   a[aria-current='location'] {
     background: var(--toc-ink);
     color: var(--toc-paper);
