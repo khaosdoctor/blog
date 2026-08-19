@@ -15,8 +15,12 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
 import {
+  CURSOR_OPACITY_STEPS,
   CURSOR_RATES,
   CURSOR_RATE_OPTIONS,
+  CURSOR_SHADE_FACES,
+  CURSOR_SHADE_GLYPHS,
+  CURSOR_SHADE_STEPS,
   labelForMark,
   MARK_ACCENT_ALL_ID,
   MARK_ACCENTS,
@@ -363,19 +367,46 @@ function replay(): void {
 // --- cursor de bloco: era exclusivo do candidato "dos", agora é um efeito à parte que qualquer um pode ligar ---
 const cursorEffectOn = ref(true)
 const cursorRateId = ref('terminal')
-const cursorOn = ref(true)
+// Índice em CURSOR_SHADE_STEPS, não mais um booleano aceso/apagado: o cursor sobe e desce
+// pela rampa de sombra do CP437 (logoMarks.ts) em vez de piscar binário. 0 é sempre o quadro
+// sólido, o mesmo quadro de repouso que o botão liso de antes usava.
+const cursorStepIndex = ref(0)
 let cursorTimer: ReturnType<typeof setInterval> | null = null
 
+/**
+ * Só Departure Mono e PxPlus IBM VGA8, das cinco fontes do seletor, carregam os quatro code
+ * points do CP437 (checado no arquivo da fonte com fontTools, ver `CURSOR_SHADE_FACES` em
+ * `logoMarks.ts`); nas outras três o glifo cairia no substituto silencioso do navegador, o
+ * mesmo risco que o relatório pediu para evitar. `cursorUsesGlyphRamp` decide entre desenhar
+ * o glifo de verdade ou cair para `CURSOR_OPACITY_STEPS`, opacidade em degrau sobre o mesmo
+ * bloco liso de sempre, ainda uma rampa, nunca uma mistura suave.
+ */
+const cursorUsesGlyphRamp = computed(() => CURSOR_SHADE_FACES.has(face.value))
+const cursorGlyph = computed(() => CURSOR_SHADE_GLYPHS[CURSOR_SHADE_STEPS[cursorStepIndex.value]])
+const cursorOpacity = computed(() => CURSOR_OPACITY_STEPS[CURSOR_SHADE_STEPS[cursorStepIndex.value]])
+
+/**
+ * WCAG 2.3.1 honestamente, não por contagem de degraus, a mesma leitura que `docs/design.md`
+ * já fez para a taxa de geração do Conway: em 228,6ms (Doom) o cursor troca de degrau cerca
+ * de 4,4 vezes por segundo, acima de "três trocas por segundo" só de contar trocas. Mas
+ * 2.3.1 não conta trocas: define flash como uma troca de luminância pareada de 10% ou mais
+ * do máximo, numa área de cerca de 21.824px². O cursor desta bancada mede 0,55em por 1,1em,
+ * bem abaixo de 100px² no tamanho de tipo do bench, ordens de grandeza abaixo do piso de
+ * área, em qualquer uma das três taxas. E um degrau de sombra troca menos densidade de tinta
+ * do que um blink binário cheio trocaria (25% por degrau contra 100% de um aceso/apagado),
+ * então o argumento de luminância fica mais folgado aqui do que no cursor binário de antes,
+ * não mais apertado. Nenhuma das três taxas aciona 2.3.1, nem a mais rápida.
+ */
 function startCursor(): void {
   if (cursorTimer) clearInterval(cursorTimer)
   cursorTimer = setInterval(() => {
-    cursorOn.value = !cursorOn.value
+    cursorStepIndex.value = (cursorStepIndex.value + 1) % CURSOR_SHADE_STEPS.length
   }, CURSOR_RATES[cursorRateId.value])
 }
 function stopCursor(): void {
   if (cursorTimer) clearInterval(cursorTimer)
   cursorTimer = null
-  cursorOn.value = true
+  cursorStepIndex.value = 0 // quadro de repouso: sólido, nunca um degrau intermediário da rampa
 }
 
 watch(cursorRateId, () => {
@@ -449,7 +480,12 @@ const decisionSettings = computed(() => [
   { label: 'respiro', value: String(density.value) },
   { label: 'caixa alta', value: caps.value ? 'sim' : 'não' },
   { label: 'animação do texto', value: labelFor(TEXT_ANIM_OPTIONS, textAnim.value) },
-  { label: 'cursor de bloco', value: cursorEffectOn.value ? `ligado, ${labelFor(CURSOR_RATE_OPTIONS, cursorRateId.value)}` : 'desligado' },
+  {
+    label: 'cursor de bloco',
+    value: cursorEffectOn.value
+      ? `ligado, ${labelFor(CURSOR_RATE_OPTIONS, cursorRateId.value)}, rampa de sombra CP437 (░▒▓█) em ${face.value}, ${cursorUsesGlyphRamp.value ? 'glifo real' : 'opacidade em degrau, a fonte não tem os quatro code points'}`
+      : 'desligado',
+  },
   ...(shape.value === 'dos' ? [{ label: 'prompt do DOS', value: dosPrompt.value || '(vazio)' }] : []),
 ])
 
@@ -482,7 +518,13 @@ const base = computed(() => ({
               <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
             </span>
           </span>
-          <span v-if="cursorEffectOn" :class="[$style.cursorBlock, cursorOn && $style.cursorOnState]"></span>
+          <span
+            v-if="cursorEffectOn"
+            :class="[$style.cursorBlock, cursorUsesGlyphRamp ? $style.cursorGlyphMode : $style.cursorFallbackMode]"
+            :style="cursorUsesGlyphRamp ? {} : { opacity: cursorOpacity }"
+            aria-hidden="true"
+            >{{ cursorUsesGlyphRamp ? cursorGlyph : '' }}</span
+          >
         </a>
         <span :class="$style.fill" :style="{ color: MUTED }">─────────────</span>
         <nav>
@@ -493,7 +535,13 @@ const base = computed(() => ({
 
       <header v-else-if="shape === 'dos'" :class="$style.dos" :style="base">
         <span :class="$style.badge" :style="{ background: accentHex, color: BG }">{{ dosPrompt }}</span>
-        <span v-if="cursorEffectOn" :class="[$style.cursorBlock, cursorOn && $style.cursorOnState]"></span>
+        <span
+          v-if="cursorEffectOn"
+          :class="[$style.cursorBlock, cursorUsesGlyphRamp ? $style.cursorGlyphMode : $style.cursorFallbackMode]"
+          :style="cursorUsesGlyphRamp ? {} : { opacity: cursorOpacity }"
+          aria-hidden="true"
+          >{{ cursorUsesGlyphRamp ? cursorGlyph : '' }}</span
+        >
         <nav :class="$style.right">
           <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
         </nav>
@@ -509,7 +557,13 @@ const base = computed(() => ({
               <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
             </span>
           </span>
-          <span v-if="cursorEffectOn" :class="[$style.cursorBlock, cursorOn && $style.cursorOnState]"></span>
+          <span
+            v-if="cursorEffectOn"
+            :class="[$style.cursorBlock, cursorUsesGlyphRamp ? $style.cursorGlyphMode : $style.cursorFallbackMode]"
+            :style="cursorUsesGlyphRamp ? {} : { opacity: cursorOpacity }"
+            aria-hidden="true"
+            >{{ cursorUsesGlyphRamp ? cursorGlyph : '' }}</span
+          >
         </a>
         <nav :class="$style.right">
           <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
@@ -528,7 +582,13 @@ const base = computed(() => ({
                   <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
                 </span>
               </span>
-              <span v-if="cursorEffectOn" :class="[$style.cursorBlock, cursorOn && $style.cursorOnState]"></span>
+              <span
+            v-if="cursorEffectOn"
+            :class="[$style.cursorBlock, cursorUsesGlyphRamp ? $style.cursorGlyphMode : $style.cursorFallbackMode]"
+            :style="cursorUsesGlyphRamp ? {} : { opacity: cursorOpacity }"
+            aria-hidden="true"
+            >{{ cursorUsesGlyphRamp ? cursorGlyph : '' }}</span
+          >
             </a>
           </span>
           <nav>
@@ -551,7 +611,13 @@ const base = computed(() => ({
                 <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
               </span>
             </span>
-            <span v-if="cursorEffectOn" :class="[$style.cursorBlock, cursorOn && $style.cursorOnState]"></span>
+            <span
+            v-if="cursorEffectOn"
+            :class="[$style.cursorBlock, cursorUsesGlyphRamp ? $style.cursorGlyphMode : $style.cursorFallbackMode]"
+            :style="cursorUsesGlyphRamp ? {} : { opacity: cursorOpacity }"
+            aria-hidden="true"
+            >{{ cursorUsesGlyphRamp ? cursorGlyph : '' }}</span
+          >
           </a>
           <span :style="{ color: MUTED }"> ······································ </span>
           <span>{{ NAV.join(' · ') }}</span>
@@ -621,9 +687,19 @@ const base = computed(() => ({
             ? ' Pausado.'
             : ' Rodando.'
       }}
-      O cursor de bloco, quando ligado, pisca a cada {{ CURSOR_RATES[cursorRateId].toFixed(1) }}ms por fase
-      ({{ labelFor(CURSOR_RATE_OPTIONS, cursorRateId) }}), e agora liga em qualquer um dos cinco candidatos, não só no
-      "linha de DOS invertida".
+      O cursor de bloco, quando ligado, troca de degrau a cada {{ CURSOR_RATES[cursorRateId].toFixed(1) }}ms
+      ({{ labelFor(CURSOR_RATE_OPTIONS, cursorRateId) }}, a mesma taxa por fase de antes), subindo e descendo pela
+      rampa de sombra do CP437 (░▒▓█) em vez de piscar aceso/apagado; o ciclo completo tem 6 degraus agora, não mais
+      2, então dura {{ (CURSOR_RATES[cursorRateId] * 6).toFixed(0) }}ms de ponta a ponta contra
+      {{ (CURSOR_RATES[cursorRateId] * 2).toFixed(0) }}ms do blink binário antigo na mesma taxa.
+      <template v-if="cursorUsesGlyphRamp">Em {{ face }} o cursor desenha os quatro glifos de verdade</template>
+      <template v-else>{{ face }} não carrega os quatro code points do CP437, então o cursor cai para opacidade em degrau sobre o mesmo bloco liso</template>;
+      Departure Mono e PxPlus IBM VGA8 são as únicas duas, das cinco fontes do seletor, cujo arquivo tem U+2588 e
+      U+2591 a U+2593 (checado direto no arquivo, não no navegador). Sobre WCAG 2.3.1: mesmo Doom, a mais rápida das
+      três taxas, troca de degrau cerca de 4,4 vezes por segundo, mas o critério real pede uma troca de luminância
+      pareada de 10% ou mais numa área de cerca de 21.824px², e este cursor mede bem menos de 100px² no tipo do
+      bench, então nenhuma das três taxas aciona a regra. E agora liga em qualquer um dos cinco candidatos, não só
+      no "linha de DOS invertida".
     </p>
 
     <DecisionCopy
@@ -823,16 +899,33 @@ const base = computed(() => ({
     0 0 6px currentColor;
 }
 
+/*
+ * A caixa é a mesma para os dois modos, 0,55em por 1,1em, perto do próprio aspecto 9:16
+ * (0,5625) da PxPlus IBM VGA8, então o glifo de sombra cabe nela sem esticar. O que muda por
+ * modo é só o conteúdo: `cursorGlyphMode` deixa o glifo desenhar a própria tinta (herda
+ * `color` do cabeçalho), `cursorFallbackMode` continua o bloco liso de sempre, agora com
+ * opacidade em degrau em vez de aceso/apagado.
+ */
 .cursorBlock {
   display: inline-block;
   inline-size: 0.55em;
   block-size: 1.1em;
   margin-inline-start: 1px;
   background: transparent;
+  line-height: 1.1em;
+  text-align: center;
+  overflow: visible;
   vertical-align: text-bottom;
 }
 
-.cursorBlock.cursorOnState {
+/* Sem regra própria, o glifo já desenha a própria tinta herdando `color`: a classe existe
+   só para deixar a chave real no módulo CSS, em vez de `$style.cursorGlyphMode` resolver
+   pra `undefined` e a classe nunca ser aplicada no DOM. */
+.cursorBlock.cursorGlyphMode {
+  color: currentColor;
+}
+
+.cursorBlock.cursorFallbackMode {
   background: currentColor;
 }
 

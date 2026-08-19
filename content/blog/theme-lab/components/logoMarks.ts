@@ -109,6 +109,33 @@ export const CURSOR_RATE_OPTIONS = [
   { id: 'terminal', name: 'terminal (530ms, o dobro do Doom)' },
 ]
 
+/**
+ * O cursor de bloco não pisca mais binário (aceso/apagado): ele sobe e desce pela rampa de
+ * sombra do CP437, a mesma técnica do candidato 6 do cartão (`CoverLab.vue`, "candidate 6's
+ * waves dither in real CP437 shade glyphs, not opacity"). `CURSOR_SHADE_GLYPHS` é a rampa em
+ * si, clara para escura; `CURSOR_SHADE_STEPS` é a sequência de índices que ela percorre a
+ * cada fase (sólido, claro, sólido de novo, ida e volta sem repetir as duas pontas seguidas),
+ * com o sólido sempre no índice 0, para que travar em repouso (`prefers-reduced-motion`, a
+ * pausa manual) baste voltar `cursorStepIndex` a 0, nunca a um degrau intermediário.
+ *
+ * Checagem direta do arquivo da fonte (fontTools, não o navegador, que troca o glifo que
+ * falta por outra fonte em silêncio): das cinco fontes que `ChromeHeader.vue` oferece no
+ * seletor de "fonte", só duas carregam os quatro code points do CP437 (U+2588 bloco cheio,
+ * U+2591 a U+2593 as três sombras). Departure Mono (`DepartureMono-Regular.woff2`) tem os
+ * quatro, gid 959, 981, 982, 983. PxPlus IBM VGA8 (`PxPlusIBMVGA8-9x16.woff`) também tem os
+ * quatro, gid 263, 266, 267, 268, os mesmos já registrados para o candidato 6 do cartão.
+ * Silkscreen, VT323 e IBM Plex Mono não têm nenhum dos quatro. Para essas três,
+ * `CURSOR_OPACITY_STEPS` é a rampa alternativa: a mesma sequência de índices, lida como
+ * opacidade em degrau sobre o bloco liso de sempre em vez de um glifo que a fonte não tem,
+ * nunca uma troca suave, degrau do mesmo jeito que o glifo troca em degrau.
+ */
+export const CURSOR_SHADE_GLYPHS = ['█', '▓', '▒', '░']
+export const CURSOR_OPACITY_STEPS = [1, 0.75, 0.5, 0.25]
+export const CURSOR_SHADE_STEPS = [0, 1, 2, 3, 2, 1]
+
+/** As duas fontes do seletor de "fonte" cujo arquivo carrega os quatro code points do CP437. */
+export const CURSOR_SHADE_FACES = new Set(['departure', 'ibmvga'])
+
 /** Glifos do glitch, usados pelo wordmark e pela marca "fio", o mesmo vocabulário nos dois lugares. */
 export const GLITCH_GLYPHS = ['#', '%', '&', '$', '@', '?', '~']
 
