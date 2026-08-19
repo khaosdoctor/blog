@@ -127,7 +127,7 @@ const CELLS = markCells()
     margin-inline: auto;
     /* "Breathing room 4" from the bench's density knob (range 4-30, in
        tenths of a rem block / sixths of a rem inline). */
-    padding: 0.4rem 0.667rem;
+    padding: 0.4rem var(--chrome-inset);
     font-family: var(--font-mono);
   }
 
@@ -166,6 +166,20 @@ const CELLS = markCells()
     color: var(--muted);
     font-family: var(--font-display);
     letter-spacing: 0.4em;
+    /*
+     * Letter-spacing adds its space after every character, the last one
+     * included, so a run of dashes ends with 0.4em of empty air that belongs
+     * to no glyph. Between the left run and POSTS that read as a wider space
+     * than the one after SOBRE, where the right run's own trailing space falls
+     * off the end of the row instead.
+     *
+     * The 0.6rem is the row's own spacing, from `.chrome > *` above: this rule
+     * has the same specificity and comes later, so setting `margin-inline-end`
+     * here replaces that value rather than adding to it. A bare `-0.4em` made
+     * the run overlap POSTS instead of spacing off it. Both together is what
+     * the row actually wants: its own measure, less the phantom space.
+     */
+    margin-inline-end: calc(0.6rem - 0.4em);
     flex: 1;
     overflow: hidden;
   }

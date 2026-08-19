@@ -197,7 +197,17 @@
    * `main` keeps `--measure` instead, since a post's running text wants the
    * narrow column; the list breaks out of `main` on its own.
    */
-  --chrome-width: 80vw;
+  --chrome-width: 88vw;
+
+  /*
+   * The header draws its own row inside `--chrome-width` with this much
+   * padding on each side ("breathing room 4" from the decided bench setting),
+   * so its visible edges finish inset by exactly this much. The post list and
+   * the pagination take the same inset, which is what makes the three line up
+   * on both sides rather than the list running slightly wider than the row
+   * above it.
+   */
+  --chrome-inset: 0.667rem;
 
   /*
    * Prose decoration. Every one of these is a candidate the lab page shows

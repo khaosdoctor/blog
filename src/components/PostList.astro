@@ -115,6 +115,10 @@ const LEADER = '·'.repeat(200)
   @media (min-width: 70rem) {
     .posts {
       inline-size: var(--chrome-width);
+      /* The same inset the header's own row carries, so the rows begin and end
+         exactly where the header's drawn edges do rather than a few pixels
+         wider on both sides. */
+      padding-inline: var(--chrome-inset);
       margin-inline-start: 50%;
       transform: translateX(calc(var(--chrome-width) / -2));
     }
