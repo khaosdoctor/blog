@@ -78,7 +78,9 @@ const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
   'scheduled.json.ts': 'shared',
   'search.astro': 'per-locale',
   'series/[name].astro': 'source-only',
+  'series/index.astro': 'per-locale',
   'tags/[tag]/[...page].astro': 'source-only',
+  'tags/index.astro': 'per-locale',
 }
 
 /** Pages that carry every language at once, so a t() call for another one is correct there. */
