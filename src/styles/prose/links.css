@@ -2,13 +2,20 @@
  * Where a link goes, shown rather than guessed: an out-of-the-box arrow when it
  * leaves the site, a hooked arrow when it stays. Inline SVG masks, so the icon
  * takes the link's own colour, costs no request and needs no JS.
+ *
+ * This file used to read as `.prose a` throughout, prose being the only place
+ * a reader ever followed a link. The owner's later ask ("links inside /oss/
+ * should follow the same rules as any other link, this means the correct
+ * accent, hover etc", then "same as the footer links, and all links across
+ * the whole website") turned that into the site's one link treatment, so
+ * every selector below reads a scope wider than `.prose` now: see the SCOPE
+ * comment above the rest-state rule for exactly what that scope is and why.
  */
-.prose {
-  --icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M17 13v6H5V7h6'/%3E%3Cpath d='M14 4h6v6'/%3E%3Cpath d='M20 4l-8 8'/%3E%3C/svg%3E");
-  --icon-internal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 6v5a3 3 0 0 0 3 3h11'/%3E%3Cpath d='M15 10l4 4-4 4'/%3E%3C/svg%3E");
-}
 
 :root {
+  --icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M17 13v6H5V7h6'/%3E%3Cpath d='M14 4h6v6'/%3E%3Cpath d='M20 4l-8 8'/%3E%3C/svg%3E");
+  --icon-internal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 6v5a3 3 0 0 0 3 3h11'/%3E%3Cpath d='M15 10l4 4-4 4'/%3E%3C/svg%3E");
+
   /* Rest-state underline, the exact values candidate 2 measured in the lab
    * (LinkLab.vue, section 06 of /theme-lab/, archived once decided): dashed,
    * 2px thick, 4px offset from the baseline, kept from that candidate rather
@@ -69,31 +76,57 @@
 }
 
 /*
- * Rest: the day accent with the terminal dashed underline above, plus 1px
- * inline / 2px block padding. Hover/focus: the whole run inverts into a
- * solid block, candidate 4's choice, background --post-accent-fill (see the
- * token above for where that colour comes from) with the page ground as the
- * text on top.
+ * SCOPE: `html :is(main, footer) a`, the site's default for a link, everywhere
+ * a link can appear outside the header. Read as two separate decisions:
  *
- * A link is a transient effect, not a mark on the post's own text, so its
- * colour reads --accent-day rather than --post-accent at both rest and
- * hover: the owner's later ask draws that line for every accent in prose,
- * strong/em keep the per-article cover colour (emphasis.css), a link and
- * everything else that is not a text modification follows the day instead.
- * Rest used to read --accent, the site's fixed link blue, before that ask;
- * hover already read the day accent through --post-accent-fill, so this
- * only brings rest into line with what hover already did.
+ * - `:is(main, footer)`, not a bare `a`: `<main>` and `<footer>` are the two
+ *   landmarks BaseLayout.astro renders content into; `<header>` (the brand
+ *   link, nav links, language switch, search opener, theme toggle, settings
+ *   panel) is a sibling of both, never a descendant, so this selector cannot
+ *   reach it structurally, not by relying on specificity to lose a fight. A
+ *   post body's `.prose` div, the OSS page's credit list, a post's tag chips
+ *   and table of contents, the 404 and offline pages, and the footer's own
+ *   links all sit inside one of those two landmarks and so all default to
+ *   this treatment; nothing above (a `.chip`, `.heading-anchor`, or a link
+ *   with its own component-scoped style, see the exclusion below and this
+ *   file's own bookmark/image-link carve-outs further down) has to opt in by
+ *   hand, and nothing new added inside `main` or `footer` later has to
+ *   remember to either.
+ * - `html` prefixed, not left off: this rule has to outrank
+ *   BaseLayout.astro's own `footer a` fallback (a plain, un-scoped `footer a`
+ *   selector, `is:global`), which this rule replaces for every footer link
+ *   except one, without editing that file (held by another agent's pass this
+ *   round). Three bare type selectors (`html`, `footer` or `main`, `a`) beat
+ *   `footer a`'s two on specificity alone, so the win holds regardless of
+ *   which stylesheet the cascade happens to load first. It stops exactly
+ *   short of beating `footer .version a` (BaseLayout.astro, one class plus a
+ *   type deeper): the version string's own commit link is a deliberate
+ *   exception ("still a link, just not dressed as one," per that file's own
+ *   comment) and has to keep winning that fight, not lose it to a wider
+ *   default arriving later. Checked by counting selectors, not by guessing:
+ *   `html :is(main, footer) a` is three types, zero classes; `footer a` is
+ *   two types, zero classes (loses); `footer .version a` is two types, one
+ *   class (still wins, one class outranks any number of bare types).
  *
- * The padding is present here, at rest, with no background of its own
- * (transparent, painted by nothing): the owner's later ask added 1px/2px
- * padding to the hover fill, and a link that only grows that padding on
- * hover pushes its neighbours. Reserving the same box at rest means hover
- * changes background, color and text-decoration-line only, none of which
- * affect box size, so there is nothing to reflow. A link that wraps across
- * two lines gets one background fragment per line (the box's default
- * decoration break), which is the expected look, not a bug to work around.
+ * EXCEPTIONS, named rather than left to chance: `.chip` (tag/category chips,
+ * chips.css's own double-border card, a different object from a text link,
+ * not a text link at all), `.heading-anchor` (headings.css's own quiet,
+ * opacity-fading "#" marker, which would otherwise gain both this rule's
+ * dashed underline and a colour clash with its own hover colour) and
+ * `footer .gh-link` (BaseLayout.astro's icon-only GitHub repo link: an icon
+ * has no baseline for a dashed underline to sit under, and the external-link
+ * arrow this rule would otherwise append is redundant beside a glyph that
+ * already reads as "GitHub") are excluded by name below. `:where()` around
+ * them keeps the exclusion at zero specificity, so adding it does not
+ * accidentally out-rank the very `footer .version a` exception this rule
+ * already has to lose to (a plain `:not(.chip)` would add a class to this
+ * selector's own count and start beating `.version a` by mistake, which is
+ * the trap this file's `:where()` avoids). A footnote reference, its
+ * back-arrow, and the bookmark card are NOT in this list: they keep the fill
+ * and the accent colour like any other text link, only the icon further down
+ * is turned off for them.
  */
-.prose a {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link)) {
   padding-inline: 1px;
   padding-block: 2px;
   background: transparent;
@@ -104,7 +137,7 @@
   text-underline-offset: var(--link-underline-offset);
 }
 
-.prose a::after {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link))::after {
   content: '';
   display: inline-block;
   inline-size: 0.7em;
@@ -119,23 +152,25 @@
  * between them is not "leaving": lsantos.dev (this blog and the personal site)
  * and lsantos.me. Add a host here when another one becomes his.
  */
-.prose a[href^='http']:not([href*='lsantos.dev']):not([href*='lsantos.me'])::after {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link))[href^='http']:not([href*='lsantos.dev']):not([href*='lsantos.me'])::after {
   mask-image: var(--icon-external);
 }
 
 /*
  * Links that are already marked as what they are, or that are not text: a
- * footnote reference, the arrow back from a footnote, a heading's own anchor, a
- * bookmark card, and any link wrapping an image.
+ * footnote reference, the arrow back from a footnote, a bookmark card, and
+ * any link wrapping an image. `.heading-anchor` needs no entry here any more:
+ * it is excluded from the rule above outright, so it never gains the icon
+ * `::after` in the first place.
  */
-.prose a:is([data-footnote-ref], [data-footnote-backref], .heading-anchor, .bookmark)::after,
-.prose a:has(img)::after,
-.prose figure a::after {
+html :is(main, footer) a:is([data-footnote-ref], [data-footnote-backref], .bookmark)::after,
+html :is(main, footer) a:has(img)::after,
+html :is(main, footer) figure a::after {
   content: none;
 }
 
-.prose a:hover,
-.prose a:focus-visible {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link)):hover,
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link)):focus-visible {
   background: var(--post-accent-fill);
   color: var(--bg);
   text-decoration-line: none;
@@ -187,21 +222,21 @@
  * the plain image; the drift is feedback for the pointer being there, same
  * split as every other link in this file (quiet rest, expressive hover).
  */
-.prose a:has(img):not(.bookmark),
-.prose a.lyt-playbtn,
-.prose a.ltv-playbtn,
-.prose figure a {
+html :is(main, footer) a:has(img):not(.bookmark),
+html :is(main, footer) a.lyt-playbtn,
+html :is(main, footer) a.ltv-playbtn,
+html :is(main, footer) figure a {
   text-decoration-line: none;
 }
 
-.prose a:has(img):not(.bookmark):hover,
-.prose a:has(img):not(.bookmark):focus-visible,
-.prose a.lyt-playbtn:hover,
-.prose a.lyt-playbtn:focus-visible,
-.prose a.ltv-playbtn:hover,
-.prose a.ltv-playbtn:focus-visible,
-.prose figure a:hover,
-.prose figure a:focus-visible {
+html :is(main, footer) a:has(img):not(.bookmark):hover,
+html :is(main, footer) a:has(img):not(.bookmark):focus-visible,
+html :is(main, footer) a.lyt-playbtn:hover,
+html :is(main, footer) a.lyt-playbtn:focus-visible,
+html :is(main, footer) a.ltv-playbtn:hover,
+html :is(main, footer) a.ltv-playbtn:focus-visible,
+html :is(main, footer) figure a:hover,
+html :is(main, footer) figure a:focus-visible {
   background: transparent;
   color: inherit;
   text-decoration-line: none;
@@ -234,14 +269,14 @@
  * other.
  */
 @media (prefers-reduced-motion: reduce) {
-  .prose a:has(img):not(.bookmark):hover,
-  .prose a:has(img):not(.bookmark):focus-visible,
-  .prose a.lyt-playbtn:hover,
-  .prose a.lyt-playbtn:focus-visible,
-  .prose a.ltv-playbtn:hover,
-  .prose a.ltv-playbtn:focus-visible,
-  .prose figure a:hover,
-  .prose figure a:focus-visible {
+  html :is(main, footer) a:has(img):not(.bookmark):hover,
+  html :is(main, footer) a:has(img):not(.bookmark):focus-visible,
+  html :is(main, footer) a.lyt-playbtn:hover,
+  html :is(main, footer) a.lyt-playbtn:focus-visible,
+  html :is(main, footer) a.ltv-playbtn:hover,
+  html :is(main, footer) a.ltv-playbtn:focus-visible,
+  html :is(main, footer) figure a:hover,
+  html :is(main, footer) figure a:focus-visible {
     animation: none;
     box-shadow: 8px 8px 0 0 var(--accent-day, var(--accent));
   }
