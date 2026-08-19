@@ -170,7 +170,10 @@ function searchPageHref(query: string): string {
 
 function init(): void {
   const triggerEl = document.querySelector<HTMLElement>('.search-trigger')
-  const openerEl = document.querySelector<HTMLButtonElement>('.sx-open')
+  // <a>, not <button>: see SearchPalette.astro's own component comment for
+  // why this is a real link with a real href now.
+  const openerEl = document.querySelector<HTMLAnchorElement>('.sx-open')
+  const hintEl = document.querySelector<HTMLElement>('.sx-hint')
   const dialogEl = document.querySelector<HTMLDialogElement>('.sx-dialog')
   const inputEl = document.querySelector<HTMLInputElement>('.sx-input')
   const cursorEl = document.querySelector<HTMLElement>('.sx-cursor')
@@ -180,6 +183,7 @@ function init(): void {
   if (
     triggerEl === null ||
     openerEl === null ||
+    hintEl === null ||
     dialogEl === null ||
     inputEl === null ||
     cursorEl === null ||
@@ -191,6 +195,7 @@ function init(): void {
   }
   const trigger = triggerEl
   const opener = openerEl
+  const hint = hintEl
   const dialog = dialogEl
   const input = inputEl
   const cursor = cursorEl
@@ -198,8 +203,21 @@ function init(): void {
   const list = listEl
   const more = moreEl
 
-  opener.setAttribute('aria-label', trigger.dataset.label ?? 'Search')
-  // The hint lives inside the button now (SearchPalette.astro), but the
+  // The upgrade: only now, once the click below is actually wired to open the
+  // dialog instead of navigating, do aria-haspopup/aria-controls become
+  // true. Declaring them in the static markup would describe behaviour a
+  // no-JS reader never gets. aria-label itself is not touched here any
+  // more: SearchPalette.astro already sets one that reads correctly in both
+  // states (see that file's own comment).
+  opener.setAttribute('aria-haspopup', 'dialog')
+  opener.setAttribute('aria-controls', 'sx-dialog')
+
+  // The hint's own space was already reserved at rest (visibility: hidden,
+  // SearchPalette.astro), so making it visible here does not resize
+  // anything; it is only true from this point on that Cmd/Ctrl+<letter>
+  // actually opens the palette, which is exactly what the hint promises.
+  hint.style.visibility = 'visible'
+  // The hint lives inside the anchor now (SearchPalette.astro), but the
   // lookup still starts from the shared wrapper: a descendant selector finds
   // it either way, and starting from opener directly would work too, this
   // just avoids depending on exactly how deep it lives.
@@ -298,7 +316,13 @@ function init(): void {
     updateCaret()
   }
 
-  opener.addEventListener('click', openDialog)
+  // preventDefault is what actually performs the upgrade: without it, a
+  // real <a href> just navigates, the correct no-JS behaviour, but wrong
+  // the moment this handler exists to open the dialog instead.
+  opener.addEventListener('click', (event) => {
+    event.preventDefault()
+    openDialog()
+  })
 
   dialog.addEventListener('close', () => {
     opener.focus()
@@ -409,8 +433,6 @@ function init(): void {
     event.preventDefault()
     openDialog()
   })
-
-  trigger.removeAttribute('hidden')
 }
 
 if (document.readyState === 'loading') {
