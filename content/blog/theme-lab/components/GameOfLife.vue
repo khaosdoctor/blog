@@ -50,11 +50,19 @@ const EDGE_MARGIN = 3
 const GLIDER_BOX = 3
 
 const ground = ref('escuro')
-const cellSize = ref(18)
-const densityPct = ref(4)
-const gps = ref(2)
-const dimnessPct = ref(6)
-const clickMode = ref('celula')
+const cellSize = ref(12)
+const densityPct = ref(10)
+const gps = ref(8)
+/**
+ * Apagamento da célula, um valor por fundo: um alfa só não serve pros dois, o que lê como
+ * textura fraca no preto fica pesado ou some no sépia. Cada fundo guarda o próprio valor
+ * enquanto o outro é editado, então comparar os dois é só alternar o FUNDO. Os dois nascem em
+ * 17%, o valor único que a bancada usava pros dois fundos antes desta divisão: nada muda na
+ * tela até ele mexer num dos dois.
+ */
+const dimnessPctEscuro = ref(17)
+const dimnessPctClaro = ref(17)
+const clickMode = ref('planador')
 const columnCh = ref(46)
 const manualPause = ref(false)
 const simulateReduced = ref(false)
@@ -81,6 +89,10 @@ let excluded = new Uint8Array(0)
 const costSamples: number[] = []
 
 const groundColours = computed(() => GROUNDS[ground.value])
+
+/** O apagamento em uso é sempre o do fundo escolhido agora em FUNDO: trocar o fundo troca qual
+ * dos dois valores o campo lê, sem tocar no valor do outro fundo. */
+const dimnessPct = computed(() => (ground.value === 'escuro' ? dimnessPctEscuro.value : dimnessPctClaro.value))
 
 const dimmedCell = computed(() => composite(parseHex(groundColours.value.fg), parseHex(groundColours.value.bg), dimnessPct.value / 100))
 const cellContrast = computed(() => ratio(dimmedCell.value, parseHex(groundColours.value.bg)))
@@ -354,7 +366,8 @@ const decisionSettings = computed(() => [
   { label: 'tamanho da célula', value: `${cellSize.value}px` },
   { label: 'densidade da semente', value: `${densityPct.value}%` },
   { label: 'gerações por segundo', value: `${gps.value}/s` },
-  { label: 'apagamento da célula', value: `${dimnessPct.value}%` },
+  { label: 'apagamento da célula no fundo escuro', value: `${dimnessPctEscuro.value}%` },
+  { label: 'apagamento da célula no fundo claro', value: `${dimnessPctClaro.value}%` },
   { label: 'clique adiciona', value: CLICK_MODES.find((m) => m.id === clickMode.value)?.name ?? clickMode.value },
   { label: 'medida da coluna simulada', value: `${columnCh.value}ch` },
   { label: 'contraste da célula acesa contra o fundo', value: `${cellContrast.value.toFixed(2)}:1 (${cellGrade.value})` },
@@ -370,7 +383,9 @@ const decisionContext =
   'ignora. prefers-reduced-motion trava num quadro só e nunca inicia o laço; o botão de pausa cobre WCAG ' +
   '2.2.2; a taxa de geração fica bem abaixo do limite de três trocas por segundo de WCAG 2.3.1. Gerações ' +
   'por segundo, células vivas e custo por geração são medidos ao vivo pelo próprio componente, abaixo do ' +
-  'palco. Bateria e o efeito numa rolagem longa não foram medidos: esta máquina não tem navegador.'
+  'palco. Bateria e o efeito numa rolagem longa não foram medidos: esta máquina não tem navegador. O ' +
+  'apagamento da célula deixou de ser um valor só: agora há um por fundo, escuro e claro, e o campo usa ' +
+  'sempre o do fundo escolhido em FUNDO, sem que trocar de fundo perturbe o valor do outro.'
 
 onMounted(() => {
   reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -418,7 +433,8 @@ onUnmounted(() => {
       <Knob v-model="cellSize" label="tamanho da célula (zoom)" :min="8" :max="32" :step="2" unit="px" />
       <Knob v-model="densityPct" label="densidade da semente" :min="1" :max="20" unit="%" />
       <Knob v-model="gps" label="gerações por segundo" :min="0.5" :max="8" :step="0.5" unit="/s" />
-      <Knob v-model="dimnessPct" label="apagamento da célula" :min="2" :max="30" unit="%" />
+      <Knob v-model="dimnessPctEscuro" label="apagamento da célula no fundo escuro" :min="2" :max="30" unit="%" />
+      <Knob v-model="dimnessPctClaro" label="apagamento da célula no fundo claro" :min="2" :max="30" unit="%" />
       <Knob
         v-model="autoSeedSeconds"
         label="alimentação: segundos por planador novo (0 desliga)"
