@@ -1,0 +1,91 @@
+---
+import { formatCoverByline } from '../lib/cover'
+
+/**
+ * The post's own cover, drawn in the browser on load, over the same spot the
+ * plain heading/date/byline occupy: "instead of rendering the title, date,
+ * byline the way we are doing today, draw the entire cover at the top of the
+ * page" (the request this answers). `src/scripts/cover-hero.ts` reads the
+ * data-* attributes below and feeds them straight to `buildCoverSvg`
+ * (src/lib/cover.ts), the exact function `scripts/cover.ts` also rasterises
+ * with `sharp` at build, so the drawn cover and the static og:image are
+ * never two different drawings of the same post.
+ *
+ * The real `<h1>`, the real `<time>` and the real byline paragraph
+ * (Authors.astro) stay exactly where the page already puts them; nothing
+ * here duplicates their markup. This component only adds a decorative
+ * container, empty and `hidden` until the script fills it, so a reader with
+ * no JavaScript gets today's page, unchanged: the container never gets an
+ * `hidden` removed, so it never takes up space or paints anything.
+ *
+ * Once the script does fill it, the real elements it repeats visually (the
+ * `<h1>`, the `<time>` and its dot, and the byline paragraph) are hidden the
+ * sr-only way, not removed: still in the accessibility tree, still what a
+ * screen reader, the RSS reader, the social scraper and search all read,
+ * just not painted twice on screen. The category chip and the reading time
+ * are not part of that swap: the cover's own kicker only echoes the
+ * category as decoration, it is not the same interactive link, and reading
+ * time is not drawn on the cover at all, so both stay visible exactly as
+ * they are today, JS or not.
+ */
+interface Props {
+  slug: string
+  title: string
+  category: string
+  pubDate: Date
+  lang: 'pt' | 'en'
+  authorName: string
+}
+
+const { slug, title, category, pubDate, lang, authorName } = Astro.props
+const byline = formatCoverByline(pubDate, lang, authorName)
+---
+
+<div class="cover-hero" data-cover-hero data-slug={slug} data-title={title} data-category={category} data-byline={byline} hidden>
+  <div class="cover-hero-canvas" aria-hidden="true"></div>
+</div>
+
+<script>
+  import '../scripts/cover-hero'
+</script>
+
+<style>
+  .cover-hero {
+    aspect-ratio: 1200 / 630;
+    width: 100%;
+    margin-block-end: 2.5rem;
+    /* The SVG this fills carries its own black ground and frame, so there is
+       nothing to paint here before the script runs: `hidden` alone (no
+       fallback background) keeps a JS-off reader from ever seeing an empty
+       box. */
+  }
+
+  .cover-hero-canvas :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /*
+   * Same recipe as .note-toggle in src/styles/sidenotes.css: off the visual
+   * canvas, still in the accessibility tree. `:global()` because the byline
+   * paragraph is Authors.astro's own `.authors`, a different component's
+   * scope, and `time + [aria-hidden]` reaches only the dot glued to the
+   * date, not the one right before the category chip.
+   */
+  :global(article[data-cover-active] h1),
+  :global(article[data-cover-active] .meta time),
+  :global(article[data-cover-active] .meta time + [aria-hidden]),
+  :global(article[data-cover-active] .authors) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

@@ -5,6 +5,7 @@ import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Authors from '../components/Authors.astro'
 import Bookmark from '../components/Bookmark.astro'
+import CoverHero from '../components/CoverHero.astro'
 import HoverPreviews from '../components/HoverPreviews.astro'
 import HtmlLab from '../components/HtmlLab.astro'
 import LabDemo from '../components/LabDemo.astro'
@@ -18,6 +19,7 @@ import SpeakerDeck from '../components/SpeakerDeck.astro'
 import Spotify from '../components/Spotify.astro'
 import Tweet from '../components/Tweet.astro'
 import Video from '../components/Video.astro'
+import { parseAuthors } from '../lib/authors'
 import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
 import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
 import { HREFLANG, t } from '../i18n/ui'
@@ -71,6 +73,7 @@ export const getStaticPaths = (async () => {
 const { post, series, alternates: folderAlternates } = Astro.props
 const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
+const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
 
 const alternates = folderAlternates.map(({ lang, path }) => ({
   lang,
@@ -101,6 +104,14 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
       chips: the same post is always the same colour, nothing to keep
       in step with the content. */}
   <article style={`--post-accent: ${chipColor(slugOf(post))}`}>
+    <CoverHero
+      slug={slugOf(post)}
+      title={post.data.title}
+      category={post.data.category}
+      pubDate={post.data.pubDate}
+      lang={post.data.lang}
+      authorName={authorName}
+    />
     <h1>{post.data.title}</h1>
     <p class="meta">
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, post.data.lang)}</time>

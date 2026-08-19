@@ -5,6 +5,7 @@ import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Authors from '../../components/Authors.astro'
 import Bookmark from '../../components/Bookmark.astro'
+import CoverHero from '../../components/CoverHero.astro'
 import HoverPreviews from '../../components/HoverPreviews.astro'
 import HtmlLab from '../../components/HtmlLab.astro'
 import LabDemo from '../../components/LabDemo.astro'
@@ -17,6 +18,7 @@ import SpeakerDeck from '../../components/SpeakerDeck.astro'
 import Spotify from '../../components/Spotify.astro'
 import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
+import { parseAuthors } from '../../lib/authors'
 import { chipColor } from '../../lib/taxonomy'
 import { HREFLANG } from '../../i18n/ui'
 import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
@@ -68,6 +70,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   lang,
   href: new URL(path, Astro.site).href,
 }))
+const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
 ---
 
 <BaseLayout
@@ -91,6 +94,14 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
       chips: the same post is always the same colour, nothing to keep
       in step with the content. */}
   <article style={`--post-accent: ${chipColor(slugOf(post))}`}>
+    <CoverHero
+      slug={slugOf(post)}
+      title={post.data.title}
+      category={post.data.category}
+      pubDate={post.data.pubDate}
+      lang="en"
+      authorName={authorName}
+    />
     <h1>{post.data.title}</h1>
     <p class="meta">
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, 'en')}</time>
