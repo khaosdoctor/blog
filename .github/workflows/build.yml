@@ -3,7 +3,11 @@ name: Build
 on:
   push:
     branches: [main]
+    # Docs never reach dist, so a docs-only commit has nothing for the build
+    # to check.
+    paths-ignore: ["docs/**"]
   pull_request:
+    paths-ignore: ["docs/**"]
   # The Cloudflare Worker fires this at a scheduled post's exact pubDate.
   repository_dispatch:
     types: [scheduled-publish]
@@ -24,6 +28,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # The astro-cache prune step below needs actions:write on top of the
+    # workflow default.
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      actions: write
     steps:
       # Full history and tags: the footer version is the last release tag plus
       # the number of commits since it, and a shallow checkout can see neither.
@@ -38,7 +49,12 @@ jobs:
 
       # Astro's content and image caches. Image work dominates this build, 1400
       # webp derivatives, so a hit is the difference between seconds and minutes.
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      # Split restore/save (rather than the combined actions/cache) because the
+      # primary key changes on almost every push (content/blog hash): a plain
+      # actions/cache would save a brand new entry each time and never reclaim
+      # the last one, so a manual prune runs after save below.
+      - id: astro-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             node_modules/.astro
@@ -64,40 +80,16 @@ jobs:
       - name: Check migrated output
         run: node scripts/check-output.ts
 
-      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
-        with:
-          path: dist
-
-  # Advisory only, never a release blocker: a broken link in one of the
-  # migrated posts or a Lighthouse regression is worth knowing about, not
-  # worth stopping a deploy over. continue-on-error keeps this job's outcome
-  # from affecting the workflow conclusion no matter what it finds, and it
-  # runs off the artifact `build` already produced instead of building again.
-  seo-audit:
-    needs: build
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    # Narrower than the workflow default: reading the artifact this run just
-    # produced needs `actions: read`, which an explicit top-level permissions
-    # block otherwise zeroes out, and this job has no business with pages
-    # or id-token.
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      # Only lighthouserc.json is needed from the repo; the pages artifact
-      # below is the actual site under test.
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: github-pages
-
-      # upload-pages-artifact tars the site root into artifact.tar, not a
-      # `dist/` folder, so it has to be extracted back into one.
-      - run: mkdir dist && tar -xf artifact.tar -C dist
-
+      # Advisory only, never a release blocker: a broken link in one of the
+      # migrated posts or a Lighthouse regression is worth knowing about, not
+      # worth stopping a deploy over. continue-on-error on each step keeps
+      # neither tool from affecting the job's outcome no matter what it finds.
+      # Runs against the dist/ this job already built instead of a second
+      # build: it used to run in its own job downloading the pages artifact,
+      # but that meant every run, including ones that can never deploy, had
+      # to produce that artifact just to hand it to this step.
       - name: Lighthouse
+        continue-on-error: true
         uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
         with:
           configPath: ./lighthouserc.json
@@ -109,11 +101,46 @@ jobs:
       # links are checked too since a lot of the migrated posts still
       # point at six-year-old URLs.
       - name: Check links
+        continue-on-error: true
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
         with:
           args: --no-progress --root-dir dist --exclude-mail 'dist/**/*.html'
           fail: false
           jobSummary: true
+
+      # Only a run that can actually deploy needs to hand dist/ off: PR runs
+      # and manual dispatches build and check but stop here. One day of
+      # retention is enough since the only consumer is deploy-pages, later in
+      # this same run.
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
+        with:
+          path: dist
+          retention-days: 1
+
+      # Always attempt the save: a hit on the exact key above already skips
+      # this (no-op, not an error), and, like the pre-split actions/cache,
+      # this runs even if an earlier step failed.
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        if: always()
+        with:
+          path: |
+            node_modules/.astro
+            .astro
+          key: ${{ steps.astro-cache.outputs.cache-primary-key }}
+
+      # The primary key above changes on almost every push, so without this
+      # the cache entry from every push stays behind. Keep only the one this
+      # run just saved for this branch.
+      - name: Prune superseded Astro cache
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh cache list --key astro- --ref "${{ github.ref }}" --limit 100 --json id,key \
+            --jq '.[] | select(.key != "${{ steps.astro-cache.outputs.cache-primary-key }}") | .id' \
+            | while read -r id; do gh cache delete "$id"; done
 
   # No deploy job yet, the repo is private and Pages isn't enabled,
   # so actions/deploy-pages@v4 would only ever fail. Add it back at DNS cutover:
