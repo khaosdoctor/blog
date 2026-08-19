@@ -147,13 +147,29 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     </script>
     {/* Same shape, one key over: the reader's chosen code theme has to be on
         <html> before the first paint too, or every page flashes the
-        system-default theme first. Nothing stored means no attribute, and the
-        prefers-color-scheme media query in expressive-code's own CSS decides,
-        which is exactly the behaviour before there was a picker. */}
+        system-default theme first.
+
+        Nothing stored means the default pair, ayu-light/ayu-dark
+        (astro.config.mjs lists them first, which is what makes them the
+        default). With no site-wide light/dark choice either, that needs no
+        attribute at all: expressive-code's own prefers-color-scheme media
+        query already resolves ayu-light on a light OS and ayu-dark on a dark
+        one. With a site-wide choice, that media query is answering about the
+        OS while the page above is showing whatever the reader picked, so the
+        matching ayu is named outright here instead. This runs after the
+        color-scheme snippet above on purpose: same key, already read once,
+        and code-theme.ts repeats exactly this resolution once it can run. */}
     <script is:inline>
       try {
         const stored = localStorage.getItem('code-theme')
-        if (stored !== null && stored !== 'auto') document.documentElement.setAttribute('data-code-theme', stored)
+        if (stored !== null && stored !== 'auto') {
+          document.documentElement.setAttribute('data-code-theme', stored)
+        } else {
+          const scheme = localStorage.getItem('color-scheme')
+          if (scheme === 'light' || scheme === 'dark') {
+            document.documentElement.setAttribute('data-code-theme', scheme === 'dark' ? 'ayu-dark' : 'ayu-light')
+          }
+        }
       } catch {
         // Private mode, or storage disabled. The media query still applies.
       }
