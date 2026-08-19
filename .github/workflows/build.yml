@@ -1,13 +1,17 @@
 name: Build
 
+# Off by hand until the DNS cutover, alongside the deploy job further down.
+# Nothing here deploys yet, so a run costs minutes and storage and tells us what
+# `npm run check` and `node scripts/check-output.ts` already say locally. Restore
+# the two triggers below at the cutover, when a red build starts meaning
+# something:
+#
+#   push:
+#     branches: [main]
+#     paths-ignore: ["docs/**"]   # docs never reach dist
+#   pull_request:
+#     paths-ignore: ["docs/**"]
 on:
-  push:
-    branches: [main]
-    # Docs never reach dist, so a docs-only commit has nothing for the build
-    # to check.
-    paths-ignore: ["docs/**"]
-  pull_request:
-    paths-ignore: ["docs/**"]
   # The Cloudflare Worker fires this at a scheduled post's exact pubDate.
   repository_dispatch:
     types: [scheduled-publish]
