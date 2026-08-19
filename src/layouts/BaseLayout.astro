@@ -29,13 +29,14 @@ import '../styles/math.css'
 import '../styles/variants/quotes.css'
 // Tag and category chips, which live outside the prose wrapper.
 import '../styles/chips.css'
-import CodeTheme from '../components/CodeTheme.astro'
+import ConwayField from '../components/ConwayField.astro'
 import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
 import LangSwitcher from '../components/LangSwitcher.astro'
 import MathCopy from '../components/MathCopy.astro'
 import QuoteCopy from '../components/QuoteCopy.astro'
 import ReadingProgress from '../components/ReadingProgress.astro'
 import SEO from '../components/SEO.astro'
+import SettingsPanel from '../components/SettingsPanel.astro'
 import ThemeToggle from '../components/ThemeToggle.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
@@ -123,6 +124,20 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
         // Private mode, or storage disabled. The media query still applies.
       }
     </script>
+    {/* Same shape again: the reader's motion override and the Conway
+        background on/off choice both decide whether anything moves or draws
+        at all, so both need to be on <html> before conway.ts's own deferred
+        module ever runs. Absent, nothing here changes: the OS query still
+        decides reduced motion, and the field still starts on. */}
+    <script is:inline>
+      try {
+        const motion = localStorage.getItem('motion')
+        if (motion === 'reduce' || motion === 'allow') document.documentElement.setAttribute('data-motion', motion)
+        if (localStorage.getItem('background-life') === '0') document.documentElement.setAttribute('data-bg-life', 'off')
+      } catch {
+        // Private mode, or storage disabled. The field starts on, motion follows the OS.
+      }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- iOS ignores the manifest and looks for this one specifically. -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -163,6 +178,11 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     />
   </head>
   <body>
+    {/* Decorative, aria-hidden, and behind everything (z-index: -1 in its own
+        scoped style): placed first so it never affects tab order, which
+        starts at the skip link below regardless of where in the DOM this
+        renders. */}
+    <ConwayField />
     {progress && <ReadingProgress locale={locale} />}
     <a href="#main-content" class="skip-link">{t(locale, 'skipToContent')}</a>
     <header>
@@ -172,6 +192,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
       </nav>
       <LangSwitcher locale={locale} alternates={alternates} />
       <ThemeToggle locale={locale} />
+      <SettingsPanel locale={locale} />
     </header>
     <main id="main-content">
       <slot />
@@ -194,7 +215,6 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <MathCopy locale={locale} />
     <FootnoteSidenotes />
     <QuoteCopy />
-    <CodeTheme locale={locale} />
     {
       analyticsToken && (
         <script

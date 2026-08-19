@@ -1,0 +1,47 @@
+---
+// The Conway "game of life" background, settled off the bench at
+// content/blog/theme-lab/components/GameOfLife.vue (docs/design.md, Settled,
+// and docs/decisions-log.md). Plain canvas and a plain script, the same
+// register as ThemeToggle/CodeTheme rather than a Vue island: this renders on
+// every page through BaseLayout, and shipping Vue's runtime everywhere for a
+// background field would be exactly the framework-on-every-page cost
+// docs/design.md's Vue note argues against for post islands.
+//
+// No props: everything reader-adjustable lives in SettingsPanel.astro and its
+// script talks to conway.ts directly (see the report), not through this
+// component. `aria-hidden` because the canvas draws nothing a screen reader
+// could use; the click-to-add-a-glider interaction is a bonus for a sighted
+// pointer user, not a feature this needs to expose.
+---
+
+<canvas class="conway-field" aria-hidden="true"></canvas>
+
+<script>
+  import '../scripts/conway'
+</script>
+
+<style>
+  /*
+   * z-index: -1 rather than a positive one on the content: header, main and
+   * footer are ordinary in-flow boxes, so they already paint above a
+   * negative-z-index fixed element without needing a z-index of their own.
+   * That is also why a click on actual page text or a link still reaches
+   * that element rather than the canvas underneath it, and why the field
+   * only receives clicks in the room outside those boxes (the gutters, and
+   * anywhere main's own exclusion mask has not already gone blank).
+   */
+  .conway-field {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    cursor: crosshair;
+    touch-action: manipulation;
+  }
+
+  /* A reader who turned the field off in the settings panel gets this even
+     if conway.ts fails to load at all: the attribute is set by the same
+     blocking script that prevents a flash of the wrong theme. */
+  :root[data-bg-life='off'] .conway-field {
+    display: none;
+  }
+</style>
