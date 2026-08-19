@@ -99,7 +99,21 @@ const tree = treeOf(flat)
     /* Held in the upper third rather than centred: centred, it drifts below the
        line the eye actually reads from, and on a short window it collided with
        the bottom of the screen before the top. */
-    inset-block-start: 33%;
+    /*
+     * 38%, not 33%: this is `translateY(-50%)`'d, so the box's own top edge is
+     * this anchor minus half its rendered height, and a long outline can reach
+     * the `max-block-size` cap below. At the old 33% anchor and the old 70vh
+     * cap, the worst case (a post with enough headings to reach the cap) put
+     * the top edge at 33vh - 35vh = -2vh: two viewport-height percent above the
+     * top of the window, under the header. Lucas's own report ("too close to
+     * the header") is that case on a real post. 38% anchor plus the 64vh cap
+     * below moves the same worst-case arithmetic to 38vh - 32vh = +6vh: a real,
+     * positive clearance instead of a negative one, verified by the arithmetic
+     * rather than by eye since there is no browser to check it in. Short
+     * outlines, the common case, only move a few percent lower than before,
+     * still reading as "upper third" rather than centred.
+     */
+    inset-block-start: 38%;
     transform: translateY(-50%);
     /*
      * `--toc-left` is written by the script from the article's real left edge.
@@ -112,7 +126,9 @@ const tree = treeOf(flat)
     inset-inline-start: var(--toc-left, var(--gutter));
     z-index: 2;
     inline-size: 15rem;
-    max-block-size: 70vh;
+    /* 64vh, down from 70vh: see the anchor comment above for the worst-case
+       maths this pairs with. */
+    max-block-size: 64vh;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 1rem 0.7rem;
@@ -231,13 +247,17 @@ const tree = treeOf(flat)
     }
   }
 
-  /* Measured room for the panel, whatever the media query guessed. */
+  /* Measured room for the panel, whatever the media query guessed. Written
+     twice on purpose, same as the rest of this mode split (see the comment
+     further down): 38%/64vh here has to match the base `.toc` rule above or
+     the measured answer would undo the header-clearance fix the instant the
+     script runs. */
   :root[data-toc-mode='panel'] .toc {
-    inset-block-start: 33%;
+    inset-block-start: 38%;
     inset-block-end: auto;
     inset-inline-start: var(--toc-left, var(--gutter));
     transform: translateY(-50%);
-    max-block-size: 70vh;
+    max-block-size: 64vh;
     display: block;
     opacity: 1;
     background: transparent;
