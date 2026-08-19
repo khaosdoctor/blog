@@ -212,6 +212,21 @@ const CELLS = markCells()
   }
 
   /*
+   * The switch, the theme toggle and the settings opener read as one cluster,
+   * so they close up to the smallest space that still separates them, against
+   * the row's own 0.5rem between everything else. The 0.5rem still applies
+   * before the switch, so the cluster stays set apart from the nav links.
+   *
+   * Written as a margin on the two trailing controls rather than a narrower
+   * column measure on the container, because the container's own measure is
+   * what keeps the search box and the links apart and should not move.
+   */
+  .controls :global(.theme-toggle),
+  .controls :global(.settings-panel) {
+    margin-inline-start: -0.25rem;
+  }
+
+  /*
    * One hard-offset shadow behind the whole brand lockup (mark and wordmark
    * together), not two separate ones: `filter: drop-shadow()` traces the
    * alpha of every non-transparent pixel underneath it, and the mark and the
