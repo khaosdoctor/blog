@@ -193,9 +193,9 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
    */
   @media (min-width: 70rem) {
     .pagination {
-      inline-size: 80vw;
+      inline-size: var(--chrome-width);
       margin-inline-start: 50%;
-      transform: translateX(-40vw);
+      transform: translateX(calc(var(--chrome-width) / -2));
     }
   }
 

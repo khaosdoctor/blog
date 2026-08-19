@@ -114,9 +114,9 @@ const LEADER = '·'.repeat(200)
    */
   @media (min-width: 70rem) {
     .posts {
-      inline-size: 80vw;
+      inline-size: var(--chrome-width);
       margin-inline-start: 50%;
-      transform: translateX(-40vw);
+      transform: translateX(calc(var(--chrome-width) / -2));
     }
   }
 

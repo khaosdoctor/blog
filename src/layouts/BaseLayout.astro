@@ -497,9 +497,18 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
    * the plain var(--measure) from the "header, main, footer" rule above, so
    * nothing here changes below the breakpoint.
    */
+  /*
+   * The header and the footer both widen past the reading column at the same
+   * breakpoint, so the page's top and bottom edges line up with each other and
+   * with the post list between them (PostList.astro and Pagination.astro read
+   * the same `--chrome-width`). `main` itself deliberately stays at
+   * `--measure`: a post's running text wants the narrow column, and the list
+   * breaks out of it on its own rather than dragging every post wide with it.
+   */
   @media (min-width: 70rem) {
+    header,
     footer {
-      max-inline-size: 80vw;
+      max-inline-size: var(--chrome-width);
     }
   }
 
