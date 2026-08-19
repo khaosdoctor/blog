@@ -69,12 +69,20 @@
 }
 
 /*
- * Rest: --accent with the terminal dashed underline above, kept exactly as
- * the owner decided it (this candidate's own explicit ask), plus 1px inline
- * / 2px block padding. Hover/focus: the whole run inverts into a solid
- * block, candidate 4's choice, background --post-accent-fill (see the token
- * above for where that colour comes from) with the page ground as the text
- * on top.
+ * Rest: the day accent with the terminal dashed underline above, plus 1px
+ * inline / 2px block padding. Hover/focus: the whole run inverts into a
+ * solid block, candidate 4's choice, background --post-accent-fill (see the
+ * token above for where that colour comes from) with the page ground as the
+ * text on top.
+ *
+ * A link is a transient effect, not a mark on the post's own text, so its
+ * colour reads --accent-day rather than --post-accent at both rest and
+ * hover: the owner's later ask draws that line for every accent in prose,
+ * strong/em keep the per-article cover colour (emphasis.css), a link and
+ * everything else that is not a text modification follows the day instead.
+ * Rest used to read --accent, the site's fixed link blue, before that ask;
+ * hover already read the day accent through --post-accent-fill, so this
+ * only brings rest into line with what hover already did.
  *
  * The padding is present here, at rest, with no background of its own
  * (transparent, painted by nothing): the owner's later ask added 1px/2px
@@ -89,7 +97,7 @@
   padding-inline: 1px;
   padding-block: 2px;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-day, var(--accent));
   text-decoration-line: underline;
   text-decoration-style: var(--link-underline-style);
   text-decoration-thickness: var(--link-underline-thickness);
