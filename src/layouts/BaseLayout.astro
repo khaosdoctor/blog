@@ -887,6 +887,38 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     margin-inline: 0;
   }
 
+  /*
+   * A picture no longer fills the reading column edge to edge. At full width a
+   * screenshot dropped into a post reads as a banner interrupting the text
+   * rather than as an illustration inside it, so the default is 80% of the
+   * column, centred, with the caption narrowing to match.
+   *
+   * Applied to the figure and not to the image, so the caption tracks the
+   * picture's width instead of running wider than what it describes. `figure
+   * img` below still fills whatever box it is given, so nothing there changes.
+   *
+   * `:has(img)` and the exclusion list together mean this only reaches a real
+   * picture: every embed (a video, a tweet, a deck, a lab demo) is also a
+   * <figure>, several of them contain an <img> of their own, and they carry
+   * sizes that embeds.css and their own components already decided. A missing
+   * image's placeholder frame is excluded for the same reason: it is drawn at
+   * the size it means to be.
+   *
+   * Full width again on a phone: 80% of an already narrow column leaves a
+   * picture too small to read, and there is no surrounding text beside it for
+   * the inset to separate it from.
+   */
+  figure:has(img):not(.video-figure, .raw-embed, .lab-demo, .missing, .deck, .spotify, .twitter-tweet) {
+    inline-size: var(--figure-width, 80%);
+    margin-inline: auto;
+  }
+
+  @media (max-width: 40rem) {
+    figure:has(img):not(.video-figure, .raw-embed, .lab-demo, .missing, .deck, .spotify, .twitter-tweet) {
+      inline-size: 100%;
+    }
+  }
+
   /* The image is wrapped in a paragraph because mdast images are phrasing content. */
   figure > p {
     margin: 0;
