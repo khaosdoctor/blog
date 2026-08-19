@@ -195,11 +195,35 @@ const CELLS = markCells()
     margin-inline-end: 0;
   }
 
+  /*
+   * One hard-offset shadow behind the whole brand lockup (mark and wordmark
+   * together), not two separate ones: `filter: drop-shadow()` traces the
+   * alpha of every non-transparent pixel underneath it, and the mark and the
+   * word are visually separate shapes with real clear space between them, so
+   * one filter here already throws a shadow behind each independently, the
+   * same as applying it twice would. Reused rather than duplicated on
+   * `.mark` itself: `.mark` keeps its own `overflow: hidden` (clips the
+   * character grid to its box), and a filter on that same element would
+   * clip its own shadow off at that boundary before it ever painted.
+   * `.brand` has no such clipping, so the shadow the owner asked for
+   * actually shows.
+   *
+   * `--code-shadow-offset`/`--code-shadow-color` (theme.css): the same hard,
+   * no-blur offset code frames and the language switch's own frame already
+   * use, reused rather than a fresh value, and already `light-dark()` so it
+   * reads dark-on-sepia and light-on-black without a second declaration.
+   *
+   * This does not change the wordmark's own measured contrast against the
+   * page (a shadow is not a WCAG-recognised way to clear a text ratio); see
+   * the report for the actual numbers and what to do about the two day
+   * colours that read weak on the sepia ground.
+   */
   .brand {
     display: inline-flex;
     align-items: center;
     color: inherit;
     text-decoration: none;
+    filter: drop-shadow(var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color));
   }
 
   .brand > .mark {
@@ -293,6 +317,18 @@ const CELLS = markCells()
     color: var(--accent-day);
     font-family: var(--font-display);
     font-size: 0.85rem;
+    font-weight: 900;
+    /*
+     * Departure Mono ships one weight (fonts.css: DepartureMono-Regular.woff2,
+     * no bold file), so `font-weight: 900` above is a request the browser may
+     * or may not honour by synthesising, the exact reason `.mark-cell`'s own
+     * legibility fix (dark-ground complaint, further down) does not rely on
+     * weight alone either. `-webkit-text-stroke` is what actually thickens
+     * the letterforms regardless: same technique, same 0.5px, reused rather
+     * than re-derived. `currentColor` follows `.word`'s own `color`, so the
+     * stroke matches the fill at rest and the hover/focus inversion below.
+     */
+    -webkit-text-stroke: 0.5px currentColor;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     /*
