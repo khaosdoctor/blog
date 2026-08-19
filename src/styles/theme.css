@@ -307,6 +307,17 @@
    * both.
    */
   --brand-shadow-offset: 1px;
+  /*
+   * Its own colour rather than `--code-shadow-color`, and transparent on the
+   * dark ground on purpose. The brand's shadow exists only to hold the mark
+   * together on the sepia page, where two of the four day accents sit under
+   * the text floor; on black the same accents are comfortable and a shadow
+   * there only drew a second copy of the letters. Transparent rather than
+   * removing the filter on dark so the brand keeps one rule with one value
+   * that changes, instead of a rule that exists on one ground and not the
+   * other.
+   */
+  --brand-shadow-color: light-dark(rgb(0 0 0 / 0.55), transparent);
 
   /*
    * Buttons: brackets, Departure Mono, brand yellow, decided on ChromeButton.vue

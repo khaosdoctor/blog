@@ -67,8 +67,12 @@ const LINKS: { key: 'navPosts' | 'navSeries' | 'navTags' | 'navAbout'; path: str
     text-transform: uppercase;
   }
 
+  /* 0.5rem, the same measure BrandHeader's `.controls` puts between its own
+     children, so the run between two links and the run between two controls
+     read as one rhythm. It was 0.6rem here against 0.5rem there, which is
+     close enough to look like a mistake rather than a choice. */
   .nav-links > a {
-    margin-inline-end: 0.6rem;
+    margin-inline-end: 0.5rem;
   }
 
   .nav-links > a:last-child {
