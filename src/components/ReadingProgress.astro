@@ -12,6 +12,13 @@
  * always were. That replaces the fixed bar this used to pin to the top of the
  * window, and its `--progress-*` tokens went with it.
  *
+ * The wordmark's block cursor is the head of that run rather than a fixture
+ * beside the brand: at the top of a post it is exactly where it always was, and
+ * as the reader scrolls it travels along the dashes, which are its trail. It is
+ * writing them. See `measureHead`/`moveHead` in the script below for the
+ * geometry, and `.cursor` in BrandHeader.astro for the two declarations that
+ * make it possible from the stylesheet's side.
+ *
  * The reveal is not a straight readout of the scroll position, per the owner's
  * own ask. Two things stay between them:
  *
@@ -47,6 +54,27 @@
    * every advance, and with it how many dashes fit), never on a scroll tick.
    */
   const fills = Array.from(document.querySelectorAll<HTMLElement>('.chrome .fill'))
+  /*
+   * The write head, which is the wordmark's own block cursor, borrowed rather
+   * than duplicated: the owner asked for "that same block", and a second block
+   * drawn somewhere else would have to hide the first to avoid two cursors on
+   * one row.
+   *
+   * It is NOT moved in the DOM. Reparenting it next to the dash it is writing
+   * would put it inside `.fill`, which is the one place on this row it cannot
+   * survive: `.fill` crops itself with `overflow: hidden` exactly where the
+   * meter ends, so the head would be clipped away at the very moment it
+   * finished a run; `.fill`'s 0.4em letter-spacing would add a slot of air
+   * after it and shove every remaining dash along, so the track would change
+   * shape as the head crossed it; its `0.55em`/`1.1em`/`0.2em` metrics would
+   * re-resolve against `.fill`'s font-size instead of `.word`'s 0.85rem, so
+   * the block would change size the instant it left home; and it would step
+   * outside `.brand`'s drop shadow, which is the only reason the wordmark
+   * reads at all on the light ground. A transform from where it already lives
+   * keeps every one of those: same box, same blink, same shadow, and the crop
+   * never applies to it because it is never inside the cropped element.
+   */
+  const cursor = document.querySelector<HTMLElement>('.chrome .cursor')
 
   if (fills.length > 0) {
     // How much of a dash's own slot its appearance can be pushed back by. Under
@@ -66,6 +94,44 @@
 
     let track: HTMLElement[] = []
     let jitter: number[] = []
+    /*
+     * Where the head is, in px to the right of its home position, once exactly
+     * `i` dashes are lit. `stops[0]` is 0, which is home: nothing written past
+     * the brand yet, and the header at the top of a post therefore draws the
+     * cursor in the position it has always drawn it. `stops[i]` past that is
+     * the TRAILING edge of dash `i - 1`, which is also the leading edge of dash
+     * `i`, since two consecutive characters of one run share that edge (letter-
+     * spacing goes into each character's own advance). So the head always
+     * occupies the slot of the dash it is about to write, one step ahead of its
+     * own trail, which is what a cursor does.
+     */
+    let stops: number[] = []
+    /*
+     * Whether the step from `stops[i]` to `stops[i + 1]` crosses the nav, which
+     * happens exactly once: at the seam between the two runs. See `moveHead`.
+     */
+    let jumps: boolean[] = []
+    /*
+     * The distance from the cursor's home edge to the start of the first run,
+     * measured once and then reused, because it is the one number here that
+     * does not change: it is the cursor's own width (em, off a rem font-size),
+     * `.word`'s 1px padding and `.chrome`'s 0.6rem column spacing, none of
+     * which move when the display face loads or when the wordmark's letters do.
+     *
+     * Measured rather than written out because it is three values from two
+     * other files, but measured ONLY on the first pass, which is the only pass
+     * guaranteed to catch the wordmark whole: this script runs at module time
+     * and header-brand.ts starts its scramble on DOMContentLoaded, after it, so
+     * the first measurement sees eleven real letters. Every later one (the font
+     * swap, a resize) can arrive mid-scramble, where the letters are blanked
+     * one by one and `.word` collapses onto its own `min-inline-size`; reading
+     * the cursor's live position there would put home some 30px to the left and
+     * the head would disagree with its trail by a whole dash for the rest of
+     * the session. Anchoring to `.fill` instead keeps the font swap's real
+     * effect, which is that every dash edge moves, without importing the
+     * wordmark's transient width into it.
+     */
+    let lead: number | null = null
     // How many leading dashes are lit. The thresholds below only ever increase
     // with the index, so the lit set is always a prefix and this one number is
     // enough to know exactly which spans need touching on any given frame.
@@ -98,31 +164,113 @@
       return reducedMotion() ? index : index + jitter[index]
     }
 
+    /**
+     * Where the head is drawn for the current `shown`, in px from home.
+     *
+     * It rides the eased count, not `scrollY`: the trail is painted from the
+     * same number one line above, so the two cannot drift out of step no matter
+     * how hard the reader flings the page. Writes one custom property and reads
+     * nothing, so it is safe on every frame; all the geometry it needs was
+     * measured in `measureHead` below.
+     *
+     * Between two stops it interpolates, so the head slides rather than
+     * stepping character to character. The one exception is the seam between
+     * the two runs, where the nav is: interpolating there would walk a solid
+     * block straight across POSTS/SERIES/TAGS/ABOUT, which reads as a bug, and
+     * hiding it for the crossing reads as the cursor blinking out at a random
+     * point in the post. So it holds at the end of the left run for that one
+     * slot and then appears at the head of the right one. It is never drawn
+     * over a link and it is never not drawn. The trail does exactly the same
+     * thing at exactly the same moment (the left run finishes, the right run
+     * starts), and the rule is already drawn as though it passed BEHIND the
+     * links rather than stopping at them, so the head skipping the same
+     * distance reads as the rule continuing, which is what it is.
+     */
+    function moveHead(): void {
+      if (cursor === null || stops.length === 0) return
+      const last = stops.length - 1
+      const index = Math.min(Math.max(Math.floor(shown), 0), last)
+      const next = Math.min(index + 1, last)
+      const fraction = jumps[index] === true ? 0 : Math.min(Math.max(shown - index, 0), 1)
+      const x = stops[index] + (stops[next] - stops[index]) * fraction
+      cursor.style.setProperty('--cursor-x', `${x.toFixed(2)}px`)
+    }
+
     /** Adds or removes only the spans the fill has actually crossed. */
     function paint(): void {
       while (lit < track.length && threshold(lit) < shown) track[lit++].classList.add('lit')
       while (lit > 0 && threshold(lit - 1) >= shown) track[--lit].classList.remove('lit')
+      moveHead()
+    }
+
+    /**
+     * The head's stops, from the dash edges the crop left visible.
+     *
+     * `runs[i]` is which of the two `.fill` spans dash `i` came from, and it is
+     * the whole of what marks the seam: the step onto dash `i` crosses the nav
+     * exactly when dash `i` and dash `i - 1` came from different runs.
+     */
+    function measureHead(edges: number[], runs: number[]): void {
+      if (cursor === null) return
+      const start = fills[0].getBoundingClientRect().left
+      if (lead === null) lead = start - cursor.getBoundingClientRect().left
+      const home = start - lead
+      stops = [0]
+      jumps = []
+      for (const [index, edge] of edges.entries()) {
+        stops.push(edge - home)
+        jumps.push(index > 0 && runs[index] !== runs[index - 1])
+      }
     }
 
     /*
-     * Which dashes the crop leaves visible, and a fresh jitter offset for each.
-     * Reads geometry, so it runs on load and resize only, never per scroll.
+     * Which dashes the crop leaves visible, a fresh jitter offset for each, and
+     * where the head has to be for each. Reads geometry, so it runs on load and
+     * resize only, never per scroll.
      */
     function measure(): void {
       for (const dash of track) dash.classList.remove('lit')
       lit = 0
       track = []
-      for (const fill of fills) {
+      const edges: number[] = []
+      const runs: number[] = []
+      for (const [run, fill] of fills.entries()) {
         const edge = fill.getBoundingClientRect().right
         for (const dash of fill.querySelectorAll<HTMLElement>('.dash')) {
+          const box = dash.getBoundingClientRect()
           // Half a pixel of slack: a fractional layout width should not lose
           // the last dash that does in fact draw.
-          if (dash.getBoundingClientRect().right <= edge + 0.5) track.push(dash)
-          else dash.classList.remove('lit')
+          if (box.right <= edge + 0.5) {
+            track.push(dash)
+            edges.push(box.right)
+            runs.push(run)
+            continue
+          }
+          dash.classList.remove('lit')
         }
       }
       jitter = track.map(() => Math.random() * JITTER)
+      measureHead(edges, runs)
       paint()
+    }
+
+    /*
+     * Blinking or solid. A terminal cursor blinks while it waits for you and
+     * holds steady while characters are going down, and that is the distinction
+     * worth keeping here: a block that blinks while it slides along the rule
+     * reads as flicker, not as a cursor. So it is solid for exactly as long as
+     * the eased count is still moving, and back to blinking the moment it parks,
+     * whether that is at the brand or halfway down the post.
+     *
+     * The blink itself belongs to header-brand.ts, which writes an inline
+     * opacity per frame and knows nothing about any of this. One attribute and
+     * one `!important` rule in BrandHeader.astro is the whole of the contract
+     * between them; neither script has to import the other or share a clock.
+     */
+    function setWriting(writing: boolean): void {
+      if (cursor === null) return
+      if (writing) cursor.setAttribute('data-writing', 'true')
+      else cursor.removeAttribute('data-writing')
     }
 
     function step(): void {
@@ -131,6 +279,7 @@
         shown = target
         animating = false
         paint()
+        setWriting(false)
         return
       }
       const move = Math.min(Math.abs(distance) * EASE, MAX_STEP)
@@ -141,13 +290,18 @@
 
     function advance(): void {
       if (reducedMotion()) {
-        // No lag and no jitter: the fill is wherever the reader is.
+        // No lag and no jitter: the fill is wherever the reader is, and so is
+        // the head. Nothing is travelling, so there is no writing state to mark
+        // either; the same convention the lag and the jitter already follow,
+        // and header-brand.ts has frozen the cursor solid regardless.
         shown = target
+        setWriting(false)
         paint()
         return
       }
       if (animating) return
       animating = true
+      setWriting(true)
       requestAnimationFrame(step)
     }
 
