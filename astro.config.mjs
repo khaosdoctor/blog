@@ -45,13 +45,23 @@ export default defineConfig({
       // same pass. A block that reads better without them can turn them off with
       // `showLineNumbers=false` on the fence.
       plugins: [pluginLineNumbers()],
-      // github-light/github-dark keep the current look; the rest are the
-      // picker's other options (see CodeTheme.astro), grouped by family:
+      // ayu-light/ayu-dark are the default pair (the owner's own words:
+      // "default code theme is ayu dark if the theme is dark, ayu light if
+      // the theme is light"), so they lead the list; the rest are the
+      // picker's other options, still grouped by family: GitHub light/dark,
       // Monokai (dark only, no light variant ships in the Shiki bundle),
       // Dracula (same, dark only), all four Catppuccin variants, all three
-      // Kanagawa variants (two dark, one light), Ayu light/dark, and Snazzy
-      // (the bundle only ships a light Snazzy, despite the name).
+      // Kanagawa variants (two dark, one light), and Snazzy (the bundle only
+      // ships a light Snazzy, despite the name).
+      //
+      // This array's order decides the default and nothing else. The order
+      // the picker itself lists its options in is CodeTheme.astro's own
+      // static <optgroup>/<option> markup, and code-theme.ts's THEMES array
+      // is only ever asked `includes()`, so moving Ayu to the front here
+      // does not reshuffle the menu a reader sees.
       themes: [
+        'ayu-light',
+        'ayu-dark',
         'github-light',
         'github-dark',
         'monokai',
@@ -63,17 +73,28 @@ export default defineConfig({
         'kanagawa-wave',
         'kanagawa-dragon',
         'kanagawa-lotus',
-        'ayu-light',
-        'ayu-dark',
         'snazzy-light',
       ],
       // This default only turns on automatically for exactly one light and
-      // one dark theme, so with fourteen it needs to stay explicit. A reader
-      // who has not picked anything yet still needs the same light/dark
-      // split as before, which only depends on the first two entries above:
-      // github-light listed first and github-dark second keeps the generated
-      // media query exactly the old light-follows-system, dark-follows-system
-      // pair, regardless of how many themes follow.
+      // one dark theme, so with fourteen it needs to stay explicit.
+      //
+      // What it actually generates (read out of @expressive-code/core's own
+      // getThemeStyles, not assumed): themes[0] becomes the base, emitted at
+      // `:root` with no theme selector at all, and the media query then
+      // overrides it with the *first entry of the opposite type*, wrapped in
+      // `:root:not([data-code-theme='<themes[0]>'])`. So it is not "the first
+      // two entries" in general, it is entry 0 plus the first one whose type
+      // differs. ayu-light first and ayu-dark second satisfies both readings
+      // at once and leaves no room for a later insertion to quietly change
+      // the pair.
+      //
+      // That media query asks the OS, which is only half the answer here: the
+      // site writes its own explicit `data-theme` on <html> when a reader
+      // picks light or dark in ThemeToggle, and a reader on a dark OS who
+      // chose light would otherwise read ayu-dark on a light page. BaseLayout's
+      // pre-paint snippet and code-theme.ts resolve that mismatch by naming
+      // the matching ayu outright as `data-code-theme` whenever a site-wide
+      // choice exists; see the comment on applyTheme in code-theme.ts.
       useDarkModeMediaQuery: true,
       // The default selector is `[data-theme='name']`; this site has no other
       // use of `data-theme`, but `data-code-theme` says what it is for and
