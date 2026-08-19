@@ -29,16 +29,13 @@ import '../styles/math.css'
 import '../styles/variants/quotes.css'
 // Tag and category chips, which live outside the prose wrapper.
 import '../styles/chips.css'
+import BrandHeader from '../components/BrandHeader.astro'
 import ConwayField from '../components/ConwayField.astro'
 import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
-import LangSwitcher from '../components/LangSwitcher.astro'
 import MathCopy from '../components/MathCopy.astro'
 import QuoteCopy from '../components/QuoteCopy.astro'
 import ReadingProgress from '../components/ReadingProgress.astro'
-import SearchPalette from '../components/SearchPalette.astro'
 import SEO from '../components/SEO.astro'
-import SettingsPanel from '../components/SettingsPanel.astro'
-import ThemeToggle from '../components/ThemeToggle.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
 // Baked in at build time: the semver the release workflow last tagged, plus a
@@ -186,19 +183,13 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <ConwayField />
     {progress && <ReadingProgress locale={locale} />}
     <a href="#main-content" class="skip-link">{t(locale, 'skipToContent')}</a>
-    <header>
-      <a href={home} class="home">lsantos.dev</a>
-      {/* The plain-link "Buscar" nav that used to live here is gone: the
-          command palette below replaced it as the actual way readers search
-          with JS on. The old link's own /search/ page still exists and still
-          works with JS off (which the palette never will), so it moved to
-          the footer instead of disappearing, next to the other quiet
-          reference links rather than the primary nav. */}
-      <SearchPalette locale={locale} />
-      <LangSwitcher locale={locale} alternates={alternates} />
-      <ThemeToggle locale={locale} />
-      <SettingsPanel locale={locale} />
-    </header>
+    {/* The plain-link "Buscar" nav that used to live here is gone: the
+        command palette BrandHeader renders replaced it as the actual way
+        readers search with JS on. The old link's own /search/ page still
+        exists and still works with JS off (which the palette never will),
+        so it moved to the footer instead of disappearing, next to the
+        other quiet reference links rather than the primary nav. */}
+    <BrandHeader locale={locale} home={home} alternates={alternates} />
     <main id="main-content">
       <slot />
     </main>
@@ -315,23 +306,6 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     margin-inline: auto;
   }
 
-  header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-block: 2rem 3rem;
-  }
-
-  /* Pushes every control to the right of the wordmark, as a group. The auto
-     margin lives on .home itself rather than on "the first control",
-     because which control is actually first in the flex row depends on
-     which of them (search, theme, settings) has un-hidden by the time this
-     paints: pinning it here keeps the split correct regardless of that
-     order, JS on or off. */
-  header .home {
-    margin-inline-end: auto;
-  }
-
   .skip-link {
     position: absolute;
     top: -3rem;
@@ -346,18 +320,6 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 
   .skip-link:focus-visible {
     top: 0.5rem;
-  }
-
-  .home {
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.9rem;
-    letter-spacing: 0.02em;
-    color: var(--muted);
-    text-decoration: none;
-  }
-
-  .home:hover {
-    color: var(--accent);
   }
 
   footer {
@@ -378,6 +340,28 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
   footer .credits,
   footer .search-link {
     color: var(--muted);
+  }
+
+  /*
+   * The footer's own plain-text links (credits, search, version): the same
+   * hover treatment as a nav link, since the real header (BrandHeader.astro)
+   * carries no plain text nav of its own any more, only icon controls and
+   * the wordmark. Padding stays present, and transparent, at rest, the same
+   * "reserve the space before you need it" trick prose/links.css uses: a
+   * link that only grew its padding on hover would push its neighbours,
+   * so the box is this size in both states and only the fill changes.
+   */
+  footer a {
+    padding-inline: 1px;
+    padding-block: 2px;
+    background: transparent;
+    text-decoration: none;
+  }
+
+  footer a:hover,
+  footer a:focus-visible {
+    background: var(--accent-day);
+    color: var(--bg);
   }
 
   /*

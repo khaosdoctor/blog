@@ -72,6 +72,27 @@
   --rule: light-dark(#736e62, #6b627b);
 
   /*
+   * The header's own accent (BrandHeader.astro), day-hash coloured rather
+   * than fixed: header-brand.ts overwrites this every page load with
+   * `dayColor({ excludePurple: true })` (src/lib/day-color.ts), so the same
+   * calendar day always shows the same one of the four non-purple brand
+   * tokens. This value, the bench's own decided yellow, is only the pre-JS
+   * fallback: a reader with JS off, or before the script runs, still gets a
+   * real accent instead of an unset custom property. Purple is excluded at
+   * the hash's own pool (chip-color.ts's `excludePurple` option) rather than
+   * rejected here, so this token can safely be any of the four either way.
+   *
+   * Measured against this ground (`--bg` above), WCAG 2.1: red 4.67 dark /
+   * 4.72 light, blue 4.90 / 4.56, green 8.03 / 3.29, yellow 11.25 / 3.23.
+   * Green and yellow clear 4.5:1 in dark mode but fail it in light mode
+   * (3.29, 3.23); red and blue clear both. A day that hashes to green or
+   * yellow is under-contrast as header text in light mode, a real risk this
+   * token change introduces that the fixed yellow (9.70:1 measured in the
+   * lab, itself always in dark mode there) never had.
+   */
+  --accent-day: var(--brand-yellow);
+
+  /*
    * A pixel face is right for chrome, labels and headings and punishing for a
    * 3000 word article, so body copy keeps a readable face. All four are decided
    * now and self-hosted, see src/styles/fonts.css.

@@ -1,0 +1,294 @@
+---
+/**
+ * The decided header, off the bench at
+ * content/blog/theme-lab/components/ChromeHeader.vue: shape "barra de caixa
+ * ┌─┐", mark "fio" (wireframe Elite) at 36px (under that candidate's own
+ * 72px legibility floor, chosen knowingly, so nothing here clamps it), in all
+ * four brand roles at once, logo plus wordmark, Departure Mono, letter-
+ * spacing 6/100em, caps on. Ported into a plain Astro component plus
+ * src/scripts/header-brand.ts rather than shipping the bench's Vue island:
+ * this renders on every page (docs/design.md's Vue-on-every-page argument
+ * that kept Conway off Vue applies here too), and every value below is
+ * fixed rather than reader-adjustable, so there is nothing left for a
+ * picker to drive.
+ *
+ * Two changes from the bench, both requested afterward rather than measured
+ * on it:
+ *
+ * - The wordmark's accent used to be a fixed yellow (#f5b200). It is now the
+ *   day-hash colour (src/lib/day-color.ts, excluding purple), applied as
+ *   `--accent-day` by header-brand.ts on every page load. `--accent-day` in
+ *   theme.css is only the pre-JS fallback (a static yellow, the bench's own
+ *   choice), so a reader with JS off still gets a sane header rather than an
+ *   unset custom property.
+ * - The scramble (decifra) used to replay on every hold, and the wordmark
+ *   also had a "falha" glitch mode as an alternative animation rather than a
+ *   companion to it. Now the scramble runs once per browser session (see the
+ *   script for why session rather than page load or forever) and never
+ *   replays; in its place, an occasional glitch burst (1-3 pulses, a random
+ *   4-20s apart) hits both the wordmark and the mark, replacing the mark's
+ *   own fixed 2.2-4s glitch cadence from the bench.
+ *
+ * The mark's hover swap to its five true colours (LogoMark.vue's own
+ * behaviour) is kept as pure CSS, disabled the same way: no rule at all
+ * under prefers-reduced-motion.
+ */
+import LangSwitcher from './LangSwitcher.astro'
+import SearchPalette from './SearchPalette.astro'
+import SettingsPanel from './SettingsPanel.astro'
+import ThemeToggle from './ThemeToggle.astro'
+import { markCells, MARK_RECTS, ROLE_TOKEN } from '../lib/logo-mark'
+import type { Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+  home: string
+  alternates?: { lang: string; href: string }[]
+}
+
+const { locale, home, alternates = [] } = Astro.props
+
+const WORD = 'lsantos.dev'
+const CELLS = markCells()
+---
+
+<header class="chrome">
+  <span class="edge" aria-hidden="true">┌─</span>
+  <a href={home} class="brand" aria-label={WORD}>
+    <span class="mark" aria-hidden="true">
+      <span class="mark-chars">
+        {
+          CELLS.map((cell) => (
+            <span class="mark-cell" data-row={cell.row} data-col={cell.col} data-glyph={cell.glyph} style={`color:${cell.color}`}>
+              {cell.glyph}
+            </span>
+          ))
+        }
+      </span>
+      <svg class="mark-solid" viewBox="0 0 64 64" aria-hidden="true">
+        {MARK_RECTS.map((rect) => <rect x={rect.x} y={rect.y} width={rect.w} height={rect.h} fill={ROLE_TOKEN[rect.role]} />)}
+      </svg>
+    </span>
+    <span class="word" data-word={WORD} aria-hidden="true">
+      {WORD.split('').map((ch) => <span class="letter" data-ch={ch}>{ch}</span>)}
+      <span class="cursor" aria-hidden="true" />
+    </span>
+  </a>
+  <span class="fill" aria-hidden="true">──────────────────────────────────────</span>
+  <nav class="controls">
+    <SearchPalette locale={locale} />
+    <LangSwitcher locale={locale} alternates={alternates} />
+    <ThemeToggle locale={locale} />
+    <SettingsPanel locale={locale} />
+  </nav>
+  <span class="edge" aria-hidden="true">─┐</span>
+</header>
+
+<script>
+  import '../scripts/header-brand'
+</script>
+
+<style>
+  /*
+   * "barra de caixa": the box-drawing edges plus a stretch of dashes that
+   * absorb whatever room the controls do not need, the same flex row the
+   * bench's `.bar` used. `.fill` (flex: 1, overflow hidden) is what pushes
+   * `.controls` to the right edge, replacing the old `margin-inline-end:
+   * auto` on the home link, since that link is no longer the only thing on
+   * this row that can carry the push.
+   */
+  .chrome {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    /* "Breathing room 4" from the bench's density knob (range 4-30, in
+       tenths of a rem block / sixths of a rem inline). */
+    padding: 0.4rem 0.667rem;
+    font-family: var(--font-mono);
+  }
+
+  .chrome > * {
+    margin-inline-end: 0.6rem;
+  }
+
+  .chrome > *:last-child {
+    margin-inline-end: 0;
+  }
+
+  .edge,
+  .fill {
+    color: var(--muted);
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+  }
+
+  .fill {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .controls {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .controls > * {
+    margin-inline-end: 0.5rem;
+  }
+
+  .controls > *:last-child {
+    margin-inline-end: 0;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .brand > .mark {
+    margin-inline-end: 0.4rem;
+  }
+
+  .brand:focus-visible {
+    outline: 2px solid var(--accent-day);
+    outline-offset: 3px;
+  }
+
+  /* --- the mark: an 8x8 character grid, wireframe Elite, all four brand roles at once --- */
+  .mark {
+    position: relative;
+    display: inline-flex;
+    inline-size: 36px;
+    block-size: 36px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .mark-chars,
+  .mark-solid {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .mark-chars {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    line-height: 1;
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  .mark-cell {
+    display: flex;
+    flex: 0 0 12.5%;
+    inline-size: 12.5%;
+    block-size: 12.5%;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.5px;
+  }
+
+  .mark-solid {
+    display: none;
+    overflow: visible;
+  }
+
+  /* A hard swap to the mark's true five-rectangle colours on hover, no
+     cross-fade: the site's pixel-era vocabulary trades frames, it does not
+     dissolve between them. Off under reduced motion, so a reduced-motion
+     reader gets the same wireframe on hover as at rest. */
+  @media (prefers-reduced-motion: no-preference) {
+    .brand:hover .mark-chars,
+    .brand:focus-visible .mark-chars {
+      display: none;
+    }
+
+    .brand:hover .mark-solid,
+    .brand:focus-visible .mark-solid {
+      display: block;
+    }
+  }
+
+  /* --- the wordmark: the header's own accent, day-hash coloured --- */
+  .word {
+    position: relative;
+    display: inline-flex;
+    min-inline-size: 11ch;
+    color: var(--accent-day);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    /*
+     * The hover fill's own padding, kept present (and transparent) at rest:
+     * the same "reserve the space before you need it" trick prose/links.css
+     * uses, so filling the background on hover changes no box size and
+     * nothing around the wordmark moves.
+     */
+    padding-inline: 1px;
+    padding-block: 2px;
+  }
+
+  .letter {
+    display: inline-block;
+  }
+
+  /*
+   * Hover/focus fills the wordmark with the day accent and inverts the text,
+   * the same treatment src/styles/prose/links.css gives a link. The mark's
+   * own hover swap above fires at the same time, from the same `:hover` on
+   * `.brand`, since both read as "this is the one clickable thing."
+   */
+  .brand:hover .word,
+  .brand:focus-visible .word {
+    background: var(--accent-day);
+    color: var(--bg);
+  }
+
+  /*
+   * The block cursor: opacity is set inline, per frame, by header-brand.ts;
+   * no CSS transition here on purpose, a stepped opacity change is the low-
+   * frame-rate read the decided cursor asks for, and a transition would
+   * smooth it into a fade.
+   */
+  .cursor {
+    display: inline-block;
+    inline-size: 0.55em;
+    block-size: 1.1em;
+    margin-inline-start: 1px;
+    background: currentColor;
+    vertical-align: text-bottom;
+  }
+
+  /* Falha glitch: two ghost copies of the wordmark, red and cyan, shifted
+     and screen-blended over the real one, only while header-brand.ts marks
+     a pulse active. Off under reduced motion; the script itself never
+     schedules a pulse in that case, this is the belt to that brace. */
+  @media (prefers-reduced-motion: no-preference) {
+    .word[data-glitch='true']::before,
+    .word[data-glitch='true']::after {
+      content: attr(data-word);
+      position: absolute;
+      inset: 0;
+      text-transform: uppercase;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .word[data-glitch='true']::before {
+      color: #ff2b4d;
+      transform: translateX(var(--glitch-a, 0));
+    }
+
+    .word[data-glitch='true']::after {
+      color: #21c8ff;
+      transform: translateX(var(--glitch-b, 0));
+      clip-path: var(--glitch-band, inset(0 0 100% 0));
+    }
+  }
+</style>
