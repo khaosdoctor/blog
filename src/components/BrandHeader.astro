@@ -342,7 +342,24 @@ const RULE = '──────────────────────
    * the report for the actual numbers and what to do about the two day
    * colours that read weak on the sepia ground.
    */
+  /*
+   * `position: relative` + `z-index: 1` is not about the brand, it is about the
+   * cursor inside it: once that block travels out over the dash runs (see
+   * `.cursor` below) it has to paint ON TOP of the dash it is standing on, or
+   * the write head reads as sliding under its own trail. `.fill` is a plain
+   * inline span later in document order, so by default it paints after this
+   * flex item. It happens to lose anyway today, because `filter` above already
+   * makes this a stacking context and a filtered element paints with the
+   * z-index:0 group rather than with inline content, but that is a side effect
+   * of a drop shadow that exists for unrelated reasons and would silently take
+   * the cursor with it if the shadow were ever dropped. Two declarations say it
+   * outright instead. Neither changes a single measured box, and 1 stays well
+   * under the 60 the theme and settings menus claim, so an open menu still
+   * covers the brand.
+   */
   .brand {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     color: inherit;
@@ -521,6 +538,18 @@ const RULE = '──────────────────────
    * no CSS transition here on purpose, a stepped opacity change is the low-
    * frame-rate read the decided cursor asks for, and a transition would
    * smooth it into a fade.
+   *
+   * On a post it is also the reading progress meter's write head: the lit
+   * dashes are its trail, and ReadingProgress.astro pushes it along the run
+   * by writing `--cursor-x` (see that file for the whole mechanism, and for
+   * why it moves by transform from here instead of being reparented into
+   * `.fill`). Unset it reads as `0px`, which makes the declaration below
+   * exactly the `translateY(0.2em)` it replaces, so a page with no meter (any
+   * listing, and any post before the reader scrolls) draws this element in
+   * precisely the position it always did. `transform` is also the only
+   * property either state touches: it is paint, not layout, so the head
+   * travelling the length of the row cannot move the wordmark, the dashes or
+   * anything else on it.
    */
   .cursor {
     display: inline-block;
@@ -534,7 +563,28 @@ const RULE = '──────────────────────
        straddling the baseline the way a terminal cursor does, rather than
        balanced exactly on top of it. */
     align-self: baseline;
-    transform: translateY(0.2em);
+    transform: translate(var(--cursor-x, 0px), 0.2em);
+  }
+
+  /*
+   * Solid while it is writing. A terminal cursor blinks when it is waiting for
+   * you and holds steady while characters are going down, and the two readings
+   * are worth keeping apart here: a block that blinks while it slides along the
+   * rule reads as flicker rather than as a cursor. ReadingProgress.astro sets
+   * this for exactly as long as the eased count is still moving and drops it on
+   * arrival, so the blink resumes wherever the head parks, at the brand or
+   * mid-run.
+   *
+   * `!important` because the thing being overridden is an inline `opacity`,
+   * written per frame by header-brand.ts (which owns the blink and knows
+   * nothing about the meter). Beating an inline declaration from a stylesheet
+   * is the one job `!important` exists for, and it keeps the two scripts from
+   * having to import each other or share a clock. Under reduced motion this
+   * never comes up from either side: header-brand.ts freezes the cursor solid,
+   * and the meter has no eased travel to mark.
+   */
+  .cursor[data-writing='true'] {
+    opacity: 1 !important;
   }
 
   /* Falha glitch: two ghost copies of the wordmark, red and cyan, shifted
