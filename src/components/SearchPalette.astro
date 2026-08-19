@@ -1,0 +1,303 @@
+---
+// A command-style opener beside LangSwitcher: a magnifier plus the reader's
+// own shortcut key, opening a native <dialog> (real top-layer placement and a
+// real focus trap for free, no popover/hidden fallback machinery to write)
+// that live-searches through Pagefind the same way Search.astro's own script
+// does. That existing form-based page is left untouched (see this file's own
+// script for why) and keeps working with JS off; this is a second, JS-only
+// entry point next to it, not a replacement.
+//
+// Hidden until search-palette.ts confirms it can run, same reason as every
+// other header control here: a reader with JS off never gets a dead button.
+import Magnifier from './icons/Magnifier.astro'
+import { t, type Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+---
+
+<div class="search-trigger" hidden data-label={t(locale, 'search')}>
+  <button type="button" class="sx-open" aria-haspopup="dialog" aria-controls="sx-dialog">
+    <Magnifier class="sx-open-icon" />
+    {/* Filled in by the script once it knows the reader's platform: the
+       bracket vocabulary matches every other button on this site (Search.astro,
+       ChromeButton.vue), and Ctrl/Cmd + the letter is read off the settings
+       panel's own choice rather than hardcoded to K. */}
+    <span class="sx-hint" aria-hidden="true"
+      >&lt;<span class="sx-hint-mod"></span>+<span class="sx-hint-key">K</span>&gt;</span
+    >
+  </button>
+
+  <dialog id="sx-dialog" class="sx-dialog" aria-label={t(locale, 'searchLabel')}>
+    <div class="sx-row">
+      <span class="sx-prompt" aria-hidden="true">&gt;</span>
+      <input
+        type="text"
+        class="sx-input"
+        autocomplete="off"
+        spellcheck="false"
+        autofocus
+        aria-label={t(locale, 'searchLabel')}
+        placeholder={t(locale, 'searchPlaceholder')}
+        data-searching={t(locale, 'searching')}
+        data-no-results={t(locale, 'noResultsFor')}
+        data-more-results={t(locale, 'moreResults')}
+        data-results-found={t(locale, 'searchResultsFound')}
+        data-no-index-message={t(locale, 'searchNoIndex')}
+      />
+      {/* The block cursor: real caret hidden (`caret-color: transparent` on
+         the input, see the style block below), this one positioned over the
+         input's own text by the script instead, coloured from the day's own
+         hash (src/lib/day-color.ts) rather than the theme accent. */}
+      <span class="sx-cursor" aria-hidden="true"></span>
+    </div>
+    {/* Announces once a search settles, not on every keystroke: debouncedSearch
+       already coalesces rapid typing (see the script), so this only ever
+       receives one update per settled query rather than one per key. */}
+    <p class="sx-status" aria-live="polite" aria-atomic="true"></p>
+    <ul class="sx-results"></ul>
+    <p class="sx-more"></p>
+  </dialog>
+</div>
+
+<script>
+  import '../scripts/search-palette'
+</script>
+
+<style>
+  .search-trigger {
+    position: relative;
+  }
+
+  /* Same reasoning as every other header control: the UA `[hidden] { display:
+     none }` sheet only ever hides the wrapper itself; a hidden reader still
+     gets nothing dead to look at. */
+  .search-trigger:not([hidden]) {
+    display: inline-flex;
+  }
+
+  /*
+   * Not the bare icon-only chip ThemeToggle/SettingsPanel use (their `::before`
+   * trick assumes the only visible content is a centred glyph): this button
+   * also carries the shortcut hint text, so it borrows LangSwitcher's own
+   * shape instead, a bordered box at `--icon-btn-hit` block-size holding more
+   * than one thing. The three shared tokens still decide every number here:
+   * `--icon-btn-hit` for the row height (matches ThemeToggle, SettingsPanel
+   * and LangSwitcher), `--icon-btn-glyph` for the icon itself. No new size is
+   * declared for either. Spacing between the icon and the hint is margin, not
+   * the CSS row property this codebase has banned (see the same note on
+   * .tt-option-icon in ThemeToggle.astro).
+   */
+  .sx-open {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--icon-btn-hit);
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--muted);
+    padding-inline: 0.6rem;
+    font-family: var(--font-mono);
+    cursor: pointer;
+  }
+
+  .sx-open-icon {
+    margin-inline-end: 0.45rem;
+    font-size: var(--icon-btn-glyph);
+  }
+
+  .sx-hint {
+    font-size: var(--text-tiny);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  .sx-open:hover,
+  .sx-open:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .sx-open:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /*
+   * The "solid square box" the owner asked for: hard corners (`--radius` is 0
+   * site-wide), a double rule in the ink colour, same treatment as
+   * ThemeToggle's and SettingsPanel's own menus. `showModal()` (the script)
+   * is what actually puts this in the top layer; nothing here needs a z-index.
+   */
+  .sx-dialog {
+    inline-size: min(92vw, 36rem);
+    max-block-size: 70vh;
+    border: 3px double var(--fg);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--fg);
+    padding: 1rem;
+  }
+
+  /* No author `display` outside the `[open]` state: the UA stylesheet already
+     hides a closed <dialog>, and this codebase's other menus carry the same
+     scar (see ThemeToggle.astro's own note on `.tt-menu`). Children are spaced
+     with margin rather than the flex row property, same reason as `.sx-open`
+     above. */
+  .sx-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sx-dialog[open] > * + * {
+    margin-block-start: 0.6rem;
+  }
+
+  /*
+   * The pixelated backdrop. A true per-pixel mosaic of the live page behind
+   * this dialog is not something CSS can do: `backdrop-filter` only accepts
+   * the same functions `filter` does (blur, contrast, saturate, ...), none of
+   * which resample anything, and no SVG filter primitive downsamples either.
+   * Every working "CSS pixelate" starts from an actual snapshot of the page
+   * rasterised onto a small canvas and scaled back up with `image-rendering:
+   * pixelated`, which needs either a new dependency (package.json is
+   * off-limits here) or a hand-rolled DOM-to-canvas renderer, both well past
+   * what a decorative backdrop justifies.
+   *
+   * `blur()` is the closest built-in effect, and the hard-edged stripes
+   * painted over it (rather than a soft gradient) are what keep the result
+   * reading as chunky rather than as a plain dim: the ask was explicitly to
+   * avoid a smooth dim, and blur alone is still smooth. Both are resolved once
+   * by the browser's own compositor when the dialog opens; nothing here
+   * re-runs on a keystroke, since typing only ever touches the results list.
+   */
+  .sx-dialog::backdrop {
+    backdrop-filter: blur(5px);
+    background-image: repeating-linear-gradient(
+      0deg,
+      color-mix(in oklab, var(--fg) 14%, transparent) 0 3px,
+      transparent 3px 6px
+    );
+  }
+
+  .sx-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    border-block-end: var(--border) solid var(--rule);
+    padding-block-end: 0.5rem;
+  }
+
+  .sx-prompt {
+    inline-size: 1.5ch;
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+
+  .sx-input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-family: inherit;
+    caret-color: transparent;
+  }
+
+  .sx-input:focus {
+    outline: none;
+  }
+
+  .sx-cursor {
+    position: absolute;
+    inset-block-start: 0.1em;
+    inset-inline-start: 1.5ch;
+    inline-size: 1ch;
+    block-size: 1.15em;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Reduced motion: solid and visible while typing, no blink at all. The rule
+     inside the media query below layers the blink on top only for readers who
+     have not asked for less motion, same split theme.css uses for
+     scroll-behavior. */
+  .sx-input:focus ~ .sx-cursor {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sx-input:focus ~ .sx-cursor {
+      animation: sx-blink 1s steps(2, jump-none) infinite;
+    }
+  }
+
+  @keyframes sx-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .sx-status {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--text-tiny);
+  }
+
+  .sx-results {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+  }
+
+  .sx-results li + li {
+    border-block-start: var(--border) solid var(--rule);
+  }
+
+  .sx-results a {
+    display: flex;
+    align-items: baseline;
+    padding-block: 0.5rem;
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .sx-results a:hover,
+  .sx-results a:focus-visible {
+    color: var(--accent);
+  }
+
+  .sx-results a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .sx-num {
+    flex-shrink: 0;
+    inline-size: 1.4em;
+    margin-inline-end: 0.6rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+  }
+
+  .sx-more:empty {
+    display: none;
+  }
+
+  .sx-more a {
+    color: var(--accent);
+    font-size: var(--text-tiny);
+  }
+</style>
