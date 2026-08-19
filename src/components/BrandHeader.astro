@@ -208,10 +208,15 @@ const CELLS = markCells()
    * `.brand` has no such clipping, so the shadow the owner asked for
    * actually shows.
    *
-   * `--code-shadow-offset`/`--code-shadow-color` (theme.css): the same hard,
-   * no-blur offset code frames and the language switch's own frame already
-   * use, reused rather than a fresh value, and already `light-dark()` so it
-   * reads dark-on-sepia and light-on-black without a second declaration.
+   * `--brand-shadow-offset` (theme.css), not `--code-shadow-offset`: the
+   * first version of this read the wordmark as drawn twice rather than
+   * shadowed, Lucas's own report, and the cause was exactly the offset,
+   * 4px against a 0.85rem/13.6px font with no blur to join it to the
+   * letter behind it. `--brand-shadow-offset` (1px) is proportionate to
+   * this small a font the same way 4px is to a code frame; see that
+   * token's own comment for the full reasoning. `--code-shadow-color`
+   * itself is still shared: it is only a colour, already `light-dark()`,
+   * with no size assumption baked in.
    *
    * This does not change the wordmark's own measured contrast against the
    * page (a shadow is not a WCAG-recognised way to clear a text ratio); see
@@ -223,7 +228,7 @@ const CELLS = markCells()
     align-items: center;
     color: inherit;
     text-decoration: none;
-    filter: drop-shadow(var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color));
+    filter: drop-shadow(var(--brand-shadow-offset) var(--brand-shadow-offset) 0 var(--code-shadow-color));
   }
 
   .brand > .mark {

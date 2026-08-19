@@ -292,6 +292,23 @@
   --code-shadow-color: light-dark(#000000, #ffffff);
 
   /*
+   * The header brand's own shadow offset, a separate number from the code
+   * block's: `--code-shadow-offset` (4px) was tried there first and read as
+   * a second, offset copy of the wordmark rather than a shadow behind it,
+   * on a 0.85rem (13.6px) font. 4px against text that small is roughly a
+   * third of its own height with no blur to soften the join; the same 4px
+   * against a code frame's much larger box reads as subtle. 1px is
+   * proportionate to a small font the way 4px is to a code frame, still
+   * hard-edged (no blur, same `--code-shadow-color`), still reads as a
+   * shadow rather than a duplicate. Kept as its own token rather than
+   * changing `--code-shadow-offset` itself, since that value is also
+   * measured against the code frame's own border width and stacking
+   * distance (see that token's own comment) and changing it would move
+   * both.
+   */
+  --brand-shadow-offset: 1px;
+
+  /*
    * Buttons: brackets, Departure Mono, brand yellow, decided on ChromeButton.vue
    * (section 02 of /theme-lab/, archived once decided). An outline variant for
    * every ordinary action (transparent fill, border and text in --brand-yellow)
