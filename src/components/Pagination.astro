@@ -168,7 +168,19 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     justify-content: center;
     margin-block-start: 2.5rem;
     padding-block-start: 1.5rem;
-    border-block-start: 1px solid var(--rule);
+    /*
+     * The quotes' own dashed rule rather than a solid hairline: the same
+     * `repeating-linear-gradient` recipe quotes.css draws its author line
+     * with (10px on, 6px off, 2px weight), so the two read as one mark used
+     * twice instead of two different rules. Drawn as a background rather than
+     * a border so it can be centred and cut to a share of the row's width,
+     * which a border cannot do.
+     */
+    border-block-start: 0;
+    background-image: repeating-linear-gradient(to right, var(--rule) 0 10px, transparent 10px 16px);
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: 50% 2px;
     font-family: var(--font-display);
     font-size: 0.85rem;
   }

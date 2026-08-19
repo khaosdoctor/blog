@@ -76,8 +76,17 @@ const CELLS = markCells()
     </span>
   </a>
   <span class="fill" aria-hidden="true">──────────────────────────────────────</span>
+  {/*
+    The nav links break out of `.controls` and sit between two runs of dashes,
+    so the rule reads as running behind them and on to the search button rather
+    than stopping short of the whole cluster. Two `.fill` spans rather than one
+    with the links overlaid: each claims its own share of the leftover room, so
+    the links end up in the middle of the row without anything being positioned
+    absolutely or having to know the other's width.
+  */}
+  <NavLinks locale={locale} />
+  <span class="fill" aria-hidden="true">──────────────────────────────────────</span>
   <nav class="controls">
-    <NavLinks locale={locale} />
     <SearchPalette locale={locale} />
     <LangSwitcher locale={locale} alternates={alternates} />
     <ThemeToggle locale={locale} />
@@ -207,13 +216,11 @@ const CELLS = markCells()
    * group's own members stay close and the run in front of it is wider, which
    * is the whole reason this is not one even measure across the row.
    */
-  /*
-   * The wide run in the row, and the only one: it separates the nav links from
-   * the cluster of controls that follows them. Search opens that cluster now,
-   * so the lead moves here from the switch.
-   */
+  /* No lead in front of search any more: the second run of dashes is what
+     separates the links from this cluster now, and a margin on top of it
+     would read as the dashes stopping early. */
   .controls :global(.search-trigger) {
-    margin-inline-start: 1.4rem;
+    margin-inline-start: 0;
   }
 
   /*

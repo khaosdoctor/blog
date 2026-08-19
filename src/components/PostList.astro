@@ -150,9 +150,10 @@ const LEADER = '·'.repeat(200)
     border-block-end: 1px solid var(--rule);
   }
 
-  .posts li:first-child {
-    border-block-start: 1px solid var(--rule);
-  }
+  /* No rule above the first row. The list already begins where the header's
+     own row ends, so a line here reads as a second header edge rather than as
+     the start of a table. Every row still carries its own bottom rule, so the
+     rows stay separated from each other. */
 
   /* The last row drops its own bottom rule: Pagination.astro draws its own
      border-block-start immediately below, and the two stacked read as a
