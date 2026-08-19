@@ -17,7 +17,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { composite, grade, parseHex, ratio } from './contrast'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
-import { labelForMark, MARK_CANDIDATES, type MarkCandidateId } from './logoMarks'
+import { effectiveMarkPx, labelForMark, MARK_CANDIDATES, MARK_GRID_SIDE, MARK_MIN_PX, type MarkCandidateId } from './logoMarks'
 import LogoMark from './LogoMark.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -36,6 +36,15 @@ const RED_DARK = '#e6242f'
 const BLUE_DARK = '#1480c2'
 
 const markCandidate = ref<MarkCandidateId>('fio')
+
+/**
+ * O mesmo piso de `ChromeHeader.vue`: um caractere por célula encolhe para
+ * uma mancha antes de simplesmente ficar menor, o que um vetor não faz, então
+ * o tamanho nunca é a `1.5em` do texto ao redor, e o slider nunca desce
+ * abaixo do piso de legibilidade do candidato atual (`MARK_MIN_PX`).
+ */
+const markSizeDesiredPx = ref(96)
+const markSizePx = computed(() => effectiveMarkPx(markCandidate.value, markSizeDesiredPx.value))
 
 const inkContrast = computed<{ label: string; num: number }>(() => {
   if (markCandidate.value === 'mesh') {
@@ -240,6 +249,10 @@ onUnmounted(() => {
 
 const decisionSettings = computed(() => [
   { label: 'marca', value: labelForMark(markCandidate.value) },
+  {
+    label: 'tamanho da marca',
+    value: `${markSizePx.value}px (piso do candidato: ${MARK_MIN_PX[markCandidate.value]}px, grade ${MARK_GRID_SIDE[markCandidate.value] ?? 'vetor'})`,
+  },
   { label: 'velocidade da digitação', value: `${CHAR_MS.value}ms/caractere` },
   { label: 'repouso antes de apagar', value: `${HOLD_SECONDS.value}s` },
   { label: 'taxa do cursor', value: `${CURSOR_MS}ms por fase, fixo (mesmo número do candidato DOS em ChromeHeader.vue)` },
@@ -265,7 +278,7 @@ const decisionContext =
       <header :class="$style.miniHeader">
         <span :class="$style.miniBadge">C:\LSANTOS&gt;</span>
         <a href="#" aria-label="Lucas Santos" :class="$style.brand" @click.prevent>
-          <LogoMark :candidate="markCandidate" size="1.5em" />
+          <LogoMark :candidate="markCandidate" :size-px="markSizePx" />
           <span :class="$style.word" aria-hidden="true" :style="{ transform: `translateX(${lineShift}ch)` }">
             <span
               v-for="(ch, i) in WORD.split('')"
@@ -285,6 +298,7 @@ const decisionContext =
 
     <Panel label="marca">
       <Pick v-model="markCandidate" label="candidato" :options="MARK_CANDIDATES.map((c) => ({ id: c.id, name: c.name }))" />
+      <Knob v-model="markSizeDesiredPx" label="tamanho da marca" :min="24" :max="160" :step="4" unit="px" />
       <Toggle v-model="manualPause" label="pausar animação (WCAG 2.2.2)" />
     </Panel>
 
@@ -304,7 +318,8 @@ const decisionContext =
             : 'Rodando.'
       }}
       Contraste do candidato "{{ labelForMark(markCandidate) }}": {{ inkContrast.num.toFixed(2) }}:1 ({{ grade(inkContrast.num) }}),
-      medido contra o fundo escuro do site. O nome acessível ("Lucas Santos") mora no <code>aria-label</code> do
+      medido contra o fundo escuro do site. A marca está em {{ markSizePx }}px; o piso de legibilidade deste candidato
+      é {{ MARK_MIN_PX[markCandidate] }}px, e o slider nunca desce abaixo dele. O nome acessível ("Lucas Santos") mora no <code>aria-label</code> do
       link, não no texto que digita e apaga: a marca e o wordmark visual estão <code>aria-hidden</code>. O cursor
       pisca a cada {{ CURSOR_MS }}ms por fase, sem suavização, o dobro da taxa do menu do Doom (228,6ms), porque um
       terminal pisca mais devagar que um jogo. O glitch troca no máximo uma letra por vez, desloca a linha inteira

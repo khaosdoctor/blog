@@ -6,7 +6,7 @@
 import { computed, ref } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
-import { labelForMark, MARK_CANDIDATES, type MarkCandidateId } from './logoMarks'
+import { effectiveMarkPx, labelForMark, MARK_CANDIDATES, MARK_GRID_SIDE, MARK_MIN_PX, type MarkCandidateId } from './logoMarks'
 import LogoMark from './LogoMark.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -53,8 +53,17 @@ function labelFor(options: Array<{ id: string; name: string }>, id: string): str
  * dele era julgar metade da decisão. As duas bancadas leem a mesma lista de
  * candidatos de `logoMarks.ts`, então trocar aqui e trocar lá são a mesma
  * escolha vista de dois ângulos.
+ *
+ * `markSizeDesiredPx` é o que o slider pede; `markSizePx` é o que de fato
+ * chega em `LogoMark`, nunca menor que o piso de legibilidade do candidato
+ * atual (`MARK_MIN_PX`, em `logoMarks.ts`). Um desenho em caractere tem um
+ * piso que um vetor não tem: abaixo dele o glifo vira uma mancha, não só uma
+ * versão menor de si mesmo. 96px cobre o piso dos seis candidatos de saída,
+ * então o padrão já lê sem precisar mexer no slider.
  */
 const markCandidate = ref<MarkCandidateId>('fio')
+const markSizeDesiredPx = ref(96)
+const markSizePx = computed(() => effectiveMarkPx(markCandidate.value, markSizeDesiredPx.value))
 
 const shape = ref('barra')
 const face = ref('departure')
@@ -71,6 +80,10 @@ const accentContrast = computed(() => ratio(parseHex(accentHex.value), parseHex(
 const decisionSettings = computed(() => [
   { label: 'candidato', value: labelFor(SHAPE_OPTIONS, shape.value) },
   { label: 'marca', value: labelForMark(markCandidate.value) },
+  {
+    label: 'tamanho da marca',
+    value: `${markSizePx.value}px (piso do candidato: ${MARK_MIN_PX[markCandidate.value]}px, grade ${MARK_GRID_SIDE[markCandidate.value] ?? 'vetor'})`,
+  },
   { label: 'fonte', value: face.value },
   { label: 'destaque', value: `${accent.value} (${accentHex.value})` },
   { label: 'entreletra', value: `${tracking.value}/100em` },
@@ -97,7 +110,7 @@ const base = computed(() => ({
     <div :class="$style.stage" :style="{ background: BG }">
       <header v-if="shape === 'barra'" :class="$style.bar" :style="base">
         <span :class="$style.edge" :style="{ color: MUTED }">┌─</span>
-        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
+        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" :size-px="markSizePx" /></span>
         <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
         <span :class="$style.fill" :style="{ color: MUTED }">─────────────</span>
         <nav>
@@ -108,7 +121,7 @@ const base = computed(() => ({
 
       <header v-else-if="shape === 'dos'" :class="$style.dos" :style="base">
         <span :class="$style.badge" :style="{ background: accentHex, color: BG }">C:\BLOG&gt;</span>
-        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
+        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" :size-px="markSizePx" /></span>
         <span :class="$style.cursor" :style="{ background: INK }"></span>
         <nav :class="$style.right">
           <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
@@ -116,7 +129,7 @@ const base = computed(() => ({
       </header>
 
       <header v-else-if="shape === 'minimo'" :class="$style.minimo" :style="base">
-        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
+        <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" :size-px="markSizePx" /></span>
         <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
         <nav :class="$style.right">
           <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
@@ -126,7 +139,7 @@ const base = computed(() => ({
       <header v-else-if="shape === 'menu'" :class="$style.menu" :style="base">
         <div :class="$style.frame" :style="{ borderColor: MUTED }">
           <span :class="$style.brandRow">
-            <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
+            <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" :size-px="markSizePx" /></span>
             <span :class="$style.brand" :style="{ color: accentHex }">lsantos.dev</span>
           </span>
           <nav>
@@ -140,7 +153,7 @@ const base = computed(() => ({
       <header v-else :class="$style.ledger" :style="base">
         <p :class="$style.line" :style="{ color: MUTED }">seção 00 / índice · v0.0.1+42 · 449 páginas</p>
         <p :class="$style.brandline">
-          <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" size="1em" /></span>
+          <span :class="$style.markSlot"><LogoMark :candidate="markCandidate" :size-px="markSizePx" /></span>
           <span :style="{ color: accentHex }">lsantos.dev</span>
           <span :style="{ color: MUTED }"> ······································ </span>
           <span>{{ NAV.join(' · ') }}</span>
@@ -151,6 +164,7 @@ const base = computed(() => ({
     <Panel label="cabeçalho">
       <Pick v-model="shape" label="candidato" :options="SHAPE_OPTIONS" />
       <Pick v-model="markCandidate" label="marca" :options="MARK_CANDIDATES.map((c) => ({ id: c.id, name: c.name }))" />
+      <Knob v-model="markSizeDesiredPx" label="tamanho da marca" :min="24" :max="160" :step="4" unit="px" />
       <Pick
         v-model="face"
         label="fonte"
@@ -169,7 +183,9 @@ const base = computed(() => ({
     <p :class="$style.readout">
       texto {{ inkContrast }}:1 · secundário {{ mutedContrast }}:1 · destaque {{ accentContrast }}:1 sobre
       {{ BG }}. A entreletra é o que separa "terminal" de "costume": acima de 0,2em o cabeçalho vira fantasia e a
-      leitura fica lenta.
+      leitura fica lenta. A marca está em {{ markSizePx }}px; o piso de legibilidade do candidato "{{ labelForMark(markCandidate) }}"
+      é {{ MARK_MIN_PX[markCandidate] }}px, porque um caractere por célula encolhe para uma mancha antes de simplesmente
+      ficar menor, o que um vetor não faz. O slider nunca desce abaixo desse piso.
     </p>
 
     <DecisionCopy
