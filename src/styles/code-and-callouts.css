@@ -146,14 +146,22 @@
 }
 
 /*
- * A hard drop shadow on the frame itself, not on .expressive-code: the
- * plugin already reads its own --ec-frm-frameBoxShdCssVal for a soft one on
- * .frame, so setting box-shadow here at one more selector's specificity
- * than that rule replaces it outright rather than fighting the custom
- * property through however many code-theme variants set it.
+ * No shadow on a code frame. It used to carry the hard offset one
+ * (--code-shadow-offset/--code-shadow-color), which on the black page is a
+ * white bar down the right edge and along the bottom: on a dark code ground
+ * that reads as a stray highlight rather than as depth, and the owner asked
+ * for it gone from code blocks specifically. The treatment itself is not
+ * retired, a picture wears it (figure img, BaseLayout.astro), where the frame
+ * has a real edge for the shadow to fall from.
+ *
+ * `none` rather than deleting the rule: the plugin sets its own soft shadow
+ * through --ec-frm-frameBoxShdCssVal on .frame, so simply removing this would
+ * restore that instead of leaving the frame flat. This selector carries one
+ * more specificity step than the plugin's own, which is what lets it win
+ * without chasing the custom property through every code theme.
  */
 .prose .expressive-code .frame {
-  box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color);
+  box-shadow: none;
 }
 
 /*
