@@ -77,8 +77,8 @@ const CELLS = markCells()
   </a>
   <span class="fill" aria-hidden="true">──────────────────────────────────────</span>
   <nav class="controls">
-    <SearchPalette locale={locale} />
     <NavLinks locale={locale} />
+    <SearchPalette locale={locale} />
     <LangSwitcher locale={locale} alternates={alternates} />
     <ThemeToggle locale={locale} />
     <SettingsPanel locale={locale} />
@@ -207,20 +207,23 @@ const CELLS = markCells()
    * group's own members stay close and the run in front of it is wider, which
    * is the whole reason this is not one even measure across the row.
    */
-  .controls :global(.lang-switch) {
+  /*
+   * The wide run in the row, and the only one: it separates the nav links from
+   * the cluster of controls that follows them. Search opens that cluster now,
+   * so the lead moves here from the switch.
+   */
+  .controls :global(.search-trigger) {
     margin-inline-start: 1.4rem;
   }
 
   /*
-   * The switch, the theme toggle and the settings opener read as one cluster,
-   * so they close up to the smallest space that still separates them, against
-   * the row's own 0.5rem between everything else. The 0.5rem still applies
-   * before the switch, so the cluster stays set apart from the nav links.
-   *
-   * Written as a margin on the two trailing controls rather than a narrower
-   * column measure on the container, because the container's own measure is
-   * what keeps the search box and the links apart and should not move.
+   * Search, the switch, the theme toggle and the settings opener read as one
+   * cluster of controls, so they close up to the smallest space that still
+   * separates them, against the row's own 0.5rem elsewhere. The negative
+   * margin pulls each back against the container's own measure rather than
+   * narrowing that measure, which still has to hold the nav links apart.
    */
+  .controls :global(.lang-switch),
   .controls :global(.theme-toggle),
   .controls :global(.settings-panel) {
     margin-inline-start: -0.25rem;

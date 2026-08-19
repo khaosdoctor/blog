@@ -162,6 +162,10 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    /* Centred in its own row rather than aligned to the start: the controls
+       are a small cluster in a box as wide as the list above, and left-aligned
+       they read as the last row of that list instead of as its own thing. */
+    justify-content: center;
     margin-block-start: 2.5rem;
     padding-block-start: 1.5rem;
     border-block-start: 1px solid var(--rule);
