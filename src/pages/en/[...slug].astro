@@ -23,7 +23,7 @@ import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
 import { parseAuthors } from '../../lib/authors'
 import { coverTone } from '../../lib/cover'
-import { buildSeriesMap, chipColor, getSeriesNavigation } from '../../lib/taxonomy'
+import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../../lib/taxonomy'
 import { HREFLANG, t } from '../../i18n/ui'
 import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
 
