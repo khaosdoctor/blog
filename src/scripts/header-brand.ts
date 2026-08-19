@@ -316,6 +316,31 @@ function init(): void {
     if (reduced()) freeze()
     else boot()
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] })
+
+  /*
+   * A pulse mid-flight (data-glitch already true, glitchPulseTimer already
+   * pending) when the tab is backgrounded is the one exit `freeze()` and
+   * `scheduleGlitch()` cannot already cover on their own: background tabs
+   * get their timers throttled, often clamped to run far less often than
+   * this pulse's own 80-150ms window, so the coloured ghosts stay painted
+   * for however long the tab stays hidden, and a reader who switches back
+   * and looks immediately can catch that stale frame before the delayed
+   * timer gets around to firing endPulse(). Clearing the moment the tab
+   * goes hidden removes the wait entirely: the resting state is guaranteed
+   * at that instant rather than whenever the browser's own throttling
+   * schedule happens to resume it. Coming back only re-arms the schedule
+   * (scheduleGlitch, which already clears+endPulse()s defensively on its
+   * own) rather than replaying the cursor or the scramble, neither of which
+   * this is about.
+   */
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearGlitchTimers()
+      endPulse()
+    } else if (!reduced()) {
+      scheduleGlitch()
+    }
+  })
 }
 
 document.addEventListener('DOMContentLoaded', init)

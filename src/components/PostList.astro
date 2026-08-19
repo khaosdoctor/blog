@@ -1,8 +1,32 @@
 ---
 import type { Post } from '../lib/posts'
-import { formatDate, urlOf } from '../lib/posts'
+import { estimateReadingTime, urlOf } from '../lib/posts'
 import { localePath } from '../i18n/ui'
+import DateCopy from './DateCopy.astro'
 
+/**
+ * The decided candidate from the theme lab (content/blog/theme-lab/components/
+ * ChromeList.vue, "tabela densa, 4 colunas"): date, title, section and reading
+ * time in one row, a dotted leader running from the end of the title to the
+ * trailing columns. Dense enough that a reader scanning the archive sees many
+ * posts per screen rather than few, which per the bench's own note is the
+ * whole reason this candidate, and not one of the six others on the same
+ * bench, survives a hundred posts: the eye runs down the title column, and
+ * the leader only carries it sideways to the date or the section when the
+ * reader goes looking for one of those.
+ *
+ * An earlier pass of this file drew an 88px cover thumbnail on every row
+ * (the "cartões"/grade candidate on the same bench) after reading the
+ * decision settings as asking for both a table and a cover. They do not
+ * combine: the table candidate draws no image at all, in the bench or here.
+ * Every thumbnail, the astro:assets Image import, the cover/no-cover branch
+ * and their CSS are removed; nothing about images belongs to this candidate.
+ *
+ * The excerpt (post.data.description) that used to sit under every title is
+ * also gone: the bench's own dense table never carried one, that is part of
+ * what "dense" means for it, and the description still exists, HoverPreviews
+ * reads it straight from each post's own built page.
+ */
 interface Props {
   posts: Post[]
   showCategory?: boolean
@@ -16,78 +40,179 @@ const { posts, showCategory = true } = Astro.props
 function categoryUrl(post: Post): string {
   return localePath(post.data.lang, `/${post.data.category}/`)
 }
+
+// The bench's own leader character, "─" (a box-drawing dash, not a hyphen):
+// repeated wide enough to fill the widest row this list ever draws, clipped
+// by .leader's own overflow:hidden to whatever room is actually left between
+// the title and the trailing columns.
+const LEADER = '─'.repeat(120)
 ---
 
-<ul class="posts">
+<ol class="posts">
   {
     posts.map((post) => (
       <li>
-        <a href={urlOf(post)}>{post.data.title}</a>
-        <p class="meta">
-          <time datetime={post.data.pubDate.toISOString()}>
-            {formatDate(post.data.pubDate, post.data.lang)}
-          </time>
-          {showCategory && (
-            <>
-              <span aria-hidden="true">·</span>
-              <a href={categoryUrl(post)} class="category">
-                {post.data.category}
-              </a>
-            </>
-          )}
-        </p>
-        <p class="excerpt">{post.data.description}</p>
+        <span class="date">
+          <DateCopy date={post.data.pubDate} lang={post.data.lang} />
+        </span>
+        <a href={urlOf(post)} class="title">
+          {post.data.title}
+        </a>
+        <span class="leader" aria-hidden="true">
+          {LEADER}
+        </span>
+        {showCategory && (
+          <a href={categoryUrl(post)} class="category">
+            {post.data.category}
+          </a>
+        )}
+        {/* post.body is the raw markdown/MDX Astro already loaded for this
+            entry; see estimateReadingTime's own comment for why this reads
+            that instead of calling render() again per post. "min", not a t()
+            call: the post's own page (src/pages/[...slug].astro) already
+            hardcodes the same abbreviation rather than the unused
+            `readingTime` ui key, and this matches that existing choice
+            rather than fixing it under a different task. */}
+        <span class="read">{estimateReadingTime(post.body ?? '')} min</span>
       </li>
     ))
   }
-</ul>
+</ol>
 
 <style>
+  /*
+   * Tracking -1/100em, the row height (13, as rows.value / 20 in rem) and the
+   * muted mono baseline every column but the title and the section keeps:
+   * set here, on the real elements this file renders, rather than on
+   * `.date-copy` or any other class <DateCopy> renders itself. Astro scopes
+   * a component's CSS to the exact elements it authors, so a selector
+   * written here for a child component's own class would compile against an
+   * attribute that child's markup never carries, and match nothing. Plain
+   * CSS inheritance still reaches into it fine, which is what this relies on.
+   */
   .posts {
     padding: 0;
     list-style: none;
+    letter-spacing: -0.01em;
   }
 
-  .posts li + li {
-    margin-block-start: 2.5rem;
-  }
-
-  /*
-   * A post title, so it takes the display face like every other title. It is a
-   * bare <a> rather than a heading, which is why the global heading rule in
-   * BaseLayout does not reach it and the face has to be named here.
-   *
-   * Weight 400, not 600: Departure Mono ships one weight and a browser asked for
-   * 600 synthesises it by smearing the glyphs sideways.
-   */
-  .posts > li > a {
-    font-family: var(--font-display);
-    font-size: 1.25rem;
-    font-weight: 400;
-  }
-
-  .meta {
+  .posts li {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-block: 0.2rem;
+    /*
+     * Centred, not baseline: the row mixes a small date/section/read-time
+     * with a visibly larger title, and baseline alignment sizes the flex
+     * line from the tallest item's own ascent/descent, which pushes every
+     * smaller item off-centre inside the row's own (equal top and bottom)
+     * padding-block. Centring keeps every item in the middle of the line
+     * regardless of its own font-size, which is what reads as one row
+     * centred in its own box rather than sitting closer to the rule above.
+     */
+    align-items: center;
     color: var(--muted);
     font-family: var(--font-mono);
     font-size: 0.8rem;
+    padding-block: 0.65rem;
+    border-block-end: 1px solid var(--rule);
   }
 
-  .category {
-    color: var(--muted);
+  .posts li:first-child {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .date {
+    flex: none;
   }
 
   /*
-   * The decided subtitle face. 16px flat, not a rem step: PxPlus is a 9x16
-   * bitmap traced to outlines and only lands crisp on whole multiples of 16.
+   * A post title, so it takes the display face like every other title. It is
+   * a bare <a> rather than a heading, which is why the global heading rule in
+   * BaseLayout does not reach it and the face has to be named here.
+   *
+   * color is set explicitly rather than left to the global `a { color: accent }`
+   * rule (BaseLayout.astro's `is:global` block): the decided candidate reads
+   * the title in ink, at 16.26:1 light / 18.61:1 dark against the real page
+   * grounds (both clear the bench's own measured 14.26:1 against its darker
+   * bench-only ground), keeping the accent for the section label alone.
+   *
+   * Weight 400, not 600: Departure Mono ships one weight and a browser asked
+   * for 600 synthesises it by smearing the glyphs sideways.
    */
-  .excerpt {
-    margin-block-start: 0.3rem;
-    font-family: var(--font-subtitle);
-    font-size: 16px;
-    line-height: 1.5;
+  .title {
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    margin-inline-start: 0.9rem;
+    overflow: hidden;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 400;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /*
+   * The one hover convention this site already has for a plain-text link
+   * (BaseLayout's `footer a:hover`): fill with the day colour, invert the
+   * text to the page ground. Reused here rather than invented again.
+   */
+  .title:hover,
+  .title:focus-visible {
+    background: var(--accent-day, var(--accent));
+    color: var(--bg);
+  }
+
+  .leader {
+    flex: 1 1 auto;
+    margin-inline: 0.7rem;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /*
+   * The section label: this list's own "destaque" colour is the day colour,
+   * not the post's own per-slug hash and not a fixed accent, since a list of
+   * many posts belongs to no single post's cover. Text, not a border or a
+   * rule, so its contrast is the 4.5:1 text floor, not the 3:1 non-text one:
+   * red 4.67:1 dark / 4.72:1 light and blue 4.90:1 dark / 4.56:1 light clear
+   * it, green 8.03:1 dark / 3.29:1 light and yellow 11.25:1 dark / 3.23:1
+   * light do not on the light page (measured in theme.css against --bg,
+   * WCAG 2.1). That shortfall already exists everywhere else --accent-day is
+   * text (the header wordmark, prose links) and is not this list's to fix.
+   */
+  .category {
+    flex: none;
+    color: var(--accent-day, var(--accent));
+    text-decoration: none;
+  }
+
+  .category:hover,
+  .category:focus-visible {
+    background: var(--accent-day, var(--accent));
+    color: var(--bg);
+  }
+
+  .read {
+    flex: none;
+    margin-inline-start: 0.7rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 34rem) {
+    .posts li {
+      flex-wrap: wrap;
+    }
+
+    .title {
+      order: -1;
+      flex-basis: 100%;
+      margin-inline-start: 0;
+      margin-block-end: 0.3rem;
+      white-space: normal;
+    }
+
+    .leader {
+      display: none;
+    }
   }
 </style>

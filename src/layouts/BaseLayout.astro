@@ -32,6 +32,7 @@ import '../styles/chips.css'
 import BrandHeader from '../components/BrandHeader.astro'
 import ConwayField from '../components/ConwayField.astro'
 import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
+import Github from '../components/icons/Github.astro'
 import MathCopy from '../components/MathCopy.astro'
 import QuoteCopy from '../components/QuoteCopy.astro'
 import ReadingProgress from '../components/ReadingProgress.astro'
@@ -40,8 +41,10 @@ import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
 // Baked in at build time: the semver the release workflow last tagged, plus a
 // count of commits since that tag. See src/lib/version.ts. It counted posts
-// once, which left every change that was not a post invisible.
-import { commitShort, commitUrl, siteVersion as version } from '../lib/version'
+// once, which left every change that was not a post invisible. REPO is the
+// same string the footer's GitHub icon link points at, so both read off one
+// constant rather than spelling the host out twice.
+import { commitShort, commitUrl, REPO, siteVersion as version } from '../lib/version'
 
 interface Props {
   title: string
@@ -94,6 +97,9 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 // in the translated string itself; this is only the end of the range, taken
 // at build time so it never needs a manual bump.
 const copyrightYear = new Date().getFullYear()
+
+// The repo's own LICENSE file, on the branch GitHub actually renders it from.
+const licenseUrl = `${REPO}/blob/main/LICENSE`
 ---
 
 <!doctype html>
@@ -212,14 +218,43 @@ const copyrightYear = new Date().getFullYear()
       </div>
       <div class="row">
         <p class="copyright">{t(locale, 'copyright', copyrightYear)}</p>
-        {/*
-          Required, not decorative: PxPlus IBM VGA is CC BY-SA 4.0, which asks for
-          attribution reachable from the site. This link is that attribution now;
-          /oss/ names the font, its author and the licence, with a link to the
-          licence text. See docs/theming.md.
-        */}
-        <p class="credits">
+        <p class="links">
+          {/*
+            Required, not decorative: PxPlus IBM VGA is CC BY-SA 4.0, which asks for
+            attribution reachable from the site. This link is that attribution now;
+            /oss/ names the font, its author and the licence, with a link to the
+            licence text. See docs/theming.md.
+          */}
           <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
+          {/*
+            "Code licence", not "site licence": LICENSE at the repo root
+            covers the repository, and the repository holds both the code
+            and the posts. Whether the posts are meant to be MIT too is not
+            this component's call, so the label only claims what the link
+            actually proves, the repository (code)'s own licence, rather
+            than the whole site.
+          */}
+          <a href={licenseUrl} rel="noopener">{t(locale, 'license')}</a>
+          {/*
+            Icon-only, so it needs a name in words: aria-label carries that,
+            and Github.astro's own aria-hidden keeps the glyph out of the
+            accessibility tree, so the label is the only thing a screen
+            reader announces. Excluded by name from the site-wide link
+            treatment (src/styles/prose/links.css's own `footer .gh-link`
+            entry, the same mechanism that already carves out the version
+            link): a dashed underline has no baseline to sit under on an
+            icon, and the external-link arrow that rule appends is redundant
+            beside a glyph that already reads as "GitHub". Styled locally
+            below instead, quieter than the header's icon controls on
+            purpose: those sit in chrome a reader reaches for constantly
+            (search, theme, settings), this is a once-in-a-while "view the
+            source" link, so it skips the header's persistent bordered chip
+            and its --icon-btn-hit touch target and reads as plain as the
+            text links beside it, with only colour changing on hover/focus.
+          */}
+          <a href={REPO} rel="noopener" class="gh-link" aria-label={t(locale, 'githubRepo')}>
+            <Github />
+          </a>
         </p>
       </div>
       {/*
@@ -363,7 +398,15 @@ const copyrightYear = new Date().getFullYear()
   }
 
   footer {
-    margin-block: 5rem 3rem;
+    /*
+     * The top value was 5rem. A page that ends in Pagination.astro already
+     * closes with its own rule and top spacing (2.5rem margin, 1.5rem
+     * padding, then a border), so the two stacked read as an oversized
+     * empty run before the footer's own rule below. Halved rather than
+     * removed: a page with no pagination (a single post) still wants real
+     * separation from the footer, just not doubled up.
+     */
+    margin-block: 2.5rem 3rem;
     padding-block-start: 1rem;
     color: var(--muted);
     font-size: 0.85rem;
@@ -465,23 +508,32 @@ const copyrightYear = new Date().getFullYear()
   }
 
   footer .version,
-  footer .credits {
+  footer .links {
     font-family: var(--font-mono);
     font-size: 0.75rem;
   }
 
-  footer .credits {
+  footer .links {
     color: var(--muted);
   }
 
   /*
-   * The footer's own plain-text link (credits): the same hover treatment as
-   * a nav link, since the real header (BrandHeader.astro) carries no plain
-   * text nav of its own any more, only icon controls and the wordmark.
-   * Padding stays present, and transparent, at rest, the same "reserve the
-   * space before you need it" trick prose/links.css uses: a link that only
-   * grew its padding on hover would push its neighbours, so the box is this
-   * size in both states and only the fill changes.
+   * The footer's own plain-text links (credits, licence): the same hover
+   * treatment as a nav link, since the real header (BrandHeader.astro)
+   * carries no plain text nav of its own any more, only icon controls and
+   * the wordmark. Padding stays present, and transparent, at rest, the same
+   * "reserve the space before you need it" trick prose/links.css uses: a
+   * link that only grew its padding on hover would push its neighbours, so
+   * the box is this size in both states and only the fill changes.
+   *
+   * This is also, now, the ENTIRE styling `.gh-link` gets: prose/links.css's
+   * site-wide treatment excludes it by name (see the markup comment above),
+   * so unlike credits and licence, nothing overrides this rule's plain,
+   * unstyled rest state or its inverted hover/focus fill for the repo icon.
+   * That absence is deliberate, not something left uncovered by mistake: an
+   * icon with no site-wide treatment competing for it is exactly the quiet
+   * footer-link look the icon was built for, not something that needs its
+   * own copy of the same two declarations.
    */
   footer a {
     padding-inline: 1px;
