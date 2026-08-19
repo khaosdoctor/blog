@@ -192,10 +192,14 @@ function init(): void {
     })
   }
 
-  // --- Reader text size: a native range input across the owner's own
-  // 50-160% span, rather than a fixed set of steps. ---
+  // --- Reader text size: a minus/plus stepper around an editable number box
+  // across the owner's own 50-160% span (SettingsPanel.astro carries the
+  // reasoning for `type="number"` over a plain text input). ---
   const fontSizeInput = menu.querySelector<HTMLInputElement>('#sp-font-size')
   const fontSizeValue = menu.querySelector<HTMLElement>('#sp-font-size-value')
+  const fontSizeDown = menu.querySelector<HTMLButtonElement>('#sp-font-size-down')
+  const fontSizeUp = menu.querySelector<HTMLButtonElement>('#sp-font-size-up')
+  const fontSizeReset = menu.querySelector<HTMLButtonElement>('#sp-font-size-reset')
   if (fontSizeInput !== null && fontSizeValue !== null) {
     const template = fontSizeValue.dataset.template ?? 'Text size: %s'
     let value = storedFontSize()
@@ -205,11 +209,21 @@ function init(): void {
       const percent = `${value}%`
       fontSizeValue.textContent = percent
       fontSizeValue.setAttribute('aria-label', template.replace('%s', percent))
+      // Disabled at each end rather than left live and silently doing
+      // nothing. Null-checked because each control is queried separately
+      // above and any of them could be missing from the markup.
+      if (fontSizeDown !== null) fontSizeDown.disabled = value <= FONT_SIZE_MIN
+      if (fontSizeUp !== null) fontSizeUp.disabled = value >= FONT_SIZE_MAX
     }
 
-    syncFontSize()
-    fontSizeInput.addEventListener('input', () => {
-      value = clampFontSize(Number(fontSizeInput.value))
+    // The one write path for every way the size can change: the buttons, the
+    // box, and reset-all further down. Storing the default as *nothing
+    // stored* is this site's convention across every reader preference, so
+    // 100 removes the key and the inline --font-scale instead of writing a
+    // literal 100 that would then have to be recognised as a default
+    // everywhere it is read back.
+    const setFontSize = (next: number): void => {
+      value = clampFontSize(next)
       try {
         if (value === FONT_SIZE_DEFAULT) localStorage.removeItem(FONT_SIZE_KEY)
         else localStorage.setItem(FONT_SIZE_KEY, String(value))
@@ -218,6 +232,23 @@ function init(): void {
       }
       applyFontSize(value)
       syncFontSize()
+    }
+
+    syncFontSize()
+
+    fontSizeDown?.addEventListener('click', () => setFontSize(value - FONT_SIZE_STEP))
+    fontSizeUp?.addEventListener('click', () => setFontSize(value + FONT_SIZE_STEP))
+    fontSizeReset?.addEventListener('click', () => setFontSize(FONT_SIZE_DEFAULT))
+
+    // `change`, not `input`: on a number field `input` fires on every
+    // keystroke, so "5" on the way to "50" would clamp up to 50 and overwrite
+    // what the reader is still typing. `change` fires on blur, on Enter and
+    // on each arrow-key step, which is every moment a typed value is actually
+    // finished. An empty or unparseable box falls back to the default rather
+    // than to NaN, which clampFontSize would otherwise turn into the minimum.
+    fontSizeInput.addEventListener('change', () => {
+      const typed = Number(fontSizeInput.value)
+      setFontSize(Number.isFinite(typed) && fontSizeInput.value.trim() !== '' ? typed : FONT_SIZE_DEFAULT)
     })
   }
 
