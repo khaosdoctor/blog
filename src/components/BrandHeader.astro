@@ -319,7 +319,14 @@ const CELLS = markCells()
     align-items: center;
     justify-content: center;
     font-size: 4.5px;
-    -webkit-text-stroke: 0.5px currentColor;
+    /*
+     * No text-stroke. There was a `0.5px currentColor` stroke here, added for
+     * "make the logo bolder", and 0.5px against a 4.5px glyph is over a tenth
+     * of the character's own size: it closed up the wireframe's interior and
+     * the mark read as smeared rather than bold. The legibility complaint that
+     * prompted it was specific to the light ground, and `--brand-shadow-color`
+     * on `.brand` already answers that one where it actually applies.
+     */
   }
 
   .mark-solid {
@@ -347,6 +354,13 @@ const CELLS = markCells()
   .word {
     position: relative;
     display: inline-flex;
+    /* The letters and the block cursor are flex items of this box, and a flex
+       container ignores `vertical-align` on its children: alignment comes from
+       here instead. Baseline puts the cursor's own bottom edge on the same line
+       the letters sit on, which is where a terminal draws it. Without this the
+       default `stretch` gave the cursor the full line height and it rode above
+       the text. */
+    align-items: baseline;
     min-inline-size: 11ch;
     color: var(--accent-day);
     font-family: var(--font-display);
@@ -403,7 +417,13 @@ const CELLS = markCells()
     block-size: 1.1em;
     margin-inline-start: 1px;
     background: currentColor;
-    vertical-align: text-bottom;
+    /* Not `vertical-align`, which a flex parent ignores (see `.word` above).
+       The block carries no text, so its own baseline is its bottom margin
+       edge; nudging it down by roughly the font's descender depth draws it
+       straddling the baseline the way a terminal cursor does, rather than
+       balanced exactly on top of it. */
+    align-self: baseline;
+    transform: translateY(0.2em);
   }
 
   /* Falha glitch: two ghost copies of the wordmark, red and cyan, shifted
