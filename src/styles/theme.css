@@ -191,6 +191,15 @@
   --btn-border: 3px double var(--accent-day);
 
   /*
+   * How wide the page's chrome runs once there is room for it: the header, the
+   * footer, the post list and its pagination all read this, so the four line
+   * up by construction rather than by four files repeating 80vw and drifting.
+   * `main` keeps `--measure` instead, since a post's running text wants the
+   * narrow column; the list breaks out of `main` on its own.
+   */
+  --chrome-width: 80vw;
+
+  /*
    * Prose decoration. Every one of these is a candidate the lab page shows
    * variants of, so changing the look later is changing a value here, not a
    * stylesheet. See the Lab feedback section of docs/design.md.
