@@ -205,15 +205,22 @@
   background: transparent;
   color: inherit;
   text-decoration-line: none;
-  animation: image-link-shadow-drift var(--image-link-shadow-duration) var(--image-link-shadow-ease) infinite;
+  /* Plays once and holds on the popped-out offset, rather than drifting for as
+     long as the pointer rests there. A loop reads as a thing demanding
+     attention; one throw reads as the image having jumped forward and stayed.
+     `forwards` is what makes it hold: without it the shadow would snap back to
+     the keyframe-free resting value the instant the animation finished. */
+  animation: image-link-shadow-drift var(--image-link-shadow-duration) var(--image-link-shadow-ease) 1 forwards;
 }
 
+/* Starts flush against the image and throws out to the popped-out offset,
+   where `forwards` holds it. It used to return to the near offset at 100%,
+   which is what made a single play look like nothing happened. */
 @keyframes image-link-shadow-drift {
-  0%,
-  100% {
-    box-shadow: 8px 8px 0 0 var(--accent-day, var(--accent));
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-day, var(--accent));
   }
-  50% {
+  100% {
     box-shadow: 14px 11px 0 0 var(--accent-day, var(--accent));
   }
 }
