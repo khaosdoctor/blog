@@ -35,7 +35,10 @@ function build(): string {
   }
 }
 
-const REPO = 'https://github.com/khaosdoctor/blog'
+/** The repository itself, so anything that needs to point at it (the footer's
+ *  GitHub link, the commit URL below) builds off one string rather than
+ *  spelling the host out again. */
+export const REPO = 'https://github.com/khaosdoctor/blog'
 
 function currentSha(): string | null {
   try {

@@ -465,12 +465,13 @@ const licenseUrl = `${REPO}/blob/main/LICENSE`
   }
 
   /*
-   * Copyright left, credits link right, on one line at desktop width. Below
-   * that there is not enough room for both without crowding or truncating,
-   * so flex-wrap lets the credits link drop to its own line under the
-   * copyright rather than overlapping or shrinking either one. Spacing is
-   * margin rather than a shorthand row/column property, so it survives both
-   * the wrapped and unwrapped case with the same two declarations.
+   * Copyright left, the credits/licence/repo-icon group right, on one line
+   * at desktop width. Below that there is not enough room for both without
+   * crowding or truncating, so flex-wrap lets the whole `.links` group drop
+   * to its own line under the copyright rather than overlapping or
+   * shrinking either one. Spacing is margin rather than a shorthand
+   * row/column property, so it survives both the wrapped and unwrapped
+   * case with the same two declarations.
    */
   footer .row {
     display: flex;
@@ -546,6 +547,20 @@ const licenseUrl = `${REPO}/blob/main/LICENSE`
   footer a:focus-visible {
     background: var(--accent-day);
     color: var(--bg);
+  }
+
+  /*
+   * The repo icon's own rest colour: --muted, the same dim default the
+   * copyright and version lines already carry, rather than the ordinary
+   * --accent every other link on the page opens with. inline-flex centres
+   * the glyph against the baseline of the credits/licence text sitting
+   * either side of it in the same line; the interactive cue itself is
+   * `footer a:hover`/`:focus-visible` above, inherited rather than repeated.
+   */
+  footer .gh-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
   }
 
   /*
