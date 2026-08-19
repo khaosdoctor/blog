@@ -116,7 +116,7 @@ jobs:
       # and manual dispatches build and check but stop here. One day of
       # retention is enough since the only consumer is deploy-pages, later in
       # this same run.
-      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
         with:
           path: dist
