@@ -7,11 +7,11 @@
  * encolhe para caber na coluna do post.
  *
  * Determinismo: nada aqui chama `Math.random()`. Cor da marca, sólido do
- * wireframe, giro dele e o campo de ondas vêm todos de um inteiro (o "seed").
- * No gerador real esse inteiro é `hashSlug(post.slug)`, então o mesmo post
- * sempre bate a mesma capa e o cache do card social não estraga a cada build;
- * aqui, sem um post de verdade para hashear, o knob "semente" faz esse papel e
- * soma-se ao hash do slug de exemplo.
+ * wireframe, giro dele e o campo de fogo do candidato 5 vêm todos de um
+ * inteiro (o "seed"). No gerador real esse inteiro é `hashSlug(post.slug)`,
+ * então o mesmo post sempre bate a mesma capa e o cache do card social não
+ * estraga a cada build; aqui, sem um post de verdade para hashear, o knob
+ * "semente" faz esse papel e soma-se ao hash do slug de exemplo.
  */
 import { computed, ref } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
@@ -75,7 +75,7 @@ function labelFor(options: Array<{ id: string; name: string }>, id: string): str
  * PRNG pequeno, determinístico e sem dependência (mulberry32, de domínio
  * público): recebe um inteiro e devolve uma função que gera números em
  * [0, 1), sempre na mesma sequência para a mesma semente. É o que faz o
- * sólido do candidato 4 e o campo do candidato 5 nascerem do hash do slug em
+ * sólido do candidato 4 e o fogo do candidato 5 nascerem do hash do slug em
  * vez de `Math.random()`: mesmo slug, mesmo inteiro, mesma sequência, sempre.
  * A diferença para o bug do plasma original não é usar "uma semente só": é
  * que cada parâmetro lê uma chamada nova do gerador, e cada chamada já mistura
@@ -213,6 +213,39 @@ function projectPerspective(v: Vec3, cx: number, cy: number, scale: number, camD
   return { x: cx + x * factor * scale, y: cy + y * factor * scale, z }
 }
 
+/**
+ * Amostra o perímetro de um retângulo em pontos presos a uma grade de `step`
+ * px, célula por célula, na mesma lógica das arestas do sólido: é o que
+ * deixa a moldura do candidato 4 desenhada no mesmo vocabulário do wireframe
+ * (glifos numa grade) em vez de um `<rect>` de traço liso.
+ */
+function rectPerimeterCells(
+  frame: { x: number; y: number; width: number; height: number },
+  step: number,
+): Array<{ x: number; y: number }> {
+  const seen = new Set<string>()
+  const points: Array<{ x: number; y: number }> = []
+  const addEdge = (x1: number, y1: number, x2: number, y2: number) => {
+    const length = Math.hypot(x2 - x1, y2 - y1)
+    const steps = Math.max(1, Math.round(length / step))
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps
+      const gx = Math.round((x1 + (x2 - x1) * t) / step) * step
+      const gy = Math.round((y1 + (y2 - y1) * t) / step) * step
+      const key = `${gx},${gy}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      points.push({ x: gx, y: gy })
+    }
+  }
+  const { x, y, width, height } = frame
+  addEdge(x, y, x + width, y)
+  addEdge(x + width, y, x + width, y + height)
+  addEdge(x + width, y + height, x, y + height)
+  addEdge(x, y + height, x, y)
+  return points
+}
+
 interface WaveParams {
   freqA: number
   freqB: number
@@ -231,9 +264,12 @@ interface WaveParams {
  * primeira tentativa: lá, uma fase só era escalada por três constantes fixas
  * e as três frequências cresciam juntas, então o campo inteiro colapsava numa
  * única rampa. Aqui as sete leituras do PRNG (três frequências, três fases, a
- * direção) não têm relação linear entre si, então o campo forma vários focos
- * de claro e escuro em vez de uma rampa, e a orientação das bandas muda de
- * post para post.
+ * direção, os tons) não têm relação linear entre si, então o campo forma
+ * vários focos de claro e escuro em vez de uma rampa, e a orientação das
+ * bandas muda de post para post. Compartilhado pelos candidatos 3 e 6: o 3
+ * usa o valor contínuo, o 6 quantiza em `levels` tons. O candidato 5 usa o
+ * fogo do Doom (mais abaixo) em vez desse campo, e é por isso que os dois
+ * continuam candidatos separados, não a mesma ideia duas vezes.
  */
 function generateWaveParams(rng: () => number): WaveParams {
   const freqA = 0.15 + rng() * 0.35
@@ -247,13 +283,6 @@ function generateWaveParams(rng: () => number): WaveParams {
   return { freqA, freqB, freqC, phaseA, phaseB, phaseC, direction, levels }
 }
 
-/**
- * Campo compartilhado pelos candidatos 3 e 5: mesma matemática, dois usos.
- * `quantize=false` (candidato 3) deixa o valor contínuo, então o plasma tem
- * dez, vinte tons de transição; `quantize=true` (candidato 5) arredonda para
- * `levels` degraus só, que é o efeito de "poucos tons" pedido para a janela
- * DOS: bandas com aresta dura, não gradiente suave.
- */
 function waveField(
   params: WaveParams,
   brandHex: string,
@@ -290,6 +319,69 @@ function waveField(
   return cells
 }
 
+const FIRE_MAX_INTENSITY = 36
+const FIRE_EDGES = ['bottom', 'top', 'left', 'right'] as const
+type FireEdge = (typeof FIRE_EDGES)[number]
+
+interface FireField {
+  values: number[][]
+  edge: FireEdge
+}
+
+/**
+ * O fogo do Doom de verdade, não uma impressão dele, porque é pequeno: uma
+ * linha fonte presa na intensidade máxima, e cada célula acima herda o valor
+ * da célula abaixo menos uma pequena queda, com um desvio horizontal de uma
+ * célula ao mesmo tempo. É a queda e o desvio que dão a inclinação e os
+ * fiapos da chama; sem eles o campo seria uma rampa lisa, não fogo. A borda
+ * fonte pode ser qualquer uma das quatro (o hash escolhe) e a simulação roda
+ * por um número fixo de iterações até assentar: o jogo original refaz esse
+ * mesmo cálculo a cada quadro sobre o buffer do quadro anterior porque é uma
+ * animação; aqui, como o cartão é uma imagem parada, ele roda N vezes sobre
+ * si mesmo e só o resultado final é desenhado.
+ */
+function buildFireField(rng: () => number, cols: number, rows: number, iterations: number, decayMax: number): FireField {
+  const edge = FIRE_EDGES[Math.floor(rng() * FIRE_EDGES.length)]
+  let field = Array.from({ length: rows }, () => new Array(cols).fill(0))
+
+  const pinSource = (f: number[][]) => {
+    if (edge === 'bottom') for (let c = 0; c < cols; c++) f[rows - 1][c] = FIRE_MAX_INTENSITY
+    if (edge === 'top') for (let c = 0; c < cols; c++) f[0][c] = FIRE_MAX_INTENSITY
+    if (edge === 'left') for (let r = 0; r < rows; r++) f[r][0] = FIRE_MAX_INTENSITY
+    if (edge === 'right') for (let r = 0; r < rows; r++) f[r][cols - 1] = FIRE_MAX_INTENSITY
+  }
+  pinSource(field)
+
+  for (let iter = 0; iter < iterations; iter++) {
+    const next = field.map((row) => row.slice())
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        if (edge === 'bottom' && row === rows - 1) continue
+        if (edge === 'top' && row === 0) continue
+        if (edge === 'left' && col === 0) continue
+        if (edge === 'right' && col === cols - 1) continue
+
+        let srcRow = row
+        let srcCol = col
+        if (edge === 'bottom') srcRow = row + 1
+        if (edge === 'top') srcRow = row - 1
+        if (edge === 'left') srcCol = col - 1
+        if (edge === 'right') srcCol = col + 1
+
+        const jitter = Math.floor(rng() * 3) - 1 // desvio de uma célula: -1, 0 ou 1
+        if (edge === 'bottom' || edge === 'top') srcCol = Math.min(cols - 1, Math.max(0, srcCol + jitter))
+        else srcRow = Math.min(rows - 1, Math.max(0, srcRow + jitter))
+
+        const decay = Math.floor(rng() * decayMax)
+        next[row][col] = Math.max(0, field[srcRow][srcCol] - decay)
+      }
+    }
+    field = next
+    pinSource(field)
+  }
+  return { values: field, edge }
+}
+
 /**
  * Hash de string pequeno o bastante para caber num comentário: só precisa
  * espalhar slugs entre as cinco cores da marca de um jeito estável, não
@@ -313,21 +405,31 @@ const cellSize = ref(28)
 const cursor = ref(true)
 const wireDensity = ref(22)
 const plasmaStrength = ref(55)
+const fireIterations = ref(24)
+const fireDecay = ref(6)
+const fireHollowBands = ref(2)
+const fireAlphaHot = ref(100)
+const fireAlphaCold = ref(22)
+// Escalonado por padrão: uma máquina do período do algoritmo não tinha canal
+// alfa, só ditherava; opacidade em degraus junto com as bandas de tom já
+// existentes mantém o registro de poucos tons. "Contínuo" existe para quem
+// quiser o desvanecimento liso, mais lido como efeito moderno.
+const fireAlphaMode = ref('escalonado')
 
 const effectiveSeed = computed(() => (hashSlug(DEMO_SLUG) + seed.value) >>> 0)
 const brand = computed(() => BRANDS[effectiveSeed.value % BRANDS.length])
 const bleedInk = computed(() => INK_ON_BRAND[brand.value.id])
 
 // Cada gerador puxa do mesmo hash, mas por uma semente derivada diferente
-// (XOR com uma constante própria), para o sólido do candidato 4 e as ondas
-// dos candidatos 3 e 5 não desenharem sempre o mesmo padrão relativo entre si
-// para o mesmo post.
-const PLASMA_WAVE_SALT = 0x1000193
-const DOS_WAVE_SALT = 0x9e3779b9
+// (XOR com uma constante própria), para o sólido, o plasma, o fogo e as ondas
+// não desenharem sempre o mesmo padrão relativo entre si para o mesmo post.
+const PLASMA_SALT = 0x1000193
+const FIRE_SALT = 0x9e3779b9
+const WAVES_SALT = 0xff51afd7
 
 const wireSolid = computed(() => generateSolid(mulberry32(effectiveSeed.value)))
-const plasmaWave = computed(() => generateWaveParams(mulberry32((effectiveSeed.value ^ PLASMA_WAVE_SALT) >>> 0)))
-const dosWave = computed(() => generateWaveParams(mulberry32((effectiveSeed.value ^ DOS_WAVE_SALT) >>> 0)))
+const plasmaWave = computed(() => generateWaveParams(mulberry32((effectiveSeed.value ^ PLASMA_SALT) >>> 0)))
+const sixWave = computed(() => generateWaveParams(mulberry32((effectiveSeed.value ^ WAVES_SALT) >>> 0)))
 
 const rawTitle = computed(() => TITLES[titleSize.value])
 // O cursor entra na string antes do quebra-linha, não depois: assim, se a
@@ -423,16 +525,51 @@ const innerFrame = computed(() => ({
 }))
 
 const DARK_BG = '#000000'
-const DARK_INK = '#e6e4e0'
 const DARK_SHADOW = '#050505'
 const SHADOW_OFFSET = 3
+const INK_FLOOR = 4.5
+
+/**
+ * A cor da marca crua não é garantida legível como texto: ela foi escolhida
+ * para outra coisa (uma barra, um traço, um fundo cheio), não para ficar em
+ * cima de um efeito escuro. `--chip-ink` e o preenchimento do hover dos links
+ * já resolvem esse mesmo problema misturando a cor da marca em direção ao
+ * branco até um piso de contraste; esta função faz a mesma conta para o
+ * cartão, contra as duas pontas que o texto de fato encontra aqui: o preto
+ * puro (quando o campo por baixo está no mínimo) e a própria cor da marca
+ * saturada (quando o campo bate no máximo). Verde e amarelo não fecham
+ * 4.5:1 nem no branco puro contra a própria versão saturada deles, porque a
+ * marca já nasce clara demais para qualquer tinta bater as duas pontas ao
+ * mesmo tempo; o laço para em t=1 e o número que sobra é reportado, não
+ * escondido.
+ */
+function deriveCardInk(brandHex: string, groundHex: string, floor: number): string {
+  const brandRgb = parseHex(brandHex)
+  const groundRgb = parseHex(groundHex)
+  const whiteRgb = parseHex('#ffffff')
+  let t = 0
+  let mixed = brandRgb
+  while (t < 1) {
+    const vsGround = ratio(mixed, groundRgb)
+    const vsBrand = ratio(mixed, brandRgb)
+    if (Math.min(vsGround, vsBrand) >= floor) break
+    t += 0.02
+    mixed = composite(whiteRgb, brandRgb, t)
+  }
+  return toHex(mixed)
+}
+
+const cardInk = computed(() => deriveCardInk(brand.value.hex, DARK_BG, INK_FLOOR))
+const cardInkBestContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(DARK_BG)))
+const cardInkWorstContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(brand.value.hex)))
 
 const meshPlasmaCells = computed(() => waveField(plasmaWave.value, brand.value.hex, DARK_BG, cellSize.value, false))
-const dosWaveCells = computed(() => waveField(dosWave.value, brand.value.hex, DARK_BG, cellSize.value, true))
+const sixWaveCells = computed(() => waveField(sixWave.value, brand.value.hex, DARK_BG, cellSize.value, true))
 
 const WIRE_CENTER = { x: 900, y: 335 }
 const WIRE_RADIUS = 130
 const WIRE_CAM_DIST = 4.5
+const WIRE_BORDER_OPACITY = 0.5
 
 /**
  * Em vez de desenhar as arestas como `<line>`, cada uma é amostrada em pontos
@@ -443,7 +580,9 @@ const WIRE_CAM_DIST = 4.5
  * maior e mais opaco, os mais longe saem menores e quase apagados, a mesma
  * ideia de "arestas escondidas ainda desenhadas, só que fracas" do cubo de
  * referência. Quando duas arestas caem na mesma célula da grade, fica a mais
- * perto (a de maior "closeness"), porque é ela que estaria na frente.
+ * perto (a de maior "closeness"), porque é ela que estaria na frente. Esse
+ * desvanecimento é textura, não texto: fica como está, só o texto do cartão
+ * ganhou piso de contraste.
  */
 const wireCells = computed(() => {
   const solid = wireSolid.value
@@ -475,14 +614,72 @@ const wireCells = computed(() => {
   return Array.from(best.values())
 })
 
+const wireBorderCells = computed(() => [
+  ...rectPerimeterCells(outerFrame.value, wireDensity.value),
+  ...rectPerimeterCells(innerFrame.value, wireDensity.value),
+])
+
+const FIRE_BANDS = 6
+const FIRE_ALPHA_MODE_OPTIONS = [
+  { id: 'escalonado', name: 'escalonado (por banda)' },
+  { id: 'continuo', name: 'contínuo' },
+]
+// Um contorno fino no mesmo alfa de um bloco cheio quase some (menos pixel
+// carregando a mesma cor); este fator compensa isso só para as ocas.
+const HOLLOW_ALPHA_BOOST = 1.5
+
+const fireField = computed(() => {
+  const size = cellSize.value
+  const cols = Math.ceil(CARD_W / size)
+  const rows = Math.ceil(CARD_H / size)
+  const rng = mulberry32((effectiveSeed.value ^ FIRE_SALT) >>> 0)
+  return buildFireField(rng, cols, rows, fireIterations.value, fireDecay.value)
+})
+
+/**
+ * Cada célula do fogo mostra a intensidade de três jeitos, não um: cheia ou
+ * oca (as bandas mais frias saem ocas, malha em vez de área sólida), o tom
+ * (FIRE_BANDS degraus, como a paleta de uma máquina antiga) e agora também a
+ * opacidade, que cai do lado quente pro lado frio. "Escalonado" usa os mesmos
+ * degraus do tom (mesma leitura de poucos níveis); "contínuo" usa a
+ * intensidade crua. Ocas recebem um alfa extra: sem isso, um contorno fino
+ * no mesmo número que um bloco cheio lê como quase apagado.
+ */
+const dosFireCells = computed(() => {
+  const size = cellSize.value
+  const brandRgb = parseHex(brand.value.hex)
+  const bgRgb = parseHex(DARK_BG)
+  const { values } = fireField.value
+  const cells: Array<{ x: number; y: number; fill: string; hollow: boolean; alpha: number }> = []
+  for (let row = 0; row < values.length; row++) {
+    for (let col = 0; col < values[row].length; col++) {
+      const rawT = values[row][col] / FIRE_MAX_INTENSITY
+      const bandIdx = Math.min(FIRE_BANDS - 1, Math.floor(rawT * FIRE_BANDS))
+      const bandT = bandIdx / (FIRE_BANDS - 1)
+      const fill = toHex(composite(brandRgb, bgRgb, bandT))
+      const hollow = bandIdx < fireHollowBands.value
+      const alphaT = fireAlphaMode.value === 'continuo' ? rawT : bandT
+      const baseAlpha = (fireAlphaCold.value + (fireAlphaHot.value - fireAlphaCold.value) * alphaT) / 100
+      const alpha = Math.min(1, hollow ? baseAlpha * HOLLOW_ALPHA_BOOST : baseAlpha)
+      cells.push({ x: col * size, y: row * size, fill, hollow, alpha })
+    }
+  }
+  return cells
+})
+const fireFilledCount = computed(() => dosFireCells.value.filter((c) => !c.hollow).length)
+const fireHollowCount = computed(() => dosFireCells.value.filter((c) => c.hollow).length)
+
+// Pior caso de verdade por baixo do texto: o fundo é preto puro, então uma
+// célula desenhada com opacidade `a` mistura pra `cor da marca × a`, não pra
+// cor cheia sem mistura. O pixel mais forte que o fogo consegue gerar usa o
+// alfa mais quente, não 100% fixo; se esse knob descer, o pior caso melhora
+// sozinho, por isso ele é recalculado aqui e não reaproveita o número dos
+// candidatos 3 e 4.
+const fireWorstBg = computed(() => toHex(composite(parseHex(brand.value.hex), parseHex(DARK_BG), fireAlphaHot.value / 100)))
+const fireInkWorstContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(fireWorstBg.value)))
+
 const dosContrast = computed(() => ratio(parseHex('#e6e4e0'), parseHex('#000000')))
 const bleedContrast = computed(() => ratio(parseHex(bleedInk.value), parseHex(brand.value.hex)))
-// Plasma, wireframe e ondas usam a mesma tinta e o mesmo preto de base, e nos
-// três o efeito satura na cor da marca no extremo mais forte (alpha 1 no
-// plasma e nas ondas, glifo bem próximo no wireframe): por isso o melhor e o
-// pior caso são os mesmos três números para os três candidatos.
-const darkBestContrast = computed(() => ratio(parseHex(DARK_INK), parseHex(DARK_BG)))
-const darkWorstContrast = computed(() => ratio(parseHex(DARK_INK), parseHex(brand.value.hex)))
 
 // Preto puro se ele ler melhor do que a tinta do candidato contra o fundo da
 // marca, tinta caso contrário. Decidido pela razão de contraste, não por uma
@@ -518,10 +715,21 @@ const wireframeDecisionSettings = computed(() => [
   },
 ])
 
-const wavesDecisionSettings = computed(() => [
+const fireDecisionSettings = computed(() => [
   ...sharedDecisionSettings.value,
   { label: 'célula da grade', value: `${cellSize.value}px` },
-  { label: 'tons gerados (hash)', value: String(dosWave.value.levels) },
+  { label: 'iterações do fogo', value: String(fireIterations.value) },
+  { label: 'queda do fogo', value: String(fireDecay.value) },
+  { label: 'bandas ocas', value: String(fireHollowBands.value) },
+  { label: 'alfa quente/frio', value: `${fireAlphaHot.value}% / ${fireAlphaCold.value}%` },
+  { label: 'modo do alfa', value: labelFor(FIRE_ALPHA_MODE_OPTIONS, fireAlphaMode.value) },
+  { label: 'borda de origem (hash)', value: fireField.value.edge },
+])
+
+const sixDecisionSettings = computed(() => [
+  ...sharedDecisionSettings.value,
+  { label: 'célula da grade', value: `${cellSize.value}px` },
+  { label: 'tons gerados (hash)', value: String(sixWave.value.levels) },
 ])
 
 const SVG_NOTE = 'A capa é um <svg viewBox="0 0 1200 630"> de verdade (1200x630), o mesmo SVG que o gerador rasteriza com sharp no build. Cor da marca e semente derivam de hashSlug(post.slug) + semente, nunca de Math.random(), para o cache do card social não estragar a cada build.'
@@ -535,23 +743,28 @@ const bleedDecisionContext = computed(
     `${SVG_NOTE} Título ${bleedContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(bleedContrast.value)}).`,
 )
 
-const darkContextTail = computed(
+const cardInkContextTail = computed(
   () =>
-    `Título ${darkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(darkBestContrast.value)}); pior caso real ${darkWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(darkWorstContrast.value)}), quando o efeito satura na cor da marca; por isso o título carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
+    `Tinta do texto derivada da cor da marca: ${cardInk.value}. Título, chapéu e assinatura ${cardInkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(cardInkBestContrast.value)}); pior caso real ${cardInkWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(cardInkWorstContrast.value)}), quando o efeito satura na cor da marca; por isso o título também carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
 )
 
 const plasmaDecisionContext = computed(
-  () => `${SVG_NOTE} Candidato único (plasma, sem wireframe empilhado por cima). ${darkContextTail.value}`,
+  () => `${SVG_NOTE} Candidato único (plasma, sem wireframe empilhado por cima). ${cardInkContextTail.value}`,
 )
 
 const wireframeDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Sólido e giro nascem do hash do slug via um PRNG pequeno (mulberry32), não de Math.random() nem de uma lista fixa de formas; a projeção é perspectiva pura em JS (sem canvas, sem WebGL, sem textmode.js), porque o gerador real só roda sharp sobre SVG estático no build. ${darkContextTail.value}`,
+    `${SVG_NOTE} Sólido e giro nascem do hash do slug via um PRNG pequeno (mulberry32), não de Math.random() nem de uma lista fixa de formas; a projeção é perspectiva pura em JS (sem canvas, sem WebGL, sem textmode.js), porque o gerador real só roda sharp sobre SVG estático no build. A moldura dupla é feita da mesma malha de "+", não de um traço liso. ${cardInkContextTail.value}`,
 )
 
-const wavesDecisionContext = computed(
+const fireDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e um campo de ondas quantizado em poucos tons (como uma paleta de máquina antiga) em vez do gradiente contínuo do candidato 3; frequência, fase, direção e número de tons também nascem do hash. ${darkContextTail.value}`,
+    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o algoritmo de fogo do Doom de verdade (fonte numa borda escolhida pelo hash, queda e desvio horizontal também do hash, ${fireIterations.value} iterações), clipado por dentro da moldura interna, não vazando pro resto do cartão; ${FIRE_BANDS} bandas de tom, as ${fireHollowBands.value} mais frias ocas, alfa ${fireAlphaMode.value} entre ${fireAlphaCold.value}% e ${fireAlphaHot.value}%. Tinta do texto derivada da cor da marca: ${cardInk.value}. Título, chapéu e assinatura ${cardInkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(cardInkBestContrast.value)}); pior caso real, recalculado com o alfa quente do fogo (não a cor cheia), ${fireInkWorstContrast.value.toFixed(2)}:1 sobre ${fireWorstBg.value} (${grade(fireInkWorstContrast.value)}); por isso o título também carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
+)
+
+const sixDecisionContext = computed(
+  () =>
+    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o campo de senos do candidato 3 quantizado em ${sixWave.value.levels} tons (como uma paleta de máquina antiga), sem célula oca e sem alfa por célula: isso fica só no candidato 5 (fogo), pra esses dois não virarem a mesma ideia duas vezes. ${cardInkContextTail.value}`,
 )
 </script>
 
@@ -562,12 +775,13 @@ const wavesDecisionContext = computed(
         v-model="view"
         label="ver"
         :options="[
-          { id: 'todos', name: 'os cinco empilhados' },
+          { id: 'todos', name: 'os seis empilhados' },
           { id: 'dos', name: '1 · janela DOS' },
           { id: 'bleed', name: '2 · sem moldura' },
           { id: 'plasma', name: '3 · plasma' },
           { id: 'wireframe', name: '4 · wireframe 3D' },
-          { id: 'ondas', name: '5 · janela DOS + ondas' },
+          { id: 'fogo', name: '5 · janela DOS + fogo' },
+          { id: 'ondas', name: '6 · janela DOS + ondas' },
         ]"
       />
     </Panel>
@@ -579,10 +793,16 @@ const wavesDecisionContext = computed(
       <Toggle v-model="cursor" label="cursor sólido █" />
     </Panel>
 
-    <Panel label="candidatos 3 · 4 · 5 (o resto do sólido e das ondas vem do hash)">
-      <Knob v-model="cellSize" label="célula da grade (plasma/ondas)" :min="16" :max="48" :step="2" unit="px" />
+    <Panel label="candidatos 3 · 4 · 5 · 6 (sólido, giro, fogo e ondas vêm do hash)">
+      <Knob v-model="cellSize" label="célula da grade (plasma/fogo/ondas)" :min="16" :max="48" :step="2" unit="px" />
       <Knob v-model="plasmaStrength" label="força do plasma" :min="0" :max="100" :step="5" unit="%" />
       <Knob v-model="wireDensity" label="densidade do wireframe" :min="12" :max="32" :step="2" unit="px" />
+      <Knob v-model="fireIterations" label="iterações do fogo" :min="4" :max="60" :step="2" />
+      <Knob v-model="fireDecay" label="queda do fogo" :min="1" :max="20" :step="1" />
+      <Knob v-model="fireHollowBands" label="bandas ocas do fogo" :min="0" :max="5" :step="1" />
+      <Knob v-model="fireAlphaHot" label="alfa quente do fogo" :min="10" :max="100" :step="5" unit="%" />
+      <Knob v-model="fireAlphaCold" label="alfa frio do fogo" :min="0" :max="90" :step="5" unit="%" />
+      <Pick v-model="fireAlphaMode" label="modo do alfa do fogo" :options="FIRE_ALPHA_MODE_OPTIONS" />
     </Panel>
 
     <div :class="$style.grid">
@@ -743,8 +963,7 @@ const wavesDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="DARK_INK"
-              opacity="0.92"
+              :fill="cardInk"
             >{{ kickerText }}</text>
             <text
               v-for="(line, i) in plasmaCard.lines"
@@ -753,7 +972,7 @@ const wavesDecisionContext = computed(
               :y="plasmaCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="plasmaCard.fontSize"
-              :fill="DARK_INK"
+              :fill="cardInk"
             >{{ line }}</text>
             <text
               :x="plasmaCard.padX"
@@ -761,14 +980,14 @@ const wavesDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="DARK_INK"
-              opacity="0.92"
+              :fill="cardInk"
             >{{ bylineText }}</text>
           </svg>
         </div>
         <p :class="$style.tiny">
-          título {{ darkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso ({{ grade(darkBestContrast) }}) ·
-          pior caso real {{ darkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }} ({{ grade(darkWorstContrast) }})
+          tinta do texto {{ cardInk }} · {{ cardInkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso
+          ({{ grade(cardInkBestContrast) }}) · pior caso real {{ cardInkWorstContrast.toFixed(2) }}:1 sobre
+          {{ brand.hex }} ({{ grade(cardInkWorstContrast) }})
         </p>
         <DecisionCopy
           lab="capa · plasma"
@@ -799,6 +1018,18 @@ const wavesDecisionContext = computed(
               :font-size="8 + c.closeness * wireDensity"
               :fill="brand.hex"
               :opacity="0.3 + c.closeness * 0.65"
+            >+</text>
+            <text
+              v-for="(c, i) in wireBorderCells"
+              :key="`b${i}`"
+              :x="c.x"
+              :y="c.y"
+              text-anchor="middle"
+              dominant-baseline="central"
+              :font-family="LABEL_FONT"
+              :font-size="wireDensity"
+              :fill="brand.hex"
+              :opacity="WIRE_BORDER_OPACITY"
             >+</text>
 
             <text
@@ -833,8 +1064,7 @@ const wavesDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="DARK_INK"
-              opacity="0.92"
+              :fill="cardInk"
             >{{ kickerText }}</text>
             <text
               v-for="(line, i) in dosCard.lines"
@@ -843,7 +1073,7 @@ const wavesDecisionContext = computed(
               :y="dosCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              :fill="DARK_INK"
+              :fill="cardInk"
             >{{ line }}</text>
             <text
               :x="dosCard.padX"
@@ -851,14 +1081,15 @@ const wavesDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="brand.hex"
+              :fill="cardInk"
             >{{ bylineText }}</text>
           </svg>
         </div>
         <p :class="$style.tiny">
-          {{ wireSolid.params.sides }} lados · {{ wireSolid.params.ringCount }} anel(is) · título
-          {{ darkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso ({{ grade(darkBestContrast) }}) ·
-          pior caso real {{ darkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }} ({{ grade(darkWorstContrast) }})
+          {{ wireSolid.params.sides }} lados · {{ wireSolid.params.ringCount }} anel(is) · tinta do texto
+          {{ cardInk }} · {{ cardInkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso
+          ({{ grade(cardInkBestContrast) }}) · pior caso real {{ cardInkWorstContrast.toFixed(2) }}:1 sobre
+          {{ brand.hex }} ({{ grade(cardInkWorstContrast) }})
         </p>
         <DecisionCopy
           lab="capa · wireframe 3D"
@@ -868,17 +1099,35 @@ const wavesDecisionContext = computed(
         />
       </div>
 
-      <div v-if="view === 'todos' || view === 'ondas'" :class="$style.candidate">
-        <p :class="$style.label">Candidato 5 · janela DOS + ondas</p>
+      <div v-if="view === 'todos' || view === 'fogo'" :class="$style.candidate">
+        <p :class="$style.label">Candidato 5 · janela DOS + fogo</p>
         <div :class="$style.stage">
           <svg
             viewBox="0 0 1200 630"
             :class="$style.svgRoot"
             role="img"
-            :aria-label="`Capa candidata, janela DOS com ondas quantizadas, categoria ${category}`"
+            :aria-label="`Capa candidata, janela DOS com fogo, categoria ${category}`"
           >
+            <defs>
+              <clipPath id="cover-lab-fire-clip">
+                <rect v-bind="innerFrame" />
+              </clipPath>
+            </defs>
             <rect width="1200" height="630" :fill="DARK_BG" />
-            <rect v-for="(c, i) in dosWaveCells" :key="i" :x="c.x" :y="c.y" :width="cellSize" :height="cellSize" :fill="c.fill" />
+            <g clip-path="url(#cover-lab-fire-clip)">
+              <rect
+                v-for="(c, i) in dosFireCells"
+                :key="i"
+                :x="c.x"
+                :y="c.y"
+                :width="cellSize"
+                :height="cellSize"
+                :fill="c.hollow ? 'none' : c.fill"
+                :stroke="c.hollow ? c.fill : 'none'"
+                :stroke-width="c.hollow ? 1.5 : 0"
+                :opacity="c.alpha"
+              />
+            </g>
             <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
             <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
 
@@ -914,8 +1163,7 @@ const wavesDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="DARK_INK"
-              opacity="0.92"
+              :fill="cardInk"
             >{{ kickerText }}</text>
             <text
               v-for="(line, i) in dosCard.lines"
@@ -924,7 +1172,7 @@ const wavesDecisionContext = computed(
               :y="dosCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              :fill="DARK_INK"
+              :fill="cardInk"
             >{{ line }}</text>
             <text
               :x="dosCard.padX"
@@ -932,32 +1180,123 @@ const wavesDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="brand.hex"
+              :fill="cardInk"
             >{{ bylineText }}</text>
           </svg>
         </div>
         <p :class="$style.tiny">
-          {{ dosWave.levels }} tons · título {{ darkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso
-          ({{ grade(darkBestContrast) }}) · pior caso real {{ darkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }}
-          ({{ grade(darkWorstContrast) }})
+          fogo da borda "{{ fireField.edge }}" · {{ fireFilledCount }} células cheias · {{ fireHollowCount }} ocas ·
+          alfa {{ fireAlphaMode }} {{ fireAlphaCold }}%–{{ fireAlphaHot }}% · tinta do texto {{ cardInk }} ·
+          {{ cardInkBestContrast.toFixed(2) }}:1 no melhor caso ({{ grade(cardInkBestContrast) }}) · pior caso real
+          (recalculado com o alfa quente) {{ fireInkWorstContrast.toFixed(2) }}:1 sobre {{ fireWorstBg }}
+          ({{ grade(fireInkWorstContrast) }})
+        </p>
+        <DecisionCopy
+          lab="capa · janela DOS + fogo"
+          component="CoverLab.vue"
+          :settings="fireDecisionSettings"
+          :context="fireDecisionContext"
+        />
+      </div>
+
+      <div v-if="view === 'todos' || view === 'ondas'" :class="$style.candidate">
+        <p :class="$style.label">Candidato 6 · janela DOS + ondas</p>
+        <div :class="$style.stage">
+          <svg
+            viewBox="0 0 1200 630"
+            :class="$style.svgRoot"
+            role="img"
+            :aria-label="`Capa candidata, janela DOS com ondas quantizadas, categoria ${category}`"
+          >
+            <rect width="1200" height="630" :fill="DARK_BG" />
+            <rect v-for="(c, i) in sixWaveCells" :key="i" :x="c.x" :y="c.y" :width="cellSize" :height="cellSize" :fill="c.fill" />
+            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
+            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
+
+            <text
+              :x="dosCard.padX + SHADOW_OFFSET"
+              :y="dosCard.kickerY + SHADOW_OFFSET"
+              :font-family="LABEL_FONT"
+              :font-size="KICKER_SIZE"
+              letter-spacing="4"
+              :fill="DARK_SHADOW"
+            >{{ kickerText }}</text>
+            <text
+              v-for="(line, i) in dosCard.lines"
+              :key="`s${i}`"
+              :x="dosCard.padX + SHADOW_OFFSET"
+              :y="dosCard.titleYs[i] + SHADOW_OFFSET"
+              :font-family="TITLE_FONT"
+              :font-size="dosCard.fontSize"
+              :fill="DARK_SHADOW"
+            >{{ line }}</text>
+            <text
+              :x="dosCard.padX + SHADOW_OFFSET"
+              :y="dosCard.bylineY + SHADOW_OFFSET"
+              :font-family="LABEL_FONT"
+              :font-size="BYLINE_SIZE"
+              letter-spacing="2"
+              :fill="DARK_SHADOW"
+            >{{ bylineText }}</text>
+
+            <text
+              :x="dosCard.padX"
+              :y="dosCard.kickerY"
+              :font-family="LABEL_FONT"
+              :font-size="KICKER_SIZE"
+              letter-spacing="4"
+              :fill="cardInk"
+            >{{ kickerText }}</text>
+            <text
+              v-for="(line, i) in dosCard.lines"
+              :key="`m${i}`"
+              :x="dosCard.padX"
+              :y="dosCard.titleYs[i]"
+              :font-family="TITLE_FONT"
+              :font-size="dosCard.fontSize"
+              :fill="cardInk"
+            >{{ line }}</text>
+            <text
+              :x="dosCard.padX"
+              :y="dosCard.bylineY"
+              :font-family="LABEL_FONT"
+              :font-size="BYLINE_SIZE"
+              letter-spacing="2"
+              :fill="cardInk"
+            >{{ bylineText }}</text>
+          </svg>
+        </div>
+        <p :class="$style.tiny">
+          {{ sixWave.levels }} tons · tinta do texto {{ cardInk }} · {{ cardInkBestContrast.toFixed(2) }}:1 sobre
+          {{ DARK_BG }} no melhor caso ({{ grade(cardInkBestContrast) }}) · pior caso real
+          {{ cardInkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }} ({{ grade(cardInkWorstContrast) }})
         </p>
         <DecisionCopy
           lab="capa · janela DOS + ondas"
           component="CoverLab.vue"
-          :settings="wavesDecisionSettings"
-          :context="wavesDecisionContext"
+          :settings="sixDecisionSettings"
+          :context="sixDecisionContext"
         />
       </div>
     </div>
 
     <p :class="$style.readout">
-      Os cinco contrastes de título, sempre pelo texto real: janela DOS {{ dosContrast.toFixed(2) }}:1 sobre preto
+      Os seis contrastes de título, sempre pelo texto real: janela DOS {{ dosContrast.toFixed(2) }}:1 sobre preto
       ({{ grade(dosContrast) }}), sem moldura {{ bleedContrast.toFixed(2) }}:1 sobre {{ brand.hex }}
-      ({{ grade(bleedContrast) }}). Plasma, wireframe 3D e janela DOS com ondas usam a mesma tinta sobre o mesmo
-      preto de base, então o melhor caso é igual nos três: {{ darkBestContrast.toFixed(2) }}:1
-      ({{ grade(darkBestContrast) }}); o pior caso também é igual: {{ darkWorstContrast.toFixed(2) }}:1
-      ({{ grade(darkWorstContrast) }}) sobre {{ brand.hex }}, quando o efeito satura na cor da marca. É por isso que
-      os três carregam a mesma sombra rígida de {{ SHADOW_OFFSET }}px em vez de confiar só na cor de fundo.
+      ({{ grade(bleedContrast) }}). Plasma, wireframe 3D, janela DOS com fogo e janela DOS com ondas desenham o
+      texto numa tinta derivada da cor da marca (misturada em direção ao branco até bater um piso de 4.5:1), não na
+      cor crua: o melhor caso é igual nos quatro, {{ cardInkBestContrast.toFixed(2) }}:1
+      ({{ grade(cardInkBestContrast) }}) sobre preto. O pior caso do plasma, do wireframe e das ondas é
+      {{ cardInkWorstContrast.toFixed(2) }}:1 ({{ grade(cardInkWorstContrast) }}) sobre {{ brand.hex }}, quando o
+      campo satura ou o glifo mais perto da câmera cobre a letra; o do fogo é recalculado com o próprio alfa quente
+      do knob, {{ fireInkWorstContrast.toFixed(2) }}:1 ({{ grade(fireInkWorstContrast) }}) sobre {{ fireWorstBg }},
+      porque uma célula do fogo nunca pinta a cor cheia sem mistura. Verde e amarelo não fecham 4.5:1 nem no branco
+      puro contra a própria versão saturada deles; os outros três fecham. É por isso que os quatro candidatos
+      também carregam a mesma sombra rígida de {{ SHADOW_OFFSET }}px em vez de confiar só na cor do texto. A
+      textura de cada um (o campo, o sólido, o fogo, as ondas) fica fraca de propósito, sem piso: só o texto
+      precisa ser sempre legível. O fogo (5) e as ondas (6) são efeitos diferentes de propósito (simulação de fogo
+      contra campo de senos quantizado); célula oca e alfa por célula ficam só no fogo, pra não virarem a mesma
+      leitura duas vezes.
     </p>
   </div>
 </template>
