@@ -36,7 +36,11 @@ const TITLES: Record<string, string> = {
   longo: 'Um título de noventa caracteres existe e vai chegar aqui um dia, então ele precisa caber',
 }
 
-const BRANDS = [
+// As cinco cores de marca de verdade, cada uma com seu próprio knob de "%
+// da marca mantida" no painel de tom (mais abaixo). `BRANDS`, logo depois de
+// TITLE_INK/DIMMED_WHITE existirem, estende esta lista com branco e branco
+// apagado para o hash também poder sortear os dois.
+const BRAND_COLORS = [
   { id: 'vermelho', hex: '#e30613' },
   { id: 'verde', hex: '#45b384' },
   { id: 'amarelo', hex: '#f5b200' },
@@ -366,6 +370,7 @@ const category = ref('meta')
 const cellSize = ref(36)
 const cursor = ref(true)
 const wireDensity = ref(12)
+const wireOpacityScale = ref(100)
 const fireIterations = ref(38)
 const fireDecay = ref(6)
 const fireHollowBands = ref(3)
@@ -489,14 +494,33 @@ const SHADOW_OFFSET = 3
 // duro, só mais largo.
 const BUSY_SHADOW_OFFSET = SHADOW_OFFSET * 2
 
+// O título é sempre esta tinta branca fixa, nos quatro candidatos, nunca
+// derivada da cor da marca; a assinatura carrega a mesma tinta, só apagada
+// por opacidade, um valor só reaproveitado em vez de um número por
+// candidato.
+const TITLE_INK = '#e6e4e0'
+const BYLINE_OPACITY = 0.75
+// Branco e branco apagado são duas entradas a mais que o hash pode sortear
+// pra "cor da marca", sem saturação nenhuma; sem knob de % pra nenhum dos
+// dois, porque não há mistura a fazer. `DIMMED_WHITE` é TITLE_INK levado a
+// BYLINE_OPACITY contra preto, a mesma dupla que já pinta a assinatura,
+// achatada num hex só, pra dar num traço ou preenchimento sólido como
+// qualquer outro tom de marca.
+const DIMMED_WHITE = toHex(composite(parseHex(TITLE_INK), parseHex(DARK_BG), BYLINE_OPACITY))
+const BRANDS = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id: 'branco-apagado', hex: DIMMED_WHITE }]
+
 /**
- * A cor da marca crua não é garantida legível como texto: ela foi escolhida
- * para outra coisa (uma barra, um traço, um fundo cheio), não para ficar em
- * cima de um efeito escuro. `--chip-ink` já resolve esse mesmo problema no
- * CSS, misturando a cor da marca em direção ao branco em `oklab`
- * (color-mix(in oklab, var(--chip-color) N%, white), src/styles/chips.css);
- * `mixOklab` em contrast.ts é a mesma conta em JS, porque aqui o SVG grava um
- * hex literal no build, não uma custom property que o CSS possa recalcular.
+ * A cor da marca crua não é garantida legível como elemento sobre um fundo
+ * escuro: ela foi escolhida para outra coisa (uma barra, um traço, um fundo
+ * cheio), não para ficar em cima de um efeito escuro. `--chip-ink` já resolve
+ * esse mesmo problema no CSS, misturando a cor da marca em direção ao branco
+ * em `oklab` (color-mix(in oklab, var(--chip-color) N%, white),
+ * src/styles/chips.css); `mixOklab` em contrast.ts é a mesma conta em JS,
+ * porque aqui o SVG grava um hex literal no build, não uma custom property
+ * que o CSS possa recalcular. O título é sempre branco fixo agora (a mesma
+ * tinta acima), então quem precisa dessa mistura são as bordas, o chapéu do
+ * candidato 4 e as células de fogo/ondas dos candidatos 5 e 6: as partes que
+ * continuam pintadas na cor da marca.
  *
  * Uma tentativa de piso automático (uma só razão-alvo, resolvida por busca)
  * já passou por este arquivo três vezes e o roxo sempre voltou "escuro
@@ -510,8 +534,8 @@ const BUSY_SHADOW_OFFSET = SHADOW_OFFSET * 2
  * laço parando na primeira razão que passa.
  *
  * Os valores abaixo são o ponto de partida: reproduzem (ou chegam o mais
- * perto que a troca de espaço de cor permite) a tinta que o cartão já
- * pintava antes deste knob existir, para abrir a bancada sem nada mudando
+ * perto que a troca de espaço de cor permite) o tom que essas peças já
+ * vestiam antes deste knob existir, para abrir a bancada sem nada mudando
  * sozinho.
  */
 const inkMix = reactive<Record<string, number>>({
@@ -526,26 +550,43 @@ function inkHexFor(brandHex: string, percent: number): string {
   return toHex(mixOklab(parseHex(brandHex), parseHex('#ffffff'), percent))
 }
 
-const cardInk = computed(() => inkHexFor(brand.value.hex, inkMix[brand.value.id]))
-const cardInkBestContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(DARK_BG)))
-const cardInkWorstContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(brand.value.hex)))
+// Branco e branco apagado não passam pelo mix: `brand.value.hex` já é o
+// valor final (TITLE_INK ou DIMMED_WHITE), fixo, sem knob por trás.
+const brandIsNeutral = computed(() => brand.value.id === 'branco' || brand.value.id === 'branco-apagado')
+const brandTone = computed(() =>
+  brandIsNeutral.value ? brand.value.hex : inkHexFor(brand.value.hex, inkMix[brand.value.id]),
+)
+const brandToneContrast = computed(() => ratio(parseHex(brandTone.value), parseHex(DARK_BG)))
+const dimmedWhiteContrast = computed(() => ratio(parseHex(DIMMED_WHITE), parseHex(DARK_BG)))
+// Frase pronta pra citar como a marca ativa virou o tom: a fórmula oklab
+// pras cinco cores de verdade, ou só o valor fixo quando é branco/branco
+// apagado, porque aí não existe knob nem mistura pra descrever.
+const brandToneDerivationLabel = computed(() => {
+  if (brand.value.id === 'branco') return `branco fixo (${TITLE_INK}), sem mistura e sem knob`
+  if (brand.value.id === 'branco-apagado') return `branco apagado fixo (${DIMMED_WHITE}), sem mistura e sem knob`
+  return `color-mix(in oklab, ${brand.value.hex} ${inkMix[brand.value.id]}%, white)`
+})
+// Pior caso pro título (sempre branco fixo) se um glifo do wireframe ou uma
+// célula de campo saturar até o tom cheio por baixo dele: usado pelo
+// wireframe (4) e pelas ondas (6), que não têm um alfa próprio como o fogo.
+const titleVsToneContrast = computed(() => ratio(parseHex(TITLE_INK), parseHex(brandTone.value)))
 
 // Uma leitura por marca, independente de qual está selecionada agora: é o
-// que deixa o painel mostrar "essa cor ainda está escura" para as cinco ao
-// mesmo tempo, sem precisar trocar a marca ativa cinco vezes.
-const brandInkReadouts = computed(() =>
+// que deixa o painel mostrar o tom (não mais a tinta do título, que agora é
+// fixa) contra preto para as cinco ao mesmo tempo, sem precisar trocar a
+// marca ativa cinco vezes. É o número que importa pras bordas, pro chapéu do
+// candidato 4 e pras células de campo do 5 e do 6, porque são eles que
+// carregam esse tom agora.
+const brandToneReadouts = computed(() =>
   Object.fromEntries(
-    BRANDS.map((b) => {
+    BRAND_COLORS.map((b) => {
       const hex = inkHexFor(b.hex, inkMix[b.id])
-      return [
-        b.id,
-        { hex, vsBlack: ratio(parseHex(hex), parseHex(DARK_BG)), vsBrand: ratio(parseHex(hex), parseHex(b.hex)) },
-      ]
+      return [b.id, { hex, vsBlack: ratio(parseHex(hex), parseHex(DARK_BG)) }]
     }),
   ),
 )
 
-const sixWaveCells = computed(() => waveField(sixWave.value, brand.value.hex, DARK_BG, cellSize.value, true))
+const sixWaveCells = computed(() => waveField(sixWave.value, brandTone.value, DARK_BG, cellSize.value, true))
 
 const WIRE_CENTER = { x: 900, y: 335 }
 const WIRE_RADIUS = 130
@@ -554,6 +595,9 @@ const WIRE_CAM_DIST = 4.5
 // WIRE_OPACITY_FLOOR é o piso (aresta mais longe) e WIRE_OPACITY_RANGE é
 // quanto ela sobe até a aresta mais perto. A moldura não faz mais parte dessa
 // escala: é o mesmo `<rect>` duplo dos candidatos 1, 5 e 6, por cima do sólido.
+// O knob "opacidade do wireframe" escala esse resultado inteiro por cima
+// (padrão 100%, o mesmo desenho de sempre); a queda por distância continua
+// por baixo dele, não é substituída por um valor fixo.
 const WIRE_OPACITY_FLOOR = 0.12
 const WIRE_OPACITY_RANGE = 0.35
 
@@ -567,10 +611,12 @@ const WIRE_OPACITY_RANGE = 0.35
  * ideia de "arestas escondidas ainda desenhadas, só que fracas" do cubo de
  * referência. Quando duas arestas caem na mesma célula da grade, fica a mais
  * perto (a de maior "closeness"), porque é ela que estaria na frente. Esse
- * desvanecimento é textura, não texto: fica como está, só o texto do cartão
- * ganhou piso de contraste. A opacidade do texto agora também tem teto: veja
- * WIRE_OPACITY_FLOOR/WIRE_OPACITY_RANGE acima, que regulam só o sólido; a
- * moldura desenha por cima como um `<rect>` fixo, fora dessa escala.
+ * desvanecimento é textura, não texto: fica como está, regulado só por
+ * WIRE_OPACITY_FLOOR/WIRE_OPACITY_RANGE (a queda por distância) e pelo knob
+ * de opacidade do wireframe (um multiplicador por cima, padrão 100%). O
+ * glifo pinta com o mesmo tom derivado do knob de marca que a moldura e o
+ * chapéu do candidato 4 usam; a moldura desenha por cima como um `<rect>`
+ * fixo, fora dessa escala de opacidade.
  */
 const wireCells = computed(() => {
   const solid = wireSolid.value
@@ -630,7 +676,7 @@ const fireField = computed(() => {
  */
 const dosFireCells = computed(() => {
   const size = cellSize.value
-  const brandRgb = parseHex(brand.value.hex)
+  const brandRgb = parseHex(brandTone.value)
   const bgRgb = parseHex(DARK_BG)
   const { values } = fireField.value
   const cells: Array<{ x: number; y: number; fill: string; hollow: boolean; alpha: number }> = []
@@ -652,19 +698,17 @@ const dosFireCells = computed(() => {
 const fireFilledCount = computed(() => dosFireCells.value.filter((c) => !c.hollow).length)
 const fireHollowCount = computed(() => dosFireCells.value.filter((c) => c.hollow).length)
 
-// Pior caso de verdade por baixo do texto: o fundo é preto puro, então uma
-// célula desenhada com opacidade `a` mistura pra `cor da marca × a`, não pra
-// cor cheia sem mistura. O pixel mais forte que o fogo consegue gerar usa o
+// Pior caso de verdade por baixo do título: o fundo é preto puro, então uma
+// célula desenhada com opacidade `a` mistura pro tom da marca × a, não pro
+// tom cheio sem mistura. O pixel mais forte que o fogo consegue gerar usa o
 // alfa mais quente, não 100% fixo; se esse knob descer, o pior caso melhora
 // sozinho, por isso ele é recalculado aqui e não reaproveita o número dos
-// candidatos 4 e 6.
-const fireWorstBg = computed(() => toHex(composite(parseHex(brand.value.hex), parseHex(DARK_BG), fireAlphaHot.value / 100)))
-const fireInkWorstContrast = computed(() => ratio(parseHex(cardInk.value), parseHex(fireWorstBg.value)))
+// candidatos 4 e 6. O título é sempre branco fixo agora, então quem entra
+// nessa conta é TITLE_INK, não mais uma tinta derivada da marca.
+const fireWorstBg = computed(() => toHex(composite(parseHex(brandTone.value), parseHex(DARK_BG), fireAlphaHot.value / 100)))
+const titleVsFireWorstContrast = computed(() => ratio(parseHex(TITLE_INK), parseHex(fireWorstBg.value)))
 
-const dosContrast = computed(() => ratio(parseHex('#e6e4e0'), parseHex('#000000')))
-// A cor crua da marca, sem mistura nenhuma: é o que o chapéu do candidato 4
-// veste agora, então o número que importa ali é este, não o do cardInk.
-const brandRawContrast = computed(() => ratio(parseHex(brand.value.hex), parseHex(DARK_BG)))
+const titleContrast = computed(() => ratio(parseHex(TITLE_INK), parseHex(DARK_BG)))
 
 // Os quatro candidatos que sobraram compartilham semente, categoria,
 // comprimento do título e cursor: todos entram na cor, no rótulo e no texto
@@ -677,17 +721,18 @@ const sharedDecisionSettings = computed(() => [
   { label: 'semente', value: String(seed.value) },
 ])
 
-// Nos três candidatos abaixo que pintam texto com `cardInk`, o valor do knob
-// de tinta da marca ativa é o que decide a razão de contraste reportada; vai
-// junto na citação para o valor ser reproduzível.
+// Nos três candidatos abaixo, o tom que pinta bordas, o chapéu (candidato 4)
+// e as células de campo (candidatos 5 e 6) vem desse knob da marca ativa;
+// vai junto na citação para o valor ser reproduzível.
 const inkSetting = computed(() => ({
-  label: 'tinta (oklab, % da marca mantida)',
-  value: `${inkMix[brand.value.id]}%`,
+  label: 'tom da marca (oklab, % da marca mantida)',
+  value: brandIsNeutral.value ? 'fixo, sem knob' : `${inkMix[brand.value.id]}%`,
 }))
 
 const wireframeDecisionSettings = computed(() => [
   ...sharedDecisionSettings.value,
   { label: 'densidade do wireframe', value: `${wireDensity.value}px` },
+  { label: 'opacidade do wireframe', value: `${wireOpacityScale.value}%` },
   {
     label: 'sólido gerado (hash)',
     value: `${wireSolid.value.params.sides} lados · ${wireSolid.value.params.ringCount} anel(is) · ${wireSolid.value.params.topClose ? 'topo fechado' : 'topo aberto'} · ${wireSolid.value.params.bottomClose ? 'base fechada' : 'base aberta'}`,
@@ -717,22 +762,22 @@ const sixDecisionSettings = computed(() => [
 const SVG_NOTE = 'A capa é um <svg viewBox="0 0 1200 630"> de verdade (1200x630), o mesmo SVG que o gerador rasteriza com sharp no build. Cor da marca e semente derivam de hashSlug(post.slug) + semente, nunca de Math.random(), para o cache do card social não estragar a cada build.'
 
 const dosDecisionContext = computed(
-  () => `${SVG_NOTE} Título ${dosContrast.value.toFixed(2)}:1 sobre #000000 (${grade(dosContrast.value)}).`,
+  () => `${SVG_NOTE} Título ${titleContrast.value.toFixed(2)}:1 sobre #000000 (${grade(titleContrast.value)}).`,
 )
 
 const wireframeDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Sólido e giro nascem do hash do slug via um PRNG pequeno (mulberry32), não de Math.random() nem de uma lista fixa de formas; a projeção é perspectiva pura em JS (sem canvas, sem WebGL, sem textmode.js), porque o gerador real só roda sharp sobre SVG estático no build. A moldura voltou a ser o mesmo retângulo duplo de traço liso dos candidatos 1, 5 e 6, por cima do sólido, não mais a malha de "+" do wireframe; o glifo fica só por dentro dela. O chapéu "blog.lsantos.dev / ${category.value}" ganhou cor própria, a cor cheia da marca (${brand.value.hex}, ${brandRawContrast.value.toFixed(2)}:1 sobre ${DARK_BG}, ${grade(brandRawContrast.value)}), e a assinatura escureceu (75% de opacidade da tinta do título), pra dar mais um degrau de leitura entre chapéu, título e assinatura. Tinta do título: color-mix(in oklab, ${brand.value.hex} ${inkMix[brand.value.id]}%, white) = ${cardInk.value}, ${cardInkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(cardInkBestContrast.value)}), ${cardInkWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} no pior caso (${grade(cardInkWorstContrast.value)}); o roxo já voltou "escuro demais" três vezes com um piso automático de 4,5:1, então agora é um knob por marca na bancada, não mais um laço decidindo sozinho. O título também carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
+    `${SVG_NOTE} Sólido e giro nascem do hash do slug via um PRNG pequeno (mulberry32), não de Math.random() nem de uma lista fixa de formas; a projeção é perspectiva pura em JS (sem canvas, sem WebGL, sem textmode.js), porque o gerador real só roda sharp sobre SVG estático no build. A moldura voltou a ser o mesmo retângulo duplo de traço liso dos candidatos 1, 5 e 6, por cima do sólido, não mais a malha de "+" do wireframe; o glifo fica só por dentro dela, e agora sua opacidade também escala por um knob (padrão 100%, a mesma queda por distância de sempre por baixo: piso ${WIRE_OPACITY_FLOOR}, alcance ${WIRE_OPACITY_RANGE}). O chapéu "blog.lsantos.dev / ${category.value}", a moldura e o glifo do sólido pintam agora com o tom derivado do knob de marca, não mais a cor crua: ${brandToneDerivationLabel.value} = ${brandTone.value}, ${brandToneContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(brandToneContrast.value)}); o roxo já voltou "escuro demais" três vezes com um piso automático de 4,5:1, então continua um knob por marca na bancada, não um laço decidindo sozinho. O título é sempre branco fixo (${TITLE_INK}), não mais derivado desse knob: ${titleContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(titleContrast.value)}); a assinatura carrega a mesma tinta, só 75% de opacidade, e o pior caso, se o glifo mais perto da câmera cobrir a letra, é ${titleVsToneContrast.value.toFixed(2)}:1 (${grade(titleVsToneContrast.value)}). O título também carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
 )
 
 const fireDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o algoritmo de fogo do Doom de verdade (fonte numa borda escolhida pelo hash, queda e desvio horizontal também do hash, ${fireIterations.value} iterações), clipado por dentro da moldura interna, não vazando pro resto do cartão; ${FIRE_BANDS} bandas de tom, as ${fireHollowBands.value} mais frias ocas, alfa ${fireAlphaMode.value} entre ${fireAlphaCold.value}% e ${fireAlphaHot.value}%. Tinta do texto: color-mix(in oklab, ${brand.value.hex} ${inkMix[brand.value.id]}%, white) = ${cardInk.value}, ${cardInkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(cardInkBestContrast.value)}); pior caso real, recalculado com o alfa quente do fogo (não a cor cheia), ${fireInkWorstContrast.value.toFixed(2)}:1 sobre ${fireWorstBg.value} (${grade(fireInkWorstContrast.value)}); por isso o título, o chapéu e a assinatura carregam uma sombra rígida maior contra esse fundo mais ocupado, de ${BUSY_SHADOW_OFFSET}px (o dobro do candidato 4).`,
+    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o algoritmo de fogo do Doom de verdade (fonte numa borda escolhida pelo hash, queda e desvio horizontal também do hash, ${fireIterations.value} iterações), clipado por dentro da moldura interna, não vazando pro resto do cartão; ${FIRE_BANDS} bandas de tom, as ${fireHollowBands.value} mais frias ocas, alfa ${fireAlphaMode.value} entre ${fireAlphaCold.value}% e ${fireAlphaHot.value}%. As células e a moldura pintam com o tom derivado do knob de marca, não a cor crua: ${brandToneDerivationLabel.value} = ${brandTone.value}, ${brandToneContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(brandToneContrast.value)}). Chapéu, título e assinatura são sempre brancos (${TITLE_INK}), não mais dessa mistura: ${titleContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(titleContrast.value)}); pior caso real, recalculado com o alfa quente do fogo sobre o tom (não a cor cheia da marca), ${titleVsFireWorstContrast.value.toFixed(2)}:1 sobre ${fireWorstBg.value} (${grade(titleVsFireWorstContrast.value)}); por isso o título, o chapéu e a assinatura carregam uma sombra rígida maior contra esse fundo mais ocupado, de ${BUSY_SHADOW_OFFSET}px (o dobro do candidato 4).`,
 )
 
 const sixDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o campo de senos que nasceu para o candidato 3 (plasma, arquivado), quantizado em ${sixWave.value.levels} tons (como uma paleta de máquina antiga), sem célula oca e sem alfa por célula: isso fica só no candidato 5 (fogo), pra esses dois não virarem a mesma ideia duas vezes. Tinta do texto: color-mix(in oklab, ${brand.value.hex} ${inkMix[brand.value.id]}%, white) = ${cardInk.value}, ${cardInkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(cardInkBestContrast.value)}); pior caso real ${cardInkWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(cardInkWorstContrast.value)}), quando o campo satura na cor da marca; por isso o título, o chapéu e a assinatura também carregam a mesma sombra rígida maior do candidato 5, de ${BUSY_SHADOW_OFFSET}px, contra esse fundo mais ocupado.`,
+    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o campo de senos que nasceu para o candidato 3 (plasma, arquivado), quantizado em ${sixWave.value.levels} tons (como uma paleta de máquina antiga), sem célula oca e sem alfa por célula: isso fica só no candidato 5 (fogo), pra esses dois não virarem a mesma ideia duas vezes. As células e a moldura pintam com o tom derivado do knob de marca, não a cor crua: ${brandToneDerivationLabel.value} = ${brandTone.value}, ${brandToneContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(brandToneContrast.value)}). Chapéu, título e assinatura são sempre brancos (${TITLE_INK}), não mais dessa mistura: ${titleContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(titleContrast.value)}); pior caso real ${titleVsToneContrast.value.toFixed(2)}:1 sobre ${brandTone.value} (${grade(titleVsToneContrast.value)}), quando o campo satura no tom da marca; por isso o título, o chapéu e a assinatura também carregam a mesma sombra rígida maior do candidato 5, de ${BUSY_SHADOW_OFFSET}px, contra esse fundo mais ocupado.`,
 )
 </script>
 
@@ -762,6 +807,7 @@ const sixDecisionContext = computed(
     <Panel label="candidatos 4 · 5 · 6 (sólido, giro, fogo e ondas vêm do hash)">
       <Knob v-model="cellSize" label="célula da grade (fogo/ondas)" :min="16" :max="48" :step="2" unit="px" />
       <Knob v-model="wireDensity" label="densidade do wireframe" :min="5" :max="32" :step="1" unit="px" />
+      <Knob v-model="wireOpacityScale" label="opacidade do wireframe" :min="0" :max="200" :step="5" unit="%" />
       <Knob v-model="fireIterations" label="iterações do fogo" :min="4" :max="60" :step="2" />
       <Knob v-model="fireDecay" label="queda do fogo" :min="1" :max="20" :step="1" />
       <Knob v-model="fireHollowBands" label="bandas ocas do fogo" :min="0" :max="5" :step="1" />
@@ -770,13 +816,27 @@ const sixDecisionContext = computed(
       <Pick v-model="fireAlphaMode" label="modo do alfa do fogo" :options="FIRE_ALPHA_MODE_OPTIONS" />
     </Panel>
 
-    <Panel label="tinta do texto por cor da marca (oklab, compartilhada entre 4 · 5 · 6)">
-      <div v-for="b in BRANDS" :key="b.id" :class="$style.inkRow">
+    <Panel label="tom da marca (oklab, compartilhado entre 4 · 5 · 6): bordas, chapéu e campo">
+      <div v-for="b in BRAND_COLORS" :key="b.id" :class="$style.inkRow">
         <Knob v-model="inkMix[b.id]" :label="`${b.id} · % da marca mantida`" :min="0" :max="100" :step="1" unit="%" />
         <p :class="$style.tiny">
-          {{ brandInkReadouts[b.id].hex }} · {{ brandInkReadouts[b.id].vsBlack.toFixed(2) }}:1 sobre preto
-          ({{ grade(brandInkReadouts[b.id].vsBlack) }}) · {{ brandInkReadouts[b.id].vsBrand.toFixed(2) }}:1 sobre
-          {{ b.hex }} ({{ grade(brandInkReadouts[b.id].vsBrand) }})
+          {{ brandToneReadouts[b.id].hex }} · {{ brandToneReadouts[b.id].vsBlack.toFixed(2) }}:1 sobre preto
+          ({{ grade(brandToneReadouts[b.id].vsBlack) }})
+        </p>
+      </div>
+      <!-- Branco e branco apagado: mais duas entradas que o hash pode
+           sortear pra "cor da marca", sem knob (não há % pra ajustar), só o
+           número contra preto, do mesmo jeito que as cinco cores acima. -->
+      <div :class="$style.inkRow">
+        <p :class="$style.tiny">
+          branco (sem knob) · {{ TITLE_INK }} · {{ titleContrast.toFixed(2) }}:1 sobre preto
+          ({{ grade(titleContrast) }})
+        </p>
+      </div>
+      <div :class="$style.inkRow">
+        <p :class="$style.tiny">
+          branco apagado (sem knob) · {{ DIMMED_WHITE }} · {{ dimmedWhiteContrast.toFixed(2) }}:1 sobre preto
+          ({{ grade(dimmedWhiteContrast) }})
         </p>
       </div>
     </Panel>
@@ -792,15 +852,15 @@ const sixDecisionContext = computed(
             :aria-label="`Capa candidata, janela DOS, categoria ${category}`"
           >
             <rect width="1200" height="630" fill="#000000" />
-            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
-            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
+            <rect v-bind="outerFrame" fill="none" :stroke="brandTone" :stroke-width="BORDER_STROKE" />
+            <rect v-bind="innerFrame" fill="none" :stroke="brandTone" stroke-width="3" />
             <text
               :x="dosCard.padX"
               :y="dosCard.kickerY"
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              fill="#e6e4e0"
+              :fill="TITLE_INK"
               opacity="0.75"
             >{{ kickerText }}</text>
             <text
@@ -810,7 +870,7 @@ const sixDecisionContext = computed(
               :y="dosCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              fill="#e6e4e0"
+              :fill="TITLE_INK"
             >{{ line }}</text>
             <text
               :x="dosCard.padX"
@@ -818,11 +878,12 @@ const sixDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="brand.hex"
+              :fill="TITLE_INK"
+              :opacity="BYLINE_OPACITY"
             >{{ bylineText }}</text>
           </svg>
         </div>
-        <p :class="$style.tiny">título {{ dosContrast.toFixed(2) }}:1 sobre #000000 · {{ grade(dosContrast) }}</p>
+        <p :class="$style.tiny">título {{ titleContrast.toFixed(2) }}:1 sobre #000000 · {{ grade(titleContrast) }}</p>
         <DecisionCopy
           lab="capa · janela DOS"
           component="CoverLab.vue"
@@ -850,11 +911,11 @@ const sixDecisionContext = computed(
               dominant-baseline="central"
               :font-family="LABEL_FONT"
               :font-size="8 + c.closeness * wireDensity"
-              :fill="brand.hex"
-              :opacity="WIRE_OPACITY_FLOOR + c.closeness * WIRE_OPACITY_RANGE"
+              :fill="brandTone"
+              :opacity="Math.min(1, (WIRE_OPACITY_FLOOR + c.closeness * WIRE_OPACITY_RANGE) * (wireOpacityScale / 100))"
             >+</text>
-            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
-            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
+            <rect v-bind="outerFrame" fill="none" :stroke="brandTone" :stroke-width="BORDER_STROKE" />
+            <rect v-bind="innerFrame" fill="none" :stroke="brandTone" stroke-width="3" />
 
             <text
               :x="dosCard.padX + SHADOW_OFFSET"
@@ -882,16 +943,16 @@ const sixDecisionContext = computed(
               :fill="DARK_SHADOW"
             >{{ bylineText }}</text>
 
-            <!-- Chapéu com cor própria (a cheia da marca), não a tinta do
-                 título: o objetivo é ele ler como uma camada diferente do
-                 título, não a mesma tinta repetida três vezes. -->
+            <!-- Chapéu com cor própria (o tom derivado do knob de marca), não
+                 a tinta do título: o objetivo é ele ler como uma camada
+                 diferente do título, não a mesma tinta repetida três vezes. -->
             <text
               :x="dosCard.padX"
               :y="dosCard.kickerY"
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="brand.hex"
+              :fill="brandTone"
             >{{ kickerText }}</text>
 
             <!-- Régua tracejada entre o chapéu e o título: mesmo traço do
@@ -903,7 +964,7 @@ const sixDecisionContext = computed(
               :y1="dosCard.ruleY"
               :x2="CARD_W - dosCard.padX"
               :y2="dosCard.ruleY"
-              :stroke="brand.hex"
+              :stroke="brandTone"
               stroke-width="2"
               stroke-dasharray="10 6"
               opacity="0.7"
@@ -916,28 +977,29 @@ const sixDecisionContext = computed(
               :y="dosCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              :fill="cardInk"
+              :fill="TITLE_INK"
             >{{ line }}</text>
             <!-- Assinatura um degrau mais fraca que o título: ainda a mesma
-                 tinta, só 75% de opacidade, pra abrir uma hierarquia entre
-                 título, chapéu (cor própria) e assinatura (mais discreta). -->
+                 tinta branca fixa, só apagada por opacidade, pra abrir uma
+                 hierarquia entre título, chapéu (tom da marca) e assinatura
+                 (mais discreta). -->
             <text
               :x="dosCard.padX"
               :y="dosCard.bylineY"
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="cardInk"
-              opacity="0.75"
+              :fill="TITLE_INK"
+              :opacity="BYLINE_OPACITY"
             >{{ bylineText }}</text>
           </svg>
         </div>
         <p :class="$style.tiny">
-          {{ wireSolid.params.sides }} lados · {{ wireSolid.params.ringCount }} anel(is) · chapéu {{ brand.hex }}
-          {{ brandRawContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} ({{ grade(brandRawContrast) }}) · tinta do título
-          {{ cardInk }} · {{ cardInkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso
-          ({{ grade(cardInkBestContrast) }}) · pior caso real {{ cardInkWorstContrast.toFixed(2) }}:1 sobre
-          {{ brand.hex }} ({{ grade(cardInkWorstContrast) }})
+          {{ wireSolid.params.sides }} lados · {{ wireSolid.params.ringCount }} anel(is) · tom {{ brandTone }} ·
+          {{ brandToneContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} ({{ grade(brandToneContrast) }}) · título fixo
+          {{ TITLE_INK }} · {{ titleContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} ({{ grade(titleContrast) }}) · pior
+          caso, se o glifo mais perto cobrir a letra, {{ titleVsToneContrast.toFixed(2) }}:1
+          ({{ grade(titleVsToneContrast) }})
         </p>
         <DecisionCopy
           lab="capa · wireframe 3D"
@@ -976,8 +1038,8 @@ const sixDecisionContext = computed(
                 :opacity="c.alpha"
               />
             </g>
-            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
-            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
+            <rect v-bind="outerFrame" fill="none" :stroke="brandTone" :stroke-width="BORDER_STROKE" />
+            <rect v-bind="innerFrame" fill="none" :stroke="brandTone" stroke-width="3" />
 
             <!-- Sombra maior que a do candidato 4 (BUSY_SHADOW_OFFSET, o
                  dobro): o fogo por trás é uma textura bem mais ocupada, e o
@@ -1014,7 +1076,7 @@ const sixDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="cardInk"
+              :fill="TITLE_INK"
             >{{ kickerText }}</text>
             <text
               v-for="(line, i) in dosCard.lines"
@@ -1023,7 +1085,7 @@ const sixDecisionContext = computed(
               :y="dosCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              :fill="cardInk"
+              :fill="TITLE_INK"
             >{{ line }}</text>
             <text
               :x="dosCard.padX"
@@ -1031,16 +1093,18 @@ const sixDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="cardInk"
+              :fill="TITLE_INK"
+              :opacity="BYLINE_OPACITY"
             >{{ bylineText }}</text>
           </svg>
         </div>
         <p :class="$style.tiny">
           fogo da borda "{{ fireField.edge }}" · {{ fireFilledCount }} células cheias · {{ fireHollowCount }} ocas ·
-          alfa {{ fireAlphaMode }} {{ fireAlphaCold }}%–{{ fireAlphaHot }}% · tinta do texto {{ cardInk }} ·
-          {{ cardInkBestContrast.toFixed(2) }}:1 no melhor caso ({{ grade(cardInkBestContrast) }}) · pior caso real
-          (recalculado com o alfa quente) {{ fireInkWorstContrast.toFixed(2) }}:1 sobre {{ fireWorstBg }}
-          ({{ grade(fireInkWorstContrast) }})
+          alfa {{ fireAlphaMode }} {{ fireAlphaCold }}%–{{ fireAlphaHot }}% · tom {{ brandTone }} ·
+          {{ brandToneContrast.toFixed(2) }}:1 sobre preto ({{ grade(brandToneContrast) }}) · título fixo
+          {{ titleContrast.toFixed(2) }}:1 sobre preto ({{ grade(titleContrast) }}) · pior caso real (recalculado com
+          o alfa quente sobre o tom) {{ titleVsFireWorstContrast.toFixed(2) }}:1 sobre {{ fireWorstBg }}
+          ({{ grade(titleVsFireWorstContrast) }})
         </p>
         <DecisionCopy
           lab="capa · janela DOS + fogo"
@@ -1061,8 +1125,8 @@ const sixDecisionContext = computed(
           >
             <rect width="1200" height="630" :fill="DARK_BG" />
             <rect v-for="(c, i) in sixWaveCells" :key="i" :x="c.x" :y="c.y" :width="cellSize" :height="cellSize" :fill="c.fill" />
-            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
-            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
+            <rect v-bind="outerFrame" fill="none" :stroke="brandTone" :stroke-width="BORDER_STROKE" />
+            <rect v-bind="innerFrame" fill="none" :stroke="brandTone" stroke-width="3" />
 
             <!-- Mesma sombra maior do candidato 5 (BUSY_SHADOW_OFFSET): o
                  campo de ondas por trás também é textura ocupada demais para
@@ -1099,7 +1163,7 @@ const sixDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="cardInk"
+              :fill="TITLE_INK"
             >{{ kickerText }}</text>
             <text
               v-for="(line, i) in dosCard.lines"
@@ -1108,7 +1172,7 @@ const sixDecisionContext = computed(
               :y="dosCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              :fill="cardInk"
+              :fill="TITLE_INK"
             >{{ line }}</text>
             <text
               :x="dosCard.padX"
@@ -1116,14 +1180,16 @@ const sixDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="cardInk"
+              :fill="TITLE_INK"
+              :opacity="BYLINE_OPACITY"
             >{{ bylineText }}</text>
           </svg>
         </div>
         <p :class="$style.tiny">
-          {{ sixWave.levels }} tons · tinta do texto {{ cardInk }} · {{ cardInkBestContrast.toFixed(2) }}:1 sobre
-          {{ DARK_BG }} no melhor caso ({{ grade(cardInkBestContrast) }}) · pior caso real
-          {{ cardInkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }} ({{ grade(cardInkWorstContrast) }})
+          {{ sixWave.levels }} tons · tom {{ brandTone }} · {{ brandToneContrast.toFixed(2) }}:1 sobre {{ DARK_BG }}
+          ({{ grade(brandToneContrast) }}) · título fixo {{ titleContrast.toFixed(2) }}:1 sobre {{ DARK_BG }}
+          ({{ grade(titleContrast) }}) · pior caso real {{ titleVsToneContrast.toFixed(2) }}:1 sobre {{ brandTone }}
+          ({{ grade(titleVsToneContrast) }})
         </p>
         <DecisionCopy
           lab="capa · janela DOS + ondas"
@@ -1135,24 +1201,29 @@ const sixDecisionContext = computed(
     </div>
 
     <p :class="$style.readout">
-      Os quatro contrastes de título que sobraram da decisão, sempre pelo texto real: janela DOS
-      {{ dosContrast.toFixed(2) }}:1 sobre preto ({{ grade(dosContrast) }}). Wireframe 3D, janela DOS com fogo e
-      janela DOS com ondas pintam o título numa tinta derivada da cor da marca, color-mix(in oklab, marca N%,
-      white), não mais um piso automático: um knob por cor de marca no painel acima decide o N, porque um só ajuste
-      nunca valeu pras cinco ao mesmo tempo (o roxo voltou escuro demais três vezes tentando). No valor de partida de
-      cada knob, o melhor caso é {{ cardInkBestContrast.toFixed(2) }}:1 ({{ grade(cardInkBestContrast) }}) sobre
-      preto para a marca ativa. O pior caso do wireframe e das ondas é {{ cardInkWorstContrast.toFixed(2) }}:1
-      ({{ grade(cardInkWorstContrast) }}) sobre {{ brand.hex }}, quando o campo satura ou o glifo mais perto da
-      câmera cobre a letra; o do fogo é recalculado com o próprio alfa quente do knob,
-      {{ fireInkWorstContrast.toFixed(2) }}:1 ({{ grade(fireInkWorstContrast) }}) sobre {{ fireWorstBg }}, porque uma
-      célula do fogo nunca pinta a cor cheia sem mistura. Verde e amarelo não fecham 4.5:1 nem no branco puro contra
-      a própria versão saturada deles; os outros três cruzam a linha no valor de partida de cada knob, mas por
-      pouco, e é para isso que o knob existe. O wireframe carrega a sombra rígida original de {{ SHADOW_OFFSET }}px;
-      fogo e ondas, contra um fundo bem mais ocupado, carregam o dobro, {{ BUSY_SHADOW_OFFSET }}px. No wireframe a
-      própria moldura agora é mais vibrante que o sólido atrás dela, pra ler como duas camadas, e o chapéu
-      "blog.lsantos.dev / seção" ganhou a cor cheia da marca em vez da tinta do título. O fogo (5) e as ondas (6) são
-      efeitos diferentes de propósito (simulação de fogo contra campo de senos quantizado); célula oca e alfa por
-      célula ficam só no fogo, pra não virarem a mesma leitura duas vezes.
+      O título é sempre a mesma tinta branca fixa nos quatro candidatos, {{ TITLE_INK }}, nunca mais derivada da cor
+      da marca: {{ titleContrast.toFixed(2) }}:1 sobre preto ({{ grade(titleContrast) }}), a mesma razão pros quatro,
+      qualquer marca, qualquer knob. Quem ainda usa a mistura em direção ao branco em oklab, color-mix(in oklab,
+      marca N%, white), são as bordas dos quatro candidatos, o chapéu do wireframe (4) e as células de campo do fogo
+      (5) e das ondas (6): um knob por cor de marca no painel acima decide o N, porque um só ajuste nunca valeu pras
+      cinco ao mesmo tempo (o roxo voltou escuro demais três vezes tentando). No valor de partida de cada knob, esse
+      tom fica em {{ brandToneContrast.toFixed(2) }}:1 ({{ grade(brandToneContrast) }}) sobre preto para a marca
+      ativa. A alegação antiga, de que verde e amarelo não fechavam 4.5:1 nem no branco puro contra a própria versão
+      saturada deles, era sobre a tinta do título contra o campo saturado na cor crua da marca; ela não vale mais do
+      jeito que estava, porque o título não deriva mais da marca e o campo agora satura no tom do knob, não na cor
+      crua. O que sobrou de risco mudou de forma: no valor de partida de cada knob, o tom fica claro demais perto do
+      próprio branco do título, e é aí que mora o pior caso agora, pras cinco cores, não só duas. Pior caso do
+      wireframe e das ondas, se o glifo mais perto da câmera ou o campo saturarem por baixo do título,
+      {{ titleVsToneContrast.toFixed(2) }}:1 ({{ grade(titleVsToneContrast) }}) contra {{ brandTone }}; o do fogo é
+      recalculado com o próprio alfa quente do knob sobre esse mesmo tom,
+      {{ titleVsFireWorstContrast.toFixed(2) }}:1 ({{ grade(titleVsFireWorstContrast) }}) sobre {{ fireWorstBg }},
+      porque uma célula do fogo nunca pinta a cor cheia sem mistura. O wireframe carrega a sombra rígida original de
+      {{ SHADOW_OFFSET }}px; fogo e ondas, contra um fundo bem mais ocupado, carregam o dobro,
+      {{ BUSY_SHADOW_OFFSET }}px. No wireframe, a opacidade do sólido agora também escala por um knob (padrão 100%,
+      o mesmo desenho de sempre), por cima da queda por distância de sempre; a própria moldura continua mais
+      vibrante que o sólido atrás dela, pra ler como duas camadas. O fogo (5) e as ondas (6) são efeitos diferentes
+      de propósito (simulação de fogo contra campo de senos quantizado); célula oca e alfa por célula ficam só no
+      fogo, pra não virarem a mesma leitura duas vezes.
     </p>
   </div>
 </template>
