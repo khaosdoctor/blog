@@ -124,13 +124,15 @@ const { locale } = Astro.props
    * (`inset-inline: 0`) rather than a fixed square, since this button's
    * content (icon + hint) is wider than it is tall. The block insets centre
    * it in the 44px hit target: half of the 12px difference on each side.
+   * Border reads --accent-day, not --rule: see ThemeToggle's own .tt-open
+   * ::before for the full reasoning and the measured numbers.
    */
   .sx-open::before {
     content: '';
     position: absolute;
     inset-inline: 0;
     inset-block: calc((var(--icon-btn-hit) - var(--icon-btn-chip)) / 2);
-    border: var(--border) solid var(--rule);
+    border: var(--border) solid var(--accent-day);
     border-radius: var(--radius);
     background: var(--bg);
     pointer-events: none;
