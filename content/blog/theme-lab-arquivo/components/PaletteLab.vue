@@ -13,10 +13,10 @@
  * funciona", não "e se eu mexer".
  */
 import { reactive } from 'vue'
-import DecisionCopy from '../../theme-lab/components/DecisionCopy.vue'
-import Pick from '../../theme-lab/components/Pick.vue'
-import { composite, grade, parseHex, ratio, toHex, type Rgb } from '../../theme-lab/components/contrast'
-import '../../theme-lab/components/fonts.css'
+import DecisionCopy from './DecisionCopy.vue'
+import Pick from './Pick.vue'
+import { composite, grade, parseHex, ratio, toHex, type Rgb } from './contrast'
+import './fonts.css'
 
 const FLOOR = 4.5
 const RAMP_STEP = 6

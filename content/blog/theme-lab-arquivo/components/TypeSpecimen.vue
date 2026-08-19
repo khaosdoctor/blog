@@ -11,14 +11,14 @@
  * que um post carrega e que decide se a fonte aguenta ou não.
  */
 import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue'
-import DecisionCopy from '../../theme-lab/components/DecisionCopy.vue'
-import Knob from '../../theme-lab/components/Knob.vue'
-import Panel from '../../theme-lab/components/Panel.vue'
-import Pick from '../../theme-lab/components/Pick.vue'
-import Toggle from '../../theme-lab/components/Toggle.vue'
+import DecisionCopy from './DecisionCopy.vue'
+import Knob from './Knob.vue'
+import Panel from './Panel.vue'
+import Pick from './Pick.vue'
+import Toggle from './Toggle.vue'
 import { BODY_FACE_OPTIONS, faceById } from './faces'
-import { parseHex, ratio } from '../../theme-lab/components/contrast'
-import '../../theme-lab/components/fonts.css'
+import { parseHex, ratio } from './contrast'
+import './fonts.css'
 
 const THEME_OPTIONS = [
   { id: 'escuro', name: 'escuro do site' },

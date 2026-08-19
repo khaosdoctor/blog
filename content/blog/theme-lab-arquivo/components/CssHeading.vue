@@ -10,13 +10,13 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 // Os compartilhados continuam no laboratório vivo: ver o comentário igual em
 // TmSolid.vue, no mesmo diretório.
-import DecisionCopy from '../../theme-lab/components/DecisionCopy.vue'
-import Knob from '../../theme-lab/components/Knob.vue'
-import Panel from '../../theme-lab/components/Panel.vue'
-import Pick from '../../theme-lab/components/Pick.vue'
-import Toggle from '../../theme-lab/components/Toggle.vue'
-import { parseHex, ratio } from '../../theme-lab/components/contrast'
-import '../../theme-lab/components/fonts.css'
+import DecisionCopy from './DecisionCopy.vue'
+import Knob from './Knob.vue'
+import Panel from './Panel.vue'
+import Pick from './Pick.vue'
+import Toggle from './Toggle.vue'
+import { parseHex, ratio } from './contrast'
+import './fonts.css'
 
 const LINES = [
   'npm create astro@latest',
