@@ -349,6 +349,13 @@ The relevant rules, exactly:
 
 What that means here. Every animated candidate has an explicit stop control, which is the 2.2.2 mechanism. The flicker in the CRT demo runs at 0.25Hz, twelve times under the 2.3.1 threshold, and still starts off. And the rule followed for `prefers-reduced-motion: reduce` is the strong one: **do not start the loop at all**, render one static frame, rather than starting and then offering a pause. A canvas that auto-started for more than five seconds and then paused still owes the reader a stop control under 2.2.2, so starting stopped is simpler as well as kinder.
 
+**This position was reopened, once, since this was written.** The Conway "game of life" bench
+(`GameOfLife.vue`, `/theme-lab/`) won a place on the real site; `docs/design.md`'s Direction section and Settled
+list carry the current wording, and `docs/decisions-log.md` has the fuller accounting, including a corrected
+reading of WCAG 2.3.1 against the bench's own claim about it. The caution recorded in this section did not change:
+reduced motion still means the loop never starts rather than starting and pausing, and a manual pause still covers
+WCAG 2.2.2.
+
 One thing the lab does not yet handle and the real site will have to: `forced-colors: active` (Windows High Contrast) replaces author colours with system colours wholesale. It would strip a phosphor palette, a scanline overlay and a glow in one go. Any of this that ships needs a `forced-colors` branch, and that is a note for implementation rather than a decision to make now.
 
 ---

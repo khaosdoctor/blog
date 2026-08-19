@@ -8,11 +8,15 @@ ASCII/ANSI, 8-bit, pixelated, terminal. Box drawing instead of borders where it 
 section markers like `SECTION 00 / INDEX`, dashed rules, information dense over decorated.
 
 References: [unix.foo](https://unix.foo), [xn--gckvb8fzb.com](https://xn--gckvb8fzb.com/),
-[tramoia.sh](https://tramoia.sh). Motion is decided now, and it is nearly absent: the site carries almost no
-animation, and the one exception is the header logo mark. [textmode.js](https://code.textmode.art), the WebGL2
-library the original brief pointed at, lost that decision along with the candidates that used it; it stays installed
-only because those retired candidates are kept working at `/theme-lab-arquivo/`. Every live candidate, including the
-logo mark, is plain SVG, CSS and DOM.
+[tramoia.sh](https://tramoia.sh). Motion was settled once as nearly absent, with the header logo mark as the only
+exception; the Conway "game of life" background reopened that call rather than overriding it quietly (see Settled),
+and kept the caution the original call was made with: reduced motion still freezes the field on one frame instead of
+pausing it partway, a manual pause control still covers WCAG 2.2.2, and a reader can now push the OS preference in
+either direction from the settings panel rather than only follow it. [textmode.js](https://code.textmode.art), the
+WebGL2 library the original brief pointed at, lost the earlier, stricter version of this decision along with the
+candidates that used it; it stays installed only because those retired candidates are kept working at
+`/theme-lab-arquivo/`. Every live candidate, including the logo mark and the Conway background, is plain SVG, CSS,
+canvas and DOM.
 
 The same treatment covers the generated images: post covers, OG cards and any background art share the palette and
 the pixel grid, so a share card looks like the site.
@@ -130,9 +134,48 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   control renders `hidden` and only appears once `theme-toggle.ts` confirms it can run. `BaseLayout`'s two hardcoded
   `theme-color` meta tags cannot read a custom property, so an explicit choice would otherwise leave them disagreeing
   with the page; the script rewrites both to the resolved colour and restores their own per-scheme colour when the
-  choice goes back to system. Placed next to `LangSwitcher` on purpose: that is also where the still-open preferences
-  popover below is meant to grow into, so the two controls end up as neighbours rather than being placed
-  independently later.
+  choice goes back to system. Placed next to `LangSwitcher` on purpose: that is also where the settings panel below
+  grew into, so the two controls are neighbours rather than having been placed independently. Both icon buttons in
+  that row share `--icon-btn-hit`, `--icon-btn-chip` and `--icon-btn-glyph` (`theme.css`): the button's own hit box
+  stays at the WCAG 44px floor, but the border and background move to a `::before` sized at the smaller chip value,
+  so what a reader sees can shrink without the target underneath it shrinking too.
+- **Settings panel.** A sliders button beside `ThemeToggle`, same shape: hidden until `settings-panel.ts` confirms
+  it can run, a popover menu, `data-*` attributes carrying option labels a plain script has no `t()` for. Four
+  things live in it. **Motion**, a light/dark/system-shaped three-way (`reduce` / `allow` / system, stored under
+  `motion`) that overrides `prefers-reduced-motion` in either direction rather than only following it. **The Conway
+  background**, on by default, stored under `background-life`. A disclosure revealing its reader-adjustable knobs:
+  seed density, generations per second, the auto-feed interval, pause and reseed; cell size, the two per-ground
+  fades, click-adds-a-glider and the bench's simulated column width stay fixed at the owner's own values and are
+  not reader-adjustable. **The code theme picker**, moved in from every code block: `CodeTheme.astro` now renders
+  once, inside this panel, still driving the same `code-theme` key and `data-code-theme` attribute. **The pinned-
+  preview persistence checkbox**, moved in from `HoverPreviews.astro`'s footer-adjacent placement, reusing the same
+  `hp-persist` key unchanged; it no longer hides itself until something is pinned, since a settings panel showing
+  every control regardless of prior use is the point of moving it here. Everything that affects first paint
+  (`motion`, `background-life`, `code-theme`, `color-scheme`) is applied by the blocking head script in
+  `BaseLayout`, same as `color-scheme` and `code-theme` already were.
+- **The Conway "game of life" background.** Settled off the bench (`GameOfLife.vue`, `/theme-lab/`): cell size
+  12px, seed density 10%, 8 generations per second, click adds a glider, one glider fed automatically every 4
+  seconds. Cell fade is per ground rather than one shared value, 16% on the dark page and 3% on the sepia one,
+  reading as the same faint texture from opposite ends of the lightness scale; the site reads whichever value
+  matches the active ground with no reader action. The bench's simulated reading-column knob does not travel to
+  the real site, which already has a real column (`main`) to keep clear of instead. Measured lit-cell contrast
+  against its own ground is 1.05:1, a deliberate failure of the 3:1 non-text-contrast criterion: it reads as
+  texture rather than content, on purpose. `prefers-reduced-motion`, or an explicit "reduce" choice in the
+  settings panel, freezes the field on one still frame and never starts the loop; the settings panel's pause
+  control covers WCAG 2.2.2. On WCAG 2.3.1: at 8 generations per second the cells change faster than three times a
+  second, so the bench's own "well below the threshold" framing does not hold up read literally, and the honest
+  reading is different: 2.3.1 defines a flash by a paired luminance change of 10% or more over an area of roughly
+  21,824px², and a single 12px cell at 3-16% alpha clears neither the luminance nor the area floor, and cells do
+  not change in the same instant across the field, so no reader sees anything that meets the technical definition
+  of a flash regardless of the generation rate. 8/s stays the shipped value on that basis. This reopens the
+  "almost no animation" position from Direction above; see that paragraph for the reopened framing and
+  `docs/decisions-log.md` for the fuller accounting, including what was not measured (battery cost, the effect on
+  a long scroll) because this machine has no browser.
+- **Language switcher.** A pixel on/off switch rather than two plain links, Português green and English red, both
+  from `--brand-green`/`--brand-red` (`theme.css`), stepped rather than eased. Colour is never the only signal:
+  the knob's position on the track and the always-visible PT/EN text are the two non-colour cues, on top of an
+  accessible name that states the destination language in words. Sized to the same `--icon-btn-hit` row height as
+  `ThemeToggle` and the settings button, its neighbours in the header.
 - **Chip ink.** `--chip-ink` mixes each chip's own colour toward whichever end of the page is readable, black on the
   sepia page and white on the black one, instead of always toward black. The old dark-mode mix moved the ink toward
   the background it was supposed to stand out from: the brand red measured 2.82:1, unreadable. Measured in oklab,
@@ -153,9 +196,6 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   1200×630: a DOS window with a spaced double border, a full-bleed brand colour with a 75% rule, and a seeded plasma
   with shadowed letters. Covers stay per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in. Colour
   and seed derive from the slug rather than being random, so a rebuild cannot change an existing cover.
-- Where the pinned-preview persistence checkbox lives. The code theme picker found its home on every code block, and
-  the footer already exists (name, version, typeface credits), but a checkbox among those links reads oddly; it may
-  want its own small settings popover, reusing the code-theme picker's pattern.
 - Which body face wins. Everything else about the type system is settled.
 - `--rule-core`: the lab page carries the colour and density options for the section break.
 - Whether the code language chip should still show when a filename tab is already present.

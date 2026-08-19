@@ -9,6 +9,76 @@ Portuguese, since it holds only the open questions you still have to answer, and
 
 ---
 
+## The Conway background ships, the settings panel is its home, and the almost-no-animation call reopens
+
+The game-of-life bench (`GameOfLife.vue`, `/theme-lab/`) moves to the real site as `ConwayField.astro` plus
+`src/scripts/conway.ts`, plain canvas and a plain script rather than a Vue island: shipping Vue's runtime on every
+page for a background field would repeat the exact cost `docs/design.md`'s own Vue note argues against for post
+islands, which load it only where a post actually places one. It sits behind a new settings panel
+(`SettingsPanel.astro` plus `src/scripts/settings-panel.ts`), opened from a sliders button beside `ThemeToggle`, the
+spot `docs/design.md` already reserved for it since the theme toggle shipped.
+
+**Configuration, Lucas's own values.** Cell size 12px, fixed. Seed density 10%, reader-adjustable from 1-20%.
+Generations per second 8, reader-adjustable from 0.5-8. Click always adds a glider; the bench's other click mode
+(a single cell) does not travel to the real site and is not reader-adjustable. One glider fed automatically every
+4 seconds, reader-adjustable from 0-20s, 0 disables auto-feed. Cell fade splits per ground rather than sharing one
+value: 16% on the dark page, 3% on the sepia one, both fixed, not reader knobs, chosen so the same faint texture
+reads the same from opposite ends of the lightness scale. The bench's simulated reading-column width does not
+travel either: the real site already has a real column (`main`) to keep the field clear of.
+
+**Storage.** `motion` (`reduce` / `allow`, absent means follow the OS, read in both directions rather than only to
+turn motion down), `background-life` (`0` means off, absent or `1` means on, defaults on), `conway-density`,
+`conway-gps`, `conway-autofeed`, `conway-paused`. `motion` and `background-life` are mirrored onto
+`data-motion`/`data-bg-life` on `<html>` by the same blocking head script that already applies `color-scheme` and
+`code-theme`, so neither one can flash the wrong state before the field's own deferred script runs.
+
+**Accessibility.** `prefers-reduced-motion`, or an explicit "reduce" choice in the panel, freezes the field on one
+still frame and never starts the loop, the same strong reading the bench already used rather than start-then-pause.
+The panel's own pause button covers WCAG 2.2.2. WCAG 2.3.1 got a real re-check rather than a copy of the bench's own
+line about it: the bench's own claim that the generation rate stayed "well below the three-changes-per-second
+threshold" does not hold up read literally, since 8 generations per second is more than three, not less. Read
+against what 2.3.1 actually measures instead of against that framing, the config still holds up: the criterion
+defines a flash as a paired luminance change of 10% or more over roughly 21,824 square pixels, and a single 12px
+cell at 3-16% alpha, changing at a different moment from every other cell on the field, clears neither the
+luminance floor nor the area floor. 8 generations per second ships on that corrected basis, Lucas's own call once
+the numbers were checked properly. Measured lit-cell contrast against its own ground is 1.05:1, recorded as a
+deliberate failure of the 3:1 non-text-contrast criterion, the same treatment the repo already gives its other
+sub-threshold values: it reads as texture rather than content, on purpose.
+
+**Not measured, recorded as such rather than assumed fine.** Battery cost and the effect on a long scroll. This
+machine has no browser, so neither could be checked; what was verified is `npm run check` passing clean and the
+rendered HTML containing the expected markup, not the loop actually running, a click actually seeding a glider, or
+the reduced-motion freeze actually taking hold in a real page.
+
+**Reopens `docs/design.md`'s "almost no animation" position rather than quietly overriding it.** Lucas is explicit
+that this candidate reopens that call; the Direction section there is rewritten to state the new position and say
+plainly that it was reopened, rather than leaving two entries that disagree with each other.
+
+**Two open items close.** The pinned-preview persistence checkbox moves out of `HoverPreviews.astro`'s own markup
+and into the settings panel, same `hp-persist` key, same behaviour, no longer hidden until something is pinned
+since a settings panel shows every control regardless of prior use. The code theme picker moves out of every code
+block and into the same panel: `CodeTheme.astro` now renders once, still driving the same `code-theme` key and
+`data-code-theme` attribute, all fourteen themes intact.
+
+## The header's icon row: a shared hit-target token, and the language switcher becomes a pixel toggle
+
+Two follow-on requests from Lucas, addressed in the same header row as the settings panel above.
+
+`ThemeToggle` and the new settings button looked too big: both were a 44px bordered square with a large glyph
+inside. `theme.css` now carries three shared tokens, `--icon-btn-hit` (44px, the button's own padded box and the
+WCAG 2.5.5 enhanced floor), `--icon-btn-chip` (2rem, the bordered square a reader actually sees) and
+`--icon-btn-glyph` (1rem, the icon's own size). Both buttons move the border and background onto a `::before`
+sized at the chip value, so the visible square is smaller while the real, always-clickable box underneath it stays
+at the 44px floor rather than shrinking with it. A third icon button in that row inherits all three for free.
+
+`LangSwitcher.astro` was two plain PT/EN links; it is now a pixel on/off switch, Portuguese green and English red,
+drawn hard-edged and stepped rather than eased, in `--brand-green`/`--brand-red` from `theme.css`. Colour is never
+the only signal carrying which language is current (WCAG 1.4.1, and red/green is the pair a colour-blind reader is
+least likely to tell apart): the knob's position on the track is one non-colour cue, the always-visible PT/EN text
+printed on the track is a second, and the link's own accessible name states in words which language clicking it
+goes to. It is still a real link rather than an in-place toggle, since choosing a language is a navigation. Sized
+to the same `--icon-btn-hit` row height as its two neighbours.
+
 ## CRT scanlines: none, and the bench is archived
 
 `CrtEffects.vue`, section 01 of `/theme-lab/`, put every scanline knob at zero and printed the contrast cost next to
