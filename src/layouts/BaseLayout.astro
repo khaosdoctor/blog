@@ -175,16 +175,28 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     {/* Same shape again: the reader's text-size choice and body face
         (theme.css, settings-panel.ts) both have to be on <html> before first
         paint too, or every page flashes at the default size and face first.
-        Text size is a raw 10-500 percent now, not one of a few named steps,
-        so it sets --font-scale directly instead of an attribute a stylesheet
-        rule would key off. Nothing stored, or a value that is not a finite
-        number in that range, means no override, which is the default 100%.
-        Nothing stored for the face means Literata. */}
+        Text size is a raw 50-160 percent, not one of a few named steps, so it
+        sets --font-scale directly instead of an attribute a stylesheet rule
+        would key off. Nothing stored, or a value that is not a finite number,
+        means no override, which is the default 100%. Nothing stored for the
+        face means Literata.
+
+        The clamp-and-snap here is settings-panel.ts's own clampFontSize,
+        repeated inline because this snippet cannot import anything and has to
+        run before the module bundle does. It has to stay identical to it: a
+        reader who set 400% while the range was still 10-500 has that in
+        storage now, and if this applied it raw the page would paint at 400%
+        and then jump to the clamped 160% the moment the panel's module ran.
+        `raw === null` is checked before Number(), since Number(null) is 0 and
+        would otherwise clamp up to the minimum instead of meaning "unset". */}
     <script is:inline>
       try {
-        const size = Number(localStorage.getItem('font-size'))
-        if (Number.isFinite(size) && size >= 10 && size <= 500) {
-          document.documentElement.style.setProperty('--font-scale', String(size / 100))
+        const raw = localStorage.getItem('font-size')
+        const size = raw === null ? Number.NaN : Number(raw)
+        if (Number.isFinite(size)) {
+          const clamped = Math.min(160, Math.max(50, size))
+          const snapped = 50 + Math.round((clamped - 50) / 10) * 10
+          if (snapped !== 100) document.documentElement.style.setProperty('--font-scale', String(snapped / 100))
         }
         if (localStorage.getItem('body-face') === 'sans') document.documentElement.setAttribute('data-body-face', 'sans')
       } catch {

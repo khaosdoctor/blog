@@ -54,14 +54,11 @@ const { locale } = Astro.props
         <label for="sp-font-size">{t(locale, 'fontSizeLabel')}</label>
       </legend>
       <div class="sp-font-size-row">
-        {/* 10-500%, the owner's own range: a flat step of 10 gives a native
-           range input 49 possible stops, each a perceptible 10% jump, reached
-           in one drag or a Home/End/PageUp/PageDown press rather than by
-           clicking through them one at a time (see settings-panel.ts's own
-           comment on FONT_SIZE_STEP for the full reasoning this replaced the
-           old five-step button pair with a slider instead of just widening
-           the same two buttons). */}
-        <input type="range" id="sp-font-size" min="10" max="500" step="10" />
+        {/* 50-160%, the owner's own range, narrowed from the 10-500 this
+           control opened with. A flat step of 10 gives twelve stops, each a
+           perceptible jump, and puts both ends on the grid (see
+           settings-panel.ts's own comment on FONT_SIZE_STEP). */}
+        <input type="range" id="sp-font-size" min="50" max="160" step="10" />
         <span
           id="sp-font-size-value"
           class="sp-font-size-value"
@@ -337,7 +334,7 @@ const { locale } = Astro.props
   }
 
   /* Fixed-width so the slider beside it does not shift as the digits
-     change (10% vs 500%, three characters apart). */
+     change (50% vs 160%, one character apart). */
   .sp-font-size-value {
     display: inline-block;
     min-inline-size: 4.5ch;

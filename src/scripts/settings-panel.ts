@@ -26,28 +26,32 @@ const HP_PERSIST_KEY = 'hp-persist'
 
 // Same key BaseLayout's own blocking <script is:inline> reads before first
 // paint, so the reader never sees a flash at the default size. A raw
-// percentage now, 10 to 500 (the owner's own range), not one of a few named
-// steps: that range is too wide for a fixed set of attribute blocks, so this
+// percentage, 50 to 160 (the owner's own range, narrowed from the 10-500 this
+// control opened with), not one of a few named steps: even 50-160 is twelve
+// stops, more than a fixed set of attribute blocks wants to carry, so this
 // writes --font-scale (theme.css) straight onto the root element's inline
-// style instead of picking one of them. FONT_SIZE_STEP (10) is a flat step
-// across the whole range rather than one that widens further out: a native
-// range input already turns that into a single drag, Home/End or
-// Page Up/Down across the whole span, so the step only has to matter for a
-// single arrow-key press, and a flat 10% is a step size a reader can feel at
-// either end of the range. No attribute, and no inline style, means the
-// stylesheet's own default (1, 100%) applies, same "nothing stored means
-// default" convention as motion and code-theme.
+// style instead of picking one of them. FONT_SIZE_STEP (10) is flat across
+// the whole range rather than widening further out: 10% is a step a reader
+// can feel at either end of a span this narrow. 160 is on the grid
+// (160 - 50 = 110, a whole number of steps), so both ends are reachable. No
+// stored value, and no inline style, means the stylesheet's own default
+// (1, 100%) applies, same "nothing stored means default" convention as motion
+// and code-theme.
 const FONT_SIZE_KEY = 'font-size'
-const FONT_SIZE_MIN = 10
-const FONT_SIZE_MAX = 500
+const FONT_SIZE_MIN = 50
+const FONT_SIZE_MAX = 160
 const FONT_SIZE_STEP = 10
 const FONT_SIZE_DEFAULT = 100
 
-// Clamped into range, then snapped onto the same 10-wide grid the range
-// input's own `step` divides it into, so a value read back out of storage
-// always resolves to a notch the slider (and a screen reader announcing it)
-// can actually stop on, the same rounding a native range input already does
-// to whatever a pointer drags it to.
+// Clamped into range, then snapped onto the same 10-wide grid the control's
+// own `step` divides it into, so a value read back out of storage always
+// resolves to a stop the control (and a screen reader announcing it) can
+// actually rest on. This is also the only thing standing between a reader who
+// set 400% under the old 10-500 range and a page that still renders at 400%:
+// clamping pulls it back to 160 rather than discarding it, so the choice
+// still means the closest thing to itself the range now allows. BaseLayout's
+// pre-paint script repeats this arithmetic inline for the same reason it
+// repeats the key, and has to keep matching it.
 function clampFontSize(value: number): number {
   const clamped = Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, value))
   return FONT_SIZE_MIN + Math.round((clamped - FONT_SIZE_MIN) / FONT_SIZE_STEP) * FONT_SIZE_STEP
@@ -188,8 +192,8 @@ function init(): void {
     })
   }
 
-  // --- Reader text size: a native range input across the owner's own full
-  // 10-500% span, rather than a fixed set of steps. ---
+  // --- Reader text size: a native range input across the owner's own
+  // 50-160% span, rather than a fixed set of steps. ---
   const fontSizeInput = menu.querySelector<HTMLInputElement>('#sp-font-size')
   const fontSizeValue = menu.querySelector<HTMLElement>('#sp-font-size-value')
   if (fontSizeInput !== null && fontSizeValue !== null) {

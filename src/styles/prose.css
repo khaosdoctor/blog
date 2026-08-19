@@ -56,14 +56,16 @@
    * --text-base only, so the running paragraph grows and everything sized off
    * the two smaller steps does not: a post's code blocks, tables, quotes,
    * footnotes, maths and chips all read --text-small/--text-tiny. At the top
-   * of the new 10-500% range that leaves a reader with 5x paragraphs beside
+   * of the 50-160% range that leaves a reader with 1.6x paragraphs beside
    * unchanged code, which is not a text-size control so much as a
    * paragraph-size one.
    *
    * The two steps are redefined here rather than in theme.css because the
    * same two tokens also size the site's own chrome (the settings panel, the
    * search palette, the credits list), and chrome should not follow a reading
-   * preference: a 500% gear menu would put its own controls out of reach.
+   * preference: a gear menu grown to the top of the range would put its own
+   * controls out of reach, and did so far more violently while that top was
+   * still the 500% this control opened with.
    * Scoping the scaled values to .prose moves exactly the reading content and
    * leaves every chrome consumer on the fixed values it already reads.
    */
