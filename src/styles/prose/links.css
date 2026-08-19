@@ -55,11 +55,18 @@
    * accent here instead: the header's wordmark accent is now the day-hash
    * colour (`--accent-day`, src/lib/day-color.ts, purple excluded from its
    * pool), so this reads that, with `--accent` as the same fallback chain
-   * end as before. `--post-accent` is still written by both [...slug].astro
-   * pages (`style={\`--post-accent: ${chipColor(slugOf(post))}\`}`) but
-   * nothing in CSS reads it any more: left in place rather than deleted
-   * silently, since the per-article mechanism was a real, documented
-   * decision, and this comment is where that history stays visible.
+   * end as before.
+   *
+   * `--post-accent` did not go away with that move, and is not dead: both
+   * [...slug].astro pages still write it onto the <article> element, and
+   * prose/emphasis.css reads it for bold, italic and the other text
+   * treatments. That is the whole split the owner drew, and it has to be
+   * kept in exactly this shape: a text treatment belongs to the article and
+   * follows the COVER's colour (lib/cover.ts's coverTone(), which is where
+   * `--post-accent` is now derived, the same function the card itself
+   * paints with); a link, a hover, anything transient belongs to the visit
+   * and follows the DAY. Do not repoint this fill at `--post-accent`, and
+   * do not repoint emphasis.css at `--accent-day`.
    */
   --post-accent-fill: light-dark(
     color-mix(in oklab, var(--accent-day, var(--accent)) 85%, black),

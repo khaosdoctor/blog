@@ -152,10 +152,84 @@ const BRANDS: Brand[] = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id
 // thing the lab's notes ask future edits not to do.
 const INK_MIX: Record<string, number> = { vermelho: 100, verde: 100, amarelo: 100, azul: 100, roxo: 90 }
 
+/**
+ * The same brand, named as the CSS custom property theme.css already tunes
+ * per ground. The SVG needs a literal hex because it always paints on its own
+ * black card (`DARK_BG`); the page needs a token because a highlight has to
+ * work on `--bg` in both themes, and theme.css has already measured each of
+ * these five for exactly that. Handing the page the card's hex instead would
+ * take the brand off its per-ground tone and drop the measurements with it:
+ * the card's yellow is #f5b200, chosen against black, and 85% of that over
+ * black on the sepia ground reads far lighter than `--brand-yellow`'s own
+ * light tone (#ac7d00) that prose/emphasis.css scanned. The hue is the same
+ * either way, which is the whole complaint being fixed; only the lightness is
+ * allowed to follow the ground it is painted on.
+ *
+ * The two neutrals have no brand token, and they cannot borrow one: a cover
+ * that draws white draws white BECAUSE the hash picked "no colour", and the
+ * page's own neutral per ground is its ink rather than a hue. `branco` maps
+ * to `--fg` and `branco-apagado` to `--muted`, the same pairing the card
+ * makes (full white for the title ink, white at 75% for the byline), just
+ * resolved against `--bg` instead of black, so a neutral post reads as a
+ * black highlight on the sepia ground and a white one on the black ground
+ * rather than white-on-white. Through prose/emphasis.css's own mix those
+ * measure 16.99:1 light / 18.74:1 dark for `--fg` and 7.15 / 8.75 for
+ * `--muted`, both well clear of the 4.5:1 that file's table holds to.
+ */
+const BRAND_TOKENS: Record<string, string> = {
+  vermelho: 'var(--brand-red)',
+  verde: 'var(--brand-green)',
+  amarelo: 'var(--brand-yellow)',
+  azul: 'var(--brand-blue)',
+  roxo: 'var(--brand-purple)',
+  branco: 'var(--fg)',
+  'branco-apagado': 'var(--muted)',
+}
+
 const SEED_SALT = 65
 const WIRE_DENSITY = 6
 const WIRE_OPACITY_SCALE = 145
 const CURSOR = true
+
+/** The one number a slug turns into. Colour and solid both read this. */
+function coverSeed(slug: string): number {
+  return (hashSlug(slug) + SEED_SALT) >>> 0
+}
+
+export interface CoverTone {
+  /** The brand the hash drew, by the lab's own name: `roxo`, `branco`, ... */
+  id: string
+  /** The literal colour the card paints, already through that brand's `INK_MIX`. */
+  hex: string
+  /** The same brand as a theme.css custom property, see `BRAND_TOKENS`. */
+  token: string
+}
+
+/**
+ * A post's colour, the only derivation of it there is.
+ *
+ * There used to be two. The card resolved its own brand here, out of seven
+ * entries, off a salted `hash * 31 + charCode`; the article element wrote
+ * `--post-accent` from `chipColor(slug)`, out of five `var(--brand-*)`
+ * tokens, off a sum of code points. Two hashes over two pools can only agree
+ * by luck, and for `criptografia-assimetrica-com-rsa` they did not: the card
+ * drew purple and every `<strong>` in the post came out red. The card's own
+ * pick wins, since that is the colour a reader has already seen at the top of
+ * the page by the time any bold text arrives, and everything else reads this.
+ *
+ * This is the cover's colour, so it follows the cover's split: bold, italic
+ * and the other text treatments (prose/emphasis.css) read this; links, hovers
+ * and anything else transient stay on the day colour (`--accent-day`,
+ * day-color.ts, prose/links.css). Do not move a link onto this.
+ */
+export function coverTone(slug: string): CoverTone {
+  const brand = BRANDS[coverSeed(slug) % BRANDS.length]
+  const isNeutral = brand.id === 'branco' || brand.id === 'branco-apagado'
+  const hex = isNeutral
+    ? brand.hex
+    : toHex(mixOklab(parseHex(brand.hex), parseHex('#ffffff'), INK_MIX[brand.id] ?? 100))
+  return { id: brand.id, hex, token: BRAND_TOKENS[brand.id] }
+}
 
 // --- the generated solid ----------------------------------------------------
 // A ring of N sides stacked M times, tips optionally closed: the same shape
@@ -422,12 +496,8 @@ function n(value: number): number {
  * apart from each other.
  */
 export function buildCoverSvg({ slug, title, category, byline }: CoverInput): string {
-  const seed = (hashSlug(slug) + SEED_SALT) >>> 0
-  const brand = BRANDS[seed % BRANDS.length]
-  const isNeutral = brand.id === 'branco' || brand.id === 'branco-apagado'
-  const brandTone = isNeutral
-    ? brand.hex
-    : toHex(mixOklab(parseHex(brand.hex), parseHex('#ffffff'), INK_MIX[brand.id] ?? 100))
+  const seed = coverSeed(slug)
+  const { hex: brandTone } = coverTone(slug)
 
   const solid = generateSolid(mulberry32(seed))
   const wireCells = buildWireCells(solid)
