@@ -119,8 +119,17 @@
    * rem rather than the 18px that was chosen, because an absolute body size
    * overrides the reader's own browser font setting, and 1.125rem is exactly
    * 18px for everyone who has not changed it.
+   *
+   * --font-scale is the settings panel's text-size step, a unitless
+   * multiplier rather than a second absolute size: multiplying a rem value
+   * keeps the result relative to whatever the reader's own browser default
+   * is, so a reader who already set a larger default there keeps that gain
+   * scaled up rather than replaced by a fixed number. Default 1 (no step
+   * chosen), the reader-facing values live below in the data-font-size
+   * block, and settings-panel.ts is what writes the attribute.
    */
-  --text-base: 1.125rem;
+  --font-scale: 1;
+  --text-base: calc(1.125rem * var(--font-scale));
   --text-small: 0.9rem;
   --text-tiny: 0.75rem;
   --leading: 1.63;
@@ -407,9 +416,36 @@
  */
 :root[data-body-face='sans'] {
   --font-body: var(--font-body-sans);
-  --text-base: 1.25rem;
+  --text-base: calc(1.25rem * var(--font-scale));
   --leading: 1.53;
   --tracking-body: 0em;
+}
+
+/*
+ * The settings panel's text-size step (SettingsPanel.astro, settings-panel.ts),
+ * five values around the default rather than a slider: each is a percentage of
+ * whichever --text-base above is already active, so it composes with the sans
+ * face's own larger base instead of fighting it, and with the reader's own
+ * browser font size instead of overriding it (--font-scale is unitless, see
+ * --text-base's own comment). Absent means the middle step, 100%, same
+ * "no attribute = default" convention as data-theme and data-code-theme.
+ * Only --text-base reads this: --text-small and --text-tiny (chrome, code,
+ * captions) stay fixed on purpose, so this only resizes the reading text.
+ */
+:root[data-font-size='xs'] {
+  --font-scale: 0.8;
+}
+
+:root[data-font-size='sm'] {
+  --font-scale: 0.9;
+}
+
+:root[data-font-size='lg'] {
+  --font-scale: 1.1;
+}
+
+:root[data-font-size='xl'] {
+  --font-scale: 1.2;
 }
 
 /* Motion is decoration everywhere on this site, so it can all go. */

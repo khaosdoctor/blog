@@ -24,6 +24,60 @@ import { getShortcutLetter, setShortcutLetter } from './search-palette'
 // reader opens a post.
 const HP_PERSIST_KEY = 'hp-persist'
 
+// Same key BaseLayout's own blocking <script is:inline> reads before first
+// paint, so the reader never sees a flash at the default size. Five steps
+// rather than a slider, null in the middle for the default (100%, same
+// "no attribute = default" convention as motion and code-theme): the
+// percentages here are read-only display text and must stay in sync with
+// theme.css's own --font-scale values per data-font-size attribute.
+const FONT_SIZE_KEY = 'font-size'
+const FONT_SIZE_STEPS: ReadonlyArray<{ value: string | null; percent: string }> = [
+  { value: 'xs', percent: '80%' },
+  { value: 'sm', percent: '90%' },
+  { value: null, percent: '100%' },
+  { value: 'lg', percent: '110%' },
+  { value: 'xl', percent: '120%' },
+]
+
+function isFontSizeValue(value: string): boolean {
+  return value === 'xs' || value === 'sm' || value === 'lg' || value === 'xl'
+}
+
+function storedFontSize(): string | null {
+  try {
+    const value = localStorage.getItem(FONT_SIZE_KEY)
+    return value !== null && isFontSizeValue(value) ? value : null
+  } catch {
+    return null
+  }
+}
+
+function applyFontSize(value: string | null): void {
+  if (value === null) document.documentElement.removeAttribute('data-font-size')
+  else document.documentElement.setAttribute('data-font-size', value)
+}
+
+// Same key BaseLayout's own blocking script reads. 'sans' is the only stored
+// value that means anything (Atkinson Hyperlegible); anything else, absent
+// included, is the default (Literata). This only ever writes --font-body
+// (theme.css), the running text inside .prose: headings, code and lists
+// already pin --font-mono of their own accord and this control never
+// touches that, nor the header or the mark, which read --font-display.
+const BODY_FACE_KEY = 'body-face'
+
+function storedBodyFace(): 'sans' | null {
+  try {
+    return localStorage.getItem(BODY_FACE_KEY) === 'sans' ? 'sans' : null
+  } catch {
+    return null
+  }
+}
+
+function applyBodyFace(face: 'sans' | null): void {
+  if (face === null) document.documentElement.removeAttribute('data-body-face')
+  else document.documentElement.setAttribute('data-body-face', face)
+}
+
 function place(el: HTMLElement, anchor: HTMLElement): void {
   const rect = anchor.getBoundingClientRect()
   const space = 8
@@ -114,6 +168,64 @@ function init(): void {
       const value = option.dataset.value
       setMotion(value === 'reduce' || value === 'allow' ? value : null)
       for (const other of motionOptions) other.setAttribute('aria-current', String(other === option))
+    })
+  }
+
+  // --- Reader text size: five steps, decrease/increase rather than a
+  // slider, buttons disabled at either end instead of wrapping. ---
+  const fontSizeDec = menu.querySelector<HTMLButtonElement>('#sp-font-size-dec')
+  const fontSizeInc = menu.querySelector<HTMLButtonElement>('#sp-font-size-inc')
+  const fontSizeValue = menu.querySelector<HTMLElement>('#sp-font-size-value')
+  if (fontSizeDec !== null && fontSizeInc !== null && fontSizeValue !== null) {
+    const template = fontSizeValue.dataset.template ?? 'Text size: %s'
+    let index = FONT_SIZE_STEPS.findIndex((step) => step.value === storedFontSize())
+    if (index === -1) index = 2
+
+    const syncFontSize = (): void => {
+      const step = FONT_SIZE_STEPS[index]
+      fontSizeValue.textContent = step.percent
+      fontSizeValue.setAttribute('aria-label', template.replace('%s', step.percent))
+      fontSizeDec.disabled = index === 0
+      fontSizeInc.disabled = index === FONT_SIZE_STEPS.length - 1
+    }
+
+    const move = (delta: number): void => {
+      index = Math.min(Math.max(index + delta, 0), FONT_SIZE_STEPS.length - 1)
+      const step = FONT_SIZE_STEPS[index]
+      try {
+        if (step.value === null) localStorage.removeItem(FONT_SIZE_KEY)
+        else localStorage.setItem(FONT_SIZE_KEY, step.value)
+      } catch {
+        // Private mode, or storage disabled: the choice still applies for this page.
+      }
+      applyFontSize(step.value)
+      syncFontSize()
+    }
+
+    syncFontSize()
+    fontSizeDec.addEventListener('click', () => move(-1))
+    fontSizeInc.addEventListener('click', () => move(1))
+  }
+
+  // --- Reading font: Literata (default) or Atkinson Hyperlegible, the two
+  // vendored body faces (src/styles/fonts.css). Same aria-current shape as
+  // the motion buttons above, its own class so this query never picks up
+  // those. ---
+  const fontFamilyOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-font-family-option')]
+  const initialBodyFace = storedBodyFace() ?? 'serif'
+  for (const option of fontFamilyOptions) option.setAttribute('aria-current', String(option.dataset.value === initialBodyFace))
+
+  for (const option of fontFamilyOptions) {
+    option.addEventListener('click', () => {
+      const value = option.dataset.value === 'sans' ? 'sans' : null
+      try {
+        if (value === null) localStorage.removeItem(BODY_FACE_KEY)
+        else localStorage.setItem(BODY_FACE_KEY, value)
+      } catch {
+        // Private mode, or storage disabled: the choice still applies for this page.
+      }
+      applyBodyFace(value)
+      for (const other of fontFamilyOptions) other.setAttribute('aria-current', String(other === option))
     })
   }
 

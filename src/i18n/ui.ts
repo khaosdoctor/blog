@@ -75,6 +75,13 @@ type UIKey =
   | 'motionReduce'
   | 'motionAllow'
   | 'motionSystem'
+  | 'fontSizeLabel'
+  | 'fontSizeDecrease'
+  | 'fontSizeIncrease'
+  | 'fontSizeCurrent'
+  | 'fontFamilyLabel'
+  | 'fontFamilySerif'
+  | 'fontFamilySans'
   | 'backgroundLife'
   | 'conwayKnobs'
   | 'conwaySeedDensity'
@@ -124,7 +131,6 @@ type UIKey =
   | 'showMarginNote'
   | 'linkToNote'
   | 'copyQuote'
-  | 'copyTimestamp'
   | 'pagination'
   | 'paginationPrev'
   | 'paginationNext'
@@ -203,6 +209,13 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     motionReduce: 'Reduzido',
     motionAllow: 'Sempre ativo',
     motionSystem: 'Sistema',
+    fontSizeLabel: 'Tamanho do texto',
+    fontSizeDecrease: 'Diminuir',
+    fontSizeIncrease: 'Aumentar',
+    fontSizeCurrent: 'Tamanho do texto: %s',
+    fontFamilyLabel: 'Fonte de leitura',
+    fontFamilySerif: 'Serifada (Literata)',
+    fontFamilySans: 'Sem serifa (Atkinson Hyperlegible)',
     backgroundLife: 'Campo de fundo (jogo da vida)',
     conwayKnobs: 'Ajustes do campo',
     conwaySeedDensity: 'Densidade da semente',
@@ -269,7 +282,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     showMarginNote: 'mostrar nota lateral',
     linkToNote: 'link para esta nota',
     copyQuote: 'copiar esta citação',
-    copyTimestamp: 'copiar o timestamp Unix desta data (%s)',
     pagination: 'Paginação',
     paginationPrev: 'Página anterior',
     paginationNext: 'Próxima página',
@@ -336,6 +348,13 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     motionReduce: 'Reduced',
     motionAllow: 'Always on',
     motionSystem: 'System',
+    fontSizeLabel: 'Text size',
+    fontSizeDecrease: 'Decrease',
+    fontSizeIncrease: 'Increase',
+    fontSizeCurrent: 'Text size: %s',
+    fontFamilyLabel: 'Reading font',
+    fontFamilySerif: 'Serif (Literata)',
+    fontFamilySans: 'Sans (Atkinson Hyperlegible)',
     backgroundLife: 'Background field (game of life)',
     conwayKnobs: 'Field settings',
     conwaySeedDensity: 'Seed density',
@@ -402,7 +421,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     showMarginNote: 'show margin note',
     linkToNote: 'link to this note',
     copyQuote: 'copy this quote',
-    copyTimestamp: 'copy this date’s Unix timestamp (%s)',
     pagination: 'Pagination',
     paginationPrev: 'Previous page',
     paginationNext: 'Next page',

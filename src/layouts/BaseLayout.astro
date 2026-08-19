@@ -154,6 +154,19 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
         // Private mode, or storage disabled. The field starts on, motion follows the OS.
       }
     </script>
+    {/* Same shape again: the reader's text-size step and body face (theme.css,
+        settings-panel.ts) both have to be on <html> before first paint too, or
+        every page flashes at the default size and face first. Nothing stored
+        means neither attribute, which is the default 100% Literata step. */}
+    <script is:inline>
+      try {
+        const size = localStorage.getItem('font-size')
+        if (size === 'xs' || size === 'sm' || size === 'lg' || size === 'xl') document.documentElement.setAttribute('data-font-size', size)
+        if (localStorage.getItem('body-face') === 'sans') document.documentElement.setAttribute('data-body-face', 'sans')
+      } catch {
+        // Private mode, or storage disabled. The default size and face apply.
+      }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- iOS ignores the manifest and looks for this one specifically. -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
