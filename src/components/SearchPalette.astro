@@ -4,43 +4,70 @@
 // real focus trap for free, no popover/hidden fallback machinery to write)
 // that live-searches through Pagefind the same way Search.astro's own script
 // does. That existing form-based page is left untouched (see this file's own
-// script for why) and keeps working with JS off; this is a second, JS-only
-// entry point next to it, not a replacement.
+// script for why) and keeps working with JS off.
 //
-// Hidden until search-palette.ts confirms it can run, same reason as every
-// other header control here: a reader with JS off never gets a dead button.
+// Progressive enhancement, not a JS-only control any more: the element below
+// is a real `<a href="/search/">` (or `/en/search/`, via `localePath`, same
+// helper NavLinks.astro already uses), so a reader with JS off, or before
+// search-palette.ts runs, clicks it and reaches the working, JS-free search
+// page, the same shape Search.astro's own form/script pair already uses
+// (real GET form first, Pagefind upgrades it in place). Once the script
+// runs, it calls `event.preventDefault()` on click and opens the dialog
+// instead, the anchor becomes the palette opener, and `aria-haspopup`/
+// `aria-controls` (only true once that upgrade has happened) are added by
+// the script rather than declared here.
+//
+// Nothing about the anchor's own appearance depends on JS: the icon and the
+// box are visible from first paint, no `hidden` on this control any more
+// (unlike ThemeToggle/SettingsPanel, which do nothing at all without JS and
+// so start hidden). The one part that IS JS-only is the shortcut hint
+// (<Cmd+K> promises a keyboard shortcut that only exists once the script's
+// global keydown listener is live): that stays reserved in space
+// (`visibility: hidden`, not `display: none`) so the box never resizes, and
+// the script switches it to visible once it is actually true, rather than
+// hiding the whole control the way the old, JS-only version did.
 import Magnifier from './icons/Magnifier.astro'
-import { t, type Locale } from '../i18n/ui'
+import { localePath, t, type Locale } from '../i18n/ui'
 
 interface Props {
   locale: Locale
 }
 
 const { locale } = Astro.props
+const searchHref = localePath(locale, '/search/')
 ---
 
 {/*
-  The button shares its hit target (--icon-btn-hit, 44px tall) and its
-  visible-chip technique (a ::before at --icon-btn-chip, 32px tall) with
-  ThemeToggle/SettingsPanel, but it is not square any more: the shortcut hint
-  is the whole point of drawing <Cmd+K>, so it lives inside the button
-  beside the magnifier rather than beside the button as a separate sibling,
-  and the button (and its ::before chip) grow to fit both. Still not part of
-  the button's own accessible name (already set by the script from
-  data-label): the hint stays aria-hidden and is reachable to sighted
-  readers as plain text painted inside the control.
+  A real link, always visible: `searchHref` above is where a reader with no
+  JS, or before the script has run, actually goes. `aria-haspopup`/
+  `aria-controls` are not declared here (the script adds them once it has
+  actually taken over the click), so this element never claims a popup
+  behaviour it cannot yet deliver. `aria-label` is the one label that has to
+  be honest in both states at once: `t(locale, 'search')` ("Buscar"/"Search")
+  describes the destination, not the mechanism, so it reads correctly
+  whether the click navigates or opens a dialog.
+
+  Shares its hit target (--icon-btn-hit, 44px tall) and its visible-chip
+  technique (a ::before at --icon-btn-chip, 32px tall) with ThemeToggle/
+  SettingsPanel, but it is not square: the shortcut hint's reserved space
+  (see .sx-hint below) already widens it before any script runs.
 */}
-<div class="search-trigger" hidden data-label={t(locale, 'search')}>
-  <button type="button" class="sx-open" aria-haspopup="dialog" aria-controls="sx-dialog">
+<div class="search-trigger">
+  <a href={searchHref} class="sx-open" aria-label={t(locale, 'search')}>
     <Magnifier class="sx-open-icon" />
-    {/* Filled in by the script once it knows the reader's platform: the
-       bracket vocabulary matches every other button on this site (Search.astro,
-       ChromeButton.vue), and Ctrl/Cmd + the letter is read off the settings
-       panel's own choice rather than hardcoded to K. */}
+    {/* Reserved space, invisible content: `visibility: hidden` below keeps
+       this in the layout (so the box is already its final width at first
+       paint, JS or not) while hiding the promise of a keyboard shortcut
+       that only exists once search-palette.ts's global keydown listener is
+       live. The script sets it visible and fills in the platform-specific
+       Cmd/Ctrl once that is true; the bracket vocabulary matches every
+       other button on this site (Search.astro, ChromeButton.vue), and
+       Ctrl/Cmd + the letter is read off the settings panel's own choice
+       rather than hardcoded to K. */}
     <span class="sx-hint" aria-hidden="true"
       >&lt;<span class="sx-hint-mod"></span>+<span class="sx-hint-key">K</span>&gt;</span
     >
-  </button>
+  </a>
 
   <dialog id="sx-dialog" class="sx-dialog" aria-label={t(locale, 'searchLabel')}>
     <div class="sx-row">
@@ -79,18 +106,14 @@ const { locale } = Astro.props
 </script>
 
 <style>
+  /*
+   * Always visible, unlike ThemeToggle/SettingsPanel's own wrappers: those
+   * do nothing at all without JS, so they start `hidden`; this one is a real
+   * link with a real destination the moment it renders, so there is nothing
+   * to wait for and nothing here depends on `[hidden]` any more.
+   */
   .search-trigger {
     position: relative;
-  }
-
-  /* Same reasoning as every other header control: the UA `[hidden] { display:
-     none }` sheet only ever hides the wrapper itself; a hidden reader still
-     gets nothing dead to look at. Row layout now, not just inline-flex: the
-     hint is a plain sibling of the button rather than something drawn
-     inside it, spaced from it with margin (see .sx-hint below), not the
-     CSS row property this codebase has banned (same note as
-     .tt-option-icon in ThemeToggle.astro). */
-  .search-trigger:not([hidden]) {
     display: inline-flex;
     align-items: center;
   }
@@ -98,10 +121,12 @@ const { locale } = Astro.props
   /*
    * The hit target is still --icon-btn-hit (44px), the same token
    * ThemeToggle's `.tt-open` and SettingsPanel's `.sp-open` use, but this
-   * button is no longer square: the icon and the hint both sit inside it, so
-   * it grows sideways to fit them while `min-block-size` keeps it 44px tall.
-   * `--icon-btn-glyph` still sizes the magnifier; the hint (`.sx-hint`
-   * below) sets its own smaller size.
+   * link is no longer square: the icon and the hint's reserved space both
+   * sit inside it, so it grows sideways to fit them while `min-block-size`
+   * keeps it 44px tall. `--icon-btn-glyph` still sizes the magnifier; the
+   * hint (`.sx-hint` below) sets its own smaller size. `text-decoration:
+   * none` is new next to the old button-based version: an `<a>` carries a
+   * default underline a `<button>` never had to override.
    */
   .sx-open {
     position: relative;
@@ -115,6 +140,7 @@ const { locale } = Astro.props
     color: var(--muted);
     font-size: var(--icon-btn-glyph);
     padding-inline: 0.5rem;
+    text-decoration: none;
     cursor: pointer;
   }
 
@@ -155,6 +181,15 @@ const { locale } = Astro.props
     letter-spacing: 0.03em;
     color: var(--muted);
     white-space: nowrap;
+    /*
+     * Reserved space, hidden content: `visibility: hidden` (not `display:
+     * none`/the `hidden` attribute) keeps this in the layout so the anchor
+     * is already its final width at first paint. The script sets this to
+     * `visible` once it has actually taken over the click, see the
+     * component comment for why a keyboard-shortcut promise is dishonest
+     * before that.
+     */
+    visibility: hidden;
   }
 
   .sx-open:hover,
