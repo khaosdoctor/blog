@@ -206,8 +206,20 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
   content: none;
 }
 
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .icon-link)):hover,
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .icon-link)):focus-visible {
+/*
+ * `.bookmark` is excluded here, having previously been kept in on the
+ * reasoning that a bookmark card carries real text for the inverted ground to
+ * read against (see the note further down about image-only links). That
+ * reasoning held for the text and missed the box: the card is a block the
+ * width of the reading column with its own rule, thumbnail and three lines of
+ * copy, so filling it does not invert a run of words, it repaints the whole
+ * card as one solid slab, dragging the muted description and host down to
+ * unreadable against it. The card still answers to today's colour on hover,
+ * on its own border and title (Bookmark.astro), which is the treatment a card
+ * can take without becoming a block of paint.
+ */
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .version a, footer .icon-link)):hover,
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .version a, footer .icon-link)):focus-visible {
   background: var(--post-accent-fill);
   color: var(--bg);
   text-decoration-line: none;

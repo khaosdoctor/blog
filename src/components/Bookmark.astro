@@ -66,8 +66,25 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     overflow: hidden;
   }
 
-  .bookmark:hover {
-    border-color: var(--accent);
+  /*
+   * Today's colour, the same one every other link on the page answers to
+   * (--accent-day, src/lib/day-color.ts), rather than the generic --accent
+   * this used to read: that token is the site's fallback blue and never
+   * changed with the day, so the card was the one link on the page hovering
+   * in a colour nothing else used. The fallback keeps it working anywhere
+   * --accent-day is not written, matching how prose/links.css reads it.
+   *
+   * The border and the title carry it, and nothing fills: prose/links.css
+   * hands the card back to this file for exactly that reason, above.
+   */
+  .bookmark:hover,
+  .bookmark:focus-visible {
+    border-color: var(--accent-day, var(--accent));
+  }
+
+  .bookmark:hover .title,
+  .bookmark:focus-visible .title {
+    color: var(--accent-day, var(--accent));
   }
 
   .thumb {
