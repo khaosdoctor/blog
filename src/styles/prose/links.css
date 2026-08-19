@@ -54,6 +54,18 @@
     color-mix(in oklab, var(--accent-day, var(--accent)) 85%, black),
     color-mix(in oklab, var(--accent-day, var(--accent)) 95%, white)
   );
+
+  /*
+   * The image-link popped shadow (below): a hard offset, no blur, same
+   * pixel-grid vocabulary as --code-shadow-offset in theme.css, just its own
+   * tokens rather than reused ones, since code-and-callouts.css repeats that
+   * same "own copy, not a cross-file reference" choice for --note-grow-ease
+   * in sidenotes.css/footnotes.css. Duration is slow on purpose: a "drift"
+   * read as a nudge, the same reasoning --note-grow-duration gives for the
+   * sidenote grow, not this site's fast 120ms general hover timing.
+   */
+  --image-link-shadow-duration: 900ms;
+  --image-link-shadow-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /*
@@ -119,6 +131,105 @@
   background: var(--post-accent-fill);
   color: var(--bg);
   text-decoration-line: none;
+}
+
+/*
+ * The inverted fill above assumes the run has text for the ground colour to
+ * read as. A link whose only content is an image has none, so filling it
+ * paints a solid rectangle over the picture instead (a YouTube thumbnail
+ * going solid yellow on hover is what sent this rule here). Four shapes
+ * carry that same "no text" content, checked against the actual markup
+ * rather than assumed:
+ *
+ * - `a:has(img)` matches a plain linked image or a linked figure: an <img>
+ *   anywhere inside the anchor, at any nesting depth (astro:assets'
+ *   <picture><img> included), so no markup change was needed. :has() is
+ *   already load-bearing elsewhere in this file (the ::after rule above)
+ *   and in footnotes.css/lists.css, so this leans on established support
+ *   rather than adding a wrapper class or attribute.
+ * - `:not(.bookmark)` on that: the old Ghost bookmark card also nests an
+ *   <img> (once content/bookmarks.json grows a vendored thumbnail; today it
+ *   always falls back to the drawn SVG placeholder instead), but it puts
+ *   that image beside a title, description and host, real text, so it
+ *   keeps the fill like any other text link.
+ * - `a.lyt-playbtn` / `a.ltv-playbtn` catch remark-embeds' YouTube/Vimeo,
+ *   which turn into astro-embed's <lite-youtube>/<lite-vimeo>. Those paint
+ *   the poster as their own CSS background-image and wrap the whole
+ *   thumbnail in an anchor with no <img> descendant at all, just a
+ *   visually-hidden screen-reader label. `:has(img)` cannot see these; the
+ *   class the library already puts on the anchor can.
+ * - `figure a` keeps the same defensive net the ::after rule above already
+ *   holds for a link inside a hand-written <figure>.
+ *
+ * In place of the fill: a solid, hard-edged shadow in the day accent colour
+ * (`--accent-day`, the same source `--post-accent-fill` reads, not that
+ * mixed token itself: there is no text on top here needing the contrast
+ * mix), offset with no blur like the code frame's own --code-shadow-offset,
+ * and detached rather than flush against the image: its x/y offset drifts
+ * between two points on a cubic-bezier easing curve while hovered, so the
+ * shadow reads as having separated from the image instead of holding one
+ * corner fixed. `box-shadow` never affects layout (it paints outside the
+ * border box without changing it), so nothing reflows the way the padding
+ * comment above already relies on for the text-link fill.
+ *
+ * Hover/focus only, not at rest: the owner's ask was to replace what the
+ * *hover* fill did, and a shadow that drifts continuously on every image
+ * link on the page at rest would be far louder than the fill it replaces.
+ * Rest for an image link stays exactly what a reader already sees today,
+ * the plain image; the drift is feedback for the pointer being there, same
+ * split as every other link in this file (quiet rest, expressive hover).
+ */
+.prose a:has(img):not(.bookmark),
+.prose a.lyt-playbtn,
+.prose a.ltv-playbtn,
+.prose figure a {
+  text-decoration-line: none;
+}
+
+.prose a:has(img):not(.bookmark):hover,
+.prose a:has(img):not(.bookmark):focus-visible,
+.prose a.lyt-playbtn:hover,
+.prose a.lyt-playbtn:focus-visible,
+.prose a.ltv-playbtn:hover,
+.prose a.ltv-playbtn:focus-visible,
+.prose figure a:hover,
+.prose figure a:focus-visible {
+  background: transparent;
+  color: inherit;
+  text-decoration-line: none;
+  animation: image-link-shadow-drift var(--image-link-shadow-duration) var(--image-link-shadow-ease) infinite;
+}
+
+@keyframes image-link-shadow-drift {
+  0%,
+  100% {
+    box-shadow: 8px 8px 0 0 var(--accent-day, var(--accent));
+  }
+  50% {
+    box-shadow: 14px 11px 0 0 var(--accent-day, var(--accent));
+  }
+}
+
+/*
+ * Motion is decoration everywhere on this site (theme.css's own words for
+ * --duration collapsing to 0ms here). The drift is exactly that: dropping
+ * it completely would leave a reader who asked for less motion with no
+ * hover feedback at all on an image link, so a shadow still shows, just
+ * fixed at the drift's rest point instead of animating between it and the
+ * other.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .prose a:has(img):not(.bookmark):hover,
+  .prose a:has(img):not(.bookmark):focus-visible,
+  .prose a.lyt-playbtn:hover,
+  .prose a.lyt-playbtn:focus-visible,
+  .prose a.ltv-playbtn:hover,
+  .prose a.ltv-playbtn:focus-visible,
+  .prose figure a:hover,
+  .prose figure a:focus-visible {
+    animation: none;
+    box-shadow: 8px 8px 0 0 var(--accent-day, var(--accent));
+  }
 }
 
 /*
