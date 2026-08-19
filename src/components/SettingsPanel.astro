@@ -66,6 +66,14 @@ const { locale } = Astro.props
           <span>{t(locale, 'conwayAutoFeed')}</span>
           <input type="range" id="sp-autofeed" min="0" max="20" step="1" />
         </label>
+        <label class="sp-knob">
+          <span>{t(locale, 'conwayOpacity')}</span>
+          {/* min/max match conway.ts's own MIN_OPACITY/MAX_OPACITY (0 to 0.5),
+             hardcoded here the same way density/gps/autofeed's own ranges
+             are above: those constants are not exported, same reason. Step
+             0.01 so the slider can actually rest on the 0.08 default. */}
+          <input type="range" id="sp-opacity" min="0" max="0.5" step="0.01" />
+        </label>
         <div class="sp-conway-actions">
           <button type="button" id="sp-pause" data-pause={t(locale, 'conwayPause')} data-resume={t(locale, 'conwayResume')}>
             {t(locale, 'conwayPause')}

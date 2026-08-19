@@ -10,7 +10,7 @@
 // collide with theirs.
 export {}
 
-import { getSettings, reseed, setAutoFeed, setBackgroundEnabled, setDensity, setGps, setMotion, setPaused } from './conway'
+import { getSettings, reseed, setAutoFeed, setBackgroundEnabled, setDensity, setGps, setMotion, setOpacity, setPaused } from './conway'
 import { getShortcutLetter, setShortcutLetter } from './search-palette'
 
 // Same key hover-previews.ts's own bindPersistToggle() already reads and
@@ -141,6 +141,12 @@ function init(): void {
   if (autoFeed !== null) {
     autoFeed.value = String(getSettings().autoFeedSeconds)
     autoFeed.addEventListener('input', () => setAutoFeed(Number(autoFeed.value)))
+  }
+
+  const opacity = menu.querySelector<HTMLInputElement>('#sp-opacity')
+  if (opacity !== null) {
+    opacity.value = String(getSettings().opacity)
+    opacity.addEventListener('input', () => setOpacity(Number(opacity.value)))
   }
 
   const pause = menu.querySelector<HTMLButtonElement>('#sp-pause')
