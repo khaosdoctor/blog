@@ -6,6 +6,7 @@
 // reader-adjustable, so there is no picker for a component tree to hold state
 // for.
 import { dayColor } from '../lib/day-color'
+import { runDecode, SCRAMBLE_TICK_MS, SCRAMBLE_LOCK_TICKS, type DecodeRun } from '../lib/decode-scramble'
 import { GLITCH_GLYPHS } from '../lib/logo-mark'
 
 const SCRAMBLE_GLYPHS = '!<>-_\\/[]{}=+*^?#'.split('')
@@ -28,10 +29,13 @@ const CURSOR_RAMP_FRAMES = 2
  * the scramble cascades through left to right, shares the cursor's own 90ms
  * ramp clock for the same reason: one shared clock rather than two unrelated
  * ones.
+ *
+ * The tick/lock timing itself (`SCRAMBLE_TICK_MS`/`SCRAMBLE_LOCK_TICKS`) now
+ * lives in `../lib/decode-scramble`, the shared loop this and the reading
+ * progress bar's own leading-edge decode both drive, so the tempo decided
+ * here is the one both read rather than two copies that could drift apart.
  */
-const SCRAMBLE_TICK_MS = 133
 const STAGGER_MS = CURSOR_RAMP_MS
-const LOCK_TICKS = 4
 
 /*
  * The glitch: a burst of 1-3 pulses, a random 4-20s apart, on both the
@@ -154,38 +158,31 @@ function init(): void {
   }
 
   // --- the scramble, once per session ---
-  let scrambleTimer: ReturnType<typeof setInterval> | null = null
+  let scrambleRun: DecodeRun | null = null
 
   function resolveLetters(): void {
     for (const el of letterEls) el.textContent = el.dataset.ch ?? ''
   }
 
   function runScramble(onDone: () => void): void {
-    const queue = letterEls.map((el, i) => {
+    for (const el of letterEls) el.textContent = ''
+    const items = letterEls.map((el, i) => {
+      const ch = el.dataset.ch ?? ''
       const start = i * STAGGER_MS + randomBetween(150, 350)
-      return { el, ch: el.dataset.ch ?? '', start, end: start + LOCK_TICKS * SCRAMBLE_TICK_MS }
-    })
-    for (const { el } of queue) el.textContent = ''
-    let frame = 0
-    scrambleTimer = setInterval(() => {
-      frame += SCRAMBLE_TICK_MS
-      let allLocked = true
-      for (const { el, ch, start, end } of queue) {
-        if (frame < start) {
-          allLocked = false
-        } else if (frame < end) {
+      return {
+        start,
+        scramble: (): void => {
           el.textContent = randomGlyph(SCRAMBLE_GLYPHS)
-          allLocked = false
-        } else {
+        },
+        lock: (): void => {
           el.textContent = ch
-        }
+        },
       }
-      if (allLocked) {
-        if (scrambleTimer !== null) clearInterval(scrambleTimer)
-        scrambleTimer = null
-        onDone()
-      }
-    }, SCRAMBLE_TICK_MS)
+    })
+    scrambleRun = runDecode(items, { tickMs: SCRAMBLE_TICK_MS, lockTicks: SCRAMBLE_LOCK_TICKS }, () => {
+      scrambleRun = null
+      onDone()
+    })
   }
 
   // --- the glitch: a burst of 1-3 pulses, both wordmark and mark, 4-20s apart ---
@@ -256,10 +253,8 @@ function init(): void {
   // --- boot / freeze, prefers-reduced-motion and the settings panel's own override ---
   function freeze(): void {
     stopCursor()
-    if (scrambleTimer !== null) {
-      clearInterval(scrambleTimer)
-      scrambleTimer = null
-    }
+    scrambleRun?.cancel()
+    scrambleRun = null
     clearGlitchTimers()
     endPulse()
     resolveLetters() // rest frame: the whole name, no mid-scramble glyph left behind
