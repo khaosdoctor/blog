@@ -1,16 +1,19 @@
 ---
-// A pixel on/off switch rather than two plain links: Português is the green
-// side, English the red side, drawn hard-edged and stepped like an old game
-// menu's toggle (Lucas's own words). Still a single real link, not a faked
-// in-place control: choosing a language is a navigation, to the page's own
-// alternate when one exists and to that language's home otherwise, exactly
-// as the plain-link version did.
+// A chunky pixel-art ON/OFF slab rather than a plain link pair or a grey
+// track with a coloured dot (Lucas's own reference image): the whole slab is
+// filled in the current state's brand colour (green for Português, red for
+// English), a single word of large pixel type names that state, and a
+// raised, textured knob occupies the other half, sliding to the side that
+// state's word is not on. Still a single real link, not a faked in-place
+// control: choosing a language is a navigation, to the page's own alternate
+// when one exists and to that language's home otherwise, exactly as the
+// plain-link version did.
 //
 // Colour is never the only signal (WCAG 1.4.1, and red/green is the one pair
 // a colour-blind reader is least likely to tell apart): the knob's position
-// on the track is one non-colour signal, the PT/EN text printed on the track
-// itself is a second, and the link's own accessible name states in words
-// which language is current and which one clicking it goes to.
+// is one non-colour signal, the PT/EN word printed on the slab is a second,
+// and the link's own accessible name states in words which language is
+// current and which one clicking it goes to.
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -34,9 +37,11 @@ function hrefFor(code: Locale): string {
   return LOCALES.find((entry) => entry.code === code)?.home ?? '/'
 }
 
+const current = LOCALES.find((entry) => entry.code === locale)
 const other = LOCALES.find((entry) => entry.code !== locale)
 const otherHref = other === undefined ? '/' : hrefFor(other.code)
 const otherName = other?.name ?? ''
+const currentLabel = current?.label ?? locale.toUpperCase()
 ---
 
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
@@ -47,8 +52,7 @@ const otherName = other?.name ?? ''
     aria-label={t(locale, 'switchLanguage', otherName)}
     title={t(locale, 'switchLanguage', otherName)}
   >
-    <span class="lang-cell" data-code="pt" aria-hidden="true">PT</span>
-    <span class="lang-cell" data-code="en" aria-hidden="true">EN</span>
+    <span class="lang-word" aria-hidden="true">{currentLabel}</span>
     <span class="lang-knob" aria-hidden="true"></span>
   </a>
 </nav>
@@ -60,27 +64,52 @@ const otherName = other?.name ?? ''
   }
 
   /*
-   * Sized to match the header's icon buttons (--icon-btn-hit, theme.css):
-   * same row height, and 3.75rem wide clears the 44px WCAG floor on both
-   * axes on its own, so the whole track is one generous hit target rather
-   * than two cramped ones.
+   * A wide rectangle, deliberately: the reference is neither a pill nor a
+   * square. Height still reads from `--icon-btn-hit`, the same token every
+   * other header control's own hit target uses (ThemeToggle, SettingsPanel,
+   * the search trigger), so this control lines up with them in one row even
+   * though nothing else about its shape borrows from theirs. Width is fixed
+   * rather than measured off the word, so the slab does not resize itself
+   * between the two languages: 7rem splits evenly into the two 3.5rem
+   * halves below.
    */
   .lang-track {
     position: relative;
-    display: inline-flex;
-    inline-size: 3.75rem;
+    display: inline-block;
+    inline-size: 7rem;
     block-size: var(--icon-btn-hit);
-    border: var(--border) solid var(--rule);
     border-radius: var(--radius);
-    background: var(--bg);
     overflow: hidden;
     text-decoration: none;
     cursor: pointer;
+    /*
+     * The whole slab is the colour, not a neutral track with a coloured
+     * dot on it: `--lang-fill-color` picks the brand token for the current
+     * state (green by default, overridden to red below), then mixes it
+     * toward black on the sepia page or toward white on the black one, the
+     * same oklab mix chips.css already proved safe for these two exact
+     * colours (dark green 13.16:1, light green 11.63:1, dark red 10.35:1,
+     * light red 13.45:1, all read there as --chip-ink against `--bg`, which
+     * is exactly what `.lang-word` below paints on top of it).
+     */
+    --lang-fill-color: var(--brand-green);
+    background: light-dark(
+      color-mix(in oklab, var(--lang-fill-color) 50%, black),
+      color-mix(in oklab, var(--lang-fill-color) 52%, white)
+    );
+    /*
+     * A hard offset block, no blur, behind the whole slab: the same shadow
+     * code frames drop (--code-shadow-offset, --code-shadow-color in
+     * theme.css), reused rather than re-invented because it already solves
+     * "read against both grounds" the way this needs to: black on the
+     * sepia page, white on the black one, so the shadow never disappears
+     * into whichever ground it falls on.
+     */
+    box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color);
   }
 
-  .lang-track:hover,
-  .lang-track:focus-visible {
-    border-color: var(--accent);
+  .lang-switch[data-current='en'] .lang-track {
+    --lang-fill-color: var(--brand-red);
   }
 
   .lang-track:focus-visible {
@@ -88,65 +117,71 @@ const otherName = other?.name ?? ''
     outline-offset: 2px;
   }
 
-  .lang-cell {
-    position: relative;
-    z-index: 1;
-    flex: 1 1 50%;
+  /*
+   * The state word: large pixel type (PxPlus IBM VGA8, --font-subtitle,
+   * sized at a whole multiple of 16px so its bitmap grid stays crisp),
+   * white in the reference and `--bg` here, the same inversion chips.css's
+   * own hover fill uses (the fill above is that chip's --chip-ink formula,
+   * so painting `--bg` on top of it is the identical, already-measured
+   * pairing read the other way round). Absolutely positioned rather than a
+   * flex child: its side (left for one language, right for the other) is a
+   * per-locale, server-rendered fact, not something that toggles at
+   * runtime, so it needs no transition of its own.
+   */
+  .lang-word {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 3.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.06em;
-    color: var(--muted);
+    font-family: var(--font-subtitle);
+    font-size: 32px;
+    color: var(--bg);
+  }
+
+  .lang-switch[data-current='en'] .lang-word {
+    inset-inline-end: auto;
+    inset-inline-start: 0;
   }
 
   /*
-   * The knob: a hard-edged block half the track's width, in the current
-   * language's own brand colour, sliding to the side that colour belongs to.
-   * `--lang-knob-fill` mixes that colour toward whichever end of the page is
-   * readable, the same oklab mix chips.css already proved safe for these two
-   * exact colours (dark green 13.16:1, light green 11.63:1, dark red
-   * 10.35:1, light red 13.45:1, all read there as --chip-ink), so the fill
-   * doubles as the current cell's own text-on-colour contrast once inverted
-   * below.
+   * The knob: a raised, textured block occupying the half of the slab the
+   * word is not on. `--lang-knob-face`/`--lang-knob-edge` (theme.css) are a
+   * fixed neutral pair rather than a mix of the brand colours above: a
+   * physical switch's plastic grip does not repaint itself to match ON
+   * green or OFF red, and the border needs to read as darker than the face
+   * in both directions, which the brand mix (light in dark mode) cannot
+   * promise. The two repeating-linear-gradients cross into the grid texture
+   * a moulded grip is drawn with in pixel art; the border reads at 2x
+   * `--border` rather than a bare literal, so it is still built from the
+   * one token everything else's hairline reads from.
    *
-   * The slide is a step, not an ease (an old switch snaps, it does not
-   * glide), and it only ever fires on a same-document navigation (a future
-   * view transition, say): a plain link swap is a full page load, so most
-   * readers only ever see the two resting states, never the motion between
-   * them. `--duration` already collapses to 0ms under
-   * prefers-reduced-motion (theme.css), so wherever this does animate, it
-   * stops doing so under that setting for free.
+   * Position is still the same transform+steps mechanism the plain-link
+   * version's knob used, kept for the same reason: a same-document
+   * transition (a future view transition, say) would still want a knob it
+   * can slide rather than teleport, and `--duration` already collapses to
+   * 0ms under prefers-reduced-motion (theme.css), so wherever this does
+   * animate, it stops doing so under that setting for free. A plain link
+   * swap is a full page load today, so most readers only ever see the two
+   * resting states, never the motion between them.
    */
   .lang-knob {
-    --lang-knob-color: var(--brand-green);
-    --lang-knob-fill: light-dark(
-      color-mix(in oklab, var(--lang-knob-color) 50%, black),
-      color-mix(in oklab, var(--lang-knob-color) 52%, white)
-    );
     position: absolute;
-    z-index: 0;
     inset-block: 0;
     inset-inline-start: 0;
-    inline-size: 50%;
-    background: var(--lang-knob-fill);
+    inline-size: 3.5rem;
+    transform: translateX(0%);
     transition: transform var(--duration) steps(2, jump-none);
+    background-color: var(--lang-knob-face);
+    background-image:
+      repeating-linear-gradient(90deg, var(--lang-knob-edge) 0 2px, transparent 2px 8px),
+      repeating-linear-gradient(0deg, var(--lang-knob-edge) 0 2px, transparent 2px 8px);
+    border: calc(var(--border) * 2) solid var(--lang-knob-edge);
   }
 
   .lang-switch[data-current='en'] .lang-knob {
-    --lang-knob-color: var(--brand-red);
     transform: translateX(100%);
-  }
-
-  /* The current side's label is drawn on top of the knob, so its own text
-     needs the knob-fill's contrast pair: --bg, the page ground, same
-     inversion chips.css's hover state already reads. Bold on top of that is
-     the non-colour cue: position and weight both say "this one", not only
-     hue. */
-  .lang-switch[data-current='pt'] .lang-cell[data-code='pt'],
-  .lang-switch[data-current='en'] .lang-cell[data-code='en'] {
-    color: var(--bg);
-    font-weight: bold;
   }
 </style>
