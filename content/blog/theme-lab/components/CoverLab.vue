@@ -255,14 +255,14 @@ function waveField(
   bgHex: string,
   size: number,
   quantize: boolean,
-): Array<{ x: number; y: number; fill: string }> {
+): Array<{ x: number; y: number; fill: string; level: number }> {
   const cols = Math.ceil(CARD_W / size)
   const rows = Math.ceil(CARD_H / size)
   const brandRgb = parseHex(brandHex)
   const bgRgb = parseHex(bgHex)
   const cosD = Math.cos(params.direction)
   const sinD = Math.sin(params.direction)
-  const cells: Array<{ x: number; y: number; fill: string }> = []
+  const cells: Array<{ x: number; y: number; fill: string; level: number }> = []
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const u = col * cosD - row * sinD
@@ -274,12 +274,18 @@ function waveField(
           6 +
         0.5
       const raw = Math.max(0, Math.min(1, wave))
-      const alpha = quantize
+      // "level" é o mesmo número que antes se chamava "alpha" aqui: escolhe
+      // o tom (mistura brandRgb/bgRgb). Agora ele também alimenta a
+      // opacidade por célula lá embaixo em sixWaveCells, do mesmo jeito que
+      // o fogo deriva seu próprio alfa da intensidade da célula (bandT ou
+      // rawT): é a mesma leitura usada pra dois canais visuais diferentes,
+      // não dois cálculos separados.
+      const level = quantize
         ? params.levels === 1
           ? 0
           : Math.min(params.levels - 1, Math.floor(raw * params.levels)) / (params.levels - 1)
         : raw
-      cells.push({ x: col * size, y: row * size, fill: toHex(composite(brandRgb, bgRgb, alpha)) })
+      cells.push({ x: col * size, y: row * size, fill: toHex(composite(brandRgb, bgRgb, level)), level })
     }
   }
   return cells
@@ -381,6 +387,15 @@ const fireAlphaCold = ref(0)
 // continua a opção para quem quiser o registro de poucos tons de uma máquina
 // do período do algoritmo, que não tinha canal alfa e só ditherava.
 const fireAlphaMode = ref('continuo')
+// Alfa por célula das ondas, mesma ideia do fogo (alto/baixo interpolados
+// pelo nível da célula) mas com knobs próprios, não os mesmos refs: fogo e
+// ondas ficam em painéis lado a lado, mas continuam dois candidatos, cada
+// um com seu próprio ajuste fino. Sem modo escalonado/contínuo à parte
+// como o fogo tem, porque o campo de ondas já chega quantizado em
+// `sixWave.levels` tons antes de qualquer alfa entrar: o próprio nível já é
+// o degrau, um terceiro controle não mudaria a leitura.
+const waveAlphaHigh = ref(100)
+const waveAlphaLow = ref(0)
 
 const effectiveSeed = computed(() => (hashSlug(DEMO_SLUG) + seed.value) >>> 0)
 const brand = computed(() => BRANDS[effectiveSeed.value % BRANDS.length])
@@ -491,8 +506,17 @@ const SHADOW_OFFSET = 3
 // Fogo (5) e ondas (6) pintam atrás do texto uma textura bem mais ocupada do
 // que o sólido do wireframe: a mesma sombra rígida de 3px que basta para o
 // candidato 4 ainda se perdia ali. Não é um efeito novo, é o mesmo bloco
-// duro, só mais largo.
-const BUSY_SHADOW_OFFSET = SHADOW_OFFSET * 2
+// duro, só mais largo. Os dois usavam o mesmo número (o dobro do wireframe)
+// até virar reclamação: no candidato 6 esse afastamento lia como uma segunda
+// cópia solta do texto, não como sombra. A diferença é o fundo por trás: o
+// fogo tem fiapos e um gradiente abrupto da fonte pro topo, um campo bem
+// desigual que ainda precisa do afastamento maior pra não se confundir com o
+// texto; as ondas quantizam num campo mais parelho (poucos tons, sem
+// fiapo), então um afastamento menor já basta pra ler como sombra. Por
+// isso agora são dois valores, um por candidato, não mais um só
+// compartilhado; o do fogo não muda.
+const BUSY_SHADOW_OFFSET = SHADOW_OFFSET * 2 // fogo (5): fundo mais desigual, precisa do afastamento maior
+const WAVES_SHADOW_OFFSET = SHADOW_OFFSET * 1.5 // ondas (6): fundo mais parelho, precisa de menos afastamento
 
 // O título é sempre esta tinta branca fixa, nos quatro candidatos, nunca
 // derivada da cor da marca; a assinatura carrega a mesma tinta, só apagada
@@ -587,7 +611,20 @@ const brandToneReadouts = computed(() =>
   ),
 )
 
-const sixWaveCells = computed(() => waveField(sixWave.value, brandTone.value, DARK_BG, cellSize.value, true))
+// Opacidade por célula, derivada do mesmo "level" que já escolhe o tom: a
+// mesma leitura que o fogo faz (alfa alto/baixo interpolados pela
+// intensidade da célula), só que aqui a intensidade já chega quantizada em
+// `sixWave.levels` degraus, então a opacidade sai naturalmente escalonada
+// sem precisar de um modo escalonado/contínuo à parte. Célula oca continua
+// só do fogo: não faz sentido pra um campo de senos, e não foi pedida aqui,
+// então é essa diferença, não mais o alfa, que ainda separa os dois
+// candidatos.
+const sixWaveCells = computed(() =>
+  waveField(sixWave.value, brandTone.value, DARK_BG, cellSize.value, true).map((c) => ({
+    ...c,
+    alpha: (waveAlphaLow.value + (waveAlphaHigh.value - waveAlphaLow.value) * c.level) / 100,
+  })),
+)
 
 const WIRE_CENTER = { x: 900, y: 335 }
 const WIRE_RADIUS = 130
@@ -757,6 +794,7 @@ const sixDecisionSettings = computed(() => [
   ...sharedDecisionSettings.value,
   { label: 'célula da grade', value: `${cellSize.value}px` },
   { label: 'tons gerados (hash)', value: String(sixWave.value.levels) },
+  { label: 'alfa alto/baixo das ondas', value: `${waveAlphaHigh.value}% / ${waveAlphaLow.value}%` },
   inkSetting.value,
 ])
 
@@ -778,7 +816,7 @@ const fireDecisionContext = computed(
 
 const sixDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o campo de senos que nasceu para o candidato 3 (plasma, arquivado), quantizado em ${sixWave.value.levels} tons (como uma paleta de máquina antiga), sem célula oca e sem alfa por célula: isso fica só no candidato 5 (fogo), pra esses dois não virarem a mesma ideia duas vezes. As células e a moldura pintam com o tom derivado do knob de marca, não a cor crua: ${brandToneDerivationLabel.value} = ${brandTone.value}, ${brandToneContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(brandToneContrast.value)}). Chapéu, título e assinatura são sempre brancos (${TITLE_INK}), não mais dessa mistura: ${titleContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(titleContrast.value)}); pior caso real ${titleVsToneContrast.value.toFixed(2)}:1 sobre ${brandTone.value} (${grade(titleVsToneContrast.value)}), quando o campo satura no tom da marca; por isso o título, o chapéu e a assinatura também carregam a mesma sombra rígida maior do candidato 5, de ${BUSY_SHADOW_OFFSET}px, contra esse fundo mais ocupado.`,
+    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o campo de senos que nasceu para o candidato 3 (plasma, arquivado), quantizado em ${sixWave.value.levels} tons (como uma paleta de máquina antiga), clipado por dentro da moldura interna do mesmo jeito que o fogo do candidato 5, não vazando pro resto do cartão. Cada célula agora também carrega opacidade própria, derivada do mesmo nível que já escolhe o tom, entre ${waveAlphaLow.value}% e ${waveAlphaHigh.value}% (a mesma leitura do alfa do fogo, sem modo escalonado/contínuo à parte porque o campo já chega quantizado nesses ${sixWave.value.levels} tons). Célula oca continua só do fogo: é essa diferença, não mais o alfa por célula, que mantém os dois candidatos separados, não a mesma ideia duas vezes. As células e a moldura pintam com o tom derivado do knob de marca, não a cor crua: ${brandToneDerivationLabel.value} = ${brandTone.value}, ${brandToneContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(brandToneContrast.value)}). Chapéu, título e assinatura são sempre brancos (${TITLE_INK}), não mais dessa mistura: ${titleContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(titleContrast.value)}); pior caso real ${titleVsToneContrast.value.toFixed(2)}:1 sobre ${brandTone.value} (${grade(titleVsToneContrast.value)}), quando o campo satura no tom da marca; por isso o título, o chapéu e a assinatura carregam uma sombra rígida própria de ${WAVES_SHADOW_OFFSET}px contra esse fundo ocupado, menor que a do candidato 5 porque o campo de ondas é mais parelho que o fogo.`,
 )
 </script>
 
@@ -815,6 +853,8 @@ const sixDecisionContext = computed(
       <Knob v-model="fireAlphaHot" label="alfa quente do fogo" :min="10" :max="100" :step="5" unit="%" />
       <Knob v-model="fireAlphaCold" label="alfa frio do fogo" :min="0" :max="90" :step="5" unit="%" />
       <Pick v-model="fireAlphaMode" label="modo do alfa do fogo" :options="FIRE_ALPHA_MODE_OPTIONS" />
+      <Knob v-model="waveAlphaHigh" label="alfa alto das ondas" :min="10" :max="100" :step="5" unit="%" />
+      <Knob v-model="waveAlphaLow" label="alfa baixo das ondas" :min="0" :max="90" :step="5" unit="%" />
     </Panel>
 
     <Panel label="tom da marca (oklab, compartilhado entre 4 · 5 · 6): bordas, chapéu e campo">
@@ -1124,17 +1164,38 @@ const sixDecisionContext = computed(
             role="img"
             :aria-label="`Capa candidata, janela DOS com ondas quantizadas, categoria ${category}`"
           >
+            <defs>
+              <clipPath id="cover-lab-waves-clip">
+                <rect v-bind="innerFrame" />
+              </clipPath>
+            </defs>
             <rect width="1200" height="630" :fill="DARK_BG" />
-            <rect v-for="(c, i) in sixWaveCells" :key="i" :x="c.x" :y="c.y" :width="cellSize" :height="cellSize" :fill="c.fill" />
+            <!-- Mesmo mecanismo de recorte do candidato 5 (fogo): um
+                 clipPath preso à moldura interna, reaproveitado aqui em vez
+                 de escrito de novo, porque uma janela DOS de verdade também
+                 não deixaria o campo de ondas passar por cima da moldura. -->
+            <g clip-path="url(#cover-lab-waves-clip)">
+              <rect
+                v-for="(c, i) in sixWaveCells"
+                :key="i"
+                :x="c.x"
+                :y="c.y"
+                :width="cellSize"
+                :height="cellSize"
+                :fill="c.fill"
+                :opacity="c.alpha"
+              />
+            </g>
             <rect v-bind="outerFrame" fill="none" :stroke="brandTone" :stroke-width="BORDER_STROKE" />
             <rect v-bind="innerFrame" fill="none" :stroke="brandTone" stroke-width="3" />
 
-            <!-- Mesma sombra maior do candidato 5 (BUSY_SHADOW_OFFSET): o
-                 campo de ondas por trás também é textura ocupada demais para
-                 o offset rígido padrão. -->
+            <!-- Sombra própria do candidato 6 (WAVES_SHADOW_OFFSET): mais
+                 perto do texto que a do fogo (candidato 5), porque o campo
+                 de ondas por trás é mais parelho e não precisa do mesmo
+                 afastamento pra não se confundir com uma cópia do texto. -->
             <text
-              :x="dosCard.padX + BUSY_SHADOW_OFFSET"
-              :y="dosCard.kickerY + BUSY_SHADOW_OFFSET"
+              :x="dosCard.padX + WAVES_SHADOW_OFFSET"
+              :y="dosCard.kickerY + WAVES_SHADOW_OFFSET"
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
@@ -1143,15 +1204,15 @@ const sixDecisionContext = computed(
             <text
               v-for="(line, i) in dosCard.lines"
               :key="`s${i}`"
-              :x="dosCard.padX + BUSY_SHADOW_OFFSET"
-              :y="dosCard.titleYs[i] + BUSY_SHADOW_OFFSET"
+              :x="dosCard.padX + WAVES_SHADOW_OFFSET"
+              :y="dosCard.titleYs[i] + WAVES_SHADOW_OFFSET"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
               :fill="DARK_SHADOW"
             >{{ line }}</text>
             <text
-              :x="dosCard.padX + BUSY_SHADOW_OFFSET"
-              :y="dosCard.bylineY + BUSY_SHADOW_OFFSET"
+              :x="dosCard.padX + WAVES_SHADOW_OFFSET"
+              :y="dosCard.bylineY + WAVES_SHADOW_OFFSET"
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
@@ -1187,10 +1248,10 @@ const sixDecisionContext = computed(
           </svg>
         </div>
         <p :class="$style.tiny">
-          {{ sixWave.levels }} tons · tom {{ brandTone }} · {{ brandToneContrast.toFixed(2) }}:1 sobre {{ DARK_BG }}
-          ({{ grade(brandToneContrast) }}) · título fixo {{ titleContrast.toFixed(2) }}:1 sobre {{ DARK_BG }}
-          ({{ grade(titleContrast) }}) · pior caso real {{ titleVsToneContrast.toFixed(2) }}:1 sobre {{ brandTone }}
-          ({{ grade(titleVsToneContrast) }})
+          {{ sixWave.levels }} tons · alfa {{ waveAlphaLow }}%–{{ waveAlphaHigh }}% · tom {{ brandTone }} ·
+          {{ brandToneContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} ({{ grade(brandToneContrast) }}) · título fixo
+          {{ titleContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} ({{ grade(titleContrast) }}) · pior caso real
+          {{ titleVsToneContrast.toFixed(2) }}:1 sobre {{ brandTone }} ({{ grade(titleVsToneContrast) }})
         </p>
         <DecisionCopy
           lab="capa · janela DOS + ondas"
@@ -1219,12 +1280,13 @@ const sixDecisionContext = computed(
       recalculado com o próprio alfa quente do knob sobre esse mesmo tom,
       {{ titleVsFireWorstContrast.toFixed(2) }}:1 ({{ grade(titleVsFireWorstContrast) }}) sobre {{ fireWorstBg }},
       porque uma célula do fogo nunca pinta a cor cheia sem mistura. O wireframe carrega a sombra rígida original de
-      {{ SHADOW_OFFSET }}px; fogo e ondas, contra um fundo bem mais ocupado, carregam o dobro,
-      {{ BUSY_SHADOW_OFFSET }}px. No wireframe, a opacidade do sólido agora também escala por um knob (padrão 100%,
-      o mesmo desenho de sempre), por cima da queda por distância de sempre; a própria moldura continua mais
-      vibrante que o sólido atrás dela, pra ler como duas camadas. O fogo (5) e as ondas (6) são efeitos diferentes
-      de propósito (simulação de fogo contra campo de senos quantizado); célula oca e alfa por célula ficam só no
-      fogo, pra não virarem a mesma leitura duas vezes.
+      {{ SHADOW_OFFSET }}px; o fogo, contra um fundo bem mais desigual, carrega o dobro, {{ BUSY_SHADOW_OFFSET }}px; as
+      ondas, contra um campo mais parelho que o fogo, precisam de menos afastamento, {{ WAVES_SHADOW_OFFSET }}px. No
+      wireframe, a opacidade do sólido agora também escala por um knob (padrão 100%, o mesmo desenho de sempre), por
+      cima da queda por distância de sempre; a própria moldura continua mais vibrante que o sólido atrás dela, pra
+      ler como duas camadas. O fogo (5) e as ondas (6) são efeitos diferentes de propósito (simulação de fogo contra
+      campo de senos quantizado), e os dois agora variam a opacidade por célula, derivada da própria intensidade da
+      célula em cada um; célula oca continua só do fogo, pra não virarem a mesma leitura duas vezes.
     </p>
   </div>
 </template>
