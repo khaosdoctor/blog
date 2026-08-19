@@ -358,7 +358,7 @@ function replay(): void {
 
 // --- cursor de bloco: era exclusivo do candidato "dos", agora é um efeito à parte que qualquer um pode ligar ---
 const cursorEffectOn = ref(true)
-const cursorRateId = ref('doom')
+const cursorRateId = ref('terminal')
 const cursorOn = ref(true)
 let cursorTimer: ReturnType<typeof setInterval> | null = null
 
