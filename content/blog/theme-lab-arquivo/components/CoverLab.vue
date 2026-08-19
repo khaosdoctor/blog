@@ -365,14 +365,18 @@ function hashSlug(slug: string): number {
 // alguma coisa; o knob "semente" abaixo soma-se por cima para embaralhar.
 const DEMO_SLUG = 'como-o-fetch-morre-no-meio-do-caminho'
 
-const seed = ref(43)
-const view = ref('todos')
+// A decisão fechou no candidato 4 (wireframe 3D), roxo, semente 65: os
+// defaults abaixo abrem a bancada já nesse estado em vez de em "todos", para
+// quem abrir este arquivo ver primeiro o que foi escolhido. Os knobs
+// continuam soltos, então qualquer valor aqui ainda muda ao vivo.
+const seed = ref(65)
+const view = ref('wireframe')
 const titleSize = ref('longo')
 const category = ref('meta')
 const cellSize = ref(36)
 const cursor = ref(true)
-const wireDensity = ref(12)
-const wireOpacityScale = ref(100)
+const wireDensity = ref(6)
+const wireOpacityScale = ref(145)
 const fireIterations = ref(38)
 const fireDecay = ref(6)
 const fireHollowBands = ref(3)
@@ -581,14 +585,17 @@ const BRANDS = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id: 'branco
  * borda, chapéu, glifo e célula são acentos contra preto, e o título já é
  * branco fixo, então não sobra tinta pra clarear por padrão. Puxar o knob
  * pra baixo é a exceção que quem está olhando o cartão pode escolher, não o
- * ponto de partida.
+ * ponto de partida. A decisão fechou com o roxo em 90%: a cor cheia, contra o
+ * fundo preto do candidato 4, saturava perto demais do glifo branco do
+ * título, e os outros quatro tons seguem no ponto de partida porque ninguém
+ * os escolheu.
  */
 const inkMix = reactive<Record<string, number>>({
   vermelho: 100,
   verde: 100,
   amarelo: 100,
   azul: 100,
-  roxo: 100,
+  roxo: 90,
 })
 
 function inkHexFor(brandHex: string, percent: number): string {

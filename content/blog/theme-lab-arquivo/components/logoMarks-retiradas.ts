@@ -1,13 +1,13 @@
 /**
  * Os quatro candidatos de marca que perderam, com o motivo de cada um.
  *
- * Saíram de `../../theme-lab/components/logoMarks.ts` quando o dono decidiu
+ * Saíram de `./logoMarks.ts` quando o dono decidiu
  * ficar só com o wireframe ("fio") e a grade de `+` ("lattice"). A silhueta,
  * `filledAt` e `roleAt` continuam vindo de lá: a forma nunca mudou, só o
  * número de jeitos de desenhá-la.
  */
 
-import { GLITCH_GLYPHS, MARK_RECTS, ROLE_TOKEN, SHAPE, filledAt, wireGlyph } from '../../theme-lab/components/logoMarks'
+import { GLITCH_GLYPHS, MARK_RECTS, ROLE_TOKEN, SHAPE, filledAt, wireGlyph } from './logoMarks'
 
 export interface RetiredMark {
   id: 'mesh' | 'ramp' | 'dither' | 'glitch'

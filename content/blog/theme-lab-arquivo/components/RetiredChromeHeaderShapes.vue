@@ -19,9 +19,9 @@
  * marca, não um texto ao lado dela.
  */
 import { computed, ref } from 'vue'
-import DecisionCopy from '../../theme-lab/components/DecisionCopy.vue'
-import Knob from '../../theme-lab/components/Knob.vue'
-import LogoMark from '../../theme-lab/components/LogoMark.vue'
+import DecisionCopy from './DecisionCopy.vue'
+import Knob from './Knob.vue'
+import LogoMark from './LogoMark.vue'
 import {
   labelForMark,
   MARK_ACCENT_ALL_ID,
@@ -31,12 +31,12 @@ import {
   MARK_DEFAULT_PX,
   MARK_MIN_PX,
   type MarkCandidateId,
-} from '../../theme-lab/components/logoMarks'
-import Panel from '../../theme-lab/components/Panel.vue'
-import Pick from '../../theme-lab/components/Pick.vue'
-import Toggle from '../../theme-lab/components/Toggle.vue'
-import { parseHex, ratio } from '../../theme-lab/components/contrast'
-import '../../theme-lab/components/fonts.css'
+} from './logoMarks'
+import Panel from './Panel.vue'
+import Pick from './Pick.vue'
+import Toggle from './Toggle.vue'
+import { parseHex, ratio } from './contrast'
+import './fonts.css'
 
 const STACKS: Record<string, string> = {
   departure: "'Departure Mono', ui-monospace, monospace",

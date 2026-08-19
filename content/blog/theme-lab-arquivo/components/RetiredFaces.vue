@@ -13,7 +13,7 @@
  */
 import { ref } from 'vue'
 import { BODY_CANDIDATES, PIXEL_SURVEY, type RetiredFace } from './faces-retiradas'
-import '../../theme-lab/components/fonts.css'
+import './fonts.css'
 
 const SAMPLE =
   'O resolvedor não pergunta ao servidor raiz onde está o site: ele pergunta quem sabe responder sobre `.br`, e repete a pergunta descendo um nível a cada resposta até alguém devolver um endereço.'

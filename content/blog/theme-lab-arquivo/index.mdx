@@ -1,26 +1,28 @@
 ---
-title: "Laboratório de tema: os candidatos recusados"
+title: "Laboratório de tema: o arquivo completo"
 pubDate: 2026-08-14
 lang: "pt"
 category: "meta"
 tags: ["meta", "design"]
-description: "Os candidatos do laboratório de tema que perderam a decisão, guardados funcionando. Uma opção recusada é parte do argumento, não lixo."
+description: "Todo candidato do laboratório de tema encerrado, decidido ou recusado, guardado aqui funcionando, com o motivo de cada escolha."
 draft: false
 noindex: true
 ---
 
-Isto é o arquivo do [[theme-lab]]. Cada bloco aqui é um candidato que perdeu uma decisão e continua funcionando, com os
-mesmos botões e sliders que tinha quando estava na página principal.
+O laboratório de tema fechou: as quatro bancadas que teve, cabeçalho, lista de posts, capa e segundo plano vivo,
+foram todas decididas. `/theme-lab/` deixou de existir, e este arquivo é agora o registro inteiro, não só dos
+candidatos recusados: também guarda os que venceram, porque a página onde moravam acabou.
 
-Ele existe por um motivo prático: a página viva só deve mostrar o que ainda está em aberto, senão ela cresce até
-ninguém conseguir comparar nada. E existe por um motivo melhor: a opção recusada é metade do argumento. Um texto que
-diz "escolhi X" não vale nada; um que mostra o Y que foi testado, funcionando, e diz por que ele perdeu, vale a
-leitura. Quando eu escrever sobre como esse redesenho foi decidido, é daqui que vêm os exemplos.
+Cada bloco é um candidato que passou por uma decisão, funcionando, com os mesmos botões e sliders que tinha quando
+foi julgado. Um texto que diz "escolhi X" não vale nada; um que mostra o Y testado, funcionando, e diz por que
+ganhou ou perdeu, vale a leitura. É daqui que vêm os exemplos de como este redesenho foi decidido.
 
 Nada foi apagado, então nada aqui é uma captura de tela morta. Os componentes moram em `components/` ao lado deste
-arquivo e continuam sendo compilados pelo build como qualquer outra ilha do site. Os controles compartilhados (os
-sliders, os seletores, a conta de contraste) continuam importados do laboratório vivo, para um candidato aposentado
-não virar motivo de duplicar código.
+arquivo, controles compartilhados incluídos, e continuam compilados pelo build como qualquer outra ilha do site.
+
+Os quatro últimos blocos desta página venceram a própria decisão: vieram para cá porque a página viva onde moravam
+foi apagada, não porque perderam. O resto, a maioria, perdeu uma disputa e está aqui pelo motivo de sempre: a opção
+recusada é metade do argumento.
 
 ## As fontes de corpo que perderam
 
@@ -202,7 +204,7 @@ Antes de apontar um domínio novo em produção, a checklist de sempre é curta,
 
 A imagem abaixo não tenta ilustrar nada disso: é só um retângulo no preto de fundo do site, para conferir se a legenda nasce do lugar certo.
 
-![](../theme-lab/placeholder.png "Uma consulta DNS, do clique ao pacote")
+![](./placeholder.png "Uma consulta DNS, do clique ao pacote")
 
 O que fica desse passeio inteiro é uma lista curta do que já foi conferido nesta bancada:
 
@@ -297,8 +299,8 @@ O motivo de ele ter ganhado não é só o contraste, que os outros também alcan
 
 ## A capa sem moldura
 
-Um dos seis candidatos de capa OG/social do [[theme-lab]]: o fundo inteiro na cor da marca, sem a janela DOS por
-cima, título e assinatura na tinta clara ou escura que aquela marca pedir.
+Um dos seis candidatos de capa OG/social do laboratório de tema: o fundo inteiro na cor da marca, sem a janela DOS
+por cima, título e assinatura na tinta clara ou escura que aquela marca pedir.
 
 Perdeu para os quatro que ficaram (janela DOS, wireframe 3D, janela DOS com fogo, janela DOS com ondas) porque o
 fundo cheio na cor da marca é a leitura mais fraca de contraste das seis: o texto só tem uma tinta para escolher, e
@@ -334,4 +336,112 @@ A seção do logo no laboratório vivo (`ChromeHeader.vue`, agora fundida com a 
 Os quatro que perderam tinham todos o mesmo problema em graus diferentes: quanto mais peças um candidato somava por cima da silhueta (um anel de SVG, oito níveis de sombra, uma reamostragem 4x4, uma franja cromática), mais ele lia como uma imagem com efeito e menos como um desenho de terminal. O pixel glitched é o caso mais claro: tirando a franja, ele é literalmente os cinco retângulos do favicon antigo, a marca que este redesenho existe para substituir.
 
 <LabDemo src="./components/RetiredLogoMarks.vue" client:visible />
+
+## O cabeçalho, decidido: barra de caixa, marca e o wordmark que decifra
+
+`ChromeHeader.vue` veio para cá porque o laboratório vivo fechou inteiro, não porque esta bancada perdeu: a moldura,
+a marca, o cursor e o wordmark abaixo são a decisão que ficou.
+
+A moldura decidida é a barra de caixa `┌─┐`, a linha de desenho de caixa que abre e fecha em volta do nome e do
+menu, como uma janela de terminal desenhada só em caractere. Cinco leituras disputaram esta moldura; as outras
+quatro (linha de DOS invertida, mínimo, menu de Game Boy, razão SEÇÃO 00 / ÍNDICE) estão em "O cabeçalho, com quatro
+formas que perderam", mais acima nesta página, cada uma com o motivo. Nenhuma leitura usa imagem ou ícone: é tudo
+caractere, então nada disso custa uma requisição. A marca e o cabeçalho eram duas bancadas separadas e viraram uma
+só, porque julgar a marca fora do cabeçalho onde ela mora era julgar metade da decisão.
+
+Duas marcas sobraram de seis: o wireframe do Elite e a grade de `+`. O seletor escolhe a cor: uma das cinco da
+marca, o traço, ou "todas", que devolve as quatro cores originais, cada célula pegando a do retângulo do favicon em
+que ela cai. A bancada abre em "todas". As outras quatro marcas perderam e estão em "As marcas que perderam", logo
+acima.
+
+O slider de tamanho vai de 0 a 300px. Cada marca tem um piso de legibilidade abaixo do qual o glifo vira mancha, mas
+ele só avisa, não trava: o painel diz o piso do candidato e marca quando a escolha está abaixo dele. A bancada abre
+em 36px, abaixo do piso de 72px do wireframe: escolha vista e mantida assim mesmo.
+
+O cursor de bloco virou efeito solto, que entra em qualquer leitura. Ele acende e apaga no ritmo escolhido, mas a
+troca entre os dois passa por dois quadros de opacidade intermediária a 90ms cada, um degrau duro por quadro, nunca
+um fade liso. O ritmo tem três opções reais, nenhuma inventada: o terminal a 530ms por fase (o padrão, o dobro do
+Doom, porque um terminal é paciente onde um menu de jogo é urgente), o menu do Doom a 8 tics de 35 por segundo, e o
+modo texto do VGA, preso em hardware a 1,875Hz.
+
+O wordmark escolhe entre cinco animações, cada uma com procedência: `teletipo` (Teletype ASR-33, 10 caracteres por
+segundo de verdade), `decifra` (o decrypt de *Sneakers*), `pipboy` (typeout com scanlines), `baud` (o controle é a
+velocidade da linha, 300 a 9600), e `falha` (split de canal de VHS). A decisão foi `decifra`, no mesmo tique de
+530ms da fase "terminal" do cursor. Resolvido o nome, `decifra` não repete sozinha; um botão "recomeçar" toca de
+novo sob demanda, e um glitch ambiente (4 a 20 segundos, sorteado a cada disparo, rajada de 1 a 3) mantém o wordmark
+e a marca vivos depois disso, a mesma franja de RGB que o `falha` já usava e o mesmo glitch de contorno que a marca
+"fio" já tinha. Todas param no estado final, nunca no meio.
+
+A composição decidida foi "ambos": só a marca, só o texto, ou os dois, e "ambos" venceu. A leitura em que a marca
+era o próprio prompt de DOS, sem logo ao lado, perdeu e está arquivada em "O cabeçalho, com quatro formas que
+perderam". No hover, o desenho em caractere vira o SVG sólido do favicon, em troca seca.
+
+`prefers-reduced-motion` trava num quadro estático e o laço nunca começa, o mesmo vale para o glitch ambiente. Um
+botão de pausa cobre o que a WCAG 2.2.2 pede. O `falha` é o único texto animado que chega perto do limite de pisca
+da 2.3.1, e por isso tem piso de intervalo; o glitch ambiente fica bem abaixo dele. O nome acessível mora no link;
+marca e wordmark são `aria-hidden`.
+
+<LabDemo src="./components/ChromeHeader.vue" client:visible />
+
+## A lista de posts, decidida: a tabela densa
+
+`ChromeList.vue` também veio para cá pelo fechamento do laboratório inteiro, não por ter perdido: o motivo de ela
+ter vencido as outras seis leituras já está registrado em "A lista de posts, com a tabela densa decidida", mais
+acima nesta página, ao lado das seis que perderam.
+
+A tabela densa de quatro colunas (data, título, seção, tempo de leitura), em Departure Mono, traço de caixa `─`
+como régua entre linhas, altura de linha 13, entreletra -1/100em, seção sempre visível: essa é a leitura que ficou,
+na página mais visitada do site depois dos posts em si.
+
+<LabDemo src="./components/ChromeList.vue" client:visible />
+
+## A capa, decidida: candidato 4, wireframe 3D
+
+`CoverLab.vue` veio para cá porque a última seção aberta do laboratório, a capa, fechou: candidato 4, o sólido em
+wireframe. A bancada abre direto nesse candidato agora, não mais em "os quatro empilhados", e os knobs abrem nos
+valores decididos: categoria `meta`, título de 90 caracteres, cor roxa (`#4b15a8`) a 90% de mistura (não 100%: a
+cor cheia satura perto demais do branco fixo do título), cursor sólido ligado, semente 65, densidade do wireframe
+6px, opacidade do wireframe 145%. Dessa semente sai o mesmo sólido de sempre: 3 lados, 3 anéis, as duas pontas
+fechadas. Nenhum desses números veio de escolha cega: são o que a semente 65 já produzia, e o resto (roxo,
+densidade, opacidade) foi ajustado até o cartão ler bem.
+
+Este arquivo é agora a referência de implementação do gerador real: outra parte do trabalho lê `CoverLab.vue` como
+a fonte do algoritmo para portar a produção. Por isso os comentários e os outros três candidatos que moram no mesmo
+arquivo (janela DOS, janela DOS com fogo, janela DOS com ondas) ficaram como estavam, nenhum knob foi removido, e a
+mudança inteira desta bancada foi só nos valores iniciais dos refs, não no código que os usa.
+
+A capa é a imagem do card do Twitter, do Slack, do WhatsApp: 1200×630, título assado por cima. Os quatro candidatos
+aqui são `<svg>` de verdade, na proporção final, porque é assim que o gerador rasteriza com `sharp`, sem canvas nem
+WebGL. Nenhuma cor, campo ou fogo vem de `Math.random()`: tudo sai do hash do slug, para o mesmo post sempre bater
+a mesma capa e o cache do card social não estragar a cada build. O knob de semente embaralha a marca, o sólido, o
+fogo e as ondas juntos. O título é sempre branco fixo; a mistura em `oklab` pinta bordas, chapéu e células de
+campo.
+
+Dois outros candidatos de capa perderam antes deste fechamento e moram em "A capa sem moldura" e "A capa em
+plasma", mais acima nesta página.
+
+<LabDemo src="./components/CoverLab.vue" client:visible />
+
+## O segundo plano vivo, decidido e no ar
+
+Este candidato pegou o pedido de frente: um Jogo da Vida de Conway rodando atrás da página inteira, bem apagado,
+bem espalhado, um pouco ampliado (células grandes), nunca atrás do texto de um post, e um clique em qualquer lugar
+acende uma célula. Foi o pedido exato do dono do site, testado aqui antes de virar decisão, que já aconteceu: o
+candidato foi para o site como `ConwayField.astro` mais `src/scripts/conway.ts`, canvas e script puro, não Vue.
+
+A configuração completa (célula 12px, densidade de semente 10%, 8 gerações por segundo, clique sempre planador, um
+planador automático a cada 4 segundos, o desvanecimento por fundo, os números de contraste e acessibilidade, e a
+reabertura da política de quase nenhuma animação que este candidato provocou) está registrada em `docs/design.md`
+(seção Settled) e em `docs/decisions-log.md` ("The Conway background ships..."); esta bancada Vue é só a prova de
+conceito, o registro da decisão mora nos dois arquivos, não aqui.
+
+O que a bancada tem e a produção não precisou copiar: a zona de exclusão vem da caixa real do artigo, medida em
+tempo de execução com um `ResizeObserver`, do mesmo jeito que `PostToc.astro` já fazia, porque a coluna é
+dimensionada em `ch` e isso vira uma largura diferente a cada fonte; o clique atrás do texto ainda seleciona texto,
+e um clique na margem ainda acende célula, sem nenhum `pointer-events: none`, porque o `<canvas>` ocupa o palco por
+baixo e o navegador entrega o clique ao elemento mais alto embaixo do cursor. Um ponto que este candidato não
+resolveu, e que a produção herdou em aberto: `forced-colors: active` troca as cores do autor pelas do sistema, e
+isso apagaria a textura das células inteira.
+
+<LabDemo src="./components/GameOfLife.vue" client:visible />
 

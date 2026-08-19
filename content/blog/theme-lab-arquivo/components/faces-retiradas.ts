@@ -1,11 +1,11 @@
 /**
  * As fontes que perderam, com o motivo de cada uma.
  *
- * Saíram de `../../theme-lab/components/faces.ts` quando o corpo foi decidido:
+ * Saíram de `./faces.ts` quando o corpo foi decidido:
  * Literata como padrão e Atkinson Hyperlegible como a opção sem serifa. Continuam
  * aqui porque o argumento do artigo não é a fonte escolhida, é o que foi
  * descartado e por quê. Todas seguem vendorizadas em `public/fonts/` e declaradas
- * em `../../theme-lab/components/fonts.css`, que esta página importa: nada aqui
+ * em `./fonts.css`, que esta página importa: nada aqui
  * depende de rede.
  *
  * `pixelStep` é o passo em que a fonte fica nítida: `0` quer dizer vetorial de

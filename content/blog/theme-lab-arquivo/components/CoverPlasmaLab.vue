@@ -3,7 +3,7 @@
  * Candidato 3 do laboratório de capas OG/social: "plasma", um campo de três
  * senos por trás do título, sem wireframe nem janela DOS. Perdeu a decisão
  * para os candidatos 1, 4, 5 e 6 (ver
- * content/blog/theme-lab/components/CoverLab.vue) e mora aqui congelado, com
+ * content/blog/theme-lab-arquivo/components/CoverLab.vue) e mora aqui congelado, com
  * os mesmos controles que tinha quando estava na bancada viva. O gerador de
  * campo (`generateWaveParams`/`waveField`) continua vivo lá também: o
  * candidato 6 (ondas) ainda o usa, quantizado.
@@ -14,13 +14,13 @@
  * exemplo.
  */
 import { computed, ref } from 'vue'
-import DecisionCopy from '../../theme-lab/components/DecisionCopy.vue'
-import Knob from '../../theme-lab/components/Knob.vue'
-import Panel from '../../theme-lab/components/Panel.vue'
-import Pick from '../../theme-lab/components/Pick.vue'
-import Toggle from '../../theme-lab/components/Toggle.vue'
-import { composite, grade, parseHex, ratio, toHex } from '../../theme-lab/components/contrast'
-import '../../theme-lab/components/fonts.css'
+import DecisionCopy from './DecisionCopy.vue'
+import Knob from './Knob.vue'
+import Panel from './Panel.vue'
+import Pick from './Pick.vue'
+import Toggle from './Toggle.vue'
+import { composite, grade, parseHex, ratio, toHex } from './contrast'
+import './fonts.css'
 
 const CARD_W = 1200
 const CARD_H = 630

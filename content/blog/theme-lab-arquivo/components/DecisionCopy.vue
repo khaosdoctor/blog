@@ -28,14 +28,14 @@ let resetTimer: ReturnType<typeof setTimeout> | null = null
 const prompt = computed(() => {
   const lines = props.settings.map((setting) => `- ${setting.label}: ${setting.value}`).join('\n')
   const contextBlock = props.context ? `\n\n${props.context}` : ''
-  return `Decidi o candidato "${props.lab}" do /theme-lab/ (${props.component}).
+  return `Decidi o candidato "${props.lab}" (${props.component}), arquivado em /theme-lab-arquivo/.
 
 Configuração escolhida:
 ${lines}${contextBlock}
 
-Aplique isso no site e, seguindo a regra em AGENTS.md, mova os candidatos
-recusados desta seção para content/blog/theme-lab-arquivo/ em vez de apagar,
-porque eles são o argumento do artigo que eu quero escrever sobre isso.`
+Aplique isso no site. O componente já mora em content/blog/theme-lab-arquivo/ e
+continua lá depois da decisão, seguindo a regra em AGENTS.md: candidatos são o
+argumento do artigo que eu quero escrever sobre isso.`
 })
 
 const buttonText = computed(() => {
