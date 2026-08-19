@@ -147,7 +147,24 @@ const LEADER = '·'.repeat(200)
     font-family: var(--font-mono);
     font-size: 0.8rem;
     padding-block: 0.65rem;
-    border-block-end: 1px solid var(--rule);
+    /*
+     * The quotes' own dashed recipe (quotes.css, 10px on and 6px off), the
+     * same mark the pagination rule above the row of controls now draws, so
+     * every horizontal rule on a listing page reads as one thing used three
+     * times rather than three unrelated lines.
+     *
+     * Two differences from those two, both deliberate: it keeps the 1px weight
+     * a row separator wants rather than the 2px a section break carries, and
+     * it runs the row's full width instead of a centred half, because this
+     * separates two rows rather than closing a block. And it draws in
+     * `--muted` rather than `--rule`, whose dark tone carries a hint of purple
+     * that read as coloured against the dim white of the row's own text.
+     */
+    border-block-end: 0;
+    background-image: repeating-linear-gradient(to right, var(--muted) 0 10px, transparent 10px 16px);
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    background-size: 100% 1px;
   }
 
   /* No rule above the first row. The list already begins where the header's
@@ -158,8 +175,10 @@ const LEADER = '·'.repeat(200)
   /* The last row drops its own bottom rule: Pagination.astro draws its own
      border-block-start immediately below, and the two stacked read as a
      doubled line with an empty band between them. */
+  /* The separator is a background now, not a border, so the last row has to
+     drop the image rather than a border width. */
   .posts li:last-child {
-    border-block-end: 0;
+    background-image: none;
   }
 
   .date {
