@@ -1,7 +1,7 @@
 /**
  * Makes the cover for a post: the wireframe-3D SVG Lucas picked in the theme
- * lab (content/blog/theme-lab/components/CoverLab.vue, "capa · wireframe
- * 3D"), rasterised locally with sharp. No network call, no Replicate token,
+ * lab (content/blog/theme-lab-arquivo/components/CoverLab.vue, "capa ·
+ * wireframe 3D"), rasterised locally with sharp. No network call, no Replicate token,
  * no external Deno service: the three shortlisted candidates all drew their
  * own SVG locally, and choosing one retired the AI-background pipeline this
  * script used to run (docs/decisions.md, docs/decisions-log.md).
