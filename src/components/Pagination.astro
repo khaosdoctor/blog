@@ -231,7 +231,7 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     position: absolute;
     inline-size: var(--icon-btn-chip);
     block-size: var(--icon-btn-chip);
-    border: var(--border) solid var(--accent-day);
+    border: var(--btn-border);
     border-radius: var(--radius);
     background: var(--bg);
     pointer-events: none;
@@ -277,8 +277,21 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
    * rule PostList.astro's own section label reads, kept from the plain-text
    * version this replaces.
    */
+  /*
+   * The current page fills solid in the day's own colour, with the page ground
+   * as the ink on top. It reads `--post-accent-fill` (prose/links.css) rather
+   * than the raw accent: that token is the same day colour already mixed the
+   * few percent it needs to clear 4.5:1 against `--bg` on either ground, so
+   * the number stays readable on a green or yellow day where the raw colour
+   * would not. Painted on ::before, the same element the chip's own border is
+   * on, so the fill and the frame are one box.
+   */
   .pg-current {
-    color: var(--accent-day, var(--accent));
+    color: var(--bg);
+  }
+
+  .pg-current::before {
+    background: var(--post-accent-fill);
   }
 
   .pg-current .pg-glyph {

@@ -230,6 +230,19 @@ const CELLS = markCells()
   }
 
   /*
+   * The theme and settings openers carry the 44px hit target while drawing a
+   * 32px chip, so each has 6px of invisible box on either side that the
+   * search box and the switch do not. Left alone, that reads as a wider run
+   * between those two than between search and the switch, even though the
+   * margins are identical. Pulling both back by that 6px makes the drawn
+   * distance match rather than the box distance.
+   */
+  .controls :global(.theme-toggle),
+  .controls :global(.settings-panel) {
+    margin-inline-start: calc(-0.25rem - ((var(--icon-btn-hit) - var(--icon-btn-chip)) / 2));
+  }
+
+  /*
    * One hard-offset shadow behind the whole brand lockup (mark and wordmark
    * together), not two separate ones: `filter: drop-shadow()` traces the
    * alpha of every non-transparent pixel underneath it, and the mark and the

@@ -180,6 +180,17 @@
   --border-card-edge: 8px;
 
   /*
+   * Every chrome button draws the same frame: the double ANSI rule, in the
+   * day's own accent. One token rather than the same declaration written into
+   * ThemeToggle, SettingsPanel, SearchPalette, Pagination and the footer's
+   * icon links, which is how four of the five ended up on a plain 1px solid
+   * while the language switch alone carried the double rule the design asks
+   * for. `3px double` is the same weight chips.css already uses for a double
+   * rule at this scale, reused rather than picked fresh.
+   */
+  --btn-border: 3px double var(--accent-day);
+
+  /*
    * Prose decoration. Every one of these is a candidate the lab page shows
    * variants of, so changing the look later is changing a value here, not a
    * stylesheet. See the Lab feedback section of docs/design.md.
