@@ -34,6 +34,7 @@
  * under prefers-reduced-motion.
  */
 import LangSwitcher from './LangSwitcher.astro'
+import NavLinks from './NavLinks.astro'
 import SearchPalette from './SearchPalette.astro'
 import SettingsPanel from './SettingsPanel.astro'
 import ThemeToggle from './ThemeToggle.astro'
@@ -77,6 +78,7 @@ const CELLS = markCells()
   <span class="fill" aria-hidden="true">──────────────────────────────────────</span>
   <nav class="controls">
     <SearchPalette locale={locale} />
+    <NavLinks locale={locale} />
     <LangSwitcher locale={locale} alternates={alternates} />
     <ThemeToggle locale={locale} />
     <SettingsPanel locale={locale} />
