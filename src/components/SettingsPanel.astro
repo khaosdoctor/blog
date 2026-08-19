@@ -8,11 +8,14 @@
 // can run.
 //
 // What lives here, in order: the motion override (mirrors ThemeToggle's own
-// light/dark/system three-way, one key over), the Conway background on/off
-// switch, a disclosure for its reader-adjustable knobs, the code theme
-// picker (moved here from every code block, see CodeTheme.astro), and the
-// pinned-preview persistence checkbox (moved here from HoverPreviews.astro,
-// closing the open decision docs/design.md recorded for it).
+// light/dark/system three-way, one key over), the text-size stepper and the
+// reading-font picker (both scoped to --text-base/--font-body, theme.css:
+// neither touches the header, the mark or code, which keep their own decided
+// faces), the Conway background on/off switch, a disclosure for its
+// reader-adjustable knobs, the code theme picker (moved here from every code
+// block, see CodeTheme.astro), and the pinned-preview persistence checkbox
+// (moved here from HoverPreviews.astro, closing the open decision
+// docs/design.md recorded for it).
 //
 // Static labels are rendered directly through t(), the same way
 // HoverPreviews.astro's own checkbox label always has been: this is an Astro
@@ -44,6 +47,25 @@ const { locale } = Astro.props
       <button type="button" class="sp-motion-option" data-value="reduce">{t(locale, 'motionReduce')}</button>
       <button type="button" class="sp-motion-option" data-value="allow">{t(locale, 'motionAllow')}</button>
       <button type="button" class="sp-motion-option" data-value="system">{t(locale, 'motionSystem')}</button>
+    </fieldset>
+
+    <fieldset class="sp-font-size">
+      <legend>{t(locale, 'fontSizeLabel')}</legend>
+      <div class="sp-font-size-row">
+        <button type="button" id="sp-font-size-dec">{t(locale, 'fontSizeDecrease')}</button>
+        <span
+          id="sp-font-size-value"
+          class="sp-font-size-value"
+          aria-live="polite"
+          data-template={t(locale, 'fontSizeCurrent')}></span>
+        <button type="button" id="sp-font-size-inc">{t(locale, 'fontSizeIncrease')}</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="sp-font-family">
+      <legend>{t(locale, 'fontFamilyLabel')}</legend>
+      <button type="button" class="sp-font-family-option" data-value="serif">{t(locale, 'fontFamilySerif')}</button>
+      <button type="button" class="sp-font-family-option" data-value="sans">{t(locale, 'fontFamilySans')}</button>
     </fieldset>
 
     <label class="sp-row">
@@ -266,6 +288,122 @@ const { locale } = Astro.props
   }
 
   .sp-motion-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Same fieldset/legend shape as .sp-motion's own, one row of two buttons and
+     a value readout instead of a button group. */
+  .sp-font-size {
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .sp-font-size legend {
+    margin-block-end: 0.3rem;
+    padding: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+  }
+
+  .sp-font-size-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .sp-font-size-row > * + * {
+    margin-inline-start: 0.5rem;
+  }
+
+  .sp-font-size-row button {
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .sp-font-size-row button:hover,
+  .sp-font-size-row button:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .sp-font-size-row button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .sp-font-size-row button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* Fixed-width so the two buttons either side do not shift as the digits
+     between them change (80% vs 120%, one character apart). */
+  .sp-font-size-value {
+    display: inline-block;
+    min-inline-size: 3.5ch;
+    text-align: center;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+  }
+
+  /* Same button-group shape as .sp-motion/.sp-motion-option, its own classes
+     since settings-panel.ts scopes its motion query to .sp-motion-option and
+     these two buttons must not answer to that query too. */
+  .sp-font-family {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .sp-font-family legend {
+    inline-size: 100%;
+    margin-block-end: 0.3rem;
+    padding: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+  }
+
+  .sp-font-family-option {
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.6rem;
+    margin-inline-end: 0.4rem;
+    margin-block-end: 0.4rem;
+    cursor: pointer;
+  }
+
+  .sp-font-family-option[aria-current='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .sp-font-family-option:hover,
+  .sp-font-family-option:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .sp-font-family-option:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
