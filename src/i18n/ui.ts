@@ -80,6 +80,7 @@ type UIKey =
   | 'fontSizeDecrease'
   | 'fontSizeIncrease'
   | 'fontSizeReset'
+  | 'fontSizeResetShort'
   | 'fontFamilyLabel'
   | 'fontFamilySerif'
   | 'fontFamilySans'
@@ -106,7 +107,6 @@ type UIKey =
   | 'tagsIntro'
   | 'allSeries'
   | 'seriesIntro'
-  | 'sourceLanguageOnlyNotice'
   | 'sections'
   | 'sectionDescription'
   | 'primaryNav'
@@ -219,18 +219,19 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     fontSizeDecrease: 'Diminuir o tamanho do texto',
     fontSizeIncrease: 'Aumentar o tamanho do texto',
     fontSizeReset: 'Voltar o tamanho do texto para 100%',
+    fontSizeResetShort: 'Redefinir',
     fontFamilyLabel: 'Fonte de leitura',
-    fontFamilySerif: 'Serifada (Literata)',
-    fontFamilySans: 'Sem serifa (Atkinson Hyperlegible)',
-    backgroundLife: 'Campo de fundo (jogo da vida)',
-    conwayKnobs: 'Ajustes do campo',
-    conwaySeedDensity: 'Densidade da semente',
+    fontFamilySerif: 'Serifada',
+    fontFamilySans: 'Sem serifa',
+    backgroundLife: 'Plano de fundo',
+    conwayKnobs: 'Propriedades',
+    conwaySeedDensity: 'Densidade do seed',
     conwayGenerationsPerSecond: 'Gerações por segundo',
     conwayAutoFeed: 'Alimentação automática (s, 0 desliga)',
     conwayOpacity: 'Opacidade do fundo',
     conwayPause: 'Pausar',
     conwayResume: 'Retomar',
-    conwayReseed: 'Semear de novo',
+    conwayReseed: 'Reiniciar',
     searchShortcutLabel: 'Tecla de atalho da busca',
     writtenBy: 'por',
     contents: 'Neste post',
@@ -245,8 +246,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     tagsIntro: 'Todas as tags usadas nos artigos, com quantos artigos cada uma tem.',
     allSeries: 'Séries',
     seriesIntro: 'Todas as séries de artigos publicadas.',
-    sourceLanguageOnlyNotice:
-      'Estas ainda existem só em português: não há páginas de tags em inglês, então os links abaixo levam a páginas em português.',
     sections: 'Seções',
     sectionDescription: 'Todos os artigos da seção %s.',
     primaryNav: 'Navegação principal',
@@ -364,10 +363,11 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     fontSizeDecrease: 'Decrease text size',
     fontSizeIncrease: 'Increase text size',
     fontSizeReset: 'Reset text size to 100%',
+    fontSizeResetShort: 'Reset',
     fontFamilyLabel: 'Reading font',
-    fontFamilySerif: 'Serif (Literata)',
-    fontFamilySans: 'Sans (Atkinson Hyperlegible)',
-    backgroundLife: 'Background field (game of life)',
+    fontFamilySerif: 'Serif',
+    fontFamilySans: 'Sans',
+    backgroundLife: 'Background field',
     conwayKnobs: 'Field settings',
     conwaySeedDensity: 'Seed density',
     conwayGenerationsPerSecond: 'Generations per second',
@@ -390,8 +390,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     tagsIntro: 'Every tag used across the articles, with how many articles carry each one.',
     allSeries: 'Series',
     seriesIntro: 'Every series of articles published so far.',
-    sourceLanguageOnlyNotice:
-      'These still exist in Portuguese only: there are no English tag pages yet, so the links below lead to Portuguese-language pages.',
     sections: 'Sections',
     sectionDescription: 'Every article in the %s section.',
     primaryNav: 'Main navigation',

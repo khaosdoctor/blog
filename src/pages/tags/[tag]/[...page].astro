@@ -1,28 +1,53 @@
 ---
+// The Portuguese half of the per-tag listing. Its English twin is
+// src/pages/en/tags/[tag]/[...page].astro, built the same way out of the
+// English posts.
+//
+// The slug is shared: a translation repeats its original's `tags:` line word
+// for word, so the two pages are /tags/<tag>/ and /en/tags/<tag>/ and switching
+// language is a prefix change like it is on a post or a section. Only the posts
+// listed differ, and this half never changes shape because of the other one:
+// neither language reads the other's map.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import PostList from '../../../components/PostList.astro'
 import Pagination from '../../../components/Pagination.astro'
 import { LIST_PAGE_SIZE } from '../../../lib/posts'
 import { getTags, slugify } from '../../../lib/taxonomy'
-import { t } from '../../../i18n/ui'
+import { HREFLANG, localePath, LOCALES, t } from '../../../i18n/ui'
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const tags = await getTags()
+  // Every language's own map, so the alternates name only the languages that
+  // build a page for this tag: `design`, `escrita` and `meta` have no English
+  // post today, and the switcher must not offer a URL no route emits.
+  const [tags, byLocale] = await Promise.all([
+    getTags(),
+    Promise.all(LOCALES.map(async (locale) => [locale, await getTags(locale)] as const)),
+  ])
   return [...tags.entries()].flatMap(([tag, posts]) =>
     paginate(posts, {
       pageSize: LIST_PAGE_SIZE,
       params: { tag: slugify(tag) },
-      props: { tag },
+      props: {
+        tag,
+        languages: byLocale.filter(([, entries]) => entries.has(tag)).map(([locale]) => locale),
+      },
     }),
   )
 }) satisfies GetStaticPaths
 
-const { tag, page } = Astro.props
+const { tag, languages, page } = Astro.props
+// Page 1 of the counterpart, whatever page this is: the two languages hold
+// different numbers of posts under the same tag, so page 3 here need not exist
+// there. That is the same choice the section pages already made.
+const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
+  lang: HREFLANG[locale],
+  href: new URL(localePath(locale, `/tags/${slugify(tag)}/`), Astro.site).href,
+}))
 const title = page.currentPage > 1 ? `${tag} | Lucas Santos | página ${page.currentPage}` : `${tag} | Lucas Santos`
 ---
 
-<BaseLayout title={title} description={t('pt', 'tagDescription', tag)}>
+<BaseLayout title={title} description={t('pt', 'tagDescription', tag)} alternates={alternates}>
   <p class="kicker">{t('pt', 'tag')}</p>
   <h1>{tag}</h1>
   <PostList posts={page.data} />
