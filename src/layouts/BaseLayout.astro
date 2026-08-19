@@ -559,6 +559,15 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     align-items: baseline;
   }
 
+  /* Both children of `.row` are `<p>`, and the UA sheet's own top margin on
+     each was adding a full line between the rule above and this line, on top
+     of the rule's own 10px. Zeroed here so the rule's margin is the only thing
+     setting that distance. */
+  footer .copyright,
+  footer .links {
+    margin-block-start: 0;
+  }
+
   footer .copyright {
     margin-inline-end: 1rem;
     margin-block-end: 0.35rem;
