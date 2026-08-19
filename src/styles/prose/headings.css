@@ -67,6 +67,12 @@ article :is(h1, h2, h3, h4, h5, h6) {
   opacity: 1;
 }
 
+/*
+ * A hover accent, not a mark on the text, so it follows the day rather than
+ * the post: same split prose/links.css draws between --post-accent (the
+ * cover, for strong/em) and --accent-day (transient effects, for a link and
+ * for this).
+ */
 .heading-anchor:hover {
-  color: var(--accent);
+  color: var(--accent-day, var(--accent));
 }

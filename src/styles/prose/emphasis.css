@@ -1,5 +1,59 @@
 /* Bold and italic, which the old blog treated as colour rather than weight. */
 
+/*
+ * The cover colour: a mark on the post's own text reads the same hue as its
+ * cover (--post-accent, chipColor(slugOf(post)), written onto <article> by
+ * both [...slug].astro pages), not the day's. That is the split the owner
+ * drew: a link, a hover, any transient effect follows today (--accent-day,
+ * see prose/links.css); strong and em belong to the article itself and stay
+ * put when today rolls over. --post-accent went unused when the header work
+ * repointed prose/links.css's fill at --accent-day; this brings it back.
+ *
+ * --post-accent resolves to one of the five brand tokens (chip-color.ts),
+ * each already light-dark()-aware but tuned in theme.css for that colour as
+ * TEXT on --bg, not as a filled background, and not always at the exact
+ * lightness a solid chip or a paragraph's worth of italic needs on its own.
+ * --em-bold-bg used to be exactly this raw brand colour and regressed once
+ * already, when --brand-yellow grew a light-mode tone and the fixed dark ink
+ * paired with it fell to 3.69:1 (theme.css's own note on --em-bold-bg).
+ * Pinning the chip to one bright yellow in both themes was the fix then,
+ * because only one colour ever reached it; five colours reach it now, so
+ * fixing the fill again would only move which of the five regresses.
+ *
+ * The correction: the same recipe prose/links.css already scanned for this
+ * exact pool of five (--post-accent-fill's own comment), just re-run here
+ * against --post-accent instead of --accent-day, since the two draw from the
+ * same five tokens and the fill/ground pairing is identical either way.
+ * light-dark(85% colour + 15% black, 95% colour + 5% white) against --bg
+ * measured (WCAG, this pair symmetric either way round):
+ *
+ *   light  red 6.63  blue 6.37  yellow 4.73  green 4.83  purple 11.39
+ *   dark   red 5.09  blue 5.31  yellow 11.64 green 8.49  purple 4.63
+ *
+ * All ten clear 4.5:1, worst case light yellow 4.73 and dark purple 4.63,
+ * both with the same small margin the fill formula already banks on rather
+ * than the exact float. That number holds for both roles this token plays
+ * below: as --em-bold-bg, a filled background with --bg (page ground) as
+ * the ink on top, the same inverted pairing --post-accent-fill already uses
+ * for a link's hover fill; and as --em-italic-fg, plain coloured text
+ * directly on --bg. Same two colours either way, so the same ratio.
+ *
+ * --em-bold-fg moves off its fixed dark ink (#332d23, tuned for one bright
+ * yellow) to --bg, the page ground: light-dark's other branch already reads
+ * as dark ink on a light chip in light mode and light ink on a dark chip in
+ * dark mode, which is the inversion above, so the ink follows automatically
+ * rather than needing five more fixed values of its own.
+ */
+.prose {
+  --post-accent-cover: light-dark(
+    color-mix(in oklab, var(--post-accent) 85%, black),
+    color-mix(in oklab, var(--post-accent) 95%, white)
+  );
+  --em-bold-bg: var(--post-accent-cover);
+  --em-bold-fg: var(--bg);
+  --em-italic-fg: var(--post-accent-cover);
+}
+
 /* Bold is a highlighter chip, the way the old blog had it. */
 .prose strong {
   padding: 0.05em 0.25em;
