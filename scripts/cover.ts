@@ -1,37 +1,25 @@
 /**
- * Makes the cover for a post.
+ * Makes the cover for a post: the wireframe-3D SVG Lucas picked in the theme
+ * lab (content/blog/theme-lab/components/CoverLab.vue, "capa · wireframe
+ * 3D"), rasterised locally with sharp. No network call, no Replicate token,
+ * no external Deno service: the three shortlisted candidates all drew their
+ * own SVG locally, and choosing one retired the AI-background pipeline this
+ * script used to run (docs/decisions.md, docs/decisions-log.md).
  *
- *   node scripts/cover.ts <slug> [--bg url] [--prompt text] [--seed n] [--n 4] [--pick 2]
+ *   node scripts/cover.ts <slug>
  *
- * Two steps. Replicate's flux-dev paints a background from the post title, you
- * pick one of them, and the cover service (a separate Deno + Satori app) draws
- * the title over it and returns the PNG, which is written to
- * content/blog/<slug>/cover.png and set as heroImage.
- *
- * Needs COVER_SERVICE_URL, the root of that service, and REPLICATE_API_TOKEN.
- * The token is only read when generating: --bg <url> skips step one, so an
- * Unsplash link and a generated background take the same path from there on.
+ * Colour, seed and the generated solid all come from `hashSlug(slug)`
+ * (src/lib/cover.ts), never `Math.random()`, so the same post always draws
+ * the same cover and the social-card cache does not break on every build.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createInterface } from 'node:readline/promises'
-import { setTimeout as sleep } from 'node:timers/promises'
-import { parseArgs } from 'node:util'
-import { bold, dim, fail as failLine, heading, ok } from './lib/cli.ts'
+import sharp from 'sharp'
+import { parseAuthors } from '../src/lib/authors.ts'
+import { buildCoverSvg, formatCoverByline } from '../src/lib/cover.ts'
+import { fail as failLine, heading, ok } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
-const MODEL = 'black-forest-labs/flux-dev'
-const ROUTE = '/blog/articles'
-
-const STYLE =
-  'abstract cypherpunk artwork in the spirit of Neuromancer, dense ASCII-art texture, glitched terminal glyphs, circuit traces dissolving into static, neon cyan and magenta over near-black, high contrast, grainy print, no text, no letters, no numbers, no logo, no watermark'
-
-interface Prediction {
-  status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled'
-  output?: string[]
-  error?: string
-  urls: { get: string }
-}
 
 function fail(message: string): never {
   failLine(message)
@@ -48,62 +36,7 @@ function field(frontmatter: string, key: string): string | null {
   return match[1].trim().replace(/^["'](.*)["']$/, '$1')
 }
 
-async function generate(token: string, prompt: string, count: number, seed: number | undefined): Promise<string[]> {
-  const input: Record<string, unknown> = {
-    prompt,
-    num_outputs: count,
-    aspect_ratio: '16:9',
-    // Satori decodes the background itself and does not read webp, flux's default.
-    output_format: 'jpg',
-  }
-  if (seed !== undefined) input.seed = seed
-
-  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-
-  // Prefer: wait holds the response open until the prediction finishes, up to a
-  // minute, which is long enough for most runs and skips the polling entirely.
-  const created = await fetch(`https://api.replicate.com/v1/models/${MODEL}/predictions`, {
-    method: 'POST',
-    headers: { ...headers, Prefer: 'wait' },
-    body: JSON.stringify({ input }),
-  })
-
-  if (!created.ok) fail(`Replicate rejected the request: ${created.status} ${await created.text()}`)
-
-  let prediction = (await created.json()) as Prediction
-  while (prediction.status === 'starting' || prediction.status === 'processing') {
-    await sleep(2000)
-    const polled = await fetch(prediction.urls.get, { headers })
-    prediction = (await polled.json()) as Prediction
-  }
-
-  if (prediction.status !== 'succeeded' || prediction.output === undefined) {
-    fail(`Generation ${prediction.status}: ${prediction.error ?? 'no output'}`)
-  }
-
-  return prediction.output
-}
-
-async function ask(count: number): Promise<string> {
-  const rl = createInterface({ input: process.stdin, output: process.stdout })
-  const answer = await rl.question(`Pick one (1-${count}): `)
-  rl.close()
-  return answer
-}
-
-const { values, positionals } = parseArgs({
-  allowPositionals: true,
-  options: {
-    bg: { type: 'string' },
-    prompt: { type: 'string' },
-    seed: { type: 'string' },
-    n: { type: 'string' },
-    pick: { type: 'string' },
-  },
-})
-
-const slug =
-  positionals[0] ?? fail('Usage: node scripts/cover.ts <slug> [--bg url] [--prompt text] [--seed n] [--n 4] [--pick 2]')
+const slug = process.argv[2] ?? fail('Usage: node scripts/cover.ts <slug>')
 
 heading(`cover: making the cover for ${slug}`)
 
@@ -113,49 +46,26 @@ const postFile = ['index.mdx', 'index.md'].map((name) => join(dir, name)).find(e
 const raw = readFileSync(postFile, 'utf8')
 const frontmatter = frontmatterOf(raw)
 const title = field(frontmatter, 'title') ?? fail(`${postFile} has no title in its frontmatter.`)
-const section = field(frontmatter, 'category') ?? ''
+const category = field(frontmatter, 'category') ?? ''
+const lang = field(frontmatter, 'lang') === 'en' ? 'en' : 'pt'
+const pubDateRaw = field(frontmatter, 'pubDate') ?? fail(`${postFile} has no pubDate in its frontmatter.`)
+const pubDate = new Date(pubDateRaw)
 
-const serviceUrl = process.env.COVER_SERVICE_URL
-if (serviceUrl === undefined || serviceUrl.length === 0) {
-  fail('COVER_SERVICE_URL is not set. Point it at the deployed cover service, e.g. https://covers.example.dev')
-}
+// No post sets `authors` today (a plain frontmatter line reader like `field`
+// above cannot follow a YAML list safely), so this reads the site's own
+// default the same way Authors.astro does when a post is silent about it.
+const [author] = parseAuthors(undefined)
+const byline = formatCoverByline(pubDate, lang, author.name)
 
-async function background(): Promise<string> {
-  if (values.bg !== undefined) return values.bg
-
-  const token = process.env.REPLICATE_API_TOKEN
-  if (token === undefined || token.length === 0) {
-    fail('REPLICATE_API_TOKEN is not set. Set it, or pass --bg <url> to use a background you already have.')
-  }
-
-  const prompt = values.prompt ?? `${title}. ${STYLE}`
-  const count = Number.parseInt(values.n ?? '4', 10)
-  const seed = values.seed === undefined ? undefined : Number.parseInt(values.seed, 10)
-
-  console.log(`generating ${bold(String(count))} backgrounds for ${bold(`"${title}"`)}`)
-  const urls = await generate(token, prompt, count, seed)
-  for (const [index, url] of urls.entries()) console.log(`  ${bold(String(index + 1))}. ${dim(url)}`)
-
-  const answer = values.pick ?? (await ask(urls.length))
-  const picked = urls[Number.parseInt(answer, 10) - 1]
-  if (picked === undefined) fail(`${answer} is not one of the ${urls.length} images.`)
-
-  return picked
-}
-
-const image = await background()
-
-// The template reads title and image; section rides along for when it uses it.
-const query = new URLSearchParams({ title, image, section })
-const cover = await fetch(`${serviceUrl.replace(/\/+$/, '')}${ROUTE}?${query}`)
-if (!cover.ok) fail(`Cover service returned ${cover.status}: ${await cover.text()}`)
+const svg = buildCoverSvg({ slug, title, category, byline })
+const png = await sharp(Buffer.from(svg)).png().toBuffer()
 
 const target = join(dir, 'cover.png')
-writeFileSync(target, Buffer.from(await cover.arrayBuffer()))
+writeFileSync(target, png)
 ok(`wrote ${target}`)
 
 if (/^heroImage:/m.test(frontmatter)) {
-  console.log(dim(`${postFile} already sets heroImage, left alone`))
+  console.log(`${postFile} already sets heroImage, left alone`)
   process.exit(0)
 }
 
