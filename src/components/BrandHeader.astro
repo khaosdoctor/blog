@@ -128,6 +128,12 @@ const CELLS = markCells()
     /* "Breathing room 4" from the bench's density knob (range 4-30, in
        tenths of a rem block / sixths of a rem inline). */
     padding: 0.4rem var(--chrome-inset);
+    /* The row spaces its own children from here rather than each child
+       carrying a trailing margin and the last one resetting it: `.fill` below
+       needs a negative margin of its own to cancel the empty run its
+       letter-spacing leaves after the final dash, and one margin property
+       cannot both space the row and cancel that without the two fighting. */
+    column-gap: 0.6rem;
     font-family: var(--font-mono);
   }
 
@@ -135,14 +141,6 @@ const CELLS = markCells()
     .chrome {
       max-inline-size: var(--chrome-width);
     }
-  }
-
-  .chrome > * {
-    margin-inline-end: 0.6rem;
-  }
-
-  .chrome > *:last-child {
-    margin-inline-end: 0;
   }
 
   .edge {
@@ -173,13 +171,13 @@ const CELLS = markCells()
      * than the one after SOBRE, where the right run's own trailing space falls
      * off the end of the row instead.
      *
-     * The 0.6rem is the row's own spacing, from `.chrome > *` above: this rule
-     * has the same specificity and comes later, so setting `margin-inline-end`
-     * here replaces that value rather than adding to it. A bare `-0.4em` made
-     * the run overlap POSTS instead of spacing off it. Both together is what
-     * the row actually wants: its own measure, less the phantom space.
+     * This only cancels that phantom space. The row's real spacing comes from
+     * the container (see `.chrome` above), which is why the two can coexist:
+     * an earlier attempt put both jobs on this one property, where the row's
+     * own measure and the correction kept overwriting each other and the run
+     * came out too tight on one side or overlapping on the other.
      */
-    margin-inline-end: calc(0.6rem - 0.4em);
+    margin-inline-end: -0.4em;
     flex: 1;
     overflow: hidden;
   }
