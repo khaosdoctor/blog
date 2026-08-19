@@ -10,8 +10,20 @@
 // collide with theirs.
 export {}
 
-import { getSettings, reseed, setAutoFeed, setBackgroundEnabled, setDensity, setGps, setMotion, setOpacity, setPaused } from './conway'
-import { getShortcutLetter, setShortcutLetter } from './search-palette'
+import {
+  getSettings,
+  reseed,
+  resetSettings as resetConway,
+  setAutoFeed,
+  setBackgroundEnabled,
+  setDensity,
+  setGps,
+  setMotion,
+  setOpacity,
+  setPaused,
+} from './conway'
+import { getShortcutLetter, resetShortcutLetter, setShortcutLetter } from './search-palette'
+import { resetCodeTheme } from './code-theme'
 
 // Same key hover-previews.ts's own bindPersistToggle() already reads and
 // writes. That function still runs, unchanged, on the post pages
@@ -131,6 +143,18 @@ function init(): void {
   const label = wrapper.dataset.label ?? 'Preferences'
   opener.setAttribute('aria-label', label)
 
+  /*
+   * What reset-all has to put back on screen, collected as each control below
+   * is wired up rather than written out again in one block at the bottom.
+   * Clearing a key is only half a reset: the control still shows the old
+   * choice until something re-reads it, and this panel has three separate
+   * shapes of "shows the old choice" (aria-current on a button group, a
+   * slider's value, a checkbox). Each control knows its own, so each one
+   * registers it here next to itself, where it stays correct when that
+   * control changes.
+   */
+  const resetHandlers: Array<() => void> = []
+
   let open = false
 
   function openMenu(): void {
@@ -181,14 +205,19 @@ function init(): void {
   // --- Motion: same three-way shape as theme-toggle.ts's own options,
   // "system" written back as null so the OS query keeps deciding. ---
   const motionOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-motion-option')]
-  const initialMotion = getSettings().motion ?? 'system'
-  for (const option of motionOptions) option.setAttribute('aria-current', String(option.dataset.value === initialMotion))
+  const markMotion = (value: string): void => {
+    for (const option of motionOptions) option.setAttribute('aria-current', String(option.dataset.value === value))
+  }
+  markMotion(getSettings().motion ?? 'system')
+  // conway.ts's resetSettings() has already cleared the key and the attribute
+  // by the time this runs, so this only has to re-read what it left.
+  resetHandlers.push(() => markMotion(getSettings().motion ?? 'system'))
 
   for (const option of motionOptions) {
     option.addEventListener('click', () => {
       const value = option.dataset.value
       setMotion(value === 'reduce' || value === 'allow' ? value : null)
-      for (const other of motionOptions) other.setAttribute('aria-current', String(other === option))
+      markMotion(value ?? 'system')
     })
   }
 
@@ -250,6 +279,10 @@ function init(): void {
       const typed = Number(fontSizeInput.value)
       setFontSize(Number.isFinite(typed) && fontSizeInput.value.trim() !== '' ? typed : FONT_SIZE_DEFAULT)
     })
+
+    // The same path the 100% button takes, which already removes the key and
+    // the inline --font-scale rather than storing a literal 100.
+    resetHandlers.push(() => setFontSize(FONT_SIZE_DEFAULT))
   }
 
   // --- Reading font: Literata (default) or Atkinson Hyperlegible, the two
@@ -257,53 +290,85 @@ function init(): void {
   // the motion buttons above, its own class so this query never picks up
   // those. ---
   const fontFamilyOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-font-family-option')]
+
+  // One write path, the same shape as setFontSize above: null is the default
+  // (Literata) and is stored as nothing stored, so a reset is just this
+  // function called with null.
+  const setBodyFace = (face: 'sans' | null): void => {
+    try {
+      if (face === null) localStorage.removeItem(BODY_FACE_KEY)
+      else localStorage.setItem(BODY_FACE_KEY, face)
+    } catch {
+      // Private mode, or storage disabled: the choice still applies for this page.
+    }
+    applyBodyFace(face)
+    const current = face ?? 'serif'
+    for (const option of fontFamilyOptions) option.setAttribute('aria-current', String(option.dataset.value === current))
+  }
+
   const initialBodyFace = storedBodyFace() ?? 'serif'
   for (const option of fontFamilyOptions) option.setAttribute('aria-current', String(option.dataset.value === initialBodyFace))
 
   for (const option of fontFamilyOptions) {
-    option.addEventListener('click', () => {
-      const value = option.dataset.value === 'sans' ? 'sans' : null
-      try {
-        if (value === null) localStorage.removeItem(BODY_FACE_KEY)
-        else localStorage.setItem(BODY_FACE_KEY, value)
-      } catch {
-        // Private mode, or storage disabled: the choice still applies for this page.
-      }
-      applyBodyFace(value)
-      for (const other of fontFamilyOptions) other.setAttribute('aria-current', String(other === option))
-    })
+    option.addEventListener('click', () => setBodyFace(option.dataset.value === 'sans' ? 'sans' : null))
   }
 
+  resetHandlers.push(() => setBodyFace(null))
+
   // --- Conway background on/off. ---
+  // Every control from here to the pause button reads its value back out of
+  // conway.ts rather than out of storage, so its own reset handler is the
+  // same one-liner that set it up: resetConway() has already put that
+  // module's state back by the time these run.
   const bgLife = menu.querySelector<HTMLInputElement>('#sp-bg-life')
   if (bgLife !== null) {
-    bgLife.checked = getSettings().backgroundEnabled
+    const syncBgLife = (): void => {
+      bgLife.checked = getSettings().backgroundEnabled
+    }
+    syncBgLife()
     bgLife.addEventListener('change', () => setBackgroundEnabled(bgLife.checked))
+    resetHandlers.push(syncBgLife)
   }
 
   // --- The reader-adjustable Conway knobs, behind their own disclosure. ---
   const density = menu.querySelector<HTMLInputElement>('#sp-density')
   if (density !== null) {
-    density.value = String(getSettings().density)
+    const syncDensity = (): void => {
+      density.value = String(getSettings().density)
+    }
+    syncDensity()
     density.addEventListener('input', () => setDensity(Number(density.value)))
+    resetHandlers.push(syncDensity)
   }
 
   const gps = menu.querySelector<HTMLInputElement>('#sp-gps')
   if (gps !== null) {
-    gps.value = String(getSettings().gps)
+    const syncGps = (): void => {
+      gps.value = String(getSettings().gps)
+    }
+    syncGps()
     gps.addEventListener('input', () => setGps(Number(gps.value)))
+    resetHandlers.push(syncGps)
   }
 
   const autoFeed = menu.querySelector<HTMLInputElement>('#sp-autofeed')
   if (autoFeed !== null) {
-    autoFeed.value = String(getSettings().autoFeedSeconds)
+    const syncAutoFeed = (): void => {
+      autoFeed.value = String(getSettings().autoFeedSeconds)
+    }
+    syncAutoFeed()
     autoFeed.addEventListener('input', () => setAutoFeed(Number(autoFeed.value)))
+    resetHandlers.push(syncAutoFeed)
   }
 
   const opacity = menu.querySelector<HTMLInputElement>('#sp-opacity')
   if (opacity !== null) {
-    opacity.value = String(getSettings().opacity)
+    const syncOpacity = (): void => {
+      opacity.value = String(getSettings().opacity)
+    }
+    syncOpacity()
     opacity.addEventListener('input', () => setOpacity(Number(opacity.value)))
+    resetHandlers.push(syncOpacity)
   }
 
   const pause = menu.querySelector<HTMLButtonElement>('#sp-pause')
@@ -318,6 +383,7 @@ function init(): void {
       setPaused(next)
       syncPauseLabel(next)
     })
+    resetHandlers.push(() => syncPauseLabel(getSettings().paused))
   }
 
   const reseedButton = menu.querySelector<HTMLButtonElement>('#sp-reseed')
@@ -328,8 +394,12 @@ function init(): void {
   // setters above. ---
   const searchKey = menu.querySelector<HTMLSelectElement>('#sp-search-key')
   if (searchKey !== null) {
-    searchKey.value = getShortcutLetter()
+    const syncSearchKey = (): void => {
+      searchKey.value = getShortcutLetter()
+    }
+    syncSearchKey()
     searchKey.addEventListener('change', () => setShortcutLetter(searchKey.value))
+    resetHandlers.push(syncSearchKey)
   }
 
   // --- Pinned preview persistence, moved in from HoverPreviews.astro. ---
@@ -348,7 +418,52 @@ function init(): void {
         // Private mode, or storage disabled: the choice still applies for this page.
       }
     })
+    /*
+     * The one control whose reset dispatches an event rather than doing the
+     * work itself. On a post page hover-previews.ts binds its own listener to
+     * this same checkbox, and that listener does more than write the flag: it
+     * moves the pinned set between sessionStorage and localStorage. Setting
+     * `.checked` from a script fires nothing, so unchecking it silently would
+     * leave a pinned set stranded in localStorage that this preference says
+     * should not be there. Dispatching the event runs both listeners, that one
+     * and the plain flag write just above, and needs no import of a module
+     * that is not on every page.
+     */
+    resetHandlers.push(() => {
+      if (!hpPersist.checked) return
+      hpPersist.checked = false
+      hpPersist.dispatchEvent(new Event('change', { bubbles: true }))
+    })
   }
+
+  /*
+   * --- Reset all, at the foot of the panel. ---
+   *
+   * The three modules that own keys of their own go first, then every
+   * control's own handler re-reads what they left, so nothing here has to
+   * know which key belongs to which control.
+   *
+   * What it deliberately does not touch is the light/dark theme choice
+   * ('color-scheme', theme-toggle.ts). Two reasons, both the same one from
+   * different sides: the owner asked for that choice to stay out of this
+   * panel, so a reader has no way to see it change from in here and would
+   * only find out by watching the whole page invert under a button labelled
+   * as a preferences reset; and ThemeToggle already carries its own reset,
+   * the "system" option, one button over from this one. A control that
+   * reaches outside its own menu to undo a setting the menu does not show is
+   * a surprise, not a convenience.
+   *
+   * 'hp-pinned' is left alone for a different reason: the pinned cards are
+   * the reader's own content, not a preference. Turning the persistence flag
+   * off above already moves that set back to the session where it belongs.
+   */
+  const resetAll = menu.querySelector<HTMLButtonElement>('#sp-reset-all')
+  resetAll?.addEventListener('click', () => {
+    resetConway()
+    resetShortcutLetter()
+    resetCodeTheme()
+    for (const handler of resetHandlers) handler()
+  })
 
   if (canPopover) {
     menu.removeAttribute('hidden')

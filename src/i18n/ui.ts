@@ -124,6 +124,8 @@ type UIKey =
   | 'switchLanguage'
   | 'version'
   | 'keepPreviews'
+  | 'resetAll'
+  | 'resetAllHint'
   | 'previewLoading'
   | 'previewClose'
   | 'previewPin'
@@ -279,6 +281,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     ossIconsHeading: 'Ícones',
     ossDependenciesHeading: 'Framework e dependências',
     keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
+    resetAll: 'Restaurar tudo',
+    resetAllHint: 'Volta todas as preferências acima para o padrão',
     previewLoading: 'Carregando…',
     previewClose: 'Fechar prévia',
     previewPin: 'Fixar esta prévia',
@@ -422,6 +426,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     ossIconsHeading: 'Icons',
     ossDependenciesHeading: 'Framework and dependencies',
     keepPreviews: 'Keep pinned previews after closing the tab',
+    resetAll: 'Reset everything',
+    resetAllHint: 'Puts every preference above back to its default',
     previewLoading: 'Loading…',
     previewClose: 'Close preview',
     previewPin: 'Pin this preview',

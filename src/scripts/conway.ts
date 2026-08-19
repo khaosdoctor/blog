@@ -460,6 +460,37 @@ export function reseed(): void {
   seed()
 }
 
+/*
+ * Every key this module owns, back to its default, for the settings panel's
+ * reset-all. One call rather than seven setters, because the setters are the
+ * wrong shape for a reset: setDensity(10) writes the literal "10", which is
+ * a stored value that happens to equal the default rather than the
+ * "nothing stored means default" this site stores its defaults as. Only
+ * setBackgroundEnabled and setPaused already remove their key, and only
+ * because their default is the falsy side of a flag.
+ *
+ * It re-applies as well as clearing: the attributes go back on <html>, the
+ * field reseeds at the default density and the loop restarts if it had been
+ * paused, so what is on screen matches what is now stored rather than only
+ * the storage being right. seed() and syncRunning() are both safe on a page
+ * with no canvas (cols and rows are 0 there and draw() returns early), which
+ * is every page but a post.
+ */
+export function resetSettings(): void {
+  motionOverride = null
+  backgroundEnabled = true
+  manualPaused = false
+  density = DEFAULT_DENSITY
+  gps = DEFAULT_GPS
+  autoFeedSeconds = DEFAULT_AUTOFEED
+  opacity = DEFAULT_OPACITY
+  for (const key of [MOTION_KEY, BG_LIFE_KEY, DENSITY_KEY, GPS_KEY, AUTOFEED_KEY, PAUSED_KEY, OPACITY_KEY]) writeStorage(key, null)
+  applyMotionAttr()
+  applyBgLifeAttr()
+  seed()
+  syncRunning()
+}
+
 export function getSettings(): {
   motion: Motion | null
   backgroundEnabled: boolean
