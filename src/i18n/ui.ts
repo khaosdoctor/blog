@@ -97,6 +97,11 @@ type UIKey =
   | 'tagDescription'
   | 'sections'
   | 'sectionDescription'
+  | 'primaryNav'
+  | 'navPosts'
+  | 'navSeries'
+  | 'navTags'
+  | 'navAbout'
   | 'article'
   | 'articles'
   | 'homeDescription'
@@ -209,6 +214,11 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     tagDescription: 'Artigos marcados com %s.',
     sections: 'Seções',
     sectionDescription: 'Todos os artigos da seção %s.',
+    primaryNav: 'Navegação principal',
+    navPosts: 'Posts',
+    navSeries: 'Séries',
+    navTags: 'Tags',
+    navAbout: 'Sobre',
     article: 'artigo',
     articles: 'artigos',
     homeDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
@@ -323,6 +333,11 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     tagDescription: 'Articles tagged %s.',
     sections: 'Sections',
     sectionDescription: 'Every article in the %s section.',
+    primaryNav: 'Main navigation',
+    navPosts: 'Posts',
+    navSeries: 'Series',
+    navTags: 'Tags',
+    navAbout: 'About',
     article: 'article',
     articles: 'articles',
     homeDescription: 'Articles about software development, technology and opinion.',

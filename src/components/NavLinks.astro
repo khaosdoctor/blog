@@ -1,0 +1,83 @@
+---
+// The four header nav links Lucas asked for: POSTS, SERIES, TAGS, ABOUT, in
+// that order, sitting between the search trigger and the language switcher
+// in BrandHeader's `.controls` row (BrandHeader.astro itself is owned by
+// another pass right now; this component only exists so that wiring is a
+// one-line import + placement once it arrives there).
+//
+// POSTS is the only one of the four with a real destination today: the
+// locale's own home page already is the latest-posts index, so it can point
+// there truthfully. SERIES, TAGS and ABOUT are dummy links per the request:
+// per-tag pages (/tags/<tag>/) and per-series pages (/series/<name>/) exist,
+// but neither has an aggregate index page, and /about/ does not exist at
+// all yet. Rather than invent three thin index pages nobody asked for, or a
+// non-navigating placeholder that reads as broken chrome, these three point
+// at the plain, un-generated path a real index would live at later
+// (/series/, /tags/, /about/). Astro never emits a page for a path nothing
+// renders, so none of these three ever reaches the sitemap; a reader who
+// clicks one now gets the site's own friendly 404 rather than a dead
+// button, and pointing the future index there is a rename away.
+//
+// `localePath` (src/i18n/ui.ts) gives every link the same source-bare,
+// prefixed-elsewhere shape every other locale-aware link on this site
+// already uses (BaseLayout's footer links, LangSwitcher's own home
+// fallback), even for the three placeholders: tags/[tag].astro and
+// series/[name].astro are both source-only today (scripts/check-i18n.ts),
+// so an /en/ prefix on those two is itself a placeholder for a decision not
+// yet made, not a claim that an English index exists.
+import { localePath, t, type Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+
+const LINKS: { key: 'navPosts' | 'navSeries' | 'navTags' | 'navAbout'; path: string }[] = [
+  { key: 'navPosts', path: '/' },
+  { key: 'navSeries', path: '/series/' },
+  { key: 'navTags', path: '/tags/' },
+  { key: 'navAbout', path: '/about/' },
+]
+---
+
+<nav class="nav-links" aria-label={t(locale, 'primaryNav')}>
+  {
+    LINKS.map((link) => (
+      <a href={localePath(locale, link.path)}>{t(locale, link.key)}</a>
+    ))
+  }
+</nav>
+
+<style>
+  .nav-links {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .nav-links > a {
+    margin-inline-end: 0.6rem;
+  }
+
+  .nav-links > a:last-child {
+    margin-inline-end: 0;
+  }
+
+  .nav-links a {
+    padding-inline: 1px;
+    padding-block: 2px;
+    color: inherit;
+    background: transparent;
+    text-decoration: none;
+  }
+
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    background: var(--accent-day);
+    color: var(--bg);
+  }
+</style>

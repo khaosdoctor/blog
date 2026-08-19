@@ -40,7 +40,7 @@ function report(check: string, detail: string, file: string): void {
  * and words Portuguese borrowed whole. Anything else appearing identically in
  * two tables is a key somebody copied and never filled in.
  */
-const LANGUAGE_NEUTRAL_KEYS = new Set(['appName', 'appShortName', 'tag', 'tags'])
+const LANGUAGE_NEUTRAL_KEYS = new Set(['appName', 'appShortName', 'tag', 'tags', 'navPosts', 'navTags'])
 
 /**
  * Literal attribute text that is not prose: a brand, or a word spelled the same
