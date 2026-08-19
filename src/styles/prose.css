@@ -51,6 +51,24 @@
  */
 .prose {
   font-family: var(--font-body);
+  /*
+   * The reader's text-size control (--font-scale, theme.css) reaches
+   * --text-base only, so the running paragraph grows and everything sized off
+   * the two smaller steps does not: a post's code blocks, tables, quotes,
+   * footnotes, maths and chips all read --text-small/--text-tiny. At the top
+   * of the new 10-500% range that leaves a reader with 5x paragraphs beside
+   * unchanged code, which is not a text-size control so much as a
+   * paragraph-size one.
+   *
+   * The two steps are redefined here rather than in theme.css because the
+   * same two tokens also size the site's own chrome (the settings panel, the
+   * search palette, the credits list), and chrome should not follow a reading
+   * preference: a 500% gear menu would put its own controls out of reach.
+   * Scoping the scaled values to .prose moves exactly the reading content and
+   * leaves every chrome consumer on the fixed values it already reads.
+   */
+  --text-small: calc(0.9rem * var(--font-scale));
+  --text-tiny: calc(0.75rem * var(--font-scale));
 }
 
 /*

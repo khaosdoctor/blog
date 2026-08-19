@@ -468,9 +468,11 @@
  * `--font-scale` straight on the root element's inline style
  * (`style.setProperty`), which wins over this stylesheet's own `--font-scale:
  * 1` above for exactly the property it sets, and BaseLayout's pre-paint
- * script does the same before first render. Only --text-base reads this:
- * --text-small and --text-tiny (chrome, code, captions) stay fixed on
- * purpose, so this only ever resizes the reading text.
+ * script does the same before first render. Here at :root only --text-base
+ * reads it, so the site's own chrome keeps a fixed size whatever a reader
+ * picks. .prose (prose.css) redefines --text-small and --text-tiny in terms
+ * of the same scale for itself, so a post's code, tables, quotes, footnotes
+ * and maths grow with its paragraphs instead of being left behind.
  */
 
 /* Motion is decoration everywhere on this site, so it can all go. */
