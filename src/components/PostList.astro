@@ -45,7 +45,7 @@ function categoryUrl(post: Post): string {
 // why this is now a short, fixed-width, dimmed run of dots instead. 24 of
 // them at this font-size overflows any width .leader is ever given, clipped
 // by its own overflow:hidden the same way the old run was.
-const LEADER = '·'.repeat(24)
+const LEADER = '·'.repeat(200)
 ---
 
 <ol class="posts">
@@ -154,6 +154,13 @@ const LEADER = '·'.repeat(24)
     border-block-start: 1px solid var(--rule);
   }
 
+  /* The last row drops its own bottom rule: Pagination.astro draws its own
+     border-block-start immediately below, and the two stacked read as a
+     doubled line with an empty band between them. */
+  .posts li:last-child {
+    border-block-end: 0;
+  }
+
   .date {
     flex: none;
     /* Departure Mono, not the inherited system mono stack: the reader asked
@@ -191,7 +198,11 @@ const LEADER = '·'.repeat(24)
    * a size decided by layout the way this one now is.
    */
   .title {
-    flex: 1 1 auto;
+    /* Shrinks but does not grow, so a title takes exactly the room its own
+       text needs and the leader claims what is left. If both grew they would
+       split the leftover space between them and the leader would never reach
+       the columns it is meant to guide the eye toward. */
+    flex: 0 1 auto;
     min-inline-size: 0;
     margin-inline-start: 0.9rem;
     color: var(--fg);
@@ -237,9 +248,20 @@ const LEADER = '·'.repeat(24)
    * and there is no 3:1 floor to hold it to the way a meaningful border or
    * icon would be.
    */
+  /*
+   * The leader fills the room between the title and the trailing columns
+   * rather than being a fixed stub. That is the whole job of a leader: it
+   * carries the eye from a title across to the date and section on the far
+   * side of a wide row. Cut to a fixed 1.75rem it guided nothing and read as
+   * punctuation after the title.
+   *
+   * `flex: 1` with `min-inline-size: 0` so it takes what is left and can also
+   * be squeezed to nothing on a narrow row, where the title needs every pixel
+   * and there is no distance worth guiding across anyway.
+   */
   .leader {
-    flex: none;
-    inline-size: 1.75rem;
+    flex: 1 1 auto;
+    min-inline-size: 0;
     margin-inline: 0.6rem;
     overflow: hidden;
     white-space: nowrap;
