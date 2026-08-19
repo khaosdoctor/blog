@@ -54,7 +54,10 @@ const LINKS: { key: 'navPosts' | 'navSeries' | 'navTags' | 'navAbout'; path: str
     display: inline-flex;
     align-items: center;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    /* Lucas's own ask, "2pt bigger": `pt` is a real, absolute CSS length
+       (1pt = 1/72in), so the browser does the point-to-pixel conversion
+       itself rather than a rem/px guess standing in for it. */
+    font-size: calc(0.75rem + 2pt);
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
