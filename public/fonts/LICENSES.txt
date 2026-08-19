@@ -1,8 +1,11 @@
 Fonts served from this folder, and what each one obliges us to do.
 
-Nothing here is applied to the site yet. Every file exists so /theme-lab/ can render
-it at a real size. Anything that does not get picked should be deleted, licence note
-and all.
+Four of these are applied to the site: Departure Mono (the default face, and every
+header, button and control), PxPlus IBM VGA8 (subtitles), Literata (body text) and
+Atkinson Hyperlegible (the settings panel's other reading font). The rest are still
+served because the archived bench at /theme-lab-arquivo/ renders every one of them
+at a real size, so deleting a file costs that page a specimen. A licence note only
+leaves here when its font file does.
 
 --------------------------------------------------------------------------------
 SIL Open Font License 1.1 (OFL)
@@ -94,4 +97,4 @@ licence.
 
                                 This is a bitmap face traced to outlines. It is only
                                 crisp at whole multiples of 16px: 16, 32, 48. At 17px
-                                or 20px it blurs, which /theme-lab/ demonstrates.
+                                or 20px it blurs, as the archived bench shows.
