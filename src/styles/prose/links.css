@@ -7,9 +7,13 @@
  * a reader ever followed a link. The owner's later ask ("links inside /oss/
  * should follow the same rules as any other link, this means the correct
  * accent, hover etc", then "same as the footer links, and all links across
- * the whole website") turned that into the site's one link treatment, so
- * every selector below reads a scope wider than `.prose` now: see the SCOPE
- * comment above the rest-state rule for exactly what that scope is and why.
+ * the whole website") widened the colour, the dashed rest underline and the
+ * inverted hover block to the site's one link treatment: see the SCOPE
+ * comment above the rest-state rule for exactly what that wider scope is and
+ * why. The icon in this file's own opening sentence did NOT widen with it: a
+ * follow-up correction asked for the arrow to stay a prose-only cue (see its
+ * own comment, further down, for why), so `::after` and the external-host
+ * test it uses still read `.prose a`, the file's original scope.
  */
 
 :root {
@@ -113,18 +117,22 @@
  * not a text link at all), `.heading-anchor` (headings.css's own quiet,
  * opacity-fading "#" marker, which would otherwise gain both this rule's
  * dashed underline and a colour clash with its own hover colour) and
- * `footer .gh-link` (BaseLayout.astro's icon-only GitHub repo link: an icon
- * has no baseline for a dashed underline to sit under, and the external-link
- * arrow this rule would otherwise append is redundant beside a glyph that
- * already reads as "GitHub") are excluded by name below. `:where()` around
- * them keeps the exclusion at zero specificity, so adding it does not
- * accidentally out-rank the very `footer .version a` exception this rule
- * already has to lose to (a plain `:not(.chip)` would add a class to this
- * selector's own count and start beating `.version a` by mistake, which is
- * the trap this file's `:where()` avoids). A footnote reference, its
- * back-arrow, and the bookmark card are NOT in this list: they keep the fill
- * and the accent colour like any other text link, only the icon further down
- * is turned off for them.
+ * `footer .gh-link` (BaseLayout.astro's icon-only GitHub repo link, styled on
+ * its own terms there: an icon has no baseline for a dashed underline to sit
+ * under) are excluded by name below, all three from the colour/underline/
+ * padding/hover-fill this rule draws. `:where()` around them keeps the
+ * exclusion at zero specificity, so adding it does not accidentally out-rank
+ * the very `footer .version a` exception this rule already has to lose to (a
+ * plain `:not(.chip)` would add a class to this selector's own count and
+ * start beating `.version a` by mistake, which is the trap this file's
+ * `:where()` avoids). A footnote reference, its back-arrow, and the bookmark
+ * card are NOT in this list: they keep the fill and the accent colour like
+ * any other text link. Whether any of these six also gets the `::after`
+ * arrow is a separate question answered further down, by a separate,
+ * prose-only rule, not by this one: `.chip` and `footer .gh-link`/`.version
+ * a` never reach it regardless (none of the three live inside `.prose`), and
+ * `.heading-anchor`, the footnote pair and the bookmark card are cancelled
+ * there by name, since the icon rule reaches everywhere in `.prose` alike.
  */
 html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link)) {
   padding-inline: 1px;
@@ -137,7 +145,21 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
   text-underline-offset: var(--link-underline-offset);
 }
 
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link))::after {
+/*
+ * The arrow stays narrow where the rest of this file went wide. Lucas's
+ * correction, after seeing the footer with both a hooked and an
+ * out-of-the-box arrow on a two-item line: the colour, the dashed rest
+ * underline and the inverted hover block read fine everywhere, but the icon
+ * is a mid-sentence cue, "does this link leave the site", which only matters
+ * to a reader following a link out of a paragraph. A footer row of two named
+ * links, an OSS page that is nothing but a list of outbound links, a 404's
+ * "try search" line: none of these are prose a reader is mid-sentence in, so
+ * every row would carry the marker and it would stop meaning anything. So
+ * `::after` and the external-host test it alone uses go back to `.prose a`,
+ * exactly the pre-widening scope, while the rest/hover rule above stays at
+ * `html :is(main, footer) a`.
+ */
+.prose a::after {
   content: '';
   display: inline-block;
   inline-size: 0.7em;
@@ -150,22 +172,28 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
 /*
  * Anything not on one of the owner's own domains. Both are his, so a link
  * between them is not "leaving": lsantos.dev (this blog and the personal site)
- * and lsantos.me. Add a host here when another one becomes his.
+ * and lsantos.me. Add a host here when another one becomes his. This test has
+ * no other consumer in this file (or anywhere else): it exists only to decide
+ * which arrow the rule above draws, so it stays beside it rather than living
+ * at the wider scope nothing else here needs it at.
  */
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link))[href^='http']:not([href*='lsantos.dev']):not([href*='lsantos.me'])::after {
+.prose a[href^='http']:not([href*='lsantos.dev']):not([href*='lsantos.me'])::after {
   mask-image: var(--icon-external);
 }
 
 /*
  * Links that are already marked as what they are, or that are not text: a
- * footnote reference, the arrow back from a footnote, a bookmark card, and
- * any link wrapping an image. `.heading-anchor` needs no entry here any more:
- * it is excluded from the rule above outright, so it never gains the icon
- * `::after` in the first place.
+ * footnote reference, the arrow back from a footnote, a heading's own anchor,
+ * a bookmark card, and any link wrapping an image. All five only ever appear
+ * inside `.prose` (a footnote, a heading anchor and a bookmark are markdown
+ * features; an image-wrapping link is prose content too), so this list is
+ * exactly what it was before the site-wide widening: nothing here has become
+ * dead weight, and nothing new needed adding, since the rule the icon comes
+ * from is prose-scoped again.
  */
-html :is(main, footer) a:is([data-footnote-ref], [data-footnote-backref], .bookmark)::after,
-html :is(main, footer) a:has(img)::after,
-html :is(main, footer) figure a::after {
+.prose a:is([data-footnote-ref], [data-footnote-backref], .heading-anchor, .bookmark)::after,
+.prose a:has(img)::after,
+.prose figure a::after {
   content: none;
 }
 
