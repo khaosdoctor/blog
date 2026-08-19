@@ -48,9 +48,25 @@ const title = page.currentPage > 1 ? `Lucas Santos | page ${page.currentPage}` :
     border: 0;
   }
 
+  /*
+   * One line at reading widths. Three things were making this wrap, and the
+   * font size was the smallest of them: <body> sets --tracking-body (0.05em)
+   * and --word-spacing-body (0.15em) on everything, and in a monospace face
+   * that is pure added width. Across this sentence's ~88 characters and its
+   * spaces the two together cost around six characters' worth of line, more
+   * than the size drop below saves. Both are body-copy tokens meant for
+   * running prose, and this is a one-line chrome notice, so it opts out of
+   * them rather than paying for them.
+   *
+   * It still wraps on a narrow screen, which is correct: nothing here forces
+   * a single line, so a phone gets two readable lines instead of a line that
+   * runs off the side.
+   */
   .note {
     margin-block-end: 2.5rem;
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    letter-spacing: normal;
+    word-spacing: normal;
   }
 </style>
