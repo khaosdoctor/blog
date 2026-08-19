@@ -260,7 +260,16 @@ const LEADER = '·'.repeat(200)
    * and there is no distance worth guiding across anyway.
    */
   .leader {
-    flex: 1 1 auto;
+    /*
+     * Basis 0, not `auto`. The dot run is 200 characters long, and with an
+     * `auto` basis that whole string counts as this item's own ideal width, so
+     * the row overflowed and flexbox shrank every shrinkable item to
+     * compensate, the title included: titles were wrapping after three or four
+     * words with empty room to their right. A zero basis means this item asks
+     * for nothing and takes only what the title leaves, which is what a leader
+     * is: the dots are decoration cut to fit, never a width the row owes them.
+     */
+    flex: 1 1 0;
     min-inline-size: 0;
     margin-inline: 0.6rem;
     overflow: hidden;
