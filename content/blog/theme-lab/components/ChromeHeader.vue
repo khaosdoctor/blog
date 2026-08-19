@@ -194,12 +194,17 @@ const PIPBOY_MS = 32
 const pipboyGlow = ref(false)
 // decifra: sem taxa de quadro original (Sneakers, 1992, e o porte de soulwire inspirado em
 // LOVE, 2011, não documentam uma). Chegou a usar o tique do próprio Doom, 28ms, rápido demais
-// perto do cursor de bloco ao lado: o dono pediu o mesmo tempo do cursor, então o tique agora
-// é `CURSOR_RATES.terminal`, 530ms, a mesma fase da taxa "terminal" do cursor. Cada caractere
-// ainda escalona 5 tiques antes de travar (`queue` abaixo), então resolver o nome inteiro leva
-// vários segundos agora, de propósito: é o mesmo "um terminal é paciente" que já justifica a
-// taxa "terminal" do cursor.
-const DECIFRA_TICK_MS = CURSOR_RATES.terminal
+// perto do cursor de bloco ao lado: o dono pediu o mesmo tempo do cursor, então o tique saiu
+// de um número solto e virou uma fração da fase do cursor.
+//
+// Um quarto dela, não ela inteira. Um tique de 530ms cheio bate exatamente no cursor, mas cada
+// caractere ainda escalona alguns tiques antes de travar, e o nome inteiro passava de seis
+// segundos para resolver. O dono já recusou "lento demais" uma vez, na rampa do cursor, então
+// a divisão por quatro mantém a relação com a fase (todo quarto tique cai junto com a troca do
+// cursor) sem o custo. É o mesmo número que `src/scripts/header-brand.ts` usa no site de
+// verdade: se um dos dois mudar, o outro muda junto, senão a bancada deixa de ser a prévia
+// honesta do que foi decidido.
+const DECIFRA_TICK_MS = CURSOR_RATES.terminal / 4
 const SCRAMBLE_GLYPHS = '!<>-_\\/[]{}—=+*^?#'.split('')
 // falha: WCAG 2.3.1 proíbe mais de três trocas de luminância por segundo; o piso de 2s
 // no knob abaixo garante isso mesmo no ajuste mais agressivo que o slider permite.
