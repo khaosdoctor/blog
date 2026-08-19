@@ -307,6 +307,24 @@
   --btn-solid-bg: var(--em-bold-bg);
   --btn-solid-fg: var(--em-bold-fg);
 
+  /*
+   * The header's icon-only controls (ThemeToggle today, the settings panel's
+   * opener beside it): one shared footprint so a third one someday lines up
+   * for free instead of three components each guessing the same three
+   * numbers. `--icon-btn-hit` is the button's own padded box, kept at
+   * `--btn-touch-min` (44px, WCAG 2.5.5's enhanced level, one step past the
+   * 24px 2.5.8 asks as a minimum) even though nothing that size is drawn
+   * inside it any more. `--icon-btn-chip` is the bordered square a reader
+   * actually sees, painted by a `::before` sized independently of the real
+   * (larger) clickable box, and `--icon-btn-glyph` is the icon's own
+   * font-size within it. Shrinking the visible chip and the glyph without
+   * shrinking the box they sit in is the point: a smaller target was never
+   * the ask, a smaller-looking one was.
+   */
+  --icon-btn-hit: var(--btn-touch-min);
+  --icon-btn-chip: 2rem;
+  --icon-btn-glyph: 1rem;
+
   --duration: 120ms;
   --ease: ease;
 }

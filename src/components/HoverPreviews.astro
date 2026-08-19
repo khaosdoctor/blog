@@ -15,8 +15,9 @@ const { locale } = Astro.props
 
 {/* Cards are built in the browser, so their labels cannot come from t()
     directly. They ride along on this element instead, which the script reads
-    once. Hidden until the reader actually pins something, so the checkbox only
-    shows up once the choice means anything. */}
+    once. The persist checkbox that used to live in here moved to
+    SettingsPanel.astro (docs/design.md, Settled); this element now only ever
+    carries data, so it stays permanently hidden rather than being toggled. */}
 <p
   class="hp-settings"
   hidden
@@ -26,12 +27,7 @@ const { locale } = Astro.props
   data-unpin={t(locale, 'previewUnpin')}
   data-drag={t(locale, 'previewDrag')}
   data-unwritten={t(locale, 'previewUnwritten')}
->
-  <label>
-    <input type="checkbox" id="hp-persist" />
-    {t(locale, 'keepPreviews')}
-  </label>
-</p>
+></p>
 
 <script>
   import '../scripts/hover-previews'

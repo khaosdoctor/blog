@@ -1,4 +1,6 @@
-// Wires up the code-block theme picker from CodeTheme.astro. This is the
+// Wires up the code-block theme picker from CodeTheme.astro, now a single
+// row inside SettingsPanel.astro rather than a shared popover with one opener
+// button injected per code block (docs/design.md, Settled). This is the
 // interactive half only: the blocking snippet that applies a stored choice
 // before first paint lives directly in BaseLayout's <head> (see the report),
 // since this module is deferred and would otherwise let the wrong theme show
@@ -7,8 +9,8 @@
 //
 // The empty export makes this a real module: without one, a script with no
 // other import or export is global rather than file-scoped, and its names
-// collide with hover-previews.ts, which has the same shape for the same
-// reason.
+// collide with theme-toggle.ts and hover-previews.ts, which have the same
+// shape for the same reason.
 export {}
 
 const STORAGE_KEY = 'code-theme'
@@ -73,113 +75,12 @@ function applyTheme(theme: ThemeName | null): void {
   else document.documentElement.setAttribute(ATTR, theme)
 }
 
-// Same feature check as hover-previews.ts's canPopover: true wherever the
-// native popover API exists, which lets the shared picker below sit in the
-// top layer instead of needing its own stacking-context and outside-click
-// bookkeeping. Where it does not exist, the same element is toggled with the
-// `hidden` attribute and positioned manually instead (see openPicker).
-const canPopover = 'popover' in HTMLElement.prototype
-
-/**
- * Places the shared picker next to the button that opened it, clamped to the
- * viewport. Same shape as hover-previews.ts's place(): getBoundingClientRect
- * is viewport-relative, which lines up with `position: fixed` (set in CSS
- * for the no-popover fallback, and imposed by the UA itself once `popover`
- * is set).
- */
-function place(el: HTMLElement, anchor: HTMLElement): void {
-  const rect = anchor.getBoundingClientRect()
-  const gap = 8
-  const w = el.offsetWidth
-  const h = el.offsetHeight
-  const vw = innerWidth
-  const vh = innerHeight
-
-  let top = rect.bottom + gap
-  if (top + h > vh && rect.top - h - gap > 0) top = rect.top - h - gap
-  top = Math.min(Math.max(top, gap), Math.max(gap, vh - h - gap))
-
-  const left = Math.min(Math.max(rect.right - w, gap), Math.max(gap, vw - w - gap))
-
-  el.style.top = `${top}px`
-  el.style.left = `${left}px`
-}
-
 function init(): void {
   const wrapperEl = document.querySelector<HTMLElement>('.ct-settings')
   const selectEl = document.querySelector<HTMLSelectElement>('#ct-theme')
   if (wrapperEl === null || selectEl === null) return
-  // Reassigned to plain consts: the nested functions below (openPicker,
-  // closePicker, injectOpeners) close over these, and TypeScript cannot carry
-  // the null check above into a closure that might run later, only into a
-  // binding it knows was never reassigned.
   const wrapper = wrapperEl
   const select = selectEl
-
-  // Tracked here rather than read back off the element: `:popover-open` and the
-  // `hidden` attribute are two different sources of truth, and the close paths
-  // below have to work the same way whichever one is in play.
-  let open = false
-
-  function openPicker(anchor: HTMLElement): void {
-    wrapper.style.visibility = 'hidden'
-    if (canPopover) {
-      // Hide first: showing an already-shown popover throws, and a click on a
-      // second block's button should reposition this one rather than fail.
-      try {
-        wrapper.hidePopover?.()
-        wrapper.showPopover?.()
-      } catch {
-        // Some engine disagreed about the state. Fall back to the attribute so
-        // the picker still opens rather than silently doing nothing.
-        wrapper.hidden = false
-      }
-    } else {
-      wrapper.hidden = false
-    }
-    open = true
-    place(wrapper, anchor)
-    wrapper.style.visibility = ''
-    select.focus()
-  }
-
-  function closePicker(): void {
-    open = false
-    // Both paths, every time. The popover API's light-dismiss is supposed to
-    // handle an outside click on its own, and when it does this is a no-op; when
-    // it does not, this is the only thing that closes the picker, which is
-    // exactly the bug it was reported with.
-    try {
-      wrapper.hidePopover?.()
-    } catch {
-      // Not currently showing as a popover. The attribute below still applies.
-    }
-    if (!canPopover) wrapper.hidden = true
-  }
-
-  // One button per code block, injected here rather than shipped in the
-  // server-rendered HTML, so a page with forty blocks pays for forty small
-  // buttons and not forty copies of the option list above them. Each is a
-  // sibling of Expressive Code's own copy button inside its `.copy` div,
-  // which is already a positioned, hover-revealed flex row (see
-  // code-and-callouts.css), so the two share layout and hover behaviour with
-  // no extra CSS on this end.
-  function injectOpeners(label: string): void {
-    for (const copy of document.querySelectorAll<HTMLElement>('.expressive-code .copy')) {
-      if (copy.querySelector('.ct-open')) continue
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.className = 'ct-open'
-      button.dataset.ctOpen = ''
-      button.setAttribute('aria-label', label)
-      // An empty inner div, matching the copy button's own markup: Expressive
-      // Code's stylesheet styles that div for the idle/hover/focus/active
-      // background wash (`.copy button div`), so this button gets the same
-      // treatment for free instead of redefining it here.
-      button.append(document.createElement('div'))
-      copy.insertBefore(button, copy.querySelector('button'))
-    }
-  }
 
   // Static <option>s ship with no text: the labels come from data attributes
   // (see CodeTheme.astro) since this plain module has no access to t().
@@ -240,7 +141,6 @@ function init(): void {
         // Nothing to clean up if storage was never available.
       }
       applyTheme(null)
-      closePicker()
       return
     }
     if (!isThemeName(select.value)) return
@@ -250,43 +150,9 @@ function init(): void {
       // Private mode, storage disabled: the theme still applies for this page.
     }
     applyTheme(select.value)
-    closePicker()
   })
 
-  // Nothing above matters without a script to run it. The picker used to
-  // reveal itself here as a static control at the foot of the page; now that
-  // every code block has its own opener, it stays out of the layout entirely
-  // and only appears as a popover next to whichever button was clicked (see
-  // openPicker). `[popover]` takes over hiding it when the API exists;
-  // without it, the `hidden` attribute stays and is toggled by hand.
-  if (canPopover) {
-    wrapper.removeAttribute('hidden')
-    wrapper.setAttribute('popover', 'auto')
-  }
-
-  injectOpeners(wrapper.dataset.pick ?? 'change the code theme')
-
-  document.addEventListener('click', (event) => {
-    const target = event.target as Element
-    const opener = target.closest<HTMLElement>('[data-ct-open]')
-    if (opener) {
-      // A second click on the same button closes it, which is what a reader
-      // expects of a control that opened on click.
-      if (open) closePicker()
-      else openPicker(opener)
-      return
-    }
-    if (open && !wrapper.contains(target)) closePicker()
-  })
-
-  {
-    document.addEventListener('keydown', (event) => {
-      // Escape closes it on both paths: the popover API does this itself, but
-      // only while focus is inside the popover, and the select swallows some
-      // key handling of its own.
-      if (event.key === 'Escape' && open) closePicker()
-    })
-  }
+  wrapper.removeAttribute('hidden')
 }
 
 if (document.readyState === 'loading') {

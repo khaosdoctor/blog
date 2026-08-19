@@ -303,19 +303,6 @@ function savePinned(): void {
   } catch {
     // Storage full or otherwise refused: same as above, nothing breaks.
   }
-  showSettings()
-}
-
-/**
- * The checkbox is pointless before anything is pinned, so it stays hidden until
- * the first card is kept, and stays visible afterwards for as long as the
- * preference is on (that is when a reader would go looking to turn it off).
- */
-function showSettings(): void {
-  const box = document.querySelector('.hp-settings')
-  if (box === null) return
-  const relevant = pinned.length > 0 || persistent()
-  box.toggleAttribute('hidden', !relevant)
 }
 
 function closeCard(card: PopoverHTMLElement): void {
@@ -642,7 +629,6 @@ function init(): void {
   for (const link of links) attach(link)
 
   bindPersistToggle()
-  showSettings()
   void restorePinned()
 }
 
