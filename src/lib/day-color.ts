@@ -21,7 +21,7 @@
  * pulled the whole content layer into the browser bundle and threw "The
  * astro:content module is only available server-side" at runtime.
  */
-import { chipColor } from './chip-color'
+import { chipColor, type ChipColorOptions } from './chip-color'
 
 /**
  * `YYYY-MM-DD` for whatever calendar day `date` falls on, in local time. This
@@ -42,7 +42,13 @@ function dayKey(date: Date): string {
  * into a `style.background` (or any other) assignment. Takes `date` only so a
  * caller near midnight, or a future test, can pass one in explicitly; every
  * real caller just calls `dayColor()`.
+ *
+ * `options` passes straight through to `chipColor`: the header's own wordmark
+ * accent (header-brand.ts) calls this with `{ excludePurple: true }`, since
+ * the owner asked purple out of that rotation. The search palette's cursor,
+ * the original caller, still calls this with no options and keeps seeing all
+ * five.
  */
-export function dayColor(date: Date = new Date()): string {
-  return chipColor(dayKey(date))
+export function dayColor(date: Date = new Date(), options: ChipColorOptions = {}): string {
+  return chipColor(dayKey(date), options)
 }

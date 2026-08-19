@@ -26,8 +26,21 @@ const CHIP_COLORS = [
   'var(--brand-purple)',
 ]
 
-export function chipColor(label: string): string {
+export interface ChipColorOptions {
+  /**
+   * Drops purple from the pool before hashing, rather than hashing into the
+   * full five and rejecting a purple result: the header's day-hash accent
+   * (day-color.ts, chosen for the real-site header) needs the pool itself
+   * narrowed, since the owner asked for purple out of the accent rotation
+   * for good, not out of one specific day. One hash mechanism still decides
+   * the colour; this only changes which tokens it can resolve to.
+   */
+  excludePurple?: boolean
+}
+
+export function chipColor(label: string, options: ChipColorOptions = {}): string {
+  const pool = options.excludePurple ? CHIP_COLORS.filter((color) => color !== 'var(--brand-purple)') : CHIP_COLORS
   let sum = 0
   for (const char of label) sum += char.codePointAt(0) ?? 0
-  return CHIP_COLORS[sum % CHIP_COLORS.length]
+  return pool[sum % pool.length]
 }
