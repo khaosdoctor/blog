@@ -96,15 +96,34 @@ const CELLS = markCells()
    * `.controls` to the right edge, replacing the old `margin-inline-end:
    * auto` on the home link, since that link is no longer the only thing on
    * this row that can carry the push.
+   *
+   * `max-inline-size: 80vw` (below, past 70rem) is what makes the row read
+   * as 80% of the row's own available width rather than the reading column
+   * (`--measure`, 78ch): the header is chrome across the top, not prose, so
+   * measuring it against the viewport reads truer than against a column
+   * meant for running text. Applied only past 70rem (the same breakpoint
+   * footnotes.css already uses for "there is room to spare"), so nothing
+   * changes below it: brand, the switch, and three icon buttons need real
+   * room of their own, and narrowing the row further on a phone, where
+   * `flex-wrap` already has to wrap `.controls` onto its own line, would
+   * only make that wrap happen sooner. `margin-inline: auto` centres the
+   * row once it is narrower than its container; a no-op at full width.
    */
   .chrome {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    margin-inline: auto;
     /* "Breathing room 4" from the bench's density knob (range 4-30, in
        tenths of a rem block / sixths of a rem inline). */
     padding: 0.4rem 0.667rem;
     font-family: var(--font-mono);
+  }
+
+  @media (min-width: 70rem) {
+    .chrome {
+      max-inline-size: 80vw;
+    }
   }
 
   .chrome > * {
@@ -115,14 +134,27 @@ const CELLS = markCells()
     margin-inline-end: 0;
   }
 
-  .edge,
-  .fill {
+  .edge {
     color: var(--muted);
     font-family: var(--font-display);
     letter-spacing: 0.06em;
   }
 
+  /*
+   * The dashes read from the same fixed 38-character string regardless of
+   * viewport (`overflow: hidden` crops whatever the flex box does not need,
+   * `flex: 1` is what actually claims the row's own leftover space, see the
+   * component comment above); wider letter-spacing here does not change how
+   * much of the row `.fill` claims, only how loosely the dash glyphs read
+   * within it, which is the owner's own separate ask ("larger space between
+   * the characters", not a different count). 0.4em rather than `.edge`'s
+   * 0.06em: enough to read as an openly spaced dashed line rather than the
+   * near-solid rule the box-drawing "─" glyph draws edge-to-edge at.
+   */
   .fill {
+    color: var(--muted);
+    font-family: var(--font-display);
+    letter-spacing: 0.4em;
     flex: 1;
     overflow: hidden;
   }
