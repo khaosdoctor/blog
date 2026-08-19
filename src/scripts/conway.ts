@@ -439,7 +439,7 @@ export function setDensity(pct: number): void {
 }
 
 export function setGps(value: number): void {
-  gps = Math.min(8, Math.max(0.5, value))
+  gps = Math.min(25, Math.max(1, value))
   writeStorage(GPS_KEY, String(gps))
 }
 

@@ -92,7 +92,9 @@ const { locale } = Astro.props
            --font-scale rather than writing a literal 100. Its visible label
            is the number itself, untranslated the same way the code theme
            names are, with the sentence in aria-label. */}
-        <button type="button" class="sp-step" id="sp-font-size-reset" aria-label={t(locale, 'fontSizeReset')}>100%</button>
+        <button type="button" class="sp-step" id="sp-font-size-reset" aria-label={t(locale, 'fontSizeReset')}>
+          {t(locale, 'fontSizeResetShort')}
+        </button>
       </div>
       {/* The announcement channel for the three buttons: pressing one does not
          move focus, so without a live region nothing tells a screen reader
@@ -121,20 +123,47 @@ const { locale } = Astro.props
     <details class="sp-conway-details">
       <summary>{t(locale, 'conwayKnobs')}</summary>
       <div class="sp-conway-knobs">
+        {/* Every knob prints its own value beside its label. A bare range
+           input shows where the handle is and never what that position
+           means, so "generations per second" was a slider a reader could
+           set without ever learning what they had set it to.
+
+           Each readout is aria-hidden and carries no unit in its markup: the
+           range input itself already announces its own value to a screen
+           reader, so a second copy would only read the number twice, and the
+           unit each one appends (%, /s, s) is a symbol rather than a word,
+           which is why it lives in settings-panel.ts's formatter instead of
+           in a translated string. */}
         <label class="sp-knob">
-          <span>{t(locale, 'conwaySeedDensity')}</span>
+          <span class="sp-knob-head">
+            <span>{t(locale, 'conwaySeedDensity')}</span>
+            <span class="sp-knob-value" id="sp-density-value" aria-hidden="true"></span>
+          </span>
           <input type="range" id="sp-density" min="1" max="20" step="1" />
         </label>
         <label class="sp-knob">
-          <span>{t(locale, 'conwayGenerationsPerSecond')}</span>
-          <input type="range" id="sp-gps" min="0.5" max="8" step="0.5" />
+          <span class="sp-knob-head">
+            <span>{t(locale, 'conwayGenerationsPerSecond')}</span>
+            <span class="sp-knob-value" id="sp-gps-value" aria-hidden="true"></span>
+          </span>
+          {/* 1 to 25 whole generations a second, matching setGps's own clamp
+             in conway.ts. It used to be 0.5 to 8 in half steps; a fractional
+             generation rate is a number nobody sets on purpose, and the top
+             of the old range was slower than the field can actually run. */}
+          <input type="range" id="sp-gps" min="1" max="25" step="1" />
         </label>
         <label class="sp-knob">
-          <span>{t(locale, 'conwayAutoFeed')}</span>
+          <span class="sp-knob-head">
+            <span>{t(locale, 'conwayAutoFeed')}</span>
+            <span class="sp-knob-value" id="sp-autofeed-value" aria-hidden="true"></span>
+          </span>
           <input type="range" id="sp-autofeed" min="0" max="20" step="1" />
         </label>
         <label class="sp-knob">
-          <span>{t(locale, 'conwayOpacity')}</span>
+          <span class="sp-knob-head">
+            <span>{t(locale, 'conwayOpacity')}</span>
+            <span class="sp-knob-value" id="sp-opacity-value" aria-hidden="true"></span>
+          </span>
           {/* min/max match conway.ts's own MIN_OPACITY/MAX_OPACITY (0 to 0.5),
              hardcoded here the same way density/gps/autofeed's own ranges
              are above: those constants are not exported, same reason. Step
@@ -522,6 +551,22 @@ const { locale } = Astro.props
     color: var(--fg);
   }
 
+  /*
+   * The field's properties only exist while the field does. With the
+   * background off, every knob in here adjusts something that is not being
+   * drawn, and the pause and reseed buttons act on a stopped canvas.
+   *
+   * Done in CSS off the checkbox's own state rather than in the script: the
+   * two are adjacent siblings, so `:has()` on the row reads the checkbox
+   * without either element needing a class toggled from JS, and the panel
+   * cannot get into a state where the box says one thing and the disclosure
+   * shows another. `display: none` rather than the `hidden` attribute so
+   * nothing has to remember to remove it.
+   */
+  .sp-row:has(#sp-bg-life:not(:checked)) + .sp-conway-details {
+    display: none;
+  }
+
   .sp-conway-details summary {
     color: var(--fg);
     cursor: pointer;
@@ -543,6 +588,23 @@ const { locale } = Astro.props
 
   .sp-knob input[type='range'] {
     inline-size: 100%;
+  }
+
+  /* The label and its readout share one line, the number pushed to the far
+     end so all four line up in a column whatever their labels measure. */
+  .sp-knob-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .sp-knob-value {
+    margin-inline-start: 0.5rem;
+    color: var(--fg);
+    white-space: nowrap;
+    /* Tabular figures so the number does not shift its neighbours as it
+       counts through different-width digits while a slider is dragged. */
+    font-variant-numeric: tabular-nums;
   }
 
   .sp-conway-actions {

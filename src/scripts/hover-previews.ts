@@ -274,11 +274,24 @@ function place(card: HTMLElement, anchor: HTMLElement): void {
  * always lives in localStorage, since a session-scoped one could never be read
  * back on the visit it was meant to affect.
  */
+/*
+ * On unless the reader has turned it off. The stored value is therefore the
+ * OFF marker ('0'), not the on one: this site's convention everywhere else is
+ * that nothing stored means the default, so a default of "keep them" has to
+ * read as true when the key is absent. A '1' written by the earlier shape,
+ * when keeping them was the opt-in, still reads as on, which is what that
+ * reader chose.
+ *
+ * Storage throwing (private mode) also comes out on, matching the default
+ * rather than silently giving that reader the opposite behaviour. Nothing can
+ * be persisted there anyway, so this only decides which store `store()` asks
+ * for first.
+ */
 function persistent(): boolean {
   try {
-    return localStorage.getItem(PERSIST_KEY) === '1'
+    return localStorage.getItem(PERSIST_KEY) !== '0'
   } catch {
-    return false
+    return true
   }
 }
 
@@ -609,8 +622,10 @@ function bindPersistToggle(): void {
     try {
       sessionStorage.removeItem(STORAGE_KEY)
       localStorage.removeItem(STORAGE_KEY)
-      if (box.checked) localStorage.setItem(PERSIST_KEY, '1')
-      else localStorage.removeItem(PERSIST_KEY)
+      // The key marks OFF, so keeping them (the default) removes it. See
+      // persistent() above for why that direction rather than the other.
+      if (box.checked) localStorage.removeItem(PERSIST_KEY)
+      else localStorage.setItem(PERSIST_KEY, '0')
     } catch {
       return
     }
