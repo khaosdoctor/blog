@@ -152,13 +152,30 @@ function currentFade(): number {
 }
 
 /*
- * The page's own ink, read off the resolved custom property rather than a
- * hex kept here: --fg already carries the light-dark() pair theme.css
- * declares, so this follows a palette change for free instead of drifting
- * from it the way a copied value would.
+ * The page's own ink, read off the canvas element's own resolved `color`
+ * rather than the `--fg` custom property directly. This is not a stylistic
+ * preference: `getComputedStyle(html).getPropertyValue('--fg')` returns the
+ * *specified* value of a custom property, which for an untyped property is
+ * the literal text `light-dark(#14120e, #f3f1ee)`, unresolved, because
+ * custom properties carry a raw token stream and only get resolved when
+ * actually consumed by a real, typed property. Handing that literal string
+ * to `ctx.fillStyle` asks the canvas to resolve `light-dark()` outside any
+ * element's used `color-scheme`, which is not guaranteed to work, and a
+ * fillStyle the canvas cannot parse is silently left at its default, black.
+ * Black cells at 16% alpha over the dark ground's own black page read as
+ * nothing, which matches the report exactly.
+ *
+ * `body` already sets `color: var(--fg)`, a real property, and this canvas
+ * inherits it (no `color` of its own). Reading `.color` off the canvas
+ * itself asks the browser for that property's *computed* value, which by
+ * definition is always a resolved colour (rgb()/color()), never a bare
+ * function call, so it still follows a palette change for free, the same
+ * as before, without depending on light-dark() being resolvable outside a
+ * styled element.
  */
 function currentFg(): string {
-  return getComputedStyle(document.documentElement).getPropertyValue('--fg').trim() || 'currentColor'
+  if (canvas === null) return 'currentColor'
+  return getComputedStyle(canvas).color || 'currentColor'
 }
 
 /*
