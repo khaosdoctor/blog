@@ -148,12 +148,18 @@ const { locale } = Astro.props
     cursor: pointer;
   }
 
+  /*
+   * Border reads --accent-day, not --rule: see ThemeToggle's own .tt-open
+   * ::before for the full reasoning (the day colour clears the 3:1 a
+   * non-text border needs on every one of its four possible values) and the
+   * measured numbers.
+   */
   .sp-open::before {
     content: '';
     position: absolute;
     inline-size: var(--icon-btn-chip);
     block-size: var(--icon-btn-chip);
-    border: var(--border) solid var(--rule);
+    border: var(--border) solid var(--accent-day);
     border-radius: var(--radius);
     background: var(--bg);
     pointer-events: none;
