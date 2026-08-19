@@ -346,15 +346,6 @@
   --icon-btn-chip: 2rem;
   --icon-btn-glyph: 1rem;
 
-  /*
-   * LangSwitcher's knob: a pixel-art switch draws its grip as neutral
-   * plastic, whichever state colour the rest of the slab is showing, so it
-   * needs its own pair rather than a mix of --brand-green/--brand-red.
-   * --lang-knob-edge is the darker of the two, for the block's own border.
-   */
-  --lang-knob-face: light-dark(#dcd4bd, #55524a);
-  --lang-knob-edge: light-dark(#8f8770, #2a2822);
-
   --duration: 120ms;
   --ease: ease;
 }
