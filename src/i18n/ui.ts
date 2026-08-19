@@ -238,7 +238,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     allSeries: 'Séries',
     seriesIntro: 'Todas as séries de artigos publicadas.',
     sourceLanguageOnlyNotice:
-      'Estas ainda existem só em português: não há um índice de tags ou séries em inglês, então os links abaixo levam a páginas em português.',
+      'Estas ainda existem só em português: não há páginas de tags em inglês, então os links abaixo levam a páginas em português.',
     sections: 'Seções',
     sectionDescription: 'Todos os artigos da seção %s.',
     primaryNav: 'Navegação principal',
@@ -378,7 +378,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     allSeries: 'Series',
     seriesIntro: 'Every series of articles published so far.',
     sourceLanguageOnlyNotice:
-      'These still exist in Portuguese only: there is no English tag or series index yet, so the links below lead to Portuguese-language pages.',
+      'These still exist in Portuguese only: there are no English tag pages yet, so the links below lead to Portuguese-language pages.',
     sections: 'Sections',
     sectionDescription: 'Every article in the %s section.',
     primaryNav: 'Main navigation',

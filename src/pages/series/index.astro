@@ -5,9 +5,10 @@
 // is not one yet), so this index applies the same filter, or it would link to
 // a page that does not exist.
 //
-// getSeries() only ever sees Portuguese posts (getPublishedPosts() defaults
-// to SOURCE_LANG), same as getTags(): see src/pages/en/series/index.astro for
-// the English half, which reuses this same data and says so.
+// getSeries() with no argument is the Portuguese map, which is the right one
+// for this tree: src/pages/en/series/index.astro is the English half and builds
+// its own list out of getSeries('en'), so neither index lists a series the
+// reader's own language cannot show.
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getSeries, seriesTitle } from '../../lib/taxonomy'
 import { HREFLANG, t } from '../../i18n/ui'

@@ -99,6 +99,10 @@ seriesOrder: 2
 That is what turns on the series page and the prev/next navigation at the bottom of every part. Existing series:
 `container-images`, `cryptography-beginners`, `grpc`, `typescript-week`.
 
+A translation repeats the same three fields in its own frontmatter, and every language then gets its own series: the
+same `series` slug (so `/series/grpc/` and `/en/series/grpc/`), its own parts, and its own `seriesName` on its own
+first part. Leave `seriesName` off a translated first part and that language falls back to showing the bare slug.
+
 ## Scripts
 
 | Command | What it does |

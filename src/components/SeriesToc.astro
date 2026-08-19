@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
-import { SOURCE_LOCALE, t, type Locale } from '../i18n/ui'
+import { localePath, t, type Locale } from '../i18n/ui'
 import { PUBLISH_CUTOFF, type Post, urlOf } from '../lib/posts'
 import { seriesTitle } from '../lib/taxonomy'
 
@@ -29,22 +29,26 @@ const title = seriesTitle(series, parts)
 // disagree with the route table about a post published mid-build.
 const isPublished = (part: Post) => !part.data.draft && part.data.pubDate <= PUBLISH_CUTOFF
 
-// /series/<slug>/ is only built when the series has more than one PUBLISHED part
-// (src/pages/series/[name].astro), so the heading links on exactly those terms.
-// One published post and two drafts used to render a link to a 404.
+// The series page is only built when the series has more than one PUBLISHED
+// part in this language (src/pages/series/[name].astro and its /en/ twin), so
+// the heading links on exactly those terms. One published post and two drafts
+// used to render a link to a 404.
+//
+// `parts` is already filtered to this page's own language, so this count is the
+// English one on an English page, which is the one that route consulted.
 const publishedCount = parts.filter(isPublished).length
+const linkHeading = publishedCount > 1
 
-// That route is built for the source language only, so a page in any other
-// language shows the title as plain text rather than sending the reader into a
-// listing they cannot read.
-const linkHeading = publishedCount > 1 && locale === SOURCE_LOCALE
+// Both languages have the route now, each under its own prefix, so the heading
+// takes the reader to the listing written in the language they are reading.
+const seriesHref = localePath(locale, `/series/${series}/`)
 ---
 
 {
   parts.length > 1 && (
     <nav class="series-toc" aria-label={t(locale, 'series')}>
       <p class="heading">
-        {linkHeading ? <a href={`/series/${series}/`}>{title}</a> : title} &middot;{' '}
+        {linkHeading ? <a href={seriesHref}>{title}</a> : title} &middot;{' '}
         {t(locale, 'seriesContents', parts.length)}
       </p>
       <ol>
