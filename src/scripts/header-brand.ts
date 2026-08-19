@@ -242,8 +242,27 @@ function init(): void {
     }, randomBetween(PULSE_MIN_MS, PULSE_MAX_MS))
   }
 
+  /*
+   * The one place every path back to "waiting for the next burst" passes
+   * through: `runPulses`'s own `remaining <= 0` exit calls this, and so does
+   * `boot()` directly, on both of its own re-entry paths (the reduced-motion
+   * media query change and the settings panel's own motion override). Before
+   * this cleared only its own `glitchScheduleTimer`, so a `boot()` re-entry
+   * while a pulse's `glitchPulseTimer`/`glitchGapTimer` were still pending
+   * (mid-burst) left that old chain running: it would still call its own
+   * `endPulse()` on its own timer, so nothing stayed visible forever, but two
+   * independent glitch schedules end up ticking at once, which can pulse the
+   * wordmark and the mark out of the 4-20s cadence this is meant to keep to.
+   * `clearGlitchTimers()` now cancels all three, and `endPulse()` runs
+   * unconditionally, so a re-entry here always starts from a clean, fully
+   * cleared state rather than trusting whatever the previous chain was
+   * mid-way through. Every road into "schedule the next one" now also
+   * clears the current one first, guaranteeing the clear by construction
+   * rather than by timing.
+   */
   function scheduleGlitch(): void {
-    if (glitchScheduleTimer !== null) clearTimeout(glitchScheduleTimer)
+    clearGlitchTimers()
+    endPulse()
     glitchScheduleTimer = setTimeout(
       () => runPulses(1 + Math.floor(Math.random() * 3)),
       randomBetween(GLITCH_MIN_MS, GLITCH_MAX_MS),
