@@ -100,12 +100,16 @@ const accentContrast = computed(() => ratio(parseHex(accentHex.value), parseHex(
  * candidato (`MARK_MIN_PX`, em `logoMarks.ts`); o dono pediu 0 a 300px
  * inteiro, então o piso virou só um aviso no relatório (`markBelowFloor`
  * abaixo), nunca mais um limite que o slider recusa.
+ *
+ * `MARK_DEFAULT_PX.fio` é só o valor de partida do ref. Um watcher que
+ * reescrevia `markSizePx` para o padrão do novo candidato a cada troca
+ * morava aqui: sobrou de quando o piso ainda travava o slider, para o
+ * tamanho nunca ficar preso abaixo do piso do candidato novo. O piso é
+ * consultivo agora (`markBelowFloor` já avisa sem travar nada), então
+ * trocar de marca troca só a marca; o tamanho escolhido atravessa a troca.
  */
 const markCandidate = ref<MarkCandidateId>('fio')
 const markSizePx = ref(MARK_DEFAULT_PX.fio)
-watch(markCandidate, (id) => {
-  markSizePx.value = MARK_DEFAULT_PX[id]
-})
 const markBelowFloor = computed(() => markSizePx.value < MARK_MIN_PX[markCandidate.value])
 
 /**
