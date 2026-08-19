@@ -122,6 +122,68 @@ const { items, locale } = Astro.props
     color: var(--toc-paper);
   }
 
+  /*
+   * The whole heading, printed over the row on hover or focus when the ellipsis
+   * above cut it short, and deliberately allowed to hang past the frame and over
+   * the article: the panel is 15rem wide and the headings are not. Two sections
+   * that both start "O que aconteceu com a" are otherwise the same line.
+   *
+   * One element, created on <body> by PostToc's own script and placed from the
+   * row's rectangle. It cannot live in the panel: `.toc` is a scroll container
+   * (`max-block-size` plus `overflow-y: auto`) and a scroll container clips its
+   * children on both axes, so a child growing sideways is cut off or turns into
+   * a horizontal scrollbar. `position: fixed` does not get it out from in there
+   * either, because the panel carries `transform: translateY(-50%)` and a
+   * transform makes its element the containing block for fixed descendants,
+   * clipping included. `:global` because an element the script creates never
+   * carries this component's scoping attribute (ReadingTime.astro's own
+   * `:global(.rt-popup)` reaches into a client-built subtree the same way).
+   *
+   * Everything under the placement repeats the `a` rule above, so the reveal
+   * reads as that same row continuing rather than as a tooltip: identical face,
+   * size, line height and padding, painted in the inversion `a:hover` uses. The
+   * two colours are literals rather than `var(--toc-ink)`/`var(--toc-paper)`,
+   * which are declared on `.toc` and cannot reach an element that is not inside
+   * it. Same copy, same reason, as ReadingTime.astro's popup.
+   *
+   * `overflow-wrap: anywhere` rather than `break-word`: a shrink-to-fit box can
+   * still be pushed wider than the room left by a single long word, and only
+   * `anywhere` lowers the minimum enough that it cannot. Together with the
+   * `max-inline-size` the script writes, that is what keeps the reveal on screen
+   * in handle mode, where the panel is a drawer at the bottom of a phone.
+   *
+   * `pointer-events: none` so a click still reaches the row's own link
+   * underneath, and so the row keeps its `:hover` while the pointer is over the
+   * part of the reveal that covers it. PostToc's script follows the pointer
+   * itself to decide when the reveal goes away.
+   *
+   * z-index 30 clears the sidenotes that float in the margins (20) and stays
+   * under the settings and theme menus (60), which a reader opens deliberately
+   * and which nothing hovered should ever cover.
+   *
+   * No transition, on purpose: `--duration` is 0ms under prefers-reduced-motion
+   * anyway, and a reveal whose whole job is to be legible the instant it appears
+   * has nothing to gain from fading in.
+   */
+  :global(.toc-full) {
+    position: fixed;
+    z-index: 30;
+    display: none;
+    margin: 0;
+    padding: 0.1rem 0.3rem;
+    background: light-dark(#000000, #ffffff);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+  }
+
+  :global(.toc-full[data-open='true']) {
+    display: block;
+  }
+
   .fold {
     padding: 0;
     border: 0;
