@@ -161,14 +161,35 @@ const LEADER = '·'.repeat(200)
      * that read as coloured against the dim white of the row's own text.
      */
     border-block-end: 0;
+    position: relative;
+  }
+
+  /*
+   * The separator, on its own pseudo-element rather than as a background on
+   * the row itself. It has to be its own box because it is masked, and a mask
+   * applies to everything an element renders: on the `li` it would fade the
+   * row's own text along with the rule.
+   *
+   * Three quarters of the row, fading out toward the right rather than
+   * stopping at a hard edge. Two layers doing two jobs: the repeating gradient
+   * draws the dashes (the same 10px on, 6px off the quotes and the pagination
+   * use), and the mask ramps its alpha away over the last stretch. One
+   * gradient cannot do both, since the dashes need a repeating pattern and the
+   * fade needs a continuous one.
+   */
+  .posts li::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-end: 0;
+    inline-size: 75%;
+    block-size: 1px;
     background-image: repeating-linear-gradient(
       to right,
       color-mix(in oklab, var(--muted) 45%, transparent) 0 10px,
       transparent 10px 16px
     );
-    background-repeat: no-repeat;
-    background-position: bottom left;
-    background-size: 100% 1px;
+    mask-image: linear-gradient(to right, #000 0 55%, transparent 100%);
   }
 
   /* No rule above the first row. The list already begins where the header's
@@ -179,10 +200,10 @@ const LEADER = '·'.repeat(200)
   /* The last row drops its own bottom rule: Pagination.astro draws its own
      border-block-start immediately below, and the two stacked read as a
      doubled line with an empty band between them. */
-  /* The separator is a background now, not a border, so the last row has to
-     drop the image rather than a border width. */
-  .posts li:last-child {
-    background-image: none;
+  /* The separator is a pseudo-element now, so the last row removes it rather
+     than zeroing a border width. */
+  .posts li:last-child::after {
+    content: none;
   }
 
   .date {
