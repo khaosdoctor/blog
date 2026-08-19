@@ -235,10 +235,12 @@ work: every selector needs a class in it (a bare `button { }` would style every 
 `.controls button`), and a static `class="x"` where `x` is defined in the style block matches nothing, because the
 rule was renamed and the attribute was not. `npm run check` fails on all three mistakes and says which.
 
-A demo does not disappear once you stop liking it. In `/lab/` and `/theme-lab/`, a candidate that loses gets moved
-into an archive post rather than deleted, so the rejected options stay around as the record of how the decision was
-made. Nothing to do differently while writing: this only changes what happens to a component after its post decides
-against it.
+A demo does not disappear once you stop liking it. In `/lab/`, a candidate that loses gets moved into an archive
+post rather than deleted, so the rejected options stay around as the record of how the decision was made. The theme
+lab followed the same rule until every section it had was decided, at which point the post itself retired too,
+since nothing was left undecided to keep it open for; every candidate it ever held, chosen or not, still works at
+`/theme-lab-arquivo/`. Nothing to do differently while writing: this only changes what happens to a component after
+its post decides against it.
 
 ## Images from somewhere else
 

@@ -12,7 +12,7 @@ This file is the operating manual, and it is deliberately short. The rest lives 
 | `docs/ci.md` | the workflows, the scheduler, the credentials |
 | `docs/i18n.md` | what pairs a post with its translation, what the i18n guard enforces, what a third language would cost |
 | `docs/design.md` | the visual direction, font and icon shortlists, open questions |
-| `docs/theming.md` | the long version of `docs/design.md`, everything tried and thrown away, interactive at `/theme-lab/` |
+| `docs/theming.md` | the long version of `docs/design.md`, everything tried and thrown away, interactive at `/theme-lab-arquivo/` |
 | `docs/seo.md` | what the build generates on its own, and the one thing left to decide |
 | `docs/translation-voice.md` | how the translation agent is told to write in English |
 | `docs/decisions-log.md` | what was decided, and the reasoning. In English, since these are settled |
