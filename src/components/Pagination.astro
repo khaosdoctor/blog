@@ -1,6 +1,7 @@
 ---
 import type { Page } from 'astro'
 import { t, type Locale } from '../i18n/ui'
+import { LIST_PAGE_SIZE } from '../lib/posts'
 
 /**
  * The list's own page nav, at the bottom of every archive, section and tag
@@ -101,71 +102,140 @@ function paginationSlots(count: number, current: number): Slot[] {
 }
 
 const slots = paginationSlots(page.lastPage, page.currentPage)
+
+// The size choices offered beside the pagination. LIST_PAGE_SIZE (10) is the
+// only one actually built: the other three work by having page-size.ts fetch
+// and merge further pages built at that same size, which is why it is read
+// off the nav's own data-built-page-size attribute below rather than
+// duplicated as a second literal in that script.
+const PAGE_SIZES = [10, 20, 50, 100]
 ---
 
 {
   page.lastPage > 1 && (
-    <nav class="pagination" aria-label={t(locale, 'pagination')}>
-      {page.url.prev ? (
-        <a class="pg-btn" href={page.url.prev} rel="prev" aria-label={t(locale, 'paginationPrev')}>
-          <span class="pg-glyph" aria-hidden="true">
-            {'<<'}
+    <nav
+      class="pagination"
+      aria-label={t(locale, 'pagination')}
+      data-base-path={basePath}
+      data-current-page={page.currentPage}
+      data-last-page={page.lastPage}
+      data-built-page-size={LIST_PAGE_SIZE}
+    >
+      {/* DOM order matches the grid's own left-to-right reading order
+         (empty first column, this cluster centred in the second, the size
+         control end-aligned in the third below), so Tab visits things in
+         the same order a sighted reader's eye would, rather than jumping to
+         the right-hand control before the centred page numbers. */}
+      <div class="pg-controls">
+        {page.url.prev ? (
+          <a class="pg-btn" href={page.url.prev} rel="prev" aria-label={t(locale, 'paginationPrev')}>
+            <span class="pg-glyph" aria-hidden="true">
+              {'<<'}
+            </span>
+          </a>
+        ) : (
+          <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationPrev')}>
+            <span class="pg-glyph" aria-hidden="true">
+              {'<<'}
+            </span>
           </span>
-        </a>
-      ) : (
-        <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationPrev')}>
-          <span class="pg-glyph" aria-hidden="true">
-            {'<<'}
-          </span>
-        </span>
-      )}
-      <ol class="numbers">
-        {slots.map((slot) =>
-          slot === 'ellipsis' ? (
-            <li aria-hidden="true">
-              <span class="pg-ellipsis">…</span>
-            </li>
-          ) : (
-            <li>
-              {slot === page.currentPage ? (
-                <span class="pg-btn pg-current" aria-current="page">
-                  <span class="pg-glyph">{slot}</span>
-                </span>
-              ) : (
-                <a class="pg-btn" href={hrefFor(slot)} aria-label={t(locale, 'paginationGoTo', slot)}>
-                  <span class="pg-glyph">{slot}</span>
-                </a>
-              )}
-            </li>
-          )
         )}
-      </ol>
-      {page.url.next ? (
-        <a class="pg-btn" href={page.url.next} rel="next" aria-label={t(locale, 'paginationNext')}>
-          <span class="pg-glyph" aria-hidden="true">
-            {'>>'}
+        <ol class="numbers">
+          {slots.map((slot) =>
+            slot === 'ellipsis' ? (
+              <li aria-hidden="true">
+                <span class="pg-ellipsis">…</span>
+              </li>
+            ) : (
+              <li>
+                {slot === page.currentPage ? (
+                  <span class="pg-btn pg-current" aria-current="page">
+                    <span class="pg-glyph">{slot}</span>
+                  </span>
+                ) : (
+                  <a class="pg-btn" href={hrefFor(slot)} aria-label={t(locale, 'paginationGoTo', slot)}>
+                    <span class="pg-glyph">{slot}</span>
+                  </a>
+                )}
+              </li>
+            )
+          )}
+        </ol>
+        {page.url.next ? (
+          <a class="pg-btn" href={page.url.next} rel="next" aria-label={t(locale, 'paginationNext')}>
+            <span class="pg-glyph" aria-hidden="true">
+              {'>>'}
+            </span>
+          </a>
+        ) : (
+          <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationNext')}>
+            <span class="pg-glyph" aria-hidden="true">
+              {'>>'}
+            </span>
           </span>
-        </a>
-      ) : (
-        <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationNext')}>
-          <span class="pg-glyph" aria-hidden="true">
-            {'>>'}
-          </span>
-        </span>
-      )}
+        )}
+      </div>
+      {/* Its own grid cell, end-aligned past the cluster above (see
+         `.pagination`'s own comment on the three-column grid this row is
+         now): the cluster stays optically centred in the row regardless of
+         how wide this control's own label gets.
+
+         Same family as ThemeToggle.astro/SettingsPanel.astro's own icon
+         buttons, not a native <select>: a native listbox draws its open
+         list with the OS's own chrome, which cannot take the double ANSI
+         rule, the pixel face or the aria-current marking every other menu
+         on this site wears. Hidden until page-size.ts confirms it can run,
+         the same reason those two start hidden: there is no server-side way
+         to change how many posts a static build already put on this page,
+         so a reader with JS off gets the built LIST_PAGE_SIZE and no
+         control offering a choice that could not do anything for them,
+         rather than a dead or misleading one. */}
+      <div class="pg-size" hidden>
+        <button
+          type="button"
+          class="pg-size-open"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="pg-size-menu"
+          data-template={t(locale, 'pageSizeCurrent')}
+        >
+          <span class="pg-size-open-label">{t(locale, 'pageSizeCurrent', LIST_PAGE_SIZE)}</span>
+        </button>
+        <div id="pg-size-menu" class="pg-size-menu" aria-label={t(locale, 'pageSizeLabel')} hidden>
+          {PAGE_SIZES.map((size) => (
+            <button type="button" class="pg-size-option" data-value={size} aria-current={size === LIST_PAGE_SIZE ? 'true' : 'false'}>
+              {size}
+            </button>
+          ))}
+        </div>
+      </div>
     </nav>
   )
 }
 
+<script>
+  import '../scripts/page-size'
+</script>
+
 <style>
+  /*
+   * A three-column grid, empty first cell, the prev/numbers/next cluster
+   * centred in the second, `.pg-size` end-aligned in the third: the middle
+   * cell's own width is only ever its content (`auto`), so its centre is
+   * the row's true centre regardless of what the third cell measures,
+   * rather than a plain flex row where a wide trailing control pushes the
+   * centred group off-centre by half its own width. `minmax(0, 1fr)` on the
+   * outer two, not a bare `1fr`, is what keeps that true even if `.pg-size`
+   * ever grows wider than the empty column would otherwise be: a bare `1fr`
+   * track cannot shrink past its own content's width, so a wide third
+   * column would out-grow the empty first one and drag the middle cell
+   * along with it; `minmax(0, …)` lets the flexible share alone decide each
+   * outer column's width instead.
+   */
   .pagination {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    /* Centred in its own row rather than aligned to the start: the controls
-       are a small cluster in a box as wide as the list above, and left-aligned
-       they read as the last row of that list instead of as its own thing. */
-    justify-content: center;
     margin-block-start: 2.5rem;
     padding-block-start: 1.5rem;
     /*
@@ -199,6 +269,180 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
       margin-inline-start: 50%;
       transform: translateX(calc(var(--chrome-width) / -2));
     }
+  }
+
+  /*
+   * Narrow enough that the grid's three columns crowd rather than help: a
+   * plain centred column instead, the cluster first and the size control
+   * under it (`order`, not source order, decides that: see the markup's own
+   * comment on why the cluster is written first in the document either
+   * way), rather than the control stranding itself alone on the row's own
+   * first line above the numbers the way a naive `flex-wrap` on the grid's
+   * row would have left it.
+   */
+  @media (max-width: 32rem) {
+    .pagination {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .pg-controls {
+      order: 1;
+    }
+
+    .pg-size {
+      order: 2;
+      margin-block-start: 0.75rem;
+    }
+  }
+
+  .pg-controls {
+    grid-column: 2;
+    justify-self: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .pg-size {
+    grid-column: 3;
+    justify-self: end;
+    position: relative;
+    margin-inline-start: 1rem;
+  }
+
+  /*
+   * Author CSS beats the UA sheet's `[hidden] { display: none }` regardless
+   * of specificity, so `display` only ever applies on the `:not([hidden])`
+   * state: a reader with JS off, who never gets past this wrapper's own
+   * `hidden`, would otherwise see a dead control anyway. Same rule
+   * ThemeToggle.astro's own `.theme-toggle:not([hidden])` carries.
+   */
+  .pg-size:not([hidden]) {
+    display: inline-flex;
+  }
+
+  /*
+   * The trigger, same footprint as every other icon button on the site
+   * (ThemeToggle.astro's `.tt-open`, SettingsPanel.astro's `.sp-open`): the
+   * chip and border move to `::before` at `--icon-btn-chip` so the visible
+   * square can be smaller than the real `--icon-btn-hit` box a pointer has
+   * to reach, and the border reads `--accent-day` for the reason those two
+   * files already measured (clears the 3:1 a non-text border needs against
+   * every one of the four day colours). Unlike those two this button keeps
+   * its own visible text (the current size), so it is not sized square:
+   * `min-inline-size` only floors it at the same hit target, and padding
+   * gives the number room past that floor.
+   */
+  .pg-size-open {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    padding-inline: 0.6rem;
+    cursor: pointer;
+  }
+
+  .pg-size-open::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: var(--btn-border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    pointer-events: none;
+  }
+
+  .pg-size-open span {
+    position: relative;
+  }
+
+  .pg-size-open:hover,
+  .pg-size-open:focus-visible,
+  .pg-size-open[aria-expanded='true'] {
+    color: var(--accent);
+  }
+
+  .pg-size-open:hover::before,
+  .pg-size-open:focus-visible::before,
+  .pg-size-open[aria-expanded='true']::before {
+    border-color: var(--accent);
+  }
+
+  .pg-size-open:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /*
+   * Positioned by page-size.ts, which sets top/left in pixels once it knows
+   * where the trigger is: same `place()` mechanism, same reason, as
+   * ThemeToggle.astro's own `.tt-menu` (see that file's own comment on why
+   * `display` never belongs here). `--font-display`, not `--font-mono`: this
+   * row already reads Departure Mono (`.pagination` above), and this menu
+   * is that row's own popup rather than the settings panel's, so it keeps
+   * that row's face instead of the settings menu's.
+   */
+  .pg-size-menu {
+    position: fixed;
+    z-index: 60;
+    margin: 0;
+    min-inline-size: 6rem;
+    border: 3px double var(--fg);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 0.3rem 0;
+    font-family: var(--font-display);
+  }
+
+  .pg-size-menu:popover-open,
+  .pg-size-menu:not([popover]):not([hidden]) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pg-size-option {
+    display: flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    border: 0;
+    border-block-end: var(--border) solid var(--rule);
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    text-align: start;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+  }
+
+  .pg-size-option:last-child {
+    border-block-end: 0;
+  }
+
+  .pg-size-option:hover,
+  .pg-size-option:focus-visible {
+    background: var(--rule);
+  }
+
+  .pg-size-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  /* The current choice, same convention as ThemeToggle.astro's own
+     `.tt-option[aria-current='true']`. */
+  .pg-size-option[aria-current='true'] {
+    color: var(--accent);
+    font-weight: bold;
   }
 
   .numbers {

@@ -138,6 +138,8 @@ type UIKey =
   | 'paginationPrev'
   | 'paginationNext'
   | 'paginationGoTo'
+  | 'pageSizeLabel'
+  | 'pageSizeCurrent'
   | 'imageGone'
   | 'imageGoneAlt'
   | 'imageGoneUnknownHost'
@@ -293,6 +295,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     paginationPrev: 'Página anterior',
     paginationNext: 'Próxima página',
     paginationGoTo: 'ir para a página %d',
+    pageSizeLabel: 'Posts por página',
+    pageSizeCurrent: 'Posts por página: %d',
     imageGone: 'Esta imagem não existe mais',
     imageGoneAlt: 'Imagem indisponível, hospedada em %s',
     imageGoneUnknownHost: 'um host que não a serve mais',
@@ -436,6 +440,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     paginationPrev: 'Previous page',
     paginationNext: 'Next page',
     paginationGoTo: 'go to page %d',
+    pageSizeLabel: 'Posts per page',
+    pageSizeCurrent: 'Posts per page: %d',
     imageGone: 'This image is gone',
     imageGoneAlt: 'Image unavailable, hosted at %s',
     imageGoneUnknownHost: 'a host that no longer serves it',
