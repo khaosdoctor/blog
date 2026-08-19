@@ -283,10 +283,26 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     box-sizing: border-box;
   }
 
+  /*
+   * The page ground lives on <html>, not on <body>, and that is load-bearing
+   * rather than a style choice. ConwayField.astro draws a fixed canvas at
+   * z-index: -1 so the header, main and footer paint above it as ordinary
+   * in-flow boxes. But CSS paints a stacking context in a fixed order, and
+   * step 2 is negative-z-index children while step 3 is the backgrounds of
+   * non-positioned block descendants. <body> is one of those descendants, so
+   * an opaque background on it paints over the canvas: the field was running
+   * the whole time and simply invisible. On <html> the background propagates
+   * to the canvas surface and is painted before step 2, so the field shows and
+   * the ground still covers the viewport past the document's own height.
+   */
+  html {
+    background: var(--bg);
+  }
+
   body {
     margin: 0;
     padding: 0 var(--gutter);
-    background: var(--bg);
+    background: transparent;
     color: var(--fg);
     font-family: var(--font-body);
     font-size: var(--text-base);
