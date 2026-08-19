@@ -26,6 +26,45 @@ export function labelForMark(id: string): string {
   return MARK_CANDIDATES.find((candidate) => candidate.id === id)?.name ?? id
 }
 
+/**
+ * Um caractere por célula tem um piso de tamanho que um vetor não tem: abaixo
+ * dele o glifo encolhe para uma mancha, porque a fonte para de conseguir
+ * desenhar o traço em vez de só ficar menor. O piso aqui é o tamanho total da
+ * marca (px por lado) necessário para cada célula da grade ter px suficiente
+ * para o olho distinguir o glifo, medido pela distinção mais fina que aquele
+ * candidato pede: um contorno de caixa precisa diferenciar canto de linha
+ * reta, um retrato em ramp precisa diferenciar oito níveis de densidade, um
+ * "+" sozinho ou um bloco cheio não precisam de quase nada disso.
+ *
+ * `glitch` é vetor (SVG de verdade), então a silhueta em si não tem este
+ * piso; o número aqui é o tamanho abaixo do qual a franja cromática (dois
+ * pixels de deslocamento num viewBox de 64 unidades) vira sub-pixel e some,
+ * o que faz o candidato voltar a ler como a marca antiga, plana e colorida.
+ */
+export const MARK_MIN_PX: Record<MarkCandidateId, number> = {
+  fio: 72, // grade 8x8, ~9px/célula: precisa diferenciar canto de linha reta
+  lattice: 64, // grade 8x8, ~8px/célula: um "+" sozinho não tem forma ambígua
+  mesh: 80, // grade 8x8 mais dois anéis de SVG por cima, ~10px/célula
+  ramp: 88, // grade 8x8, ~11px/célula: oito níveis de densidade para distinguir
+  dither: 40, // grade 4x4, ~10px/célula, só duas densidades
+  glitch: 32, // vetor: a silhueta lê bem menor, mas a franja de 2 unidades vira sub-pixel abaixo disto
+}
+
+/** Lado da grade de cada candidato, só para o relatório: `glitch` é vetor, não tem grade. */
+export const MARK_GRID_SIDE: Record<MarkCandidateId, number | null> = {
+  fio: 8,
+  lattice: 8,
+  mesh: 8,
+  ramp: 8,
+  dither: 4,
+  glitch: null,
+}
+
+/** O tamanho pedido, nunca menor que o piso de legibilidade do candidato atual. */
+export function effectiveMarkPx(candidate: MarkCandidateId, desiredPx: number): number {
+  return Math.max(desiredPx, MARK_MIN_PX[candidate])
+}
+
 /** `R` a haste do L, `G`/`Y`/`B` os três acentos, `.` o vão entre eles. */
 export const SHAPE: string[] = ['RR.GGGGG', 'RR.GGGGG', 'RR.GGGGG', 'RR......', 'RRRRR.YY', 'RRRRR.YY', '........', '.BBBBBBB']
 

@@ -7,18 +7,24 @@
  * instead of the two benches quietly disagreeing on what the mark looks like.
  * Always `aria-hidden`: the accessible name lives on the link that wraps it,
  * in either bench, never in this markup.
+ *
+ * `sizePx` is a plain pixel number, never an `em`: a character grid has a
+ * legibility floor a smooth vector does not, so the size cannot ride the
+ * surrounding text's font size. Both callers compute it with
+ * `effectiveMarkPx()` from `logoMarks.ts`, which never lets it drop under the
+ * candidate's own `MARK_MIN_PX`.
  */
 import { computed } from 'vue'
 import { MARK_RECTS, ROLE_TOKEN, SHAPE, ditherBlockAt, rampGlyph, roleAt, wireGlyph, type MarkCandidateId } from './logoMarks'
 
-withDefaults(defineProps<{ candidate: MarkCandidateId; size?: string }>(), { size: '1.5em' })
+defineProps<{ candidate: MarkCandidateId; sizePx: number }>()
 
 const rows = computed(() => SHAPE.map((row, r) => [...row].map((_, c) => ({ r, c }))))
 const ditherRows = computed(() => Array.from({ length: 4 }, (_, r) => Array.from({ length: 4 }, (_, c) => ditherBlockAt(r, c))))
 </script>
 
 <template>
-  <span :class="$style.mark" :style="{ '--mark-size': size }" aria-hidden="true">
+  <span :class="$style.mark" :style="{ '--mark-size': `${sizePx}px` }" aria-hidden="true">
     <span v-if="candidate === 'fio'" :class="[$style.grid, $style.fio]">
       <span v-for="row in rows" :key="row[0].r" :class="$style.row">
         <span v-for="cell in row" :key="cell.c" :class="$style.cell">{{ wireGlyph(cell.r, cell.c) }}</span>
@@ -85,7 +91,7 @@ const ditherRows = computed(() => Array.from({ length: 4 }, (_, r) => Array.from
 
 <style module>
 .mark {
-  --mark-size: 1.5em;
+  --mark-size: 72px;
   position: relative;
   display: inline-flex;
   inline-size: var(--mark-size);
