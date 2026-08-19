@@ -57,7 +57,9 @@ O quarto é um sólido em wireframe desenhado em "+" numa grade, no espírito do
 
 O quinto volta pra janela DOS do primeiro e troca o vazio de dentro pelo fogo do Doom de verdade: uma borda pega fogo, e cada célula acima herda o valor de baixo menos uma queda. A intensidade quantiza em seis tons, como a paleta de uma máquina antiga, as bandas mais frias saem ocas, e cada célula ganha opacidade própria, caindo do lado quente pro frio.
 
-O sexto é o candidato de ondas que já existia antes do fogo, de volta como candidato próprio: mesma moldura, mesmo preto, o campo de senos do plasma arquivado por baixo, quantizado em poucos tons em vez do gradiente contínuo. Sem célula oca e sem opacidade por célula: essas duas ficaram só no fogo, pros dois não virarem a mesma leitura.
+O sexto é o candidato de ondas que já existia antes do fogo, de volta como candidato próprio: mesma moldura, mesmo preto, o campo de senos do plasma arquivado por baixo, recortado por dentro da moldura interna igual ao fogo.
+
+A densidade dele não é opacidade: são os quatro caracteres de sombreado do CP437 (`░▒▓█`), o jeito que aquelas máquinas faziam gradiente, porque não tinham canal alfa nenhum. A fonte da capa foi aberta e conferida glifo por glifo antes: a PxPlus IBM VGA8 tem os quatro, então a imagem gerada não sai com quadrado vazio. É isso que separa o quinto do sexto agora: o fogo varia alfa de verdade, as ondas variam densidade de glifo. A célula oca continua só no fogo.
 
 Nenhuma cor, campo ou fogo aqui vem de `Math.random()`: tudo sai do hash do slug. O knob de semente embaralha a marca (também branco e branco apagado agora), o sólido, o fogo e as ondas. O título é sempre branco fixo; a mistura em `oklab` agora pinta bordas, chapéu e células de campo. A alegação de que verde e amarelo não fechavam 4.5:1 caiu: era sobre o título, que não deriva mais da marca.
 
