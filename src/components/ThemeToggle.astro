@@ -125,8 +125,19 @@ const { locale } = Astro.props
    * SVG namespace. Without this the attribute is inert and all three glyphs
    * draw at once.
    */
+  /*
+   * position: relative only so the glyph paints above the ::before chip below.
+   * That chip is absolutely positioned and fills itself with --bg, and an
+   * absolutely positioned pseudo-element paints over a non-positioned sibling
+   * whatever the source order says, so the opaque square covered the icon and
+   * the button rendered as an empty outlined box. Giving the glyph a position
+   * puts it in the same painting group and later in it. No z-index: the two
+   * are siblings in one stacking context, so tree order decides once both are
+   * positioned, and a z-index here would only invite a fight with the menu.
+   */
   .tt-icon:not([hidden]) {
     display: block;
+    position: relative;
   }
 
   .tt-icon[hidden] {

@@ -119,6 +119,13 @@ const { locale } = Astro.props
     display: none;
   }
 
+  /* Same reason as ThemeToggle's .tt-icon: the ::before chip is absolutely
+     positioned and opaque, so it paints over an unpositioned glyph and leaves
+     an empty outlined square. */
+  .sp-icon {
+    position: relative;
+  }
+
   /*
    * Identical footprint to ThemeToggle's .tt-open, both reading the same
    * three tokens (theme.css): --icon-btn-hit is the real hit target, the
