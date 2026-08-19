@@ -22,11 +22,22 @@ import { formatCoverByline } from '../lib/cover'
  * `<h1>`, the `<time>` and its dot, and the byline paragraph) are hidden the
  * sr-only way, not removed: still in the accessibility tree, still what a
  * screen reader, the RSS reader, the social scraper and search all read,
- * just not painted twice on screen. The category chip and the reading time
- * are not part of that swap: the cover's own kicker only echoes the
- * category as decoration, it is not the same interactive link, and reading
- * time is not drawn on the cover at all, so both stay visible exactly as
- * they are today, JS or not.
+ * just not painted twice on screen.
+ *
+ * The category chip and the reading time are the exception, and the empty
+ * `.cover-hero-meta` slot below is why it exists. The card's last line is
+ * those two, but the chip is a real link to the category page and the reading
+ * time is a real hover control with its own popup (ReadingTime.astro,
+ * scripts/reading-time-hover.ts). Drawing them as SVG text and hiding the
+ * originals would leave a picture of a link and a picture of a control, so
+ * instead the SVG leaves that slot empty in the browser (`drawMeta: false`)
+ * and cover-hero.ts moves the page's own `.meta` row into this slot, over the
+ * card, at the coordinates `coverOverlay` reports. Nothing is copied and
+ * nothing is redrawn: it is the same paragraph, the same anchor, the same
+ * button, only somewhere else on the page. The one cost is reading order,
+ * since the row now comes before the `<h1>` in the DOM rather than after it,
+ * which reads as a dateline over a headline and is the ordinary way round for
+ * a card like this.
  */
 interface Props {
   slug: string
@@ -43,6 +54,10 @@ const byline = formatCoverByline(pubDate, lang, authorName)
 
 <div class="cover-hero" data-cover-hero data-slug={slug} data-title={title} data-category={category} data-byline={byline} hidden>
   <div class="cover-hero-canvas" aria-hidden="true"></div>
+  {/* Written here, empty, rather than created by the script: Astro's scoping
+      attribute is only applied to elements that exist in this template, so a
+      slot the script invented would match none of the rules below. */}
+  <div class="cover-hero-meta"></div>
 </div>
 
 <script>
@@ -51,9 +66,15 @@ const byline = formatCoverByline(pubDate, lang, authorName)
 
 <style>
   .cover-hero {
+    position: relative;
     aspect-ratio: 1200 / 630;
     width: 100%;
     margin-block-end: 2.5rem;
+    /* A container, so the overlay below can be measured in the card's own
+       1200x630 coordinates: 1cqw is a hundredth of the card's rendered width,
+       so `n * (100cqw / 1200)` is exactly SVG unit n, at every viewport, with
+       nothing to recompute on resize. */
+    container-type: inline-size;
     /* The SVG this fills carries its own black ground and frame, so there is
        nothing to paint here before the script runs: `hidden` alone (no
        fallback background) keeps a JS-off reader from ever seeing an empty
@@ -64,6 +85,63 @@ const byline = formatCoverByline(pubDate, lang, authorName)
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  /*
+   * Where the card's own meta line would have been drawn. The three numbers
+   * are set by cover-hero.ts from `coverOverlay`, the same layout the drawing
+   * reads, and the fallbacks are only there so an empty slot cannot collapse
+   * to the card's top-left corner if the script ever fails between filling the
+   * canvas and setting them.
+   */
+  .cover-hero-meta {
+    position: absolute;
+    inset-inline-start: calc(var(--cover-meta-x, 160) * (100cqw / 1200));
+    inset-block-start: calc(var(--cover-meta-y, 470) * (100cqw / 1200));
+    transform: translateY(-50%);
+    font-size: calc(var(--cover-meta-size, 20) * (100cqw / 1200));
+    /*
+     * The card paints its own black ground in both page themes, so every
+     * `light-dark()` reached from in here has to take its dark branch,
+     * whichever ground the rest of the page is on. Narrowing `color-scheme` is
+     * the whole mechanism (theme.css says so where it narrows the same
+     * property per theme), and it settles all of them at once: `--bg` for the
+     * chip's and the trigger's inverted hover text, `--brand-*` for the day
+     * accent that fills the trigger, and the reading-time popup's own
+     * ink-on-paper pair.
+     */
+    color-scheme: dark;
+  }
+
+  /*
+   * The moved row. `:global()` because it is the post page's own `.meta`
+   * paragraph, another component's scope, and the two class ancestors give
+   * these rules more weight than that page's scoped `.meta` rule so the row's
+   * page margins and its screen-sized text give way to the card's.
+   */
+  .cover-hero .cover-hero-meta :global(.meta) {
+    margin: 0;
+    color: var(--cover-meta-ink);
+    font-family: var(--font-display);
+    font-size: 1em;
+  }
+
+  /*
+   * The chip keeps chips.css's own look, its own double rule and its own
+   * hashed colour; only the three lengths that were sized for page text are
+   * re-expressed in `em` so the whole chip scales with the card instead of
+   * growing fat on a phone. `--chip-ink` is handed over as a literal hex by
+   * cover-hero.ts, from the same `coverChipInk` the rasteriser draws with, so
+   * the chip on the page and the chip on the og:image are the same colour by
+   * construction rather than by two derivations agreeing.
+   */
+  .cover-hero .cover-hero-meta :global(.chip) {
+    --chip-ink: var(--cover-chip-ink);
+
+    padding: 0.25em 0.7em;
+    border-width: 0.3em;
+    font-family: var(--font-display);
+    font-size: 1em;
   }
 
   /*

@@ -13,6 +13,7 @@ import LangBanner from '../../components/LangBanner.astro'
 import MarginNote from '../../components/MarginNote.astro'
 import MissingImage from '../../components/MissingImage.astro'
 import RawEmbed from '../../components/RawEmbed.astro'
+import ReadingTime from '../../components/ReadingTime.astro'
 import Sidenote from '../../components/Sidenote.astro'
 import SpeakerDeck from '../../components/SpeakerDeck.astro'
 import Spotify from '../../components/Spotify.astro'
@@ -66,7 +67,13 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths
 
 const { post, sourcePath, alternates: folderAlternates } = Astro.props
-const { Content } = await render(post)
+// Same render() the Portuguese page makes, read for the same two things: the
+// content, and the exact reading time remark-reading-time.mjs computed for it.
+// This page went without one until the cover's meta line started carrying the
+// reading time, at which point an English post would have drawn a chip and
+// nothing beside it.
+const { Content, remarkPluginFrontmatter } = await render(post)
+const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
 const alternates = folderAlternates.map(({ lang, path }) => ({
   lang,
   href: new URL(path, Astro.site).href,
@@ -116,6 +123,14 @@ const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
       >
         {post.data.category}
       </a>
+      {
+        readingTime !== undefined && (
+          <>
+            <span aria-hidden="true">·</span>
+            <ReadingTime minutes={readingTime} locale="en" />
+          </>
+        )
+      }
     </p>
     <Authors authors={post.data.authors} locale={'en'} />
     {
