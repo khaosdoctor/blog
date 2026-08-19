@@ -42,11 +42,11 @@ jobs:
     steps:
       # Full history and tags: the footer version is the last release tag plus
       # the number of commits since it, and a shallow checkout can see neither.
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -58,7 +58,7 @@ jobs:
       # actions/cache would save a brand new entry each time and never reclaim
       # the last one, so a manual prune runs after save below.
       - id: astro-cache
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             node_modules/.astro
@@ -116,7 +116,7 @@ jobs:
       # and manual dispatches build and check but stop here. One day of
       # retention is enough since the only consumer is deploy-pages, later in
       # this same run.
-      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
         with:
           path: dist
@@ -125,7 +125,7 @@ jobs:
       # Always attempt the save: a hit on the exact key above already skips
       # this (no-op, not an error), and, like the pre-split actions/cache,
       # this runs even if an earlier step failed.
-      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always()
         with:
           path: |
