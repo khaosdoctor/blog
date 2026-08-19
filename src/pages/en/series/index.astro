@@ -1,0 +1,80 @@
+---
+// The English half of the series index (see src/pages/series/index.astro for
+// the Portuguese one, which this reuses data from).
+//
+// getSeries() only ever sees Portuguese posts (getPublishedPosts() defaults
+// to SOURCE_LANG), and the per-series page itself (src/pages/series/[name].astro)
+// is source-only: there is no /en/series/<name>/ route. So this page shows the
+// same series as the Portuguese index, says so (sourceLanguageOnlyNotice), and
+// links to the same bare, un-prefixed /series/<name>/ URLs rather than a
+// localePath()-prefixed path that would 404.
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { getSeries, seriesTitle } from '../../../lib/taxonomy'
+import { HREFLANG, t } from '../../../i18n/ui'
+
+const series = [...(await getSeries()).entries()]
+  .filter(([, posts]) => posts.length > 1)
+  .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), count: posts.length }))
+  .sort((a, b) => a.title.localeCompare(b.title, 'en'))
+
+const alternates = [
+  { lang: HREFLANG.pt, href: new URL('/series/', Astro.site).href },
+  { lang: HREFLANG.en, href: new URL('/en/series/', Astro.site).href },
+]
+---
+
+<BaseLayout
+  title={`${t('en', 'allSeries')} | Lucas Santos`}
+  description={t('en', 'seriesIntro')}
+  lang="en"
+  alternates={alternates}
+>
+  <h1>{t('en', 'allSeries')}</h1>
+  <p class="intro">{t('en', 'seriesIntro')}</p>
+  <p class="notice">{t('en', 'sourceLanguageOnlyNotice')}</p>
+  <ul class="series-list">
+    {
+      series.map((entry) => (
+        <li>
+          <a href={`/series/${entry.slug}/`}>{entry.title}</a>
+          <span class="count">
+            {entry.count} {t('en', 'articles')}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-inline-size: var(--measure);
+    color: var(--muted);
+  }
+
+  .notice {
+    max-inline-size: var(--measure);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .series-list {
+    margin-block-start: 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .series-list li {
+    display: flex;
+    align-items: baseline;
+    padding-block: 0.4rem;
+    border-block-end: var(--border) solid color-mix(in oklab, var(--muted) 45%, transparent);
+  }
+
+  .count {
+    margin-inline-start: 0.5rem;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.8rem;
+  }
+</style>

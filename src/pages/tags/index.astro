@@ -1,0 +1,45 @@
+---
+// The tag index: every tag on the site, as a chip, linking to its own
+// /tags/<tag>/ listing (src/pages/tags/[tag]/[...page].astro). Both that page
+// and getTags() (src/lib/taxonomy.ts) only ever see Portuguese posts
+// (getPublishedPosts() defaults to SOURCE_LANG), so this page is the same:
+// see src/pages/en/tags/index.astro for the English half, which reuses this
+// same data and says so.
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { chipColor, getTags, slugify } from '../../lib/taxonomy'
+import { HREFLANG, t } from '../../i18n/ui'
+
+const tags = [...(await getTags()).entries()].sort(([a], [b]) => a.localeCompare(b, 'pt-BR'))
+
+const alternates = [
+  { lang: HREFLANG.pt, href: new URL('/tags/', Astro.site).href },
+  { lang: HREFLANG.en, href: new URL('/en/tags/', Astro.site).href },
+]
+---
+
+<BaseLayout title={`${t('pt', 'tags')} | Lucas Santos`} description={t('pt', 'tagsIntro')} alternates={alternates}>
+  <h1>{t('pt', 'tags')}</h1>
+  <p class="intro">{t('pt', 'tagsIntro')}</p>
+  <ul class="chips">
+    {
+      tags.map(([tag, posts]) => (
+        <li>
+          <a href={`/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}`}>
+            {tag} ({posts.length})
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-inline-size: var(--measure);
+    color: var(--muted);
+  }
+
+  .chips {
+    margin-block-start: 1.5rem;
+  }
+</style>

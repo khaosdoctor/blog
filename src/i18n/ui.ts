@@ -36,6 +36,7 @@ type UIKey =
   | 'publishedOn'
   | 'updatedOn'
   | 'readingTime'
+  | 'finishReadingAt'
   | 'machineTranslated'
   | 'readOriginal'
   | 'readOriginals'
@@ -103,6 +104,10 @@ type UIKey =
   | 'tags'
   | 'tag'
   | 'tagDescription'
+  | 'tagsIntro'
+  | 'allSeries'
+  | 'seriesIntro'
+  | 'sourceLanguageOnlyNotice'
   | 'sections'
   | 'sectionDescription'
   | 'primaryNav'
@@ -168,6 +173,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     publishedOn: 'Publicado em',
     updatedOn: 'Atualizado em',
     readingTime: 'minutos',
+    finishReadingAt: 'termina às %s',
     machineTranslated: 'Esta página foi traduzida automaticamente.',
     readOriginal: 'Ler original',
     readOriginals: 'Ler os originais',
@@ -237,6 +243,11 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     tags: 'Tags',
     tag: 'Tag',
     tagDescription: 'Artigos marcados com %s.',
+    tagsIntro: 'Todas as tags usadas nos artigos, com quantos artigos cada uma tem.',
+    allSeries: 'Séries',
+    seriesIntro: 'Todas as séries de artigos publicadas.',
+    sourceLanguageOnlyNotice:
+      'Estas ainda existem só em português: não há um índice de tags ou séries em inglês, então os links abaixo levam a páginas em português.',
     sections: 'Seções',
     sectionDescription: 'Todos os artigos da seção %s.',
     primaryNav: 'Navegação principal',
@@ -307,6 +318,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     publishedOn: 'Published on',
     updatedOn: 'Updated on',
     readingTime: 'minutes',
+    finishReadingAt: 'finish at %s',
     machineTranslated: 'This page was machine translated.',
     readOriginal: 'Read original',
     readOriginals: 'Read the originals',
@@ -376,6 +388,11 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     tags: 'Tags',
     tag: 'Tag',
     tagDescription: 'Articles tagged %s.',
+    tagsIntro: 'Every tag used across the articles, with how many articles carry each one.',
+    allSeries: 'Series',
+    seriesIntro: 'Every series of articles published so far.',
+    sourceLanguageOnlyNotice:
+      'These still exist in Portuguese only: there is no English tag or series index yet, so the links below lead to Portuguese-language pages.',
     sections: 'Sections',
     sectionDescription: 'Every article in the %s section.',
     primaryNav: 'Main navigation',

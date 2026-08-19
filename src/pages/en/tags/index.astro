@@ -1,0 +1,61 @@
+---
+// The English half of the tag index (see src/pages/tags/index.astro for the
+// Portuguese one, which this reuses data from).
+//
+// getTags() only ever sees Portuguese posts (getPublishedPosts() defaults to
+// SOURCE_LANG in src/lib/posts.ts), and the per-tag page itself
+// (src/pages/tags/[tag]/[...page].astro) is source-only: there is no
+// /en/tags/<tag>/ route. So this page shows the same tags as the Portuguese
+// index, says so (sourceLanguageOnlyNotice), and links to the same bare,
+// un-prefixed /tags/<tag>/ URLs rather than a localePath()-prefixed path that
+// would 404.
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { chipColor, getTags, slugify } from '../../../lib/taxonomy'
+import { HREFLANG, t } from '../../../i18n/ui'
+
+const tags = [...(await getTags()).entries()].sort(([a], [b]) => a.localeCompare(b, 'en'))
+
+const alternates = [
+  { lang: HREFLANG.pt, href: new URL('/tags/', Astro.site).href },
+  { lang: HREFLANG.en, href: new URL('/en/tags/', Astro.site).href },
+]
+---
+
+<BaseLayout
+  title={`${t('en', 'tags')} | Lucas Santos`}
+  description={t('en', 'tagsIntro')}
+  lang="en"
+  alternates={alternates}
+>
+  <h1>{t('en', 'tags')}</h1>
+  <p class="intro">{t('en', 'tagsIntro')}</p>
+  <p class="notice">{t('en', 'sourceLanguageOnlyNotice')}</p>
+  <ul class="chips">
+    {
+      tags.map(([tag, posts]) => (
+        <li>
+          <a href={`/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}`}>
+            {tag} ({posts.length})
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-inline-size: var(--measure);
+    color: var(--muted);
+  }
+
+  .notice {
+    max-inline-size: var(--measure);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .chips {
+    margin-block-start: 1.5rem;
+  }
+</style>
