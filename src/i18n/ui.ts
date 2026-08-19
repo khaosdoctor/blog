@@ -45,6 +45,7 @@ type UIKey =
   | 'noResultsFor'
   | 'searching'
   | 'moreResults'
+  | 'searchResultsFound'
   | 'searchLabel'
   | 'searchPlaceholder'
   | 'searchNoJs'
@@ -82,6 +83,7 @@ type UIKey =
   | 'conwayPause'
   | 'conwayResume'
   | 'conwayReseed'
+  | 'searchShortcutLabel'
   | 'writtenBy'
   | 'readingProgress'
   | 'contents'
@@ -153,6 +155,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     noResultsFor: 'Nenhum resultado para "%s".',
     searching: 'Buscando...',
     moreResults: 'E mais %d resultado(s).',
+    searchResultsFound: '%d resultado(s).',
     searchLabel: 'Buscar no blog',
     searchPlaceholder: 'ex: deno, astro, observabilidade',
     searchNoJs:
@@ -192,6 +195,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwayPause: 'Pausar',
     conwayResume: 'Retomar',
     conwayReseed: 'Semear de novo',
+    searchShortcutLabel: 'Tecla de atalho da busca',
     writtenBy: 'por',
     readingProgress: 'progresso da leitura',
     contents: 'Neste post',
@@ -265,6 +269,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     noResultsFor: 'No results for "%s".',
     searching: 'Searching...',
     moreResults: 'And %d more result(s).',
+    searchResultsFound: '%d result(s).',
     searchLabel: 'Search the blog',
     searchPlaceholder: 'e.g. deno, astro, observability',
     searchNoJs:
@@ -304,6 +309,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwayPause: 'Pause',
     conwayResume: 'Resume',
     conwayReseed: 'Reseed',
+    searchShortcutLabel: 'Search shortcut key',
     writtenBy: 'by',
     readingProgress: 'reading progress',
     contents: 'In this post',
