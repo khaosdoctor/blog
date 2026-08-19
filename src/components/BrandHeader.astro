@@ -164,6 +164,7 @@ const CELLS = markCells()
   .controls {
     display: inline-flex;
     align-items: center;
+    column-gap: 0.5rem;
   }
 
   /*
@@ -187,12 +188,27 @@ const CELLS = markCells()
    * reaches every pair, `.chrome > *` never had this problem, since edge/
    * brand/fill/controls are all written directly in this file's own markup.
    */
+  /*
+   * The container spaces its own children (see `.controls` above), rather than
+   * every child carrying a trailing margin and the last one resetting it. With
+   * margins, NavLinks' own trailing margin on its last link added to this one,
+   * so the run between SOBRE and the switch measured 1.1rem while the run
+   * between the switch and the theme button measured 0.5rem. Uneven, and
+   * invisible from either file on its own. Container spacing cannot be doubled
+   * by what a child does inside itself.
+   */
   .controls > :global(*) {
-    margin-inline-end: 0.5rem;
+    margin-inline-end: 0;
   }
 
-  .controls > :global(*:last-child) {
-    margin-inline-end: 0;
+  /*
+   * The switch and the two icon buttons read as one group, set apart from the
+   * links: they act on the page, where the links navigate away from it. So the
+   * group's own members stay close and the run in front of it is wider, which
+   * is the whole reason this is not one even measure across the row.
+   */
+  .controls :global(.lang-switch) {
+    margin-inline-start: 1.4rem;
   }
 
   /*
@@ -228,7 +244,20 @@ const CELLS = markCells()
     align-items: center;
     color: inherit;
     text-decoration: none;
-    filter: drop-shadow(var(--brand-shadow-offset) var(--brand-shadow-offset) 0 var(--code-shadow-color));
+    /*
+     * Not `--code-shadow-color`, which is `light-dark(#000000, #ffffff)`: that
+     * token is white on the dark page, because a code block's own shadow needs
+     * to read against a dark ground. Behind the brand it drew a white offset
+     * copy around the accent-coloured letters, which is the doubled wordmark
+     * reported three separate times.
+     *
+     * The shadow only ever existed for the light ground, where two of the four
+     * day accents (green 3.28, yellow 3.23) fall under the 4.5:1 text floor and
+     * the mark reads washed out. On the dark ground the same accents measure
+     * 8.03 and 11.25 and need no help. So this draws dark on the light page and
+     * nothing at all on the dark one.
+     */
+    filter: drop-shadow(var(--brand-shadow-offset) var(--brand-shadow-offset) 0 var(--brand-shadow-color));
   }
 
   .brand > .mark {

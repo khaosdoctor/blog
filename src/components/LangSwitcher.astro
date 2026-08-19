@@ -58,6 +58,10 @@ const otherName = other?.name ?? ''
 // destination: see the component comment above for why the fill and the
 // position agree with this instead of pointing onward.
 const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
+// The destination's own code, printed dim in the hollow half so both sides of
+// the switch are legible: the solid square says where you are, the dim half
+// says where the click goes.
+const otherLabel = other?.label ?? ''
 ---
 
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
@@ -72,7 +76,15 @@ const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
        is the 32px hollow frame a reader actually sees, the same drawn-vs-hit
        split every other header control uses. .lang-square is the one solid
        half, carrying the current language's colour and its word together. */}
+    {/*
+      `.lang-other` is first in source order so the solid square paints over it
+      if the two ever overlap. It fills the whole rectangle and centres its own
+      text in the half the square is not on, rather than being positioned per
+      state: one rule, and the `[data-current]` selector below moves it with
+      the square instead of a second set of insets to keep in step.
+    */}
     <span class="lang-rect" aria-hidden="true">
+      <span class="lang-other">{otherLabel}</span>
       <span class="lang-square">{currentLabel}</span>
     </span>
   </a>
@@ -179,5 +191,39 @@ const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
     transform: translateX(100%);
     background: var(--brand-red);
     color: #ffffff;
+  }
+
+  /*
+   * The destination's code, in the hollow half. Same 50% box as the square and
+   * the same font, so the two codes read as one pair at one size rather than
+   * as a label and an afterthought; it just starts on the opposite side and
+   * carries no fill.
+   *
+   * `--muted` rather than a bespoke dim: it is the site's own token for text
+   * that is present but not the point, and it is already measured against both
+   * grounds at 8.30:1 dark and 5.17:1 light, so "dim" here still clears the
+   * 4.5:1 floor rather than being dim enough to fail. The hollow half shows the
+   * page ground through it, which is exactly what those two numbers measure.
+   */
+  .lang-other {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(0%);
+    transition: transform var(--duration) steps(2, jump-none);
+    color: var(--muted);
+    font-family: var(--font-subtitle);
+    font-size: var(--icon-btn-glyph);
+  }
+
+  /* Moves with the square, in the opposite direction, so the two never share a
+     half: on the English page the square takes the right and this takes the
+     left. */
+  .lang-switch[data-current='en'] .lang-other {
+    transform: translateX(-100%);
   }
 </style>
