@@ -79,7 +79,7 @@ const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
   'search.astro': 'per-locale',
   'series/[name].astro': 'per-locale',
   'series/index.astro': 'per-locale',
-  'tags/[tag]/[...page].astro': 'source-only',
+  'tags/[tag]/[...page].astro': 'per-locale',
   'tags/index.astro': 'per-locale',
 }
 

@@ -12,8 +12,25 @@ export async function getCategories(): Promise<Map<string, Post[]>> {
   return byCategory
 }
 
-export async function getTags(): Promise<Map<string, Post[]>> {
-  const posts = await getPublishedPosts()
+/**
+ * Every tag in one language, mapped to the posts carrying it, newest first.
+ *
+ * One language at a time, defaulting to the source one, the same shape
+ * getSeries() takes. A translation repeats its original's `tags:` line byte for
+ * byte (scripts/translate.ts copies the field verbatim, and all 173 translated
+ * pairs under content/blog/ agree today), so the tag string, and with it the
+ * slug slugify() derives from it, is shared across languages: /tags/javascript/
+ * and /en/tags/javascript/ are the same tag, and switching language is the
+ * prefix change it is everywhere else on this site.
+ *
+ * What is not shared is the membership. Each language maps only its own posts,
+ * so an English tag page lists English articles at English URLs, and a tag
+ * whose posts are none of them translated yet (`design`, `escrita` and `meta`
+ * today) has no entry here in English and therefore no English page at all,
+ * the same rule a section with no translated post already follows.
+ */
+export async function getTags(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
+  const posts = await getPublishedPosts(lang)
   const byTag = new Map<string, Post[]>()
   for (const post of posts) {
     for (const tag of post.data.tags) {
