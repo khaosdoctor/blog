@@ -12,6 +12,7 @@ import LabDemo from '../../components/LabDemo.astro'
 import LangBanner from '../../components/LangBanner.astro'
 import MarginNote from '../../components/MarginNote.astro'
 import MissingImage from '../../components/MissingImage.astro'
+import PostToc from '../../components/PostToc.astro'
 import RawEmbed from '../../components/RawEmbed.astro'
 import ReadingTime from '../../components/ReadingTime.astro'
 import Sidenote from '../../components/Sidenote.astro'
@@ -72,7 +73,7 @@ const { post, sourcePath, alternates: folderAlternates } = Astro.props
 // This page went without one until the cover's meta line started carrying the
 // reading time, at which point an English post would have drawn a chip and
 // nothing beside it.
-const { Content, remarkPluginFrontmatter } = await render(post)
+const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
 const alternates = folderAlternates.map(({ lang, path }) => ({
   lang,
@@ -97,6 +98,12 @@ const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
   noindex={post.data.noindex}
   progress
 >
+  {/* The outline, which this page never rendered: a reader of a translated
+      post got no way to see its shape or jump inside it, purely because this
+      file was written without the component rather than by any decision. The
+      headings it reads are the translated ones, from this post's own render(),
+      so the outline is in English like the text it points at. */}
+  <PostToc headings={headings} locale="en" />
   {/* The post's own colour: whatever brand its cover drew, read straight
       off the cover's own derivation (coverTone, lib/cover.ts) so bold and
       italic inside the article cannot come out a different colour from the
