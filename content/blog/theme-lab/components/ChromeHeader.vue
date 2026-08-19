@@ -18,6 +18,7 @@ import {
   CURSOR_RATES,
   CURSOR_RATE_OPTIONS,
   labelForMark,
+  MARK_ACCENT_ALL_ID,
   MARK_ACCENTS,
   MARK_CANDIDATES,
   MARK_DEFAULT_ACCENT,
@@ -52,7 +53,12 @@ const BG = '#14161a'
 const INK = '#e6e4e0'
 const MUTED = '#9a9ea6'
 
-/** Espelho em hex dos tokens de marca (`src/styles/theme.css`, modo escuro), só para o número de contraste da marca. */
+/**
+ * Espelho em hex dos tokens de marca (`src/styles/theme.css`, modo escuro),
+ * só para o número de contraste da marca. `todas` não tem entrada própria
+ * aqui: `ROLE_HEX`, mais abaixo, lê os quatro papéis (vermelho, verde,
+ * amarelo, azul) direto deste mesmo mapa em vez de duplicar os hex.
+ */
 const MARK_ACCENT_HEX: Record<string, string> = {
   verde: '#45b384',
   amarelo: '#f5b200',
@@ -102,10 +108,38 @@ watch(markCandidate, (id) => {
 })
 const markBelowFloor = computed(() => markSizePx.value < MARK_MIN_PX[markCandidate.value])
 
-/** A cor da marca: um seletor de acento único, a mesma ideia do "destaque" do resto do cabeçalho. */
+/**
+ * A cor da marca: um seletor de acento único, a mesma ideia do "destaque" do
+ * resto do cabeçalho, mais a exceção `todas` (`MARK_ACCENT_ALL_ID`), a marca
+ * original de volta, cada célula na cor do seu próprio papel em vez de um
+ * acento só.
+ */
 const markAccentId = ref(MARK_DEFAULT_ACCENT)
 const markAccentColor = computed(() => MARK_ACCENTS[markAccentId.value])
-const markAccentContrast = computed(() => ratio(parseHex(MARK_ACCENT_HEX[markAccentId.value]), parseHex(BG)).toFixed(2))
+const markAccentIsAll = computed(() => markAccentId.value === MARK_ACCENT_ALL_ID)
+
+/**
+ * `todas` pinta quatro papéis (`ROLE_TOKEN` só tem R/G/Y/B; roxo não entra em
+ * nenhum retângulo de `MARK_RECTS`), não um só, então nenhuma razão única
+ * descreve o desenho inteiro. Imprimir a razão do vermelho sozinho, por
+ * exemplo, seria mentir sobre as outras três células visíveis. A leitura
+ * honesta é a pior das quatro, porque é a parte que primeiro deixa de ser
+ * legível contra o fundo: vermelho 4,67:1, azul 4,90:1, verde 8,03:1, amarelo
+ * 11,25:1 sobre este fundo escuro, então o vermelho decide o número.
+ */
+const ROLE_HEX: Record<string, string> = {
+  R: MARK_ACCENT_HEX.vermelho,
+  G: MARK_ACCENT_HEX.verde,
+  Y: MARK_ACCENT_HEX.amarelo,
+  B: MARK_ACCENT_HEX.azul,
+}
+const markAccentContrast = computed(() => {
+  if (markAccentIsAll.value) {
+    const ratios = Object.values(ROLE_HEX).map((hex) => ratio(parseHex(hex), parseHex(BG)))
+    return Math.min(...ratios).toFixed(2)
+  }
+  return ratio(parseHex(MARK_ACCENT_HEX[markAccentId.value]), parseHex(BG)).toFixed(2)
+})
 
 /**
  * Composição da marca: logo, texto, ou os dois. O candidato "linha de DOS
@@ -398,7 +432,12 @@ const decisionSettings = computed(() => [
     label: 'tamanho da marca',
     value: `${markSizePx.value}px (piso de legibilidade do candidato: ${MARK_MIN_PX[markCandidate.value]}px, grade ${MARK_GRID_SIDE[markCandidate.value]}${markBelowFloor.value ? ', abaixo do piso' : ''})`,
   },
-  { label: 'cor da marca', value: `${markAccentId.value} (${markAccentContrast.value}:1 sobre ${BG})` },
+  {
+    label: 'cor da marca',
+    value: markAccentIsAll.value
+      ? `todas (pior dos 4 papéis, vermelho: ${markAccentContrast.value}:1 sobre ${BG})`
+      : `${markAccentId.value} (${markAccentContrast.value}:1 sobre ${BG})`,
+  },
   { label: 'composição da marca', value: shape.value === 'dos' ? 'prompt (a marca é o próprio prompt)' : labelFor(BRAND_MODE_OPTIONS, brandMode.value) },
   { label: 'fonte', value: face.value },
   { label: 'destaque', value: `${accent.value} (${accentHex.value})` },
@@ -432,7 +471,7 @@ const base = computed(() => ({
         <span :class="$style.edge" :style="{ color: MUTED }">┌─</span>
         <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
           <span v-if="showLogoSlot" :class="$style.markSlot">
-            <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :glitch-enabled="!animationsFrozen" />
+            <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
           </span>
           <span v-if="showTextSlot" :class="$style.brand" :style="{ color: accentHex }">
             <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
@@ -459,7 +498,7 @@ const base = computed(() => ({
       <header v-else-if="shape === 'minimo'" :class="$style.minimo" :style="base">
         <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
           <span v-if="showLogoSlot" :class="$style.markSlot">
-            <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :glitch-enabled="!animationsFrozen" />
+            <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
           </span>
           <span v-if="showTextSlot" :class="$style.brand" :style="{ color: accentHex }">
             <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
@@ -478,7 +517,7 @@ const base = computed(() => ({
           <span :class="$style.brandRow">
             <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
               <span v-if="showLogoSlot" :class="$style.markSlot">
-                <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :glitch-enabled="!animationsFrozen" />
+                <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
               </span>
               <span v-if="showTextSlot" :class="$style.brand" :style="{ color: accentHex }">
                 <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
@@ -501,7 +540,7 @@ const base = computed(() => ({
         <p :class="$style.brandline">
           <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
             <span v-if="showLogoSlot" :class="$style.markSlot">
-              <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :glitch-enabled="!animationsFrozen" />
+              <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
             </span>
             <span v-if="showTextSlot" :style="{ color: accentHex }">
               <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
@@ -561,7 +600,9 @@ const base = computed(() => ({
     <p :class="$style.readout">
       texto {{ inkContrast }}:1 · secundário {{ mutedContrast }}:1 · destaque {{ accentContrast }}:1 sobre
       {{ BG }}. A entreletra é o que separa "terminal" de "costume": acima de 0,2em o cabeçalho vira fantasia e a
-      leitura fica lenta. A marca está em {{ markSizePx }}px, na cor {{ markAccentId }} ({{ markAccentContrast }}:1);
+      leitura fica lenta. A marca está em {{ markSizePx }}px, na cor
+      <template v-if="markAccentIsAll">todas (cada célula no papel dela, pior contraste entre os quatro: {{ markAccentContrast }}:1, o vermelho)</template>
+      <template v-else>{{ markAccentId }} ({{ markAccentContrast }}:1)</template>;
       o piso de legibilidade do candidato "{{ labelForMark(markCandidate) }}" é {{ MARK_MIN_PX[markCandidate] }}px,
       porque um caractere por célula encolhe para uma mancha antes de simplesmente ficar menor, o que um vetor não
       faz. O slider vai de 0 a 300px sem parar nesse piso;

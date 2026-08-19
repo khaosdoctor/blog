@@ -54,9 +54,17 @@ export const MARK_DEFAULT_PX: Record<MarkCandidateId, number> = {
 
 /**
  * A cor da marca, a mesma ideia do seletor "destaque" que `ChromeHeader.vue`
- * já usa para o resto do cabeçalho: um só acento por vez, nunca um arco-íris
- * por célula. O dono pediu os dois sobreviventes coloridos; verde é o acento
+ * já usa para o resto do cabeçalho: um só acento por vez para as escolhas de
+ * cor sólida. O dono pediu os dois sobreviventes coloridos; verde é o acento
  * único recomendado em `docs/theming.md` seção 11, então é o padrão daqui.
+ *
+ * `todas` é a exceção deliberada: o dono pediu a marca original de volta como
+ * opção, cada célula na cor do seu próprio papel (`ROLE_TOKEN`), em vez de um
+ * acento só. O valor aqui (`var(--fg)`) nunca é usado como tinta de verdade
+ * quando `todas` está selecionado, porque `LogoMark.vue` desvia para
+ * `rectRoleAt` mais `ROLE_TOKEN` antes de olhar este mapa; ele existe só como
+ * resposta segura caso algum candidato futuro ignore o desvio e leia
+ * `MARK_ACCENTS` direto.
  */
 export const MARK_ACCENTS: Record<string, string> = {
   verde: 'var(--brand-green)',
@@ -65,9 +73,13 @@ export const MARK_ACCENTS: Record<string, string> = {
   vermelho: 'var(--brand-red)',
   roxo: 'var(--brand-purple)',
   traço: 'var(--fg)',
+  todas: 'var(--fg)',
 }
 
 export const MARK_DEFAULT_ACCENT = 'verde'
+
+/** O id de `MARK_ACCENTS` que significa "a marca original, todas as cores de uma vez", não um acento só. */
+export const MARK_ACCENT_ALL_ID = 'todas'
 
 /**
  * Taxa do cursor de bloco, o efeito composável que qualquer candidato de
@@ -123,6 +135,22 @@ export function filledAt(row: number, col: number): boolean {
 export function roleAt(row: number, col: number): string {
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return '.'
   return SHAPE[row][col]
+}
+
+/**
+ * O papel de uma célula da grade 8x8 quando a cor da marca é `todas`: o
+ * centro dela, projetado no mesmo espaço de 64 unidades que `MARK_RECTS` usa
+ * (8 unidades por célula, 64 dividido por 8), decide qual dos cinco
+ * retângulos ela cobre. Uma célula cujo centro não cai dentro de nenhum
+ * retângulo, o caso comum numa borda entre dois deles ou numa sobreposição,
+ * cai de volta no papel que `SHAPE` já traçou à mão para aquela posição
+ * (`roleAt`), que nunca fica indefinido para uma célula preenchida.
+ */
+export function rectRoleAt(row: number, col: number): string {
+  const cx = col * 8 + 4
+  const cy = row * 8 + 4
+  const hit = MARK_RECTS.find((rect) => cx >= rect.x && cx < rect.x + rect.w && cy >= rect.y && cy < rect.y + rect.h)
+  return hit ? hit.role : roleAt(row, col)
 }
 
 /**
