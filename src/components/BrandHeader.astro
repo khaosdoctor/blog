@@ -320,13 +320,21 @@ const CELLS = markCells()
     justify-content: center;
     font-size: 4.5px;
     /*
-     * No text-stroke. There was a `0.5px currentColor` stroke here, added for
-     * "make the logo bolder", and 0.5px against a 4.5px glyph is over a tenth
-     * of the character's own size: it closed up the wireframe's interior and
-     * the mark read as smeared rather than bold. The legibility complaint that
-     * prompted it was specific to the light ground, and `--brand-shadow-color`
-     * on `.brand` already answers that one where it actually applies.
+     * A stroke, because the underlying problem cannot be solved any other way
+     * here: the mark is drawn at 36px against this candidate's own 72px
+     * legibility floor (MARK_MIN_PX in the bench's logoMarks.ts), a size the
+     * owner chose knowingly. Each cell is an eighth of that, so a glyph comes
+     * out around 4.5px and the wireframe's strokes render as hairlines.
+     *
+     * 0.25px, not the 0.5px this carried before. Half a pixel against a 4.5px
+     * glyph is over a tenth of the character's own size: it closed the
+     * wireframe's interior and the mark read as smeared rather than bold, which
+     * is what the owner reported as "shadows". Removing it outright then read
+     * as too dim, which is this line's real justification. This is the knob to
+     * reach for if it needs tuning again; the floor is the actual constraint
+     * and only a larger mark escapes it.
      */
+    -webkit-text-stroke: 0.25px currentColor;
   }
 
   .mark-solid {
