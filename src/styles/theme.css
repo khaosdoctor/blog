@@ -120,13 +120,20 @@
    * overrides the reader's own browser font setting, and 1.125rem is exactly
    * 18px for everyone who has not changed it.
    *
-   * --font-scale is the settings panel's text-size step, a unitless
+   * --font-scale is the settings panel's text-size control, a unitless
    * multiplier rather than a second absolute size: multiplying a rem value
    * keeps the result relative to whatever the reader's own browser default
    * is, so a reader who already set a larger default there keeps that gain
-   * scaled up rather than replaced by a fixed number. Default 1 (no step
-   * chosen), the reader-facing values live below in the data-font-size
-   * block, and settings-panel.ts is what writes the attribute.
+   * scaled up rather than replaced by a fixed number.
+   *
+   * The reader's choice ranges 10% to 500%, which is too wide to express as
+   * a fixed set of attribute blocks (that shape held five steps, 80-120%,
+   * before this comment). settings-panel.ts now writes this custom property
+   * directly on the root element's inline style instead of picking one of a
+   * few named blocks, and BaseLayout's own pre-paint script does the same
+   * before first render. Default 1 (100%, no inline override), same
+   * "nothing stored means default" convention every other reader
+   * preference on this site already follows.
    */
   --font-scale: 1;
   --text-base: calc(1.125rem * var(--font-scale));
@@ -452,31 +459,19 @@
 }
 
 /*
- * The settings panel's text-size step (SettingsPanel.astro, settings-panel.ts),
- * five values around the default rather than a slider: each is a percentage of
- * whichever --text-base above is already active, so it composes with the sans
- * face's own larger base instead of fighting it, and with the reader's own
- * browser font size instead of overriding it (--font-scale is unitless, see
- * --text-base's own comment). Absent means the middle step, 100%, same
- * "no attribute = default" convention as data-theme and data-code-theme.
- * Only --text-base reads this: --text-small and --text-tiny (chrome, code,
- * captions) stay fixed on purpose, so this only resizes the reading text.
+ * The settings panel's text-size control (SettingsPanel.astro,
+ * settings-panel.ts) used to pick one of five named steps here (xs/sm/lg/xl,
+ * 80-120%), each its own `:root[data-font-size='…']` block. That shape does
+ * not reach the owner's actual ask, a continuous 10% to 500%: five blocks
+ * would need to become dozens. There is nothing left to declare here now,
+ * the mechanism moved instead of growing: settings-panel.ts sets
+ * `--font-scale` straight on the root element's inline style
+ * (`style.setProperty`), which wins over this stylesheet's own `--font-scale:
+ * 1` above for exactly the property it sets, and BaseLayout's pre-paint
+ * script does the same before first render. Only --text-base reads this:
+ * --text-small and --text-tiny (chrome, code, captions) stay fixed on
+ * purpose, so this only ever resizes the reading text.
  */
-:root[data-font-size='xs'] {
-  --font-scale: 0.8;
-}
-
-:root[data-font-size='sm'] {
-  --font-scale: 0.9;
-}
-
-:root[data-font-size='lg'] {
-  --font-scale: 1.1;
-}
-
-:root[data-font-size='xl'] {
-  --font-scale: 1.2;
-}
 
 /* Motion is decoration everywhere on this site, so it can all go. */
 @media (prefers-reduced-motion: reduce) {

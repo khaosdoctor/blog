@@ -25,36 +25,53 @@ import { getShortcutLetter, setShortcutLetter } from './search-palette'
 const HP_PERSIST_KEY = 'hp-persist'
 
 // Same key BaseLayout's own blocking <script is:inline> reads before first
-// paint, so the reader never sees a flash at the default size. Five steps
-// rather than a slider, null in the middle for the default (100%, same
-// "no attribute = default" convention as motion and code-theme): the
-// percentages here are read-only display text and must stay in sync with
-// theme.css's own --font-scale values per data-font-size attribute.
+// paint, so the reader never sees a flash at the default size. A raw
+// percentage now, 10 to 500 (the owner's own range), not one of a few named
+// steps: that range is too wide for a fixed set of attribute blocks, so this
+// writes --font-scale (theme.css) straight onto the root element's inline
+// style instead of picking one of them. FONT_SIZE_STEP (10) is a flat step
+// across the whole range rather than one that widens further out: a native
+// range input already turns that into a single drag, Home/End or
+// Page Up/Down across the whole span, so the step only has to matter for a
+// single arrow-key press, and a flat 10% is a step size a reader can feel at
+// either end of the range. No attribute, and no inline style, means the
+// stylesheet's own default (1, 100%) applies, same "nothing stored means
+// default" convention as motion and code-theme.
 const FONT_SIZE_KEY = 'font-size'
-const FONT_SIZE_STEPS: ReadonlyArray<{ value: string | null; percent: string }> = [
-  { value: 'xs', percent: '80%' },
-  { value: 'sm', percent: '90%' },
-  { value: null, percent: '100%' },
-  { value: 'lg', percent: '110%' },
-  { value: 'xl', percent: '120%' },
-]
+const FONT_SIZE_MIN = 10
+const FONT_SIZE_MAX = 500
+const FONT_SIZE_STEP = 10
+const FONT_SIZE_DEFAULT = 100
 
-function isFontSizeValue(value: string): boolean {
-  return value === 'xs' || value === 'sm' || value === 'lg' || value === 'xl'
+// Clamped into range, then snapped onto the same 10-wide grid the range
+// input's own `step` divides it into, so a value read back out of storage
+// always resolves to a notch the slider (and a screen reader announcing it)
+// can actually stop on, the same rounding a native range input already does
+// to whatever a pointer drags it to.
+function clampFontSize(value: number): number {
+  const clamped = Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, value))
+  return FONT_SIZE_MIN + Math.round((clamped - FONT_SIZE_MIN) / FONT_SIZE_STEP) * FONT_SIZE_STEP
 }
 
-function storedFontSize(): string | null {
+// A stored value that is missing, not a number, or outside the range must
+// never reach the page as-is: missing or non-numeric falls back to the
+// default outright, and an out-of-range number is pulled back inside the
+// range rather than discarded, so a reader's past choice still means
+// something close to itself if the range itself ever moves again.
+function storedFontSize(): number {
   try {
-    const value = localStorage.getItem(FONT_SIZE_KEY)
-    return value !== null && isFontSizeValue(value) ? value : null
+    const raw = localStorage.getItem(FONT_SIZE_KEY)
+    if (raw === null) return FONT_SIZE_DEFAULT
+    const value = Number(raw)
+    return Number.isFinite(value) ? clampFontSize(value) : FONT_SIZE_DEFAULT
   } catch {
-    return null
+    return FONT_SIZE_DEFAULT
   }
 }
 
-function applyFontSize(value: string | null): void {
-  if (value === null) document.documentElement.removeAttribute('data-font-size')
-  else document.documentElement.setAttribute('data-font-size', value)
+function applyFontSize(value: number): void {
+  if (value === FONT_SIZE_DEFAULT) document.documentElement.style.removeProperty('--font-scale')
+  else document.documentElement.style.setProperty('--font-scale', String(value / 100))
 }
 
 // Same key BaseLayout's own blocking script reads. 'sans' is the only stored
@@ -171,40 +188,33 @@ function init(): void {
     })
   }
 
-  // --- Reader text size: five steps, decrease/increase rather than a
-  // slider, buttons disabled at either end instead of wrapping. ---
-  const fontSizeDec = menu.querySelector<HTMLButtonElement>('#sp-font-size-dec')
-  const fontSizeInc = menu.querySelector<HTMLButtonElement>('#sp-font-size-inc')
+  // --- Reader text size: a native range input across the owner's own full
+  // 10-500% span, rather than a fixed set of steps. ---
+  const fontSizeInput = menu.querySelector<HTMLInputElement>('#sp-font-size')
   const fontSizeValue = menu.querySelector<HTMLElement>('#sp-font-size-value')
-  if (fontSizeDec !== null && fontSizeInc !== null && fontSizeValue !== null) {
+  if (fontSizeInput !== null && fontSizeValue !== null) {
     const template = fontSizeValue.dataset.template ?? 'Text size: %s'
-    let index = FONT_SIZE_STEPS.findIndex((step) => step.value === storedFontSize())
-    if (index === -1) index = 2
+    let value = storedFontSize()
 
     const syncFontSize = (): void => {
-      const step = FONT_SIZE_STEPS[index]
-      fontSizeValue.textContent = step.percent
-      fontSizeValue.setAttribute('aria-label', template.replace('%s', step.percent))
-      fontSizeDec.disabled = index === 0
-      fontSizeInc.disabled = index === FONT_SIZE_STEPS.length - 1
-    }
-
-    const move = (delta: number): void => {
-      index = Math.min(Math.max(index + delta, 0), FONT_SIZE_STEPS.length - 1)
-      const step = FONT_SIZE_STEPS[index]
-      try {
-        if (step.value === null) localStorage.removeItem(FONT_SIZE_KEY)
-        else localStorage.setItem(FONT_SIZE_KEY, step.value)
-      } catch {
-        // Private mode, or storage disabled: the choice still applies for this page.
-      }
-      applyFontSize(step.value)
-      syncFontSize()
+      fontSizeInput.value = String(value)
+      const percent = `${value}%`
+      fontSizeValue.textContent = percent
+      fontSizeValue.setAttribute('aria-label', template.replace('%s', percent))
     }
 
     syncFontSize()
-    fontSizeDec.addEventListener('click', () => move(-1))
-    fontSizeInc.addEventListener('click', () => move(1))
+    fontSizeInput.addEventListener('input', () => {
+      value = clampFontSize(Number(fontSizeInput.value))
+      try {
+        if (value === FONT_SIZE_DEFAULT) localStorage.removeItem(FONT_SIZE_KEY)
+        else localStorage.setItem(FONT_SIZE_KEY, String(value))
+      } catch {
+        // Private mode, or storage disabled: the choice still applies for this page.
+      }
+      applyFontSize(value)
+      syncFontSize()
+    })
   }
 
   // --- Reading font: Literata (default) or Atkinson Hyperlegible, the two

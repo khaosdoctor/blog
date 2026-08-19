@@ -77,8 +77,6 @@ type UIKey =
   | 'motionAllow'
   | 'motionSystem'
   | 'fontSizeLabel'
-  | 'fontSizeDecrease'
-  | 'fontSizeIncrease'
   | 'fontSizeCurrent'
   | 'fontFamilyLabel'
   | 'fontFamilySerif'
@@ -216,8 +214,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     motionAllow: 'Sempre ativo',
     motionSystem: 'Sistema',
     fontSizeLabel: 'Tamanho do texto',
-    fontSizeDecrease: 'Diminuir',
-    fontSizeIncrease: 'Aumentar',
     fontSizeCurrent: 'Tamanho do texto: %s',
     fontFamilyLabel: 'Fonte de leitura',
     fontFamilySerif: 'Serifada (Literata)',
@@ -361,8 +357,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     motionAllow: 'Always on',
     motionSystem: 'System',
     fontSizeLabel: 'Text size',
-    fontSizeDecrease: 'Decrease',
-    fontSizeIncrease: 'Increase',
     fontSizeCurrent: 'Text size: %s',
     fontFamilyLabel: 'Reading font',
     fontFamilySerif: 'Serif (Literata)',
