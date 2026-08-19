@@ -1,9 +1,12 @@
 <script setup lang="ts">
 /**
  * A lista de posts, que é a página mais visitada do site depois dos posts em si.
- * Seis leituras: quatro só de texto, do mais denso ao mais decorado, mais duas
- * que carregam uma miniatura da capa (grade em proporção nativa, lista com
- * miniatura quadrada) para comparar o que uma imagem por linha custa em altura.
+ * Sete leituras: quatro só de texto, do mais denso ao mais decorado; duas que
+ * carregam uma miniatura da capa (grade em proporção nativa, lista com
+ * miniatura quadrada) para comparar o que uma imagem por linha custa em
+ * altura; e uma sétima onde o leitor troca entre as duas formas de capa sem
+ * trocar de candidato, o jeito como uma página de verdade carregaria essa
+ * escolha.
  */
 import { computed, ref } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
@@ -41,6 +44,7 @@ const SHAPE_OPTIONS = [
   { id: 'cartoes', name: 'cartões com aresta grossa' },
   { id: 'grade', name: 'grade com capa, proporção nativa' },
   { id: 'miniatura', name: 'lista com miniatura quadrada' },
+  { id: 'densidade', name: 'densidade que o leitor escolhe' },
 ]
 
 /**
@@ -112,6 +116,14 @@ const selected = ref(0)
 // unidades diferentes, não porque o valor em si seja outro.
 const thumbSize = ref(96)
 
+// O controle de verdade do candidato "densidade": o leitor troca de cartão
+// para lista sem trocar de página. Aqui é uma variável que reseta ao
+// recarregar a bancada; numa página de verdade a escolha ficaria guardada
+// (por exemplo localStorage, chave própria do site), não implementado aqui
+// porque o pedido foi uma demonstração do controle, não o sistema de
+// preferência inteiro.
+const density = ref<'cards' | 'lista'>('cards')
+
 const inkContrast = computed(() => ratio(parseHex(INK), parseHex(BG)).toFixed(2))
 const mutedContrast = computed(() => ratio(parseHex(MUTED), parseHex(BG)).toFixed(2))
 
@@ -160,6 +172,7 @@ const decisionSettings = computed(() => [
   { label: 'entreletra', value: `${tracking.value}/100em` },
   { label: 'mostrar seção', value: showTag.value ? 'sim' : 'não' },
   { label: 'tamanho da miniatura', value: `${thumbSize.value}px` },
+  { label: 'densidade escolhida (candidato "densidade")', value: density.value === 'cards' ? 'cartões' : 'lista' },
 ])
 
 const decisionContext = computed(() => {
@@ -178,6 +191,14 @@ const decisionContext = computed(() => {
       `Com miniatura de ${thumbSize.value}px, cabem ${rowsIn900Miniatura.value} linhas numa janela de 900px.`
     )
   }
+  if (shape.value === 'densidade') {
+    const activeRows = density.value === 'cards' ? rowsIn900Grade.value : rowsIn900Miniatura.value
+    return (
+      `${contrastText} Densidade escolhida pelo leitor nesta sessão: ${density.value === 'cards' ? 'cartões' : 'lista'}. ` +
+      `Monograma ${thumbContrast.value.toFixed(2)}:1 no pior caso. ` +
+      `Com miniatura de ${thumbSize.value}px, cabem ${activeRows} linhas numa janela de 900px nesta densidade.`
+    )
+  }
   return contrastText
 })
 </script>
@@ -185,6 +206,30 @@ const decisionContext = computed(() => {
 <template>
   <div :class="$style.demo">
     <div :class="$style.stage" :style="{ background: BG, ...base }">
+      <!--
+        Único controle que o leitor de verdade opera dentro do candidato (o
+        Pick da bancada escolhe ENTRE candidatos, não dentro de um deles). Os
+        dois <ol> de baixo (grade e miniatura) já sabem responder a ele: a
+        condição de cada um só ganhou um "ou" a mais, então este candidato não
+        duplica marcação nenhuma, só decide qual das duas já existentes aparece.
+      -->
+      <div v-if="shape === 'densidade'" :class="$style.densidadeControl" role="group" aria-label="densidade da lista">
+        <button
+          type="button"
+          :class="$style.densidadeBotao"
+          :style="{ color: density === 'cards' ? ACCENT : MUTED }"
+          :aria-pressed="density === 'cards'"
+          @click="density = 'cards'"
+        >cartões</button>
+        <button
+          type="button"
+          :class="$style.densidadeBotao"
+          :style="{ color: density === 'lista' ? ACCENT : MUTED }"
+          :aria-pressed="density === 'lista'"
+          @click="density = 'lista'"
+        >lista</button>
+      </div>
+
       <ol v-if="shape === 'tabela'" :class="$style.tabela">
         <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
           <span :class="$style.date" :style="{ color: MUTED }">{{ post.date }}</span>
@@ -233,7 +278,11 @@ const decisionContext = computed(() => {
         cada linha da grade cabe poucos cartões numa janela de 900px, o que faz
         dela um candidato para uma frente curada, não para cem posts.
       -->
-      <ol v-else-if="shape === 'grade'" :class="$style.grade" :style="{ '--capa-largura': `${thumbSize}px` }">
+      <ol
+        v-else-if="shape === 'grade' || (shape === 'densidade' && density === 'cards')"
+        :class="$style.grade"
+        :style="{ '--capa-largura': `${thumbSize}px` }"
+      >
         <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
           <div :class="$style.capa">
             <svg viewBox="0 0 1200 630" :class="$style.capaSvg" role="img" :aria-label="`Capa de ${post.title}`">
@@ -261,7 +310,10 @@ const decisionContext = computed(() => {
         centrais sobrevivem ao corte, e a linha continua do tamanho de uma
         linha de texto, então é este o candidato que aguenta cem posts.
       -->
-      <ol v-else-if="shape === 'miniatura'" :class="$style.miniatura">
+      <ol
+        v-else-if="shape === 'miniatura' || (shape === 'densidade' && density === 'lista')"
+        :class="$style.miniatura"
+      >
         <li v-for="post in POSTS" :key="post.title" :style="rowStyle">
           <div :class="$style.chip" :style="{ '--chip-lado': `${thumbSize}px` }">
             <svg
@@ -314,7 +366,17 @@ const decisionContext = computed(() => {
     <p v-else-if="shape === 'miniatura'" :class="$style.readout">
       capa recortada num quadrado de {{ thumbSize }}px · monograma {{ thumbContrast.toFixed(2) }}:1 no pior caso ·
       cabem {{ rowsIn900Miniatura }} linhas numa janela de 900px. Numa tela estreita o quadrado encolhe com o
-      knob (min() contra a largura da janela) e o título trunca com reticências antes de forçar rolagem lateral.
+      knob (a régua de 18% da largura da própria bancada, não da janela do navegador inteira) e o título trunca
+      com reticências antes de forçar rolagem lateral.
+    </p>
+
+    <p v-else-if="shape === 'densidade'" :class="$style.readout">
+      densidade atual: {{ density === 'cards' ? 'cartões' : 'lista' }} · monograma {{ thumbContrast.toFixed(2) }}:1
+      no pior caso · cabem {{ density === 'cards' ? rowsIn900Grade : rowsIn900Miniatura }} linhas numa janela de
+      900px nesta densidade. O botão acima é o controle de verdade, não o Pick da bancada; numa página real a
+      escolha ficaria guardada (localStorage, chave própria do site), aqui ela só dura enquanto a bancada está
+      aberta. As duas formas reaproveitam a marcação da grade e da miniatura acima, então trocar de densidade não
+      custa HTML a mais, só a condição que decide qual delas aparece.
     </p>
 
     <DecisionCopy
@@ -335,6 +397,10 @@ const decisionContext = computed(() => {
   padding: clamp(1rem, 4%, 1.6rem);
   font-size: 0.85rem;
   overflow-x: auto;
+  /* Container de consulta: a miniatura (.chip) mede sua régua de segurança
+     contra a largura desta caixa, não da janela do navegador inteira, senão
+     o knob e a régua nunca concordam no mesmo número. */
+  container-type: inline-size;
 }
 
 .stage ol {
@@ -418,17 +484,48 @@ const decisionContext = computed(() => {
   text-transform: uppercase;
 }
 
+.densidadeControl {
+  display: inline-flex;
+  margin-block-end: 0.8rem;
+  border: 1px solid #ffffff33;
+}
+
+.densidadeBotao {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.densidadeBotao + .densidadeBotao {
+  border-inline-start: 1px solid #ffffff33;
+}
+
 /* Grade: cada item carrega sua própria margem em vez de um vão do contêiner,
    com o contêiner puxado de volta pela mesma medida, para as bordas externas
-   da grade não ficarem com o dobro de respiro das internas. */
+   da grade não ficarem com o dobro de respiro das internas.
+
+   A largura de cada item vem direto do knob (min(var, 100%)), não de uma
+   coluna de grade com minmax(..., 1fr): com só quatro posts na bancada, um
+   grid auto-fit redistribui o espaço sobrando pelas colunas existentes e o
+   valor mínimo nunca é o que decide a largura na tela, então o knob parecia
+   não fazer nada. Em flexbox a largura pedida é a largura desenhada; a
+   sobra de cada linha fica vazia, e numa tela mais estreita que a própria
+   capa o cartão cai sozinho pra linha de baixo (min(..., 100%) nunca deixa
+   passar da largura disponível). */
 .grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(var(--capa-largura, 160px), 100%), 1fr));
+  display: flex;
+  flex-wrap: wrap;
   margin: -0.55rem;
 }
 
 .grade li {
   margin: 0.55rem;
+  inline-size: min(var(--capa-largura, 160px), 100%);
 }
 
 .grade p {
@@ -489,10 +586,14 @@ const decisionContext = computed(() => {
   font-variant-numeric: tabular-nums;
 }
 
-/* min() prende o quadrado a 18% da largura da janela: numa tela estreita ele
-   encolhe sozinho antes de empurrar o título para fora da coluna. */
+/* 18cqi prende o quadrado a 18% da largura da própria bancada (.stage marca
+   o container de consulta lá em cima). A régua era 18vw: mede a janela do
+   navegador inteira, não a coluna estreita onde a lista de posto realmente
+   vive, então o teto que a régua desenhava dependia da largura da janela em
+   vez da largura que está na tela, e o knob e a régua nunca respondiam pelo
+   mesmo número. cqi resolve contra o container de verdade. */
 .chip {
-  inline-size: min(var(--chip-lado, 56px), 18vw);
+  inline-size: min(var(--chip-lado, 56px), 18cqi);
   aspect-ratio: 1 / 1;
   overflow: hidden;
   border: 1px solid #ffffff1f;
