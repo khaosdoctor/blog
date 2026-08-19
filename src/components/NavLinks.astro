@@ -80,7 +80,10 @@ function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): bool
     }
     case 'navTags':
       // /tags/ itself, or a specific tag and its pagination
-      // (/tags/javascript/, /tags/javascript/2/).
+      // (/tags/javascript/, /tags/javascript/2/). Both languages now build all
+      // three (src/pages/en/tags/), and the /en/ prefix already came off above,
+      // so /en/tags/javascript/2/ reaches this test as /tags/javascript/2/ and
+      // needs no case of its own.
       return path === '/tags/' || /^\/tags\/[^/]+\/(?:\d+\/)?$/.test(path)
     case 'navSeries':
       // /series/ itself, or a specific series (/series/<name>/, no
