@@ -1,18 +1,19 @@
 ---
 // The English half of the series index (see src/pages/series/index.astro for
-// the Portuguese one, which this reuses data from).
+// the Portuguese one).
 //
-// getSeries() only ever sees Portuguese posts (getPublishedPosts() defaults
-// to SOURCE_LANG), and the per-series page itself (src/pages/series/[name].astro)
-// is source-only: there is no /en/series/<name>/ route. So this page shows the
-// same series as the Portuguese index, says so (sourceLanguageOnlyNotice), and
-// links to the same bare, un-prefixed /series/<name>/ URLs rather than a
-// localePath()-prefixed path that would 404.
+// This page builds its own list rather than borrowing the Portuguese one:
+// getSeries('en') groups the English posts by the `series` each translation
+// carries in its own frontmatter, so the count beside a title is how many parts
+// exist in English and every link goes to /en/series/<name>/, which
+// src/pages/en/series/[name].astro builds. Nothing here sends an English reader
+// into the Portuguese tree, which is what the old sourceLanguageOnlyNotice line
+// used to apologise for.
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { getSeries, seriesTitle } from '../../../lib/taxonomy'
 import { HREFLANG, t } from '../../../i18n/ui'
 
-const series = [...(await getSeries()).entries()]
+const series = [...(await getSeries('en')).entries()]
   .filter(([, posts]) => posts.length > 1)
   .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), count: posts.length }))
   .sort((a, b) => a.title.localeCompare(b.title, 'en'))
@@ -31,12 +32,11 @@ const alternates = [
 >
   <h1>{t('en', 'allSeries')}</h1>
   <p class="intro">{t('en', 'seriesIntro')}</p>
-  <p class="notice">{t('en', 'sourceLanguageOnlyNotice')}</p>
   <ul class="series-list">
     {
       series.map((entry) => (
         <li>
-          <a href={`/series/${entry.slug}/`}>{entry.title}</a>
+          <a href={`/en/series/${entry.slug}/`}>{entry.title}</a>
           <span class="count">
             {entry.count} {t('en', 'articles')}
           </span>
@@ -50,12 +50,6 @@ const alternates = [
   .intro {
     max-inline-size: var(--measure);
     color: var(--muted);
-  }
-
-  .notice {
-    max-inline-size: var(--measure);
-    color: var(--muted);
-    font-size: 0.9rem;
   }
 
   .series-list {

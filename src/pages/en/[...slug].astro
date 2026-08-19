@@ -15,6 +15,7 @@ import MissingImage from '../../components/MissingImage.astro'
 import PostToc from '../../components/PostToc.astro'
 import RawEmbed from '../../components/RawEmbed.astro'
 import ReadingTime from '../../components/ReadingTime.astro'
+import SeriesToc from '../../components/SeriesToc.astro'
 import Sidenote from '../../components/Sidenote.astro'
 import SpeakerDeck from '../../components/SpeakerDeck.astro'
 import Spotify from '../../components/Spotify.astro'
@@ -22,8 +23,8 @@ import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
 import { parseAuthors } from '../../lib/authors'
 import { coverTone } from '../../lib/cover'
-import { chipColor } from '../../lib/taxonomy'
-import { HREFLANG } from '../../i18n/ui'
+import { buildSeriesMap, chipColor, getSeriesNavigation } from '../../lib/taxonomy'
+import { HREFLANG, t } from '../../i18n/ui'
 import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
 
 const mdxComponents = {
@@ -47,6 +48,10 @@ const mdxComponents = {
 // English article reads as English in the address bar.
 export const getStaticPaths = (async () => {
   const [posts, byFolder] = await Promise.all([getPublishedPosts('en'), getPublishedByFolder()])
+  // Built from the English posts alone, so previous/next inside a series can
+  // only ever reach another English part, and "part N of M" counts what exists
+  // in English rather than what exists in Portuguese.
+  const seriesMap = buildSeriesMap(posts)
   return posts.map((post) => {
     // Every language of this article is a file in the same folder.
     const siblings = byFolder.get(folderOf(post)) ?? [post]
@@ -55,6 +60,7 @@ export const getStaticPaths = (async () => {
       params: { slug: slugOf(post) },
       props: {
         post,
+        series: getSeriesNavigation(post, seriesMap),
         // The original to link back to. A translation of a post that is still a
         // draft has nowhere to point, so the banner has to cope with null.
         sourcePath: source === undefined ? null : urlOf(source),
@@ -67,7 +73,7 @@ export const getStaticPaths = (async () => {
   })
 }) satisfies GetStaticPaths
 
-const { post, sourcePath, alternates: folderAlternates } = Astro.props
+const { post, series, sourcePath, alternates: folderAlternates } = Astro.props
 // Same render() the Portuguese page makes, read for the same two things: the
 // content, and the exact reading time remark-reading-time.mjs computed for it.
 // This page went without one until the cover's meta line started carrying the
@@ -156,9 +162,38 @@ const postAccent = coverTone(slugOf(post)).token
         <LangBanner lang="en" originalHref={sourcePath} />
       )
     }
+    {/* The series box and the line under it, both of which this page used to
+        leave out: a reader of a translated part was told nothing about the
+        series it belongs to. Every link either draws comes from the English
+        map, so it points inside /en/. */}
+    {post.data.series && <SeriesToc series={post.data.series} current={post.id} locale="en" />}
+    {
+      series !== null && (
+        <p class="series">
+          {t('en', 'partOfSeriesNamed', series.index, series.total)}{' '}
+          <a href={`/en/series/${series.name}/`}>{series.title}</a>
+        </p>
+      )
+    }
     <div class="prose">
       <Content components={mdxComponents} />
     </div>
+    {
+      series !== null && (
+        <nav class="series-nav" aria-label={t('en', 'seriesNav')}>
+          {series.previous !== null && (
+            <a href={urlOf(series.previous)} rel="prev">
+              ← {series.previous.data.title}
+            </a>
+          )}
+          {series.next !== null && (
+            <a href={urlOf(series.next)} rel="next" class="next">
+              {series.next.data.title} →
+            </a>
+          )}
+        </nav>
+      )
+    }
   </article>
   <HoverPreviews locale="en" />
 </BaseLayout>

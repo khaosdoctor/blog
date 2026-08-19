@@ -31,6 +31,11 @@ export type Series = { name: string; posts: Post[] }
  * The display title of a series: the first `seriesName` found among its parts,
  * in order. Write it once on the first post, every other part only carries the
  * slug, and the slug is the fallback if none of them set it.
+ *
+ * Once per language, though: the members handed in are all one language, so a
+ * translated first part needs its own `seriesName` or the English pages fall
+ * back to the bare slug. Nothing here reads across languages on purpose, since
+ * borrowing the Portuguese name would put Portuguese in an English heading.
  */
 export function seriesTitle(slug: string, members: Post[]): string {
   for (const member of members) {
@@ -58,9 +63,19 @@ export function buildSeriesMap(posts: Post[]): Map<string, Post[]> {
   return bySeries
 }
 
-/** Series posts are ordered by seriesOrder, not by date. */
-export async function getSeries(): Promise<Map<string, Post[]>> {
-  const posts = await getPublishedPosts()
+/**
+ * Series posts are ordered by seriesOrder, not by date.
+ *
+ * One language at a time, defaulting to the source one. A translation carries
+ * its own `series` and `seriesOrder` in its own frontmatter, so each language
+ * builds a complete map of its own and a series page never mixes the two: an
+ * English series lists the English parts and links at English URLs. A series
+ * whose parts are only half translated simply comes out shorter in the language
+ * missing the rest, and drops out of the routes once it is down to a single
+ * part, which is the same rule a one-post series has always followed.
+ */
+export async function getSeries(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
+  const posts = await getPublishedPosts(lang)
   return buildSeriesMap(posts)
 }
 
@@ -68,12 +83,17 @@ export async function getSeries(): Promise<Map<string, Post[]>> {
  * Previous/next within a series. Takes an already-built series map so callers
  * that need this for every post (e.g. one call per post page) can build the
  * map once instead of re-fetching and re-sorting the whole collection per call.
+ *
+ * The map decides the language of the answer: hand it the one built from this
+ * post's own language (getSeries(lang)) and every neighbour it returns is a
+ * post in that language, so the arrows at the foot of an English part can only
+ * ever point at another English part.
  */
 export function getSeriesNavigation(
   post: Post,
   seriesMap: Map<string, Post[]>,
 ): {
-  /** The slug, which is also the URL. */
+  /** The slug, shared by every language: /series/<name>/ and /en/series/<name>/. */
   name: string
   /** Derived from the first part's title. */
   title: string

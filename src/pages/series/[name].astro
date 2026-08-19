@@ -1,21 +1,48 @@
 ---
+// The Portuguese half of the per-series page. Its English twin is
+// src/pages/en/series/[name].astro, built the same way out of the English posts.
+//
+// The slug is shared: `series: grpc` in the frontmatter is the same word in
+// every language, so the two pages are /series/grpc/ and /en/series/grpc/, and
+// switching language is a prefix change like it is on a post or a section.
+// Only the display title (seriesName) and the parts themselves differ.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
 import { getSeries, seriesTitle } from '../../lib/taxonomy'
-import { t } from '../../i18n/ui'
+import { HREFLANG, t } from '../../i18n/ui'
 
 export const getStaticPaths = (async () => {
-  const series = await getSeries()
+  // The English map is read only to know whether the English page for this
+  // series is built at all: the switcher must not offer a URL that route never
+  // emits, which is any series with fewer than two translated parts.
+  const [series, english] = await Promise.all([getSeries(), getSeries('en')])
   return [...series.entries()]
     .filter(([, posts]) => posts.length > 1)
-    .map(([slug, posts]) => ({ params: { name: slug }, props: { name: seriesTitle(slug, posts), posts } }))
+    .map(([slug, posts]) => ({
+      params: { name: slug },
+      props: {
+        slug,
+        name: seriesTitle(slug, posts),
+        posts,
+        hasEnglish: (english.get(slug)?.length ?? 0) > 1,
+      },
+    }))
 }) satisfies GetStaticPaths
 
-const { name, posts } = Astro.props
+const { slug, name, posts, hasEnglish } = Astro.props
+
+const alternates = [
+  { lang: HREFLANG.pt, href: new URL(`/series/${slug}/`, Astro.site).href },
+  ...(hasEnglish ? [{ lang: HREFLANG.en, href: new URL(`/en/series/${slug}/`, Astro.site).href }] : []),
+]
 ---
 
-<BaseLayout title={`${name} | Lucas Santos`} description={t('pt', 'seriesDescription', name)}>
+<BaseLayout
+  title={`${name} | Lucas Santos`}
+  description={t('pt', 'seriesDescription', name)}
+  alternates={alternates}
+>
   <p class="kicker">{t('pt', 'series')}</p>
   <h1>{name}</h1>
   <PostList posts={posts} />
