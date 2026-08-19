@@ -126,11 +126,13 @@
    * is, so a reader who already set a larger default there keeps that gain
    * scaled up rather than replaced by a fixed number.
    *
-   * The reader's choice ranges 10% to 500%, which is too wide to express as
-   * a fixed set of attribute blocks (that shape held five steps, 80-120%,
-   * before this comment). settings-panel.ts now writes this custom property
-   * directly on the root element's inline style instead of picking one of a
-   * few named blocks, and BaseLayout's own pre-paint script does the same
+   * The reader's choice ranges 50% to 160%, twelve 10% stops, which is more
+   * than a fixed set of attribute blocks wants to carry (that shape held
+   * five steps, 80-120%, before this comment; the control opened at
+   * 10%-500% and the owner has since narrowed it to this).
+   * settings-panel.ts writes this custom property directly on the root
+   * element's inline style instead of picking one of a few named blocks,
+   * and BaseLayout's own pre-paint script does the same
    * before first render. Default 1 (100%, no inline override), same
    * "nothing stored means default" convention every other reader
    * preference on this site already follows.
@@ -454,8 +456,10 @@
  * The settings panel's text-size control (SettingsPanel.astro,
  * settings-panel.ts) used to pick one of five named steps here (xs/sm/lg/xl,
  * 80-120%), each its own `:root[data-font-size='…']` block. That shape does
- * not reach the owner's actual ask, a continuous 10% to 500%: five blocks
- * would need to become dozens. There is nothing left to declare here now,
+ * not reach the owner's actual ask, a stepped 50% to 160%: five blocks
+ * would need to become twelve, and did need to become dozens while the
+ * range was still the 10%-500% this control opened with. There is nothing
+ * left to declare here now,
  * the mechanism moved instead of growing: settings-panel.ts sets
  * `--font-scale` straight on the root element's inline style
  * (`style.setProperty`), which wins over this stylesheet's own `--font-scale:
