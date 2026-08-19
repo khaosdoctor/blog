@@ -331,45 +331,49 @@ function init(): void {
   }
 
   // --- The reader-adjustable Conway knobs, behind their own disclosure. ---
-  const density = menu.querySelector<HTMLInputElement>('#sp-density')
-  if (density !== null) {
-    const syncDensity = (): void => {
-      density.value = String(getSettings().density)
+  //
+  // All four are the same three lines with different names, so they share one
+  // wiring function rather than repeating it: read the current value, write
+  // the slider and its own readout, and re-read after every change.
+  //
+  // The readout prints from the value the setter actually took, not from the
+  // slider's raw string. conway.ts clamps every one of these (setDensity to
+  // 1-20, setGps to 0.5-8, and so on), so a value that arrives out of range,
+  // from storage written by an older build, say, would otherwise be shown as
+  // the number nothing is using.
+  //
+  // The unit is a symbol appended here rather than a translated string: `%`,
+  // `/s` and `s` read the same in both languages, and the number is
+  // aria-hidden in the markup anyway (SettingsPanel.astro says why), so this
+  // text is never spoken, only seen.
+  const wireKnob = (
+    id: string,
+    read: () => number,
+    write: (value: number) => void,
+    format: (value: number) => string
+  ): void => {
+    const input = menu.querySelector<HTMLInputElement>(`#${id}`)
+    if (input === null) return
+    const readout = menu.querySelector<HTMLElement>(`#${id}-value`)
+    const sync = (): void => {
+      const value = read()
+      input.value = String(value)
+      if (readout !== null) readout.textContent = format(value)
     }
-    syncDensity()
-    density.addEventListener('input', () => setDensity(Number(density.value)))
-    resetHandlers.push(syncDensity)
+    sync()
+    input.addEventListener('input', () => {
+      write(Number(input.value))
+      sync()
+    })
+    resetHandlers.push(sync)
   }
 
-  const gps = menu.querySelector<HTMLInputElement>('#sp-gps')
-  if (gps !== null) {
-    const syncGps = (): void => {
-      gps.value = String(getSettings().gps)
-    }
-    syncGps()
-    gps.addEventListener('input', () => setGps(Number(gps.value)))
-    resetHandlers.push(syncGps)
-  }
-
-  const autoFeed = menu.querySelector<HTMLInputElement>('#sp-autofeed')
-  if (autoFeed !== null) {
-    const syncAutoFeed = (): void => {
-      autoFeed.value = String(getSettings().autoFeedSeconds)
-    }
-    syncAutoFeed()
-    autoFeed.addEventListener('input', () => setAutoFeed(Number(autoFeed.value)))
-    resetHandlers.push(syncAutoFeed)
-  }
-
-  const opacity = menu.querySelector<HTMLInputElement>('#sp-opacity')
-  if (opacity !== null) {
-    const syncOpacity = (): void => {
-      opacity.value = String(getSettings().opacity)
-    }
-    syncOpacity()
-    opacity.addEventListener('input', () => setOpacity(Number(opacity.value)))
-    resetHandlers.push(syncOpacity)
-  }
+  wireKnob('sp-density', () => getSettings().density, setDensity, (value) => `${value}%`)
+  wireKnob('sp-gps', () => getSettings().gps, setGps, (value) => `${value}/s`)
+  wireKnob('sp-autofeed', () => getSettings().autoFeedSeconds, setAutoFeed, (value) => `${value}s`)
+  // Stored as an alpha (0 to 0.5) and shown as a percentage: 0.08 reads as 8%,
+  // which is the number the owner set this knob's default in.
+  wireKnob('sp-opacity', () => getSettings().opacity, setOpacity, (value) => `${Math.round(value * 100)}%`)
 
   const pause = menu.querySelector<HTMLButtonElement>('#sp-pause')
   if (pause !== null) {
@@ -405,15 +409,20 @@ function init(): void {
   // --- Pinned preview persistence, moved in from HoverPreviews.astro. ---
   const hpPersist = menu.querySelector<HTMLInputElement>('#hp-persist')
   if (hpPersist !== null) {
+    // On by default, so the stored value marks OFF rather than on and an
+    // absent key reads as checked: the same direction hover-previews.ts's own
+    // persistent() reads, and the same "nothing stored means the default"
+    // convention as every other preference here. Both files write this key,
+    // so the two have to agree on which value means what.
     try {
-      hpPersist.checked = localStorage.getItem(HP_PERSIST_KEY) === '1'
+      hpPersist.checked = localStorage.getItem(HP_PERSIST_KEY) !== '0'
     } catch {
-      hpPersist.checked = false
+      hpPersist.checked = true
     }
     hpPersist.addEventListener('change', () => {
       try {
-        if (hpPersist.checked) localStorage.setItem(HP_PERSIST_KEY, '1')
-        else localStorage.removeItem(HP_PERSIST_KEY)
+        if (hpPersist.checked) localStorage.removeItem(HP_PERSIST_KEY)
+        else localStorage.setItem(HP_PERSIST_KEY, '0')
       } catch {
         // Private mode, or storage disabled: the choice still applies for this page.
       }
@@ -430,8 +439,10 @@ function init(): void {
      * that is not on every page.
      */
     resetHandlers.push(() => {
-      if (!hpPersist.checked) return
-      hpPersist.checked = false
+      // The default is checked, so a reset only has work to do when the reader
+      // had turned it off.
+      if (hpPersist.checked) return
+      hpPersist.checked = true
       hpPersist.dispatchEvent(new Event('change', { bubbles: true }))
     })
   }

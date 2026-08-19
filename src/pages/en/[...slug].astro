@@ -178,6 +178,26 @@ const postAccent = coverTone(slugOf(post)).token
     <div class="prose">
       <Content components={mdxComponents} />
     </div>
+    {/* The tag row under the article, which this page never drew: a translation
+        carries the same `tags:` line as its original, but there was nowhere in
+        English to send a reader who clicked one, so the chips were left out
+        rather than pointed at Portuguese listings. Now that /en/tags/<tag>/
+        exists (src/pages/en/tags/[tag]/[...page].astro) every chip stays inside
+        /en/. The tag string is the same one in both languages, so slugify()
+        gives the same segment on both sides. */}
+    {
+      post.data.tags.length > 0 && (
+        <ul class="chips">
+          {post.data.tags.map((tag) => (
+            <li>
+              <a href={`/en/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}`}>
+                {tag}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
     {
       series !== null && (
         <nav class="series-nav" aria-label={t('en', 'seriesNav')}>

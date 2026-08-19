@@ -309,9 +309,30 @@ const RULE = '──────────────────────
    * margins are identical. Pulling both back by that 6px makes the drawn
    * distance match rather than the box distance.
    */
-  .controls :global(.theme-toggle),
+  /*
+   * The theme opener starts a second group. Search and the language switch
+   * are about this page (find something here, read it in another language);
+   * the theme and settings openers are about the reader's own setup and
+   * apply everywhere. They are drawn as two runs with a real step between
+   * them rather than one undifferentiated row of four.
+   *
+   * Positive against the row's own measure, minus the one side of invisible
+   * box the opener carries and the switch does not, so the step is the drawn
+   * distance rather than the box distance.
+   */
+  .controls :global(.theme-toggle) {
+    margin-inline-start: calc(0.25rem - ((var(--icon-btn-hit) - var(--icon-btn-chip)) / 2));
+  }
+
+  /*
+   * The settings opener closes up against the theme opener, the pair being
+   * the second group. Both carry the invisible box here, not just one, so
+   * this subtracts both sides: pulling back only one, as the search and
+   * switch steps need, still left this step drawing 6px wider than it
+   * measured.
+   */
   .controls :global(.settings-panel) {
-    margin-inline-start: calc(-0.25rem - ((var(--icon-btn-hit) - var(--icon-btn-chip)) / 2));
+    margin-inline-start: calc(-0.25rem - (var(--icon-btn-hit) - var(--icon-btn-chip)));
   }
 
   /*
