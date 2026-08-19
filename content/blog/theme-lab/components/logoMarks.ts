@@ -87,18 +87,26 @@ export const MARK_ACCENT_ALL_ID = 'todas'
  * `doom` é o tique do menu do Doom, 8 tiques a 35 tiques/s, de `m_menu.c`.
  * `vga` é o hardware puro: o VGA em modo texto pisca o cursor a cada 16
  * quadros verticais, 1,875Hz, sem ajuste por software num PC de verdade
- * (https://www.osdever.net/FreeVGA/vga/textcur.htm). As duas taxas são reais,
- * próximas mas não iguais, e o ponto de ter as duas nomeadas é justamente
- * esse: nenhuma delas é a "certa", são dois hardwares diferentes.
+ * (https://www.osdever.net/FreeVGA/vga/textcur.htm). `terminal`, 530ms por
+ * fase, é o dobro dos 228,6ms do Doom: `docs/theming.md` seção 3 registra que
+ * um cursor de terminal pisca mais devagar que um menu de jogo, um terminal é
+ * paciente onde um menu de jogo é urgente. Era a taxa de verdade da antiga
+ * `LogoLab.vue` antes da fusão com este arquivo, perdida quando o cursor
+ * virou efeito composável só com Doom e VGA listados; o dono pediu de volta,
+ * como padrão. As três taxas são reais, próximas mas não iguais, e o ponto de
+ * ter as três nomeadas é justamente esse: nenhuma delas é a "certa", são três
+ * hardwares (ou convenções) diferentes.
  */
 export const CURSOR_RATES: Record<string, number> = {
   doom: 228.6,
   vga: 266.7,
+  terminal: 530,
 }
 
 export const CURSOR_RATE_OPTIONS = [
   { id: 'doom', name: 'Doom (228,6ms, menu M_SKULL)' },
   { id: 'vga', name: 'VGA (266,7ms, hardware)' },
+  { id: 'terminal', name: 'terminal (530ms, o dobro do Doom)' },
 ]
 
 /** Glifos do glitch, usados pelo wordmark e pela marca "fio", o mesmo vocabulário nos dois lugares. */
