@@ -91,7 +91,6 @@ type UIKey =
   | 'conwayReseed'
   | 'searchShortcutLabel'
   | 'writtenBy'
-  | 'readingProgress'
   | 'contents'
   | 'openContents'
   | 'foldSection'
@@ -226,7 +225,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwayReseed: 'Semear de novo',
     searchShortcutLabel: 'Tecla de atalho da busca',
     writtenBy: 'por',
-    readingProgress: 'progresso da leitura',
     contents: 'Neste post',
     openContents: 'abrir o índice',
     foldSection: 'recolher ou expandir esta seção',
@@ -367,7 +365,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwayReseed: 'Reseed',
     searchShortcutLabel: 'Search shortcut key',
     writtenBy: 'by',
-    readingProgress: 'reading progress',
     contents: 'In this post',
     openContents: 'open the contents',
     foldSection: 'fold or unfold this section',

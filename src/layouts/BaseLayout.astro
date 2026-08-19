@@ -68,6 +68,23 @@ interface Props {
   section?: { name: string; url: string }
   /** Only a post gets the reading progress bar; an index has nothing to read through. */
   progress?: boolean
+  /**
+   * The post's own colour, as one of the `var(--brand-*)` (or `var(--fg)` /
+   * `var(--muted)`) tokens `coverTone()` hands out. Written onto <body> below
+   * as `--post-accent`.
+   *
+   * It used to be written onto <article> by each post page, which was enough
+   * while only the prose read it (bold, italic, prose/emphasis.css). The
+   * header's reading progress now reads it too, and the header is a sibling of
+   * <main>, not a descendant of the article, so an <article>-level custom
+   * property can never reach it. <body> is the nearest element that contains
+   * both, which is the whole reason this prop exists.
+   *
+   * Still exactly one derivation: the post pages pass `coverTone(slug).token`
+   * straight through, the same call the cover itself paints with. Do not
+   * re-derive a post's colour anywhere else (lib/cover.ts's own note says why).
+   */
+  postAccent?: string
 }
 
 const {
@@ -86,6 +103,7 @@ const {
   markdown,
   noindex,
   progress = false,
+  postAccent,
 } = Astro.props
 
 const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
@@ -212,13 +230,21 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       noindex={noindex}
     />
   </head>
-  <body>
+  <!-- The post's cover colour, on the one element that contains both the
+       header (whose dashes draw the reading progress) and the article (whose
+       bold and italic read the same token). A page with no post carries no
+       attribute at all, and every rule that reads --post-accent names its own
+       fallback. See the prop's own comment for the full reasoning. -->
+  <body style={postAccent === undefined ? undefined : `--post-accent: ${postAccent}`}>
     {/* Decorative, aria-hidden, and behind everything (z-index: -1 in its own
         scoped style): placed first so it never affects tab order, which
         starts at the skip link below regardless of where in the DOM this
         renders. */}
     <ConwayField />
-    {progress && <ReadingProgress locale={locale} />}
+    {/* Renders no markup: it drives the header's own dashes. Still rendered
+        here, and still only when `progress` is set, so the script ships on a
+        page that has something to read through and nowhere else. */}
+    {progress && <ReadingProgress />}
     <a href="#main-content" class="skip-link">{t(locale, 'skipToContent')}</a>
     {/* The plain-link "Buscar" nav that used to live here is gone: the
         command palette BrandHeader renders replaced it as the actual way
@@ -517,9 +543,11 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
    * same token <html> paints, so it follows a theme switch with no second
    * value to keep in step.
    *
-   * z-index above the skip link's own 1 and below ReadingProgress's 3: the
-   * progress bar draws at the very top of the viewport and belongs over the
-   * header, the skip link belongs under it.
+   * z-index above the skip link's own 1, so the skip link passes under the
+   * header rather than over it. Nothing on the page draws above this any
+   * more: the reading progress used to, as a fixed bar pinned over the top of
+   * the window at z-index 3, and it is now drawn by this header's own dashes
+   * (ReadingProgress.astro, BrandHeader.astro's `.dash`).
    */
   header {
     position: sticky;

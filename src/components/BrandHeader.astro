@@ -51,6 +51,22 @@ const { locale, home, alternates = [] } = Astro.props
 
 const WORD = 'lsantos.dev'
 const CELLS = markCells()
+
+/**
+ * The run of dashes between the brackets, one `<span>` per character rather
+ * than one text node.
+ *
+ * The characters are the same 38 they have always been, and at rest they
+ * render exactly as they did as plain text: same face, same letter-spacing,
+ * same colour, same trailing-space correction on `.fill`. Splitting them into
+ * elements is what lets ReadingProgress.astro colour them one at a time as
+ * the reader scrolls, since a text node has no per-character handle to hold
+ * on to and a gradient mask over the whole run could only ever fill smoothly
+ * rather than a character at a time. Nothing here depends on that script: with
+ * JS off (or on a page that is not a post) not one of these spans is ever
+ * touched, and the row reads as the plain dashed rule it always was.
+ */
+const RULE = '──────────────────────────────────────'
 ---
 
 <header class="chrome">
@@ -75,7 +91,7 @@ const CELLS = markCells()
       <span class="cursor" aria-hidden="true" />
     </span>
   </a>
-  <span class="fill" aria-hidden="true">──────────────────────────────────────</span>
+  <span class="fill" aria-hidden="true">{RULE.split('').map((ch) => <span class="dash">{ch}</span>)}</span>
   {/*
     The nav links break out of `.controls` and sit between two runs of dashes,
     so the rule reads as running behind them and on to the search button rather
@@ -85,7 +101,7 @@ const CELLS = markCells()
     absolutely or having to know the other's width.
   */}
   <NavLinks locale={locale} />
-  <span class="fill" aria-hidden="true">──────────────────────────────────────</span>
+  <span class="fill" aria-hidden="true">{RULE.split('').map((ch) => <span class="dash">{ch}</span>)}</span>
   <nav class="controls">
     <SearchPalette locale={locale} />
     <LangSwitcher locale={locale} alternates={alternates} />
@@ -180,6 +196,43 @@ const CELLS = markCells()
     margin-inline-end: -0.4em;
     flex: 1;
     overflow: hidden;
+  }
+
+  /*
+   * One dash of the run, and the whole of the reading progress meter's paint:
+   * a dash the reader has already scrolled past reads in the post's own cover
+   * colour, everything past it stays the plain `--muted` it inherits from
+   * `.fill`. Colour is the only property either state touches, so a dash
+   * lighting up cannot move anything on this row.
+   *
+   * `--post-accent` is the cover's brand, written on <body> by
+   * BaseLayout.astro (see the prop there for why it cannot live on <article>
+   * any more, which is where it used to be written). The header is not inside
+   * the article, so this is the nearest ancestor both can read. `--accent-day`
+   * is the fallback for a page that has no post and therefore no cover colour,
+   * which no reader ever sees today: the class is only ever added by
+   * ReadingProgress.astro, and that renders on posts alone.
+   *
+   * No transition: the meter's own script decides when a dash appears (and
+   * jitters that), and a CSS fade on top would smear the one-at-a-time read
+   * the owner asked for into a gradient.
+   *
+   * The stroke is not decoration, it is what keeps the meter readable on the
+   * cover's two NEUTRAL tones. `coverTone()` draws from seven entries, and two
+   * of them have no brand colour at all: `branco` resolves to --fg and
+   * `branco-apagado` to --muted (lib/cover.ts's BRAND_TOKENS says why the
+   * page's own ink is the right neutral there). --muted is exactly the colour
+   * `.fill` already paints every dash, so on those posts a colour change alone
+   * would be no change at all and the progress would be invisible. Thickening
+   * the glyph reads as the rule filling in regardless of which of the seven
+   * the post drew. `-webkit-text-stroke` rather than a weight or a size: it is
+   * paint only, it changes no advance and no line box, so a dash lighting up
+   * still cannot move this row (the same technique, and the same reason,
+   * `.mark-cell` and `.word` below already use it).
+   */
+  .dash.lit {
+    color: var(--post-accent, var(--accent-day));
+    -webkit-text-stroke: 0.4px currentColor;
   }
 
   .controls {

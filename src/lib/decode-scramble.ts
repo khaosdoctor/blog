@@ -4,8 +4,10 @@
  * its own offset, that step through a caller-supplied "still scrambling"
  * callback once per tick for a fixed number of ticks, then lock to a
  * caller-supplied final callback. header-brand.ts (the wordmark's letters)
- * and ReadingProgress.astro (the progress bar's leading edge) both drive it
- * now, through this one loop rather than each keeping its own copy.
+ * drives it. ReadingProgress.astro used to as well, for the old fixed bar's
+ * leading edge, until the owner asked for that effect to go; the loop stays
+ * here rather than moving back into header-brand.ts, since it is the shape
+ * any second caller should reuse instead of writing its own.
  *
  * Timing is the caller's own: `SCRAMBLE_TICK_MS`/`SCRAMBLE_LOCK_TICKS` below
  * are the wordmark's own decided tempo (133ms/tick, a quarter of the header

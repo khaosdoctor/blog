@@ -58,9 +58,10 @@
    * end as before.
    *
    * `--post-accent` did not go away with that move, and is not dead: both
-   * [...slug].astro pages still write it onto the <article> element, and
-   * prose/emphasis.css reads it for bold, italic and the other text
-   * treatments. That is the whole split the owner drew, and it has to be
+   * [...slug].astro pages still hand it to BaseLayout.astro, which writes it
+   * onto <body> (it used to go on <article>, and moved out when the header's
+   * reading progress started reading it too), and prose/emphasis.css reads it
+   * for bold, italic and the other text treatments. That is the whole split the owner drew, and it has to be
    * kept in exactly this shape: a text treatment belongs to the article and
    * follows the COVER's colour (lib/cover.ts's coverTone(), which is where
    * `--post-accent` is now derived, the same function the card itself
