@@ -1,6 +1,6 @@
 # Theming
 
-The long version. `docs/design.md` is the short one, kept skimmable on purpose; this file is the opposite. It records what was looked at, what was tried, what was thrown away and why, and where the reasoning is still incomplete. Every candidate named here exists and is interactive at `/theme-lab/`, and everything at `/theme-lab/` is explained here.
+The long version. `docs/design.md` is the short one, kept skimmable on purpose; this file is the opposite. It records what was looked at, what was tried, what was thrown away and why, and where the reasoning is still incomplete. Every candidate named here exists and is interactive at `/theme-lab-arquivo/`: `/theme-lab/` closed once its last open section was decided, and every bench it ever held, decided or not, lives there now. The rest of this file still describes them by their old `/theme-lab/` section numbers, a snapshot of where things stood while the lab was still open, not a live address.
 
 This started as a pure exploration with nothing applied to the site, and that is no longer true. The parts that have since been adopted are marked as decided where they appear, and the short list of them lives in `docs/design.md`: the two page grounds, the full palette with a tone per colour per ground, the display and subtitle faces, and no CRT scanline effect. Everything else here is still a candidate.
 

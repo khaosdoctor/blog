@@ -153,7 +153,8 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   every control regardless of prior use is the point of moving it here. Everything that affects first paint
   (`motion`, `background-life`, `code-theme`, `color-scheme`) is applied by the blocking head script in
   `BaseLayout`, same as `color-scheme` and `code-theme` already were.
-- **The Conway "game of life" background.** Settled off the bench (`GameOfLife.vue`, `/theme-lab/`): cell size
+- **The Conway "game of life" background.** Settled off the bench (`GameOfLife.vue`, now
+  `content/blog/theme-lab-arquivo/`): cell size
   12px, seed density 10%, 8 generations per second, click adds a glider, one glider fed automatically every 4
   seconds. Cell fade is per ground rather than one shared value, 11% on the dark page and 3% on the sepia one,
   reading as the same faint texture from opposite ends of the lightness scale; the site reads whichever value
@@ -183,26 +184,30 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   10.45, green 7.24, yellow 5.70, red 10.69, purple 15.12. The frame and the hover fill read the same token, which
   also fixes the purple chip's 1.97:1 border on black. The old light-mode mix was failing quietly too: green at
   4.23, yellow at 3.11, both under the 4.5 minimum.
-- **No CRT scanline effect.** The bench (`CrtEffects.vue`, section 01 of `/theme-lab/`) starts every knob at zero and
+- **No CRT scanline effect.** The bench (`CrtEffects.vue`, now `content/blog/theme-lab-arquivo/`) starts every knob at zero and
   prints the contrast cost next to each slider. The owner's own setting: ground light, scanline 0%, pitch 2px, glow
   0%, grain 0%, vignette 0%, flicker off, reading 16.79:1 with the effect off and 16.79:1 on the dark scanline row,
   AAA, cost 0.00, the same setting the bench opens on. The site carries none of this. `CrtEffects.vue` is archived to
   `content/blog/theme-lab-arquivo/`, kept rather than deleted because the rejected settings are the argument for the
   article the owner intends to write about how the redesign was decided.
+- **The cover: candidate 4, wireframe 3D.** Settled off the bench (`CoverLab.vue`, now
+  `content/blog/theme-lab-arquivo/`, which also still holds the DOS-window, fire and waves candidates it never chose
+  between): category chip, a 90-character title, brand purple `#4b15a8` at 90% kept (not the full colour, which
+  saturated too close to the title's fixed white), a solid cursor, seed 65. That seed is what produces the generated
+  solid's own shape, 3 sides, 3 rings, both ends closed, plus wireframe density 6px and wireframe opacity 145%.
+  Covers stay per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in. Colour and seed derive from
+  the slug rather than `Math.random()`, so a rebuild cannot change an existing cover. `scripts/cover.ts` and
+  `src/lib/cover.ts` port this.
+- **The header's wordmark animation: `decifra`.** Settled off the bench (`ChromeHeader.vue`, now
+  `content/blog/theme-lab-arquivo/`): the *Sneakers*-style decrypt scramble, ticking at 530ms, the same rate as the
+  cursor's "terminal" phase. The other four (`teletipo`, `pipboy`, `baud`, `falha`) stay as selectable options rather
+  than retiring, since the bench never pitted them against `decifra` as a closed dispute. `prefers-reduced-motion`
+  freezes on the final frame and the loop never starts; a manual pause control covers WCAG 2.2.2.
 
 ## Open decisions
 
-- Which of the three cover candidates wins. All three are built in `/theme-lab/` section 03 as SVG at the real
-  1200×630: a DOS window with a spaced double border, a full-bleed brand colour with a 75% rule, and a seeded plasma
-  with shadowed letters. Covers stay per locale, `cover.pt.png` and `cover.en.png`, since the title is baked in. Colour
-  and seed derive from the slug rather than being random, so a rebuild cannot change an existing cover.
 - Which body face wins. Everything else about the type system is settled.
 - `--rule-core`: the lab page carries the colour and density options for the section break.
 - Whether the code language chip should still show when a filename tab is already present.
 - Which of his other domains count as internal for the link icon. `lsantos.dev` and `lsantos.me` are confirmed now;
   anything beyond those two is still open.
-- Which of the five logo animation candidates wins. All five are at `/theme-lab/` section 04: colour cycling through
-  the accents, a sliding brightness band, a character-ramp scramble, a sequential trace across the accents, and a pulse on
-  the accents. Alongside them, the "Lucas Santos" wordmark next to the mark scrambles away after a delay and collapses
-  into it rather than just disappearing. `prefers-reduced-motion` stops all five outright rather than just pausing
-  them, and a manual pause control covers WCAG 2.2.2 for whichever one ships.

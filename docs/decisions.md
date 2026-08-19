@@ -10,19 +10,7 @@ Nada aqui impede o build. Tudo funciona hoje.
 
 ---
 
-## 1. Escolher uma capa
-
-As três candidatas estão na seção 04 do `/theme-lab/`, construídas a partir das suas descrições: **janela DOS** (fundo
-preto, borda dupla ANSI espaçada, cursor de bloco no fim do título), **sem moldura** (cartão inteiro numa cor da marca,
-linha fina até 75% da largura) e **plasma** (campo gerado por semente, com sombra dura atrás das letras).
-
-Cada uma é um SVG no tamanho real de 1200x630, então a escolhida entra no gerador sem ser redesenhada.
-
-Escolher qualquer uma aposenta o `scripts/cover.ts` atual, que chama a Replicate para gerar fundo com IA e depende de um
-serviço Deno externo. As três desenham localmente, só geometria e texto, então as capas passam a funcionar offline como
-o resto do build.
-
-## 2. Testar o fluxo de escrita no Obsidian
+## 1. Testar o fluxo de escrita no Obsidian
 
 Sua, não minha: escrever um post no vault, publicar e confirmar que ele aparece. É a única parte do sistema que ninguém
 verificou de ponta a ponta.

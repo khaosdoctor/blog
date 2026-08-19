@@ -9,6 +9,39 @@ Portuguese, since it holds only the open questions you still have to answer, and
 
 ---
 
+## The theme lab closes: every bench decided, the post deleted, the archive stands alone
+
+`/theme-lab/` is gone. Its last three open sections, the header and post list (interface), the cover, and the
+Conway background, all closed this session (the header on `decifra` and the box-bar frame, the list on the dense
+table, the cover on candidate 4 wireframe 3D: purple `#4b15a8` at 90% kept, seed 65, wireframe density 6px,
+opacity 145%). With nothing left undecided, the post itself retired rather than staying open as an empty shell:
+the standing rule in `AGENTS.md` protects candidates, not the live bench page, and every candidate already lived in
+`content/blog/theme-lab-arquivo/`.
+
+**What moved.** `ChromeHeader.vue`, `ChromeList.vue`, `CoverLab.vue` and `GameOfLife.vue` join the archive, each
+still rendering with its decided values as the default. The shared control library the whole lab depended on
+(`DecisionCopy.vue`, `Knob.vue`, `Panel.vue`, `Pick.vue`, `Toggle.vue`, `contrast.ts`, `copy.ts`, `logoMarks.ts`,
+`LogoMark.vue`, `fonts.css`) and the one image asset (`placeholder.png`) moved with them, since the archive is now
+the only place left importing any of it. Every archived component's imports were rewritten from the old
+`../../theme-lab/components/` back-reference to a local `./` one. `DecisionCopy.vue`'s generated prompt used to cite
+"/theme-lab/"; it now cites `/theme-lab-arquivo/`, since that citation ships to readers who copy it.
+
+**What did not move.** The archive's own historical entries elsewhere in this file, and the ones in `docs/design.md`
+that describe a bench's location at the moment a past decision was made, keep their original `/theme-lab/`
+wording: those are records of what was true then, not live links. `docs/design.md`'s "Settled" bullets for the
+Conway background and the CRT bench were updated to their current location, since those bullets describe present
+state rather than history, and the two "Open decisions" bullets that named `/theme-lab/` sections directly (the
+cover, the logo animation) moved to "Settled" with the actual outcome, since both were already decided and neither
+survives naming a route that no longer resolves. `docs/theming.md` still describes `/theme-lab/` throughout, as the
+long, itemised research record it always was; it was not rewritten wholesale, only checked for anything that would
+mislead a reader looking for a bench that no longer exists at that address.
+
+**Verified.** `npm run check` clean. `/theme-lab/` 404s, `/theme-lab-arquivo/` still renders all islands, including
+the four newly moved ones, with their decided defaults visible in the rendered markup. No browser in this
+environment, so no visual confirmation; the dev server's own memory ceiling needed raising
+(`--max-old-space-size`) to render the now-heavier archive page without crashing, a pre-existing constraint of this
+machine rather than something this change introduced, though this change made the page heavy enough to hit it.
+
 ## The Conway background ships, the settings panel is its home, and the almost-no-animation call reopens
 
 The game-of-life bench (`GameOfLife.vue`, `/theme-lab/`) moves to the real site as `ConwayField.astro` plus
