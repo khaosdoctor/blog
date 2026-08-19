@@ -45,6 +45,12 @@ const parsed = parseAuthors(authors)
   .authors {
     display: flex;
     flex-wrap: wrap;
+    /* Baseline, not the default stretch: the author name is a link, and the
+       site-wide link treatment gives every link block padding plus a dashed
+       underline offset from its own baseline. Stretched to this row height,
+       that underline drew well below the name and out of line with the "por"
+       beside it. Baseline puts both on one line. */
+    align-items: baseline;
     gap: 0.35rem;
     margin-block: -1.5rem 2rem;
     font-family: var(--font-mono);
