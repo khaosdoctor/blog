@@ -17,6 +17,7 @@ import { join } from 'node:path'
 import sharp from 'sharp'
 import { parseAuthors } from '../src/lib/authors.ts'
 import { buildCoverSvg, formatCoverByline } from '../src/lib/cover.ts'
+import { estimateReadingTime } from '../src/lib/reading-time.ts'
 import { fail as failLine, heading, ok } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
@@ -57,7 +58,15 @@ const pubDate = new Date(pubDateRaw)
 const [author] = parseAuthors(undefined)
 const byline = formatCoverByline(pubDate, lang, author.name)
 
-const svg = buildCoverSvg({ slug, title, category, byline })
+// The card's meta line carries the reading time, and this script has no
+// render() to read the exact remark-computed number off (src/plugins/
+// remark-reading-time.mjs runs inside Astro). The regex estimate every list
+// page already shows is the one available here, so an MDX-heavy post's
+// og:image can read a minute off its own page. Same trade PostList makes, and
+// the same reason.
+const readingMinutes = estimateReadingTime(raw.replace(/^---\n[\s\S]*?\n---/, ''))
+
+const svg = buildCoverSvg({ slug, title, category, byline, readingMinutes })
 const png = await sharp(Buffer.from(svg)).png().toBuffer()
 
 const target = join(dir, 'cover.png')
