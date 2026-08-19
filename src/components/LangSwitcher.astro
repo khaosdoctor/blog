@@ -1,19 +1,23 @@
 ---
 // A chunky pixel-art ON/OFF slab rather than a plain link pair or a grey
 // track with a coloured dot (Lucas's own reference image): the whole slab is
-// filled in the current state's brand colour (green for Português, red for
-// English), a single word of large pixel type names that state, and a
-// raised, textured knob occupies the other half, sliding to the side that
-// state's word is not on. Still a single real link, not a faked in-place
-// control: choosing a language is a navigation, to the page's own alternate
-// when one exists and to that language's home otherwise, exactly as the
-// plain-link version did.
+// filled in the DESTINATION language's brand colour (green for Português,
+// red for English, so a page currently in Portuguese shows a red slab, the
+// English it switches to), a single word of large pixel type names that same
+// destination, and a raised block occupies the other half, sliding to the
+// side that word is not on. A switch shows where it will take you: the fill
+// and the word both name the destination, on purpose, so they agree with
+// each other rather than one naming the current language and the other the
+// destination. Still a single real link, not a faked in-place control:
+// choosing a language is a navigation, to the page's own alternate when one
+// exists and to that language's home otherwise, exactly as the plain-link
+// version did.
 //
 // Colour is never the only signal (WCAG 1.4.1, and red/green is the one pair
-// a colour-blind reader is least likely to tell apart): the knob's position
+// a colour-blind reader is least likely to tell apart): the block's position
 // is one non-colour signal, the PT/EN word printed on the slab is a second,
-// and the link's own accessible name states in words which language is
-// current and which one clicking it goes to.
+// and the link's own accessible name states in words which language it goes
+// to.
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -37,11 +41,12 @@ function hrefFor(code: Locale): string {
   return LOCALES.find((entry) => entry.code === code)?.home ?? '/'
 }
 
-const current = LOCALES.find((entry) => entry.code === locale)
 const other = LOCALES.find((entry) => entry.code !== locale)
 const otherHref = other === undefined ? '/' : hrefFor(other.code)
 const otherName = other?.name ?? ''
-const currentLabel = current?.label ?? locale.toUpperCase()
+// The word on the slab names the destination, agreeing with the fill
+// (both below): there is no more a "current label" for this control to show.
+const otherLabel = other?.label ?? ''
 ---
 
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
@@ -58,7 +63,7 @@ const currentLabel = current?.label ?? locale.toUpperCase()
        Here the drawn box carries real children (the fill, the word, the
        knob) rather than a pseudo-element, so it is a real element instead. */}
     <span class="lang-slab" aria-hidden="true">
-      <span class="lang-word">{currentLabel}</span>
+      <span class="lang-word">{otherLabel}</span>
       <span class="lang-knob"></span>
     </span>
   </a>
@@ -116,19 +121,29 @@ const currentLabel = current?.label ?? locale.toUpperCase()
     overflow: hidden;
     /*
      * The whole slab is the colour, not a neutral track with a coloured
-     * dot on it: `--lang-fill-color` picks the brand token for the current
-     * state (green by default, overridden to red below), then mixes it
-     * toward black on the sepia page or toward white on the black one, the
-     * same oklab mix chips.css already proved safe for these two exact
-     * colours (dark green 13.16:1, light green 11.63:1, dark red 10.35:1,
-     * light red 13.45:1, all read there as --chip-ink against `--bg`, which
-     * is exactly what `.lang-word` below paints on top of it).
+     * dot on it, and it is the raw brand token, not a mix toward black or
+     * white: `--lang-fill-color` picks the destination language's brand
+     * colour (red by default, since a page in Portuguese switches to
+     * English; overridden to green below, since a page in English switches
+     * to Português).
+     *
+     * This used to mix each colour toward the ground first, the same
+     * formula chips.css's --chip-ink uses, because the word painted on top
+     * (`.lang-word` below) needed the contrast that gave. Painting the token
+     * raw instead reuses exactly the numbers theme.css's own brand table
+     * already measured for these colours as text against each ground (its
+     * word ink is literally `--bg`, so word-on-fill is the same pair,
+     * foreground and background swapped, which the contrast formula treats
+     * identically): red 4.67:1 dark / 4.72:1 light, green 8.03:1 dark /
+     * 3.29:1 light. Both pass on dark; on light, red clears the 4.5 floor
+     * and green does not. A page in English, in light mode, shows a green
+     * slab (the Português destination) with the word under the floor at
+     * 3.29:1, a real regression this raw-colour change introduces and a
+     * fix past what this task asked for: reported rather than silently
+     * mixed back in.
      */
-    --lang-fill-color: var(--brand-green);
-    background: light-dark(
-      color-mix(in oklab, var(--lang-fill-color) 50%, black),
-      color-mix(in oklab, var(--lang-fill-color) 52%, white)
-    );
+    --lang-fill-color: var(--brand-red);
+    background: var(--lang-fill-color);
     /*
      * A hard offset block, no blur, behind the whole slab: the same shadow
      * code frames drop (--code-shadow-offset, --code-shadow-color in
@@ -141,17 +156,16 @@ const currentLabel = current?.label ?? locale.toUpperCase()
   }
 
   .lang-switch[data-current='en'] .lang-slab {
-    --lang-fill-color: var(--brand-red);
+    --lang-fill-color: var(--brand-green);
   }
 
   /*
-   * The state word: large pixel type (PxPlus IBM VGA8, --font-subtitle,
-   * sized at a whole multiple of 16px so its bitmap grid stays crisp),
-   * white in the reference and `--bg` here, the same inversion chips.css's
-   * own hover fill uses (the fill above is that chip's --chip-ink formula,
-   * so painting `--bg` on top of it is the identical, already-measured
-   * pairing read the other way round). Absolutely positioned rather than a
-   * flex child: its side (left for one language, right for the other) is a
+   * The destination word: large pixel type (PxPlus IBM VGA8,
+   * --font-subtitle, sized at a whole multiple of 16px so its bitmap grid
+   * stays crisp), white in the reference and `--bg` here (see the
+   * measurements on `.lang-slab` above for what that pairing measures out
+   * to against the raw fill). Absolutely positioned rather than a flex
+   * child: its side (left for one language, right for the other) is a
    * per-locale, server-rendered fact, not something that toggles at
    * runtime, so it needs no transition of its own.
    */
@@ -174,16 +188,18 @@ const currentLabel = current?.label ?? locale.toUpperCase()
   }
 
   /*
-   * The knob: a raised, textured block occupying the half of the slab the
-   * word is not on. `--lang-knob-face`/`--lang-knob-edge` (theme.css) are a
-   * fixed neutral pair rather than a mix of the brand colours above: a
-   * physical switch's plastic grip does not repaint itself to match ON
-   * green or OFF red, and the border needs to read as darker than the face
-   * in both directions, which the brand mix (light in dark mode) cannot
-   * promise. The two repeating-linear-gradients cross into the grid texture
-   * a moulded grip is drawn with in pixel art; the border reads at 2x
-   * `--border` rather than a bare literal, so it is still built from the
-   * one token everything else's hairline reads from.
+   * The knob: a flat block occupying the half of the slab the word is not
+   * on, one of the two non-colour state signals alongside the word's own
+   * text. It used to carry a crosshatch texture (two repeating-linear-
+   * gradients, a moulded-grip look); dropped, flat rather than textured, per
+   * the owner's own direction. `--lang-knob-face`/`--lang-knob-edge`
+   * (theme.css) stay a fixed neutral pair rather than a mix of the brand
+   * colours above: a physical switch's plastic grip does not repaint itself
+   * to match ON green or OFF red, and the border needs to read as darker
+   * than the face in both directions, which the brand mix (light in dark
+   * mode) cannot promise. The border still reads at 2x `--border` rather
+   * than a bare literal, so it is still built from the one token everything
+   * else's hairline reads from.
    *
    * Position is still the same transform+steps mechanism the plain-link
    * version's knob used, kept for the same reason: a same-document
@@ -202,9 +218,6 @@ const currentLabel = current?.label ?? locale.toUpperCase()
     transform: translateX(0%);
     transition: transform var(--duration) steps(2, jump-none);
     background-color: var(--lang-knob-face);
-    background-image:
-      repeating-linear-gradient(90deg, var(--lang-knob-edge) 0 2px, transparent 2px 8px),
-      repeating-linear-gradient(0deg, var(--lang-knob-edge) 0 2px, transparent 2px 8px);
     border: calc(var(--border) * 2) solid var(--lang-knob-edge);
   }
 
