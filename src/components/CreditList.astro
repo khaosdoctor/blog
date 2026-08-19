@@ -1,8 +1,8 @@
 ---
 // Shared by /oss/ and /en/oss/, the same way Search.astro is shared by the two
 // search pages: one render, driven by a locale prop, reading the one credit
-// list in src/lib/credits.ts.
-import { credits, type CreditKind } from '../lib/credits'
+// data in src/lib/credits.ts.
+import { dependencies, fonts, icons, type AttributedCredit, type Credit } from '../lib/credits'
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -10,56 +10,80 @@ interface Props {
 }
 
 const { locale } = Astro.props
-
-// Fixed order, not the array's own order: fonts first since one of them is
-// the reason this page exists.
-const KIND_ORDER: CreditKind[] = ['font', 'icon', 'dependency', 'markdown', 'search']
-const KIND_HEADING: Record<CreditKind, Parameters<typeof t>[1]> = {
-  font: 'ossFontsHeading',
-  icon: 'ossIconsHeading',
-  dependency: 'ossDependenciesHeading',
-  markdown: 'ossMarkdownHeading',
-  search: 'ossSearchHeading',
-}
-const groups = KIND_ORDER.map((kind) => ({
-  kind,
-  heading: t(locale, KIND_HEADING[kind]),
-  entries: credits.filter((credit) => credit.kind === kind),
-})).filter((group) => group.entries.length > 0)
 ---
 
-{
-  groups.map((group) => (
-    <section class="credit-group">
-      <h2>{group.heading}</h2>
-      <ul>
-        {group.entries.map((credit) => (
-          <li>
-            <a href={credit.url} rel="noopener">
-              {credit.name}
+<section class="credit-group">
+  <h2>{t(locale, 'ossFontsHeading')}</h2>
+  <ul>
+    {fonts.map((credit: AttributedCredit) => (
+      <li>
+        <a href={credit.url} rel="noopener">
+          {credit.name}
+        </a>
+        <span class="meta">
+          {credit.licenseUrl ? (
+            <a href={credit.licenseUrl} rel="noopener license">
+              {credit.license}
             </a>
-            <span class="meta">
-              {credit.licenseUrl ? (
-                <a href={credit.licenseUrl} rel="noopener license">
-                  {credit.license}
-                </a>
-              ) : (
-                credit.license
-              )}
-              {credit.author && (
-                <>
-                  {' · '}
-                  {t(locale, 'writtenBy')} {credit.author}
-                </>
-              )}
-            </span>
-            <p>{credit.note}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
-  ))
-}
+          ) : (
+            credit.license
+          )}
+          {credit.author && (
+            <>
+              {' · '}
+              {t(locale, 'writtenBy')} {credit.author}
+            </>
+          )}
+        </span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<section class="credit-group">
+  <h2>{t(locale, 'ossIconsHeading')}</h2>
+  <ul>
+    {icons.map((credit: AttributedCredit) => (
+      <li>
+        <a href={credit.url} rel="noopener">
+          {credit.name}
+        </a>
+        <span class="meta">
+          {credit.licenseUrl ? (
+            <a href={credit.licenseUrl} rel="noopener license">
+              {credit.license}
+            </a>
+          ) : (
+            credit.license
+          )}
+          {credit.author && (
+            <>
+              {' · '}
+              {t(locale, 'writtenBy')} {credit.author}
+            </>
+          )}
+        </span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<section class="credit-group">
+  <h2>{t(locale, 'ossDependenciesHeading')}</h2>
+  <ul>
+    {dependencies.map((credit: Credit) => (
+      <li>
+        {credit.url ? (
+          <a href={credit.url} rel="noopener">
+            {credit.name}
+          </a>
+        ) : (
+          credit.name
+        )}
+      </li>
+    ))}
+  </ul>
+</section>
 
 <style>
   .credit-group + .credit-group {
@@ -96,11 +120,5 @@ const groups = KIND_ORDER.map((kind) => ({
     color: var(--muted);
     font-family: var(--font-mono);
     font-size: var(--text-tiny);
-  }
-
-  li > p {
-    margin-block: 0.4rem 0;
-    color: var(--muted);
-    font-size: var(--text-small);
   }
 </style>
