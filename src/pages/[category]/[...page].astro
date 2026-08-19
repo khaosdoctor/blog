@@ -2,7 +2,8 @@
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
-import { getPublishedPosts } from '../../lib/posts'
+import Pagination from '../../components/Pagination.astro'
+import { getPublishedPosts, LIST_PAGE_SIZE } from '../../lib/posts'
 import { categoryDescription } from '../../lib/categories'
 import { getCategories } from '../../lib/taxonomy'
 import { HREFLANG, localePath, LOCALES, t } from '../../i18n/ui'
@@ -11,7 +12,11 @@ import { HREFLANG, localePath, LOCALES, t } from '../../i18n/ui'
 // Astro gives this dynamic route priority over the [...slug] rest route, so the
 // only real hazard is a category named exactly like a post: fail the build
 // instead of silently shadowing an article.
-export const getStaticPaths = (async () => {
+//
+// [...page] rather than [page]: page 1 stays bare (/{category}/), and page
+// 2+ gets a real /{category}/2/, the same rest-param convention as the
+// paginated home page (see src/pages/[...page].astro's own comment).
+export const getStaticPaths = (async ({ paginate }) => {
   const [categories, posts] = await Promise.all([getCategories(), getPublishedPosts()])
   const slugs = new Set(posts.map((post) => post.id))
   for (const category of categories.keys()) {
@@ -30,28 +35,31 @@ export const getStaticPaths = (async () => {
   const sectionsByLocale = languages.map(
     ([locale, localePosts]) => [locale, new Set(localePosts.map((post) => post.data.category))] as const,
   )
-  return [...categories.entries()].map(([category, categoryPosts]) => ({
-    params: { category },
-    props: {
-      category,
-      posts: categoryPosts,
-      languages: sectionsByLocale.filter(([, sections]) => sections.has(category)).map(([locale]) => locale),
-    },
-  }))
+  return [...categories.entries()].flatMap(([category, categoryPosts]) =>
+    paginate(categoryPosts, {
+      pageSize: LIST_PAGE_SIZE,
+      params: { category },
+      props: {
+        category,
+        languages: sectionsByLocale.filter(([, sections]) => sections.has(category)).map(([locale]) => locale),
+      },
+    }),
+  )
 }) satisfies GetStaticPaths
 
-const { category, posts, languages } = Astro.props
-const alternates = languages.map((locale) => ({
+const { category, languages, page } = Astro.props
+const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
   lang: HREFLANG[locale],
   href: new URL(localePath(locale, `/${category}/`), Astro.site).href,
 }))
 // A written description when there is one, otherwise the generated sentence.
 const described = categoryDescription(category)
 const description = described ?? t('pt', 'sectionDescription', category)
+const title = page.currentPage > 1 ? `${category} | Lucas Santos | página ${page.currentPage}` : `${category} | Lucas Santos`
 ---
 
 <BaseLayout
-  title={`${category} | Lucas Santos`}
+  title={title}
   description={description}
   alternates={alternates}
   section={{ name: category, url: `/${category}/` }}
@@ -59,9 +67,10 @@ const description = described ?? t('pt', 'sectionDescription', category)
   <h1>{category}</h1>
   {described !== null && <p class="about">{described}</p>}
   <p class="count">
-    {posts.length} {t('pt', posts.length === 1 ? 'article' : 'articles')}
+    {page.total} {t('pt', page.total === 1 ? 'article' : 'articles')}
   </p>
-  <PostList posts={posts} />
+  <PostList posts={page.data} />
+  <Pagination page={page} basePath={`/${category}/`} locale="pt" />
 </BaseLayout>
 
 <style>

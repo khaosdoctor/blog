@@ -1,0 +1,48 @@
+---
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PostList from '../components/PostList.astro'
+import Pagination from '../components/Pagination.astro'
+import { getPublishedPosts, LIST_PAGE_SIZE } from '../lib/posts'
+import { t } from '../i18n/ui'
+
+// [...page] (a rest param, not [page]) so page 1 is the bare "/" this file
+// used to be (index.astro), and page 2+ get a real "/2/", "/3/" segment:
+// paginate() only special-cases the first page's own params to undefined
+// for a rest param, not for a plain [page] segment, which would put page 1
+// at /1/ instead of /.
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPublishedPosts()
+  return paginate(posts, { pageSize: LIST_PAGE_SIZE })
+}) satisfies GetStaticPaths
+
+const { page } = Astro.props
+const title = page.currentPage > 1 ? `Lucas Santos | página ${page.currentPage}` : 'Lucas Santos'
+---
+
+<BaseLayout
+  title={title}
+  description={t('pt', 'homeDescription')}
+  alternates={[
+    { lang: 'pt-BR', href: new URL('/', Astro.site).href },
+    { lang: 'en', href: new URL('/en/', Astro.site).href },
+  ]}
+>
+  <h1 class="visually-hidden">Lucas Santos</h1>
+  <PostList posts={page.data} />
+  <Pagination page={page} basePath="/" locale="pt" />
+</BaseLayout>
+
+<style>
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

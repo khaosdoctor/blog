@@ -64,10 +64,10 @@ const LANGUAGE_NEUTRAL_TEXT = new Set(['Lucas Santos', 'Spotify', 'Slides'])
  */
 const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
   '404.astro': 'shared',
-  '[category]/index.astro': 'per-locale',
+  '[category]/[...page].astro': 'per-locale',
   '[...slug].astro': 'per-locale',
   '[...slug]/index.md.ts': 'per-locale',
-  'index.astro': 'per-locale',
+  '[...page].astro': 'per-locale',
   'link-metadata.json.ts': 'shared',
   'llms.txt.ts': 'source-only',
   'manifest.webmanifest.ts': 'per-locale',
@@ -78,7 +78,7 @@ const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
   'scheduled.json.ts': 'shared',
   'search.astro': 'per-locale',
   'series/[name].astro': 'source-only',
-  'tags/[tag].astro': 'source-only',
+  'tags/[tag]/[...page].astro': 'source-only',
 }
 
 /** Pages that carry every language at once, so a t() call for another one is correct there. */
