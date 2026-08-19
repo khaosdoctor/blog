@@ -87,8 +87,18 @@ export function formatDate(date: Date, lang: string): string {
   })
 }
 
-/** How many posts a list page (the archive, a section, a tag) holds before it pages. */
-export const LIST_PAGE_SIZE = 20
+/**
+ * How many posts a list page (the archive, a section, a tag) holds before it
+ * pages. This is the only page size the site actually builds: a reader can
+ * still ask Pagination.astro's own size control for 20, 50 or 100, but that
+ * control works by fetching and merging further pages built at this size
+ * client-side (src/scripts/page-size.ts) rather than by this constant
+ * changing per request, which a static build has no way to do. 10, not the
+ * 20 this used to be, because it is also the reader-facing default the size
+ * control opens on, and no-JS/first-paint readers get whatever this number
+ * is with no further choice available to them.
+ */
+export const LIST_PAGE_SIZE = 10
 
 // Mirrors remark-reading-time.mjs's own rate, so the number a list shows and
 // the number the post's own page shows are computed from the same assumption.
