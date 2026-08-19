@@ -206,42 +206,6 @@ function projectPerspective(v: Vec3, cx: number, cy: number, scale: number, camD
   return { x: cx + x * factor * scale, y: cy + y * factor * scale, z }
 }
 
-/**
- * Amostra o perímetro de um retângulo em pontos presos a uma grade de `step`
- * px, célula por célula, na mesma lógica das arestas do sólido: é o que
- * deixa a moldura do candidato 4 desenhada no mesmo vocabulário do wireframe
- * (glifos numa grade) em vez de um `<rect>` de traço liso. O vocabulário é o
- * mesmo, o peso não: a moldura carrega `WIRE_BORDER_OPACITY`, bem mais alto
- * que a opacidade do sólido interno, para as duas lerem como camadas
- * separadas (frame vibrante, textura por trás) em vez de uma coisa só.
- */
-function rectPerimeterCells(
-  frame: { x: number; y: number; width: number; height: number },
-  step: number,
-): Array<{ x: number; y: number }> {
-  const seen = new Set<string>()
-  const points: Array<{ x: number; y: number }> = []
-  const addEdge = (x1: number, y1: number, x2: number, y2: number) => {
-    const length = Math.hypot(x2 - x1, y2 - y1)
-    const steps = Math.max(1, Math.round(length / step))
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps
-      const gx = Math.round((x1 + (x2 - x1) * t) / step) * step
-      const gy = Math.round((y1 + (y2 - y1) * t) / step) * step
-      const key = `${gx},${gy}`
-      if (seen.has(key)) continue
-      seen.add(key)
-      points.push({ x: gx, y: gy })
-    }
-  }
-  const { x, y, width, height } = frame
-  addEdge(x, y, x + width, y)
-  addEdge(x + width, y, x + width, y + height)
-  addEdge(x + width, y + height, x, y + height)
-  addEdge(x, y + height, x, y)
-  return points
-}
-
 interface WaveParams {
   freqA: number
   freqB: number
@@ -586,11 +550,10 @@ const sixWaveCells = computed(() => waveField(sixWave.value, brand.value.hex, DA
 const WIRE_CENTER = { x: 900, y: 335 }
 const WIRE_RADIUS = 130
 const WIRE_CAM_DIST = 4.5
-// A moldura carrega a cor da marca cheia e vibrante, o sólido por trás dela
-// fica sempre mais fraco: WIRE_OPACITY_FLOOR + WIRE_OPACITY_RANGE (o teto do
-// sólido, na aresta mais perto da câmera) nunca alcança WIRE_BORDER_OPACITY,
-// de propósito, para as duas lerem como camadas separadas, não uma textura só.
-const WIRE_BORDER_OPACITY = 0.92
+// Opacidade de cada glifo do sólido, escalada pela distância à câmera:
+// WIRE_OPACITY_FLOOR é o piso (aresta mais longe) e WIRE_OPACITY_RANGE é
+// quanto ela sobe até a aresta mais perto. A moldura não faz mais parte dessa
+// escala: é o mesmo `<rect>` duplo dos candidatos 1, 5 e 6, por cima do sólido.
 const WIRE_OPACITY_FLOOR = 0.12
 const WIRE_OPACITY_RANGE = 0.35
 
@@ -606,7 +569,8 @@ const WIRE_OPACITY_RANGE = 0.35
  * perto (a de maior "closeness"), porque é ela que estaria na frente. Esse
  * desvanecimento é textura, não texto: fica como está, só o texto do cartão
  * ganhou piso de contraste. A opacidade do texto agora também tem teto: veja
- * WIRE_OPACITY_FLOOR/WIRE_OPACITY_RANGE acima, sempre abaixo da moldura.
+ * WIRE_OPACITY_FLOOR/WIRE_OPACITY_RANGE acima, que regulam só o sólido; a
+ * moldura desenha por cima como um `<rect>` fixo, fora dessa escala.
  */
 const wireCells = computed(() => {
   const solid = wireSolid.value
@@ -637,11 +601,6 @@ const wireCells = computed(() => {
   }
   return Array.from(best.values())
 })
-
-const wireBorderCells = computed(() => [
-  ...rectPerimeterCells(outerFrame.value, wireDensity.value),
-  ...rectPerimeterCells(innerFrame.value, wireDensity.value),
-])
 
 const FIRE_BANDS = 6
 const FIRE_ALPHA_MODE_OPTIONS = [
@@ -763,7 +722,7 @@ const dosDecisionContext = computed(
 
 const wireframeDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Sólido e giro nascem do hash do slug via um PRNG pequeno (mulberry32), não de Math.random() nem de uma lista fixa de formas; a projeção é perspectiva pura em JS (sem canvas, sem WebGL, sem textmode.js), porque o gerador real só roda sharp sobre SVG estático no build. A moldura dupla é feita da mesma malha de "+" do sólido, mas em ${Math.round(WIRE_BORDER_OPACITY * 100)}% de opacidade contra um teto de ${Math.round((WIRE_OPACITY_FLOOR + WIRE_OPACITY_RANGE) * 100)}% no sólido por trás: mesmo vocabulário de glifo, duas camadas em vez de uma textura só. O chapéu "blog.lsantos.dev / ${category.value}" ganhou cor própria, a cor cheia da marca (${brand.value.hex}, ${brandRawContrast.value.toFixed(2)}:1 sobre ${DARK_BG}, ${grade(brandRawContrast.value)}), e a assinatura escureceu (75% de opacidade da tinta do título), pra dar mais um degrau de leitura entre chapéu, título e assinatura. Tinta do título: color-mix(in oklab, ${brand.value.hex} ${inkMix[brand.value.id]}%, white) = ${cardInk.value}, ${cardInkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(cardInkBestContrast.value)}), ${cardInkWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} no pior caso (${grade(cardInkWorstContrast.value)}); o roxo já voltou "escuro demais" três vezes com um piso automático de 4,5:1, então agora é um knob por marca na bancada, não mais um laço decidindo sozinho. O título também carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
+    `${SVG_NOTE} Sólido e giro nascem do hash do slug via um PRNG pequeno (mulberry32), não de Math.random() nem de uma lista fixa de formas; a projeção é perspectiva pura em JS (sem canvas, sem WebGL, sem textmode.js), porque o gerador real só roda sharp sobre SVG estático no build. A moldura voltou a ser o mesmo retângulo duplo de traço liso dos candidatos 1, 5 e 6, por cima do sólido, não mais a malha de "+" do wireframe; o glifo fica só por dentro dela. O chapéu "blog.lsantos.dev / ${category.value}" ganhou cor própria, a cor cheia da marca (${brand.value.hex}, ${brandRawContrast.value.toFixed(2)}:1 sobre ${DARK_BG}, ${grade(brandRawContrast.value)}), e a assinatura escureceu (75% de opacidade da tinta do título), pra dar mais um degrau de leitura entre chapéu, título e assinatura. Tinta do título: color-mix(in oklab, ${brand.value.hex} ${inkMix[brand.value.id]}%, white) = ${cardInk.value}, ${cardInkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(cardInkBestContrast.value)}), ${cardInkWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} no pior caso (${grade(cardInkWorstContrast.value)}); o roxo já voltou "escuro demais" três vezes com um piso automático de 4,5:1, então agora é um knob por marca na bancada, não mais um laço decidindo sozinho. O título também carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
 )
 
 const fireDecisionContext = computed(
@@ -894,18 +853,8 @@ const sixDecisionContext = computed(
               :fill="brand.hex"
               :opacity="WIRE_OPACITY_FLOOR + c.closeness * WIRE_OPACITY_RANGE"
             >+</text>
-            <text
-              v-for="(c, i) in wireBorderCells"
-              :key="`b${i}`"
-              :x="c.x"
-              :y="c.y"
-              text-anchor="middle"
-              dominant-baseline="central"
-              :font-family="LABEL_FONT"
-              :font-size="wireDensity"
-              :fill="brand.hex"
-              :opacity="WIRE_BORDER_OPACITY"
-            >+</text>
+            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
+            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
 
             <text
               :x="dosCard.padX + SHADOW_OFFSET"
