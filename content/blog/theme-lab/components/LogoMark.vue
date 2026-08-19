@@ -13,10 +13,17 @@
  * is only advisory (the owner asked for the full 0-300px range), so whatever
  * `sizePx` the caller passes is drawn as given.
  *
- * `accentColor` is the single brand colour both candidates draw in, the same
- * "one accent, not a rainbow per cell" idea `ChromeHeader.vue` already uses
- * for the rest of the header. It replaces the old per-role rainbow the
- * "lattice" candidate used to draw from `SHAPE`'s R/G/Y/B letters.
+ * `accentColor` is the single brand colour both candidates draw in for every
+ * solid-accent choice in the picker, the same "one accent, not a rainbow per
+ * cell" idea `ChromeHeader.vue` already uses for the rest of the header.
+ *
+ * `multiAccent` is the owner's request for the rainbow back, as an option
+ * rather than the only mode: when true, `accentColor` is ignored and each
+ * cell instead takes the brand colour of the region it belongs to
+ * (`ROLE_TOKEN`, resolved through `rectRoleAt` in `logoMarks.ts`), the same
+ * five colours the hover-solid mark and `public/favicon.svg` already draw.
+ * Both candidates support it; `cellColor` below is the single place that
+ * decides between the two modes per cell.
  *
  * On hover (the parent link's hover, via `:global(a):hover`), the character
  * art swaps to the true five-rectangle solid mark traced from
@@ -34,11 +41,11 @@
  * automatic motion source with no pause control.
  */
 import { computed, onUnmounted, ref, watch } from 'vue'
-import { GLITCH_GLYPHS, MARK_RECTS, ROLE_TOKEN, roleAt, wireGlyph, type MarkCandidateId } from './logoMarks'
+import { GLITCH_GLYPHS, MARK_RECTS, rectRoleAt, ROLE_TOKEN, roleAt, wireGlyph, type MarkCandidateId } from './logoMarks'
 
 const props = withDefaults(
-  defineProps<{ candidate: MarkCandidateId; sizePx: number; accentColor?: string; glitchEnabled?: boolean }>(),
-  { accentColor: 'var(--fg)' },
+  defineProps<{ candidate: MarkCandidateId; sizePx: number; accentColor?: string; multiAccent?: boolean; glitchEnabled?: boolean }>(),
+  { accentColor: 'var(--fg)', multiAccent: false },
 )
 
 const rows = computed(() => Array.from({ length: 8 }, (_, r) => Array.from({ length: 8 }, (_, c) => ({ r, c }))))
@@ -108,6 +115,18 @@ function glyphAt(row: number, col: number): string {
   if (glitchCell.value && glitchCell.value.r === row && glitchCell.value.c === col) return glitchGlyph.value
   return wireGlyph(row, col)
 }
+
+/**
+ * A cor de uma célula, para os dois candidatos: vazia usa a régua do fundo, e
+ * preenchida usa `accentColor` sempre que `multiAccent` está desligado (o
+ * modo de hoje). Ligado, cada célula preenchida troca para a cor do papel que
+ * `rectRoleAt` resolve para ela, a marca original de volta como opção.
+ */
+function cellColor(row: number, col: number): string {
+  if (roleAt(row, col) === '.') return 'var(--rule)'
+  if (!props.multiAccent) return 'var(--mark-ink)'
+  return ROLE_TOKEN[rectRoleAt(row, col)] ?? 'var(--mark-ink)'
+}
 </script>
 
 <template>
@@ -123,6 +142,7 @@ function glyphAt(row: number, col: number): string {
             v-for="cell in row"
             :key="cell.c"
             :class="[$style.cell, tornColumn === cell.c && $style.torn]"
+            :style="{ color: cellColor(cell.r, cell.c) }"
             >{{ glyphAt(cell.r, cell.c) }}</span
           >
         </span>
@@ -135,7 +155,7 @@ function glyphAt(row: number, col: number): string {
             :key="cell.c"
             :class="$style.cell"
             :style="{
-              color: roleAt(cell.r, cell.c) === '.' ? 'var(--rule)' : 'var(--mark-ink)',
+              color: cellColor(cell.r, cell.c),
               opacity: roleAt(cell.r, cell.c) === '.' ? 0.35 : 1,
             }"
             >+</span
