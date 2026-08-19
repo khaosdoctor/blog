@@ -53,7 +53,12 @@ const LINKS: { key: 'navPosts' | 'navSeries' | 'navTags' | 'navAbout'; path: str
   .nav-links {
     display: inline-flex;
     align-items: center;
-    font-family: var(--font-mono);
+    /* --font-display, which is Departure Mono, not --font-mono, which is the
+       system monospace stack. The rest of this row (the box-drawing edges, the
+       dash fill, the wordmark) already draws in Departure, so reading the
+       system stack here made the nav links the one thing in the header set in
+       a different face. */
+    font-family: var(--font-display);
     /* Lucas's own ask, "2pt bigger": `pt` is a real, absolute CSS length
        (1pt = 1/72in), so the browser does the point-to-pixel conversion
        itself rather than a rem/px guess standing in for it. */
