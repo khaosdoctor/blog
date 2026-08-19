@@ -2,8 +2,10 @@
 
 /*
  * The cover colour: a mark on the post's own text reads the same hue as its
- * cover (--post-accent, written onto <article> by both [...slug].astro
- * pages), rather than the day's. That is the split the owner drew: a link, a
+ * cover (--post-accent, which both [...slug].astro pages hand to
+ * BaseLayout.astro and it writes onto <body>, so the header can read the same
+ * value for its reading progress; it used to go on <article>, and the prose
+ * inherits it either way), rather than the day's. That is the split the owner drew: a link, a
  * hover, any transient effect follows today (--accent-day, see
  * prose/links.css); strong and em belong to the article itself and stay put
  * when today rolls over. --post-accent went unused when the header work

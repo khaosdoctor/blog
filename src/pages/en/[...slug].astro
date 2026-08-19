@@ -80,6 +80,22 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   href: new URL(path, Astro.site).href,
 }))
 const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
+
+/**
+ * The post's own colour: whatever brand its cover drew, read straight off the
+ * cover's own derivation (coverTone, lib/cover.ts) so bold and italic inside
+ * the article cannot come out a different colour from the card at the top of
+ * the page. Links do NOT read this, they follow the day colour
+ * (prose/links.css). The English translation has its own slug and so its own
+ * cover colour, same as it has its own cover.
+ *
+ * Handed to the layout rather than written onto <article> here, which is where
+ * it used to sit: the header now draws the reading progress in this same
+ * colour (ReadingProgress.astro), and the header is not inside the article, so
+ * the property has to be written on an element that contains both. BaseLayout
+ * puts it on <body>; the article inherits it exactly as before.
+ */
+const postAccent = coverTone(slugOf(post)).token
 ---
 
 <BaseLayout
@@ -97,6 +113,7 @@ const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
   markdown={new URL(`${Astro.url.pathname}index.md`, Astro.site).href}
   noindex={post.data.noindex}
   progress
+  postAccent={postAccent}
 >
   {/* The outline, which this page never rendered: a reader of a translated
       post got no way to see its shape or jump inside it, purely because this
@@ -104,13 +121,7 @@ const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
       headings it reads are the translated ones, from this post's own render(),
       so the outline is in English like the text it points at. */}
   <PostToc headings={headings} locale="en" />
-  {/* The post's own colour: whatever brand its cover drew, read straight
-      off the cover's own derivation (coverTone, lib/cover.ts) so bold and
-      italic inside the article cannot come out a different colour from the
-      card at the top of the page. Links do NOT read this, they follow the
-      day colour (prose/links.css). The English translation has its own slug
-      and so its own cover colour, same as it has its own cover. */}
-  <article style={`--post-accent: ${coverTone(slugOf(post)).token}`}>
+  <article>
     <CoverHero
       slug={slugOf(post)}
       title={post.data.title}

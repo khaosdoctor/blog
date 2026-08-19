@@ -1,131 +1,85 @@
 ---
-import { t, type Locale } from '../i18n/ui'
-
 /**
- * How far down the post you are, as a bar pinned to the top of the window.
+ * How far down the post you are, drawn on the header's own dashed rule.
  *
- * Drawn as discrete blocks rather than a smooth fill: the bar is a repeating
- * gradient of solid segments with gaps, masked to the current percentage, so it
- * fills one chunk at a time like a DOS install meter. That is the whole reason
- * it is not a `<progress>` element, which no browser lets you segment.
+ * This component renders no markup of its own any more. The track it drives is
+ * the two runs of dashes BrandHeader.astro already draws between the bracket
+ * corners (`.fill > .dash`, one span per character), read as ONE meter running
+ * left to right across the row: the left run's dashes first, then the right
+ * run's, so progress starts at the `┌─` corner and finishes at the `─┐` one.
+ * A dash the reader has passed takes the post's cover colour (`--post-accent`,
+ * BrandHeader's own `.dash.lit` rule); the rest stay the muted dashes they
+ * always were. That replaces the fixed bar this used to pin to the top of the
+ * window, and its `--progress-*` tokens went with it.
  *
- * The leading few blocks (`.edge`) carry the header wordmark's own
- * scramble/decode effect (`../lib/decode-scramble`, shared with
- * `header-brand.ts`): each edge cell flickers through random opacity before
- * locking solid in the day colour (`--accent-day`), the same random-states-
- * settling-to-one shape the wordmark's letters use, translated to what a bar
- * can actually show: there is no text here to scramble. Once locked it holds
- * for a beat, then fades back out: the day colour marks the position that is
- * actively moving, not a permanent trail left behind it, which would just
- * turn into a fully coloured bar after enough scrolling. The already-read
- * stretch underneath (`.bar`) stays the plain, muted fill it always was.
+ * The reveal is not a straight readout of the scroll position, per the owner's
+ * own ask. Two things stay between them:
  *
- * It is decoration for a mouse-and-eyes reader, so it is `aria-hidden`: a screen
- * reader announcing a percentage on every scroll tick is noise, and the reader
- * already knows where they are in the document.
+ * - Lag. The lit count eases toward where the reader actually is instead of
+ *   snapping to it, so on a fast scroll the dashes visibly catch up rather
+ *   than arriving with the page.
+ * - Jitter. Each dash carries a small random offset in WHEN it lights within
+ *   its own slot, so the run types itself out unevenly, the way a person
+ *   types, instead of at a metronome's cadence.
+ *
+ * Both are motion, so under reduced motion both are off: the lit count tracks
+ * the scroll exactly and every dash lights at its own even position. The bar
+ * still reports the reader's position, which is the part that is information
+ * rather than decoration.
+ *
+ * It stays out of the accessibility tree (the dash spans are inside
+ * BrandHeader's own `aria-hidden` runs): a screen reader announcing a
+ * percentage on every scroll tick is noise, and the reader already knows where
+ * they are in the document.
  */
-interface Props {
-  locale: Locale
-}
-
-const { locale } = Astro.props
 ---
 
-<div class="progress" aria-hidden="true" data-label={t(locale, 'readingProgress')}>
-  <div class="bar"></div>
-  <div class="edge">
-    <span class="cell"></span>
-    <span class="cell"></span>
-    <span class="cell"></span>
-  </div>
-</div>
-
-<style>
-  .progress {
-    position: fixed;
-    inset-block-start: 0;
-    inset-inline: 0;
-    z-index: 3;
-    block-size: var(--progress-height);
-    background: var(--progress-track);
-    /* Nothing to show before the script runs, and nothing at all without it. */
-    display: none;
-  }
-
-  .progress.ready {
-    display: block;
-  }
-
-  .bar {
-    block-size: 100%;
-    inline-size: 100%;
-    background: repeating-linear-gradient(
-      to right,
-      var(--progress-fill) 0 var(--progress-block),
-      transparent var(--progress-block) calc(var(--progress-block) + var(--progress-block-gap))
-    );
-    /* The mask is what advances: the blocks are always drawn across the full
-       width, and only as many as the reader has earned are revealed. Clipping in
-       whole blocks keeps the last visible block solid instead of half-painted. */
-    mask: linear-gradient(to right, black var(--progress), transparent 0);
-  }
-
-  .edge {
-    /* 3px between cells: matches the space theme.css's own block-spacing
-       custom property resolves to today, kept as a literal here rather
-       than that property so this file does not silently drift out of sync
-       if that value ever changes without this component being revisited. */
-    --edge-cell-space: 3px;
-    --edge-width: calc(var(--progress-block) * 3 + var(--edge-cell-space) * 2);
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: max(0px, calc(var(--progress) - var(--edge-width)));
-    inline-size: var(--edge-width);
-    display: flex;
-    opacity: 0;
-  }
-
-  .edge.active {
-    opacity: 1;
-  }
-
-  .edge .cell {
-    block-size: 100%;
-    inline-size: var(--progress-block);
-    background: var(--accent-day, var(--progress-fill));
-    opacity: 0;
-  }
-
-  .edge .cell:not(:last-child) {
-    margin-inline-end: var(--edge-cell-space);
-  }
-</style>
-
 <script>
-  import { runDecode, SCRAMBLE_TICK_MS, SCRAMBLE_LOCK_TICKS, type DecodeRun } from '../lib/decode-scramble'
+  /*
+   * The track, in visual order: the left run's dashes, then the right run's.
+   * DOM order is left-to-right order here, so no sorting is needed.
+   *
+   * Only the dashes that are actually VISIBLE count. `.fill` crops its fixed
+   * 38-character run with `overflow: hidden`, and how many of those 38 survive
+   * depends on the viewport, so treating all 76 as the meter would stall the
+   * fill against a cropped stretch nobody can see and then jump. Measured on
+   * load, on resize and once the display face has loaded (a font swap changes
+   * every advance, and with it how many dashes fit), never on a scroll tick.
+   */
+  const fills = Array.from(document.querySelectorAll<HTMLElement>('.chrome .fill'))
 
-  // Scroll position as a fraction of the scrollable height, written to a custom
-  // property on the container (both `.bar` and `.edge` read it). rAF-throttled:
-  // a scroll listener that writes style on every event is the classic way to
-  // make a long post feel heavy.
-  const progress = document.querySelector<HTMLElement>('.progress')
-  const bar = progress?.querySelector<HTMLElement>('.bar')
-  const edge = progress?.querySelector<HTMLElement>('.edge')
-  const cells = edge != null ? Array.from(edge.querySelectorAll<HTMLElement>('.cell')) : []
+  if (fills.length > 0) {
+    // How much of a dash's own slot its appearance can be pushed back by. Under
+    // 1 so the order can never invert: dash i lights somewhere inside [i, i+1),
+    // which is still strictly after dash i-1.
+    const JITTER = 0.85
+    // How much of the remaining distance the fill closes per frame. The lag the
+    // owner asked for, and the reason it reads as catching up rather than
+    // tracking.
+    const EASE = 0.18
+    // Ceiling on that, in dashes per frame: without it a jump to the bottom of
+    // a long post closes most of the distance in the first frame or two, which
+    // reads as the whole run appearing at once rather than being typed. At 60Hz
+    // this is roughly 54 dashes a second, so even a full-length jump types
+    // itself out in well under two seconds.
+    const MAX_STEP = 0.9
 
-  if (progress != null && bar != null) {
-    progress.classList.add('ready')
-
+    let track: HTMLElement[] = []
+    let jitter: number[] = []
+    // How many leading dashes are lit. The thresholds below only ever increase
+    // with the index, so the lit set is always a prefix and this one number is
+    // enough to know exactly which spans need touching on any given frame.
+    let lit = 0
+    let shown = 0
+    let target = 0
+    let animating = false
     let queued = false
-    let lastRatio = -1
 
     /*
      * Reduced motion: the same convention conway.ts and header-brand.ts
      * already read, an explicit `data-motion` override (written by the
-     * settings panel) wins in both directions, and the OS query decides
-     * when it is absent. Reduced motion means the edge never plays: the
-     * bar still reports position via `--progress`, just without the
-     * flicker.
+     * settings panel) wins in both directions, and the OS query decides when
+     * it is absent.
      */
     function motionOverride(): 'reduce' | 'allow' | null {
       const attr = document.documentElement.getAttribute('data-motion')
@@ -139,80 +93,75 @@ const { locale } = Astro.props
       return matchMedia('(prefers-reduced-motion: reduce)').matches
     }
 
-    let decodeRun: DecodeRun | null = null
-    let holdTimer: ReturnType<typeof setTimeout> | null = null
-
-    // How long a locked edge holds solid before it fades back into the plain
-    // bar underneath.
-    const HOLD_MS = 180
-    // The edge re-plays at most this often. A rAF-throttled scroll handler
-    // still fires on every frame of a long drag; without this floor the
-    // decode would restart every frame too, the exact "runs at full rate off
-    // a scroll event" this was built to avoid, and would read as noise
-    // rather than a moving marker. Also nowhere near a 2.3.1 flash-rate
-    // concern regardless: that criterion measures paired 10% luminance
-    // changes over roughly 21,824px², and this bar, a handful of px tall
-    // across a strip a few blocks wide, cannot reach that area no matter how
-    // often it re-triggers. Kept well under 3/s anyway rather than relying
-    // on that alone.
-    const DECODE_MIN_INTERVAL_MS = 350
-    let lastDecodeAt = 0
-
-    function stopEdge(): void {
-      decodeRun?.cancel()
-      decodeRun = null
-      if (holdTimer !== null) clearTimeout(holdTimer)
-      holdTimer = null
-      edge?.classList.remove('active')
-      for (const cell of cells) cell.style.opacity = '0'
+    /** Where in the run dash `index` lights up, in dashes. */
+    function threshold(index: number): number {
+      return reducedMotion() ? index : index + jitter[index]
     }
 
-    function startDecode(): void {
-      if (edge == null || cells.length === 0 || reducedMotion()) return
-      decodeRun?.cancel()
-      if (holdTimer !== null) clearTimeout(holdTimer)
-      holdTimer = null
-
-      edge.classList.add('active')
-      for (const cell of cells) cell.style.opacity = '0.25'
-
-      // No cursor to sync a stagger to here (unlike the wordmark), so the
-      // per-cell stagger reuses the tick itself rather than a new constant.
-      const items = cells.map((cell, i) => ({
-        start: i * SCRAMBLE_TICK_MS,
-        scramble: (): void => {
-          cell.style.opacity = String(0.2 + Math.random() * 0.7)
-        },
-        lock: (): void => {
-          cell.style.opacity = '1'
-        },
-      }))
-
-      decodeRun = runDecode(items, { tickMs: SCRAMBLE_TICK_MS, lockTicks: SCRAMBLE_LOCK_TICKS }, () => {
-        decodeRun = null
-        holdTimer = setTimeout(() => {
-          holdTimer = null
-          edge.classList.remove('active')
-        }, HOLD_MS)
-      })
+    /** Adds or removes only the spans the fill has actually crossed. */
+    function paint(): void {
+      while (lit < track.length && threshold(lit) < shown) track[lit++].classList.add('lit')
+      while (lit > 0 && threshold(lit - 1) >= shown) track[--lit].classList.remove('lit')
     }
 
+    /*
+     * Which dashes the crop leaves visible, and a fresh jitter offset for each.
+     * Reads geometry, so it runs on load and resize only, never per scroll.
+     */
+    function measure(): void {
+      for (const dash of track) dash.classList.remove('lit')
+      lit = 0
+      track = []
+      for (const fill of fills) {
+        const edge = fill.getBoundingClientRect().right
+        for (const dash of fill.querySelectorAll<HTMLElement>('.dash')) {
+          // Half a pixel of slack: a fractional layout width should not lose
+          // the last dash that does in fact draw.
+          if (dash.getBoundingClientRect().right <= edge + 0.5) track.push(dash)
+          else dash.classList.remove('lit')
+        }
+      }
+      jitter = track.map(() => Math.random() * JITTER)
+      paint()
+    }
+
+    function step(): void {
+      const distance = target - shown
+      if (Math.abs(distance) <= 0.01) {
+        shown = target
+        animating = false
+        paint()
+        return
+      }
+      const move = Math.min(Math.abs(distance) * EASE, MAX_STEP)
+      shown += Math.sign(distance) * move
+      paint()
+      requestAnimationFrame(step)
+    }
+
+    function advance(): void {
+      if (reducedMotion()) {
+        // No lag and no jitter: the fill is wherever the reader is.
+        shown = target
+        paint()
+        return
+      }
+      if (animating) return
+      animating = true
+      requestAnimationFrame(step)
+    }
+
+    // Scroll position as a fraction of the scrollable height. rAF-throttled,
+    // the same as the fixed bar this replaces: a scroll listener that reads
+    // layout on every event is the classic way to make a long post feel heavy.
     const update = (): void => {
       queued = false
       const max = document.documentElement.scrollHeight - innerHeight
       // A post shorter than the window has nothing to scroll, so it is either
       // fully read already or the question is meaningless. Either way: full.
       const ratio = max <= 0 ? 1 : Math.min(Math.max(scrollY / max, 0), 1)
-      progress.style.setProperty('--progress', `${(ratio * 100).toFixed(1)}%`)
-
-      if (ratio !== lastRatio) {
-        lastRatio = ratio
-        const now = performance.now()
-        if (now - lastDecodeAt >= DECODE_MIN_INTERVAL_MS) {
-          lastDecodeAt = now
-          startDecode()
-        }
-      }
+      target = ratio * track.length
+      advance()
     }
 
     const schedule = (): void => {
@@ -221,19 +170,28 @@ const { locale } = Astro.props
       requestAnimationFrame(update)
     }
 
+    const remeasure = (): void => {
+      measure()
+      schedule()
+    }
+
     addEventListener('scroll', schedule, { passive: true })
-    addEventListener('resize', schedule, { passive: true })
+    addEventListener('resize', remeasure, { passive: true })
+    // The dashes are laid out in the display face, which loads after first
+    // paint: until it has, the run measures at the fallback's advance and the
+    // crop falls in a different place.
+    document.fonts?.ready.then(remeasure)
+    measure()
     update()
 
-    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => {
-      if (reducedMotion()) stopEdge()
-    })
+    // A reader turning reduced motion on mid-scroll should finish at the exact
+    // position rather than complete an eased run; both paths below do that
+    // through the same `advance`.
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', advance)
 
     // The settings panel writes `data-motion` straight onto <html>; a
     // MutationObserver is the plain platform way to notice that without this
     // script importing the settings panel's own module.
-    new MutationObserver(() => {
-      if (reducedMotion()) stopEdge()
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] })
+    new MutationObserver(advance).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] })
   }
 </script>
