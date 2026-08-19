@@ -267,3 +267,35 @@ O motivo de ele ter ganhado não é só o contraste, que os outros também alcan
 
 <LabDemo src="./components/LinkLab.vue" client:visible />
 
+## A capa sem moldura
+
+Um dos seis candidatos de capa OG/social do [[theme-lab]]: o fundo inteiro na cor da marca, sem a janela DOS por
+cima, título e assinatura na tinta clara ou escura que aquela marca pedir.
+
+Perdeu para os quatro que ficaram (janela DOS, wireframe 3D, janela DOS com fogo, janela DOS com ondas) porque o
+fundo cheio na cor da marca é a leitura mais fraca de contraste das seis: o texto só tem uma tinta para escolher, e
+o verde e o amarelo da marca já nascem claros demais para qualquer tinta bater 4.5:1 nas duas pontas ao mesmo tempo.
+As outras quatro sempre têm um fundo escuro por baixo em algum ponto do cartão, e é aí que o texto lê melhor.
+
+Vale guardar pela régua tracejada que esvanece para o meio do cartão: é ela quem separa o chapéu do título sem uma
+linha inteira cruzando a capa, e virou referência para a régua nova do candidato 4 na bancada viva.
+
+<LabDemo src="./components/CoverBleedLab.vue" client:visible />
+
+## A capa em plasma
+
+Outro dos seis candidatos de capa: um campo de três senos por trás do título, sem moldura e sem wireframe, cada
+frequência e cada fase vindas de uma chamada separada do mesmo PRNG que gera o sólido do wireframe e o fogo do
+candidato 5.
+
+Perdeu por ser um candidato único demais: nem a janela DOS do primeiro candidato, nem a moldura dupla que os outros
+quatro compartilham, então ele lia como uma ideia à parte da família em vez de uma variação dela. O campo que ele
+usa não se perdeu com a decisão, só o cartão: o candidato 6 (janela DOS com ondas) ainda gera o mesmo campo,
+quantizado em poucos tons em vez do valor contínuo daqui.
+
+Vale guardar pelo próprio bug que ele carregou na primeira tentativa e que o comentário do gerador de campo, na
+bancada viva, ainda explica: uma fase só escalada por três constantes fixas fazia o campo inteiro colapsar numa
+única rampa, em vez das várias manchas de claro e escuro que sete leituras independentes do PRNG produzem.
+
+<LabDemo src="./components/CoverPlasmaLab.vue" client:visible />
+
