@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { formatDate, urlOf } from '../../lib/posts'
+import PostList from '../../components/PostList.astro'
 import { getSeries, seriesTitle } from '../../lib/taxonomy'
 import { t } from '../../i18n/ui'
 
@@ -18,18 +18,7 @@ const { name, posts } = Astro.props
 <BaseLayout title={`${name} | Lucas Santos`} description={t('pt', 'seriesDescription', name)}>
   <p class="kicker">{t('pt', 'series')}</p>
   <h1>{name}</h1>
-  <ol class="parts">
-    {
-      posts.map((post) => (
-        <li>
-          <a href={urlOf(post)}>{post.data.title}</a>
-          <time datetime={post.data.pubDate.toISOString()}>
-            {formatDate(post.data.pubDate, post.data.lang)}
-          </time>
-        </li>
-      ))
-    }
-  </ol>
+  <PostList posts={posts} />
 </BaseLayout>
 
 <style>
@@ -44,20 +33,5 @@ const { name, posts } = Astro.props
 
   h1 {
     margin-block-start: 0.2rem;
-  }
-
-  .parts {
-    padding-inline-start: 1.4rem;
-  }
-
-  .parts li {
-    margin-block-end: 1rem;
-  }
-
-  .parts time {
-    display: block;
-    color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.75rem;
   }
 </style>

@@ -1,0 +1,198 @@
+---
+/**
+ * A post date that is also a control: click it and the post's own Unix
+ * timestamp (seconds since 1970-01-01 UTC) goes to the clipboard, hover or
+ * focus it and a small popup shows that number.
+ *
+ * The visible/announced date still comes from formatDate (locale-formatted),
+ * exactly as it did before this existed. The timestamp is computed here, once,
+ * from `date` itself (the post's real `pubDate`, a `Date` already resolved by
+ * Zod's `z.coerce.date()` from the frontmatter's own `...Z` instant) rather than
+ * by reparsing the formatted string in the browser, so the number can never
+ * drift by a timezone from what the frontmatter actually says.
+ *
+ * The click-to-clipboard shape (a real button, the same .toast confirmation,
+ * silent on failure) matches QuoteCopy.astro and MathCopy.astro exactly,
+ * reusing `linkCopied` as its confirmation text the same way those two do
+ * for a quote and a formula, rather than growing a third copy-confirmation
+ * string for a fourth thing that isn't a link either.
+ *
+ * The popup borrows PostToc.astro's own idiom (an ANSI-style double border,
+ * monospace, ink/paper inverted from the page) rather than importing that
+ * file's CSS wholesale: PostToc is owned by another agent mid-edit, and the
+ * two treatments are declared independently here under their own `--dc-*`
+ * names. If a third caller ever wants this exact panel look, that is the
+ * point to lift both into one shared class in theme.css; today it would mean
+ * editing a file neither this change nor that one owns.
+ */
+import { formatDate } from '../lib/posts'
+import { t, type Locale } from '../i18n/ui'
+
+interface Props {
+  date: Date
+  lang: Locale
+}
+
+const { date, lang } = Astro.props
+const unix = Math.floor(date.getTime() / 1000)
+---
+
+<span class="date-copy">
+  <button type="button" class="date-copy-btn" data-unix={unix} data-copied-label={t(lang, 'linkCopied')}>
+    <time datetime={date.toISOString()}>{formatDate(date, lang)}</time>
+    <span class="sr-only">{t(lang, 'copyTimestamp', unix)}</span>
+  </button>
+  <span class="date-copy-tip" aria-hidden="true">{unix}</span>
+</span>
+
+<style>
+  /*
+   * Full ink/paper invert, the same move PostToc.astro makes for its own
+   * frame: chrome beside the text reads better at full contrast than at the
+   * muted grey everything else uses. Declared locally, see the header
+   * comment for why this isn't a shared token yet.
+   */
+  .date-copy {
+    --dc-ink: light-dark(#000000, #ffffff);
+    --dc-paper: var(--bg);
+    position: relative;
+    display: inline-flex;
+  }
+
+  .date-copy-btn {
+    all: unset;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+
+  .date-copy-btn:hover,
+  .date-copy-btn:focus-visible {
+    color: var(--accent-day, var(--accent));
+  }
+
+  .date-copy-btn:focus-visible {
+    outline: 2px solid var(--accent-day, var(--accent));
+    outline-offset: 2px;
+  }
+
+  .sr-only {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /*
+   * A sibling of the button, inside the same wrapper, so hovering the popup
+   * itself (it renders outside the button's own box, above it) still counts
+   * as hovering `.date-copy`: CSS :hover matches on any descendant's box
+   * regardless of where that box paints, so the popup stays open while the
+   * pointer crosses into it (WCAG 1.4.13 "hoverable") with no script needed
+   * for that part.
+   */
+  .date-copy-tip {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-end: 100%;
+    z-index: 1;
+    margin-block-end: 0.3rem;
+    padding: 0.15rem 0.45rem;
+    border: 3px double var(--dc-ink);
+    background: var(--dc-paper);
+    color: var(--dc-ink);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration) var(--ease);
+  }
+
+  .date-copy:hover .date-copy-tip,
+  .date-copy:focus-within .date-copy-tip {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /*
+   * Escape hides the popup (WCAG 1.4.13 "dismissible") without moving pointer
+   * hover or focus off the control: the script below only ever toggles this
+   * attribute, it never blurs or moves the pointer. Cleared on the next real
+   * mouseleave/focusout of the wrapper, so hovering again afterwards still
+   * works ("persistent" holds for every visit after the dismissed one, not
+   * just the first).
+   */
+  .date-copy[data-dismissed] .date-copy-tip {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .date-copy-tip {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // One delegated pair of listeners for every .date-copy on the page, the
+  // same shape as QuoteCopy's and MathCopy's own click handlers. A normal
+  // (bundled, not is:inline) script, so Astro includes it once per page no
+  // matter how many posts render their own <DateCopy>, rather than once per
+  // instance the way an is:inline + define:vars script would. The confirmation
+  // text travels on the button itself (data-copied-label) instead, since every
+  // instance already carries its own locale-correct copy of `linkCopied`.
+  document.addEventListener('click', async (event) => {
+    const target = event.target
+    if (!(target instanceof Element)) return
+    const button = target.closest<HTMLButtonElement>('.date-copy-btn')
+    if (button === null) return
+
+    try {
+      await navigator.clipboard.writeText(button.dataset.unix ?? '')
+    } catch {
+      // No clipboard permission, or an insecure origin. Silent, same as
+      // every other copy control on this site.
+      return
+    }
+
+    document.querySelector('.toast')?.remove()
+    const toast = document.createElement('div')
+    toast.className = 'toast'
+    toast.setAttribute('role', 'status')
+    toast.textContent = button.dataset.copiedLabel ?? ''
+    document.body.append(toast)
+    setTimeout(() => toast.remove(), 2000)
+  })
+
+  // Escape dismisses whichever popup is currently open, hovered or focused,
+  // without moving focus (WCAG 1.4.13). Delegated rather than one listener
+  // per instance, since a page can carry dozens of these in a post list.
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return
+    const open = document.querySelector('.date-copy:hover, .date-copy:focus-within')
+    if (open === null) return
+    open.setAttribute('data-dismissed', '')
+  })
+
+  // Once the pointer or focus actually leaves the wrapper, the dismissal is
+  // forgotten, so hovering it again later still opens the popup normally.
+  for (const type of ['mouseout', 'focusout']) {
+    document.addEventListener(type, (event) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const wrap = target.closest('.date-copy')
+      if (wrap === null) return
+      const related = (event as MouseEvent | FocusEvent).relatedTarget
+      if (related instanceof Node && wrap.contains(related)) return
+      wrap.removeAttribute('data-dismissed')
+    })
+  }
+</script>
