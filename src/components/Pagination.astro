@@ -12,6 +12,12 @@ import { t, type Locale } from '../i18n/ui'
  * not something `paginate()` hands back, only prev/next/first/last, so those
  * are built from `basePath` plus the same `N/` convention every page file
  * already generates its own routes with.
+ *
+ * Every control (previous, next, each visible page number) is a link styled
+ * as one of the header's own icon buttons (ThemeToggle.astro/
+ * SettingsPanel.astro): they navigate, so they stay <a> even where they look
+ * like buttons, the current page and a disabled previous/next render as a
+ * plain <span> instead since neither one goes anywhere.
  */
 interface Props {
   page: Page<unknown>
@@ -25,43 +31,126 @@ function hrefFor(pageNumber: number): string {
   return pageNumber === 1 ? basePath : `${basePath}${pageNumber}/`
 }
 
-const numbers = Array.from({ length: page.lastPage }, (_, index) => index + 1)
+type Slot = number | 'ellipsis'
+
+/**
+ * Which page numbers actually render, out of `count`. The rule is MUI's own
+ * `usePagination` (boundaryCount 1, siblingCount 1), not an invented one:
+ * page 1 and the last page always render as real numbers, the current page
+ * always keeps one sibling on each side, and an ellipsis only ever replaces
+ * a run of two or more hidden pages, since one hidden between two visible
+ * numbers would read the same length as just printing it. Below 8 pages
+ * (`COLLAPSE_FLOOR`, below) those three rules already cover every page
+ * between them, so nothing ever collapses.
+ *
+ * The property this buys, and the reason it was picked over a plainer
+ * "first four, ellipsis, last four": every render at 8 pages or past it
+ * produces exactly 7 slots (2 boundary numbers, up to 2 ellipses, up to 3
+ * sibling numbers, the current page), a constant width regardless of which
+ * page is current, so the row of controls never shifts under a reader's
+ * pointer as they move through it. And unlike a fixed first-N/last-N split,
+ * the current page can never fall inside the hidden middle with nothing to
+ * mark where it is: it is always one of the rendered numbers, or is covered
+ * by the boundary/sibling numbers already on screen.
+ */
+function paginationSlots(count: number, current: number): Slot[] {
+  const BOUNDARY = 1
+  const SIBLING = 1
+  // The smallest count the boundary pairs and the current page's own
+  // siblings cannot already cover between them without a hidden run of two
+  // or more; at or under it, list every page instead of collapsing anything.
+  const COLLAPSE_FLOOR = 2 * BOUNDARY + 2 * SIBLING + 3
+  if (count < COLLAPSE_FLOOR + 1) {
+    return Array.from({ length: count }, (_, index) => index + 1)
+  }
+
+  const range = (start: number, end: number): number[] =>
+    Array.from({ length: end - start + 1 }, (_, index) => start + index)
+
+  const startPages = range(1, BOUNDARY)
+  const endPages = range(count - BOUNDARY + 1, count)
+
+  const siblingsStart = Math.max(
+    Math.min(current - SIBLING, count - BOUNDARY - SIBLING * 2 - 1),
+    BOUNDARY + 2
+  )
+  const siblingsEnd = Math.min(
+    Math.max(current + SIBLING, BOUNDARY + SIBLING * 2 + 2),
+    endPages[0] - 2
+  )
+
+  const slots: Slot[] = [...startPages]
+
+  if (siblingsStart > BOUNDARY + 2) {
+    slots.push('ellipsis')
+  } else if (BOUNDARY + 1 < count - BOUNDARY) {
+    slots.push(BOUNDARY + 1)
+  }
+
+  slots.push(...range(siblingsStart, siblingsEnd))
+
+  if (siblingsEnd < count - BOUNDARY - 1) {
+    slots.push('ellipsis')
+  } else if (count - BOUNDARY > BOUNDARY) {
+    slots.push(count - BOUNDARY)
+  }
+
+  slots.push(...endPages)
+
+  return slots
+}
+
+const slots = paginationSlots(page.lastPage, page.currentPage)
 ---
 
 {
   page.lastPage > 1 && (
     <nav class="pagination" aria-label={t(locale, 'pagination')}>
       {page.url.prev ? (
-        <a class="step" href={page.url.prev} rel="prev">
-          {t(locale, 'paginationPrev')}
+        <a class="pg-btn" href={page.url.prev} rel="prev" aria-label={t(locale, 'paginationPrev')}>
+          <span class="pg-glyph" aria-hidden="true">
+            {'<<'}
+          </span>
         </a>
       ) : (
-        <span class="step" aria-disabled="true">
-          {t(locale, 'paginationPrev')}
+        <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationPrev')}>
+          <span class="pg-glyph" aria-hidden="true">
+            {'<<'}
+          </span>
         </span>
       )}
       <ol class="numbers">
-        {numbers.map((number) => (
-          <li>
-            {number === page.currentPage ? (
-              <span class="current" aria-current="page">
-                {number}
-              </span>
-            ) : (
-              <a href={hrefFor(number)} aria-label={t(locale, 'paginationGoTo', number)}>
-                {number}
-              </a>
-            )}
-          </li>
-        ))}
+        {slots.map((slot) =>
+          slot === 'ellipsis' ? (
+            <li aria-hidden="true">
+              <span class="pg-ellipsis">…</span>
+            </li>
+          ) : (
+            <li>
+              {slot === page.currentPage ? (
+                <span class="pg-btn pg-current" aria-current="page">
+                  <span class="pg-glyph">{slot}</span>
+                </span>
+              ) : (
+                <a class="pg-btn" href={hrefFor(slot)} aria-label={t(locale, 'paginationGoTo', slot)}>
+                  <span class="pg-glyph">{slot}</span>
+                </a>
+              )}
+            </li>
+          )
+        )}
       </ol>
       {page.url.next ? (
-        <a class="step" href={page.url.next} rel="next">
-          {t(locale, 'paginationNext')}
+        <a class="pg-btn" href={page.url.next} rel="next" aria-label={t(locale, 'paginationNext')}>
+          <span class="pg-glyph" aria-hidden="true">
+            {'>>'}
+          </span>
         </a>
       ) : (
-        <span class="step" aria-disabled="true">
-          {t(locale, 'paginationNext')}
+        <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationNext')}>
+          <span class="pg-glyph" aria-hidden="true">
+            {'>>'}
+          </span>
         </span>
       )}
     </nav>
@@ -76,62 +165,135 @@ const numbers = Array.from({ length: page.lastPage }, (_, index) => index + 1)
     margin-block-start: 2.5rem;
     padding-block-start: 1.5rem;
     border-block-start: 1px solid var(--rule);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 0.85rem;
   }
 
-  .step {
-    color: var(--fg);
-    text-decoration: none;
-  }
-
-  .step[aria-disabled='true'] {
-    color: var(--muted);
-    opacity: 0.5;
-  }
-
-  .step:hover,
-  .step:focus-visible {
-    background: var(--accent-day, var(--accent));
-    color: var(--bg);
+  /*
+   * Same 70rem/80vw treatment as PostList.astro's own `.posts` (see that
+   * file's comment for the full mechanism): this row widens exactly as much
+   * as the list above it, so the two read as one deliberate width rather
+   * than the list widening on its own.
+   */
+  @media (min-width: 70rem) {
+    .pagination {
+      inline-size: 80vw;
+      margin-inline-start: 50%;
+      transform: translateX(-40vw);
+    }
   }
 
   .numbers {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 0.9rem;
+    margin: 0 0.5rem;
     padding: 0;
     list-style: none;
   }
 
   .numbers li + li {
-    margin-inline-start: 0.5rem;
-  }
-
-  .numbers a,
-  .numbers .current {
-    display: inline-block;
-    min-inline-size: 1.4em;
-    text-align: center;
-    text-decoration: none;
-    color: var(--muted);
-  }
-
-  .numbers a:hover,
-  .numbers a:focus-visible {
-    background: var(--accent-day, var(--accent));
-    color: var(--bg);
+    margin-inline-start: 0.15rem;
   }
 
   /*
-   * The current page: this list's own destaque colour, the day colour, not
-   * a border and not a fixed accent, same rule as the section label in
-   * PostList.astro. It is text, so the same light-mode shortfall on green
-   * and yellow days applies here (see that file's own comment for the
-   * measured numbers); already known, not this component's to fix.
+   * Every control here, previous, next, each page number, shares the
+   * header's own icon-button footprint (ThemeToggle.astro/
+   * SettingsPanel.astro, both read in full before writing this):
+   * --icon-btn-hit is the real 44px hit target, --icon-btn-chip the smaller
+   * bordered square actually drawn (on ::before, so the visible chip can be
+   * smaller than the box a pointer has to reach), --accent-day the border
+   * every icon button already reads. These stay <a> (or, disabled/current, a
+   * plain <span>) rather than becoming <button>: they navigate, which is
+   * what a link is for, and there is nothing here to submit the way
+   * ThemeToggle's own menu options do.
    */
-  .numbers .current {
+  .pg-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .pg-btn::before {
+    content: '';
+    position: absolute;
+    inline-size: var(--icon-btn-chip);
+    block-size: var(--icon-btn-chip);
+    border: var(--border) solid var(--accent-day);
+    border-radius: var(--radius);
+    background: var(--bg);
+    pointer-events: none;
+  }
+
+  /*
+   * position: relative for the same reason ThemeToggle's own .tt-icon needs
+   * it: the ::before chip above is absolutely positioned and opaque, and an
+   * absolutely positioned box paints over a non-positioned sibling whatever
+   * the source order says. Giving the label a position moves it into the
+   * same later paint step the chip is already in, so tree order (the label
+   * comes after ::before) decides, and the label draws on top.
+   */
+  .pg-glyph {
+    position: relative;
+    font-size: var(--icon-btn-glyph);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pg-btn:hover,
+  .pg-btn:focus-visible {
+    color: var(--accent);
+  }
+
+  .pg-btn:hover::before,
+  .pg-btn:focus-visible::before {
+    border-color: var(--accent);
+  }
+
+  .pg-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .pg-btn[aria-disabled='true'] {
+    color: var(--muted);
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /*
+   * The current page: this list's own destaque colour, the day colour, same
+   * rule PostList.astro's own section label reads, kept from the plain-text
+   * version this replaces.
+   */
+  .pg-current {
     color: var(--accent-day, var(--accent));
+  }
+
+  .pg-current .pg-glyph {
     font-weight: bold;
+  }
+
+  /*
+   * min-inline-size matches .pg-btn's own hit target, not because the
+   * ellipsis is a control (it is aria-hidden and un-clickable, plain text),
+   * but so it takes up the same width as every real slot: the whole point of
+   * the 7-slot rule above is a row that holds a constant width as the
+   * current page changes, and an undersized ellipsis would undo that.
+   */
+  .pg-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+    color: var(--muted);
   }
 </style>
