@@ -9,6 +9,17 @@ import { t, type Locale } from '../i18n/ui'
  * fills one chunk at a time like a DOS install meter. That is the whole reason
  * it is not a `<progress>` element, which no browser lets you segment.
  *
+ * The leading few blocks (`.edge`) carry the header wordmark's own
+ * scramble/decode effect (`../lib/decode-scramble`, shared with
+ * `header-brand.ts`): each edge cell flickers through random opacity before
+ * locking solid in the day colour (`--accent-day`), the same random-states-
+ * settling-to-one shape the wordmark's letters use, translated to what a bar
+ * can actually show: there is no text here to scramble. Once locked it holds
+ * for a beat, then fades back out: the day colour marks the position that is
+ * actively moving, not a permanent trail left behind it, which would just
+ * turn into a fully coloured bar after enough scrolling. The already-read
+ * stretch underneath (`.bar`) stays the plain, muted fill it always was.
+ *
  * It is decoration for a mouse-and-eyes reader, so it is `aria-hidden`: a screen
  * reader announcing a percentage on every scroll tick is noise, and the reader
  * already knows where they are in the document.
@@ -22,6 +33,11 @@ const { locale } = Astro.props
 
 <div class="progress" aria-hidden="true" data-label={t(locale, 'readingProgress')}>
   <div class="bar"></div>
+  <div class="edge">
+    <span class="cell"></span>
+    <span class="cell"></span>
+    <span class="cell"></span>
+  </div>
 </div>
 
 <style>
@@ -53,27 +69,150 @@ const { locale } = Astro.props
        whole blocks keeps the last visible block solid instead of half-painted. */
     mask: linear-gradient(to right, black var(--progress), transparent 0);
   }
+
+  .edge {
+    /* 3px between cells: matches the space theme.css's own block-spacing
+       custom property resolves to today, kept as a literal here rather
+       than that property so this file does not silently drift out of sync
+       if that value ever changes without this component being revisited. */
+    --edge-cell-space: 3px;
+    --edge-width: calc(var(--progress-block) * 3 + var(--edge-cell-space) * 2);
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: max(0px, calc(var(--progress) - var(--edge-width)));
+    inline-size: var(--edge-width);
+    display: flex;
+    opacity: 0;
+  }
+
+  .edge.active {
+    opacity: 1;
+  }
+
+  .edge .cell {
+    block-size: 100%;
+    inline-size: var(--progress-block);
+    background: var(--accent-day, var(--progress-fill));
+    opacity: 0;
+  }
+
+  .edge .cell:not(:last-child) {
+    margin-inline-end: var(--edge-cell-space);
+  }
 </style>
 
 <script>
+  import { runDecode, SCRAMBLE_TICK_MS, SCRAMBLE_LOCK_TICKS, type DecodeRun } from '../lib/decode-scramble'
+
   // Scroll position as a fraction of the scrollable height, written to a custom
-  // property. rAF-throttled: a scroll listener that writes style on every event
-  // is the classic way to make a long post feel heavy.
+  // property on the container (both `.bar` and `.edge` read it). rAF-throttled:
+  // a scroll listener that writes style on every event is the classic way to
+  // make a long post feel heavy.
   const progress = document.querySelector<HTMLElement>('.progress')
   const bar = progress?.querySelector<HTMLElement>('.bar')
+  const edge = progress?.querySelector<HTMLElement>('.edge')
+  const cells = edge != null ? Array.from(edge.querySelectorAll<HTMLElement>('.cell')) : []
 
-  if (progress !== null && bar != null) {
+  if (progress != null && bar != null) {
     progress.classList.add('ready')
 
     let queued = false
+    let lastRatio = -1
+
+    /*
+     * Reduced motion: the same convention conway.ts and header-brand.ts
+     * already read, an explicit `data-motion` override (written by the
+     * settings panel) wins in both directions, and the OS query decides
+     * when it is absent. Reduced motion means the edge never plays: the
+     * bar still reports position via `--progress`, just without the
+     * flicker.
+     */
+    function motionOverride(): 'reduce' | 'allow' | null {
+      const attr = document.documentElement.getAttribute('data-motion')
+      return attr === 'reduce' || attr === 'allow' ? attr : null
+    }
+
+    function reducedMotion(): boolean {
+      const override = motionOverride()
+      if (override === 'reduce') return true
+      if (override === 'allow') return false
+      return matchMedia('(prefers-reduced-motion: reduce)').matches
+    }
+
+    let decodeRun: DecodeRun | null = null
+    let holdTimer: ReturnType<typeof setTimeout> | null = null
+
+    // How long a locked edge holds solid before it fades back into the plain
+    // bar underneath.
+    const HOLD_MS = 180
+    // The edge re-plays at most this often. A rAF-throttled scroll handler
+    // still fires on every frame of a long drag; without this floor the
+    // decode would restart every frame too, the exact "runs at full rate off
+    // a scroll event" this was built to avoid, and would read as noise
+    // rather than a moving marker. Also nowhere near a 2.3.1 flash-rate
+    // concern regardless: that criterion measures paired 10% luminance
+    // changes over roughly 21,824px², and this bar, a handful of px tall
+    // across a strip a few blocks wide, cannot reach that area no matter how
+    // often it re-triggers. Kept well under 3/s anyway rather than relying
+    // on that alone.
+    const DECODE_MIN_INTERVAL_MS = 350
+    let lastDecodeAt = 0
+
+    function stopEdge(): void {
+      decodeRun?.cancel()
+      decodeRun = null
+      if (holdTimer !== null) clearTimeout(holdTimer)
+      holdTimer = null
+      edge?.classList.remove('active')
+      for (const cell of cells) cell.style.opacity = '0'
+    }
+
+    function startDecode(): void {
+      if (edge == null || cells.length === 0 || reducedMotion()) return
+      decodeRun?.cancel()
+      if (holdTimer !== null) clearTimeout(holdTimer)
+      holdTimer = null
+
+      edge.classList.add('active')
+      for (const cell of cells) cell.style.opacity = '0.25'
+
+      // No cursor to sync a stagger to here (unlike the wordmark), so the
+      // per-cell stagger reuses the tick itself rather than a new constant.
+      const items = cells.map((cell, i) => ({
+        start: i * SCRAMBLE_TICK_MS,
+        scramble: (): void => {
+          cell.style.opacity = String(0.2 + Math.random() * 0.7)
+        },
+        lock: (): void => {
+          cell.style.opacity = '1'
+        },
+      }))
+
+      decodeRun = runDecode(items, { tickMs: SCRAMBLE_TICK_MS, lockTicks: SCRAMBLE_LOCK_TICKS }, () => {
+        decodeRun = null
+        holdTimer = setTimeout(() => {
+          holdTimer = null
+          edge.classList.remove('active')
+        }, HOLD_MS)
+      })
+    }
 
     const update = (): void => {
       queued = false
       const max = document.documentElement.scrollHeight - innerHeight
       // A post shorter than the window has nothing to scroll, so it is either
-      // entirely read or the question is meaningless. Either way: full.
+      // fully read already or the question is meaningless. Either way: full.
       const ratio = max <= 0 ? 1 : Math.min(Math.max(scrollY / max, 0), 1)
-      bar.style.setProperty('--progress', `${(ratio * 100).toFixed(1)}%`)
+      progress.style.setProperty('--progress', `${(ratio * 100).toFixed(1)}%`)
+
+      if (ratio !== lastRatio) {
+        lastRatio = ratio
+        const now = performance.now()
+        if (now - lastDecodeAt >= DECODE_MIN_INTERVAL_MS) {
+          lastDecodeAt = now
+          startDecode()
+        }
+      }
     }
 
     const schedule = (): void => {
@@ -85,5 +224,16 @@ const { locale } = Astro.props
     addEventListener('scroll', schedule, { passive: true })
     addEventListener('resize', schedule, { passive: true })
     update()
+
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => {
+      if (reducedMotion()) stopEdge()
+    })
+
+    // The settings panel writes `data-motion` straight onto <html>; a
+    // MutationObserver is the plain platform way to notice that without this
+    // script importing the settings panel's own module.
+    new MutationObserver(() => {
+      if (reducedMotion()) stopEdge()
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] })
   }
 </script>
