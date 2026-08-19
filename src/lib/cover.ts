@@ -38,7 +38,7 @@
 // The extension is not decoration: scripts/cover.ts runs this file through
 // plain node, whose ESM resolver does not guess one, while every import
 // reached only through Astro (day-color.ts, taxonomy.ts) can stay bare.
-import { chipColor } from './chip-color.ts'
+import { chipColor, hashString } from './chip-color.ts'
 
 export const CARD_W = 1200
 export const CARD_H = 630
@@ -49,11 +49,14 @@ const LABEL_FONT = "'PxPlus IBM VGA8', ui-monospace, monospace"
 // --- hash + PRNG -----------------------------------------------------------
 // Small, deterministic, no dependency: the only job is to spread slugs across
 // the brand pool and the solid's shape stably. Same slug, same number, always.
-export function hashSlug(slug: string): number {
-  let hash = 0
-  for (const char of slug) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
-  return hash
-}
+//
+// The arithmetic moved to chip-color.ts as `hashString` when day-color.ts
+// needed the same mixing (a date hashed with a weaker sum drew the same colour
+// two days running). Re-exported under this name rather than renamed at every
+// call site: the seed it feeds decides every cover's colour AND its solid's
+// shape, so the name staying put is one fewer way to change a drawing by
+// accident. Identical arithmetic, so every existing cover is byte-identical.
+export const hashSlug = hashString
 
 // mulberry32, public domain: a seed in, a function that draws numbers in
 // [0, 1) out, always the same sequence for the same seed.
