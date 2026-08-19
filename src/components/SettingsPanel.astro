@@ -54,17 +54,57 @@ const { locale } = Astro.props
         <label for="sp-font-size">{t(locale, 'fontSizeLabel')}</label>
       </legend>
       <div class="sp-font-size-row">
-        {/* 50-160%, the owner's own range, narrowed from the 10-500 this
-           control opened with. A flat step of 10 gives twelve stops, each a
-           perceptible jump, and puts both ends on the grid (see
-           settings-panel.ts's own comment on FONT_SIZE_STEP). */}
-        <input type="range" id="sp-font-size" min="50" max="160" step="10" />
-        <span
-          id="sp-font-size-value"
-          class="sp-font-size-value"
-          aria-live="polite"
-          data-template={t(locale, 'fontSizeCurrent')}></span>
+        {/* A stepper, the owner's own ask ("instead of a slider, add a - and
+           a + button with a textbox in the middle"), across 50-160% (the
+           range narrowed from the 10-500 this control opened with). A flat
+           step of 10 gives twelve stops, each a perceptible jump, and puts
+           both ends on the grid (see settings-panel.ts's own comment on
+           FONT_SIZE_STEP).
+
+           `type="number"` rather than a plain text box: min/max/step here are
+           what give the box its own Up/Down arrow stepping for free, on the
+           same grid the two buttons move it along, and what make a screen
+           reader announce it as a spinbutton with a range rather than as an
+           open-ended text field. A text input would mean owning both of
+           those by hand for nothing gained. What `type="number"` does *not*
+           do is enforce min/max on a typed value (it only reports the field
+           invalid), so settings-panel.ts still clamps and snaps whatever is
+           typed, on `change` rather than on every keystroke: "5" on the way
+           to "50" would otherwise apply as 50 and fight the reader's typing.
+
+           The two buttons take .sp-step, the same border/radius/uppercase
+           chrome as .sp-motion-option and the Conway actions row, so this is
+           the panel's existing button rather than a new one.
+
+           The percent sign is a static aria-hidden marker, not part of the
+           box: keeping it out of the input is what lets the input hold a
+           bare number the browser can step and validate. The reader-facing
+           unit is still on screen, and the accessible name of the whole
+           thing comes from the legend's own label plus the live region
+           below. */}
+        <button type="button" class="sp-step" id="sp-font-size-down" aria-label={t(locale, 'fontSizeDecrease')}>&minus;</button>
+        <input type="number" id="sp-font-size" min="50" max="160" step="10" inputmode="numeric" />
+        <span class="sp-font-size-unit" aria-hidden="true">%</span>
+        <button type="button" class="sp-step" id="sp-font-size-up" aria-label={t(locale, 'fontSizeIncrease')}>+</button>
+        {/* Back to 100%, which this panel stores as *nothing stored* (see
+           settings-panel.ts's applyFontSize and the FONT_SIZE_DEFAULT branch
+           of the write path): resetting removes the key and the inline
+           --font-scale rather than writing a literal 100. Its visible label
+           is the number itself, untranslated the same way the code theme
+           names are, with the sentence in aria-label. */}
+        <button type="button" class="sp-step" id="sp-font-size-reset" aria-label={t(locale, 'fontSizeReset')}>100%</button>
       </div>
+      {/* The announcement channel for the three buttons: pressing one does not
+         move focus, so without a live region nothing tells a screen reader
+         the size changed. Visually hidden (the .sr-only in BaseLayout's own
+         global block) rather than removed, because the box beside it already
+         shows the same number on screen and a second copy in an 18rem menu
+         is noise. */}
+      <span
+        id="sp-font-size-value"
+        class="sp-font-size-value sr-only"
+        aria-live="polite"
+        data-template={t(locale, 'fontSizeCurrent')}></span>
     </fieldset>
 
     <fieldset class="sp-font-family">
@@ -317,29 +357,90 @@ const { locale } = Astro.props
   .sp-font-size-row {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .sp-font-size-row > * + * {
-    margin-inline-start: 0.5rem;
+    margin-inline-start: 0.3rem;
   }
 
-  .sp-font-size-row input[type='range'] {
-    flex: 1;
-    accent-color: var(--accent);
+  /* The minus/plus/reset buttons. Same border, radius, family and casing as
+     .sp-motion-option and .sp-conway-actions button, which is the panel's one
+     button treatment; only the padding is tighter, since two of the three
+     carry a single glyph rather than a word. */
+  .sp-step {
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
   }
 
-  .sp-font-size-row input[type='range']:focus-visible {
+  .sp-step:hover:not(:disabled),
+  .sp-step:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .sp-step:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
-  /* Fixed-width so the slider beside it does not shift as the digits
-     change (50% vs 160%, one character apart). */
-  .sp-font-size-value {
-    display: inline-block;
-    min-inline-size: 4.5ch;
+  /* At 50% and at 160% the matching button is disabled rather than left
+     looking live and doing nothing. Dimmed *and* given not-allowed, since
+     colour alone is the signal a reader with low vision is least likely to
+     catch; the `disabled` attribute itself is what tells a screen reader. */
+  .sp-step:disabled {
+    color: var(--muted);
+    border-color: var(--rule);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /*
+   * Sized to the widest value it can hold (three digits), so the row does not
+   * shift between 50 and 160.
+   *
+   * The native spinner is dropped on purpose: the minus and plus buttons
+   * beside it already are that control, at a hit target a pointer can
+   * actually reach, and the browser's own arrows are two tiny halves stacked
+   * inside the field. Up/Down on the keyboard still steps it, since that
+   * behaviour belongs to `type="number"` itself rather than to the rendered
+   * spinner.
+   */
+  .sp-font-size-row input[type='number'] {
+    inline-size: 4.5ch;
+    flex: 0 0 auto;
     text-align: center;
+    background: var(--bg);
     color: var(--fg);
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    padding: 0.3rem 0.2rem;
+    appearance: textfield;
+  }
+
+  .sp-font-size-row input[type='number']:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .sp-font-size-row input[type='number']::-webkit-outer-spin-button,
+  .sp-font-size-row input[type='number']::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+
+  .sp-font-size-unit {
+    color: var(--muted);
     font-family: var(--font-mono);
     font-size: var(--text-tiny);
   }
