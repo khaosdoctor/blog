@@ -188,9 +188,12 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     <a href="#main-content" class="skip-link">{t(locale, 'skipToContent')}</a>
     <header>
       <a href={home} class="home">lsantos.dev</a>
-      <nav aria-label={t(locale, 'search')}>
-        <a href={locale === 'en' ? '/en/search/' : '/search/'}>{t(locale, 'search')}</a>
-      </nav>
+      {/* The plain-link "Buscar" nav that used to live here is gone: the
+          command palette below replaced it as the actual way readers search
+          with JS on. The old link's own /search/ page still exists and still
+          works with JS off (which the palette never will), so it moved to
+          the footer instead of disappearing, next to the other quiet
+          reference links rather than the primary nav. */}
       <SearchPalette locale={locale} />
       <LangSwitcher locale={locale} alternates={alternates} />
       <ThemeToggle locale={locale} />
@@ -209,6 +212,12 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
       */}
       <p class="credits">
         <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
+      </p>
+      {/* The one place /search/ is still linked from, now that the header
+          nav is gone: kept reachable (and in the sitemap) for the reader
+          with JS off, who the command palette above can never serve. */}
+      <p class="search-link">
+        <a href={locale === 'en' ? '/en/search/' : '/search/'}>{t(locale, 'search')}</a>
       </p>
       <p class="version">
         <a href={commitUrl} rel="noopener">{t(locale, 'version')}: {version}</a>
@@ -313,9 +322,14 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     padding-block: 2rem 3rem;
   }
 
-  /* Pushes search and the language switcher to the right of the wordmark. */
-  header nav:first-of-type {
-    margin-inline-start: auto;
+  /* Pushes every control to the right of the wordmark, as a group. The auto
+     margin lives on .home itself rather than on "the first control",
+     because which control is actually first in the flex row depends on
+     which of them (search, theme, settings) has un-hidden by the time this
+     paints: pinning it here keeps the split correct regardless of that
+     order, JS on or off. */
+  header .home {
+    margin-inline-end: auto;
   }
 
   .skip-link {
@@ -355,12 +369,14 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
   }
 
   footer .version,
-  footer .credits {
+  footer .credits,
+  footer .search-link {
     font-family: var(--font-mono);
     font-size: 0.75rem;
   }
 
-  footer .credits {
+  footer .credits,
+  footer .search-link {
     color: var(--muted);
   }
 
