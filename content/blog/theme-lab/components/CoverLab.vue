@@ -1,16 +1,17 @@
 <script setup lang="ts">
 /**
- * Seção 04: três capas OG/social candidatas, 1200×630, com o título assado por
+ * Seção 02: cinco capas OG/social candidatas, 1200×630, com o título assado por
  * cima. Cada uma é um `<svg viewBox="0 0 1200 630">` de verdade, não canvas: o
  * gerador real rasteriza SVG com `sharp` no build, então o que está aqui entra
  * na build sem reescrita, e a proporção fica honesta enquanto a pré-visualização
  * encolhe para caber na coluna do post.
  *
- * Determinismo: nada aqui chama `Math.random()`. Cor da marca, forma do plasma
- * e tudo o resto vêm de um inteiro (o "seed"). No gerador real esse inteiro é
- * `hashSlug(post.slug)`, então o mesmo post sempre bate a mesma capa e o cache
- * do card social não estraga a cada build; aqui, sem um post de verdade para
- * hashear, o knob "semente" faz esse papel e soma-se ao hash do slug de exemplo.
+ * Determinismo: nada aqui chama `Math.random()`. Cor da marca, sólido do
+ * wireframe, giro dele e o campo de ondas vêm todos de um inteiro (o "seed").
+ * No gerador real esse inteiro é `hashSlug(post.slug)`, então o mesmo post
+ * sempre bate a mesma capa e o cache do card social não estraga a cada build;
+ * aqui, sem um post de verdade para hashear, o knob "semente" faz esse papel e
+ * soma-se ao hash do slug de exemplo.
  */
 import { computed, ref } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
@@ -71,68 +72,222 @@ function labelFor(options: Array<{ id: string; name: string }>, id: string): str
 }
 
 /**
- * Sólidos de baixa contagem de polígono para o wireframe do candidato 3, no
- * espírito do Elite (1984): vértices e arestas puros, sem face nem sombreado,
- * a mesma malha desenhada inteira mesmo do lado escondido. Coordenadas de -1 a
- * 1 porque a projeção abaixo escala pelo raio na hora.
+ * PRNG pequeno, determinístico e sem dependência (mulberry32, de domínio
+ * público): recebe um inteiro e devolve uma função que gera números em
+ * [0, 1), sempre na mesma sequência para a mesma semente. É o que faz o
+ * sólido do candidato 4 e o campo do candidato 5 nascerem do hash do slug em
+ * vez de `Math.random()`: mesmo slug, mesmo inteiro, mesma sequência, sempre.
+ * A diferença para o bug do plasma original não é usar "uma semente só": é
+ * que cada parâmetro lê uma chamada nova do gerador, e cada chamada já mistura
+ * o estado inteiro (multiplicação, xor, shift) antes de devolver o número, e
+ * não uma mesma leitura escalada por constantes diferentes.
  */
-type Vec3 = [number, number, number]
-interface Solid {
-  vertices: Vec3[]
-  edges: Array<[number, number]>
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
 }
-
-const SOLIDS: Record<string, Solid> = {
-  cubo: {
-    vertices: [
-      [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-      [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
-    ],
-    edges: [
-      [0, 1], [1, 2], [2, 3], [3, 0],
-      [4, 5], [5, 6], [6, 7], [7, 4],
-      [0, 4], [1, 5], [2, 6], [3, 7],
-    ],
-  },
-  piramide: {
-    vertices: [
-      [0, -1, 0],
-      [-1, 1, -1], [1, 1, -1], [1, 1, 1], [-1, 1, 1],
-    ],
-    edges: [
-      [0, 1], [0, 2], [0, 3], [0, 4],
-      [1, 2], [2, 3], [3, 4], [4, 1],
-    ],
-  },
-  octaedro: {
-    vertices: [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]],
-    edges: [
-      [0, 2], [0, 3], [0, 4], [0, 5],
-      [1, 2], [1, 3], [1, 4], [1, 5],
-      [2, 4], [2, 5], [3, 4], [3, 5],
-    ],
-  },
-}
-const SOLID_IDS = Object.keys(SOLIDS)
-const SOLID_OPTIONS = [
-  { id: 'auto', name: 'automático (hash)' },
-  { id: 'cubo', name: 'cubo' },
-  { id: 'piramide', name: 'pirâmide' },
-  { id: 'octaedro', name: 'octaedro' },
-]
 
 /**
- * Projeção ortográfica pura (sem perspectiva): gira em Y depois em X e ignora
- * a profundidade resultante. O Elite também não sombreava por profundidade,
- * só desenhava a aresta; a leitura de "objeto girando" vem da rotação, não de
- * um Z fingido.
+ * Sólido gerado, não escolhido: em vez de indexar uma lista fixa de formas,
+ * cada parâmetro sai de uma chamada do PRNG. Um anel de N lados empilhado M
+ * vezes, com as pontas fechando em face ou em ponto, é o mesmo desenho que
+ * produz um cubo (4 lados, 2 anéis, sem ponta), um prisma hexagonal (6 lados,
+ * 2 anéis), um octaedro (4 lados, 1 anel, as duas pontas fechadas) ou um
+ * tetraedro (3 lados, 1 anel, uma ponta fechada) só variando os números, o
+ * que dá mais variedade real com menos código do que escrever cada sólido à
+ * mão.
  */
-function project(v: Vec3, yaw: number, pitch: number, cx: number, cy: number, scale: number) {
-  const [x, y, z] = v
+type Vec3 = [number, number, number]
+interface SolidParams {
+  sides: number
+  ringCount: number
+  topClose: boolean
+  bottomClose: boolean
+  taper: number
+  brace: boolean
+  yaw: number
+  pitch: number
+  roll: number
+}
+interface GeneratedSolid {
+  vertices: Vec3[]
+  edges: Array<[number, number]>
+  params: SolidParams
+}
+
+function generateSolidParams(rng: () => number): SolidParams {
+  const sides = 3 + Math.floor(rng() * 6) // 3..8 lados por anel
+  let ringCount = 1 + Math.floor(rng() * 3) // 1..3 anéis empilhados
+  let topClose = rng() < 0.5
+  let bottomClose = rng() < 0.5
+  if (ringCount === 1 && !topClose && !bottomClose) topClose = true // nunca um anel plano sozinho
+  const taper = 0.55 + rng() * 0.45 // 0.55..1.0, o quanto o topo estreita
+  const brace = rng() < 0.45 // arestas cruzadas extras entre anéis
+  const yaw = rng() * Math.PI * 2
+  const pitch = rng() * Math.PI * 2
+  const roll = rng() * Math.PI * 2
+  return { sides, ringCount, topClose, bottomClose, taper, brace, yaw, pitch, roll }
+}
+
+function generateSolid(rng: () => number): GeneratedSolid {
+  const params = generateSolidParams(rng)
+  const { sides, ringCount, topClose, bottomClose, taper } = params
+
+  let ringYs: number[]
+  if (ringCount === 1) {
+    if (topClose && bottomClose) ringYs = [0] // bipirâmide: anel no equador, ponta nos dois polos
+    else if (topClose) ringYs = [-1] // pirâmide: anel na base, ponta no topo
+    else ringYs = [1] // pirâmide invertida: anel no topo, ponta embaixo
+  } else {
+    ringYs = Array.from({ length: ringCount }, (_, i) => -1 + (2 * i) / (ringCount - 1))
+  }
+
+  const vertices: Vec3[] = []
+  const edges: Array<[number, number]> = []
+  const ringIndices: number[][] = []
+  for (const y of ringYs) {
+    const radius = 1 + (taper - 1) * ((y + 1) / 2)
+    const indices: number[] = []
+    for (let s = 0; s < sides; s++) {
+      const angle = (s / sides) * Math.PI * 2
+      indices.push(vertices.length)
+      vertices.push([Math.cos(angle) * radius, y, Math.sin(angle) * radius])
+    }
+    ringIndices.push(indices)
+    for (let s = 0; s < sides; s++) edges.push([indices[s], indices[(s + 1) % sides]])
+  }
+  for (let r = 0; r < ringIndices.length - 1; r++) {
+    for (let s = 0; s < sides; s++) {
+      edges.push([ringIndices[r][s], ringIndices[r + 1][s]])
+      if (params.brace) edges.push([ringIndices[r][s], ringIndices[r + 1][(s + 1) % sides]])
+    }
+  }
+  if (topClose) {
+    const apexIdx = vertices.length
+    vertices.push([0, ringCount === 1 ? 1 : 1.3, 0])
+    for (const idx of ringIndices[ringIndices.length - 1]) edges.push([apexIdx, idx])
+  }
+  if (bottomClose) {
+    const apexIdx = vertices.length
+    vertices.push([0, ringCount === 1 ? -1 : -1.3, 0])
+    for (const idx of ringIndices[0]) edges.push([apexIdx, idx])
+  }
+  return { vertices, edges, params }
+}
+
+function rotate3(v: Vec3, yaw: number, pitch: number, roll: number): Vec3 {
+  let [x, y, z] = v
   const x1 = x * Math.cos(yaw) + z * Math.sin(yaw)
   const z1 = -x * Math.sin(yaw) + z * Math.cos(yaw)
-  const y1 = y * Math.cos(pitch) - z1 * Math.sin(pitch)
-  return { x: cx + x1 * scale, y: cy + y1 * scale }
+  x = x1
+  z = z1
+  const y1 = y * Math.cos(pitch) - z * Math.sin(pitch)
+  const z2 = y * Math.sin(pitch) + z * Math.cos(pitch)
+  y = y1
+  z = z2
+  const x2 = x * Math.cos(roll) - y * Math.sin(roll)
+  const y2 = x * Math.sin(roll) + y * Math.cos(roll)
+  x = x2
+  y = y2
+  return [x, y, z]
+}
+
+/**
+ * Projeção em perspectiva de verdade (não a ortográfica da tentativa
+ * anterior, que ignorava a profundidade e por isso lia como um desenho 2D
+ * girando, não como um sólido 3D): quanto maior o Z depois da rotação, mais
+ * perto de `camDist` o ponto fica da câmera e mais o fator `camDist / (camDist
+ * + z)` encolhe. `textmode.js` faz esse mesmo tipo de projeção em 3D, mas
+ * dentro de um `<canvas>`/WebGL no navegador; aqui o gerador real só roda
+ * `sharp` sobre um `<svg>` estático no build, sem navegador, então a projeção
+ * precisa ser essa arimética pura em JS, não a biblioteca.
+ */
+function projectPerspective(v: Vec3, cx: number, cy: number, scale: number, camDist: number) {
+  const [x, y, z] = v
+  const factor = camDist / (camDist + z)
+  return { x: cx + x * factor * scale, y: cy + y * factor * scale, z }
+}
+
+interface WaveParams {
+  freqA: number
+  freqB: number
+  freqC: number
+  phaseA: number
+  phaseB: number
+  phaseC: number
+  direction: number
+  levels: number
+}
+
+/**
+ * Três senos, como no campo original, mas cada frequência e cada fase vêm de
+ * uma chamada separada do PRNG, e o par (col, row) gira por um ângulo de
+ * direção antes de entrar nos senos. É o oposto do que quebrou o plasma da
+ * primeira tentativa: lá, uma fase só era escalada por três constantes fixas
+ * e as três frequências cresciam juntas, então o campo inteiro colapsava numa
+ * única rampa. Aqui as sete leituras do PRNG (três frequências, três fases, a
+ * direção) não têm relação linear entre si, então o campo forma vários focos
+ * de claro e escuro em vez de uma rampa, e a orientação das bandas muda de
+ * post para post.
+ */
+function generateWaveParams(rng: () => number): WaveParams {
+  const freqA = 0.15 + rng() * 0.35
+  const freqB = 0.15 + rng() * 0.35
+  const freqC = 0.15 + rng() * 0.35
+  const phaseA = rng() * Math.PI * 2
+  const phaseB = rng() * Math.PI * 2
+  const phaseC = rng() * Math.PI * 2
+  const direction = rng() * Math.PI * 2
+  const levels = 3 + Math.floor(rng() * 4) // 3..6 tons, como uma paleta de máquina antiga
+  return { freqA, freqB, freqC, phaseA, phaseB, phaseC, direction, levels }
+}
+
+/**
+ * Campo compartilhado pelos candidatos 3 e 5: mesma matemática, dois usos.
+ * `quantize=false` (candidato 3) deixa o valor contínuo, então o plasma tem
+ * dez, vinte tons de transição; `quantize=true` (candidato 5) arredonda para
+ * `levels` degraus só, que é o efeito de "poucos tons" pedido para a janela
+ * DOS: bandas com aresta dura, não gradiente suave.
+ */
+function waveField(
+  params: WaveParams,
+  brandHex: string,
+  bgHex: string,
+  size: number,
+  quantize: boolean,
+): Array<{ x: number; y: number; fill: string }> {
+  const cols = Math.ceil(CARD_W / size)
+  const rows = Math.ceil(CARD_H / size)
+  const brandRgb = parseHex(brandHex)
+  const bgRgb = parseHex(bgHex)
+  const cosD = Math.cos(params.direction)
+  const sinD = Math.sin(params.direction)
+  const cells: Array<{ x: number; y: number; fill: string }> = []
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const u = col * cosD - row * sinD
+      const v = col * sinD + row * cosD
+      const wave =
+        (Math.sin(u * params.freqA + params.phaseA) +
+          Math.sin(v * params.freqB + params.phaseB) +
+          Math.sin((u + v) * params.freqC + params.phaseC)) /
+          6 +
+        0.5
+      const raw = Math.max(0, Math.min(1, wave))
+      const alpha = quantize
+        ? params.levels === 1
+          ? 0
+          : Math.min(params.levels - 1, Math.floor(raw * params.levels)) / (params.levels - 1)
+        : raw
+      cells.push({ x: col * size, y: row * size, fill: toHex(composite(brandRgb, bgRgb, alpha)) })
+    }
+  }
+  return cells
 }
 
 /**
@@ -156,13 +311,23 @@ const titleSize = ref('curto')
 const category = ref('meta')
 const cellSize = ref(28)
 const cursor = ref(true)
-const solidPick = ref('auto')
 const wireDensity = ref(22)
 const plasmaStrength = ref(55)
 
 const effectiveSeed = computed(() => (hashSlug(DEMO_SLUG) + seed.value) >>> 0)
 const brand = computed(() => BRANDS[effectiveSeed.value % BRANDS.length])
 const bleedInk = computed(() => INK_ON_BRAND[brand.value.id])
+
+// Cada gerador puxa do mesmo hash, mas por uma semente derivada diferente
+// (XOR com uma constante própria), para o sólido do candidato 4 e as ondas
+// dos candidatos 3 e 5 não desenharem sempre o mesmo padrão relativo entre si
+// para o mesmo post.
+const PLASMA_WAVE_SALT = 0x1000193
+const DOS_WAVE_SALT = 0x9e3779b9
+
+const wireSolid = computed(() => generateSolid(mulberry32(effectiveSeed.value)))
+const plasmaWave = computed(() => generateWaveParams(mulberry32((effectiveSeed.value ^ PLASMA_WAVE_SALT) >>> 0)))
+const dosWave = computed(() => generateWaveParams(mulberry32((effectiveSeed.value ^ DOS_WAVE_SALT) >>> 0)))
 
 const rawTitle = computed(() => TITLES[titleSize.value])
 // O cursor entra na string antes do quebra-linha, não depois: assim, se a
@@ -174,7 +339,7 @@ const bylineText = 'Lucas Santos · 14 AGO 2026'
 
 const KICKER_SIZE = 22
 const BYLINE_SIZE = 20
-const LINE_GAP = 1.22
+const LINE_HEIGHT_RATIO = 1.22
 const MONO_ADVANCE = 0.62 // avanço aproximado de uma fonte monoespaçada, em em
 const WRAP_SAFETY = 0.92 // margem contra erro dessa estimativa
 
@@ -214,29 +379,35 @@ interface Card {
 function buildCard(padX: number, padY: number): Card {
   const fontSize = titleFontSize(rawTitle.value.length)
   const lines = wrapTitle(displayTitle.value, CARD_W - padX * 2, fontSize)
-  const lineHeight = fontSize * LINE_GAP
-  const gap1 = fontSize * 0.55
-  const gap2 = fontSize * 0.5
-  const blockHeight = KICKER_SIZE * LINE_GAP + gap1 + lines.length * lineHeight + gap2 + BYLINE_SIZE * LINE_GAP
+  const lineHeight = fontSize * LINE_HEIGHT_RATIO
+  const spaceAfterKicker = fontSize * 0.55
+  const spaceBeforeByline = fontSize * 0.5
+  const blockHeight =
+    KICKER_SIZE * LINE_HEIGHT_RATIO +
+    spaceAfterKicker +
+    lines.length * lineHeight +
+    spaceBeforeByline +
+    BYLINE_SIZE * LINE_HEIGHT_RATIO
   const contentHeight = CARD_H - padY * 2
   const startY = padY + Math.max(0, (contentHeight - blockHeight) / 2)
   const kickerY = startY + KICKER_SIZE
-  const titleStartY = kickerY + gap1 + fontSize
+  const titleStartY = kickerY + spaceAfterKicker + fontSize
   const titleYs = lines.map((_, index) => titleStartY + index * lineHeight)
-  const bylineY = titleYs[titleYs.length - 1] + gap2 + BYLINE_SIZE
-  return { padX, fontSize, lines, kickerY, ruleY: kickerY + gap1 * 0.5, titleYs, bylineY }
+  const bylineY = titleYs[titleYs.length - 1] + spaceBeforeByline + BYLINE_SIZE
+  return { padX, fontSize, lines, kickerY, ruleY: kickerY + spaceAfterKicker * 0.5, titleYs, bylineY }
 }
 
 const dosCard = computed(() => buildCard(160, 140))
 const bleedCard = computed(() => buildCard(90, 110))
+const plasmaCard = computed(() => buildCard(90, 110))
 
 // Moldura dupla: uma borda "double" ingênua deixa 2-4px entre as duas linhas,
 // que foi exatamente a reclamação da última tentativa ("apertada demais"). O
 // vão aqui é sete vezes isso.
 const BORDER_OUTER_INSET = 36
 const BORDER_STROKE = 4
-const BORDER_GAP = 28
-const BORDER_INNER_INSET = BORDER_OUTER_INSET + BORDER_STROKE + BORDER_GAP
+const BORDER_SPACING = 28
+const BORDER_INNER_INSET = BORDER_OUTER_INSET + BORDER_STROKE + BORDER_SPACING
 
 const outerFrame = computed(() => ({
   x: BORDER_OUTER_INSET,
@@ -251,73 +422,38 @@ const innerFrame = computed(() => ({
   height: CARD_H - BORDER_INNER_INSET * 2,
 }))
 
-const MESH_BG = '#000000'
-const MESH_INK = '#e6e4e0'
-const MESH_SHADOW = '#050505'
+const DARK_BG = '#000000'
+const DARK_INK = '#e6e4e0'
+const DARK_SHADOW = '#050505'
 const SHADOW_OFFSET = 3
 
-/**
- * O campo original somava três senos com frequências quase iguais e todas
- * crescendo junto com col/row: o resultado era uma única rampa de claro a
- * escuro, quase sem textura, e por isso lia como "uma caixa preta que muda de
- * cor com a semente" em vez de plasma. Aqui as três frequências são bem
- * diferentes entre si e a terceira usa (col - row), não (col + row), para não
- * reforçar as outras duas na mesma direção: o resultado tem vários focos
- * claros e escuros espalhados pelo cartão, não uma rampa só.
- */
-const meshPlasmaCells = computed(() => {
-  const size = cellSize.value
-  const cols = Math.ceil(CARD_W / size)
-  const rows = Math.ceil(CARD_H / size)
-  const brandRgb = parseHex(brand.value.hex)
-  const bgRgb = parseHex(MESH_BG)
-  const phase = (effectiveSeed.value % 100) * 0.31
-  const cells: Array<{ x: number; y: number; fill: string }> = []
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const wave =
-        (Math.sin(col * 0.35 + phase) +
-          Math.sin(row * 0.4 - phase * 0.7) +
-          Math.sin((col - row) * 0.3 + phase * 1.1)) /
-          6 +
-        0.5
-      const value = Math.max(0, Math.min(1, wave))
-      cells.push({ x: col * size, y: row * size, fill: toHex(composite(brandRgb, bgRgb, value)) })
-    }
-  }
-  return cells
-})
-
-// Sólido e giro vêm do mesmo hash que já escolhe a cor: nada aqui chama
-// Math.random(), então o mesmo post sempre desenha o mesmo objeto no mesmo
-// ângulo. O knob "sólido" deixa passar por cima do automático para navegar as
-// três formas sem precisar variar a semente.
-const activeSolidId = computed(() =>
-  solidPick.value === 'auto' ? SOLID_IDS[effectiveSeed.value % SOLID_IDS.length] : solidPick.value,
-)
-const wireYaw = computed(() => ((effectiveSeed.value % 360) * Math.PI) / 180)
-const wirePitch = computed(() => (((Math.floor(effectiveSeed.value / 37) % 360) * Math.PI) / 180))
+const meshPlasmaCells = computed(() => waveField(plasmaWave.value, brand.value.hex, DARK_BG, cellSize.value, false))
+const dosWaveCells = computed(() => waveField(dosWave.value, brand.value.hex, DARK_BG, cellSize.value, true))
 
 const WIRE_CENTER = { x: 900, y: 335 }
-const WIRE_RADIUS = 150
+const WIRE_RADIUS = 130
+const WIRE_CAM_DIST = 4.5
 
 /**
- * Em vez de desenhar as arestas como <line>, cada uma é amostrada em pontos e
- * cada ponto vira um "+" preso à grade de wireDensity px: é o que faz o objeto
- * ler como uma malha de caracteres (a referência do cubo feito só de "+"),
- * não como um desenho vetorial liso. Arestas escondidas não são removidas,
- * o Elite também não fazia esse corte, então pontos repetidos na mesma
- * célula da grade só entram uma vez, para não empilhar glifos em cima do
- * outro sem necessidade.
+ * Em vez de desenhar as arestas como `<line>`, cada uma é amostrada em pontos
+ * e cada ponto vira um "+" preso à grade de `wireDensity` px, no espírito do
+ * cubo feito só de "+": uma malha de caracteres, não um traço vetorial liso.
+ * A profundidade de cada ponto (o Z depois da rotação, antes da perspectiva)
+ * dá a leitura de 3D de verdade: pontos mais perto da câmera saem com glifo
+ * maior e mais opaco, os mais longe saem menores e quase apagados, a mesma
+ * ideia de "arestas escondidas ainda desenhadas, só que fracas" do cubo de
+ * referência. Quando duas arestas caem na mesma célula da grade, fica a mais
+ * perto (a de maior "closeness"), porque é ela que estaria na frente.
  */
 const wireCells = computed(() => {
-  const solid = SOLIDS[activeSolidId.value]
+  const solid = wireSolid.value
   const step = wireDensity.value
-  const projected = solid.vertices.map((v) =>
-    project(v, wireYaw.value, wirePitch.value, WIRE_CENTER.x, WIRE_CENTER.y, WIRE_RADIUS),
-  )
-  const seen = new Set<string>()
-  const cells: Array<{ x: number; y: number }> = []
+  const rotated = solid.vertices.map((v) => rotate3(v, solid.params.yaw, solid.params.pitch, solid.params.roll))
+  const zs = rotated.map(([, , z]) => z)
+  const zMin = Math.min(...zs)
+  const zRange = Math.max(0.0001, Math.max(...zs) - zMin)
+  const projected = rotated.map((v) => projectPerspective(v, WIRE_CENTER.x, WIRE_CENTER.y, WIRE_RADIUS, WIRE_CAM_DIST))
+  const best = new Map<string, { x: number; y: number; closeness: number }>()
   for (const [a, b] of solid.edges) {
     const p1 = projected[a]
     const p2 = projected[b]
@@ -325,24 +461,28 @@ const wireCells = computed(() => {
     const steps = Math.max(1, Math.round(length / step))
     for (let i = 0; i <= steps; i++) {
       const t = i / steps
-      const gx = Math.round((p1.x + (p2.x - p1.x) * t) / step) * step
-      const gy = Math.round((p1.y + (p2.y - p1.y) * t) / step) * step
+      const x = p1.x + (p2.x - p1.x) * t
+      const y = p1.y + (p2.y - p1.y) * t
+      const z = p1.z + (p2.z - p1.z) * t
+      const closeness = 1 - (z - zMin) / zRange // 1 = mais perto da câmera, 0 = mais longe
+      const gx = Math.round(x / step) * step
+      const gy = Math.round(y / step) * step
       const key = `${gx},${gy}`
-      if (seen.has(key)) continue
-      seen.add(key)
-      cells.push({ x: gx, y: gy })
+      const existing = best.get(key)
+      if (!existing || closeness > existing.closeness) best.set(key, { x: gx, y: gy, closeness })
     }
   }
-  return cells
+  return Array.from(best.values())
 })
 
 const dosContrast = computed(() => ratio(parseHex('#e6e4e0'), parseHex('#000000')))
 const bleedContrast = computed(() => ratio(parseHex(bleedInk.value), parseHex(brand.value.hex)))
-// Pior caso de verdade: tanto o plasma no alpha máximo quanto o traço do
-// wireframe convergem para a cor da marca, então é contra ela que o título
-// realmente precisa ler, não contra o preto de base (que é o melhor caso).
-const meshContrast = computed(() => ratio(parseHex(MESH_INK), parseHex(MESH_BG)))
-const meshWorstContrast = computed(() => ratio(parseHex(MESH_INK), parseHex(brand.value.hex)))
+// Plasma, wireframe e ondas usam a mesma tinta e o mesmo preto de base, e nos
+// três o efeito satura na cor da marca no extremo mais forte (alpha 1 no
+// plasma e nas ondas, glifo bem próximo no wireframe): por isso o melhor e o
+// pior caso são os mesmos três números para os três candidatos.
+const darkBestContrast = computed(() => ratio(parseHex(DARK_INK), parseHex(DARK_BG)))
+const darkWorstContrast = computed(() => ratio(parseHex(DARK_INK), parseHex(brand.value.hex)))
 
 // Preto puro se ele ler melhor do que a tinta do candidato contra o fundo da
 // marca, tinta caso contrário. Decidido pela razão de contraste, não por uma
@@ -353,10 +493,8 @@ const bleedRuleColour = computed(() => {
   return onBlack >= onInk ? '#000000' : bleedInk.value
 })
 
-// Os três candidatos compartilham semente, categoria, comprimento do título e
-// cursor: todos entram na cor, no rótulo e no texto dos três cartões. Célula
-// do plasma, sólido, densidade do wireframe e força do plasma só existem no
-// candidato 3, então só aparecem na decisão dele.
+// Os cinco candidatos compartilham semente, categoria, comprimento do título
+// e cursor: todos entram na cor, no rótulo e no texto dos cinco cartões.
 const sharedDecisionSettings = computed(() => [
   { label: 'categoria', value: category.value },
   { label: 'comprimento do título', value: labelFor(TITLE_SIZE_OPTIONS, titleSize.value) },
@@ -365,12 +503,25 @@ const sharedDecisionSettings = computed(() => [
   { label: 'semente', value: String(seed.value) },
 ])
 
-const meshDecisionSettings = computed(() => [
+const plasmaDecisionSettings = computed(() => [
   ...sharedDecisionSettings.value,
-  { label: 'célula do plasma', value: `${cellSize.value}px` },
+  { label: 'célula da grade', value: `${cellSize.value}px` },
   { label: 'força do plasma', value: `${plasmaStrength.value}%` },
-  { label: 'sólido do wireframe', value: labelFor(SOLID_OPTIONS, solidPick.value) },
+])
+
+const wireframeDecisionSettings = computed(() => [
+  ...sharedDecisionSettings.value,
   { label: 'densidade do wireframe', value: `${wireDensity.value}px` },
+  {
+    label: 'sólido gerado (hash)',
+    value: `${wireSolid.value.params.sides} lados · ${wireSolid.value.params.ringCount} anel(is) · ${wireSolid.value.params.topClose ? 'topo fechado' : 'topo aberto'} · ${wireSolid.value.params.bottomClose ? 'base fechada' : 'base aberta'}`,
+  },
+])
+
+const wavesDecisionSettings = computed(() => [
+  ...sharedDecisionSettings.value,
+  { label: 'célula da grade', value: `${cellSize.value}px` },
+  { label: 'tons gerados (hash)', value: String(dosWave.value.levels) },
 ])
 
 const SVG_NOTE = 'A capa é um <svg viewBox="0 0 1200 630"> de verdade (1200x630), o mesmo SVG que o gerador rasteriza com sharp no build. Cor da marca e semente derivam de hashSlug(post.slug) + semente, nunca de Math.random(), para o cache do card social não estragar a cada build.'
@@ -384,9 +535,23 @@ const bleedDecisionContext = computed(
     `${SVG_NOTE} Título ${bleedContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(bleedContrast.value)}).`,
 )
 
-const meshDecisionContext = computed(
+const darkContextTail = computed(
   () =>
-    `${SVG_NOTE} Título ${meshContrast.value.toFixed(2)}:1 sobre ${MESH_BG} no melhor caso (${grade(meshContrast.value)}); pior caso real ${meshWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(meshWorstContrast.value)}), porque tanto o plasma saturado quanto o traço do wireframe convergem pra cor da marca; por isso o título carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
+    `Título ${darkBestContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(darkBestContrast.value)}); pior caso real ${darkWorstContrast.value.toFixed(2)}:1 sobre ${brand.value.hex} (${grade(darkWorstContrast.value)}), quando o efeito satura na cor da marca; por isso o título carrega uma sombra rígida de ${SHADOW_OFFSET}px.`,
+)
+
+const plasmaDecisionContext = computed(
+  () => `${SVG_NOTE} Candidato único (plasma, sem wireframe empilhado por cima). ${darkContextTail.value}`,
+)
+
+const wireframeDecisionContext = computed(
+  () =>
+    `${SVG_NOTE} Sólido e giro nascem do hash do slug via um PRNG pequeno (mulberry32), não de Math.random() nem de uma lista fixa de formas; a projeção é perspectiva pura em JS (sem canvas, sem WebGL, sem textmode.js), porque o gerador real só roda sharp sobre SVG estático no build. ${darkContextTail.value}`,
+)
+
+const wavesDecisionContext = computed(
+  () =>
+    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e um campo de ondas quantizado em poucos tons (como uma paleta de máquina antiga) em vez do gradiente contínuo do candidato 3; frequência, fase, direção e número de tons também nascem do hash. ${darkContextTail.value}`,
 )
 </script>
 
@@ -397,10 +562,12 @@ const meshDecisionContext = computed(
         v-model="view"
         label="ver"
         :options="[
-          { id: 'todos', name: 'os três empilhados' },
+          { id: 'todos', name: 'os cinco empilhados' },
           { id: 'dos', name: '1 · janela DOS' },
           { id: 'bleed', name: '2 · sem moldura' },
-          { id: 'plasma', name: '3 · plasma + wireframe' },
+          { id: 'plasma', name: '3 · plasma' },
+          { id: 'wireframe', name: '4 · wireframe 3D' },
+          { id: 'ondas', name: '5 · janela DOS + ondas' },
         ]"
       />
     </Panel>
@@ -409,13 +576,12 @@ const meshDecisionContext = computed(
       <Knob v-model="seed" label="semente" :min="0" :max="200" />
       <Pick v-model="titleSize" label="comprimento do título" :options="TITLE_SIZE_OPTIONS" />
       <Pick v-model="category" label="categoria" :options="CATEGORIES" />
-      <Knob v-model="cellSize" label="célula do plasma" :min="16" :max="48" :step="2" unit="px" />
       <Toggle v-model="cursor" label="cursor sólido █" />
     </Panel>
 
-    <Panel label="candidato 3 · plasma + wireframe">
+    <Panel label="candidatos 3 · 4 · 5 (o resto do sólido e das ondas vem do hash)">
+      <Knob v-model="cellSize" label="célula da grade (plasma/ondas)" :min="16" :max="48" :step="2" unit="px" />
       <Knob v-model="plasmaStrength" label="força do plasma" :min="0" :max="100" :step="5" unit="%" />
-      <Pick v-model="solidPick" label="sólido do wireframe" :options="SOLID_OPTIONS" />
       <Knob v-model="wireDensity" label="densidade do wireframe" :min="12" :max="32" :step="2" unit="px" />
     </Panel>
 
@@ -532,18 +698,96 @@ const meshDecisionContext = computed(
       </div>
 
       <div v-if="view === 'todos' || view === 'plasma'" :class="$style.candidate">
-        <p :class="$style.label">Candidato 3 · plasma + wireframe</p>
+        <p :class="$style.label">Candidato 3 · plasma</p>
         <div :class="$style.stage">
           <svg
             viewBox="0 0 1200 630"
             :class="$style.svgRoot"
             role="img"
-            :aria-label="`Capa candidata, plasma e wireframe, categoria ${category}`"
+            :aria-label="`Capa candidata, plasma, categoria ${category}`"
           >
-            <rect width="1200" height="630" :fill="MESH_BG" />
+            <rect width="1200" height="630" :fill="DARK_BG" />
             <g :opacity="plasmaStrength / 100">
               <rect v-for="(c, i) in meshPlasmaCells" :key="i" :x="c.x" :y="c.y" :width="cellSize" :height="cellSize" :fill="c.fill" />
             </g>
+
+            <text
+              :x="plasmaCard.padX + SHADOW_OFFSET"
+              :y="plasmaCard.kickerY + SHADOW_OFFSET"
+              :font-family="LABEL_FONT"
+              :font-size="KICKER_SIZE"
+              letter-spacing="4"
+              :fill="DARK_SHADOW"
+            >{{ kickerText }}</text>
+            <text
+              v-for="(line, i) in plasmaCard.lines"
+              :key="`s${i}`"
+              :x="plasmaCard.padX + SHADOW_OFFSET"
+              :y="plasmaCard.titleYs[i] + SHADOW_OFFSET"
+              :font-family="TITLE_FONT"
+              :font-size="plasmaCard.fontSize"
+              :fill="DARK_SHADOW"
+            >{{ line }}</text>
+            <text
+              :x="plasmaCard.padX + SHADOW_OFFSET"
+              :y="plasmaCard.bylineY + SHADOW_OFFSET"
+              :font-family="LABEL_FONT"
+              :font-size="BYLINE_SIZE"
+              letter-spacing="2"
+              :fill="DARK_SHADOW"
+            >{{ bylineText }}</text>
+
+            <text
+              :x="plasmaCard.padX"
+              :y="plasmaCard.kickerY"
+              :font-family="LABEL_FONT"
+              :font-size="KICKER_SIZE"
+              letter-spacing="4"
+              :fill="DARK_INK"
+              opacity="0.92"
+            >{{ kickerText }}</text>
+            <text
+              v-for="(line, i) in plasmaCard.lines"
+              :key="`m${i}`"
+              :x="plasmaCard.padX"
+              :y="plasmaCard.titleYs[i]"
+              :font-family="TITLE_FONT"
+              :font-size="plasmaCard.fontSize"
+              :fill="DARK_INK"
+            >{{ line }}</text>
+            <text
+              :x="plasmaCard.padX"
+              :y="plasmaCard.bylineY"
+              :font-family="LABEL_FONT"
+              :font-size="BYLINE_SIZE"
+              letter-spacing="2"
+              :fill="DARK_INK"
+              opacity="0.92"
+            >{{ bylineText }}</text>
+          </svg>
+        </div>
+        <p :class="$style.tiny">
+          título {{ darkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso ({{ grade(darkBestContrast) }}) ·
+          pior caso real {{ darkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }} ({{ grade(darkWorstContrast) }})
+        </p>
+        <DecisionCopy
+          lab="capa · plasma"
+          component="CoverLab.vue"
+          :settings="plasmaDecisionSettings"
+          :context="plasmaDecisionContext"
+        />
+      </div>
+
+      <div v-if="view === 'todos' || view === 'wireframe'" :class="$style.candidate">
+        <p :class="$style.label">Candidato 4 · wireframe 3D</p>
+        <div :class="$style.stage">
+          <svg
+            viewBox="0 0 1200 630"
+            :class="$style.svgRoot"
+            role="img"
+            :aria-label="`Capa candidata, wireframe 3D, categoria ${category}`"
+          >
+            <rect width="1200" height="630" :fill="DARK_BG" />
             <text
               v-for="(c, i) in wireCells"
               :key="i"
@@ -552,13 +796,10 @@ const meshDecisionContext = computed(
               text-anchor="middle"
               dominant-baseline="central"
               :font-family="LABEL_FONT"
-              :font-size="wireDensity"
+              :font-size="8 + c.closeness * wireDensity"
               :fill="brand.hex"
-              opacity="0.85"
+              :opacity="0.3 + c.closeness * 0.65"
             >+</text>
-
-            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
-            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
 
             <text
               :x="dosCard.padX + SHADOW_OFFSET"
@@ -566,7 +807,7 @@ const meshDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="MESH_SHADOW"
+              :fill="DARK_SHADOW"
             >{{ kickerText }}</text>
             <text
               v-for="(line, i) in dosCard.lines"
@@ -575,7 +816,7 @@ const meshDecisionContext = computed(
               :y="dosCard.titleYs[i] + SHADOW_OFFSET"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              :fill="MESH_SHADOW"
+              :fill="DARK_SHADOW"
             >{{ line }}</text>
             <text
               :x="dosCard.padX + SHADOW_OFFSET"
@@ -583,7 +824,7 @@ const meshDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="BYLINE_SIZE"
               letter-spacing="2"
-              :fill="MESH_SHADOW"
+              :fill="DARK_SHADOW"
             >{{ bylineText }}</text>
 
             <text
@@ -592,7 +833,7 @@ const meshDecisionContext = computed(
               :font-family="LABEL_FONT"
               :font-size="KICKER_SIZE"
               letter-spacing="4"
-              :fill="MESH_INK"
+              :fill="DARK_INK"
               opacity="0.92"
             >{{ kickerText }}</text>
             <text
@@ -602,7 +843,7 @@ const meshDecisionContext = computed(
               :y="dosCard.titleYs[i]"
               :font-family="TITLE_FONT"
               :font-size="dosCard.fontSize"
-              :fill="MESH_INK"
+              :fill="DARK_INK"
             >{{ line }}</text>
             <text
               :x="dosCard.padX"
@@ -615,28 +856,108 @@ const meshDecisionContext = computed(
           </svg>
         </div>
         <p :class="$style.tiny">
-          título {{ meshContrast.toFixed(2) }}:1 sobre {{ MESH_BG }} no melhor caso ({{ grade(meshContrast) }}) ·
-          pior caso real {{ meshWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }} ({{ grade(meshWorstContrast) }}),
-          onde o plasma satura e o traço do wireframe convergem pra mesma cor
+          {{ wireSolid.params.sides }} lados · {{ wireSolid.params.ringCount }} anel(is) · título
+          {{ darkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso ({{ grade(darkBestContrast) }}) ·
+          pior caso real {{ darkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }} ({{ grade(darkWorstContrast) }})
         </p>
         <DecisionCopy
-          lab="capa · plasma + wireframe"
+          lab="capa · wireframe 3D"
           component="CoverLab.vue"
-          :settings="meshDecisionSettings"
-          :context="meshDecisionContext"
+          :settings="wireframeDecisionSettings"
+          :context="wireframeDecisionContext"
+        />
+      </div>
+
+      <div v-if="view === 'todos' || view === 'ondas'" :class="$style.candidate">
+        <p :class="$style.label">Candidato 5 · janela DOS + ondas</p>
+        <div :class="$style.stage">
+          <svg
+            viewBox="0 0 1200 630"
+            :class="$style.svgRoot"
+            role="img"
+            :aria-label="`Capa candidata, janela DOS com ondas quantizadas, categoria ${category}`"
+          >
+            <rect width="1200" height="630" :fill="DARK_BG" />
+            <rect v-for="(c, i) in dosWaveCells" :key="i" :x="c.x" :y="c.y" :width="cellSize" :height="cellSize" :fill="c.fill" />
+            <rect v-bind="outerFrame" fill="none" :stroke="brand.hex" :stroke-width="BORDER_STROKE" />
+            <rect v-bind="innerFrame" fill="none" :stroke="brand.hex" stroke-width="3" />
+
+            <text
+              :x="dosCard.padX + SHADOW_OFFSET"
+              :y="dosCard.kickerY + SHADOW_OFFSET"
+              :font-family="LABEL_FONT"
+              :font-size="KICKER_SIZE"
+              letter-spacing="4"
+              :fill="DARK_SHADOW"
+            >{{ kickerText }}</text>
+            <text
+              v-for="(line, i) in dosCard.lines"
+              :key="`s${i}`"
+              :x="dosCard.padX + SHADOW_OFFSET"
+              :y="dosCard.titleYs[i] + SHADOW_OFFSET"
+              :font-family="TITLE_FONT"
+              :font-size="dosCard.fontSize"
+              :fill="DARK_SHADOW"
+            >{{ line }}</text>
+            <text
+              :x="dosCard.padX + SHADOW_OFFSET"
+              :y="dosCard.bylineY + SHADOW_OFFSET"
+              :font-family="LABEL_FONT"
+              :font-size="BYLINE_SIZE"
+              letter-spacing="2"
+              :fill="DARK_SHADOW"
+            >{{ bylineText }}</text>
+
+            <text
+              :x="dosCard.padX"
+              :y="dosCard.kickerY"
+              :font-family="LABEL_FONT"
+              :font-size="KICKER_SIZE"
+              letter-spacing="4"
+              :fill="DARK_INK"
+              opacity="0.92"
+            >{{ kickerText }}</text>
+            <text
+              v-for="(line, i) in dosCard.lines"
+              :key="`m${i}`"
+              :x="dosCard.padX"
+              :y="dosCard.titleYs[i]"
+              :font-family="TITLE_FONT"
+              :font-size="dosCard.fontSize"
+              :fill="DARK_INK"
+            >{{ line }}</text>
+            <text
+              :x="dosCard.padX"
+              :y="dosCard.bylineY"
+              :font-family="LABEL_FONT"
+              :font-size="BYLINE_SIZE"
+              letter-spacing="2"
+              :fill="brand.hex"
+            >{{ bylineText }}</text>
+          </svg>
+        </div>
+        <p :class="$style.tiny">
+          {{ dosWave.levels }} tons · título {{ darkBestContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} no melhor caso
+          ({{ grade(darkBestContrast) }}) · pior caso real {{ darkWorstContrast.toFixed(2) }}:1 sobre {{ brand.hex }}
+          ({{ grade(darkWorstContrast) }})
+        </p>
+        <DecisionCopy
+          lab="capa · janela DOS + ondas"
+          component="CoverLab.vue"
+          :settings="wavesDecisionSettings"
+          :context="wavesDecisionContext"
         />
       </div>
     </div>
 
     <p :class="$style.readout">
-      Os três contrastes de título, sempre pelo texto real: janela DOS {{ dosContrast.toFixed(2) }}:1 sobre preto
+      Os cinco contrastes de título, sempre pelo texto real: janela DOS {{ dosContrast.toFixed(2) }}:1 sobre preto
       ({{ grade(dosContrast) }}), sem moldura {{ bleedContrast.toFixed(2) }}:1 sobre {{ brand.hex }}
-      ({{ grade(bleedContrast) }}), plasma + wireframe {{ meshContrast.toFixed(2) }}:1 sobre o preto de base
-      ({{ grade(meshContrast) }}) no melhor caso e {{ meshWorstContrast.toFixed(2) }}:1 ({{ grade(meshWorstContrast) }})
-      no pior, quando o campo satura ou o wireframe cobre a letra na cor da marca. Os dois primeiros usam cor sólida
-      atrás do texto, então o número já é o número real da capa; o terceiro varia entre esses dois extremos, e é por
-      isso que o título carrega uma
-      sombra rígida de {{ SHADOW_OFFSET }}px em vez de confiar só na cor de fundo.
+      ({{ grade(bleedContrast) }}). Plasma, wireframe 3D e janela DOS com ondas usam a mesma tinta sobre o mesmo
+      preto de base, então o melhor caso é igual nos três: {{ darkBestContrast.toFixed(2) }}:1
+      ({{ grade(darkBestContrast) }}); o pior caso também é igual: {{ darkWorstContrast.toFixed(2) }}:1
+      ({{ grade(darkWorstContrast) }}) sobre {{ brand.hex }}, quando o efeito satura na cor da marca. É por isso que
+      os três carregam a mesma sombra rígida de {{ SHADOW_OFFSET }}px em vez de confiar só na cor de fundo.
     </p>
   </div>
 </template>
@@ -648,13 +969,19 @@ const meshDecisionContext = computed(
 
 .grid {
   display: grid;
-  gap: 1.6rem;
   margin-block-start: 1rem;
+}
+
+.grid > * + * {
+  margin-block-start: 1.6rem;
 }
 
 .candidate {
   display: grid;
-  gap: 0.5rem;
+}
+
+.candidate > * + * {
+  margin-block-start: 0.5rem;
 }
 
 .label {
