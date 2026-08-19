@@ -41,7 +41,7 @@ import { contentSecurityPolicy } from '../lib/embed-hosts'
 // Baked in at build time: the semver the release workflow last tagged, plus a
 // count of commits since that tag. See src/lib/version.ts. It counted posts
 // once, which left every change that was not a post invisible.
-import { commitShort, siteVersion as version } from '../lib/version'
+import { commitShort, commitUrl, siteVersion as version } from '../lib/version'
 
 interface Props {
   title: string
@@ -222,10 +222,21 @@ const copyrightYear = new Date().getFullYear()
           <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
         </p>
       </div>
-      {/* Plain text, not a link: a version string is still something a
-          reader might want to read, and it does not point anywhere a
-          reader can follow from here now that it is not the commit link. */}
-      <p class="version">{t(locale, 'version')}: {version}</p>
+      {/*
+        Still a real link to the commit it was built from, deliberately not
+        styled as one: the owner asked for both, so this is a link a reader can
+        follow while reading as plain dim text in the line.
+
+        `.version a` therefore has to opt out of the site-wide link treatment
+        (the dashed rest underline and the inverted hover block). It keeps a
+        visible focus ring and a hover cue of its own rather than dropping
+        every affordance: an unstyled link that also gives no feedback on
+        hover or focus is undiscoverable and unreachable by keyboard, which is
+        a different problem from the one being solved here.
+      */}
+      <p class="version">
+        {t(locale, 'version')}: <a href={commitUrl}>{version}</a>
+      </p>
     </footer>
     <MathCopy locale={locale} />
     <FootnoteSidenotes />
@@ -433,6 +444,24 @@ const copyrightYear = new Date().getFullYear()
   footer .version {
     margin-block-start: 0.75rem;
     text-align: center;
+  }
+
+  /* Reads as the dim text around it, not as a link: no underline, no accent,
+     inheriting the colour of its own line. Hover and focus still say it is
+     interactive, which is the part that cannot be dropped. */
+  footer .version a {
+    color: inherit;
+    text-decoration: none;
+    background: none;
+  }
+
+  footer .version a:hover {
+    text-decoration: underline dotted;
+  }
+
+  footer .version a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   footer .version,
