@@ -20,6 +20,7 @@ import Spotify from '../components/Spotify.astro'
 import Tweet from '../components/Tweet.astro'
 import Video from '../components/Video.astro'
 import { parseAuthors } from '../lib/authors'
+import { coverTone } from '../lib/cover'
 import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
 import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
 import { HREFLANG, t } from '../i18n/ui'
@@ -99,11 +100,12 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   progress
 >
   <PostToc headings={headings} locale={post.data.lang} />
-  {/* The hover-invert colour every link inside gets (prose/links.css),
-      hashed from the slug the same way chipColor already colours tag
-      chips: the same post is always the same colour, nothing to keep
-      in step with the content. */}
-  <article style={`--post-accent: ${chipColor(slugOf(post))}`}>
+  {/* The post's own colour: whatever brand its cover drew, read straight
+      off the cover's own derivation (coverTone, lib/cover.ts) so bold and
+      italic inside the article cannot come out a different colour from the
+      card at the top of the page. Links do NOT read this, they follow the
+      day colour (prose/links.css). */}
+  <article style={`--post-accent: ${coverTone(slugOf(post)).token}`}>
     <CoverHero
       slug={slugOf(post)}
       title={post.data.title}
