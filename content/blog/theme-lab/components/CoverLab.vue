@@ -533,17 +533,18 @@ const BRANDS = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id: 'branco
  * abaixo, e quem decide o valor final é quem está olhando o cartão, não um
  * laço parando na primeira razão que passa.
  *
- * Os valores abaixo são o ponto de partida: reproduzem (ou chegam o mais
- * perto que a troca de espaço de cor permite) o tom que essas peças já
- * vestiam antes deste knob existir, para abrir a bancada sem nada mudando
- * sozinho.
+ * Cada knob começa em 100%: cor cheia da marca, sem branco misturado, porque
+ * borda, chapéu, glifo e célula são acentos contra preto, e o título já é
+ * branco fixo, então não sobra tinta pra clarear por padrão. Puxar o knob
+ * pra baixo é a exceção que quem está olhando o cartão pode escolher, não o
+ * ponto de partida.
  */
 const inkMix = reactive<Record<string, number>>({
-  vermelho: 4,
-  verde: 0,
-  amarelo: 0,
-  azul: 2,
-  roxo: 40,
+  vermelho: 100,
+  verde: 100,
+  amarelo: 100,
+  azul: 100,
+  roxo: 100,
 })
 
 function inkHexFor(brandHex: string, percent: number): string {
