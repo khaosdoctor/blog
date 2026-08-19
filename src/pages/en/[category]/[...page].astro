@@ -2,7 +2,8 @@
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import PostList from '../../../components/PostList.astro'
-import { getPublishedPosts } from '../../../lib/posts'
+import Pagination from '../../../components/Pagination.astro'
+import { getPublishedPosts, LIST_PAGE_SIZE } from '../../../lib/posts'
 import { categoryDescription } from '../../../lib/categories'
 import { HREFLANG, localePath, LOCALES, t } from '../../../i18n/ui'
 
@@ -16,7 +17,7 @@ import { HREFLANG, localePath, LOCALES, t } from '../../../i18n/ui'
  * Built from the English posts alone, so a section with no translated post yet
  * simply has no English page rather than an empty one.
  */
-export const getStaticPaths = (async () => {
+export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPublishedPosts('en')
   const byCategory = new Map<string, typeof posts>()
   for (const post of posts) {
@@ -32,27 +33,30 @@ export const getStaticPaths = (async () => {
   const sectionsByLocale = languages.map(
     ([locale, localePosts]) => [locale, new Set(localePosts.map((post) => post.data.category))] as const,
   )
-  return [...byCategory.entries()].map(([category, categoryPosts]) => ({
-    params: { category },
-    props: {
-      category,
-      posts: categoryPosts,
-      languages: sectionsByLocale.filter(([, sections]) => sections.has(category)).map(([locale]) => locale),
-    },
-  }))
+  return [...byCategory.entries()].flatMap(([category, categoryPosts]) =>
+    paginate(categoryPosts, {
+      pageSize: LIST_PAGE_SIZE,
+      params: { category },
+      props: {
+        category,
+        languages: sectionsByLocale.filter(([, sections]) => sections.has(category)).map(([locale]) => locale),
+      },
+    }),
+  )
 }) satisfies GetStaticPaths
 
-const { category, posts, languages } = Astro.props
-const alternates = languages.map((locale) => ({
+const { category, languages, page } = Astro.props
+const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
   lang: HREFLANG[locale],
   href: new URL(localePath(locale, `/${category}/`), Astro.site).href,
 }))
 const described = categoryDescription(category, 'en')
 const description = described ?? t('en', 'sectionDescription', category)
+const title = page.currentPage > 1 ? `${category} | Lucas Santos | page ${page.currentPage}` : `${category} | Lucas Santos`
 ---
 
 <BaseLayout
-  title={`${category} | Lucas Santos`}
+  title={title}
   description={description}
   lang="en"
   alternates={alternates}
@@ -61,9 +65,10 @@ const description = described ?? t('en', 'sectionDescription', category)
   <h1>{category}</h1>
   {described !== null && <p class="about">{described}</p>}
   <p class="count">
-    {posts.length} {t('en', posts.length === 1 ? 'article' : 'articles')}
+    {page.total} {t('en', page.total === 1 ? 'article' : 'articles')}
   </p>
-  <PostList posts={posts} />
+  <PostList posts={page.data} />
+  <Pagination page={page} basePath={`/en/${category}/`} locale="en" />
 </BaseLayout>
 
 <style>

@@ -1,0 +1,137 @@
+---
+import type { Page } from 'astro'
+import { t, type Locale } from '../i18n/ui'
+
+/**
+ * The list's own page nav, at the bottom of every archive, section and tag
+ * page long enough to page. Takes Astro's own `page` object straight from
+ * `paginate()` (see the page files this renders on: they all use the
+ * `[...page].astro` shape, page 1 bare and page N at `.../N/`), so the
+ * previous/next targets (`page.url.prev`/`next`) come from Astro's own route
+ * generator rather than being rebuilt here. The individual page numbers are
+ * not something `paginate()` hands back, only prev/next/first/last, so those
+ * are built from `basePath` plus the same `N/` convention every page file
+ * already generates its own routes with.
+ */
+interface Props {
+  page: Page<unknown>
+  basePath: string
+  locale: Locale
+}
+
+const { page, basePath, locale } = Astro.props
+
+function hrefFor(pageNumber: number): string {
+  return pageNumber === 1 ? basePath : `${basePath}${pageNumber}/`
+}
+
+const numbers = Array.from({ length: page.lastPage }, (_, index) => index + 1)
+---
+
+{
+  page.lastPage > 1 && (
+    <nav class="pagination" aria-label={t(locale, 'pagination')}>
+      {page.url.prev ? (
+        <a class="step" href={page.url.prev} rel="prev">
+          {t(locale, 'paginationPrev')}
+        </a>
+      ) : (
+        <span class="step" aria-disabled="true">
+          {t(locale, 'paginationPrev')}
+        </span>
+      )}
+      <ol class="numbers">
+        {numbers.map((number) => (
+          <li>
+            {number === page.currentPage ? (
+              <span class="current" aria-current="page">
+                {number}
+              </span>
+            ) : (
+              <a href={hrefFor(number)} aria-label={t(locale, 'paginationGoTo', number)}>
+                {number}
+              </a>
+            )}
+          </li>
+        ))}
+      </ol>
+      {page.url.next ? (
+        <a class="step" href={page.url.next} rel="next">
+          {t(locale, 'paginationNext')}
+        </a>
+      ) : (
+        <span class="step" aria-disabled="true">
+          {t(locale, 'paginationNext')}
+        </span>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-block-start: 2.5rem;
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .step {
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .step[aria-disabled='true'] {
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  .step:hover,
+  .step:focus-visible {
+    background: var(--accent-day, var(--accent));
+    color: var(--bg);
+  }
+
+  .numbers {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0.9rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .numbers li + li {
+    margin-inline-start: 0.5rem;
+  }
+
+  .numbers a,
+  .numbers .current {
+    display: inline-block;
+    min-inline-size: 1.4em;
+    text-align: center;
+    text-decoration: none;
+    color: var(--muted);
+  }
+
+  .numbers a:hover,
+  .numbers a:focus-visible {
+    background: var(--accent-day, var(--accent));
+    color: var(--bg);
+  }
+
+  /*
+   * The current page: this list's own destaque colour, the day colour, not
+   * a border and not a fixed accent, same rule as the section label in
+   * PostList.astro. It is text, so the same light-mode shortfall on green
+   * and yellow days applies here (see that file's own comment for the
+   * measured numbers); already known, not this component's to fix.
+   */
+  .numbers .current {
+    color: var(--accent-day, var(--accent));
+    font-weight: bold;
+  }
+</style>

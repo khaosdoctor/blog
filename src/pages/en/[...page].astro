@@ -1,0 +1,56 @@
+---
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import PostList from '../../components/PostList.astro'
+import Pagination from '../../components/Pagination.astro'
+import { getPublishedPosts, LIST_PAGE_SIZE } from '../../lib/posts'
+import { t } from '../../i18n/ui'
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPublishedPosts('en')
+  // paginate() always returns at least one page, even for an empty array (one
+  // page of zero posts), which is what lets the "no translated posts yet"
+  // notice below still render on /en/ rather than the route failing to exist.
+  return paginate(posts, { pageSize: LIST_PAGE_SIZE })
+}) satisfies GetStaticPaths
+
+const { page } = Astro.props
+const title = page.currentPage > 1 ? `Lucas Santos | page ${page.currentPage}` : 'Lucas Santos'
+---
+
+<BaseLayout
+  title={title}
+  description={t('en', 'homeDescription')}
+  lang="en"
+  alternates={[
+    { lang: 'pt-BR', href: new URL('/', Astro.site).href },
+    { lang: 'en', href: new URL('/en/', Astro.site).href },
+  ]}
+>
+  <h1 class="visually-hidden">Lucas Santos</h1>
+  <p class="note">
+    {t('en', 'translatedIndexNotice')} <a href="/">{t('en', 'readOriginals')}</a>.
+  </p>
+  {page.total === 0 ? <p>{t('en', 'noTranslatedPosts')}</p> : <PostList posts={page.data} />}
+  <Pagination page={page} basePath="/en/" locale="en" />
+</BaseLayout>
+
+<style>
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .note {
+    margin-block-end: 2.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
