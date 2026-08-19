@@ -8,12 +8,17 @@
  * colour, so any later feature that wants "today's colour" imports this
  * directly instead of copying the palette's own logic.
  *
- * Reuses chipColor's own hash-a-string-into-one-of-five-brand-tokens mechanism
- * (the same one that colours tag chips and a post's own accent stripe, see
- * [...slug].astro) rather than inventing a second hash or a private list of
- * hexes: the string handed to it here is the day's own key instead of a slug
- * or a tag label, so every "pick a brand colour deterministically from a
- * string" caller in the codebase agrees on one mechanism and one palette.
+ * Reads the same brand pool chip-color.ts hands every other "pick a colour
+ * from a string" caller (tag chips, a post's own cover tone), rather than
+ * keeping a private list of hexes, so all of them agree on one palette.
+ *
+ * It does NOT use chipColor's own sum-of-character-codes hash, which is the
+ * one thing here that differs from a tag chip. That sum is fine for labels
+ * that differ wildly and useless for a run of dates: `2026-08-19` and
+ * `2026-08-20` sum eight apart, and against a four-token pool an eight
+ * resolves to the same index, so those two days drew the same colour, as did
+ * every other decade rollover. `hashString` mixes properly; its own comment
+ * in chip-color.ts has the full derivation.
  *
  * Imported from ./chip-color rather than from taxonomy.ts, which re-exports
  * it: taxonomy.ts imports ./posts, which imports `astro:content`, and that
@@ -21,7 +26,7 @@
  * pulled the whole content layer into the browser bundle and threw "The
  * astro:content module is only available server-side" at runtime.
  */
-import { chipColor, type ChipColorOptions } from './chip-color'
+import { brandPool, hashString, type ChipColorOptions } from './chip-color'
 
 /**
  * `YYYY-MM-DD` for whatever calendar day `date` falls on, in local time. This
@@ -50,5 +55,6 @@ function dayKey(date: Date): string {
  * five.
  */
 export function dayColor(date: Date = new Date(), options: ChipColorOptions = {}): string {
-  return chipColor(dayKey(date), options)
+  const pool = brandPool(options)
+  return pool[hashString(dayKey(date)) % pool.length]
 }
