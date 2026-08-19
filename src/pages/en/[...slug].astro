@@ -5,6 +5,7 @@ import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Authors from '../../components/Authors.astro'
 import Bookmark from '../../components/Bookmark.astro'
+import DateCopy from '../../components/DateCopy.astro'
 import HoverPreviews from '../../components/HoverPreviews.astro'
 import HtmlLab from '../../components/HtmlLab.astro'
 import LabDemo from '../../components/LabDemo.astro'
@@ -19,15 +20,7 @@ import Tweet from '../../components/Tweet.astro'
 import Video from '../../components/Video.astro'
 import { chipColor } from '../../lib/taxonomy'
 import { HREFLANG } from '../../i18n/ui'
-import {
-  folderOf,
-  formatDate,
-  getPublishedByFolder,
-  getPublishedPosts,
-  slugOf,
-  SOURCE_LANG,
-  urlOf,
-} from '../../lib/posts'
+import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
 
 const mdxComponents = {
   Bookmark,
@@ -101,9 +94,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   <article style={`--post-accent: ${chipColor(slugOf(post))}`}>
     <h1>{post.data.title}</h1>
     <p class="meta">
-      <time datetime={post.data.pubDate.toISOString()}>
-        {formatDate(post.data.pubDate, 'en')}
-      </time>
+      <DateCopy date={post.data.pubDate} lang="en" />
       <span aria-hidden="true">·</span>
       <a
         href={`/en/${post.data.category}/`}
