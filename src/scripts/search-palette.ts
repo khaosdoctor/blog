@@ -64,6 +64,24 @@ export function setShortcutLetter(letter: string): void {
   applyHint()
 }
 
+/*
+ * Back to K, for the settings panel's reset-all. Not setShortcutLetter('K'),
+ * which would store the literal "K": that function is for a reader choosing a
+ * letter, and choosing K on purpose is still a choice worth storing, while a
+ * reset is the absence of one. Same "nothing stored means default" convention
+ * as every other preference on this site, so readStoredLetter() falls through
+ * to DEFAULT_LETTER on the next page instead of reading a value back.
+ */
+export function resetShortcutLetter(): void {
+  shortcutLetter = DEFAULT_LETTER
+  try {
+    localStorage.removeItem(SHORTCUT_KEY)
+  } catch {
+    // Private mode, or storage disabled: the reset still applies for this page.
+  }
+  applyHint()
+}
+
 // Cmd on Apple platforms, Ctrl everywhere else, fixed rather than reader
 // configurable (the owner's own words: "let's keep the meta key").
 // navigator.platform is deprecated but still universally implemented; the
