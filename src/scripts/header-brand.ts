@@ -5,7 +5,7 @@
 // every page through BaseLayout, and every value below is fixed rather than
 // reader-adjustable, so there is no picker for a component tree to hold state
 // for.
-import { dayColor } from '../lib/day-color'
+import { applyAccent } from '../lib/accent'
 import { runDecode, SCRAMBLE_TICK_MS, SCRAMBLE_LOCK_TICKS, type DecodeRun } from '../lib/decode-scramble'
 import { GLITCH_GLYPHS } from '../lib/logo-mark'
 
@@ -126,12 +126,10 @@ function init(): void {
   const cursor = cursorEl
   const markChars = markCharsEl
 
-  try {
-    document.documentElement.style.setProperty('--accent-day', dayColor(undefined, { excludePurple: true }))
-  } catch {
-    // Never blocks the rest of the header: the static fallback in theme.css
-    // still paints a sane accent.
-  }
+  // Today's colour unless the reader has picked one in the settings panel;
+  // lib/accent.ts owns that decision now, and its own try/catch means this
+  // never blocks the rest of the header.
+  applyAccent()
 
   // --- the cursor ---
   const cursorFrames = buildCursorFrames()

@@ -40,9 +40,11 @@ function isMotion(value: string): value is Motion {
  * the settings panel can move all three (see the exported setters below).
  */
 const CELL_SIZE = 12
+// The three the owner settled on after watching the field run at each of
+// them: 10% seed, 6 generations a second, a glider every 3 seconds.
 const DEFAULT_DENSITY = 10
-const DEFAULT_GPS = 8
-const DEFAULT_AUTOFEED = 4
+const DEFAULT_GPS = 6
+const DEFAULT_AUTOFEED = 3
 /*
  * Cell opacity, now one reader-adjustable value rather than two fixed ones.
  *
@@ -54,19 +56,19 @@ const DEFAULT_AUTOFEED = 4
  * reason (the fill resolved to black on black, see `currentFg()`), so no one
  * had ever actually judged those numbers against a drawn field. With it
  * finally visible the owner asked for 5% off, then decided the value should be
- * a knob in the settings panel instead, at 0.08 to open on.
+ * a knob in the settings panel instead, at 0.04 to open on.
  *
  * So the per-ground split is gone from here: one knob cannot mean two numbers,
  * and a knob whose meaning changes with the theme is worse than one that holds
  * still. **The consequence is that the light ground now draws at whatever the
- * dark ground draws at**, and 8% on sepia is stronger than the 3% that ground
+ * dark ground draws at**, and 4% on sepia is stronger than the 3% that ground
  * was given when the two were separate. That is a real change in how the light
  * page reads, and it is reported rather than hidden behind a scale factor.
  *
  * Measured lit-cell contrast stays around 1.05:1, a deliberate failure of the
  * 3:1 non-text-contrast criterion: this draws texture, not content.
  */
-const DEFAULT_OPACITY = 0.08
+const DEFAULT_OPACITY = 0.04
 const MIN_OPACITY = 0
 const MAX_OPACITY = 0.5
 /* Cells of slack around a glider so it does not spawn already touching the

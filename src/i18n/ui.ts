@@ -84,6 +84,13 @@ type UIKey =
   | 'fontFamilyLabel'
   | 'fontFamilySerif'
   | 'fontFamilySans'
+  | 'accentLabel'
+  | 'accentAuto'
+  | 'accentRed'
+  | 'accentGreen'
+  | 'accentYellow'
+  | 'accentBlue'
+  | 'accentPurple'
   | 'backgroundLife'
   | 'conwayKnobs'
   | 'conwaySeedDensity'
@@ -223,6 +230,13 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     fontFamilyLabel: 'Fonte de leitura',
     fontFamilySerif: 'Serifada',
     fontFamilySans: 'Sem serifa',
+    accentLabel: 'Cor de destaque',
+    accentAuto: 'Automática',
+    accentRed: 'Vermelho',
+    accentGreen: 'Verde',
+    accentYellow: 'Amarelo',
+    accentBlue: 'Azul',
+    accentPurple: 'Roxo',
     backgroundLife: 'Plano de fundo',
     conwayKnobs: 'Propriedades',
     conwaySeedDensity: 'Densidade do seed',
@@ -367,6 +381,13 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     fontFamilyLabel: 'Reading font',
     fontFamilySerif: 'Serif',
     fontFamilySans: 'Sans',
+    accentLabel: 'Accent',
+    accentAuto: 'Auto',
+    accentRed: 'Red',
+    accentGreen: 'Green',
+    accentYellow: 'Yellow',
+    accentBlue: 'Blue',
+    accentPurple: 'Purple',
     backgroundLife: 'Background field',
     conwayKnobs: 'Field settings',
     conwaySeedDensity: 'Seed density',
