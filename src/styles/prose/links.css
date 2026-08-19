@@ -33,30 +33,50 @@
    * tint: dark red 5.10 blue 5.34 green 8.48 yellow 11.65 purple 4.64; light
    * red 6.62 blue 6.40 green 4.80 yellow 4.71 purple 11.44. Every one clears
    * 4.5:1, and none of the five reads as washed out at this small a mix.
-   * --accent falls through the same formula when --post-accent is unset,
-   * which only raises its own already-safe 6.06/10.84 further.
+   * These percentages hold for `--accent-day` too, below: it resolves to one
+   * of the same five brand tokens, so nothing here needs re-scanning.
+   *
+   * The fill's SOURCE colour changed once, after this formula was first
+   * decided: it used to be `--post-accent`, a post's own colour hashed from
+   * its slug (chipColor(), the same mechanism that colours a tag chip,
+   * written onto the <article> element by [...slug].astro so a post's links
+   * matched its own cover). The owner later asked for the header's own
+   * accent here instead: the header's wordmark accent is now the day-hash
+   * colour (`--accent-day`, src/lib/day-color.ts, purple excluded from its
+   * pool), so this reads that, with `--accent` as the same fallback chain
+   * end as before. `--post-accent` is still written by both [...slug].astro
+   * pages (`style={\`--post-accent: ${chipColor(slugOf(post))}\`}`) but
+   * nothing in CSS reads it any more: left in place rather than deleted
+   * silently, since the per-article mechanism was a real, documented
+   * decision, and this comment is where that history stays visible.
    */
   --post-accent-fill: light-dark(
-    color-mix(in oklab, var(--post-accent, var(--accent)) 85%, black),
-    color-mix(in oklab, var(--post-accent, var(--accent)) 95%, white)
+    color-mix(in oklab, var(--accent-day, var(--accent)) 85%, black),
+    color-mix(in oklab, var(--accent-day, var(--accent)) 95%, white)
   );
 }
 
 /*
- * Rest: --accent with the terminal dashed underline above. Hover/focus: the
- * whole run inverts into a solid block, candidate 4's choice, background
- * --post-accent-fill (the post's own colour, hashed from its slug the same
- * way src/lib/taxonomy.ts's chipColor() already colours tag chips, written
- * onto the article element by the page, then mixed toward legibility as a
- * fill, see the token above) with the page ground as the text on top.
+ * Rest: --accent with the terminal dashed underline above, kept exactly as
+ * the owner decided it (this candidate's own explicit ask), plus 1px inline
+ * / 2px block padding. Hover/focus: the whole run inverts into a solid
+ * block, candidate 4's choice, background --post-accent-fill (see the token
+ * above for where that colour comes from) with the page ground as the text
+ * on top.
  *
- * Zero padding-inline, his own knob left at 0: background, color and
- * text-decoration-line are the only properties this changes, none of which
+ * The padding is present here, at rest, with no background of its own
+ * (transparent, painted by nothing): the owner's later ask added 1px/2px
+ * padding to the hover fill, and a link that only grows that padding on
+ * hover pushes its neighbours. Reserving the same box at rest means hover
+ * changes background, color and text-decoration-line only, none of which
  * affect box size, so there is nothing to reflow. A link that wraps across
  * two lines gets one background fragment per line (the box's default
  * decoration break), which is the expected look, not a bug to work around.
  */
 .prose a {
+  padding-inline: 1px;
+  padding-block: 2px;
+  background: transparent;
   color: var(--accent);
   text-decoration-line: underline;
   text-decoration-style: var(--link-underline-style);
