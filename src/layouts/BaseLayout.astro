@@ -41,7 +41,7 @@ import { contentSecurityPolicy } from '../lib/embed-hosts'
 // Baked in at build time: the semver the release workflow last tagged, plus a
 // count of commits since that tag. See src/lib/version.ts. It counted posts
 // once, which left every change that was not a post invisible.
-import { commitShort, commitUrl, siteVersion as version } from '../lib/version'
+import { commitShort, siteVersion as version } from '../lib/version'
 
 interface Props {
   title: string
@@ -89,6 +89,11 @@ const home = locale === 'en' ? '/en/' : '/'
 // Cloudflare Web Analytics: cookieless, no consent banner needed. Emitted only
 // when the token is set, so local builds and previews send nothing.
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
+
+// The footer copyright's closing year. 2019 (the first post's year) is fixed
+// in the translated string itself; this is only the end of the range, taken
+// at build time so it never needs a manual bump.
+const copyrightYear = new Date().getFullYear()
 ---
 
 <!doctype html>
@@ -186,33 +191,41 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
     {/* The plain-link "Buscar" nav that used to live here is gone: the
         command palette BrandHeader renders replaced it as the actual way
         readers search with JS on. The old link's own /search/ page still
-        exists and still works with JS off (which the palette never will),
-        so it moved to the footer instead of disappearing, next to the
-        other quiet reference links rather than the primary nav. */}
+        exists and still works with JS off (which the palette never will).
+        It no longer lives in this footer, but it is not orphaned: the 404
+        page and the home page's own no-JS notice both link to it directly,
+        and robots.txt/the sitemap filter still know it by name. */}
     <BrandHeader locale={locale} home={home} alternates={alternates} />
     <main id="main-content">
       <slot />
     </main>
     <footer>
-      <p>Lucas Santos</p>
-      {/*
-        Required, not decorative: PxPlus IBM VGA is CC BY-SA 4.0, which asks for
-        attribution reachable from the site. This link is that attribution now;
-        /oss/ names the font, its author and the licence, with a link to the
-        licence text. See docs/theming.md.
-      */}
-      <p class="credits">
-        <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
-      </p>
-      {/* The one place /search/ is still linked from, now that the header
-          nav is gone: kept reachable (and in the sitemap) for the reader
-          with JS off, who the command palette above can never serve. */}
-      <p class="search-link">
-        <a href={locale === 'en' ? '/en/search/' : '/search/'}>{t(locale, 'search')}</a>
-      </p>
-      <p class="version">
-        <a href={commitUrl} rel="noopener">{t(locale, 'version')}: {version}</a>
-      </p>
+      {/* Drawn the same way BrandHeader.astro's .chrome draws its own top
+          edge: box-drawing corners plus a run of dashes filling whatever
+          room is left, same --muted, same font-display, same 0.4em
+          letter-spacing on the dashes. Corners point down (└─ / ─┘) rather
+          than repeating the header's up-pointing ┌─/─┐: the header opens
+          the frame at the top of the page, this closes it at the bottom,
+          so the two read as one box rather than two unrelated bars. */}
+      <div class="rule" aria-hidden="true">
+        <span class="rule-edge">└─</span><span class="rule-fill">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span><span class="rule-edge">─┘</span>
+      </div>
+      <div class="row">
+        <p class="copyright">{t(locale, 'copyright', copyrightYear)}</p>
+        {/*
+          Required, not decorative: PxPlus IBM VGA is CC BY-SA 4.0, which asks for
+          attribution reachable from the site. This link is that attribution now;
+          /oss/ names the font, its author and the licence, with a link to the
+          licence text. See docs/theming.md.
+        */}
+        <p class="credits">
+          <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
+        </p>
+      </div>
+      {/* Plain text, not a link: a version string is still something a
+          reader might want to read, and it does not point anywhere a
+          reader can follow from here now that it is not the commit link. */}
+      <p class="version">{t(locale, 'version')}: {version}</p>
     </footer>
     <MathCopy locale={locale} />
     <FootnoteSidenotes />
@@ -340,32 +353,106 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 
   footer {
     margin-block: 5rem 3rem;
-    padding-block-start: 1.5rem;
-    border-block-start: 1px solid var(--rule);
+    padding-block-start: 1rem;
     color: var(--muted);
     font-size: 0.85rem;
   }
 
+  /*
+   * Same width as the header past the same breakpoint: BrandHeader.astro's
+   * .chrome caps itself at 80vw past 70rem (the "there is room to spare"
+   * breakpoint footnotes.css already uses) rather than the reading column,
+   * since chrome across the top of the page is not prose. The footer is
+   * chrome too, so it matches the exact property, value and breakpoint here
+   * rather than only lining up at one width. Below 70rem both still share
+   * the plain var(--measure) from the "header, main, footer" rule above, so
+   * nothing here changes below the breakpoint.
+   */
+  @media (min-width: 70rem) {
+    footer {
+      max-inline-size: 80vw;
+    }
+  }
+
+  /*
+   * The footer's own rule, drawn the same way BrandHeader.astro's .chrome
+   * draws its own top edge: box-drawing corners plus a run of dashes filling
+   * whatever room is left between them, the same --muted, the same
+   * font-display, the same 0.4em letter-spacing on the dash run, flex: 1 and
+   * overflow: hidden on the fill so it crops to whatever width the footer
+   * actually has rather than reflowing. Corners point down (└─ / ─┘) instead
+   * of repeating the header's up-pointing ┌─/─┐: the header opens the frame
+   * at the top of the page, this closes it at the bottom, so the two read as
+   * one box rather than two unrelated bars. Duplicated by hand rather than
+   * shared with BrandHeader.astro, which is held by another agent this pass;
+   * if this pairing is meant to stay in lockstep going forward, the corner
+   * treatment belongs in one shared place (styles/theme.css, or a small
+   * chrome-rule partial) rather than two copies of the same characters.
+   */
+  footer .rule {
+    display: flex;
+    align-items: center;
+    margin-block-end: 1rem;
+  }
+
+  footer .rule-edge {
+    color: var(--muted);
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+  }
+
+  footer .rule-fill {
+    flex: 1;
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--font-display);
+    letter-spacing: 0.4em;
+    white-space: nowrap;
+  }
+
+  /*
+   * Copyright left, credits link right, on one line at desktop width. Below
+   * that there is not enough room for both without crowding or truncating,
+   * so flex-wrap lets the credits link drop to its own line under the
+   * copyright rather than overlapping or shrinking either one. Spacing is
+   * margin rather than a shorthand row/column property, so it survives both
+   * the wrapped and unwrapped case with the same two declarations.
+   */
+  footer .row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  footer .copyright {
+    margin-inline-end: 1rem;
+    margin-block-end: 0.35rem;
+  }
+
+  footer .version {
+    margin-block-start: 0.75rem;
+    text-align: center;
+  }
+
   footer .version,
-  footer .credits,
-  footer .search-link {
+  footer .credits {
     font-family: var(--font-mono);
     font-size: 0.75rem;
   }
 
-  footer .credits,
-  footer .search-link {
+  footer .credits {
     color: var(--muted);
   }
 
   /*
-   * The footer's own plain-text links (credits, search, version): the same
-   * hover treatment as a nav link, since the real header (BrandHeader.astro)
-   * carries no plain text nav of its own any more, only icon controls and
-   * the wordmark. Padding stays present, and transparent, at rest, the same
-   * "reserve the space before you need it" trick prose/links.css uses: a
-   * link that only grew its padding on hover would push its neighbours,
-   * so the box is this size in both states and only the fill changes.
+   * The footer's own plain-text link (credits): the same hover treatment as
+   * a nav link, since the real header (BrandHeader.astro) carries no plain
+   * text nav of its own any more, only icon controls and the wordmark.
+   * Padding stays present, and transparent, at rest, the same "reserve the
+   * space before you need it" trick prose/links.css uses: a link that only
+   * grew its padding on hover would push its neighbours, so the box is this
+   * size in both states and only the fill changes.
    */
   footer a {
     padding-inline: 1px;
