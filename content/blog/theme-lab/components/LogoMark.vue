@@ -39,50 +39,47 @@
  * by one cell). Callers with no reduced-motion/pause state of their own
  * simply never pass it, so the mark stays still rather than gaining a second
  * automatic motion source with no pause control.
+ *
+ * `glitchPulse` is who decides when: this component never schedules its own
+ * glitch anymore. It used to run its own 2.2-4s loop internally; the winning
+ * header now drives one shared ambient schedule (4-20s, bursts of 1-3) for
+ * both the wordmark and the mark, so `ChromeHeader.vue` increments this
+ * number once per pulse and this component just reacts, the same visual
+ * glitch as before, a different caller deciding the rhythm.
  */
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { GLITCH_GLYPHS, MARK_RECTS, rectRoleAt, ROLE_TOKEN, roleAt, wireGlyph, type MarkCandidateId } from './logoMarks'
 
 const props = withDefaults(
-  defineProps<{ candidate: MarkCandidateId; sizePx: number; accentColor?: string; multiAccent?: boolean; glitchEnabled?: boolean }>(),
-  { accentColor: 'var(--fg)', multiAccent: false },
+  defineProps<{ candidate: MarkCandidateId; sizePx: number; accentColor?: string; multiAccent?: boolean; glitchEnabled?: boolean; glitchPulse?: number }>(),
+  { accentColor: 'var(--fg)', multiAccent: false, glitchPulse: 0 },
 )
 
 const rows = computed(() => Array.from({ length: 8 }, (_, r) => Array.from({ length: 8 }, (_, c) => ({ r, c }))))
 
-// --- glitch do contorno: só "fio" usa isto, ocasional, o mesmo vocabulário do wordmark ---
+// --- glitch do contorno: só "fio" usa isto, disparado de fora (glitchPulse), nunca por um relógio próprio ---
 const glitchCell = ref<{ r: number; c: number } | null>(null)
 const glitchGlyph = ref('')
 const tornColumn = ref<number | null>(null)
 const lineOffsetCells = ref(0)
-let glitchTimer: ReturnType<typeof setTimeout> | null = null
 let glitchResetTimer: ReturnType<typeof setTimeout> | null = null
 
-function clearMarkGlitch(): void {
-  if (glitchTimer) clearTimeout(glitchTimer)
+function resetMarkGlitch(): void {
   if (glitchResetTimer) clearTimeout(glitchResetTimer)
-  glitchTimer = null
   glitchResetTimer = null
   glitchCell.value = null
   tornColumn.value = null
   lineOffsetCells.value = 0
 }
 
-function scheduleMarkGlitch(): void {
-  if (glitchTimer) clearTimeout(glitchTimer)
-  glitchTimer = setTimeout(runMarkGlitch, 2200 + Math.random() * 1800)
-}
-
 /**
  * Uma célula trocada, uma coluna rasgada em 1px, ou a grade inteira deslocada
- * em 1 célula: uma área pequena por vez, a cada 2,2 a 4 segundos, a mesma
- * conta de segurança do glitch do wordmark em `ChromeHeader.vue`.
+ * em 1 célula: uma área pequena por vez, por 180ms, a cada pulso que
+ * `glitchPulse` anuncia.
  */
-function runMarkGlitch(): void {
-  if (!props.glitchEnabled || props.candidate !== 'fio') {
-    scheduleMarkGlitch()
-    return
-  }
+function fireMarkGlitch(): void {
+  if (!props.glitchEnabled || props.candidate !== 'fio') return
+  if (glitchResetTimer) clearTimeout(glitchResetTimer)
   const kind = Math.floor(Math.random() * 3)
   if (kind === 0) {
     glitchCell.value = { r: Math.floor(Math.random() * 8), c: Math.floor(Math.random() * 8) }
@@ -96,20 +93,21 @@ function runMarkGlitch(): void {
     glitchCell.value = null
     tornColumn.value = null
     lineOffsetCells.value = 0
-    scheduleMarkGlitch()
   }, 180)
 }
 
+watch(() => props.glitchPulse, fireMarkGlitch)
+
+// prefers-reduced-motion e a pausa manual chegam aqui como `glitchEnabled: false`; a marca trava no
+// quadro de repouso na hora, nunca no meio de um glitch em andamento.
 watch(
-  () => [props.glitchEnabled, props.candidate] as const,
-  ([enabled, candidate]) => {
-    if (enabled && candidate === 'fio') scheduleMarkGlitch()
-    else clearMarkGlitch()
+  () => props.glitchEnabled,
+  (enabled) => {
+    if (!enabled) resetMarkGlitch()
   },
-  { immediate: true },
 )
 
-onUnmounted(clearMarkGlitch)
+onUnmounted(resetMarkGlitch)
 
 function glyphAt(row: number, col: number): string {
   if (glitchCell.value && glitchCell.value.r === row && glitchCell.value.c === col) return glitchGlyph.value

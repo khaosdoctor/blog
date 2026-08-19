@@ -1,15 +1,23 @@
 <script setup lang="ts">
 /**
- * O cabeçalho, em cinco leituras da mesma direção, com a marca de verdade
- * dentro de cada uma. Todos usam só caracteres: nenhuma imagem, nenhum ícone,
- * nada que precise de requisição.
+ * O cabeçalho decidido: a barra de caixa `┌─┐`, com a marca de verdade dentro
+ * dela. Só caractere, nenhuma imagem, nenhum ícone, nada que precise de
+ * requisição.
  *
  * Esta bancada absorveu a antiga seção 03 (`LogoLab.vue`, agora removida): o
  * dono pediu para fundir as duas, porque as duas mostravam a mesma marca
  * dentro do mesmo tipo de cabeçalho, só em lugares separados da página. O que
  * era exclusivo do logo (o wordmark que digita e apaga, o glitch, a pausa e o
  * `prefers-reduced-motion`) mora aqui agora, ao lado do que já era exclusivo
- * do cabeçalho (os cinco formatos, fonte, destaque, entreletra, respiro).
+ * do cabeçalho (fonte, destaque, entreletra, respiro).
+ *
+ * Cinco formas disputaram esta moldura; só a barra de caixa venceu. As outras
+ * quatro (linha de DOS invertida, mínimo, menu de Game Boy, razão SEÇÃO 00 /
+ * ÍNDICE) moraram aqui e agora estão em
+ * `content/blog/theme-lab-arquivo/components/RetiredChromeHeaderShapes.vue`,
+ * funcionando, com o motivo de cada uma. O `dosPrompt` editável, exclusivo da
+ * forma "dos", foi junto: esta bancada não tem mais nenhuma leitura em que a
+ * marca é o próprio prompt.
  */
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
@@ -23,8 +31,6 @@ import {
   MARK_ACCENT_ALL_ID,
   MARK_ACCENTS,
   MARK_CANDIDATES,
-  MARK_DEFAULT_ACCENT,
-  MARK_DEFAULT_PX,
   MARK_GRID_SIDE,
   MARK_MIN_PX,
   type MarkCandidateId,
@@ -72,23 +78,15 @@ const MARK_ACCENT_HEX: Record<string, string> = {
 
 const NAV = ['posts', 'séries', 'tags', 'busca', 'sobre']
 
-const SHAPE_OPTIONS = [
-  { id: 'barra', name: 'barra de caixa ┌─┐' },
-  { id: 'dos', name: 'linha de DOS invertida' },
-  { id: 'minimo', name: 'mínimo, só uma régua' },
-  { id: 'menu', name: 'menu de Game Boy ▸' },
-  { id: 'ledger', name: 'razão, SEÇÃO 00 / ÍNDICE' },
-]
-
 function labelFor(options: Array<{ id: string; name: string }>, id: string): string {
   return options.find((option) => option.id === id)?.name ?? id
 }
 
-const shape = ref('barra')
+// Os valores de partida são a decisão, não um palpite: é o que a bancada mostra ao abrir.
 const face = ref('departure')
-const accent = ref('verde')
-const tracking = ref(8)
-const density = ref(10)
+const accent = ref('amarelo')
+const tracking = ref(6)
+const density = ref(4)
 const caps = ref(true)
 
 const accentHex = computed(() => ACCENTS[accent.value])
@@ -101,26 +99,23 @@ const accentContrast = computed(() => ratio(parseHex(accentHex.value), parseHex(
  * (grade de +). O slider de tamanho ia de 24 a 160px com um piso rígido por
  * candidato (`MARK_MIN_PX`, em `logoMarks.ts`); o dono pediu 0 a 300px
  * inteiro, então o piso virou só um aviso no relatório (`markBelowFloor`
- * abaixo), nunca mais um limite que o slider recusa.
- *
- * `MARK_DEFAULT_PX.fio` é só o valor de partida do ref. Um watcher que
- * reescrevia `markSizePx` para o padrão do novo candidato a cada troca
- * morava aqui: sobrou de quando o piso ainda travava o slider, para o
- * tamanho nunca ficar preso abaixo do piso do candidato novo. O piso é
- * consultivo agora (`markBelowFloor` já avisa sem travar nada), então
- * trocar de marca troca só a marca; o tamanho escolhido atravessa a troca.
+ * abaixo), nunca mais um limite que o slider recusa. Trocar de marca troca só
+ * a marca; o tamanho escolhido atravessa a troca, nenhum watcher reescreve
+ * `markSizePx` sozinho.
  */
 const markCandidate = ref<MarkCandidateId>('fio')
-const markSizePx = ref(MARK_DEFAULT_PX.fio)
+// 36px é abaixo do piso de legibilidade do "fio" (72px, ver `MARK_MIN_PX`), de propósito: o dono viu o piso
+// e escolheu ficar abaixo dele mesmo assim. `markBelowFloor` só avisa, nunca trava o slider.
+const markSizePx = ref(36)
 const markBelowFloor = computed(() => markSizePx.value < MARK_MIN_PX[markCandidate.value])
 
 /**
  * A cor da marca: um seletor de acento único, a mesma ideia do "destaque" do
  * resto do cabeçalho, mais a exceção `todas` (`MARK_ACCENT_ALL_ID`), a marca
  * original de volta, cada célula na cor do seu próprio papel em vez de um
- * acento só.
+ * acento só. A decisão foi exatamente essa exceção.
  */
-const markAccentId = ref(MARK_DEFAULT_ACCENT)
+const markAccentId = ref(MARK_ACCENT_ALL_ID)
 const markAccentColor = computed(() => MARK_ACCENTS[markAccentId.value])
 const markAccentIsAll = computed(() => markAccentId.value === MARK_ACCENT_ALL_ID)
 
@@ -148,11 +143,11 @@ const markAccentContrast = computed(() => {
 })
 
 /**
- * Composição da marca: logo, texto, ou os dois. O candidato "linha de DOS
- * invertida" fica de fora desta escolha porque nele o próprio prompt já é a
- * marca (pedido do dono): colocar o logo ao lado seria redundante, então essa
- * leitura nunca mostra o `markSlot`, e o painel esconde o seletor quando ela
- * está selecionada.
+ * Composição da marca: logo, texto, ou os dois. A decisão foi "ambos". O
+ * candidato "linha de DOS invertida", a única leitura em que o próprio prompt
+ * já era a marca e o logo nunca aparecia ao lado, perdeu e está arquivado em
+ * `theme-lab-arquivo/components/RetiredChromeHeaderShapes.vue`; esta bancada
+ * não precisa mais da exceção que ele exigia aqui.
  */
 const BRAND_MODE_OPTIONS = [
   { id: 'ambos', name: 'logo + texto' },
@@ -160,11 +155,8 @@ const BRAND_MODE_OPTIONS = [
   { id: 'texto', name: 'só o texto' },
 ]
 const brandMode = ref('ambos')
-const showLogoSlot = computed(() => shape.value !== 'dos' && brandMode.value !== 'texto')
-const showTextSlot = computed(() => shape.value !== 'dos' && brandMode.value !== 'logo')
-
-/** O prompt do candidato "dos": editável, pode ficar vazio, sem nenhuma marca ao lado. */
-const dosPrompt = ref('C:\\BLOG>')
+const showLogoSlot = computed(() => brandMode.value !== 'texto')
+const showTextSlot = computed(() => brandMode.value !== 'logo')
 
 // --- o wordmark: "lsantos.dev", com cinco jeitos de aparecer na tela ---
 const WORD = 'lsantos.dev'
@@ -177,10 +169,14 @@ const TEXT_ANIM_OPTIONS = [
   { id: 'baud', name: 'baud (linha serial)' },
   { id: 'falha', name: 'falha (glitch RGB)' },
 ]
-const textAnim = ref('teletipo')
+// A decisão foi "decifra", a única das cinco arquivada como opção do candidato vencedor
+// (as outras quatro seguem aqui, no painel "wordmark" abaixo).
+const textAnim = ref('decifra')
 
 // teletipo: Teletype Model 33 ASR, 10 caracteres/s a 110 baud, 100ms/caractere de verdade.
-const charMs = ref(100)
+// A bancada não abre nesse número: o dono pediu mais devagar, então o padrão aqui é 220ms
+// (o teto do knob), e o 100ms de verdade fica só registrado neste comentário.
+const charMs = ref(220)
 // baud: a mesma conta de qualquer linha serial, 10 bits por caractere (start + stop + 8 de dado),
 // então caracteres/s = baud/10 e ms/caractere = 10000/baud. 300 baud é a leitura de BBS clássica.
 const BAUD_OPTIONS = [
@@ -197,8 +193,13 @@ const baudRate = ref(300)
 const PIPBOY_MS = 32
 const pipboyGlow = ref(false)
 // decifra: sem taxa de quadro original (Sneakers, 1992, e o porte de soulwire inspirado em
-// LOVE, 2011, não documentam uma), então o tique usado é o do próprio Doom, 28ms.
-const DECIFRA_TICK_MS = 28
+// LOVE, 2011, não documentam uma). Chegou a usar o tique do próprio Doom, 28ms, rápido demais
+// perto do cursor de bloco ao lado: o dono pediu o mesmo tempo do cursor, então o tique agora
+// é `CURSOR_RATES.terminal`, 530ms, a mesma fase da taxa "terminal" do cursor. Cada caractere
+// ainda escalona 5 tiques antes de travar (`queue` abaixo), então resolver o nome inteiro leva
+// vários segundos agora, de propósito: é o mesmo "um terminal é paciente" que já justifica a
+// taxa "terminal" do cursor.
+const DECIFRA_TICK_MS = CURSOR_RATES.terminal
 const SCRAMBLE_GLYPHS = '!<>-_\\/[]{}—=+*^?#'.split('')
 // falha: WCAG 2.3.1 proíbe mais de três trocas de luminância por segundo; o piso de 2s
 // no knob abaixo garante isso mesmo no ajuste mais agressivo que o slider permite.
@@ -279,7 +280,13 @@ function randomScrambleGlyph(): string {
   return SCRAMBLE_GLYPHS[Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)]
 }
 
-/** Decifra: cada caractere escala um atraso próprio (20 a 80ms, mais o índice) e só então passa a trocar de glifo a cada 28ms até travar na letra final. */
+/**
+ * Decifra: cada caractere escala um atraso próprio (20 a 80ms, mais o índice a `DECIFRA_TICK_MS`) e só
+ * então passa a trocar de glifo a cada `DECIFRA_TICK_MS` até travar na letra final. Uma vez travado, o
+ * nome fica resolvido: nenhum `holdTimer` reagenda `runDecifra` de novo, o decidido foi "toca uma vez e
+ * fica". Ver o botão "recomeçar" abaixo para tocar de novo, e o glitch ambiente (`scheduleAmbientGlitch`)
+ * para o que mantém o cabeçalho vivo depois que o nome resolve.
+ */
 function runDecifra(): void {
   clearDecifraTimer()
   clearHoldTimer()
@@ -303,10 +310,7 @@ function runDecifra(): void {
       }
       return ch
     })
-    if (allLocked) {
-      clearDecifraTimer()
-      holdTimer = setTimeout(runDecifra, holdSeconds.value * 1000)
-    }
+    if (allLocked) clearDecifraTimer()
   }, DECIFRA_TICK_MS)
 }
 
@@ -360,6 +364,67 @@ watch(textAnim, () => {
 function replay(): void {
   if (animationsFrozen.value) return
   startTextAnim()
+}
+
+/**
+ * Glitch ambiente: o que substitui o antigo laço de "decifra resolve, espera, decifra de novo".
+ * Agora que decifra resolve uma vez só, o cabeçalho ficaria parado para sempre sem isto. A cada
+ * 4 a 20 segundos (sorteado de novo a cada disparo, `Math.random()` de verdade, não hash: isto é
+ * uma animação ao vivo, não uma capa de build que precisa reproduzir), uma rajada de 1 a 3
+ * glitches em sequência mexe no wordmark e na marca ao mesmo tempo.
+ *
+ * O wordmark reaproveita o mesmo mecanismo visual do "falha" (`falhaActive`/`falhaShiftA`/
+ * `falhaShiftB`/`falhaTearBand`), só que disparado por este relógio em vez do de `runFalha`; por
+ * isso `data-falha` no template não olha mais para `textAnim === 'falha'`, olha só para
+ * `falhaActive`. A marca reaproveita o glitch que `LogoMark.vue` já tinha para o candidato "fio"
+ * (`glitchPulse`, abaixo): nenhum glitch novo foi escrito, só uma segunda origem para o mesmo.
+ *
+ * Cada pulso dura 80 a 150ms, o mesmo estouro curto do "falha", bem abaixo de qualquer piso da
+ * WCAG 2.3.1, e no máximo três pulsos a cada 4 segundos é uma fração do limite de três trocas
+ * por segundo daquela regra.
+ */
+const AMBIENT_GLITCH_MIN_S = 4
+const AMBIENT_GLITCH_MAX_S = 20
+const markGlitchPulse = ref(0)
+let ambientTimer: ReturnType<typeof setTimeout> | null = null
+let ambientPulseTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearAmbientTimers(): void {
+  if (ambientTimer) clearTimeout(ambientTimer)
+  if (ambientPulseTimer) clearTimeout(ambientPulseTimer)
+  ambientTimer = null
+  ambientPulseTimer = null
+}
+
+function scheduleAmbientGlitch(): void {
+  clearAmbientTimers()
+  const delayMs = (AMBIENT_GLITCH_MIN_S + Math.random() * (AMBIENT_GLITCH_MAX_S - AMBIENT_GLITCH_MIN_S)) * 1000
+  ambientTimer = setTimeout(() => runAmbientBurst(1 + Math.floor(Math.random() * 3)), delayMs)
+}
+
+function pulseAmbientGlitch(): void {
+  falhaShiftA.value = `${(Math.random() * 4 - 2).toFixed(1)}px`
+  falhaShiftB.value = `${(Math.random() * 4 - 2).toFixed(1)}px`
+  falhaTearBand.value = `inset(${Math.floor(Math.random() * 60)}% 0 ${Math.floor(Math.random() * 30)}% 0)`
+  falhaActive.value = true
+  markGlitchPulse.value += 1
+  ambientPulseTimer = setTimeout(() => {
+    falhaActive.value = false
+  }, 80 + Math.random() * 70)
+}
+
+function runAmbientBurst(remaining: number): void {
+  pulseAmbientGlitch()
+  if (remaining > 1) {
+    ambientTimer = setTimeout(() => runAmbientBurst(remaining - 1), 200 + Math.random() * 200)
+    return
+  }
+  scheduleAmbientGlitch()
+}
+
+function stopAmbientGlitch(): void {
+  clearAmbientTimers()
+  falhaActive.value = false // quadro de repouso: sem franja, sem deslocamento
 }
 
 // --- cursor de bloco: era exclusivo do candidato "dos", agora é um efeito à parte que qualquer um pode ligar ---
@@ -454,9 +519,11 @@ watch(animationsFrozen, (frozen) => {
   if (frozen) {
     stopTextAnim()
     stopCursor()
+    stopAmbientGlitch()
   } else {
     startTextAnim()
     if (cursorEffectOn.value) startCursor()
+    scheduleAmbientGlitch()
   }
 })
 
@@ -467,6 +534,7 @@ onMounted(() => {
   if (!animationsFrozen.value) {
     startTextAnim()
     if (cursorEffectOn.value) startCursor()
+    scheduleAmbientGlitch()
   }
 })
 
@@ -477,10 +545,11 @@ onUnmounted(() => {
   clearDecifraTimer()
   clearFalhaTimer()
   stopCursor()
+  clearAmbientTimers()
 })
 
 const decisionSettings = computed(() => [
-  { label: 'candidato', value: labelFor(SHAPE_OPTIONS, shape.value) },
+  { label: 'candidato', value: 'barra de caixa ┌─┐ (decidido, as outras quatro formas estão em theme-lab-arquivo)' },
   { label: 'marca', value: labelForMark(markCandidate.value) },
   {
     label: 'tamanho da marca',
@@ -492,7 +561,7 @@ const decisionSettings = computed(() => [
       ? `todas (pior dos 4 papéis, vermelho: ${markAccentContrast.value}:1 sobre ${BG})`
       : `${markAccentId.value} (${markAccentContrast.value}:1 sobre ${BG})`,
   },
-  { label: 'composição da marca', value: shape.value === 'dos' ? 'prompt (a marca é o próprio prompt)' : labelFor(BRAND_MODE_OPTIONS, brandMode.value) },
+  { label: 'composição da marca', value: labelFor(BRAND_MODE_OPTIONS, brandMode.value) },
   { label: 'fonte', value: face.value },
   { label: 'destaque', value: `${accent.value} (${accentHex.value})` },
   { label: 'entreletra', value: `${tracking.value}/100em` },
@@ -505,13 +574,16 @@ const decisionSettings = computed(() => [
       ? `ligado, ${labelFor(CURSOR_RATE_OPTIONS, cursorRateId.value)} por fase, troca em ${CURSOR_RAMP_FRAMES} quadros de opacidade a ${CURSOR_RAMP_MS}ms cada`
       : 'desligado',
   },
-  ...(shape.value === 'dos' ? [{ label: 'prompt do DOS', value: dosPrompt.value || '(vazio)' }] : []),
+  {
+    label: 'glitch ambiente',
+    value: `entre ${AMBIENT_GLITCH_MIN_S} e ${AMBIENT_GLITCH_MAX_S}s, sorteado a cada disparo, rajada de 1 a 3 no wordmark e na marca`,
+  },
 ])
 
 const decisionContext = computed(
   () =>
     `Texto ${inkContrast.value}:1 · secundário ${mutedContrast.value}:1 · destaque ${accentContrast.value}:1 sobre ${BG}. ` +
-    'prefers-reduced-motion e a pausa manual travam o wordmark e o cursor no quadro de repouso (nome inteiro, sem cursor piscando), nunca no meio de um quadro.',
+    'prefers-reduced-motion e a pausa manual travam o wordmark, o cursor e o glitch ambiente no quadro de repouso (nome inteiro, sem cursor piscando, sem franja), nunca no meio de um quadro.',
 )
 
 const base = computed(() => ({
@@ -526,14 +598,14 @@ const base = computed(() => ({
 <template>
   <div :class="$style.demo">
     <div :class="$style.stage" :style="{ background: BG }">
-      <header v-if="shape === 'barra'" :class="$style.bar" :style="base">
+      <header :class="$style.bar" :style="base">
         <span :class="$style.edge" :style="{ color: MUTED }">┌─</span>
         <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
           <span v-if="showLogoSlot" :class="$style.markSlot">
-            <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
+            <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" :glitch-pulse="markGlitchPulse" />
           </span>
           <span v-if="showTextSlot" :class="$style.brand" :style="{ color: accentHex }">
-            <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
+            <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
               <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
             </span>
           </span>
@@ -551,109 +623,13 @@ const base = computed(() => ({
         </nav>
         <span :class="$style.edge" :style="{ color: MUTED }">─┐</span>
       </header>
-
-      <header v-else-if="shape === 'dos'" :class="$style.dos" :style="base">
-        <span :class="$style.badge" :style="{ background: accentHex, color: BG }">{{ dosPrompt }}</span>
-        <span
-          v-if="cursorEffectOn"
-          :class="$style.cursorBlock"
-          :style="{ opacity: cursorOpacity }"
-          aria-hidden="true"
-          ></span
-        >
-        <nav :class="$style.right">
-          <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
-        </nav>
-      </header>
-
-      <header v-else-if="shape === 'minimo'" :class="$style.minimo" :style="base">
-        <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
-          <span v-if="showLogoSlot" :class="$style.markSlot">
-            <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
-          </span>
-          <span v-if="showTextSlot" :class="$style.brand" :style="{ color: accentHex }">
-            <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
-              <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
-            </span>
-          </span>
-          <span
-            v-if="cursorEffectOn"
-            :class="$style.cursorBlock"
-            :style="{ opacity: cursorOpacity }"
-            aria-hidden="true"
-            ></span
-          >
-        </a>
-        <nav :class="$style.right">
-          <span v-for="item in NAV" :key="item" :class="$style.item">{{ item }}</span>
-        </nav>
-      </header>
-
-      <header v-else-if="shape === 'menu'" :class="$style.menu" :style="base">
-        <div :class="$style.frame" :style="{ borderColor: MUTED }">
-          <span :class="$style.brandRow">
-            <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
-              <span v-if="showLogoSlot" :class="$style.markSlot">
-                <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
-              </span>
-              <span v-if="showTextSlot" :class="$style.brand" :style="{ color: accentHex }">
-                <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
-                  <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
-                </span>
-              </span>
-              <span
-            v-if="cursorEffectOn"
-            :class="$style.cursorBlock"
-            :style="{ opacity: cursorOpacity }"
-            aria-hidden="true"
-            ></span
-          >
-            </a>
-          </span>
-          <nav>
-            <span v-for="(item, index) in NAV" :key="item" :class="[$style.item, $style.row]">
-              <span :class="$style.pointer" :style="{ color: index === 0 ? accentHex : 'transparent' }">▸</span>{{ item }}
-            </span>
-          </nav>
-        </div>
-      </header>
-
-      <header v-else :class="$style.ledger" :style="base">
-        <p :class="$style.line" :style="{ color: MUTED }">seção 00 / índice · v0.0.1+42 · 449 páginas</p>
-        <p :class="$style.brandline">
-          <a href="#" aria-label="lsantos.dev" :class="$style.brandLink" @click.prevent>
-            <span v-if="showLogoSlot" :class="$style.markSlot">
-              <LogoMark :candidate="markCandidate" :size-px="markSizePx" :accent-color="markAccentColor" :multi-accent="markAccentIsAll" :glitch-enabled="!animationsFrozen" />
-            </span>
-            <span v-if="showTextSlot" :style="{ color: accentHex }">
-              <span :class="$style.wordChars" :style="{ '--falha-a': falhaShiftA, '--falha-b': falhaShiftB, '--falha-band': falhaTearBand }" :data-word="WORD" :data-falha="textAnim === 'falha' && falhaActive" :data-pipboy="textAnim === 'pipboy'" :data-glow="textAnim === 'pipboy' && pipboyGlow" aria-hidden="true">
-                <span v-for="(ch, i) in chars" :key="i" :class="$style.letter">{{ ch }}</span>
-              </span>
-            </span>
-            <span
-            v-if="cursorEffectOn"
-            :class="$style.cursorBlock"
-            :style="{ opacity: cursorOpacity }"
-            aria-hidden="true"
-            ></span
-          >
-          </a>
-          <span :style="{ color: MUTED }"> ······································ </span>
-          <span>{{ NAV.join(' · ') }}</span>
-        </p>
-      </header>
     </div>
 
     <Panel label="cabeçalho">
-      <Pick v-model="shape" label="candidato" :options="SHAPE_OPTIONS" />
       <Pick v-model="markCandidate" label="marca" :options="MARK_CANDIDATES.map((c) => ({ id: c.id, name: c.name }))" />
       <Knob v-model="markSizePx" label="tamanho da marca" :min="0" :max="300" :step="4" unit="px" />
       <Pick v-model="markAccentId" label="cor da marca" :options="Object.keys(MARK_ACCENTS).map((id) => ({ id, name: id }))" />
-      <Pick v-if="shape !== 'dos'" v-model="brandMode" label="composição da marca" :options="BRAND_MODE_OPTIONS" />
-      <label v-if="shape === 'dos'" :class="$style.textField">
-        <span :class="$style.textFieldName">prompt do DOS</span>
-        <input v-model="dosPrompt" type="text" :class="$style.textFieldInput" placeholder="(vazio)" />
-      </label>
+      <Pick v-model="brandMode" label="composição da marca" :options="BRAND_MODE_OPTIONS" />
       <Pick
         v-model="face"
         label="fonte"
@@ -680,7 +656,7 @@ const base = computed(() => ({
       <Pick v-if="textAnim === 'baud'" v-model.number="baudRate" label="taxa" :options="BAUD_OPTIONS" />
       <Toggle v-if="textAnim === 'pipboy'" v-model="pipboyGlow" label="brilho" />
       <Knob v-if="textAnim === 'falha'" v-model="falhaIntervalSeconds" label="intervalo entre falhas" :min="2" :max="6" :step="0.5" unit="s" />
-      <Knob v-if="textAnim !== 'falha'" v-model="holdSeconds" label="repouso antes de repetir" :min="0.5" :max="4" :step="0.1" unit="s" />
+      <Knob v-if="textAnim !== 'falha' && textAnim !== 'decifra'" v-model="holdSeconds" label="repouso antes de repetir" :min="0.5" :max="4" :step="0.1" unit="s" />
       <button type="button" :class="$style.replay" :disabled="animationsFrozen" @click="replay">recomeçar</button>
       <Toggle v-model="manualPause" label="pausar animação (WCAG 2.2.2)" />
       <Toggle v-model="simulateReduced" label="simular prefers-reduced-motion" />
@@ -715,8 +691,17 @@ const base = computed(() => ({
       uma fase cada davam {{ (CURSOR_RATES[cursorRateId] * 6).toFixed(0) }}ms de ciclo. Sobre WCAG 2.3.1: mesmo
       Doom, a mais rápida das três taxas, o critério pede uma troca de luminância pareada de 10% ou mais numa área
       de cerca de 21.824px², e este cursor mede bem menos de 100px² no tipo do bench, então nenhuma das três taxas
-      aciona a regra, e um degrau de opacidade move menos luminância que o aceso/apagado cheio movia. E ele liga em
-      qualquer um dos cinco candidatos, não só no "linha de DOS invertida".
+      aciona a regra, e um degrau de opacidade move menos luminância que o aceso/apagado cheio movia. O cursor virou
+      efeito à parte de qualquer forma de cabeçalho, não mais exclusivo de nenhuma leitura.
+    </p>
+    <p :class="$style.readout">
+      A animação "decifra" agora tica no mesmo {{ DECIFRA_TICK_MS }}ms da fase "terminal" do cursor, em
+      vez dos 28ms do menu do Doom: o mesmo tempo, não mais rápido. Ela resolve uma vez e para, sem repetir sozinha;
+      o botão "recomeçar" acima toca de novo sob demanda. Depois de resolver, um glitch ambiente mexe no wordmark e
+      na marca a um intervalo sorteado entre {{ AMBIENT_GLITCH_MIN_S }} e {{ AMBIENT_GLITCH_MAX_S }}s, em rajadas de
+      1 a 3, com sorteio de verdade a cada disparo, nunca reproduzível. prefers-reduced-motion, a simulação
+      da bancada e a pausa manual travam os três (wordmark, cursor, glitch) no quadro de repouso: o nome inteiro,
+      sem cursor piscando e sem franja de glitch.
     </p>
 
     <DecisionCopy
@@ -753,12 +738,6 @@ const base = computed(() => ({
   margin-inline-end: 0.5rem;
 }
 
-.brandRow {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
 .item {
   cursor: pointer;
 }
@@ -777,54 +756,6 @@ const base = computed(() => ({
 .fill {
   flex: 1;
   overflow: hidden;
-}
-
-.dos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  align-items: center;
-}
-
-.badge {
-  padding: 0.15rem 0.4rem;
-  font-weight: 700;
-}
-
-.right {
-  margin-inline-start: auto;
-}
-
-.minimo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  border-block-end: 1px dotted currentColor;
-}
-
-.menu .frame {
-  display: inline-grid;
-  gap: 0.4rem;
-  padding: 0.7rem 1.1rem 0.7rem 0.7rem;
-  border: 3px double;
-}
-
-.row {
-  display: block;
-}
-
-.pointer {
-  display: inline-block;
-  inline-size: 1.2em;
-}
-
-.ledger .line {
-  margin: 0 0 0.4rem;
-  font-size: 0.62rem;
-}
-
-.brandline {
-  margin: 0;
 }
 
 /*
@@ -930,33 +861,6 @@ const base = computed(() => ({
   background: currentColor;
   line-height: 1.1em;
   vertical-align: text-bottom;
-}
-
-.textField {
-  display: grid;
-  gap: 0.1rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-}
-
-.textFieldName {
-  color: var(--muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.textFieldInput {
-  padding: 0.2rem 0.3rem;
-  border: 1px solid var(--rule);
-  border-radius: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font: inherit;
-}
-
-.textFieldInput:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
 }
 
 .replay {
