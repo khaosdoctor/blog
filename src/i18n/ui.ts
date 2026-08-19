@@ -91,6 +91,7 @@ type UIKey =
   | 'accentYellow'
   | 'accentBlue'
   | 'accentPurple'
+  | 'accentWhite'
   | 'backgroundLife'
   | 'conwayKnobs'
   | 'conwaySeedDensity'
@@ -231,12 +232,13 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     fontFamilySerif: 'Serifada',
     fontFamilySans: 'Sem serifa',
     accentLabel: 'Cor de destaque',
-    accentAuto: 'Automática',
+    accentAuto: 'Auto',
     accentRed: 'Vermelho',
     accentGreen: 'Verde',
     accentYellow: 'Amarelo',
     accentBlue: 'Azul',
     accentPurple: 'Roxo',
+    accentWhite: 'Branco',
     backgroundLife: 'Plano de fundo',
     conwayKnobs: 'Propriedades',
     conwaySeedDensity: 'Densidade do seed',
@@ -388,6 +390,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     accentYellow: 'Yellow',
     accentBlue: 'Blue',
     accentPurple: 'Purple',
+    accentWhite: 'White',
     backgroundLife: 'Background field',
     conwayKnobs: 'Field settings',
     conwaySeedDensity: 'Seed density',

@@ -189,9 +189,34 @@
     function moveHead(): void {
       if (cursor === null || stops.length === 0) return
       const last = stops.length - 1
-      const index = Math.min(Math.max(Math.floor(shown), 0), last)
+      /*
+       * The head is placed from `lit`, the count of dashes actually written,
+       * not from `shown`. The two are the same number in the reduced-motion
+       * path and can be most of a dash apart otherwise: `threshold()` pushes
+       * each dash's own lighting back by up to JITTER of its slot, so `shown`
+       * can be well past a dash the trail has not drawn yet. Placing from
+       * `shown` therefore ran the block ahead of its own trail, further ahead
+       * the more jitter that dash happened to draw, which is the drift the
+       * owner reported.
+       *
+       * `lit` is the pen's real position: it is exactly the number of dashes
+       * that exist, so the head standing at `stops[lit]` is standing on the
+       * one it is about to write.
+       */
+      const index = Math.min(Math.max(lit, 0), last)
       const next = Math.min(index + 1, last)
-      const fraction = jumps[index] === true ? 0 : Math.min(Math.max(shown - index, 0), 1)
+      /*
+       * The slide between two stops comes from how far `shown` has travelled
+       * toward the moment this dash lights, not from `shown`'s own fraction:
+       * the dash lights at `threshold(index)`, so measuring against that is
+       * what makes the head arrive exactly as the dash appears rather than
+       * reaching the next slot early and waiting there.
+       */
+      const from = index === 0 ? 0 : threshold(index - 1)
+      const to = threshold(index)
+      const span = to - from
+      const progress = span > 0 ? (shown - from) / span : 1
+      const fraction = jumps[index] === true ? 0 : Math.min(Math.max(progress, 0), 1)
       const x = stops[index] + (stops[next] - stops[index]) * fraction
       cursor.style.setProperty('--cursor-x', `${x.toFixed(2)}px`)
     }
