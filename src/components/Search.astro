@@ -48,7 +48,7 @@ const { action = '/search/', locale = 'pt' } = Astro.props
   }
 
   interface PagefindModule {
-    init?: () => Promise<void>
+    init?: (language?: string) => Promise<void>
     search: (query: string) => Promise<{ results: PagefindResult[] }>
   }
 
@@ -168,7 +168,23 @@ const { action = '/search/', locale = 'pt' } = Astro.props
       return
     }
 
-    if (pagefind.init) await pagefind.init()
+    // Pagefind builds one index per language (en 183 pages, pt 276 as of the
+    // 2026-08-19 build), and picks between them from the page's own lang when
+    // init() is called bare. That already scopes a search to the language being
+    // read, but its miss path is `findIndex`: an unknown or variant tag falls
+    // back to whichever index has the most pages, which here is always pt. A
+    // reader on an English page would silently get Portuguese results and
+    // nothing would report an error. Passing the tag explicitly keeps the same
+    // behaviour on the happy path and turns that quiet fallback into a thrown
+    // error we handle below, rather than wrong results that look right.
+    if (pagefind.init) {
+      try {
+        await pagefind.init(document.documentElement.lang)
+      } catch {
+        if (input.value.trim()) showMessage(resultsEl, input.dataset.noIndexMessage ?? '')
+        return
+      }
+    }
 
     form.addEventListener('submit', (event) => {
       event.preventDefault()
