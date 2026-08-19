@@ -23,9 +23,19 @@ Nada que se mexe começa se mexendo para quem pediu `prefers-reduced-motion: red
 
 ## Seção 01 / Interface
 
-O cabeçalho, em cinco leituras da mesma direção. Nenhuma usa imagem ou ícone: é tudo caractere, então nada disso custa uma requisição. Cada leitura carrega a marca de verdade ao lado do nome, porque julgar um cabeçalho sem a marca era julgar só metade da decisão. O seletor "marca" escolhe qual dos seis candidatos da Seção 03 aparece aqui.
+O cabeçalho, em cinco leituras da mesma direção. Nenhuma usa imagem ou ícone: é tudo caractere, então nada disso custa uma requisição. A marca e o cabeçalho eram duas bancadas separadas e viraram uma só, porque julgar a marca fora do cabeçalho onde ela mora era julgar metade da decisão.
 
-A marca começou pequena demais pra ver: o tamanho vinha do `1em` do texto ao redor, e um desenho em caractere tem um piso de legibilidade que um vetor não tem. O slider "tamanho da marca" agora manda em pixels de verdade, nunca abaixo do piso do candidato escolhido, e o padrão, 96px, já cobre o piso dos seis.
+Duas marcas sobraram de seis: o wireframe do Elite e a grade de `+`, as duas agora desenhadas numa cor de marca que o seletor escolhe. As outras quatro (malha ciano, retrato em ramp, dither de dois tons, pixel glitched) estão em [[theme-lab-arquivo]], funcionando, com o motivo de cada uma.
+
+O slider de tamanho vai de 0 a 300px. Cada marca tem um piso de legibilidade abaixo do qual o glifo vira mancha, mas ele agora só avisa, não trava: o painel diz o piso do candidato e marca quando a escolha está abaixo dele. Quem manda é quem olha.
+
+O cursor de bloco saiu da linha de DOS e virou efeito solto, que entra em qualquer leitura. Ele pisca em dois ritmos reais, os dois medidos e não inventados: o cursor de menu do Doom, 8 tics de 35 por segundo, e o cursor do modo texto do VGA, fixo em hardware a 1,875Hz.
+
+O wordmark escolhe entre cinco animações, cada uma com procedência: `teletipo` (Teletype ASR-33, 10 caracteres por segundo de verdade), `decifra` (o decrypt de *Sneakers*), `pipboy` (typeout com scanlines), `baud` (o controle é a velocidade da linha, 300 a 9600), e `falha` (split de canal de VHS). Todas param no estado final, nunca no meio.
+
+A composição é escolhida à parte: só a marca, só o texto, ou os dois. Na leitura de prompt de DOS a marca é o próprio prompt, então não há logo ao lado, e o texto do prompt é editável ali mesmo. No hover, em qualquer caso, o desenho em caractere vira o SVG sólido do favicon, em troca seca.
+
+`prefers-reduced-motion` trava num quadro estático e o laço nunca começa. Um botão de pausa cobre o que a WCAG 2.2.2 pede. O `falha` é o único que chega perto do limite de pisca da 2.3.1, e por isso tem piso de intervalo. O nome acessível mora no link; marca e wordmark são `aria-hidden`.
 
 <LabDemo src="./components/ChromeHeader.vue" client:load />
 
@@ -53,25 +63,7 @@ Nenhuma cor, campo ou fogo aqui vem de `Math.random()`: tudo sai do hash do slug
 
 <LabDemo src="./components/CoverLab.vue" client:load />
 
-## Seção 03 / O logo animado
-
-A decisão que abre esta bancada inteira: o site vai ter quase nenhuma animação, e a única exceção fica no cabeçalho. Não o título, não a lista de posts, não os botões. O que mudou com o retorno do dono é onde, dentro do cabeçalho, esse movimento mora.
-
-Os cinco candidatos antigos coloriam os mesmos retângulos do favicon, e liam como imagem, não marca pra um terminal. Os seis abaixo desenham a mesma silhueta em caractere e célula: contorno vetorial, grade de `+`, malha em ciano com anéis de latitude, retrato em ramp, dither em xadrez, e um pixel glitched com franja cromática, parado de propósito.
-
-O movimento mudou de lugar. Antes era a cor dos acentos que girava, porque a marca era só retângulos coloridos; um contorno ou treliça não pede esse giro. Agora ele fica no wordmark: "Lucas Santos" digita e apaga como um terminal, cursor piscando a 530ms, backspace no lugar de fade. Um glitch ocasional troca uma letra ou rasga uma coluna, abaixo do limite de pisca perigosa da WCAG 2.3.1.
-
-A marca tem um piso de tamanho que a versão em retângulos nunca teve: abaixo dele o glifo vira mancha. Em pixels: contorno vetorial 72px, grade de `+` 64px, malha ciano 80px, retrato em ramp 88px, dither 40px, pixel glitched 32px. O retrato em ramp é o único que não cabe num cabeçalho real; os outros cinco cabem, apertados. O slider nunca desce abaixo do piso escolhido.
-
-Quatro correções depois de ver isto rodando: o nome e a marca ganharam sublinhado azul sem querer (corrigido por especificidade); o cabeçalho "linha DOS invertida" colidia com a marca (fonte da célula grande demais, corrigido); o "pixel glitched" ficou definido demais (desfoque leve, menos opacidade, tamanho menor); e o "wireframe Elite" ganhou traço mais grosso e o mesmo glitch do wordmark.
-
-A marca e o cabeçalho, finalmente, se veem juntos: o palco desta bancada já é um cabeçalho de verdade, na leitura "linha de DOS invertida" que o dono pediu pra manter, e a Seção 01 mostra a mesma marca. Ficaram duas seções, não uma só, porque o cabeçalho ainda compartilha página com a lista de posts e a capa compartilha com o gerador, os dois em obra por outra mão agora.
-
-`prefers-reduced-motion` trava num quadro estático, o nome parado, e o laço nunca começa. Um botão de pausa cobre o que a WCAG 2.2.2 pede de qualquer coisa que se mexa por mais de cinco segundos. O nome acessível mora no `aria-label` do link; a marca e o wordmark visual são `aria-hidden` em toda parte onde aparecem.
-
-<LabDemo src="./components/LogoLab.vue" client:visible />
-
-## Seção 04 / Segundo plano vivo
+## Seção 03 / Segundo plano vivo
 
 Este candidato pega o pedido de frente: um Jogo da Vida de Conway rodando atrás da página inteira, bem apagado,
 bem espalhado, um pouco ampliado (células grandes), nunca atrás do texto de um post, e um clique em qualquer
