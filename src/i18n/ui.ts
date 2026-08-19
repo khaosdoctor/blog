@@ -144,8 +144,10 @@ type UIKey =
   | 'appDescription'
   | 'copyright'
   | 'credits'
-  | 'license'
   | 'githubRepo'
+  | 'linkedinProfile'
+  | 'twitterProfile'
+  | 'youtubeChannel'
   | 'ossTitle'
   | 'ossDescription'
   | 'ossIntro'
@@ -246,13 +248,10 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     // A licença CC BY-SA da PxPlus IBM VGA exige atribuição alcançável do site.
     // A página /oss/ é essa atribuição hoje; veja docs/theming.md.
     credits: 'Créditos',
-    // "do código" por escolha deliberada, não decorativa: o LICENSE na raiz do
-    // repositório cobre o repositório (código e posts moram na mesma árvore),
-    // e não está claro que o autor queira que o MIT valha para os textos. Esta
-    // rotula só o que dá pra verificar (a licença do repositório/código), sem
-    // dizer que o site inteiro é MIT.
-    license: 'Licença do código: MIT',
     githubRepo: 'Repositório no GitHub',
+    linkedinProfile: 'Perfil no LinkedIn',
+    twitterProfile: 'Perfil no Twitter',
+    youtubeChannel: 'Canal no YouTube',
     ossTitle: 'Código aberto',
     ossDescription: 'Cada projeto de código aberto, fonte e ferramenta usados para construir este site, com um link para cada um.',
     ossIntro: 'Este site é construído sobre o trabalho de muita gente. Aqui está cada projeto, fonte e ferramenta usados, com um link para cada um.',
@@ -382,12 +381,10 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     // PxPlus IBM VGA is CC BY-SA, which requires attribution reachable from the
     // site. /en/oss/ is that attribution today; see docs/theming.md.
     credits: 'Credits',
-    // "code" is deliberate, not decorative: LICENSE at the repo root covers the
-    // repository (code and posts live in the same tree), and it is not clear
-    // the author means MIT to cover the writing too. This labels only what can
-    // be verified (the repository/code licence), not the whole site.
-    license: 'Code licence: MIT',
     githubRepo: 'GitHub repository',
+    linkedinProfile: 'LinkedIn profile',
+    twitterProfile: 'Twitter profile',
+    youtubeChannel: 'YouTube channel',
     ossTitle: 'Open source',
     ossDescription: 'Every open source project, typeface and tool this site is built on, with a link to each.',
     ossIntro: 'This site is built on the work of a lot of people. Here is every project, typeface and tool used, with a link to each.',

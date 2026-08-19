@@ -117,24 +117,26 @@
  * not a text link at all), `.heading-anchor` (headings.css's own quiet,
  * opacity-fading "#" marker, which would otherwise gain both this rule's
  * dashed underline and a colour clash with its own hover colour) and
- * `footer .gh-link` (BaseLayout.astro's icon-only GitHub repo link, styled on
- * its own terms there: an icon has no baseline for a dashed underline to sit
- * under) are excluded by name below, all three from the colour/underline/
- * padding/hover-fill this rule draws. `:where()` around them keeps the
- * exclusion at zero specificity, so adding it does not accidentally out-rank
- * the very `footer .version a` exception this rule already has to lose to (a
- * plain `:not(.chip)` would add a class to this selector's own count and
- * start beating `.version a` by mistake, which is the trap this file's
- * `:where()` avoids). A footnote reference, its back-arrow, and the bookmark
- * card are NOT in this list: they keep the fill and the accent colour like
- * any other text link. Whether any of these six also gets the `::after`
- * arrow is a separate question answered further down, by a separate,
- * prose-only rule, not by this one: `.chip` and `footer .gh-link`/`.version
- * a` never reach it regardless (none of the three live inside `.prose`), and
- * `.heading-anchor`, the footnote pair and the bookmark card are cancelled
- * there by name, since the icon rule reaches everywhere in `.prose` alike.
+ * `footer .icon-link` (BaseLayout.astro's four icon-only footer buttons,
+ * GitHub/LinkedIn/Twitter/YouTube, styled on their own terms there, matching
+ * the header's own icon-button chrome: an icon has no baseline for a dashed
+ * underline to sit under) are excluded by name below, all three from the
+ * colour/underline/padding/hover-fill this rule draws. `:where()` around
+ * them keeps the exclusion at zero specificity, so adding it does not
+ * accidentally out-rank the very `footer .version a` exception this rule
+ * already has to lose to (a plain `:not(.chip)` would add a class to this
+ * selector's own count and start beating `.version a` by mistake, which is
+ * the trap this file's `:where()` avoids). A footnote reference, its
+ * back-arrow, and the bookmark card are NOT in this list: they keep the fill
+ * and the accent colour like any other text link. Whether any of these also
+ * gets the `::after` arrow is a separate question answered further down, by
+ * a separate, prose-only rule, not by this one: `.chip` and
+ * `footer .icon-link`/`.version a` never reach it regardless (none of the
+ * three live inside `.prose`), and `.heading-anchor`, the footnote pair and
+ * the bookmark card are cancelled there by name, since the icon rule reaches
+ * everywhere in `.prose` alike.
  */
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link)) {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .icon-link)) {
   padding-inline: 1px;
   padding-block: 2px;
   background: transparent;
@@ -197,8 +199,8 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
   content: none;
 }
 
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link)):hover,
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .gh-link)):focus-visible {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .icon-link)):hover,
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .icon-link)):focus-visible {
   background: var(--post-accent-fill);
   color: var(--bg);
   text-decoration-line: none;

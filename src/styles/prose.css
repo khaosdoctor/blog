@@ -36,6 +36,24 @@
 @import './prose/code.css';
 
 /*
+ * The one deliberate font-family declaration this file makes for running
+ * text itself (headings, code, tables and links below all already had their
+ * own). It used to come for free: <body> in BaseLayout.astro read
+ * --font-body directly, and .prose is a descendant, so nothing here had to
+ * say so. <body>'s own default changed (site-wide, so anything that never
+ * picked a face defaults to Departure Mono instead), which would have taken
+ * a post's own body copy along with it purely because nothing here
+ * contradicted the new default. This line is that contradiction, on
+ * purpose: --font-body is still an open decision (docs/design.md), and a
+ * reader should see today's answer to it change only when that decision
+ * does, never as a side effect of the site's chrome defaulting to
+ * something else.
+ */
+.prose {
+  font-family: var(--font-body);
+}
+
+/*
  * Two block-level children of the same visual weight, a figure or a code
  * frame, touch when one follows the other directly: neither carries a
  * bottom margin the next one's top margin can collapse against, so nothing
