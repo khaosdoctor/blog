@@ -11,6 +11,7 @@
 export {}
 
 import { getSettings, reseed, setAutoFeed, setBackgroundEnabled, setDensity, setGps, setMotion, setPaused } from './conway'
+import { getShortcutLetter, setShortcutLetter } from './search-palette'
 
 // Same key hover-previews.ts's own bindPersistToggle() already reads and
 // writes. That function still runs, unchanged, on the post pages
@@ -158,6 +159,15 @@ function init(): void {
 
   const reseedButton = menu.querySelector<HTMLButtonElement>('#sp-reseed')
   reseedButton?.addEventListener('click', () => reseed())
+
+  // --- The search palette's shortcut letter, direct import into
+  // search-palette.ts's own control surface, same convention as the Conway
+  // setters above. ---
+  const searchKey = menu.querySelector<HTMLSelectElement>('#sp-search-key')
+  if (searchKey !== null) {
+    searchKey.value = getShortcutLetter()
+    searchKey.addEventListener('change', () => setShortcutLetter(searchKey.value))
+  }
 
   // --- Pinned preview persistence, moved in from HoverPreviews.astro. ---
   const hpPersist = menu.querySelector<HTMLInputElement>('#hp-persist')

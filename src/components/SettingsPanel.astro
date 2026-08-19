@@ -75,6 +75,15 @@ const { locale } = Astro.props
       </div>
     </details>
 
+    <fieldset class="sp-search-shortcut">
+      <legend>{t(locale, 'searchShortcutLabel')}</legend>
+      <select id="sp-search-key">
+        {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
+          <option value={letter}>{letter}</option>
+        ))}
+      </select>
+    </fieldset>
+
     <hr class="sp-rule" />
 
     <CodeTheme locale={locale} />
@@ -298,6 +307,34 @@ const { locale } = Astro.props
     border: 0;
     border-block-start: var(--border) solid var(--rule);
     margin: 0;
+  }
+
+  /* Same shape as .sp-motion's own fieldset/legend: a plain <select> rather
+     than 26 buttons, since a native picker already gives keyboard and screen
+     reader support for a long option list for free. */
+  .sp-search-shortcut {
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .sp-search-shortcut legend {
+    margin-block-end: 0.3rem;
+    padding: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+  }
+
+  .sp-search-shortcut select {
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+    background: var(--bg);
+    color: var(--fg);
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    padding: 0.3rem;
   }
 
   /* The code theme row, moved in from CodeTheme.astro, drops its own
