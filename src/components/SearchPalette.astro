@@ -19,17 +19,27 @@ interface Props {
 const { locale } = Astro.props
 ---
 
+{/*
+  The button itself is icon-only now, the same square footprint as
+  ThemeToggle/SettingsPanel (--icon-btn-hit for the box, --icon-btn-chip for
+  the visible chip), rather than the wide pill a text label made it. The
+  shortcut hint still has to be visible somewhere, since it is the whole
+  point of drawing <Ctrl+K>, so it moved out of the button to a plain span
+  beside it: reachable to sighted readers as normal text, not part of the
+  button's own accessible name (already set by the script from data-label),
+  and not eating into the button's own hit target the way inline text did.
+*/}
 <div class="search-trigger" hidden data-label={t(locale, 'search')}>
   <button type="button" class="sx-open" aria-haspopup="dialog" aria-controls="sx-dialog">
     <Magnifier class="sx-open-icon" />
-    {/* Filled in by the script once it knows the reader's platform: the
-       bracket vocabulary matches every other button on this site (Search.astro,
-       ChromeButton.vue), and Ctrl/Cmd + the letter is read off the settings
-       panel's own choice rather than hardcoded to K. */}
-    <span class="sx-hint" aria-hidden="true"
-      >&lt;<span class="sx-hint-mod"></span>+<span class="sx-hint-key">K</span>&gt;</span
-    >
   </button>
+  {/* Filled in by the script once it knows the reader's platform: the
+     bracket vocabulary matches every other button on this site (Search.astro,
+     ChromeButton.vue), and Ctrl/Cmd + the letter is read off the settings
+     panel's own choice rather than hardcoded to K. */}
+  <span class="sx-hint" aria-hidden="true"
+    >&lt;<span class="sx-hint-mod"></span>+<span class="sx-hint-key">K</span>&gt;</span
+  >
 
   <dialog id="sx-dialog" class="sx-dialog" aria-label={t(locale, 'searchLabel')}>
     <div class="sx-row">
@@ -74,53 +84,81 @@ const { locale } = Astro.props
 
   /* Same reasoning as every other header control: the UA `[hidden] { display:
      none }` sheet only ever hides the wrapper itself; a hidden reader still
-     gets nothing dead to look at. */
+     gets nothing dead to look at. Row layout now, not just inline-flex: the
+     hint is a plain sibling of the button rather than something drawn
+     inside it, spaced from it with margin (see .sx-hint below), not the
+     CSS row property this codebase has banned (same note as
+     .tt-option-icon in ThemeToggle.astro). */
   .search-trigger:not([hidden]) {
     display: inline-flex;
+    align-items: center;
   }
 
   /*
-   * Not the bare icon-only chip ThemeToggle/SettingsPanel use (their `::before`
-   * trick assumes the only visible content is a centred glyph): this button
-   * also carries the shortcut hint text, so it borrows LangSwitcher's own
-   * shape instead, a bordered box at `--icon-btn-hit` block-size holding more
-   * than one thing. The three shared tokens still decide every number here:
-   * `--icon-btn-hit` for the row height (matches ThemeToggle, SettingsPanel
-   * and LangSwitcher), `--icon-btn-glyph` for the icon itself. No new size is
-   * declared for either. Spacing between the icon and the hint is margin, not
-   * the CSS row property this codebase has banned (see the same note on
-   * .tt-option-icon in ThemeToggle.astro).
+   * Icon-only now, the identical footprint ThemeToggle's `.tt-open` and
+   * SettingsPanel's `.sp-open` use: `--icon-btn-hit` is the real hit target
+   * (min-inline/block-size on the button itself), `--icon-btn-chip` is the
+   * bordered square a reader actually sees (painted by `::before`, sized
+   * independently of the box a pointer has to reach), `--icon-btn-glyph`
+   * sizes the icon within it. The shortcut hint used to live inside this
+   * button and stretch it into a pill; it is `.sx-hint` now, a sibling
+   * beside the button rather than a child, so this button stays exactly as
+   * square as the other two.
    */
   .sx-open {
+    position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    min-inline-size: var(--icon-btn-hit);
     min-block-size: var(--icon-btn-hit);
-    border: var(--border) solid var(--rule);
-    border-radius: var(--radius);
-    background: var(--bg);
+    border: 0;
+    background: transparent;
     color: var(--muted);
-    padding-inline: 0.6rem;
-    font-family: var(--font-mono);
+    font-size: var(--icon-btn-glyph);
+    padding: 0;
     cursor: pointer;
   }
 
+  .sx-open::before {
+    content: '';
+    position: absolute;
+    inline-size: var(--icon-btn-chip);
+    block-size: var(--icon-btn-chip);
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--bg);
+    pointer-events: none;
+  }
+
+  /* Same reason as ThemeToggle's .tt-icon and SettingsPanel's .sp-icon: the
+     ::before chip is absolutely positioned and opaque, so it paints over an
+     unpositioned glyph and leaves an empty outlined square. */
   .sx-open-icon {
-    margin-inline-end: 0.45rem;
-    font-size: var(--icon-btn-glyph);
+    position: relative;
   }
 
   .sx-hint {
+    margin-inline-start: 0.5rem;
+    font-family: var(--font-mono);
     font-size: var(--text-tiny);
     letter-spacing: 0.03em;
+    color: var(--muted);
     white-space: nowrap;
   }
 
   .sx-open:hover,
   .sx-open:focus-visible {
-    border-color: var(--accent);
     color: var(--accent);
   }
 
+  .sx-open:hover::before,
+  .sx-open:focus-visible::before {
+    border-color: var(--accent);
+  }
+
+  /* Drawn on the real (larger) hit box, not the chip, same reason as
+     ThemeToggle's own .tt-open:focus-visible rule. */
   .sx-open:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
