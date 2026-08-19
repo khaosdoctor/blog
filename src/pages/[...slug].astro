@@ -13,6 +13,7 @@ import MarginNote from '../components/MarginNote.astro'
 import MissingImage from '../components/MissingImage.astro'
 import PostToc from '../components/PostToc.astro'
 import RawEmbed from '../components/RawEmbed.astro'
+import ReadingTime from '../components/ReadingTime.astro'
 import SeriesToc from '../components/SeriesToc.astro'
 import Sidenote from '../components/Sidenote.astro'
 import SpeakerDeck from '../components/SpeakerDeck.astro'
@@ -129,7 +130,7 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
         readingTime !== undefined && (
           <>
             <span aria-hidden="true">·</span>
-            <span>{readingTime} min</span>
+            <ReadingTime minutes={readingTime} locale={post.data.lang} />
           </>
         )
       }

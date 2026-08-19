@@ -1,0 +1,124 @@
+---
+import { t, type Locale } from '../i18n/ui'
+
+/**
+ * The reading time text PostList and a post's own header already render
+ * ("11 min"), made hoverable: hovering, or focusing, reveals the clock time a
+ * reader finishes at if they start now. Just the time, no date.
+ *
+ * That finish time cannot exist here: "when will I finish" depends on the
+ * moment the reader looks, not on when the page was built, so nothing about
+ * it is computed in this file. What this file builds, at build time, is
+ * exactly the same plain "%d min" text the site always rendered, plus two
+ * data attributes reading-time-hover.ts needs to compute the rest client
+ * side: the post's own minutes, and the locale's own "finish at %s" template
+ * (so the popup's words are never hardcoded into a client script, the same
+ * reason HoverPreviews/SearchPalette pass their copy through data-* rather
+ * than importing ui.ts into the browser bundle).
+ *
+ * With JavaScript off, or before the script below has run, this renders
+ * nothing but that plain text: no button, no popup, the reading time exactly
+ * as it always was. reading-time-hover.ts is what upgrades the span's own
+ * text in place into a real <button> plus an empty popup <span>, the same
+ * upgrade-in-place shape SearchPalette's real link already uses.
+ *
+ * Astro dedupes an identical component <script> across every instance on a
+ * page, so PostList rendering this once per row still ships the script once.
+ */
+interface Props {
+  minutes: number
+  locale: Locale
+}
+
+const { minutes, locale } = Astro.props
+---
+
+<span class="reading-time" data-reading-minutes={minutes} data-finish-template={t(locale, 'finishReadingAt')}
+  >{minutes} min</span
+>
+
+<style>
+  /*
+   * The upgraded button and popup are both created by reading-time-hover.ts,
+   * never written in this template, so Astro's own scoping attribute (added
+   * only to elements that exist in the markup above) is never applied to
+   * them. :global() is this site's own escape hatch for exactly that case
+   * (BrandHeader.astro's `.controls :global(.search-trigger)` and neighbours
+   * reach the same way into a client-rendered subtree).
+   */
+  .reading-time {
+    position: relative;
+    display: inline-block;
+  }
+
+  /*
+   * A plain reset, not `all: unset`: that would also drop `display` and this
+   * button still needs to sit inline like the text it replaces. Every other
+   * declaration (font, color) is inherited so the button reads exactly like
+   * the plain text it upgrades, until it is hovered or focused.
+   */
+  .reading-time :global(.rt-trigger) {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /*
+   * The one hover convention this site already has for a plain-text control
+   * (PostList's own `.title:hover`): fill with the day colour, invert the
+   * text. Reused here rather than invented again.
+   */
+  .reading-time :global(.rt-trigger:hover),
+  .reading-time :global(.rt-trigger:focus-visible) {
+    background: var(--accent-day, var(--accent));
+    color: var(--bg);
+    outline: none;
+  }
+
+  /*
+   * The popup borrows PostToc.astro's own ink-on-paper style (full ink on the
+   * page's own ground, a 3px double border), the strong existing precedent
+   * for exactly this "small inverted box of text over the page" treatment.
+   * Copied as literal values rather than importing PostToc's own scoped
+   * `--toc-ink`/`--toc-paper`, which are private to that component; nothing
+   * here edits PostToc itself.
+   *
+   * Absolutely positioned, so it is removed from flow completely: it can
+   * never push the row below it, in PostList's flex rows or anywhere else.
+   * Opacity plus pointer-events, not `hidden`/`display: none`: either of
+   * those pulls the element out of the accessibility tree, and
+   * aria-describedby (set by the script below) needs its text reachable by a
+   * screen reader on focus even while it is visually hidden.
+   */
+  .reading-time :global(.rt-popup) {
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-end: 100%;
+    transform: translateX(-50%);
+    margin-block-end: 0.4rem;
+    padding: 0.3rem 0.55rem;
+    border: 3px double light-dark(#000000, #ffffff);
+    background: var(--bg);
+    color: light-dark(#000000, #ffffff);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration) var(--ease);
+  }
+
+  .reading-time[data-open='true'] :global(.rt-popup) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>
+
+<script>
+  import '../scripts/reading-time-hover'
+</script>

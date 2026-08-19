@@ -2,6 +2,7 @@
 import type { Post } from '../lib/posts'
 import { estimateReadingTime, formatDate, urlOf } from '../lib/posts'
 import { localePath } from '../i18n/ui'
+import ReadingTime from './ReadingTime.astro'
 
 /**
  * The decided candidate from the theme lab (content/blog/theme-lab/components/
@@ -73,7 +74,9 @@ const LEADER = '·'.repeat(200)
             hardcodes the same abbreviation rather than the unused
             `readingTime` ui key, and this matches that existing choice
             rather than fixing it under a different task. */}
-        <span class="read">{estimateReadingTime(post.body ?? '')} min</span>
+        <span class="read">
+          <ReadingTime minutes={estimateReadingTime(post.body ?? '')} locale={post.data.lang} />
+        </span>
       </li>
     ))
   }
