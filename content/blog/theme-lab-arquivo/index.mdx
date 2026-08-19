@@ -299,3 +299,11 @@ bancada viva, ainda explica: uma fase só escalada por três constantes fixas fa
 
 <LabDemo src="./components/CoverPlasmaLab.vue" client:visible />
 
+## As marcas que perderam
+
+A seção do logo no laboratório vivo (`ChromeHeader.vue`, agora fundida com a antiga seção de interface) tinha seis jeitos de desenhar a mesma silhueta 8x8 em caractere: contorno vetorial, grade de `+`, malha ciano, retrato em ramp, dither de dois tons e pixel glitched. Só dois sobreviveram, o contorno ("fio", no espírito do wireframe da Elite de 1984) e a grade de `+` ("lattice"), agora coloridos com o mesmo seletor de acento que o resto da bancada usa.
+
+Os quatro que perderam tinham todos o mesmo problema em graus diferentes: quanto mais peças um candidato somava por cima da silhueta (um anel de SVG, oito níveis de sombra, uma reamostragem 4x4, uma franja cromática), mais ele lia como uma imagem com efeito e menos como um desenho de terminal. O pixel glitched é o caso mais claro: tirando a franja, ele é literalmente os cinco retângulos do favicon antigo, a marca que este redesenho existe para substituir.
+
+<LabDemo src="./components/RetiredLogoMarks.vue" client:visible />
+

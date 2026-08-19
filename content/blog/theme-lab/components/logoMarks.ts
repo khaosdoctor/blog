@@ -1,23 +1,23 @@
 /**
- * Shared shape for the six character-art logo candidates, read by
- * `LogoMark.vue` and offered as a picker by both `ChromeHeader.vue` and
- * `LogoLab.vue`. One shape in one file means the header bench and the logo
- * bench show the same mark instead of two hand-copied grids drifting apart.
+ * Shared shape for the two surviving character-art logo candidates, read by
+ * `LogoMark.vue` and offered as a picker by `ChromeHeader.vue`. One shape in
+ * one file means the header bench and the mark inside it never drift apart.
  *
  * The silhouette below is the same 8x8 hand trace of the five rectangles in
  * `public/favicon.svg` (viewBox 64, so a cell is 8 units) that the earlier,
- * colour-only candidates used. What changed is not the shape, it is that
- * every candidate now draws it out of characters and cells instead of
- * colouring or clipping a picture.
+ * colour-only candidates used, and that `MARK_RECTS` below still draws in
+ * full colour for the hover reveal in `LogoMark.vue`.
+ *
+ * Four other candidates (malha ciano, retrato em ramp, dither de dois tons,
+ * pixel glitched) were tried and lost: the owner kept only this wireframe and
+ * the `+` lattice. They are not gone, `content/blog/theme-lab-arquivo/components/logoMarks-retiradas.ts`
+ * and `RetiredLogoMarks.vue` still render them, importing `SHAPE`, `roleAt` and
+ * `filledAt` from here rather than re-tracing the silhouette a second time.
  */
 
 export const MARK_CANDIDATES = [
   { id: 'fio', name: 'wireframe Elite' },
   { id: 'lattice', name: 'grade de +' },
-  { id: 'mesh', name: 'malha ciano' },
-  { id: 'ramp', name: 'retrato em ramp' },
-  { id: 'dither', name: 'dither de dois tons' },
-  { id: 'glitch', name: 'pixel glitched' },
 ] as const
 
 export type MarkCandidateId = (typeof MARK_CANDIDATES)[number]['id']
@@ -29,59 +29,67 @@ export function labelForMark(id: string): string {
 /**
  * Um caractere por célula tem um piso de tamanho que um vetor não tem: abaixo
  * dele o glifo encolhe para uma mancha, porque a fonte para de conseguir
- * desenhar o traço em vez de só ficar menor. O piso aqui é o tamanho total da
- * marca (px por lado) necessário para cada célula da grade ter px suficiente
- * para o olho distinguir o glifo, medido pela distinção mais fina que aquele
- * candidato pede: um contorno de caixa precisa diferenciar canto de linha
- * reta, um retrato em ramp precisa diferenciar oito níveis de densidade, um
- * "+" sozinho ou um bloco cheio não precisam de quase nada disso.
- *
- * `glitch` é vetor (SVG de verdade), então a silhueta em si não tem este
- * piso; o número aqui é o tamanho abaixo do qual a franja cromática (dois
- * pixels de deslocamento num viewBox de 64 unidades) vira sub-pixel e some,
- * o que faz o candidato voltar a ler como a marca antiga, plana e colorida.
+ * desenhar o traço em vez de só ficar menor. Isto já foi um teto rígido no
+ * slider (nunca deixava o tamanho descer abaixo dele); o dono pediu o slider
+ * de 0 a 300px inteiro, então agora é só informativo: o piso aparece no
+ * relatório e no aviso da bancada, e o tamanho escolhido pode ficar abaixo
+ * dele se for isso que se quer ver.
  */
 export const MARK_MIN_PX: Record<MarkCandidateId, number> = {
   fio: 72, // grade 8x8, ~9px/célula: precisa diferenciar canto de linha reta
   lattice: 64, // grade 8x8, ~8px/célula: um "+" sozinho não tem forma ambígua
-  mesh: 80, // grade 8x8 mais dois anéis de SVG por cima, ~10px/célula
-  ramp: 88, // grade 8x8, ~11px/célula: oito níveis de densidade para distinguir
-  dither: 40, // grade 4x4, ~10px/célula, só duas densidades
-  glitch: 32, // vetor: a silhueta lê bem menor, mas a franja de 2 unidades vira sub-pixel abaixo disto
 }
 
-/** Lado da grade de cada candidato, só para o relatório: `glitch` é vetor, não tem grade. */
-export const MARK_GRID_SIDE: Record<MarkCandidateId, number | null> = {
+/** Lado da grade de cada candidato, só para o relatório. */
+export const MARK_GRID_SIDE: Record<MarkCandidateId, number> = {
   fio: 8,
   lattice: 8,
-  mesh: 8,
-  ramp: 8,
-  dither: 4,
-  glitch: null,
 }
 
-/** O tamanho pedido, nunca menor que o piso de legibilidade do candidato atual. */
-export function effectiveMarkPx(candidate: MarkCandidateId, desiredPx: number): number {
-  return Math.max(desiredPx, MARK_MIN_PX[candidate])
-}
-
-/**
- * O tamanho de partida ao trocar de candidato pelo seletor: 96px cobre o piso
- * dos cinco candidatos em grade sem sobra nenhuma. `glitch` é o único vetor
- * dos seis, o de piso mais baixo (32px), então ele tem espaço de sobra para
- * começar menor, o que o dono pediu depois de ver o candidato pela primeira
- * vez grande demais.
- */
+/** O tamanho de partida ao trocar de candidato pelo seletor. */
 export const MARK_DEFAULT_PX: Record<MarkCandidateId, number> = {
   fio: 96,
   lattice: 96,
-  mesh: 96,
-  ramp: 96,
-  dither: 96,
-  glitch: 48,
 }
 
-/** Glifos do glitch, usados tanto pelo wordmark (`LogoLab.vue`) quanto pela marca (`LogoMark.vue`), o mesmo vocabulário nos dois lugares. */
+/**
+ * A cor da marca, a mesma ideia do seletor "destaque" que `ChromeHeader.vue`
+ * já usa para o resto do cabeçalho: um só acento por vez, nunca um arco-íris
+ * por célula. O dono pediu os dois sobreviventes coloridos; verde é o acento
+ * único recomendado em `docs/theming.md` seção 11, então é o padrão daqui.
+ */
+export const MARK_ACCENTS: Record<string, string> = {
+  verde: 'var(--brand-green)',
+  amarelo: 'var(--brand-yellow)',
+  azul: 'var(--brand-blue)',
+  vermelho: 'var(--brand-red)',
+  roxo: 'var(--brand-purple)',
+  traço: 'var(--fg)',
+}
+
+export const MARK_DEFAULT_ACCENT = 'verde'
+
+/**
+ * Taxa do cursor de bloco, o efeito composável que qualquer candidato de
+ * cabeçalho pode ligar (`docs/theming.md` seção 3 para a proveniência).
+ * `doom` é o tique do menu do Doom, 8 tiques a 35 tiques/s, de `m_menu.c`.
+ * `vga` é o hardware puro: o VGA em modo texto pisca o cursor a cada 16
+ * quadros verticais, 1,875Hz, sem ajuste por software num PC de verdade
+ * (https://www.osdever.net/FreeVGA/vga/textcur.htm). As duas taxas são reais,
+ * próximas mas não iguais, e o ponto de ter as duas nomeadas é justamente
+ * esse: nenhuma delas é a "certa", são dois hardwares diferentes.
+ */
+export const CURSOR_RATES: Record<string, number> = {
+  doom: 228.6,
+  vga: 266.7,
+}
+
+export const CURSOR_RATE_OPTIONS = [
+  { id: 'doom', name: 'Doom (228,6ms, menu M_SKULL)' },
+  { id: 'vga', name: 'VGA (266,7ms, hardware)' },
+]
+
+/** Glifos do glitch, usados pelo wordmark e pela marca "fio", o mesmo vocabulário nos dois lugares. */
 export const GLITCH_GLYPHS = ['#', '%', '&', '$', '@', '?', '~']
 
 /** `R` a haste do L, `G`/`Y`/`B` os três acentos, `.` o vão entre eles. */
@@ -94,7 +102,7 @@ export const ROLE_TOKEN: Record<string, string> = {
   B: 'var(--brand-blue)',
 }
 
-/** As cinco formas originais, para o candidato "glitch", que ainda desenha retângulos de verdade. */
+/** As cinco formas originais, coloridas de verdade: o que o hover revela em `LogoMark.vue`. */
 export const MARK_RECTS = [
   { role: 'R', x: 0, y: 0, w: 14, h: 31 },
   { role: 'R', x: 0, y: 31, w: 37, h: 15 },
@@ -106,7 +114,8 @@ export const MARK_RECTS = [
 const ROWS = SHAPE.length
 const COLS = SHAPE[0].length
 
-function filledAt(row: number, col: number): boolean {
+/** Exportado para os candidatos aposentados (`logoMarks-retiradas.ts`), que precisam da mesma silhueta. */
+export function filledAt(row: number, col: number): boolean {
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false
   return SHAPE[row][col] !== '.'
 }
@@ -136,38 +145,4 @@ export function wireGlyph(row: number, col: number): string {
   if (top || bottom) return '─'
   if (left || right) return '│'
   return ' '
-}
-
-const RAMP = [' ', '.', ':', '+', '*', '▒', '▓', '█']
-
-/**
- * Uma luz vinda do canto superior esquerdo: as células mais perto dele usam
- * glifo esparso (luz), as mais longe usam glifo denso (sombra), a mesma
- * convenção de um retrato ASCII, só que aplicada à marca em vez de a um rosto.
- */
-export function rampGlyph(row: number, col: number): string {
-  if (!filledAt(row, col)) return ' '
-  const distance = (row + col) / (ROWS + COLS - 2)
-  const index = Math.min(RAMP.length - 1, Math.floor(distance * RAMP.length))
-  return RAMP[index]
-}
-
-export interface DitherBlock {
-  glyph: string
-  tone: string
-}
-
-/**
- * A marca reamostrada numa grade 4x4 (blocos de 2x2 da grade original), célula
- * bem maior, só duas densidades alternando em xadrez. É a técnica das peças
- * 3D em ASCII de célula grande: o olho lê a alternância como curva, não como
- * dois tons planos.
- */
-export function ditherBlockAt(row: number, col: number): DitherBlock | null {
-  const r0 = row * 2
-  const c0 = col * 2
-  const filled = filledAt(r0, c0) || filledAt(r0, c0 + 1) || filledAt(r0 + 1, c0) || filledAt(r0 + 1, c0 + 1)
-  if (!filled) return null
-  const dark = (row + col) % 2 === 0
-  return dark ? { glyph: '█', tone: 'var(--fg)' } : { glyph: '▒', tone: 'var(--muted)' }
 }
