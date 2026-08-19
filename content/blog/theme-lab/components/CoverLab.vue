@@ -249,20 +249,22 @@ function generateWaveParams(rng: () => number): WaveParams {
   return { freqA, freqB, freqC, phaseA, phaseB, phaseC, direction, levels }
 }
 
-function waveField(
-  params: WaveParams,
-  brandHex: string,
-  bgHex: string,
-  size: number,
-  quantize: boolean,
-): Array<{ x: number; y: number; fill: string; level: number }> {
+/**
+ * "level" não vira mais cor: é o número puro (0..1) que sixWaveCells usa
+ * pra escolher qual glifo de sombra do CP437 desenhar em cada célula (ver
+ * WAVE_SHADE_GLYPHS mais abaixo). Antes esse mesmo número misturava
+ * brandRgb/bgRgb pra pintar um retângulo; agora a variação de "quanto do
+ * campo está aqui" vem só da densidade do glifo, não de uma cor derivada
+ * nem de um canal alfa, porque é assim que o dithering de CP437 de verdade
+ * funciona: tinta cheia numa cor só, e a sombra é o padrão de pontos do
+ * caractere.
+ */
+function waveField(params: WaveParams, size: number, quantize: boolean): Array<{ x: number; y: number; level: number }> {
   const cols = Math.ceil(CARD_W / size)
   const rows = Math.ceil(CARD_H / size)
-  const brandRgb = parseHex(brandHex)
-  const bgRgb = parseHex(bgHex)
   const cosD = Math.cos(params.direction)
   const sinD = Math.sin(params.direction)
-  const cells: Array<{ x: number; y: number; fill: string; level: number }> = []
+  const cells: Array<{ x: number; y: number; level: number }> = []
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const u = col * cosD - row * sinD
@@ -274,18 +276,12 @@ function waveField(
           6 +
         0.5
       const raw = Math.max(0, Math.min(1, wave))
-      // "level" é o mesmo número que antes se chamava "alpha" aqui: escolhe
-      // o tom (mistura brandRgb/bgRgb). Agora ele também alimenta a
-      // opacidade por célula lá embaixo em sixWaveCells, do mesmo jeito que
-      // o fogo deriva seu próprio alfa da intensidade da célula (bandT ou
-      // rawT): é a mesma leitura usada pra dois canais visuais diferentes,
-      // não dois cálculos separados.
       const level = quantize
         ? params.levels === 1
           ? 0
           : Math.min(params.levels - 1, Math.floor(raw * params.levels)) / (params.levels - 1)
         : raw
-      cells.push({ x: col * size, y: row * size, fill: toHex(composite(brandRgb, bgRgb, level)), level })
+      cells.push({ x: col * size, y: row * size, level })
     }
   }
   return cells
@@ -387,15 +383,39 @@ const fireAlphaCold = ref(0)
 // continua a opção para quem quiser o registro de poucos tons de uma máquina
 // do período do algoritmo, que não tinha canal alfa e só ditherava.
 const fireAlphaMode = ref('continuo')
-// Alfa por célula das ondas, mesma ideia do fogo (alto/baixo interpolados
-// pelo nível da célula) mas com knobs próprios, não os mesmos refs: fogo e
-// ondas ficam em painéis lado a lado, mas continuam dois candidatos, cada
-// um com seu próprio ajuste fino. Sem modo escalonado/contínuo à parte
-// como o fogo tem, porque o campo de ondas já chega quantizado em
-// `sixWave.levels` tons antes de qualquer alfa entrar: o próprio nível já é
-// o degrau, um terceiro controle não mudaria a leitura.
-const waveAlphaHigh = ref(100)
-const waveAlphaLow = ref(0)
+/**
+ * Sombreado real do CP437, não opacidade nem mistura de cor: as quatro
+ * texturas de densidade que a paleta tem de verdade, na ordem que o CP437
+ * realmente oferece, mais um espaço pra ausência de tinta. docs/theming.md
+ * (seção 3, "BBS e ANSI") registra que CP437 tem exatamente três sombras
+ * (░▒▓, U+2591 a U+2593) e um bloco cheio (█, U+2588); não tem oitavos de
+ * bloco nem blocos de quadrante, que são Unicode moderno sem byte de DOS
+ * por trás, então esses ficam fora. Confirmado no arquivo vendorizado, não
+ * só no navegador (que troca silenciosamente por um glifo substituto
+ * quando falta um, e a diferença só aparece na imagem rasterizada): o cmap
+ * de public/fonts/PxPlusIBMVGA8-9x16.woff (family "Web437 IBM VGA 9x16")
+ * resolve os quatro code points para glifos de verdade (gid 263, 266, 267,
+ * 268), não caem em tofu.
+ *
+ * Blink não entra aqui: no CP437 de verdade o bit 7 do atributo de cada
+ * célula é blink, e é por isso que o DOS só tinha 8 cores de fundo em vez
+ * de 16; mas a capa é uma imagem parada que o `sharp` rasteriza uma vez no
+ * build pro card social, não um terminal ao vivo. Nada nela pisca, e não
+ * deveria: não tem pra onde animar.
+ */
+const WAVE_SHADE_GLYPHS = [' ', '░', '▒', '▓', '█']
+
+// A fonte (Web437 IBM VGA 9x16) tem ascent 1200 e descent -400 num em de
+// 1600 unidades: ascent + |descent| = 1600, o em inteiro, então em
+// font-size = cellSize a caixa do glifo cobre a célula de cima a baixo sem
+// sobra; a linha de base fica a 1200/1600 = 75% da altura da célula, não
+// na metade.
+const WAVE_GLYPH_BASELINE_RATIO = 0.75
+
+function shadeGlyphFor(level: number): string {
+  const idx = Math.round(level * (WAVE_SHADE_GLYPHS.length - 1))
+  return WAVE_SHADE_GLYPHS[Math.max(0, Math.min(WAVE_SHADE_GLYPHS.length - 1, idx))]
+}
 
 const effectiveSeed = computed(() => (hashSlug(DEMO_SLUG) + seed.value) >>> 0)
 const brand = computed(() => BRANDS[effectiveSeed.value % BRANDS.length])
@@ -611,19 +631,18 @@ const brandToneReadouts = computed(() =>
   ),
 )
 
-// Opacidade por célula, derivada do mesmo "level" que já escolhe o tom: a
-// mesma leitura que o fogo faz (alfa alto/baixo interpolados pela
-// intensidade da célula), só que aqui a intensidade já chega quantizada em
-// `sixWave.levels` degraus, então a opacidade sai naturalmente escalonada
-// sem precisar de um modo escalonado/contínuo à parte. Célula oca continua
-// só do fogo: não faz sentido pra um campo de senos, e não foi pedida aqui,
-// então é essa diferença, não mais o alfa, que ainda separa os dois
+// Cada célula escolhe um glifo de sombra pelo mesmo "level" que antes
+// virava opacidade: mais denso onde o campo está mais alto, vazio (espaço,
+// filtrado fora) onde está mais baixo. Células de espaço nem entram no
+// array: não têm glifo pra desenhar, do mesmo jeito que uma célula com
+// opacidade 0 não pintava nada antes. Célula oca continua só do fogo: não
+// faz sentido pra um campo de senos e não foi pedida aqui, então é essa
+// diferença, não mais a densidade por célula, que ainda separa os dois
 // candidatos.
 const sixWaveCells = computed(() =>
-  waveField(sixWave.value, brandTone.value, DARK_BG, cellSize.value, true).map((c) => ({
-    ...c,
-    alpha: (waveAlphaLow.value + (waveAlphaHigh.value - waveAlphaLow.value) * c.level) / 100,
-  })),
+  waveField(sixWave.value, cellSize.value, true)
+    .map((c) => ({ ...c, glyph: shadeGlyphFor(c.level) }))
+    .filter((c) => c.glyph !== ' '),
 )
 
 const WIRE_CENTER = { x: 900, y: 335 }
@@ -794,7 +813,7 @@ const sixDecisionSettings = computed(() => [
   ...sharedDecisionSettings.value,
   { label: 'célula da grade', value: `${cellSize.value}px` },
   { label: 'tons gerados (hash)', value: String(sixWave.value.levels) },
-  { label: 'alfa alto/baixo das ondas', value: `${waveAlphaHigh.value}% / ${waveAlphaLow.value}%` },
+  { label: 'glifos de sombra CP437', value: `${WAVE_SHADE_GLYPHS.length - 1} + espaço` },
   inkSetting.value,
 ])
 
@@ -816,7 +835,7 @@ const fireDecisionContext = computed(
 
 const sixDecisionContext = computed(
   () =>
-    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o campo de senos que nasceu para o candidato 3 (plasma, arquivado), quantizado em ${sixWave.value.levels} tons (como uma paleta de máquina antiga), clipado por dentro da moldura interna do mesmo jeito que o fogo do candidato 5, não vazando pro resto do cartão. Cada célula agora também carrega opacidade própria, derivada do mesmo nível que já escolhe o tom, entre ${waveAlphaLow.value}% e ${waveAlphaHigh.value}% (a mesma leitura do alfa do fogo, sem modo escalonado/contínuo à parte porque o campo já chega quantizado nesses ${sixWave.value.levels} tons). Célula oca continua só do fogo: é essa diferença, não mais o alfa por célula, que mantém os dois candidatos separados, não a mesma ideia duas vezes. As células e a moldura pintam com o tom derivado do knob de marca, não a cor crua: ${brandToneDerivationLabel.value} = ${brandTone.value}, ${brandToneContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(brandToneContrast.value)}). Chapéu, título e assinatura são sempre brancos (${TITLE_INK}), não mais dessa mistura: ${titleContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(titleContrast.value)}); pior caso real ${titleVsToneContrast.value.toFixed(2)}:1 sobre ${brandTone.value} (${grade(titleVsToneContrast.value)}), quando o campo satura no tom da marca; por isso o título, o chapéu e a assinatura carregam uma sombra rígida própria de ${WAVES_SHADOW_OFFSET}px contra esse fundo ocupado, menor que a do candidato 5 porque o campo de ondas é mais parelho que o fogo.`,
+    `${SVG_NOTE} Mesma moldura dupla do candidato 1, fundo preto, e o campo de senos que nasceu para o candidato 3 (plasma, arquivado), quantizado em ${sixWave.value.levels} tons (como uma paleta de máquina antiga), clipado por dentro da moldura interna do mesmo jeito que o fogo do candidato 5, não vazando pro resto do cartão. Cada célula agora desenha um glifo de sombra do CP437 de verdade (espaço, as três sombras ou o bloco cheio) em vez de um retângulo colorido: a densidade do glifo faz o papel que antes era opacidade ou mistura de cor, tinta sempre na mesma cor cheia, do jeito que o dithering de CP437 funcionava numa máquina sem canal alfa. Célula oca continua só do fogo: é essa diferença, não mais a densidade por célula, que mantém os dois candidatos separados, não a mesma ideia duas vezes. As células e a moldura pintam com o tom derivado do knob de marca, não a cor crua: ${brandToneDerivationLabel.value} = ${brandTone.value}, ${brandToneContrast.value.toFixed(2)}:1 sobre ${DARK_BG} (${grade(brandToneContrast.value)}). Chapéu, título e assinatura são sempre brancos (${TITLE_INK}), não mais dessa mistura: ${titleContrast.value.toFixed(2)}:1 sobre ${DARK_BG} no melhor caso (${grade(titleContrast.value)}); pior caso real ${titleVsToneContrast.value.toFixed(2)}:1 sobre ${brandTone.value} (${grade(titleVsToneContrast.value)}), quando o campo satura no tom da marca; por isso o título, o chapéu e a assinatura carregam uma sombra rígida própria de ${WAVES_SHADOW_OFFSET}px contra esse fundo ocupado, menor que a do candidato 5 porque o campo de ondas é mais parelho que o fogo.`,
 )
 </script>
 
@@ -853,8 +872,6 @@ const sixDecisionContext = computed(
       <Knob v-model="fireAlphaHot" label="alfa quente do fogo" :min="10" :max="100" :step="5" unit="%" />
       <Knob v-model="fireAlphaCold" label="alfa frio do fogo" :min="0" :max="90" :step="5" unit="%" />
       <Pick v-model="fireAlphaMode" label="modo do alfa do fogo" :options="FIRE_ALPHA_MODE_OPTIONS" />
-      <Knob v-model="waveAlphaHigh" label="alfa alto das ondas" :min="10" :max="100" :step="5" unit="%" />
-      <Knob v-model="waveAlphaLow" label="alfa baixo das ondas" :min="0" :max="90" :step="5" unit="%" />
     </Panel>
 
     <Panel label="tom da marca (oklab, compartilhado entre 4 · 5 · 6): bordas, chapéu e campo">
@@ -1175,16 +1192,25 @@ const sixDecisionContext = computed(
                  de escrito de novo, porque uma janela DOS de verdade também
                  não deixaria o campo de ondas passar por cima da moldura. -->
             <g clip-path="url(#cover-lab-waves-clip)">
-              <rect
+              <!-- Cada célula é um glifo de sombra do CP437 (fonte
+                   PxPlus IBM VGA8, a mesma do chapéu/assinatura), não um
+                   retângulo: textLength + lengthAdjust esticam o glifo (a
+                   fonte tem avanço de 9 unidades num grid 9x16, mais
+                   estreito que a célula quadrada) até cobrir cellSize de
+                   largura; font-size = cellSize cobre a célula de cima a
+                   baixo porque ascent+descent da fonte já somam o em
+                   inteiro (ver WAVE_GLYPH_BASELINE_RATIO). -->
+              <text
                 v-for="(c, i) in sixWaveCells"
                 :key="i"
                 :x="c.x"
-                :y="c.y"
-                :width="cellSize"
-                :height="cellSize"
-                :fill="c.fill"
-                :opacity="c.alpha"
-              />
+                :y="c.y + WAVE_GLYPH_BASELINE_RATIO * cellSize"
+                :font-family="LABEL_FONT"
+                :font-size="cellSize"
+                :textLength="cellSize"
+                lengthAdjust="spacingAndGlyphs"
+                :fill="brandTone"
+              >{{ c.glyph }}</text>
             </g>
             <rect v-bind="outerFrame" fill="none" :stroke="brandTone" :stroke-width="BORDER_STROKE" />
             <rect v-bind="innerFrame" fill="none" :stroke="brandTone" stroke-width="3" />
@@ -1248,7 +1274,7 @@ const sixDecisionContext = computed(
           </svg>
         </div>
         <p :class="$style.tiny">
-          {{ sixWave.levels }} tons · alfa {{ waveAlphaLow }}%–{{ waveAlphaHigh }}% · tom {{ brandTone }} ·
+          {{ sixWave.levels }} tons · glifos de sombra CP437 (░▒▓█) · tom {{ brandTone }} ·
           {{ brandToneContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} ({{ grade(brandToneContrast) }}) · título fixo
           {{ titleContrast.toFixed(2) }}:1 sobre {{ DARK_BG }} ({{ grade(titleContrast) }}) · pior caso real
           {{ titleVsToneContrast.toFixed(2) }}:1 sobre {{ brandTone }} ({{ grade(titleVsToneContrast) }})
@@ -1285,8 +1311,10 @@ const sixDecisionContext = computed(
       wireframe, a opacidade do sólido agora também escala por um knob (padrão 100%, o mesmo desenho de sempre), por
       cima da queda por distância de sempre; a própria moldura continua mais vibrante que o sólido atrás dela, pra
       ler como duas camadas. O fogo (5) e as ondas (6) são efeitos diferentes de propósito (simulação de fogo contra
-      campo de senos quantizado), e os dois agora variam a opacidade por célula, derivada da própria intensidade da
-      célula em cada um; célula oca continua só do fogo, pra não virarem a mesma leitura duas vezes.
+      campo de senos quantizado) e agora também de mecanismo: o fogo varia opacidade real por célula (um canal alfa
+      de verdade), as ondas variam a densidade de um glifo de sombra do CP437 (░▒▓█, sem canal alfa nenhum, tinta
+      sempre cheia), porque é assim que o dithering daquela paleta funcionava sem alfa; célula oca continua só do
+      fogo, pra não virarem a mesma leitura duas vezes.
     </p>
   </div>
 </template>
