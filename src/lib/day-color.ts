@@ -9,14 +9,19 @@
  * directly instead of copying the palette's own logic.
  *
  * Reuses chipColor's own hash-a-string-into-one-of-five-brand-tokens mechanism
- * (taxonomy.ts, the same one that colours tag chips and a post's own accent
- * stripe, see [...slug].astro) rather than inventing a second hash or a
- * private list of hexes: the string handed to it here is the day's own key
- * instead of a slug or a tag label, so every "pick a brand colour
- * deterministically from a string" caller in the codebase agrees on one
- * mechanism and one palette.
+ * (the same one that colours tag chips and a post's own accent stripe, see
+ * [...slug].astro) rather than inventing a second hash or a private list of
+ * hexes: the string handed to it here is the day's own key instead of a slug
+ * or a tag label, so every "pick a brand colour deterministically from a
+ * string" caller in the codebase agrees on one mechanism and one palette.
+ *
+ * Imported from ./chip-color rather than from taxonomy.ts, which re-exports
+ * it: taxonomy.ts imports ./posts, which imports `astro:content`, and that
+ * module only exists on the server. Reaching chipColor through taxonomy.ts
+ * pulled the whole content layer into the browser bundle and threw "The
+ * astro:content module is only available server-side" at runtime.
  */
-import { chipColor } from './taxonomy'
+import { chipColor } from './chip-color'
 
 /**
  * `YYYY-MM-DD` for whatever calendar day `date` falls on, in local time. This
