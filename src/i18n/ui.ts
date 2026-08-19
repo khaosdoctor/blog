@@ -136,8 +136,6 @@ type UIKey =
   | 'ossFontsHeading'
   | 'ossIconsHeading'
   | 'ossDependenciesHeading'
-  | 'ossMarkdownHeading'
-  | 'ossSearchHeading'
 
 export const ui: Record<Locale, Record<UIKey, string>> = {
   pt: {
@@ -226,8 +224,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     ossFontsHeading: 'Tipografia',
     ossIconsHeading: 'Ícones',
     ossDependenciesHeading: 'Framework e dependências',
-    ossMarkdownHeading: 'Pipeline de markdown',
-    ossSearchHeading: 'Índice de busca',
     keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
     previewLoading: 'Carregando…',
     previewClose: 'Fechar prévia',
@@ -340,8 +336,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     ossFontsHeading: 'Typefaces',
     ossIconsHeading: 'Icons',
     ossDependenciesHeading: 'Framework and dependencies',
-    ossMarkdownHeading: 'Markdown pipeline',
-    ossSearchHeading: 'Search index',
     keepPreviews: 'Keep pinned previews after closing the tab',
     previewLoading: 'Loading…',
     previewClose: 'Close preview',
