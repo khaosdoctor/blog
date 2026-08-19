@@ -199,9 +199,10 @@ function init(): void {
   const more = moreEl
 
   opener.setAttribute('aria-label', trigger.dataset.label ?? 'Search')
-  // The hint used to live inside the button; it is a sibling of it now
-  // (SearchPalette.astro, so the button stays icon-only and square), so the
-  // lookup starts from the shared wrapper rather than from opener itself.
+  // The hint lives inside the button now (SearchPalette.astro), but the
+  // lookup still starts from the shared wrapper: a descendant selector finds
+  // it either way, and starting from opener directly would work too, this
+  // just avoids depending on exactly how deep it lives.
   hintModEl = trigger.querySelector('.sx-hint-mod')
   hintKeyEl = trigger.querySelector('.sx-hint-key')
   applyHint()
