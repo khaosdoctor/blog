@@ -132,6 +132,7 @@ const { locale } = Astro.props
         <button type="button" class="sp-accent-option" data-value="yellow" style="--swatch: var(--brand-yellow)" aria-label={t(locale, 'accentYellow')}></button>
         <button type="button" class="sp-accent-option" data-value="blue" style="--swatch: var(--brand-blue)" aria-label={t(locale, 'accentBlue')}></button>
         <button type="button" class="sp-accent-option" data-value="purple" style="--swatch: var(--brand-purple)" aria-label={t(locale, 'accentPurple')}></button>
+        <button type="button" class="sp-accent-option" data-value="white" style="--swatch: var(--fg)" aria-label={t(locale, 'accentWhite')}></button>
       </div>
     </fieldset>
 
@@ -616,6 +617,28 @@ const { locale } = Astro.props
     inline-size: 100%;
   }
 
+  /*
+   * The same borderless, unpadded fieldset every other group here is. Without
+   * it this one kept the browser's own default fieldset chrome, a box with a
+   * notched border, which is why it drew a frame none of its neighbours have
+   * and sat its swatches right against that frame.
+   */
+  .sp-accent {
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .sp-accent legend {
+    inline-size: 100%;
+    margin-block-end: 0.3rem;
+    padding: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+  }
+
   .sp-accent-row {
     display: flex;
     flex-wrap: wrap;
@@ -628,10 +651,18 @@ const { locale } = Astro.props
    * on screen: six named colours would fill the menu, and the name is in
    * aria-label where a screen reader finds it.
    */
+  /*
+   * The spacing has to clear the selected ring, not just the box: that ring is
+   * an outline 2px outside the border, so two swatches a hair apart overlap
+   * the moment one of them is chosen. 0.5rem on both axes leaves room for it
+   * on either side, and the block margin is what stops a wrapped second row
+   * from being drawn through by the row above it.
+   */
   .sp-accent-option {
     inline-size: 1.5rem;
     block-size: 1.5rem;
-    margin-inline-end: 0.35rem;
+    margin-inline-end: 0.5rem;
+    margin-block-end: 0.5rem;
     padding: 0;
     border: var(--border) solid var(--rule);
     border-radius: var(--radius);
@@ -640,7 +671,8 @@ const { locale } = Astro.props
   }
 
   .sp-accent-auto {
-    margin-inline-end: 0.35rem;
+    margin-inline-end: 0.5rem;
+    margin-block-end: 0.5rem;
     padding: 0.15rem 0.5rem;
     border: var(--border) solid var(--rule);
     border-radius: var(--radius);

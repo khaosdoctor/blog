@@ -38,6 +38,15 @@ export const ACCENT_TOKENS: Record<string, string> = {
   yellow: 'var(--brand-yellow)',
   blue: 'var(--brand-blue)',
   purple: 'var(--brand-purple)',
+  /*
+   * "No colour", which is `--fg`, the page's own ink, rather than a literal
+   * white: on the sepia ground a literal white accent would be invisible
+   * against the page it is drawn on. `--fg` is white on the black page, which
+   * is what this option is picked for, and its readable opposite on the light
+   * one. The cover's own neutral entries make the same choice for the same
+   * reason (`branco` in lib/cover.ts).
+   */
+  white: 'var(--fg)',
 }
 
 /** The reader's own choice, or null for the day rotation. */
