@@ -245,7 +245,6 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
             /oss/ names the font, its author and the licence, with a link to the
             licence text. See docs/theming.md.
           */}
-          <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
           {/*
             Four icon-only links, each needing a name in words: aria-label
             carries that, and every icon component's own aria-hidden keeps
@@ -305,6 +304,20 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       */}
       <p class="version">
         {t(locale, 'version')}: <a href={commitUrl}>{version}</a>
+      </p>
+      {/*
+        The OSS credits, moved out of the right-hand link row and given their
+        own centred line under the version, smaller than it.
+
+        Required, not decorative: PxPlus IBM VGA8 is CC BY-SA 4.0, which asks
+        for attribution reachable from the site, and /oss/ is where the font,
+        its author and its licence are named. So this line is a licence
+        obligation wearing the quietest treatment that still satisfies it,
+        which is why it can be the smallest thing in the footer but cannot be
+        dropped.
+      */}
+      <p class="credits">
+        <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
       </p>
     </footer>
     <MathCopy locale={locale} />
@@ -549,6 +562,17 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
 
   footer .version {
     margin-block-start: 0.75rem;
+    text-align: center;
+  }
+
+  /* Centred under the version and smaller than it: the quietest line in the
+     footer, which is what a licence attribution can be once it is reachable.
+     It keeps the site-wide link treatment rather than opting out the way
+     `.version a` does, since this one is meant to read as a link a reader
+     might follow. */
+  footer .credits {
+    margin-block-start: 0.35rem;
+    font-size: var(--text-tiny);
     text-align: center;
   }
 
