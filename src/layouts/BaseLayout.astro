@@ -924,10 +924,38 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     margin: 0;
   }
 
+  /*
+   * The house frame, on a picture: a double rule in the post's own colour and
+   * one hard offset shadow, no blur, the same vocabulary a code block already
+   * carries (--code-shadow-offset/--code-shadow-color, theme.css).
+   *
+   * The colour is --post-accent, the tone this post's cover drew (coverTone,
+   * lib/cover.ts), inherited from <body>. Two things it needs that a raw
+   * var() would not give it: a fallback, since a page with no post (404, the
+   * OSS list, a search result) never has the property written at all, and the
+   * quote card's own per-ground recipe (variants/quotes.css), which uses the
+   * brand tone straight on the sepia ground and lifts it 25% toward white on
+   * the black one, where the same hue reads muddy.
+   *
+   * `border-style: double` collapses to a single line under 3px, which is why
+   * this is 4px and not 2, the same floor the bookmark card and the quote
+   * frame both name.
+   *
+   * The shadow is deliberately near: 4px, the code block's own offset, so the
+   * picture lifts off the page without reading as a sticker floating over it.
+   * box-sizing is border-box globally (see the reset above), so the rule and
+   * the 100% width share one box and the picture cannot overflow its figure.
+   */
   figure img {
     display: block;
     width: 100%;
     border-radius: 4px;
+    border: 4px double
+      light-dark(
+        var(--post-accent, var(--rule)),
+        color-mix(in oklab, var(--post-accent, var(--rule)) 75%, white)
+      );
+    box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color);
   }
 
   figcaption {
