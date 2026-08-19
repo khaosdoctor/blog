@@ -197,11 +197,23 @@ function currentFg(): string {
  * is cleared immediately, so a reflow never leaves one stuck behind the text.
  */
 function computeExclusion(): void {
-  const main = document.querySelector('main')
-  if (canvas === null || main === null || cols === 0 || rows === 0) return
+  /*
+   * The article, not `main`. The mask exists so the field never draws behind
+   * the text of a post, and only a post has one: `main` on a listing page is
+   * the post list, the pagination and nothing a reader is reading through, so
+   * measuring against it blanked the middle of the page and left the field
+   * confined to the margins. With no article on the page there is nothing to
+   * keep clear, so the field takes the whole viewport.
+   */
+  const article = document.querySelector('main article')
+  if (canvas === null || cols === 0 || rows === 0) return
+  if (article === null) {
+    excluded.fill(0)
+    return
+  }
 
   const canvasBox = canvas.getBoundingClientRect()
-  const mainBox = main.getBoundingClientRect()
+  const mainBox = article.getBoundingClientRect()
   const pad = CELL_SIZE
 
   const colStart = Math.max(0, Math.floor((mainBox.left - canvasBox.left - pad) / CELL_SIZE))
