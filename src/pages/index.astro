@@ -2,11 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PostList from '../components/PostList.astro'
 import { getPublishedPosts } from '../lib/posts'
-import { getCategories } from '../lib/taxonomy'
 import { t } from '../i18n/ui'
 
-const [posts, categories] = await Promise.all([getPublishedPosts(), getCategories()])
-const sections = [...categories.entries()].sort((a, b) => b[1].length - a[1].length)
+const posts = await getPublishedPosts()
 const latest = posts.slice(0, 30)
 ---
 
@@ -19,15 +17,6 @@ const latest = posts.slice(0, 30)
   ]}
 >
   <h1 class="visually-hidden">Lucas Santos</h1>
-  <nav class="sections" aria-label={t('pt', 'sections')}>
-    {
-      sections.map(([category, categoryPosts]) => (
-        <a href={`/${category}/`}>
-          {category} <span class="count">{categoryPosts.length}</span>
-        </a>
-      ))
-    }
-  </nav>
   <PostList posts={latest} />
   <p class="more">
     {t('pt', 'showingLatest', latest.length, posts.length)}
@@ -47,30 +36,6 @@ const latest = posts.slice(0, 30)
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-  }
-
-  .sections {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-block-end: 3rem;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.85rem;
-  }
-
-  .sections a {
-    padding: 0.25rem 0.7rem;
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    text-decoration: none;
-  }
-
-  .sections a:hover {
-    border-color: var(--accent);
-  }
-
-  .count {
-    color: var(--muted);
   }
 
   .more {
