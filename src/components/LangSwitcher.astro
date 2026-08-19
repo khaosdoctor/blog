@@ -52,8 +52,15 @@ const currentLabel = current?.label ?? locale.toUpperCase()
     aria-label={t(locale, 'switchLanguage', otherName)}
     title={t(locale, 'switchLanguage', otherName)}
   >
-    <span class="lang-word" aria-hidden="true">{currentLabel}</span>
-    <span class="lang-knob" aria-hidden="true"></span>
+    {/* The 44px hit target is .lang-track (the link itself, above); this inner
+       slab is the 32px box a reader actually sees, the same split
+       ThemeToggle/SettingsPanel/SearchPalette draw with a ::before chip.
+       Here the drawn box carries real children (the fill, the word, the
+       knob) rather than a pseudo-element, so it is a real element instead. */}
+    <span class="lang-slab" aria-hidden="true">
+      <span class="lang-word">{currentLabel}</span>
+      <span class="lang-knob"></span>
+    </span>
   </a>
 </nav>
 
@@ -64,24 +71,49 @@ const currentLabel = current?.label ?? locale.toUpperCase()
   }
 
   /*
-   * A wide rectangle, deliberately: the reference is neither a pill nor a
-   * square. Height still reads from `--icon-btn-hit`, the same token every
+   * The 44px hit target: a wide rectangle, deliberately, the reference is
+   * neither a pill nor a square. `--icon-btn-hit` is the same token every
    * other header control's own hit target uses (ThemeToggle, SettingsPanel,
    * the search trigger), so this control lines up with them in one row even
-   * though nothing else about its shape borrows from theirs. Width is fixed
-   * rather than measured off the word, so the slab does not resize itself
-   * between the two languages: 7rem splits evenly into the two 3.5rem
-   * halves below.
+   * though nothing else about its shape borrows from theirs. This element
+   * draws nothing itself any more (no fill, no border, no shadow): it is a
+   * flex container that centres the real drawn box, `.lang-slab` below, the
+   * same "hit target vs. visible box" split the icon buttons draw with a
+   * ::before chip, done here with a real child element instead since the
+   * slab has its own children (fill, word, knob) rather than being a single
+   * pseudo-element.
    */
   .lang-track {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     inline-size: 7rem;
     block-size: var(--icon-btn-hit);
-    border-radius: var(--radius);
-    overflow: hidden;
     text-decoration: none;
     cursor: pointer;
+  }
+
+  .lang-track:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /*
+   * The 32px drawn box, the same height every other header control's own
+   * visible chip uses (--icon-btn-chip). Full width of `.lang-track` (100%
+   * of its 7rem), centred in the taller hit target above by that element's
+   * own flex `align-items: center`. `.lang-word` and `.lang-knob` below are
+   * absolutely positioned against this element (the nearest `position:
+   * relative` ancestor), not against `.lang-track`, so they fill this 32px
+   * box rather than the 44px one that holds it.
+   */
+  .lang-slab {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    block-size: var(--icon-btn-chip);
+    border-radius: var(--radius);
+    overflow: hidden;
     /*
      * The whole slab is the colour, not a neutral track with a coloured
      * dot on it: `--lang-fill-color` picks the brand token for the current
@@ -108,13 +140,8 @@ const currentLabel = current?.label ?? locale.toUpperCase()
     box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color);
   }
 
-  .lang-switch[data-current='en'] .lang-track {
+  .lang-switch[data-current='en'] .lang-slab {
     --lang-fill-color: var(--brand-red);
-  }
-
-  .lang-track:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
   }
 
   /*
