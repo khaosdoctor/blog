@@ -39,7 +39,6 @@ type UIKey =
   | 'finishReadingAt'
   | 'machineTranslated'
   | 'readOriginal'
-  | 'readOriginals'
   | 'suggestFix'
   | 'search'
   | 'noResults'
@@ -118,7 +117,6 @@ type UIKey =
   | 'homeDescription'
   | 'showingLatest'
   | 'noTranslatedPosts'
-  | 'translatedIndexNotice'
   | 'skipToContent'
   | 'language'
   | 'switchLanguage'
@@ -174,7 +172,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     finishReadingAt: 'termina às %s',
     machineTranslated: 'Esta página foi traduzida automaticamente.',
     readOriginal: 'Ler original',
-    readOriginals: 'Ler os originais',
     suggestFix: 'Sugerir correção',
     search: 'Buscar',
     noResults: 'Nenhum resultado encontrado',
@@ -256,7 +253,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     homeDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
     showingLatest: 'Mostrando os %d mais recentes de %d.',
     noTranslatedPosts: 'Nenhum artigo traduzido ainda.',
-    translatedIndexNotice: 'Estes artigos foram escritos em português e traduzidos automaticamente.',
     skipToContent: 'Pular para o conteúdo',
     language: 'Idioma',
     switchLanguage: 'Mudar para %s',
@@ -317,7 +313,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     finishReadingAt: 'finish at %s',
     machineTranslated: 'This page was machine translated.',
     readOriginal: 'Read original',
-    readOriginals: 'Read the originals',
     suggestFix: 'Suggest a fix',
     search: 'Search',
     noResults: 'No results found',
@@ -399,7 +394,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     homeDescription: 'Articles about software development, technology and opinion.',
     showingLatest: 'Showing the %d most recent of %d.',
     noTranslatedPosts: 'No translated articles yet.',
-    translatedIndexNotice: 'These articles are written in Portuguese and translated automatically.',
     skipToContent: 'Skip to content',
     language: 'Language',
     switchLanguage: 'Switch to %s',

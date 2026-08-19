@@ -29,14 +29,6 @@ const title = page.currentPage > 1 ? `Lucas Santos | page ${page.currentPage}` :
 >
   <h1 class="visually-hidden">Lucas Santos</h1>
   {page.total === 0 ? <p>{t('en', 'noTranslatedPosts')}</p> : <PostList posts={page.data} />}
-  {/* Under the list rather than over it, reading as a footnote to what was
-      just read instead of as a warning to get past first. It renders whether
-      or not Pagination does (that component draws nothing at all on a
-      single-page list), so the notice is never tied to there being a second
-      page. */}
-  <p class="note">
-    {t('en', 'translatedIndexNotice')} <a href="/">{t('en', 'readOriginals')}</a>.
-  </p>
   <Pagination page={page} basePath="/en/" locale="en" />
 </BaseLayout>
 
@@ -53,32 +45,4 @@ const title = page.currentPage > 1 ? `Lucas Santos | page ${page.currentPage}` :
     border: 0;
   }
 
-  /*
-   * One line at reading widths. Three things were making this wrap, and the
-   * font size was the smallest of them: <body> sets --tracking-body (0.05em)
-   * and --word-spacing-body (0.15em) on everything, and in a monospace face
-   * that is pure added width. Across this sentence's ~88 characters and its
-   * spaces the two together cost around six characters' worth of line, more
-   * than the size drop below saves. Both are body-copy tokens meant for
-   * running prose, and this is a one-line chrome notice, so it opts out of
-   * them rather than paying for them.
-   *
-   * It still wraps on a narrow screen, which is correct: nothing here forces
-   * a single line, so a phone gets two readable lines instead of a line that
-   * runs off the side.
-   */
-  .note {
-    /* No bottom margin of its own: the dashed rule below belongs to
-       Pagination.astro's own 2.5rem top margin, and adding a second one here
-       would double the space between the note and the line it annotates. */
-    margin-block: 1.5rem 0;
-    color: var(--muted);
-    font-size: 0.7rem;
-    letter-spacing: normal;
-    word-spacing: normal;
-    /* Centred on the rule beneath it, which Pagination draws centred at half
-       the row's width. Left-aligned, a note this small reads as a stray last
-       row of the list instead of as an aside about the whole page. */
-    text-align: center;
-  }
 </style>
