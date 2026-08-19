@@ -1,17 +1,20 @@
 ---
 // A chunky pixel-art ON/OFF slab rather than a plain link pair or a grey
 // track with a coloured dot (Lucas's own reference image): the whole slab is
-// filled in the DESTINATION language's brand colour (green for Português,
-// red for English, so a page currently in Portuguese shows a red slab, the
-// English it switches to), a single word of large pixel type names that same
-// destination, and a raised block occupies the other half, sliding to the
-// side that word is not on. A switch shows where it will take you: the fill
-// and the word both name the destination, on purpose, so they agree with
-// each other rather than one naming the current language and the other the
-// destination. Still a single real link, not a faked in-place control:
-// choosing a language is a navigation, to the page's own alternate when one
-// exists and to that language's home otherwise, exactly as the plain-link
-// version did.
+// filled in the DESTINATION language's brand colour (green when the switch
+// goes to Português, red when it goes to English), a single word of large
+// pixel type names the CURRENT language instead (PT on the Portuguese site,
+// EN on the English one), and a raised block occupies the other half,
+// sliding to the side the word is not on. Two of these three signals name
+// the current state (the word, and the block's own position, which swaps
+// side together with the word via the same `[data-current]` selector) and
+// one names the destination (the fill): a deliberate split, not an
+// oversight, since the fill and the word naming the same thing (both past
+// attempts here) reads as either "which one is this" or "where do I go",
+// never as answering both questions at once the way this arrangement does.
+// Still a single real link, not a faked in-place control: choosing a
+// language is a navigation, to the page's own alternate when one exists and
+// to that language's home otherwise, exactly as the plain-link version did.
 //
 // Colour is never the only signal (WCAG 1.4.1, and red/green is the one pair
 // a colour-blind reader is least likely to tell apart): the block's position
@@ -44,9 +47,20 @@ function hrefFor(code: Locale): string {
 const other = LOCALES.find((entry) => entry.code !== locale)
 const otherHref = other === undefined ? '/' : hrefFor(other.code)
 const otherName = other?.name ?? ''
-// The word on the slab names the destination, agreeing with the fill
-// (both below): there is no more a "current label" for this control to show.
-const otherLabel = other?.label ?? ''
+/*
+ * The word names the language the reader is on RIGHT NOW, not the destination.
+ * Only the fill colour is inverted (see `.lang-slab` below, where the token is
+ * the destination's brand colour): the owner asked for the colour to point at
+ * where the control goes, and separately reported the word reading backwards
+ * once it pointed there too. So the two carry different things on purpose.
+ *
+ * Word plus knob position are the state signals, and both describe the
+ * current language, which is what WCAG 1.4.1 needs from a control whose other
+ * cue is colour. The colour is the invitation; the word is the fact. The link
+ * itself still goes to the other language, and `aria-label` still says which
+ * one, so nothing a screen reader hears depends on reading the slab.
+ */
+const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
 ---
 
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
@@ -63,7 +77,7 @@ const otherLabel = other?.label ?? ''
        Here the drawn box carries real children (the fill, the word, the
        knob) rather than a pseudo-element, so it is a real element instead. */}
     <span class="lang-slab" aria-hidden="true">
-      <span class="lang-word">{otherLabel}</span>
+      <span class="lang-word">{currentLabel}</span>
       <span class="lang-knob"></span>
     </span>
   </a>
@@ -160,14 +174,19 @@ const otherLabel = other?.label ?? ''
   }
 
   /*
-   * The destination word: large pixel type (PxPlus IBM VGA8,
+   * The current-language word: large pixel type (PxPlus IBM VGA8,
    * --font-subtitle, sized at a whole multiple of 16px so its bitmap grid
    * stays crisp), white in the reference and `--bg` here (see the
    * measurements on `.lang-slab` above for what that pairing measures out
-   * to against the raw fill). Absolutely positioned rather than a flex
-   * child: its side (left for one language, right for the other) is a
-   * per-locale, server-rendered fact, not something that toggles at
-   * runtime, so it needs no transition of its own.
+   * to against the raw fill; the ink and the fill are unchanged by which
+   * text is painted on top of them, only the word's own content read above
+   * did). Absolutely positioned rather than a flex child: its side (left
+   * for one language, right for the other) is a per-locale, server-rendered
+   * fact, not something that toggles at runtime, so it needs no transition
+   * of its own. `.lang-knob` below moves to the opposite side through the
+   * same `[data-current='en']` selector, so the block's position agrees
+   * with this word (both current-language signals) rather than with the
+   * fill.
    */
   .lang-word {
     position: absolute;
