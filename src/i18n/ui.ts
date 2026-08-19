@@ -80,6 +80,7 @@ type UIKey =
   | 'conwaySeedDensity'
   | 'conwayGenerationsPerSecond'
   | 'conwayAutoFeed'
+  | 'conwayOpacity'
   | 'conwayPause'
   | 'conwayResume'
   | 'conwayReseed'
@@ -123,6 +124,7 @@ type UIKey =
   | 'showMarginNote'
   | 'linkToNote'
   | 'copyQuote'
+  | 'copyTimestamp'
   | 'imageGone'
   | 'imageGoneAlt'
   | 'imageGoneUnknownHost'
@@ -136,6 +138,7 @@ type UIKey =
   | 'appName'
   | 'appShortName'
   | 'appDescription'
+  | 'copyright'
   | 'credits'
   | 'ossTitle'
   | 'ossDescription'
@@ -197,6 +200,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwaySeedDensity: 'Densidade da semente',
     conwayGenerationsPerSecond: 'Gerações por segundo',
     conwayAutoFeed: 'Alimentação automática (s, 0 desliga)',
+    conwayOpacity: 'Opacidade do fundo',
     conwayPause: 'Pausar',
     conwayResume: 'Retomar',
     conwayReseed: 'Semear de novo',
@@ -229,6 +233,10 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Idioma',
     switchLanguage: 'Mudar para %s',
     version: 'Versão',
+    // 2019 é o ano do primeiro post publicado (content/blog), fixo. O ano final
+    // vem de new Date().getFullYear() no momento do build, então nunca fica
+    // desatualizado sozinho: cada novo build já traz o ano certo.
+    copyright: '© 2019–%d Lucas Santos. Todos os direitos reservados.',
     // A licença CC BY-SA da PxPlus IBM VGA exige atribuição alcançável do site.
     // A página /oss/ é essa atribuição hoje; veja docs/theming.md.
     credits: 'Créditos',
@@ -249,6 +257,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     showMarginNote: 'mostrar nota lateral',
     linkToNote: 'link para esta nota',
     copyQuote: 'copiar esta citação',
+    copyTimestamp: 'copiar o timestamp Unix desta data (%s)',
     imageGone: 'Esta imagem não existe mais',
     imageGoneAlt: 'Imagem indisponível, hospedada em %s',
     imageGoneUnknownHost: 'um host que não a serve mais',
@@ -316,6 +325,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwaySeedDensity: 'Seed density',
     conwayGenerationsPerSecond: 'Generations per second',
     conwayAutoFeed: 'Auto-feed (s, 0 disables)',
+    conwayOpacity: 'Background opacity',
     conwayPause: 'Pause',
     conwayResume: 'Resume',
     conwayReseed: 'Reseed',
@@ -348,6 +358,10 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Language',
     switchLanguage: 'Switch to %s',
     version: 'Version',
+    // 2019 is the year the first post went up (content/blog), fixed. The end
+    // year comes from new Date().getFullYear() at build time, so it never goes
+    // stale on its own: every new build already carries the right year.
+    copyright: '© 2019–%d Lucas Santos. All rights reserved.',
     // PxPlus IBM VGA is CC BY-SA, which requires attribution reachable from the
     // site. /en/oss/ is that attribution today; see docs/theming.md.
     credits: 'Credits',
@@ -368,6 +382,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     showMarginNote: 'show margin note',
     linkToNote: 'link to this note',
     copyQuote: 'copy this quote',
+    copyTimestamp: 'copy this date’s Unix timestamp (%s)',
     imageGone: 'This image is gone',
     imageGoneAlt: 'Image unavailable, hosted at %s',
     imageGoneUnknownHost: 'a host that no longer serves it',
