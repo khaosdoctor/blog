@@ -10,14 +10,17 @@
  * live inside the same <article> (the tag row, the series navigation) is
  * deliberately outside that wrapper so none of this reaches it.
  *
- * One exception: ./prose/links.css. A link is not only a prose thing any
- * more (the owner's ask: /oss/, the footer and every other link on the site
- * read the same accent, underline and hover as a link in a post), so that
- * file's own selectors read `html :is(main, footer) a` rather than
- * `.prose a`. It stays imported from here regardless, since every other rule
- * in it (the rest-state underline tokens, the hover fill contrast maths)
+ * One exception: ./prose/links.css. A link's colour, dashed rest underline
+ * and inverted hover block are not only a prose thing any more (the owner's
+ * ask: /oss/, the footer and every other link on the site read the same
+ * accent and hover as a link in a post), so those rules in that file read
+ * `html :is(main, footer) a` rather than `.prose a`. The out/in arrow icon
+ * stayed behind at `.prose a`, a follow-up correction: it is a mid-sentence
+ * "does this leave the site" cue, which only means something in running
+ * text, not on a footer row or an OSS credit list. That file stays imported
+ * from here regardless of which of its own rules are which width, since it
  * still belongs beside the rest of what a post's own text looks like; see
- * that file's own top comment for the wider scope and why.
+ * that file's own top comment for the exact split and why.
  *
  * The lab page at /lab/ renders variants of most of this side by side; see the
  * Lab feedback section of docs/design.md for what is still undecided.
