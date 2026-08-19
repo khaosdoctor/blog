@@ -259,6 +259,22 @@ Uma coisa sobrevive intacta do candidato "linha de DOS invertida": nele o prompt
 
 <LabDemo src="./components/RetiredChromeHeaderShapes.vue" client:visible />
 
+## A lista de posts, com a tabela densa decidida
+
+Sete leituras disputaram a lista de posts, a página mais visitada do site depois dos posts em si, e só uma venceu: a tabela densa de quatro colunas, data, título, seção e tempo de leitura, cada um na própria coluna, sem imagem nenhuma. As outras seis estão aqui, com os mesmos controles de fonte, pontilhado, altura de linha, entreletra e seção que a bancada viva usa para a tabela.
+
+A razão com pontilhado foi a mais perto de vencer: o olho corre pela coluna de títulos e o pontilhado leva até a data só quando o leitor procura por ela. Ela perdeu por um motivo simples: para caber numa linha só, ela abre mão da seção e do tempo de leitura, os dois dados que a tabela mantém alinhados em coluna própria sem custar espaço a mais.
+
+O menu de Game Boy é o mais bonito dos sete e o que menos escala: o destaque de cada linha só existe com o mouse sobre ela, e o respiro que um menu de jogo pede não é o respiro de uma lista de cem posts.
+
+Os cartões com aresta grossa custam altura por linha (moldura dupla, aresta de 8px do lado esquerdo) para entregar o mesmo dado que a tabela já mostra sem moldura nenhuma.
+
+A grade com capa e a lista com miniatura quadrada são os dois candidatos que carregam uma imagem por post: a grade na proporção nativa 1200x630, a miniatura recortada num quadrado. As duas perdem pelo mesmo motivo, medido no próprio painel: quanto maior a miniatura, menos linhas cabem numa janela de 900px, um custo que a tabela não paga porque não desenha imagem nenhuma.
+
+A densidade que o leitor escolhe é o sétimo candidato: um controle que troca entre a grade e a miniatura sem trocar de página, a favor de deixar a densidade a critério de quem lê. Ela herda a limitação das duas formas que reaproveita, então não resolve o problema que a tabela resolve sozinha ao dispensar imagem. O controle em si (aqui um estado que reseta ao recarregar a bancada) também nunca chegou a virar preferência persistida: o pedido original era uma demonstração do controle, não o sistema de preferência inteiro.
+
+<LabDemo src="./components/RetiredChromeListShapes.vue" client:visible />
+
 ## O botão, com os colchetes decididos
 
 Cinco desenhos escondidos atrás do mesmo componente, porque a comparação pedia ver os cinco lado a lado, não julgar um candidato de cada vez: colchetes `[ ]`, bloco cheio, moldura dupla, prompt (sublinhado pontilhado com um `>` na frente) e cursor de menu (`▸` que aparece no hover e no foco). Ganharam os colchetes: Departure Mono, amarelo, respiro 11, sem entreletra, sem texto branco no bloco cheio.
