@@ -1,26 +1,33 @@
 ---
-// A chunky pixel-art ON/OFF slab rather than a plain link pair or a grey
-// track with a coloured dot (Lucas's own reference image): the whole slab is
-// filled in the DESTINATION language's brand colour (green when the switch
-// goes to Português, red when it goes to English), a single word of large
-// pixel type names the CURRENT language instead (PT on the Portuguese site,
-// EN on the English one), and a raised block occupies the other half,
-// sliding to the side the word is not on. Two of these three signals name
-// the current state (the word, and the block's own position, which swaps
-// side together with the word via the same `[data-current]` selector) and
-// one names the destination (the fill): a deliberate split, not an
-// oversight, since the fill and the word naming the same thing (both past
-// attempts here) reads as either "which one is this" or "where do I go",
-// never as answering both questions at once the way this arrangement does.
+// A hollow rectangle with a solid square inside it (Lucas's own spec,
+// replacing the earlier full-slab and knob-slider attempts): the rectangle
+// is a double-ruled outline in the day colour (`--accent-day`, the same
+// token the header accent and the icon buttons' own outline read), no fill
+// of its own. Twice the square's width, so the square occupies exactly one
+// half and the other half stays hollow, page ground showing through.
+//
+// The square carries the CURRENT language, not the destination, on every
+// axis: solid green with `PT` on the Portuguese site (left half), solid red
+// with `EN` on the English one (right half). Word, fill and position all
+// name the same thing now, which is what the reader is asked to confirm
+// before leaving; the destination is implied by which half is hollow (the
+// side the square would move to) and stated in words by the link's own
+// accessible name, not painted anywhere on the square itself.
+//
 // Still a single real link, not a faked in-place control: choosing a
 // language is a navigation, to the page's own alternate when one exists and
-// to that language's home otherwise, exactly as the plain-link version did.
+// to that language's home otherwise. "The square moves" on click is real
+// only in the sense that the next page renders it on the other side; there
+// is no in-place slide today, since a plain link swaps the whole document.
+// The transform+steps transition on `.lang-square` below is a no-cost
+// placeholder for the one case that could show it: a future same-document
+// view transition carrying this element across the navigation, the same
+// reasoning the old knob's own transition carried before it was replaced.
 //
-// Colour is never the only signal (WCAG 1.4.1, and red/green is the one pair
-// a colour-blind reader is least likely to tell apart): the block's position
-// is one non-colour signal, the PT/EN word printed on the slab is a second,
-// and the link's own accessible name states in words which language it goes
-// to.
+// Colour is never the only signal (WCAG 1.4.1, and red/green is the one
+// pair a colour-blind reader is least likely to tell apart): the word is
+// one non-colour signal, which half is solid vs. hollow is a second, and
+// the link's own accessible name states in words which language it goes to.
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -47,19 +54,9 @@ function hrefFor(code: Locale): string {
 const other = LOCALES.find((entry) => entry.code !== locale)
 const otherHref = other === undefined ? '/' : hrefFor(other.code)
 const otherName = other?.name ?? ''
-/*
- * The word names the language the reader is on RIGHT NOW, not the destination.
- * Only the fill colour is inverted (see `.lang-slab` below, where the token is
- * the destination's brand colour): the owner asked for the colour to point at
- * where the control goes, and separately reported the word reading backwards
- * once it pointed there too. So the two carry different things on purpose.
- *
- * Word plus knob position are the state signals, and both describe the
- * current language, which is what WCAG 1.4.1 needs from a control whose other
- * cue is colour. The colour is the invitation; the word is the fact. The link
- * itself still goes to the other language, and `aria-label` still says which
- * one, so nothing a screen reader hears depends on reading the slab.
- */
+// The square names the language the reader is on right now, not the
+// destination: see the component comment above for why the fill and the
+// position agree with this instead of pointing onward.
 const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
 ---
 
@@ -71,14 +68,12 @@ const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
     aria-label={t(locale, 'switchLanguage', otherName)}
     title={t(locale, 'switchLanguage', otherName)}
   >
-    {/* The 44px hit target is .lang-track (the link itself, above); this inner
-       slab is the 32px box a reader actually sees, the same split
-       ThemeToggle/SettingsPanel/SearchPalette draw with a ::before chip.
-       Here the drawn box carries real children (the fill, the word, the
-       knob) rather than a pseudo-element, so it is a real element instead. */}
-    <span class="lang-slab" aria-hidden="true">
-      <span class="lang-word">{currentLabel}</span>
-      <span class="lang-knob"></span>
+    {/* The 44px hit target is .lang-track (the link itself, above); .lang-rect
+       is the 32px hollow frame a reader actually sees, the same drawn-vs-hit
+       split every other header control uses. .lang-square is the one solid
+       half, carrying the current language's colour and its word together. */}
+    <span class="lang-rect" aria-hidden="true">
+      <span class="lang-square">{currentLabel}</span>
     </span>
   </a>
 </nav>
@@ -90,23 +85,19 @@ const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
   }
 
   /*
-   * The 44px hit target: a wide rectangle, deliberately, the reference is
-   * neither a pill nor a square. `--icon-btn-hit` is the same token every
-   * other header control's own hit target uses (ThemeToggle, SettingsPanel,
-   * the search trigger), so this control lines up with them in one row even
-   * though nothing else about its shape borrows from theirs. This element
-   * draws nothing itself any more (no fill, no border, no shadow): it is a
-   * flex container that centres the real drawn box, `.lang-slab` below, the
-   * same "hit target vs. visible box" split the icon buttons draw with a
-   * ::before chip, done here with a real child element instead since the
-   * slab has its own children (fill, word, knob) rather than being a single
-   * pseudo-element.
+   * The 44px hit target: `--icon-btn-hit`, the same token every other header
+   * control's own hit target uses (ThemeToggle, SettingsPanel, the search
+   * trigger), so this control lines up with them in one row. Width matches
+   * `.lang-rect` below (twice `--icon-btn-chip`) rather than a separate
+   * fixed measurement, so the hit target never reaches wider than the frame
+   * a reader actually sees. Draws nothing itself: a flex container that
+   * centres the real drawn box.
    */
   .lang-track {
     position: relative;
     display: inline-flex;
     align-items: center;
-    inline-size: 7rem;
+    inline-size: calc(var(--icon-btn-chip) * 2);
     block-size: var(--icon-btn-hit);
     text-decoration: none;
     cursor: pointer;
@@ -118,129 +109,75 @@ const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
   }
 
   /*
-   * The 32px drawn box, the same height every other header control's own
-   * visible chip uses (--icon-btn-chip). Full width of `.lang-track` (100%
-   * of its 7rem), centred in the taller hit target above by that element's
-   * own flex `align-items: center`. `.lang-word` and `.lang-knob` below are
-   * absolutely positioned against this element (the nearest `position:
-   * relative` ancestor), not against `.lang-track`, so they fill this 32px
-   * box rather than the 44px one that holds it.
+   * The hollow frame: 32px tall (--icon-btn-chip, the same drawn height
+   * every other control's own visible chip uses) and twice that wide, so a
+   * single square (below) fills exactly half of it. No background of its
+   * own, on purpose: "hollow" means the page ground shows through the half
+   * the square is not on. The double border reads `--accent-day`, the day-
+   * hash accent BrandHeader.astro sets on every page load (the pre-JS
+   * fallback in theme.css is a static yellow), the same token the icon
+   * buttons' own outline now reads too. 3px double is chips.css's own
+   * weight for a double rule at this scale, reused rather than picked fresh.
    */
-  .lang-slab {
+  .lang-rect {
     position: relative;
     display: block;
     inline-size: 100%;
     block-size: var(--icon-btn-chip);
+    border: 3px double var(--accent-day);
     border-radius: var(--radius);
     overflow: hidden;
-    /*
-     * The whole slab is the colour, not a neutral track with a coloured
-     * dot on it, and it is the raw brand token, not a mix toward black or
-     * white: `--lang-fill-color` picks the destination language's brand
-     * colour (red by default, since a page in Portuguese switches to
-     * English; overridden to green below, since a page in English switches
-     * to Português).
-     *
-     * This used to mix each colour toward the ground first, the same
-     * formula chips.css's --chip-ink uses, because the word painted on top
-     * (`.lang-word` below) needed the contrast that gave. Painting the token
-     * raw instead reuses exactly the numbers theme.css's own brand table
-     * already measured for these colours as text against each ground (its
-     * word ink is literally `--bg`, so word-on-fill is the same pair,
-     * foreground and background swapped, which the contrast formula treats
-     * identically): red 4.67:1 dark / 4.72:1 light, green 8.03:1 dark /
-     * 3.29:1 light. Both pass on dark; on light, red clears the 4.5 floor
-     * and green does not. A page in English, in light mode, shows a green
-     * slab (the Português destination) with the word under the floor at
-     * 3.29:1, a real regression this raw-colour change introduces and a
-     * fix past what this task asked for: reported rather than silently
-     * mixed back in.
-     */
-    --lang-fill-color: var(--brand-red);
-    background: var(--lang-fill-color);
-    /*
-     * A hard offset block, no blur, behind the whole slab: the same shadow
-     * code frames drop (--code-shadow-offset, --code-shadow-color in
-     * theme.css), reused rather than re-invented because it already solves
-     * "read against both grounds" the way this needs to: black on the
-     * sepia page, white on the black one, so the shadow never disappears
-     * into whichever ground it falls on.
-     */
-    box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color);
-  }
-
-  .lang-switch[data-current='en'] .lang-slab {
-    --lang-fill-color: var(--brand-green);
+    background: transparent;
   }
 
   /*
-   * The current-language word: large pixel type (PxPlus IBM VGA8,
-   * --font-subtitle, sized at a whole multiple of 16px so its bitmap grid
-   * stays crisp), white in the reference and `--bg` here (see the
-   * measurements on `.lang-slab` above for what that pairing measures out
-   * to against the raw fill; the ink and the fill are unchanged by which
-   * text is painted on top of them, only the word's own content read above
-   * did). Absolutely positioned rather than a flex child: its side (left
-   * for one language, right for the other) is a per-locale, server-rendered
-   * fact, not something that toggles at runtime, so it needs no transition
-   * of its own. `.lang-knob` below moves to the opposite side through the
-   * same `[data-current='en']` selector, so the block's position agrees
-   * with this word (both current-language signals) rather than with the
-   * fill.
+   * The one solid half: exactly one square (50% of the rectangle's own
+   * width, which is itself twice the square size, so this resolves to the
+   * same 32px on a side as the frame's own height). Left by default
+   * (Portuguese, the site's own default locale); the `[data-current='en']`
+   * rule below moves it to the right instead via `transform`, not by
+   * changing which inset property is set, so the property stays animatable
+   * (see the component comment for why this transition exists at all).
+   *
+   * Fill and ink are both fixed literals, not `light-dark()`: the brand
+   * green/red tokens already carry their own per-ground tone (theme.css),
+   * so the ink only has to clear both of those resolved shades, not the
+   * page ground the old slab design painted its word against.
+   *
+   * Measured (WCAG 2.1, relative luminance, 4.5:1 the running-text floor):
+   * black on green, this square's PT state, 8.04:1 dark (`--brand-green`
+   * #45b384), 5.56:1 light (#39936c), comfortable on both, which is why
+   * black rather than `--em-bold-fg`'s warmer near-black was chosen (that
+   * tone only reaches 5.22:1 dark and 3.61:1 light, failing on light).
+   * White on red, the EN state, per the owner's own spec: 4.51:1 dark
+   * (`--brand-red` #e6242f), a hair over the floor with almost no margin,
+   * reported here rather than silently swapped for a safer ink since white
+   * was specified explicitly; 5.43:1 light (#d50612), comfortable.
    */
-  .lang-word {
+  .lang-square {
     position: absolute;
     inset-block: 0;
-    inset-inline-end: 0;
-    inline-size: 3.5rem;
+    inset-inline-start: 0;
+    inline-size: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-subtitle);
-    font-size: 32px;
-    color: var(--bg);
-  }
-
-  .lang-switch[data-current='en'] .lang-word {
-    inset-inline-end: auto;
-    inset-inline-start: 0;
-  }
-
-  /*
-   * The knob: a flat block occupying the half of the slab the word is not
-   * on, one of the two non-colour state signals alongside the word's own
-   * text. It used to carry a crosshatch texture (two repeating-linear-
-   * gradients, a moulded-grip look); dropped, flat rather than textured, per
-   * the owner's own direction. `--lang-knob-face`/`--lang-knob-edge`
-   * (theme.css) stay a fixed neutral pair rather than a mix of the brand
-   * colours above: a physical switch's plastic grip does not repaint itself
-   * to match ON green or OFF red, and the border needs to read as darker
-   * than the face in both directions, which the brand mix (light in dark
-   * mode) cannot promise. The border still reads at 2x `--border` rather
-   * than a bare literal, so it is still built from the one token everything
-   * else's hairline reads from.
-   *
-   * Position is still the same transform+steps mechanism the plain-link
-   * version's knob used, kept for the same reason: a same-document
-   * transition (a future view transition, say) would still want a knob it
-   * can slide rather than teleport, and `--duration` already collapses to
-   * 0ms under prefers-reduced-motion (theme.css), so wherever this does
-   * animate, it stops doing so under that setting for free. A plain link
-   * swap is a full page load today, so most readers only ever see the two
-   * resting states, never the motion between them.
-   */
-  .lang-knob {
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    inline-size: 3.5rem;
     transform: translateX(0%);
     transition: transform var(--duration) steps(2, jump-none);
-    background-color: var(--lang-knob-face);
-    border: calc(var(--border) * 2) solid var(--lang-knob-edge);
+    background: var(--brand-green);
+    color: #000000;
+    font-family: var(--font-subtitle);
+    /* --icon-btn-glyph, not a bespoke size: the same 16px-in-32px ratio the
+       icon buttons themselves draw their glyph at, and two letters at 16px
+       comfortably clear this 32px-wide half (PxPlus IBM VGA8's own advance
+       width is roughly half its em), where the old design's 32px word needed
+       a wider slot than this square has to give. */
+    font-size: var(--icon-btn-glyph);
   }
 
-  .lang-switch[data-current='en'] .lang-knob {
+  .lang-switch[data-current='en'] .lang-square {
     transform: translateX(100%);
+    background: var(--brand-red);
+    color: #ffffff;
   }
 </style>
