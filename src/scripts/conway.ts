@@ -21,6 +21,7 @@ const DENSITY_KEY = 'conway-density'
 const GPS_KEY = 'conway-gps'
 const AUTOFEED_KEY = 'conway-autofeed'
 const PAUSED_KEY = 'conway-paused'
+const OPACITY_KEY = 'conway-opacity'
 const THEME_ATTR = 'data-theme'
 const MOTION_ATTR = 'data-motion'
 const BG_LIFE_ATTR = 'data-bg-life'
@@ -43,22 +44,31 @@ const DEFAULT_DENSITY = 10
 const DEFAULT_GPS = 8
 const DEFAULT_AUTOFEED = 4
 /*
- * One fade per ground, not one shared value: the dark page needs a higher
- * number than the sepia one to read as the same faint texture, because the two
- * grounds start from opposite ends of the lightness scale. Measured lit-cell
- * contrast against its own ground is around 1.05:1 either way, a deliberate
- * failure of the 3:1 non-text-contrast criterion: it reads as texture rather
- * than content, on purpose.
+ * Cell opacity, now one reader-adjustable value rather than two fixed ones.
  *
- * The dark value was 16% while the field was invisible for an unrelated reason
- * (the fill colour resolved to black on black, see `currentFg()` below). Once
- * that was fixed and the field could actually be seen, 16% read as too present
- * and the owner asked for 5% off it, so the dark ground is 11% now. The light
- * ground is untouched: it was never part of that report and 3% is already at
- * the edge of visible.
+ * This went through three positions worth recording, because the last one
+ * looks like a regression from the second and is not. It started as a fixed
+ * pair, 16% on the dark ground and 3% on the sepia one, chosen so each would
+ * read as the same faint texture from opposite ends of the lightness scale.
+ * Then the field proved to have been invisible the whole time for an unrelated
+ * reason (the fill resolved to black on black, see `currentFg()`), so no one
+ * had ever actually judged those numbers against a drawn field. With it
+ * finally visible the owner asked for 5% off, then decided the value should be
+ * a knob in the settings panel instead, at 0.08 to open on.
+ *
+ * So the per-ground split is gone from here: one knob cannot mean two numbers,
+ * and a knob whose meaning changes with the theme is worse than one that holds
+ * still. **The consequence is that the light ground now draws at whatever the
+ * dark ground draws at**, and 8% on sepia is stronger than the 3% that ground
+ * was given when the two were separate. That is a real change in how the light
+ * page reads, and it is reported rather than hidden behind a scale factor.
+ *
+ * Measured lit-cell contrast stays around 1.05:1, a deliberate failure of the
+ * 3:1 non-text-contrast criterion: this draws texture, not content.
  */
-const FADE_DARK = 0.11
-const FADE_LIGHT = 0.03
+const DEFAULT_OPACITY = 0.08
+const MIN_OPACITY = 0
+const MAX_OPACITY = 0.5
 /* Cells of slack around a glider so it does not spawn already touching the
    viewport edge and die within a few generations. */
 const EDGE_MARGIN = 3
@@ -113,6 +123,7 @@ let manualPaused = false
 let density = DEFAULT_DENSITY
 let gps = DEFAULT_GPS
 let autoFeedSeconds = DEFAULT_AUTOFEED
+let opacity = DEFAULT_OPACITY
 let tabHidden = false
 let wasReduced = false
 let isRunning = false
@@ -147,15 +158,8 @@ function indexOf(col: number, row: number): number {
   return row * cols + col
 }
 
-function activeIsDark(): boolean {
-  const attr = document.documentElement.getAttribute(THEME_ATTR)
-  if (attr === 'light') return false
-  if (attr === 'dark') return true
-  return matchMedia('(prefers-color-scheme: dark)').matches
-}
-
 function currentFade(): number {
-  return activeIsDark() ? FADE_DARK : FADE_LIGHT
+  return opacity
 }
 
 /*
@@ -432,6 +436,14 @@ export function setAutoFeed(seconds: number): void {
   writeStorage(AUTOFEED_KEY, String(autoFeedSeconds))
 }
 
+/** Redraws immediately rather than waiting for the next generation: the reader
+    is dragging a slider and needs to see the result while dragging it. */
+export function setOpacity(value: number): void {
+  opacity = Math.min(MAX_OPACITY, Math.max(MIN_OPACITY, value))
+  writeStorage(OPACITY_KEY, String(opacity))
+  draw()
+}
+
 export function reseed(): void {
   seed()
 }
@@ -443,12 +455,48 @@ export function getSettings(): {
   density: number
   gps: number
   autoFeedSeconds: number
+  opacity: number
 } {
-  return { motion: motionOverride, backgroundEnabled, paused: manualPaused, density, gps, autoFeedSeconds }
+  return { motion: motionOverride, backgroundEnabled, paused: manualPaused, density, gps, autoFeedSeconds, opacity }
 }
 
-function onCanvasClick(event: MouseEvent): void {
+/*
+ * Listened for on the document, not on the canvas, and that is the whole
+ * reason clicking used to do nothing.
+ *
+ * The canvas is `position: fixed; z-index: -1` so the header, main and footer
+ * paint over it as ordinary in-flow boxes. But a negative z-index element is
+ * not just painted behind them, it is behind them for hit testing too, and
+ * `body` covers the entire viewport: it is the topmost element under the
+ * pointer everywhere the page's own content is not, including the gutters.
+ * So the canvas never received a click anywhere, and the component's comment
+ * claiming clicks reach it "in the gutters" was wrong.
+ *
+ * Listening on the document avoids stacking altogether, at the cost of having
+ * to decide what a click means. Two rules do that:
+ *
+ * A click on something interactive or selectable belongs to the page, never to
+ * the field. `closest()` on an anchor, button, input, label, summary or any
+ * focusable thing bails out, so a link still navigates and a caption is still
+ * selectable. A drag that selected text is also not a click on the background,
+ * which is what the collapsed-selection check is for.
+ *
+ * A click inside the reading column is already excluded by the mask, so it
+ * needs no separate rule: `excluded[idx]` covers it, the same as before.
+ */
+const CLICK_THROUGH = 'a, button, input, select, textarea, label, summary, details, [role="button"], [tabindex]'
+
+function onDocumentClick(event: MouseEvent): void {
   if (canvas === null || cols === 0) return
+  if (event.defaultPrevented || event.button !== 0) return
+
+  const target = event.target
+  if (target instanceof Element && target.closest(CLICK_THROUGH) !== null) return
+
+  // A click that ends a text selection is a drag, not a tap on the background.
+  const selection = document.getSelection()
+  if (selection !== null && !selection.isCollapsed) return
+
   const box = canvas.getBoundingClientRect()
   const col = Math.floor((event.clientX - box.left) / CELL_SIZE)
   const row = Math.floor((event.clientY - box.top) / CELL_SIZE)
@@ -475,6 +523,7 @@ function init(): void {
   density = clampNumber(readStorage(DENSITY_KEY), DEFAULT_DENSITY, 1, 20)
   gps = clampNumber(readStorage(GPS_KEY), DEFAULT_GPS, 0.5, 8)
   autoFeedSeconds = clampNumber(readStorage(AUTOFEED_KEY), DEFAULT_AUTOFEED, 0, 20)
+  opacity = clampNumber(readStorage(OPACITY_KEY), DEFAULT_OPACITY, MIN_OPACITY, MAX_OPACITY)
   wasReduced = effectiveReduced()
   applyMotionAttr()
   applyBgLifeAttr()
@@ -500,7 +549,7 @@ function init(): void {
     syncRunning()
   })
 
-  canvas.addEventListener('click', onCanvasClick)
+  document.addEventListener('click', onDocumentClick)
 
   if (shouldRun()) {
     isRunning = true

@@ -20,7 +20,7 @@
 // modules that wire the controls up afterwards. Dataset attributes are kept
 // only for the one label that genuinely changes at runtime (the pause
 // button's own text swapping to "resume").
-import Sliders from './icons/Sliders.astro'
+import Cog from './icons/Cog.astro'
 import CodeTheme from './CodeTheme.astro'
 import { t, type Locale } from '../i18n/ui'
 
@@ -33,7 +33,7 @@ const { locale } = Astro.props
 
 <div class="settings-panel" hidden data-label={t(locale, 'settingsPanel')}>
   <button type="button" class="sp-open" aria-haspopup="true" aria-expanded="false" aria-controls="sp-menu">
-    <Sliders class="sp-icon" />
+    <Cog class="sp-icon" />
   </button>
 
   <div id="sp-menu" class="sp-menu" hidden>
