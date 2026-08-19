@@ -17,7 +17,15 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { composite, grade, parseHex, ratio } from './contrast'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
-import { effectiveMarkPx, labelForMark, MARK_CANDIDATES, MARK_GRID_SIDE, MARK_MIN_PX, type MarkCandidateId } from './logoMarks'
+import {
+  effectiveMarkPx,
+  labelForMark,
+  MARK_CANDIDATES,
+  MARK_DEFAULT_PX,
+  MARK_GRID_SIDE,
+  MARK_MIN_PX,
+  type MarkCandidateId,
+} from './logoMarks'
 import LogoMark from './LogoMark.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -43,8 +51,14 @@ const markCandidate = ref<MarkCandidateId>('fio')
  * o tamanho nunca é a `1.5em` do texto ao redor, e o slider nunca desce
  * abaixo do piso de legibilidade do candidato atual (`MARK_MIN_PX`).
  */
-const markSizeDesiredPx = ref(96)
+const markSizeDesiredPx = ref(MARK_DEFAULT_PX.fio)
 const markSizePx = computed(() => effectiveMarkPx(markCandidate.value, markSizeDesiredPx.value))
+
+// Trocar de candidato começa de novo no tamanho sugerido para ele: "glitch" é
+// vetor e sobra bem abaixo dos outros cinco, então ele começa menor.
+watch(markCandidate, (id) => {
+  markSizeDesiredPx.value = MARK_DEFAULT_PX[id]
+})
 
 const inkContrast = computed<{ label: string; num: number }>(() => {
   if (markCandidate.value === 'mesh') {
@@ -278,7 +292,7 @@ const decisionContext =
       <header :class="$style.miniHeader">
         <span :class="$style.miniBadge">C:\LSANTOS&gt;</span>
         <a href="#" aria-label="Lucas Santos" :class="$style.brand" @click.prevent>
-          <LogoMark :candidate="markCandidate" :size-px="markSizePx" />
+          <LogoMark :candidate="markCandidate" :size-px="markSizePx" :glitch-enabled="!animationsFrozen" />
           <span :class="$style.word" aria-hidden="true" :style="{ transform: `translateX(${lineShift}ch)` }">
             <span
               v-for="(ch, i) in WORD.split('')"
@@ -324,7 +338,9 @@ const decisionContext =
       pisca a cada {{ CURSOR_MS }}ms por fase, sem suavização, o dobro da taxa do menu do Doom (228,6ms), porque um
       terminal pisca mais devagar que um jogo. O glitch troca no máximo uma letra por vez, desloca a linha inteira
       em 1ch, ou rasga uma coluna em 1px, a cada 2,2 a 4 segundos: bem abaixo do limite de três trocas por segundo
-      da WCAG 2.3.1, numa área de uma única célula de caractere.
+      da WCAG 2.3.1, numa área de uma única célula de caractere. O candidato "wireframe Elite" carrega o mesmo
+      vocabulário de glitch na própria marca, na mesma cadência e presa à mesma pausa e ao mesmo
+      prefers-reduced-motion desta bancada.
     </p>
 
     <DecisionCopy lab="logo" component="LogoLab.vue" :settings="decisionSettings" :context="decisionContext" />
@@ -353,10 +369,10 @@ const decisionContext =
 
 .miniHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   inline-size: 100%;
   font-size: 0.85rem;
-  white-space: nowrap;
 }
 
 .miniBadge {
@@ -370,13 +386,35 @@ const decisionContext =
 .brand {
   display: inline-flex;
   align-items: center;
-  color: var(--fg);
   font-family: var(--font-display);
   font-size: 1.05rem;
-  text-decoration: none;
 }
 
-.brand:focus-visible {
+/*
+ * This link lives inside the post body, and the post body is `.prose`.
+ * `src/styles/prose/links.css` gives every `.prose a` a dashed underline, an
+ * arrow after it, and a hover invert. A real header link lives in
+ * `BaseLayout`, outside `.prose`, and never picks up that rule; this bench's
+ * own anchor does only because it happens to render inside an article.
+ * Undoing it here keeps the demo honest about what a real header would look
+ * like, instead of changing anything about the site's actual prose links.
+ * `.prose a` carries one class and one element (specificity 0,1,1); repeating
+ * `.brand` beats it with plain CSS instead of `!important`, since two classes
+ * (0,2,0) outrank one class plus one element.
+ */
+.brand.brand,
+.brand.brand:hover,
+.brand.brand:focus-visible {
+  background: none;
+  color: var(--fg);
+  text-decoration-line: none;
+}
+
+.brand.brand::after {
+  content: none;
+}
+
+.brand.brand:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }

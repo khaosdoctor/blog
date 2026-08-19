@@ -65,6 +65,25 @@ export function effectiveMarkPx(candidate: MarkCandidateId, desiredPx: number): 
   return Math.max(desiredPx, MARK_MIN_PX[candidate])
 }
 
+/**
+ * O tamanho de partida ao trocar de candidato pelo seletor: 96px cobre o piso
+ * dos cinco candidatos em grade sem sobra nenhuma. `glitch` é o único vetor
+ * dos seis, o de piso mais baixo (32px), então ele tem espaço de sobra para
+ * começar menor, o que o dono pediu depois de ver o candidato pela primeira
+ * vez grande demais.
+ */
+export const MARK_DEFAULT_PX: Record<MarkCandidateId, number> = {
+  fio: 96,
+  lattice: 96,
+  mesh: 96,
+  ramp: 96,
+  dither: 96,
+  glitch: 48,
+}
+
+/** Glifos do glitch, usados tanto pelo wordmark (`LogoLab.vue`) quanto pela marca (`LogoMark.vue`), o mesmo vocabulário nos dois lugares. */
+export const GLITCH_GLYPHS = ['#', '%', '&', '$', '@', '?', '~']
+
 /** `R` a haste do L, `G`/`Y`/`B` os três acentos, `.` o vão entre eles. */
 export const SHAPE: string[] = ['RR.GGGGG', 'RR.GGGGG', 'RR.GGGGG', 'RR......', 'RRRRR.YY', 'RRRRR.YY', '........', '.BBBBBBB']
 

@@ -3,10 +3,10 @@
  * O cabeçalho, em cinco leituras da mesma direção. Todos usam só caracteres:
  * nenhuma imagem, nenhum ícone, nada que precise de requisição.
  */
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import DecisionCopy from './DecisionCopy.vue'
 import Knob from './Knob.vue'
-import { effectiveMarkPx, labelForMark, MARK_CANDIDATES, MARK_GRID_SIDE, MARK_MIN_PX, type MarkCandidateId } from './logoMarks'
+import { effectiveMarkPx, labelForMark, MARK_CANDIDATES, MARK_DEFAULT_PX, MARK_GRID_SIDE, MARK_MIN_PX, type MarkCandidateId } from './logoMarks'
 import LogoMark from './LogoMark.vue'
 import Panel from './Panel.vue'
 import Pick from './Pick.vue'
@@ -62,8 +62,14 @@ function labelFor(options: Array<{ id: string; name: string }>, id: string): str
  * então o padrão já lê sem precisar mexer no slider.
  */
 const markCandidate = ref<MarkCandidateId>('fio')
-const markSizeDesiredPx = ref(96)
+const markSizeDesiredPx = ref(MARK_DEFAULT_PX.fio)
 const markSizePx = computed(() => effectiveMarkPx(markCandidate.value, markSizeDesiredPx.value))
+
+// Trocar de candidato começa de novo no tamanho sugerido para ele, não no que o
+// slider tinha antes: "glitch" é vetor e sobra bem abaixo dos outros cinco.
+watch(markCandidate, (id) => {
+  markSizeDesiredPx.value = MARK_DEFAULT_PX[id]
+})
 
 const shape = ref('barra')
 const face = ref('departure')
@@ -224,6 +230,7 @@ const base = computed(() => ({
 
 .brandRow {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -237,9 +244,9 @@ const base = computed(() => ({
 
 .bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
   align-items: center;
-  white-space: nowrap;
 }
 
 .fill {
@@ -249,6 +256,7 @@ const base = computed(() => ({
 
 .dos {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
   align-items: center;
 }
@@ -282,6 +290,7 @@ const base = computed(() => ({
 
 .minimo {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   border-block-end: 1px dotted currentColor;
 }
@@ -309,7 +318,6 @@ const base = computed(() => ({
 
 .brandline {
   margin: 0;
-  white-space: nowrap;
 }
 
 .readout {
