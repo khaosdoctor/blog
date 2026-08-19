@@ -75,6 +75,10 @@ is yours.
 `career`, `meta`, `security`. Any new value creates a new section page. `tags` are many and free-form, each one gets
 `/tags/<tag>/`.
 
+A translation repeats the same `tags` line, and every language then gets its own tag pages: the same slug (so
+`/tags/javascript/` and `/en/tags/javascript/`), listing that language's own articles. Give a translation a different
+tag and it lists under that one instead, in its language alone.
+
 Publishing is `draft: false` and a push. A `pubDate` in the future means scheduled, and the post appears on its own.
 
 ### Markdown conventions
@@ -125,7 +129,7 @@ first part. Leave `seriesName` off a translated first part and that language fal
 | `content/blog/<folder>/<slug>.mdx` | a translation of that post, identified by its `lang` |
 | `content/bookmarks.json`, `content/dead-images.json` | metadata captured at migration time so the build stays offline |
 | `content/categories.json` | what each section is about, per language. Shown on the section page |
-| `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, `/en/`, `/en/<category>/` |
+| `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, and the same set again under `/en/` |
 | `src/components/` | the component set posts can use |
 | `src/plugins/` | the remark and rehype plugins that turn markdown into figures, embeds and margin notes |
 | `worker/` | Cloudflare Worker that rebuilds the site the minute a scheduled post is due |

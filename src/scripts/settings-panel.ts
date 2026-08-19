@@ -24,6 +24,7 @@ import {
 } from './conway'
 import { getShortcutLetter, resetShortcutLetter, setShortcutLetter } from './search-palette'
 import { resetCodeTheme } from './code-theme'
+import { setAccent, storedAccent } from '../lib/accent'
 
 // Same key hover-previews.ts's own bindPersistToggle() already reads and
 // writes. That function still runs, unchanged, on the post pages
@@ -315,6 +316,32 @@ function init(): void {
 
   resetHandlers.push(() => setBodyFace(null))
 
+  // --- Accent: today's colour, or one the reader pins. ---
+  // The write path and the resolution both live in lib/accent.ts, since
+  // header-brand.ts applies the same choice on every page load and this panel
+  // only exists on a page the reader has opened the menu on. Same aria-current
+  // shape as the two groups above; "auto" is stored as nothing stored, so the
+  // reset is setAccent(null) like every other default here.
+  const accentOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-accent-auto, .sp-accent-option')]
+  if (accentOptions.length > 0) {
+    const syncAccent = (): void => {
+      const current = storedAccent() ?? 'auto'
+      for (const option of accentOptions) option.setAttribute('aria-current', String(option.dataset.value === current))
+    }
+    syncAccent()
+    for (const option of accentOptions) {
+      option.addEventListener('click', () => {
+        const value = option.dataset.value
+        setAccent(value === undefined || value === 'auto' ? null : value)
+        syncAccent()
+      })
+    }
+    resetHandlers.push(() => {
+      setAccent(null)
+      syncAccent()
+    })
+  }
+
   // --- Conway background on/off. ---
   // Every control from here to the pause button reads its value back out of
   // conway.ts rather than out of storage, so its own reset handler is the
@@ -371,7 +398,7 @@ function init(): void {
   wireKnob('sp-density', () => getSettings().density, setDensity, (value) => `${value}%`)
   wireKnob('sp-gps', () => getSettings().gps, setGps, (value) => `${value}/s`)
   wireKnob('sp-autofeed', () => getSettings().autoFeedSeconds, setAutoFeed, (value) => `${value}s`)
-  // Stored as an alpha (0 to 0.5) and shown as a percentage: 0.08 reads as 8%,
+  // Stored as an alpha (0 to 0.5) and shown as a percentage: 0.04 reads as 4%,
   // which is the number the owner set this knob's default in.
   wireKnob('sp-opacity', () => getSettings().opacity, setOpacity, (value) => `${Math.round(value * 100)}%`)
 

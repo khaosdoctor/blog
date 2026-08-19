@@ -109,6 +109,32 @@ const { locale } = Astro.props
         data-template={t(locale, 'fontSizeCurrent')}></span>
     </fieldset>
 
+    {/* The accent override. "Auto" is the site's own behaviour, today's colour
+       from the day hash (lib/day-color.ts), and is the default; the five
+       swatches pin it to one brand colour instead.
+
+       Swatches are buttons rather than radios for the same reason the motion
+       and reading-font rows are: this panel has one button-group shape and
+       one aria-current convention, and a radio group here would be a second.
+       Each carries a real name in aria-label, so the choice is never colour
+       alone (WCAG 1.4.1), and the selected one is marked by the same
+       aria-current the rest of the panel uses rather than by its swatch
+       looking different.
+
+       Purple is offered even though the automatic rotation never draws it:
+       that exclusion is about chance, not about the colour. */}
+    <fieldset class="sp-accent">
+      <legend>{t(locale, 'accentLabel')}</legend>
+      <div class="sp-accent-row">
+        <button type="button" class="sp-accent-auto" data-value="auto">{t(locale, 'accentAuto')}</button>
+        <button type="button" class="sp-accent-option" data-value="red" style="--swatch: var(--brand-red)" aria-label={t(locale, 'accentRed')}></button>
+        <button type="button" class="sp-accent-option" data-value="green" style="--swatch: var(--brand-green)" aria-label={t(locale, 'accentGreen')}></button>
+        <button type="button" class="sp-accent-option" data-value="yellow" style="--swatch: var(--brand-yellow)" aria-label={t(locale, 'accentYellow')}></button>
+        <button type="button" class="sp-accent-option" data-value="blue" style="--swatch: var(--brand-blue)" aria-label={t(locale, 'accentBlue')}></button>
+        <button type="button" class="sp-accent-option" data-value="purple" style="--swatch: var(--brand-purple)" aria-label={t(locale, 'accentPurple')}></button>
+      </div>
+    </fieldset>
+
     <fieldset class="sp-font-family">
       <legend>{t(locale, 'fontFamilyLabel')}</legend>
       <button type="button" class="sp-font-family-option" data-value="serif">{t(locale, 'fontFamilySerif')}</button>
@@ -167,7 +193,7 @@ const { locale } = Astro.props
           {/* min/max match conway.ts's own MIN_OPACITY/MAX_OPACITY (0 to 0.5),
              hardcoded here the same way density/gps/autofeed's own ranges
              are above: those constants are not exported, same reason. Step
-             0.01 so the slider can actually rest on the 0.08 default. */}
+             0.01 so the slider can actually rest on the 0.04 default. */}
           <input type="range" id="sp-opacity" min="0" max="0.5" step="0.01" />
         </label>
         <div class="sp-conway-actions">
@@ -588,6 +614,61 @@ const { locale } = Astro.props
 
   .sp-knob input[type='range'] {
     inline-size: 100%;
+  }
+
+  .sp-accent-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /*
+   * A swatch is a square of the colour it sets, with the panel's own border
+   * around it so it reads as a control rather than as a decoration. No label
+   * on screen: six named colours would fill the menu, and the name is in
+   * aria-label where a screen reader finds it.
+   */
+  .sp-accent-option {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    margin-inline-end: 0.35rem;
+    padding: 0;
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--swatch);
+    cursor: pointer;
+  }
+
+  .sp-accent-auto {
+    margin-inline-end: 0.35rem;
+    padding: 0.15rem 0.5rem;
+    border: var(--border) solid var(--rule);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: var(--text-tiny);
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  /*
+   * The selected one, marked the way every other group in this panel marks
+   * its own: aria-current drives it, and the mark is a ring drawn outside the
+   * swatch rather than a change to the swatch itself, since the swatch's whole
+   * job is to show one exact colour.
+   */
+  .sp-accent-option[aria-current='true'],
+  .sp-accent-auto[aria-current='true'] {
+    border-color: var(--fg);
+    outline: var(--border) solid var(--fg);
+    outline-offset: 2px;
+  }
+
+  .sp-accent-option:focus-visible,
+  .sp-accent-auto:focus-visible {
+    outline: 2px solid var(--accent-day, var(--accent));
+    outline-offset: 2px;
   }
 
   /* The label and its readout share one line, the number pushed to the far
