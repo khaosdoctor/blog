@@ -1,148 +1,66 @@
 /*
- * Where a link goes, shown rather than guessed: an out-of-the-box arrow when it
- * leaves the site, a hooked arrow when it stays. Inline SVG masks, so the icon
- * takes the link's own colour, costs no request and needs no JS.
+ * Every link on the site outside the header: colour, dashed rest underline,
+ * inverted hover block.
  *
- * This file used to read as `.prose a` throughout, prose being the only place
- * a reader ever followed a link. The owner's later ask ("links inside /oss/
- * should follow the same rules as any other link, this means the correct
- * accent, hover etc", then "same as the footer links, and all links across
- * the whole website") widened the colour, the dashed rest underline and the
- * inverted hover block to the site's one link treatment: see the SCOPE
- * comment above the rest-state rule for exactly what that wider scope is and
- * why. The icon in this file's own opening sentence did NOT widen with it: a
- * follow-up correction asked for the arrow to stay a prose-only cue (see its
- * own comment, further down, for why), so `::after` and the external-host
- * test it uses still read `.prose a`, the file's original scope.
+ * Two different scopes live here on purpose. The colour/underline/hover rules
+ * read `html :is(main, footer) a`, the site's one link treatment. The `::after`
+ * arrow stays at `.prose a`: it is a mid-sentence "does this leave the site"
+ * cue, and on a footer row or an OSS list every line would carry it and it
+ * would stop meaning anything.
  */
 
 :root {
   --icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M17 13v6H5V7h6'/%3E%3Cpath d='M14 4h6v6'/%3E%3Cpath d='M20 4l-8 8'/%3E%3C/svg%3E");
   --icon-internal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M4 6v5a3 3 0 0 0 3 3h11'/%3E%3Cpath d='M15 10l4 4-4 4'/%3E%3C/svg%3E");
 
-  /* Rest-state underline, the exact values candidate 2 measured in the lab
-   * (LinkLab.vue, section 06 of /theme-lab/, archived once decided): dashed,
-   * 2px thick, 4px offset from the baseline, kept from that candidate rather
-   * than candidate 4's own thin dotted rest state. */
   --link-underline-style: dashed;
   --link-underline-thickness: 2px;
   --link-underline-offset: 4px;
 
   /*
-   * The hover block's own fill, derived the way chips.css derives --chip-ink,
-   * except read the other way round: there the mixed colour is TEXT against
-   * the ground, here it is the FILL with the ground colour as the text on
-   * top, so the floor check is the same pair asked in reverse. Read as text,
-   * three of the five brand colours fail one ground (green 3.29 and yellow
-   * 3.23 light, purple 4.22 dark, see theme.css), so the raw colour cannot
-   * be the fill directly.
+   * The hover fill. The raw brand colour cannot be used directly: read as text
+   * against this fill, three of the five fail one ground (green 3.29 and yellow
+   * 3.23 light, purple 4.22 dark).
    *
-   * Scanned in 1% steps with the mixing script: dark needs at most 4% white
-   * mixed in for the worst of the five (purple) to clear 4.5:1; light needs
-   * at most 14% black for the worst (yellow) to clear it. Rounded down to 5%
-   * / 15% for a small margin rather than the exact float, still barely a
-   * tint: dark red 5.10 blue 5.34 green 8.48 yellow 11.65 purple 4.64; light
-   * red 6.62 blue 6.40 green 4.80 yellow 4.71 purple 11.44. Every one clears
-   * 4.5:1, and none of the five reads as washed out at this small a mix.
-   * These percentages hold for `--accent-day` too, below: it resolves to one
-   * of the same five brand tokens, so nothing here needs re-scanning.
+   * Scanned in 1% steps: dark needs at most 4% white for the worst (purple) to
+   * clear 4.5:1, light at most 14% black for the worst (yellow). Rounded to
+   * 5%/15% for margin. Result: dark red 5.10 blue 5.34 green 8.48 yellow 11.65
+   * purple 4.64; light red 6.62 blue 6.40 green 4.80 yellow 4.71 purple 11.44.
    *
-   * The fill's SOURCE colour changed once, after this formula was first
-   * decided: it used to be `--post-accent`, a post's own colour hashed from
-   * its slug (chipColor(), the same mechanism that colours a tag chip,
-   * written onto the <article> element by [...slug].astro so a post's links
-   * matched its own cover). The owner later asked for the header's own
-   * accent here instead: the header's wordmark accent is now the day-hash
-   * colour (`--accent-day`, src/lib/day-color.ts, purple excluded from its
-   * pool), so this reads that, with `--accent` as the same fallback chain
-   * end as before.
-   *
-   * `--post-accent` did not go away with that move, and is not dead: both
-   * [...slug].astro pages still hand it to BaseLayout.astro, which writes it
-   * onto <body> (it used to go on <article>, and moved out when the header's
-   * reading progress started reading it too), and prose/emphasis.css reads it
-   * for bold, italic and the other text treatments. That is the whole split the owner drew, and it has to be
-   * kept in exactly this shape: a text treatment belongs to the article and
-   * follows the COVER's colour (lib/cover.ts's coverTone(), which is where
-   * `--post-accent` is now derived, the same function the card itself
-   * paints with); a link, a hover, anything transient belongs to the visit
-   * and follows the DAY. Do not repoint this fill at `--post-accent`, and
-   * do not repoint emphasis.css at `--accent-day`.
+   * It reads `--accent-day`, NOT `--post-accent`. That split is deliberate and
+   * has to be kept: a text treatment belongs to the article and follows the
+   * COVER's colour (emphasis.css); a link, a hover, anything transient belongs
+   * to the visit and follows the DAY. Do not repoint either at the other.
    */
   --post-accent-fill: light-dark(
     color-mix(in oklab, var(--accent-day, var(--accent)) 85%, black),
     color-mix(in oklab, var(--accent-day, var(--accent)) 95%, white)
   );
 
-  /*
-   * The image-link popped shadow (below): a hard offset, no blur, same
-   * pixel-grid vocabulary as --code-shadow-offset in theme.css, just its own
-   * tokens rather than reused ones, since code-blocks.css repeats that
-   * same "own copy, not a cross-file reference" choice for --note-grow-ease
-   * in sidenotes.css/footnotes.css. Duration is slow on purpose: a "drift"
-   * read as a nudge, the same reasoning --note-grow-duration gives for the
-   * sidenote grow, not this site's fast 120ms general hover timing.
-   */
+  /* Slow on purpose: a drift, not this site's 120ms hover timing. */
   --image-link-shadow-duration: 900ms;
   --image-link-shadow-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /*
- * SCOPE: `html :is(main, footer) a`, the site's default for a link, everywhere
- * a link can appear outside the header. Read as two separate decisions:
+ * SCOPE, two decisions:
  *
- * - `:is(main, footer)`, not a bare `a`: `<main>` and `<footer>` are the two
- *   landmarks BaseLayout.astro renders content into; `<header>` (the brand
- *   link, nav links, language switch, search opener, theme toggle, settings
- *   panel) is a sibling of both, never a descendant, so this selector cannot
- *   reach it structurally, not by relying on specificity to lose a fight. A
- *   post body's `.prose` div, the OSS page's credit list, a post's tag chips
- *   and table of contents, the 404 and offline pages, and the footer's own
- *   links all sit inside one of those two landmarks and so all default to
- *   this treatment; nothing above (a `.chip`, `.heading-anchor`, or a link
- *   with its own component-scoped style, see the exclusion below and this
- *   file's own bookmark/image-link carve-outs further down) has to opt in by
- *   hand, and nothing new added inside `main` or `footer` later has to
- *   remember to either.
- * - `html` prefixed, not left off: this rule has to outrank
- *   BaseLayout.astro's own `footer a` fallback (a plain, un-scoped `footer a`
- *   selector, `is:global`), which this rule replaces for every footer link
- *   except one, without editing that file (held by another agent's pass this
- *   round). Three bare type selectors (`html`, `footer` or `main`, `a`) beat
- *   `footer a`'s two on specificity alone, so the win holds regardless of
- *   which stylesheet the cascade happens to load first. It stops exactly
- *   short of beating `footer .version a` (BaseLayout.astro, one class plus a
- *   type deeper): the version string's own commit link is a deliberate
- *   exception ("still a link, just not dressed as one," per that file's own
- *   comment) and has to keep winning that fight, not lose it to a wider
- *   default arriving later. Checked by counting selectors, not by guessing:
- *   `html :is(main, footer) a` is three types, zero classes; `footer a` is
- *   two types, zero classes (loses); `footer .version a` is two types, one
- *   class (still wins, one class outranks any number of bare types).
+ * - `:is(main, footer)` rather than a bare `a`, because `<header>` is a sibling
+ *   of both and so cannot be reached structurally. The header's own controls
+ *   never have to opt out, and nothing added inside main or footer later has to
+ *   opt in.
+ * - `html` prefixed, so this outranks core.css's plain `footer a` fallback.
+ *   Counted rather than guessed: this is three type selectors and zero classes,
+ *   `footer a` is two types (loses), `footer .version a` is two types plus a
+ *   class (still wins, which it must: that link is deliberately not dressed as
+ *   one).
  *
- * EXCEPTIONS, named rather than left to chance: `.chip` (tag/category chips,
- * chips.css's own double-border card, a different object from a text link,
- * not a text link at all), `.heading-anchor` (headings.css's own quiet,
- * opacity-fading "#" marker, which would otherwise gain both this rule's
- * dashed underline and a colour clash with its own hover colour) and
- * `footer .icon-link` (BaseLayout.astro's four icon-only footer buttons,
- * GitHub/LinkedIn/Twitter/YouTube, styled on their own terms there, matching
- * the header's own icon-button chrome: an icon has no baseline for a dashed
- * underline to sit under) are excluded by name below, all three from the
- * colour/underline/padding/hover-fill this rule draws. `:where()` around
- * them keeps the exclusion at zero specificity, so adding it does not
- * accidentally out-rank the very `footer .version a` exception this rule
- * already has to lose to (a plain `:not(.chip)` would add a class to this
- * selector's own count and start beating `.version a` by mistake, which is
- * the trap this file's `:where()` avoids). A footnote reference, its
- * back-arrow, and the bookmark card are NOT in this list: they keep the fill
- * and the accent colour like any other text link. Whether any of these also
- * gets the `::after` arrow is a separate question answered further down, by
- * a separate, prose-only rule, not by this one: `.chip` and
- * `footer .icon-link`/`.version a` never reach it regardless (none of the
- * three live inside `.prose`), and `.heading-anchor`, the footnote pair and
- * the bookmark card are cancelled there by name, since the icon rule reaches
- * everywhere in `.prose` alike.
+ * The exclusions are wrapped in `:where()` to keep them at zero specificity. A
+ * plain `:not(.chip)` would add a class to this selector's count and start
+ * beating `footer .version a` by mistake.
+ *
+ * A footnote reference, its back-arrow and the bookmark card are NOT excluded:
+ * they take the colour and fill like any other text link.
  */
 html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .icon-link)) {
   padding-inline: 1px;
@@ -155,20 +73,6 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
   text-underline-offset: var(--link-underline-offset);
 }
 
-/*
- * The arrow stays narrow where the rest of this file went wide. Lucas's
- * correction, after seeing the footer with both a hooked and an
- * out-of-the-box arrow on a two-item line: the colour, the dashed rest
- * underline and the inverted hover block read fine everywhere, but the icon
- * is a mid-sentence cue, "does this link leave the site", which only matters
- * to a reader following a link out of a paragraph. A footer row of two named
- * links, an OSS page that is nothing but a list of outbound links, a 404's
- * "try search" line: none of these are prose a reader is mid-sentence in, so
- * every row would carry the marker and it would stop meaning anything. So
- * `::after` and the external-host test it alone uses go back to `.prose a`,
- * exactly the pre-widening scope, while the rest/hover rule above stays at
- * `html :is(main, footer) a`.
- */
 .prose a::after {
   content: '';
   display: inline-block;
@@ -179,28 +83,15 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
   mask: var(--icon-internal) center / contain no-repeat;
 }
 
-/*
- * Anything not on one of the owner's own domains. Both are his, so a link
- * between them is not "leaving": lsantos.dev (this blog and the personal site)
- * and lsantos.me. Add a host here when another one becomes his. This test has
- * no other consumer in this file (or anywhere else): it exists only to decide
- * which arrow the rule above draws, so it stays beside it rather than living
- * at the wider scope nothing else here needs it at.
- */
+/* Both domains are Lucas's, so a link between them is not "leaving". Add a host
+   here when another one becomes his. */
 .prose a[href^='http']:not([href*='lsantos.dev']):not([href*='lsantos.me'])::after {
   mask-image: var(--icon-external);
 }
 
-/*
- * Links that are already marked as what they are, or that are not text: a
- * footnote reference, the arrow back from a footnote, a heading's own anchor,
- * a bookmark card, and any link wrapping an image. All five only ever appear
- * inside `.prose` (a footnote, a heading anchor and a bookmark are markdown
- * features; an image-wrapping link is prose content too), so this list is
- * exactly what it was before the site-wide widening: nothing here has become
- * dead weight, and nothing new needed adding, since the rule the icon comes
- * from is prose-scoped again.
- */
+/* Links already marked as what they are, or that are not text at all. All five
+   only ever appear inside `.prose`, which is why this list needs nothing from
+   the wider scope above. */
 .prose a:is([data-footnote-ref], [data-footnote-backref], .heading-anchor, .bookmark)::after,
 .prose a:has(img)::after,
 .prose figure a::after {
@@ -208,16 +99,12 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
 }
 
 /*
- * `.bookmark` is excluded here, having previously been kept in on the
- * reasoning that a bookmark card carries real text for the inverted ground to
- * read against (see the note further down about image-only links). That
- * reasoning held for the text and missed the box: the card is a block the
- * width of the reading column with its own rule, thumbnail and three lines of
- * copy, so filling it does not invert a run of words, it repaints the whole
- * card as one solid slab, dragging the muted description and host down to
- * unreadable against it. The card still answers to today's colour on hover,
- * on its own border and title (Bookmark.astro), which is the treatment a card
- * can take without becoming a block of paint.
+ * `.bookmark` is excluded from the fill. It carries real text, which was the
+ * original reasoning for keeping it in, but the card is a block the width of
+ * the reading column: filling it does not invert a run of words, it repaints
+ * the whole card as one slab and drags the muted description to unreadable. It
+ * answers to the day colour on its own border and title instead
+ * (Bookmark.astro).
  */
 html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .version a, footer .icon-link)):hover,
 html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .version a, footer .icon-link)):focus-visible {
@@ -227,50 +114,22 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .v
 }
 
 /*
- * The inverted fill above assumes the run has text for the ground colour to
- * read as. A link whose only content is an image has none, so filling it
- * paints a solid rectangle over the picture instead (a YouTube thumbnail
- * going solid yellow on hover is what sent this rule here). Four shapes
- * carry that same "no text" content, checked against the actual markup
- * rather than assumed:
+ * An inverted fill assumes there is text for the ground colour to read as. A
+ * link whose only content is an image has none, so filling it paints a solid
+ * rectangle over the picture (a YouTube thumbnail going solid yellow is what
+ * sent this rule here). Four shapes carry that content, checked against the
+ * real markup:
  *
- * - `a:has(img)` matches a plain linked image or a linked figure: an <img>
- *   anywhere inside the anchor, at any nesting depth (astro:assets'
- *   <picture><img> included), so no markup change was needed. :has() is
- *   already load-bearing elsewhere in this file (the ::after rule above)
- *   and in footnotes.css/lists.css, so this leans on established support
- *   rather than adding a wrapper class or attribute.
- * - `:not(.bookmark)` on that: the old Ghost bookmark card also nests an
- *   <img> (once content/bookmarks.json grows a vendored thumbnail; today it
- *   always falls back to the drawn SVG placeholder instead), but it puts
- *   that image beside a title, description and host, real text, so it
- *   keeps the fill like any other text link.
- * - `a.lyt-playbtn` / `a.ltv-playbtn` catch remark-embeds' YouTube/Vimeo,
- *   which turn into astro-embed's <lite-youtube>/<lite-vimeo>. Those paint
- *   the poster as their own CSS background-image and wrap the whole
- *   thumbnail in an anchor with no <img> descendant at all, just a
- *   visually-hidden screen-reader label. `:has(img)` cannot see these; the
- *   class the library already puts on the anchor can.
- * - `figure a` keeps the same defensive net the ::after rule above already
- *   holds for a link inside a hand-written <figure>.
+ * - `a:has(img)` catches a linked image or figure at any depth, astro:assets'
+ *   <picture><img> included.
+ * - `:not(.bookmark)` on it, since a bookmark puts its image beside real text.
+ * - `.lyt-playbtn`/`.ltv-playbtn` catch astro-embed's YouTube/Vimeo, which
+ *   paint the poster as a CSS background and wrap it in an anchor with no <img>
+ *   descendant at all. `:has(img)` cannot see those.
+ * - `figure a` is the net for a hand-written <figure>.
  *
- * In place of the fill: a solid, hard-edged shadow in the day accent colour
- * (`--accent-day`, the same source `--post-accent-fill` reads, not that
- * mixed token itself: there is no text on top here needing the contrast
- * mix), offset with no blur like the code frame's own --code-shadow-offset,
- * and detached rather than flush against the image: its x/y offset drifts
- * between two points on a cubic-bezier easing curve while hovered, so the
- * shadow reads as having separated from the image instead of holding one
- * corner fixed. `box-shadow` never affects layout (it paints outside the
- * border box without changing it), so nothing reflows the way the padding
- * comment above already relies on for the text-link fill.
- *
- * Hover/focus only, not at rest: the owner's ask was to replace what the
- * *hover* fill did, and a shadow that drifts continuously on every image
- * link on the page at rest would be far louder than the fill it replaces.
- * Rest for an image link stays exactly what a reader already sees today,
- * the plain image; the drift is feedback for the pointer being there, same
- * split as every other link in this file (quiet rest, expressive hover).
+ * In place of the fill: a hard-edged shadow that throws out from the image.
+ * `box-shadow` never affects layout, so nothing reflows.
  */
 html :is(main, footer) a:has(img):not(.bookmark),
 html :is(main, footer) a.lyt-playbtn,
@@ -290,17 +149,12 @@ html :is(main, footer) figure a:focus-visible {
   background: transparent;
   color: inherit;
   text-decoration-line: none;
-  /* Plays once and holds on the popped-out offset, rather than drifting for as
-     long as the pointer rests there. A loop reads as a thing demanding
-     attention; one throw reads as the image having jumped forward and stayed.
-     `forwards` is what makes it hold: without it the shadow would snap back to
-     the keyframe-free resting value the instant the animation finished. */
+  /* Plays once and holds. A loop reads as a thing demanding attention; one
+     throw reads as the image having jumped forward and stayed. `forwards` is
+     what holds it: without it the shadow snaps back the instant it finishes. */
   animation: image-link-shadow-drift var(--image-link-shadow-duration) var(--image-link-shadow-ease) 1 forwards;
 }
 
-/* Starts flush against the image and throws out to the popped-out offset,
-   where `forwards` holds it. It used to return to the near offset at 100%,
-   which is what made a single play look like nothing happened. */
 @keyframes image-link-shadow-drift {
   0% {
     box-shadow: 0 0 0 0 var(--accent-day, var(--accent));
@@ -311,12 +165,9 @@ html :is(main, footer) figure a:focus-visible {
 }
 
 /*
- * Motion is decoration everywhere on this site (theme.css's own words for
- * --duration collapsing to 0ms here). The drift is exactly that: dropping
- * it completely would leave a reader who asked for less motion with no
- * hover feedback at all on an image link, so a shadow still shows, just
- * fixed at the drift's rest point instead of animating between it and the
- * other.
+ * Dropping the drift completely would leave a reader who asked for less motion
+ * with no hover feedback at all on an image link, so the shadow still shows,
+ * fixed rather than animated.
  */
 @media (prefers-reduced-motion: reduce) {
   html :is(main, footer) a:has(img):not(.bookmark):hover,
@@ -332,20 +183,14 @@ html :is(main, footer) figure a:focus-visible {
   }
 }
 
-/*
- * A wikilink to a post that is still a draft. Wikipedia's red link, in a red that
- * survives both themes, with the localised "not written yet" marker beside it
- * doing the work colour cannot.
- */
+/* A wikilink to a post still in draft. Wikipedia's red link, with the localised
+   "not written yet" marker beside it doing the work colour cannot. */
 .prose a.link-unwritten {
   color: var(--link-unwritten);
 }
 
-/*
- * A separate inversion from the run above: whether a post is missing has
- * nothing to do with which article links to it, so this stays red rather
- * than picking up the hash colour of whichever page it happens to appear on.
- */
+/* Stays red rather than picking up the colour of whichever page it appears on:
+   whether a post is missing has nothing to do with what links to it. */
 .prose a.link-unwritten:hover,
 .prose a.link-unwritten:focus-visible {
   background: var(--link-unwritten);
