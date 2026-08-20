@@ -309,7 +309,7 @@ main {
  * would reflow the floated column in the wide layout below, which is a
  * bigger, and louder, effect than "slightly enlarge" asked for. A transform
  * does not reflow, though, which is the trade-off: two notes floated close
- * together (see /theme-lab-arquivo/'s "Notas na margem" section, a Sidenote and a
+ * together (see /lab/'s "Notas na margem" section, a Sidenote and a
  * MarginNote back to back) can have the growing one paint over the small
  * space before its neighbour. transform-origin below points growth away
  * from the note above rather than centering it, which keeps it clear of
