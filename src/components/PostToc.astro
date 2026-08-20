@@ -100,18 +100,12 @@ const tree = treeOf(flat)
        line the eye actually reads from, and on a short window it collided with
        the bottom of the screen before the top. */
     /*
-     * 38%, not 33%: this is `translateY(-50%)`'d, so the box's own top edge is
-     * this anchor minus half its rendered height, and a long outline can reach
-     * the `max-block-size` cap below. At the old 33% anchor and the old 70vh
-     * cap, the worst case (a post with enough headings to reach the cap) put
-     * the top edge at 33vh - 35vh = -2vh: two viewport-height percent above the
-     * top of the window, under the header. Lucas's own report ("too close to
-     * the header") is that case on a real post. 38% anchor plus the 64vh cap
-     * below moves the same worst-case arithmetic to 38vh - 32vh = +6vh: a real,
-     * positive clearance instead of a negative one, verified by the arithmetic
-     * rather than by eye since there is no browser to check it in. Short
-     * outlines, the common case, only move a few percent lower than before,
-     * still reading as "upper third" rather than centred.
+     * 38%, not 33%: this is `translateY(-50%)`'d, so the top edge is the anchor
+     * minus half the rendered height, and a long outline reaches the cap below.
+     * At 33% with the old 70vh cap the worst case put the top edge at
+     * 33vh - 35vh = -2vh, above the top of the window and under the header,
+     * which is the "too close to the header" report. 38% with the 64vh cap
+     * moves the same arithmetic to +6vh. Short outlines only drop a few percent.
      */
     inset-block-start: 38%;
     transform: translateY(-50%);
@@ -414,27 +408,21 @@ const tree = treeOf(flat)
     })
 
     /*
-     * The whole heading, for the rows the ellipsis cut short.
+     * The whole heading, for rows the ellipsis cut short.
      *
-     * A row is 15rem wide and a heading is not, so TocBranch truncates, and two
-     * sections that both start "O que aconteceu com a" become the same line to
-     * anyone reading with their eyes: the full text is still in the accessible
-     * name, so a screen reader was never affected. Hovering or focusing a cut
-     * row prints the whole thing, over the article if it has to.
+     * A row is 15rem and a heading is not, so two sections that both start "O
+     * que aconteceu com a" become the same line to anyone reading with their
+     * eyes. The full text was always in the accessible name, so a screen reader
+     * was never affected.
      *
-     * On <body>, placed from the row's own getBoundingClientRect(), which is the
-     * same shape hover-previews.ts uses for its cards. Nothing inside the panel
-     * can do this: `.toc` is a scroll container and clips its children on both
-     * axes, and `position: fixed` does not escape from in there either while the
-     * panel carries `transform: translateY(-50%)`, since a transform makes its
-     * element the containing block for fixed descendants. CSS anchor positioning
-     * would have placed it without any of this measuring, but it is still
-     * "limited availability" on MDN (not Baseline: Firefox has not shipped it),
-     * it would need a measured fallback anyway for the browsers without it, and
-     * it would still not escape the clip on its own without the top layer. The
-     * top layer via `popover` would escape it, but this element takes no
-     * pointer, no focus and no light dismiss, so the only thing it would buy
-     * over one z-index is a support question.
+     * On <body>, placed from the row's own rect. Nothing inside the panel can
+     * do this: `.toc` is a scroll container and clips on both axes, and
+     * `position: fixed` does not escape it either while the panel carries a
+     * transform, since a transform makes its element the containing block for
+     * fixed descendants. CSS anchor positioning would place it without the
+     * measuring, but it is not Baseline (Firefox has not shipped it), would
+     * need a measured fallback anyway, and would still not escape the clip
+     * without the top layer.
      *
      * One element for the whole outline: only one row is ever revealed.
      */
