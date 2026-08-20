@@ -55,7 +55,7 @@ Why each plugin exists, in the order they run:
 | Plugin | Turns this | Into this |
 |---|---|---|
 | `remark-reading-time` | the body | a `readingTime` number in the frontmatter |
-| `remark-math` + `rehype-katex` | `$$...$$` | rendered maths. Single-dollar `$x$` is off, so prices in prose stay prices |
+| `remark-math` + `rehype-katex` | `$x$` and `$$...$$` | rendered maths. A literal dollar in prose must be escaped, see WRITING.md |
 | `remark-embeds` | a bare URL or `![](url)` alone in a paragraph | `<YouTube>`, `<Vimeo>`, `<Tweet>`, `<SpeakerDeck>`, `<Spotify>`, `<Bookmark>` |
 | `remark-figures` | a lone image whose title is set | `<figure>` plus `<figcaption>` |
 | `remark-wikilinks` | `[[folder]]` | a link to that article in the reader's language |

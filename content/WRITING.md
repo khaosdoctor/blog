@@ -179,6 +179,16 @@ graph TD
 
 Inline maths with `$E = mc^2$`, a block with `$$ ... $$`. Both render in Obsidian too.
 
+**A literal dollar sign in prose has to be escaped: `\$`.** Two unescaped dollars in one
+paragraph are an inline maths span, so "it cost $4,950 ... and $9,800" renders as a single
+formula with every letter between the prices stacked vertically. Six lines in the archive
+had that bug before anyone noticed. A lone `$` with no partner on the same line is already
+safe, and a dollar inside `backticks` or a code fence is never touched.
+
+Turning the single-dollar form off instead was tried and reverted: the RSA post alone
+carries dozens of real `$...$` expressions, several with braces (`$\frac{a}{b}$`), and
+without that form those braces reach MDX's own expression parser and fail the build.
+
 ## Notes in the margin
 
 ```mdx
