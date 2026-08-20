@@ -9,6 +9,74 @@ Portuguese, since it holds only the open questions you still have to answer, and
 
 ---
 
+## The accent can be pinned, and the day hash that picks it was collapsing two days into one
+
+Two related things, one of them a real bug Lucas caught by looking at the site two days running.
+
+**The bug.** `dayColor()` hashed the calendar day through `chipColor`, whose hash is a sum of character codes. That
+is fine for tag labels, which differ wildly from each other and only cost a shared colour when they collide. It is
+useless for a run of dates: `2026-08-19` and `2026-08-20` sum exactly 8 apart, and against a four-token pool (purple
+excluded from the rotation) a difference of 8 resolves to the same index. Every decade rollover collided the same
+way, so the 9th to the 10th and the 29th to the 30th were also stuck. The fix is a multiplying hash
+(`hashString`, now in `src/lib/chip-color.ts`) that carries each digit's change into the high bits. Across a full
+month there are now zero adjacent repeats.
+
+That function is not new: `cover.ts` already had exactly this arithmetic as `hashSlug`, feeding the seed that decides
+both a cover's colour and its solid's shape. Rather than write a third hash, the arithmetic moved into
+`chip-color.ts` and `hashSlug` now points at it, verified byte-identical on five slugs first. Tag chips keep the sum
+hash, so no tag colour moved.
+
+**The override.** `src/lib/accent.ts` is new and owns the whole question of what `--accent-day` should be: the
+reader's pinned colour if there is one, today's hash otherwise. The settings panel grows an Accent row of swatches
+with an Auto button, and `header-brand.ts` calls `applyAccent()` instead of writing the day colour itself, so both
+callers resolve through one function. Auto is stored as *nothing stored*, the same convention every other preference
+here follows. Purple is offered as a manual choice even though the rotation never draws it: that exclusion was about
+never drawing it by chance, which choosing it deliberately is not. White is offered as `--fg` rather than a literal
+white, since a literal white accent is invisible on the sepia ground; the cover's own neutral entries make the same
+choice for the same reason.
+
+---
+
+## The reading progress bar becomes the header's own dashes, written by the wordmark's cursor
+
+The fixed bar at the top of the window is gone. Each character of the header's two dash runs is its own span, the two
+runs read as one meter from the `┌─` corner to the `─┐` one, and the fill is coloured with the post's own cover tone
+rather than the day colour. Per-character elements rather than a mask, because the ask was one dash at a time with
+uneven timing, and a mask can only fill smoothly.
+
+Three details worth keeping:
+
+- **`--post-accent` moved from `<article>` to `<body>`.** The header is a sibling of `<main>`, so an article-level
+  custom property could never reach it. `coverTone()` stays the single derivation; the post pages pass it to
+  BaseLayout as a prop.
+- **The two neutral cover tones are invisible as a fill.** `branco-apagado` resolves to `--muted`, which is exactly
+  what the dashes already paint, so a lit dash also takes a text stroke. That thickens the glyph without changing its
+  advance, which a font-weight change would.
+- **The head is placed from the count of dashes actually written, not from the eased position.** Placing it from the
+  eased number ran the cursor ahead of its own trail, further ahead the more jitter a given dash drew. The pen stands
+  on the dash it is about to write.
+
+The cursor crosses the nav by jumping the seam rather than hiding: hiding reads as the block blinking out at a random
+point in the post, and the rule is already drawn as though it passed behind the links rather than stopping at them.
+
+---
+
+## Tags and series exist in both languages
+
+Both taxonomies were source-language only: `getTags()` and `getSeries()` called `getPublishedPosts()` with no
+argument, which defaults to Portuguese, so every tag and series page was built from Portuguese posts, `/en/tags/` and
+`/en/series/` linked to unprefixed URLs, and an English reader clicking a tag left the English site. Series went
+first and tags followed the same shape rather than inventing a second one.
+
+The content answered the design question: English translations already carried `series` and `seriesOrder` in their
+own frontmatter and were only missing `seriesName`, so four translated files gained an English series title rather
+than the code deriving English membership from the Portuguese original.
+
+English post pages also never rendered `PostToc` at all. Not a decision, just an omission in a file written without
+the component.
+
+---
+
 ## The theme lab closes: every bench decided, the post deleted, the archive stands alone
 
 `/theme-lab/` is gone. Its last three open sections, the header and post list (interface), the cover, and the

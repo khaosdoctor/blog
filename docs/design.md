@@ -204,6 +204,24 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   than retiring, since the bench never pitted them against `decifra` as a closed dispute. `prefers-reduced-motion`
   freezes on the final frame and the loop never starts; a manual pause control covers WCAG 2.2.2.
 
+## Next up
+
+The order the work goes in from here, Lucas's own list.
+
+1. **Mobile design.** Nothing below 70rem has had a pass of its own. Every width decision so far was made at desktop
+   and given a fallback rather than a design: the header row wraps, the outline becomes a drawer, the post list drops
+   to the plain measure, and the cover overlay's own coordinates were reasoned about rather than seen. This is the one
+   item that touches every surface already built.
+2. **Reading the existing posts.** A pass through what is already published to judge what reads well and what does
+   not, now that the type, the rules, the code frames and the callouts are all decided. Content review feeding
+   design rather than a code task: expect it to reopen a few settled values.
+3. **The series header.** The current layout is not good enough. The series box on a post and the series pages
+   themselves both need a real treatment rather than the plain list they carry today.
+4. **Individual page layouts.** `/about/` has no content and 404s from the nav. The tag, series and category index
+   pages exist but were built to be correct rather than designed. Same for `/search/`, `/oss/`, 404 and offline.
+5. **A pass over what already exists**, together, so Lucas sees the whole thing in one sitting rather than one
+   screenshot at a time.
+
 ## Open decisions
 
 - Which body face wins. Everything else about the type system is settled.

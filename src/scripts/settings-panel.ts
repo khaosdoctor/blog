@@ -398,7 +398,7 @@ function init(): void {
   wireKnob('sp-density', () => getSettings().density, setDensity, (value) => `${value}%`)
   wireKnob('sp-gps', () => getSettings().gps, setGps, (value) => `${value}/s`)
   wireKnob('sp-autofeed', () => getSettings().autoFeedSeconds, setAutoFeed, (value) => `${value}s`)
-  // Stored as an alpha (0 to 0.5) and shown as a percentage: 0.04 reads as 4%,
+  // Stored as an alpha (0 to 0.5) and shown as a percentage: 0.09 reads as 9%,
   // which is the number the owner set this knob's default in.
   wireKnob('sp-opacity', () => getSettings().opacity, setOpacity, (value) => `${Math.round(value * 100)}%`)
 
