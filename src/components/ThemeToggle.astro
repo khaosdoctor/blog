@@ -98,20 +98,14 @@ const { locale } = Astro.props
   }
 
   /*
-   * The chip a reader actually sees: centred inside .tt-open by that button's
-   * own flex centring, sized at --icon-btn-chip rather than the full hit box.
-   * pointer-events: none so a click anywhere in the real (larger) button box
-   * still reaches .tt-open itself rather than being swallowed by this
-   * decoration.
+   * The chip a reader actually sees, sized at `--icon-btn-chip` rather than the
+   * full hit box. `pointer-events: none` so a click anywhere in the real button
+   * still reaches it rather than being swallowed by this decoration.
    *
-   * Border reads --accent-day now, not --rule: every icon button's outline
-   * takes the day colour, the same token the language switch's own frame
-   * reads, so the row shares one accent rather than a neutral one plus a
-   * coloured one. --rule was chosen for the 3:1 a non-text border needs
-   * (docs/theming.md), not the 4.5:1 a text pairing needs; the day colours
-   * clear 3:1 too (WCAG 2.1, against --bg): red 4.67 dark / 4.72 light, blue
-   * 4.90 / 4.56, green 8.03 / 3.29, yellow 11.25 / 3.23, so nothing here
-   * drops under the floor even on the weakest day.
+   * The border reads `--accent-day`, not `--rule`, so every icon button shares
+   * the row's one accent. `--rule` was chosen for the 3:1 a non-text border
+   * needs; the day colours clear 3:1 too on both grounds (the weakest being
+   * yellow at 3.23 light), so nothing drops under the floor.
    */
   .tt-open::before {
     content: '';
