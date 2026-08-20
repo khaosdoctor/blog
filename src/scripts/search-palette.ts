@@ -1,39 +1,32 @@
-// Wires up the command-style search opener from SearchPalette.astro: a
-// magnifier plus a configurable Ctrl/Cmd+letter, opening a native <dialog>
-// that live-searches through Pagefind.
+// The command-style search opener from SearchPalette.astro: a magnifier plus a
+// configurable Ctrl/Cmd+letter, opening a native <dialog> that live-searches
+// through Pagefind.
 //
-// Deliberately not sharing code with Search.astro's own <script>: that file
-// shipped earlier this session and works both with JS off and before a
-// Pagefind index exists, and duplicating its small loadPagefind/init dance
-// here is cheaper than touching a file this task was told to leave alone. The
-// two copies are short enough that drifting apart later is an acceptable risk.
+// The loadPagefind/init dance is duplicated from Search.astro's own <script>
+// rather than shared: that file has to work with JS off and before an index
+// exists, and both copies are short. If one changes, change both.
 //
-// The empty export makes this a real module, same reason as theme-toggle.ts,
-// code-theme.ts and conway.ts: a script with no other import or export is
-// global rather than file-scoped, and its names would collide with theirs.
+// The empty export makes this a real module, same as theme-toggle.ts,
+// code-theme.ts and conway.ts: a script with no import or export is global,
+// and its names would collide with theirs.
 export {}
 
 import { dayColor } from '../lib/day-color'
 
-// --- The shortcut letter: stored and read the same way every other reader
-// preference on this site is (settings-panel.ts, conway.ts): a plain
-// localStorage key, written on change, read once at startup, wrapped in
-// try/catch for private mode. Exported so settings-panel.ts's own script can
-// call straight into this module rather than duplicating the storage key, the
-// same direct-import convention conway.ts's own control surface already uses. ---
+// --- The shortcut letter. Stored like every other reader preference here: a
+// plain localStorage key, written on change, read once at startup, wrapped for
+// private mode. Exported so settings-panel.ts calls into this module instead
+// of duplicating the key. ---
 
 const SHORTCUT_KEY = 'search-shortcut'
 const DEFAULT_LETTER = 'K'
 
 /*
- * Any of the 26 letters is choosable, but seven of them are a shortcut the
- * browser itself owns (bookmark, address bar, new window, quit, reload, new
- * tab, close tab) and a page-level keydown handler cannot preventDefault:
- * picking one of D, L, N, Q, R, T or W leaves the setting looking like it
- * silently does nothing, because the browser's own chrome intercepts the
- * combination before this script's listener ever runs. K, the default, works
- * unmodified in GitHub, Linear, Slack and every other command palette that
- * picked it.
+ * Seven letters are a shortcut the browser itself owns (bookmark, address bar,
+ * new window, quit, reload, new tab, close tab) and a page-level keydown
+ * handler cannot preventDefault, so picking one would leave the setting
+ * looking broken. settings-panel.ts disables these in the picker. K, the
+ * default, is unclaimed and is what every other command palette uses.
  */
 export const RESERVED_LETTERS = new Set(['D', 'L', 'N', 'Q', 'R', 'T', 'W'])
 
@@ -59,33 +52,30 @@ export function setShortcutLetter(letter: string): void {
   try {
     localStorage.setItem(SHORTCUT_KEY, upper)
   } catch {
-    // Private mode, or storage disabled: the choice still applies for this page.
+    // Private mode: the choice still applies for this page.
   }
   applyHint()
 }
 
 /*
- * Back to K, for the settings panel's reset-all. Not setShortcutLetter('K'),
- * which would store the literal "K": that function is for a reader choosing a
- * letter, and choosing K on purpose is still a choice worth storing, while a
- * reset is the absence of one. Same "nothing stored means default" convention
- * as every other preference on this site, so readStoredLetter() falls through
- * to DEFAULT_LETTER on the next page instead of reading a value back.
+ * For the settings panel's reset-all. Removes the key rather than storing
+ * 'K': choosing K on purpose is a choice worth storing, a reset is the
+ * absence of one, and this site's convention is that nothing stored means the
+ * default.
  */
 export function resetShortcutLetter(): void {
   shortcutLetter = DEFAULT_LETTER
   try {
     localStorage.removeItem(SHORTCUT_KEY)
   } catch {
-    // Private mode, or storage disabled: the reset still applies for this page.
+    // Private mode: the reset still applies for this page.
   }
   applyHint()
 }
 
-// Cmd on Apple platforms, Ctrl everywhere else, fixed rather than reader
-// configurable (the owner's own words: "let's keep the meta key").
-// navigator.platform is deprecated but still universally implemented; the
-// user agent string is the fallback for the one engine that might drop it.
+// Cmd on Apple platforms, Ctrl everywhere else, not reader configurable.
+// navigator.platform is deprecated but still universally implemented; the user
+// agent string is the fallback for the one engine that might drop it.
 const isApple = /Mac|iPhone|iPad|iPod/.test(`${navigator.platform ?? ''} ${navigator.userAgent}`)
 
 let hintModEl: HTMLElement | null = null
@@ -96,11 +86,8 @@ function applyHint(): void {
   if (hintKeyEl !== null) hintKeyEl.textContent = shortcutLetter
 }
 
-// --- Pagefind, loaded once and cached: the dialog can be opened many times
-// in one page view, and there is no reason to re-run the dynamic import (or
-// re-run init(), which Pagefind does not expect twice) each time. Same shape
-// as Search.astro's own loadPagefind/init pair; see the note at the top of
-// this file for why it is copied rather than shared outright. ---
+// --- Pagefind, loaded once and cached: the dialog opens many times per page
+// view, and init() is not something Pagefind expects twice. ---
 
 interface PagefindResult {
   data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }>
@@ -122,10 +109,9 @@ let pagefindLoad: Promise<PagefindModule | null> | null = null
 
 async function loadPagefind(): Promise<PagefindModule | null> {
   try {
-    // Pagefind writes this file into dist/ after the build, so it is not a
-    // source module: the specifier goes through a variable to keep both Vite
-    // and the typechecker from trying to resolve something that only exists
-    // in the built output. Same reasoning as Search.astro's own loadPagefind.
+    // Pagefind writes this into dist/ after the build, so it is not a source
+    // module: the specifier goes through a variable to keep Vite and the
+    // typechecker from resolving something that only exists in the output.
     const module = '/pagefind/pagefind.js'
     return (await import(/* @vite-ignore */ module)) as PagefindModule
   } catch {
@@ -134,11 +120,8 @@ async function loadPagefind(): Promise<PagefindModule | null> {
 }
 
 /**
- * Loads and initialises Pagefind on the first dialog open, then reuses the
- * result on every later one. Resolves to null both when the index does not
- * exist (dev, or a pre-build environment: the documented 404, same as
- * Search.astro) and when init() itself throws (the language-scoping guard
- * below), so every caller only has to handle one "not available" case.
+ * Resolves to null both when the index does not exist (dev, or before a build)
+ * and when init() throws, so callers handle one "not available" case.
  */
 async function ensurePagefind(): Promise<PagefindModule | null> {
   if (pagefindState !== 'unready') return pagefindState
@@ -146,13 +129,10 @@ async function ensurePagefind(): Promise<PagefindModule | null> {
     const pagefind = await loadPagefind()
     if (pagefind === null) return null
 
-    // Pagefind builds one index per language and picks between them from the
-    // page's own lang when init() is called bare, which silently serves
-    // whichever index has the most pages (Portuguese, 276 against English's
-    // 183 as of the 2026-08-19 build) to an unrecognised or variant tag. This
-    // is the exact guard Search.astro's own script carries, kept identical
-    // here so the palette never regresses it: passing the tag explicitly
-    // turns that quiet fallback into a thrown error, handled the same way.
+    // Called bare, init() picks between the per-language indexes from the
+    // page's lang and silently serves whichever has the most pages to an
+    // unrecognised or variant tag. Passing the tag turns that quiet fallback
+    // into a thrown error. Search.astro carries the same guard.
     if (pagefind.init) {
       try {
         await pagefind.init(document.documentElement.lang)
@@ -167,9 +147,8 @@ async function ensurePagefind(): Promise<PagefindModule | null> {
   return pagefindState
 }
 
-// --- The label() helper, `t()`'s server-side strings read back off the
-// input's own data attributes, same technique and same reason as
-// Search.astro: this plain script module has no access to t(). ---
+// t()'s server-side strings read back off the input's own data attributes:
+// this plain script module has no access to t(). Same as Search.astro.
 
 function label(
   input: HTMLInputElement,
@@ -179,7 +158,7 @@ function label(
   return (input.dataset[name] ?? '').replace(/%[ds]/, value)
 }
 
-const MAX_RESULTS = 5 // Matches the numbered 1-5 shortcut; anything past this is a link to the full /search/ page instead of a 6th row.
+const MAX_RESULTS = 5 // Matches the numbered 1-5 shortcut; past this is a link to /search/ instead of a 6th row.
 
 function searchPageHref(query: string): string {
   const base = document.documentElement.lang === 'en' ? '/en/search/' : '/search/'
@@ -188,8 +167,7 @@ function searchPageHref(query: string): string {
 
 function init(): void {
   const triggerEl = document.querySelector<HTMLElement>('.search-trigger')
-  // <a>, not <button>: see SearchPalette.astro's own component comment for
-  // why this is a real link with a real href now.
+  // <a>, not <button>: see SearchPalette.astro for why this is a real link.
   const openerEl = document.querySelector<HTMLAnchorElement>('.sx-open')
   const hintEl = document.querySelector<HTMLElement>('.sx-hint')
   const dialogEl = document.querySelector<HTMLDialogElement>('.sx-dialog')
@@ -221,24 +199,16 @@ function init(): void {
   const list = listEl
   const more = moreEl
 
-  // The upgrade: only now, once the click below is actually wired to open the
-  // dialog instead of navigating, do aria-haspopup/aria-controls become
-  // true. Declaring them in the static markup would describe behaviour a
-  // no-JS reader never gets. aria-label itself is not touched here any
-  // more: SearchPalette.astro already sets one that reads correctly in both
-  // states (see that file's own comment).
+  // These only become true now that the click below opens a dialog instead of
+  // navigating; in the static markup they would describe behaviour a no-JS
+  // reader never gets. aria-label is left alone, SearchPalette.astro sets one
+  // that reads correctly in both states.
   opener.setAttribute('aria-haspopup', 'dialog')
   opener.setAttribute('aria-controls', 'sx-dialog')
 
-  // The hint's own space was already reserved at rest (visibility: hidden,
-  // SearchPalette.astro), so making it visible here does not resize
-  // anything; it is only true from this point on that Cmd/Ctrl+<letter>
-  // actually opens the palette, which is exactly what the hint promises.
+  // The hint's space is already reserved at rest (visibility: hidden), so
+  // revealing it resizes nothing. Only from here is the promise it makes true.
   hint.style.visibility = 'visible'
-  // The hint lives inside the anchor now (SearchPalette.astro), but the
-  // lookup still starts from the shared wrapper: a descendant selector finds
-  // it either way, and starting from opener directly would work too, this
-  // just avoids depending on exactly how deep it lives.
   hintModEl = trigger.querySelector('.sx-hint-mod')
   hintKeyEl = trigger.querySelector('.sx-hint-key')
   applyHint()
@@ -271,10 +241,9 @@ function init(): void {
       return
     }
 
-    // debouncedSearch coalesces rapid keystrokes through Pagefind's own API
-    // rather than a hand-rolled setTimeout: a call superseded by a newer
-    // keystroke resolves to null instead of running the search at all, which
-    // is what keeps the status/results announcement from firing once per key.
+    // Pagefind's own coalescing rather than a hand-rolled setTimeout: a call
+    // superseded by a newer keystroke resolves to null instead of running,
+    // which keeps the live region from announcing once per key.
     const outcome = await pagefind.debouncedSearch(query, {}, 200)
     if (outcome === null || generation !== searchGeneration) return
 
@@ -309,10 +278,9 @@ function init(): void {
       return link
     })
 
-    // One announcement per settled search, the count rather than the list
-    // itself: the results are already visible, and reading every title aloud
-    // on each keystroke is exactly the "shouting" a polite live region has to
-    // avoid.
+    // One announcement per settled search, the count rather than the titles:
+    // the results are already visible, and reading each one aloud on every
+    // keystroke is what a polite live region has to avoid.
     status.textContent = label(input, 'resultsFound', String(results.length))
 
     if (results.length > MAX_RESULTS) {
@@ -334,9 +302,8 @@ function init(): void {
     updateCaret()
   }
 
-  // preventDefault is what actually performs the upgrade: without it, a
-  // real <a href> just navigates, the correct no-JS behaviour, but wrong
-  // the moment this handler exists to open the dialog instead.
+  // preventDefault is the upgrade: without it a real <a href> navigates, which
+  // is the correct no-JS behaviour and wrong once this handler exists.
   opener.addEventListener('click', (event) => {
     event.preventDefault()
     openDialog()
@@ -346,10 +313,8 @@ function init(): void {
     opener.focus()
   })
 
-  // Clicking the backdrop closes: a click event with the dialog element
-  // itself as its target, rather than any of the dialog's content, only ever
-  // happens when the click falls on the ::backdrop area, since every real
-  // child has its own box.
+  // A click whose target is the dialog element itself, rather than any of its
+  // content, only happens on the ::backdrop area: every real child has a box.
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close()
   })
@@ -365,11 +330,9 @@ function init(): void {
   dialog.addEventListener('keydown', (event) => {
     const metaHeld = isApple ? event.metaKey : event.ctrlKey
 
-    // Cmd/Ctrl+1-5 jumps straight to that result, from either the input or
-    // the list. Ctrl/Cmd+1-9 is also how most browsers switch to the tab in
-    // that position; depending on the browser, this page's preventDefault may
-    // lose that race, the same way GitHub's and Linear's own number-jump
-    // shortcuts sometimes do, without a guarantee of winning everywhere.
+    // Cmd/Ctrl+1-5 jumps to that result. Most browsers also use Ctrl/Cmd+1-9
+    // to switch tabs, so this preventDefault may lose that race depending on
+    // the browser, the same way GitHub's and Linear's number shortcuts do.
     if (metaHeld && /^[1-5]$/.test(event.key)) {
       event.preventDefault()
       resultLinks[Number(event.key) - 1]?.click()
@@ -380,7 +343,7 @@ function init(): void {
 
     if (target === input) {
       // Arrow keys never insert a character, so they can move focus into the
-      // results while the reader is still typing, with no conflict at all.
+      // results while the reader is still typing.
       if (event.key === 'ArrowDown' && resultLinks.length > 0) {
         event.preventDefault()
         resultLinks[0].focus()
@@ -388,18 +351,15 @@ function init(): void {
         event.preventDefault()
         resultLinks[resultLinks.length - 1].focus()
       }
-      // Escape is handled natively: showModal()'s own Escape behaviour fires
-      // 'cancel' then closes the dialog with no listener needed here. Every
-      // other key, h/j/k/l included, types into the field exactly as pressed:
-      // the letters are never bound while this element has focus.
+      // Escape is native: showModal() fires 'cancel' and closes with no
+      // listener. Every other key, h/j/k/l included, types as pressed.
       return
     }
 
-    // Focus is on a result link. This is the one place h/j/k/l are bound, and
-    // that placement resolves the whole conflict on its own: hjkl are
-    // ordinary letters a reader needs to type into the field above, so they
-    // only ever mean navigation once focus has left it, reached here through
-    // ArrowDown/Up, a click, or Tab, never through a letter keystroke.
+    // Focus is on a result link, the one place h/j/k/l are bound. That
+    // placement is what resolves the conflict: they are ordinary letters a
+    // reader types into the field above, so they only mean navigation once
+    // focus has left it via arrows, a click or Tab, never via a letter.
     const currentIndex = resultLinks.indexOf(target as HTMLAnchorElement)
     if (currentIndex === -1) return
 
@@ -411,27 +371,22 @@ function init(): void {
         break
       case 'k':
       case 'ArrowUp':
-        // Past the first item, k/ArrowUp returns focus to the input rather
-        // than wrapping to the last result: a convenience of this palette,
-        // since the field is the only other useful place to send focus from
-        // here.
+        // From the first item this returns to the input rather than wrapping
+        // to the last result: the field is the only other useful target.
         event.preventDefault()
         if (currentIndex === 0) input.focus()
         else resultLinks[currentIndex - 1].focus()
         break
       case 'h':
       case 'ArrowLeft':
-        // h: back, ranger/vifm's own convention for "up a level". There is no
-        // parent list here, only the query that produced this one, so back
-        // means returning focus to the input to keep editing it.
+        // ranger/vifm's "up a level". There is no parent list, only the query
+        // that produced this one, so back means returning to the input.
         event.preventDefault()
         input.focus()
         break
       case 'l':
       case 'ArrowRight':
       case 'Enter':
-        // l: open, the same ranger/vifm convention mirrored as "follow the
-        // highlighted result".
         event.preventDefault()
         target.click()
         break
@@ -440,9 +395,8 @@ function init(): void {
     }
   })
 
-  // --- The global open shortcut. Modifier+letter never types a character
-  // into whatever is currently focused, so this stays active everywhere on
-  // the page, not only while the dialog itself has focus. ---
+  // Modifier+letter never types a character into whatever is focused, so the
+  // global open shortcut stays active everywhere on the page.
   document.addEventListener('keydown', (event) => {
     if (dialog.open) return
     const metaHeld = isApple ? event.metaKey : event.ctrlKey
