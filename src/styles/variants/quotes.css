@@ -1,109 +1,43 @@
 /*
- * Quotes. The only quote-shaped thing on the site: every quote gets one look,
- * no card fill, an italic body, and a bold, underlined author line.
+ * Quotes. One look for every quote: no fill, italic body, bold underlined
+ * author line.
  *
- * `> [!quote] Author Name` + body is an Obsidian callout, run through
- * rehype-callouts (theme: obsidian, see astro.config.mjs). Its actual output
- * is `div.callout[data-callout="quote"] > .callout-title (icon, text) +
- * .callout-content`, confirmed against this repo's own build output (a
- * `blockquote` wrapper was the assumption at the start of this file's brief,
- * but the installed plugin and its current options emit a `div`). Both
- * selectors are kept below: the `blockquote.callout[...]` form for the
- * contract this file was written against, and the tag-less `.callout[...]`
- * form that actually matches, so this keeps working unchanged if the
- * container tag is ever reconfigured to `blockquote`.
+ * `> [!quote] Author` is an Obsidian callout, and rehype-callouts emits
+ * `div.callout[data-callout="quote"] > .callout-title + .callout-content`. Both
+ * the `blockquote.callout[...]` and the tag-less `.callout[...]` selectors are
+ * kept, so this keeps working if the container tag is ever reconfigured.
  *
- * A plain `>` blockquote with no callout gets the same look minus the author
- * row: no `.callout-title` exists to show. `.twitter-tweet` is excluded
- * because it is also a bare `<blockquote>` produced elsewhere on the site
- * (the Ghost tweet-card migration), and is not a quote. `.epigraph` used to
- * be excluded here for the same reason, but that component no longer exists
- * anywhere in the codebase, so the guard is gone with it.
+ * A plain `>` blockquote gets the same look minus the author row.
+ * `.twitter-tweet` is excluded: it is also a bare <blockquote>, from the Ghost
+ * migration, and is not a quote.
  *
- * The author arrives as the callout's TITLE (its first child) and has to
- * render at the BOTTOM. Solved with flex order, no markup change: the
- * container is a column flex box, the title gets `order: 2`, the content
- * `order: 1`.
+ * The author arrives as the callout's TITLE, its first child, and has to render
+ * at the BOTTOM. Flex order does it with no markup change: the container is a
+ * column, the title is `order: 2`, the content `order: 1`.
  *
- * House style: every card carries a double-rule border (top, right, bottom)
- * except the left edge, which stays the thick solid bar it always was.
- * `border-style: double` renders as a single line under 3px, hence
- * --qc-border-width below.
- *
- * The look itself, picked after a lab page compared eight variants (now
- * removed): no background fill, the body always italic in both markup
- * shapes, the author bold and underlined, and a short dashed rule above the
- * author line that starts flush at the card's left inner edge and fades out
- * as it reaches the middle. That rule is built the same way as the fading
- * `hr` in prose/rules.css, a background pattern clipped by a mask, except
- * here the pseudo-element's own inline-size does the shortening instead of
- * the mask, so --qc-rule-extent (how far in from the left it reaches) is the
- * one value that changes its length; the mask itself never moved; it always
- * faded the far edge of the pseudo-element's own box; only the box's
- * position flipped from [middle, right edge] to [left edge, middle], which
- * turns "fades toward the right" into "fades toward the middle" for free.
- *
- * Two paragraphs in one quote used to read as two separate blocks: the card
- * is a column flex box and `gap: var(--qc-gap)` sat between every one of its
- * children, which is exactly one row (content, author) in the callout shape
- * but every paragraph in the plain-blockquote shape, since a bare
- * `blockquote` has no author row and its paragraphs are the flex children
- * directly. Each paragraph also carried the browser's own ~1em block
- * margins, which flex items never collapse, so a two-paragraph quote paid
- * for both the flex gap and two uncollapsed paragraph margins. Fixed by
- * dropping `gap` from the shared rule entirely (the callout shape gets its
- * content/author spacing back as `margin-block-start` on `.callout-title`
- * instead, same visual slot the divider already draws into) and giving
- * paragraphs their own reset: zero margin, then a small `--qc-para-gap`
- * between consecutive ones only (`p + p`), never before the first or after
- * the last. That reads as one quotation with a paragraph break, not two
- * cards' worth of space.
- *
- * The copy button (QuoteCopy.astro) is injected at runtime, since neither
- * markup shape ever contains one: same shape as .note-copy-link in
- * sidenotes.css (a real button, an inline SVG mask icon, hidden until hover
- * or focus, the site's one .toast confirmation). It sits top-right, the
- * mirror corner from the `"` watermark (top-left, see the glyph rule below),
- * so the two never compete for the same pixels. Its footprint (1.5rem
- * square, inset 0.1rem from the edge, so it clears at 1.6rem) fits inside
- * the card's own --qc-pad inline padding (1.75rem) with room to spare, the
- * same "reserve it as padding, never float it over the text" technique
- * .note-copy-link uses, except here the ambient padding already does the
- * reserving; --qc-copy-gutter names that 1.75rem explicitly and is applied
- * as its own override rather than left as a coincidence with --qc-pad, so a
- * later change to --qc-pad's inline component alone cannot quietly reopen
- * the overlap.
+ * The divider above the author is built like the fading `hr` in
+ * prose/rules.css: a background pattern clipped by a mask, which a border
+ * cannot do.
  */
 
 :root {
   --qc-pad: 1.5rem 1.75rem;
   --qc-radius: 0;
   --qc-gap: 0.6rem;
-  /* Space between consecutive paragraphs inside one quote, deliberately
-   * smaller than --qc-gap: that token now only separates the body from the
-   * author row, this one keeps a multi-paragraph quote reading as one
-   * quotation. A first pass at 1em still read as two blocks (a full line's
-   * worth of blank space); half that, at roughly the same size as the gap
-   * the body's own line-height already leaves between two wrapped lines of
-   * the same paragraph, reads as a paragraph break inside one quotation
-   * instead of a second block. */
+  /* Between consecutive paragraphs inside one quote, deliberately smaller than
+     --qc-gap: a full 1em read as two separate blocks. Roughly the distance the
+     body's own line-height already leaves between wrapped lines, so it reads as
+     a paragraph break inside one quotation. */
   --qc-para-gap: 0.5em;
   --qc-indent: 2rem;
   --qc-dropcap-size: 2.75em;
 
-  /* Double-rule border, house style. 3px is the floor for two lines to
-   * render at all; 4px splits cleanly into line-gap-line instead of
-   * rounding down to a single visible line in some browsers. */
+  /* 3px is the floor for `border-style: double` to draw two lines at all; 4px
+     splits cleanly into line-space-line rather than rounding down. */
   --qc-border-width: 4px;
 
-  /*
-   * No card fill, per the final decision: the double-rule frame does the
-   * separating, and the quote now reads straight off the page background.
-   * --qc-fg and --qc-muted-fg were already the site's own --fg and --muted,
-   * so both still clear 4.5:1 against --bg with nothing changed here: --fg
-   * comes out to roughly 16.8:1 in light and 14.3:1 in dark, --muted to
-   * roughly 6.1:1 in light and 6.7:1 in dark.
-   */
+  /* No fill: the frame does the separating and the quote reads off the page.
+     --fg comes out ~16.8:1 light / ~14.3:1 dark, --muted ~6.1 / ~6.7. */
   --qc-bg: transparent;
   --qc-fg: var(--fg);
   --qc-muted-fg: var(--muted);
@@ -114,29 +48,14 @@
   --qc-dropcap-fg: var(--qc-border);
 
   /*
-   * Watermark glyph: a `"` behind the text, upper left, bigger and fainter
-   * again on the owner's second pass: 240px (up from 160px) at 6% white on
-   * the dark page, 3% black on the light page (both halved again from
-   * 10%/5%, keeping the same 2:1 ratio those two values already had, so both
-   * themes still read at a comparable weight). Deliberately clipped at the
-   * top-left corner now, rather than sitting fully inside the card:
-   * --qc-glyph-inset went negative (-0.08em, about 19px at this size),
-   * pushing the glyph up and left past the card's own padding edge, which is
-   * exactly what `overflow: hidden` on the card clips away. That crops the
-   * tip of the mark, roughly a tenth of its own box on each axis, enough to
-   * read as "runs off the corner" without losing the shape; a card too short
-   * to clear it at all (a short single-line quote) still crops more, the
-   * same trade the previous, uncropped version already accepted at the
-   * bottom edge. It is a decoration behind the text: the real content always
-   * paints above it (see the z-index rule below), so size, alpha and crop
-   * are free to move without touching legibility on their own; the worst
-   * case is still worth stating because the glyph is not opaque, so
-   * wherever it sits behind real text it very slightly tints --bg underneath
-   * that text. Blending in the new, lower alphas at full strength (directly
-   * under the glyph, the strongest case) still comes out to roughly 12:1 for
-   * --fg on --bg in dark mode and roughly 16:1 in light mode, both far past
-   * the 4.5:1 floor and both better than before this pass, since a lower
-   * alpha tints the background less, not more.
+   * A `"` watermark behind the text, clipped at the top-left corner: the inset
+   * is negative so the glyph pushes past the padding edge, which `overflow:
+   * hidden` on the card then crops. It reads as running off the corner without
+   * losing the shape.
+   *
+   * It is decoration and the real content always paints above it, but it is not
+   * opaque, so it tints --bg under any text it sits behind. At these alphas the
+   * worst case is still ~12:1 dark / ~16:1 light for --fg.
    */
   --qc-glyph-size: 240px;
   --qc-glyph-inset: -0.08em;
@@ -145,34 +64,19 @@
     color-mix(in oklab, white 6%, transparent)
   );
 
-  /*
-   * The rule above the author line: a dashed background pattern, marks
-   * longer than the site's dotted `hr` (prose/rules.css uses a 3px mark),
-   * clipped by a fixed fade-toward-the-end mask. What makes it short and
-   * anchors it to the left is the pseudo-element's own inline-size and
-   * position, set below with `inset-inline: 0 calc(100% - var(--qc-rule-extent))`:
-   * --qc-rule-extent (how far in from the left edge it reaches) is the only
-   * value to change to make the rule longer or shorter, the mask always
-   * fades over the last 30% of whatever length results, which is now the end
-   * closest to the middle of the card rather than the card's own right edge.
-   */
+  /* --qc-rule-extent is the only value to change to make the divider longer or
+     shorter: the mask always fades the last 30% of whatever length results. */
   --qc-rule-weight: 2px;
   --qc-rule-extent: 50%;
   --qc-rule-image: repeating-linear-gradient(to right, var(--qc-border) 0 10px, transparent 10px 16px);
   --qc-rule-mask: linear-gradient(to right, black 70%, transparent);
 
-  /*
-   * Copy-as-citation button (QuoteCopy.astro), same technique as
-   * .note-copy-link's --note-icon-link in sidenotes.css: a copy-glyph SVG as
-   * a mask, so it takes currentColor and costs no request. Square corners on
-   * the glyph itself (plain <rect>, no rx), per house style.
-   */
+  /* An SVG as a mask, so the icon takes currentColor and costs no request.
+     Square corners on the glyph itself, per house style. */
   --qc-icon-copy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Crect x='3' y='3' width='13' height='13'/%3E%3Crect x='8' y='8' width='13' height='13'/%3E%3C/svg%3E");
-  /* Named explicitly rather than left as a coincidence with --qc-pad's own
-   * 1.75rem inline component: the button is 1.5rem square, inset 0.1rem from
-   * the edge, so it clears at 1.6rem; this reuses that same 1.75rem, with
-   * 0.15rem to spare, but as its own token, so a future edit to --qc-pad
-   * alone cannot silently reopen the overlap this guarantees against. */
+  /* The copy button is 1.5rem square inset 0.1rem, so it clears at 1.6rem. This
+     reuses --qc-pad's own 1.75rem but as its own token, so a later edit to the
+     padding alone cannot silently reopen the overlap. */
   --qc-copy-gutter: 1.75rem;
 }
 
@@ -185,34 +89,27 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  /* No flex `gap` here: the callout shape gets its content/author spacing
-   * from `.callout-title`'s own margin-block-start below, and the plain
-   * blockquote shape (paragraphs as the direct flex children, no author row
-   * to separate from) would otherwise have that same gap between every
-   * paragraph, which is the bug this rule used to have. */
-  /* Indented from the left, flush to the right edge of the column: a quote reads
-   * as set apart from the paragraph before it without losing width. */
+  /* No flex spacing here on purpose: it would apply between every paragraph in
+     the plain-blockquote shape, where the paragraphs ARE the flex children.
+     The callout shape gets its content/author separation from
+     `.callout-title`'s own margin below. */
+  /* Indented left, flush right: set apart from the paragraph before it without
+     losing width. */
   margin-block: 1.75rem;
   margin-inline: var(--qc-indent) 0;
   padding: var(--qc-pad);
-  /* Explicit override of --qc-pad's own inline-end component: see
-   * --qc-copy-gutter above for why this is its own named value rather than
-   * left as a coincidence. */
   padding-inline-end: var(--qc-copy-gutter);
   overflow: hidden;
-  /* Double top/right/bottom, solid thick left: the house-style frame every
-   * card on this site carries, just with a two-line rule instead of one. */
+  /* Double on three sides, thick solid left: the house frame. */
   border-style: double;
   border-color: var(--qc-border);
   border-width: var(--qc-border-width);
   border-inline-start-style: solid;
   border-inline-start-width: var(--border-card-edge);
   border-radius: var(--qc-radius);
-  /* The obsidian theme's own .callout sets mix-blend-mode so light/dark
-   * variants can share one colour; it also blends an opaque background
-   * against the page behind it, which would quietly shift every colour
-   * computed below. Not wanted here, all the colours are already picked per
-   * theme. */
+  /* The obsidian theme uses mix-blend-mode so its variants can share one
+     colour. It would blend an opaque background against the page and shift
+     every colour below; ours are already picked per theme. */
   mix-blend-mode: normal;
   background: var(--qc-bg);
   color: var(--qc-fg);
@@ -234,9 +131,8 @@
   position: relative;
   order: 2;
   margin: 0;
-  /* The content/author gap the shared flex rule above no longer supplies
-   * (see the comment there): this is the one place --qc-gap still applies,
-   * in exactly the slot the flex gap used to occupy. */
+  /* The one place --qc-gap still applies, in the slot the flex spacing used to
+     occupy. */
   margin-block-start: var(--qc-gap);
   padding-block-start: calc(0.5rem + var(--qc-rule-weight));
   font-family: var(--font-mono);
@@ -245,14 +141,10 @@
   color: var(--qc-muted-fg);
 }
 
-/* The divider between the body and the author line: a background pattern
- * clipped by a mask, so it can fade, which a plain border cannot do. */
 .prose .callout[data-callout='quote'] > .callout-title::before {
   content: '';
   position: absolute;
   inset-block-start: 0;
-  /* Flush at the left edge, reaching in by --qc-rule-extent: the reverse of
-   * the [middle, right edge] span this used to be. */
   inset-inline: 0 calc(100% - var(--qc-rule-extent));
   block-size: var(--qc-rule-weight);
   background: var(--qc-rule-image);
@@ -263,10 +155,8 @@
   content: '\00bb  '; /* the ANSI-prompt » rather than an em dash */
 }
 
-/* Bold and underlined: the author name is the one line on the card that
- * carries no italic, so it needs its own weight to read as set apart. The
- * `»` prefix above is part of the same text node, so it comes along for
- * free rather than fighting it. */
+/* The author name is the one line on the card carrying no italic, so it needs
+   its own weight to read as set apart. */
 .prose .callout[data-callout='quote'] .callout-title-text {
   font-weight: 700;
   text-decoration: underline;
@@ -277,11 +167,9 @@
 }
 
 /*
- * The obsidian theme sets `overflow-x: auto` on callout content. Per the spec a
- * `visible` on the other axis then computes to `auto` too, so a quote long
- * enough to wrap grew its own vertical scrollbar instead of growing the card.
- * A quote has nothing to scroll: it is prose, and the card should be as tall as
- * the words in it.
+ * The obsidian theme sets `overflow-x: auto`, and per spec `visible` on the
+ * other axis then computes to `auto` too, so a wrapping quote grew a vertical
+ * scrollbar instead of growing the card. A quote has nothing to scroll.
  */
 .prose .callout[data-callout='quote'] > .callout-content {
   overflow: visible;
@@ -294,11 +182,8 @@
   font-style: italic;
 }
 
-/* Own paragraph rhythm rather than the browser default: zeroed first, then
- * --qc-para-gap only between one paragraph and the next, never before the
- * first or after the last, so a multi-paragraph quote reads as one
- * quotation. See the header comment for why the flex `gap` above cannot do
- * this job on its own. */
+/* Zeroed, then spaced only between one paragraph and the next, never before the
+   first or after the last. */
 .prose .callout[data-callout='quote'] .callout-content > p,
 .prose blockquote:not(.callout):not(.twitter-tweet) > p {
   margin: 0;
@@ -316,13 +201,6 @@
   content: '\201c';
   position: absolute;
   z-index: 0;
-  /* Negative on purpose now: it pushes the glyph up and left past the
-   * card's own padding edge, which is exactly what overflow: hidden on the
-   * card clips away, so the mark runs off the top-left corner instead of
-   * sitting fully inside it. A much larger negative value used to erase the
-   * glyph outright (a 7rem glyph at -0.35em never showed at all); this one
-   * is sized to crop only the tip, see --qc-glyph-inset above for the exact
-   * numbers and the reasoning. */
   inset-block-start: var(--qc-glyph-inset);
   inset-inline-start: var(--qc-glyph-inset);
   font-family: Georgia, 'Times New Roman', serif;
@@ -348,11 +226,9 @@
 
 /* --------------------------------------------------------- copy button */
 
-/* Appended into the card at runtime by QuoteCopy.astro; neither markup shape
- * ever contains one. Selector scoped to the card's own direct child, not
- * just `.qc-copy` alone, so it out-specifies the `> *` rule near the top of
- * this file that would otherwise leave it `position: relative` instead of
- * absolute. */
+/* Appended at runtime by QuoteCopy.astro; neither markup shape contains one.
+   Scoped to the card's own direct child so it out-specifies the `> *` rule
+   above, which would otherwise leave it relative instead of absolute. */
 .prose .callout[data-callout='quote'] > .qc-copy,
 .prose blockquote:not(.callout):not(.twitter-tweet) > .qc-copy {
   position: absolute;
@@ -387,10 +263,8 @@
   color: var(--accent);
 }
 
-/* Visible on hovering anywhere on the card, not just the button itself (the
- * same reasoning .note-copy-link uses in sidenotes.css), and on the button's
- * own :focus-visible so a keyboard user tabbing straight to it still sees
- * it appear. */
+/* Hovering anywhere on the card reveals it, plus the button's own focus so a
+   keyboard user tabbing to it still sees it appear. */
 .prose .callout[data-callout='quote']:hover .qc-copy,
 .prose .callout[data-callout='quote']:focus-within .qc-copy,
 .prose blockquote:not(.callout):not(.twitter-tweet):hover .qc-copy,
