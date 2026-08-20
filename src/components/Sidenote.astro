@@ -2,36 +2,22 @@
 /**
  * <Sidenote>inline text</Sidenote>
  *
- * A numbered note anchored to the exact word it follows. Called from
- * migrated MDX content without an import, it is injected globally via the
- * `components` prop, so its public shape (tag name, slot content) must not
- * change.
+ * A numbered note anchored to the word it follows. Injected globally into MDX,
+ * so its public shape (tag name, slot content) must not change.
  *
- * - Numbering is a CSS counter on <body> (see src/styles/sidenotes.css),
- *   no client JS, works even if this is the only Sidenote on the page.
- * - Each instance also gets a build-time sequential id (`sidenote-1`,
- *   `sidenote-2`, ...) for its own permalink: a normal-sized copy-link button
- *   that appears in the note's own top-right corner on hover/focus. Clicking
- *   it copies the anchor URL and does not navigate, handled by
- *   FootnoteSidenotes.astro's own click listener, not BaseLayout's delegated
- *   `a[data-copy-link]` handler (that one deliberately lets the browser
- *   follow the link, the opposite of what this control should do). It lives
- *   inside `.note-text`, not in the running text, see
- *   src/styles/sidenotes.css.
- * - Hovering or focusing anywhere on the note (marker, popover, or the
- *   floated margin text) highlights the text it is attached to, the plain
- *   prose right before this tag. That text is not wrapped in anything here,
- *   so the highlight is applied to a Range by
- *   src/components/FootnoteSidenotes.astro, not by this component's markup.
- * - On wide viewports the note text floats into the right margin, the
- *   double-ANSI frame (thick solid inline-start edge, thin double rule on
- *   the other three sides), always visible. On narrow viewports it
- *   collapses to a tap/click-to-reveal popover, toggled by a checkbox (zero
- *   JS either way). Following a link to this note's own anchor rings the
- *   marker, it never forces the popover open (nothing on this page should
- *   land in a state the reader cannot dismiss).
- * - Slot content MUST be inline only: text, <strong>, <em>, <a>, <code>.
- *   Never headings or block elements, this renders inside a <span>, and a
+ * - Numbering is a CSS counter, no client JS.
+ * - Each instance gets a build-time id for its own permalink. The copy button
+ *   lives inside `.note-text`, not the running text, and copies without
+ *   navigating: FootnoteSidenotes.astro handles it rather than BaseLayout's
+ *   delegated handler, which deliberately lets the browser follow the link.
+ * - Hovering anywhere on the note highlights the prose it is attached to. That
+ *   text is not wrapped in anything, so the highlight is painted on a Range by
+ *   FootnoteSidenotes.astro rather than by this markup.
+ * - Wide: the text floats into the right margin, always visible. Narrow: a
+ *   tap-to-reveal popover toggled by a checkbox. No JS either way. Following a
+ *   link to this note's anchor rings the marker and never forces the popover
+ *   open, since nothing should reach a state the reader cannot dismiss.
+ * - Slot content MUST be inline only. This renders inside a <span>, and a
  *   popover card is not a place for a blockquote.
  */
 import { localeFromPath, t } from '../i18n/ui'

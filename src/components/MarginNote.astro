@@ -2,27 +2,17 @@
 /**
  * <MarginNote>inline text</MarginNote>
  *
- * Same mechanics as <Sidenote> (src/components/Sidenote.astro) but
- * unnumbered: no counter mark appears in the text flow, the note just rests in
- * the margin. Called from migrated MDX content without an import.
+ * The same mechanics as <Sidenote> but unnumbered: no counter mark in the text
+ * flow, the note just rests in the margin. Injected globally into MDX.
  *
- * - On wide viewports the note text floats into the right margin, unmarked,
- *   the same double-ANSI frame as a Sidenote (thick solid inline-start edge,
- *   thin double rule on the other three sides), always visible.
- * - On narrow viewports there is no margin to show it in, so a small dot
- *   becomes the tap/click target for a popover (checkbox hack, zero JS).
- * - Each instance also gets a build-time sequential id (`marginnote-1`, ...)
- *   for its own permalink: a normal-sized copy-link button in the note's own
- *   top-left corner on hover/focus. Clicking it copies the anchor URL and
- *   does not navigate, handled by FootnoteSidenotes.astro's own click
- *   listener, not BaseLayout's delegated `a[data-copy-link]` handler (that
- *   one deliberately lets the browser follow the link). Lives inside
- *   `.note-text`, see src/styles/sidenotes.css.
- * - Hovering or focusing the note highlights the text it is attached to,
- *   done by src/components/FootnoteSidenotes.astro via the CSS Custom
- *   Highlight API, since that text is not wrapped in anything here.
- * - Slot content MUST be inline only: text, <strong>, <em>, <a>, <code>.
- *   Never headings or block elements.
+ * - Wide: floats into the right margin, unmarked, always visible. Narrow:
+ *   there is no margin to show it in, so a small dot becomes the tap target
+ *   for the same checkbox popover.
+ * - Its copy button behaves exactly as a Sidenote's, in the top-LEFT corner
+ *   rather than the right.
+ * - Hovering highlights the text it is attached to, painted on a Range by
+ *   FootnoteSidenotes.astro since that text is not wrapped in anything.
+ * - Slot content MUST be inline only.
  */
 import { localeFromPath, t } from '../i18n/ui'
 import '../styles/sidenotes.css'

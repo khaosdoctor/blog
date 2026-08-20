@@ -288,32 +288,19 @@ const RULE = '──────────────────────
   }
 
   /*
-   * One hard-offset shadow behind the whole brand lockup (mark and wordmark
-   * together), not two separate ones: `filter: drop-shadow()` traces the
-   * alpha of every non-transparent pixel underneath it, and the mark and the
-   * word are visually separate shapes with real clear space between them, so
-   * one filter here already throws a shadow behind each independently, the
-   * same as applying it twice would. Reused rather than duplicated on
-   * `.mark` itself: `.mark` keeps its own `overflow: hidden` (clips the
-   * character grid to its box), and a filter on that same element would
-   * clip its own shadow off at that boundary before it ever painted.
-   * `.brand` has no such clipping, so the shadow the owner asked for
-   * actually shows.
+   * One shadow behind the whole lockup rather than two: `drop-shadow()` traces
+   * the alpha of everything under it, and the mark and word are separate shapes
+   * with clear space between them, so one filter already throws a shadow behind
+   * each. It goes on `.brand` and not `.mark`, which keeps its own
+   * `overflow: hidden` and would clip its own shadow off at that boundary.
    *
-   * `--brand-shadow-offset` (theme.css), not `--code-shadow-offset`: the
-   * first version of this read the wordmark as drawn twice rather than
-   * shadowed, Lucas's own report, and the cause was exactly the offset,
-   * 4px against a 0.85rem/13.6px font with no blur to join it to the
-   * letter behind it. `--brand-shadow-offset` (1px) is proportionate to
-   * this small a font the same way 4px is to a code frame; see that
-   * token's own comment for the full reasoning. `--code-shadow-color`
-   * itself is still shared: it is only a colour, already `light-dark()`,
-   * with no size assumption baked in.
+   * `--brand-shadow-offset`, not `--code-shadow-offset`: at 4px against a
+   * 13.6px font with no blur, the wordmark read as drawn twice rather than
+   * shadowed. The COLOUR token is still shared, since it carries no size
+   * assumption.
    *
-   * This does not change the wordmark's own measured contrast against the
-   * page (a shadow is not a WCAG-recognised way to clear a text ratio); see
-   * the report for the actual numbers and what to do about the two day
-   * colours that read weak on the sepia ground.
+   * This does not change the wordmark's measured contrast: a shadow is not a
+   * WCAG-recognised way to clear a text ratio.
    */
   /*
    * `position: relative` + `z-index: 1` is about the CURSOR, not the brand:

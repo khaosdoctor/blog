@@ -162,22 +162,19 @@ export default defineConfig({
       remarkPlugins: [
         remarkReadingTime,
         /*
-         * Display math only. With `$...$` inline math on (remark-math's own
-         * default), any two dollar signs in one paragraph are a math span, and
-         * these posts are full of prices: "It cost $4,950 Canadian dollars […]
-         * and $9,800 for the one with 8Kb" rendered as one KaTeX expression,
-         * every letter between the two prices stacked on its own line.
+         * Inline `$x$` stays ON. It looks like a trap (two dollar signs in one
+         * paragraph become one expression, so "$4,950 ... and $9,800" rendered
+         * as a single KaTeX span with every letter between them stacked
+         * vertically) and turning it off was tried. It cannot be: the RSA post
+         * alone carries dozens of real single-dollar expressions, several with
+         * braces (`$\frac{a}{b}$`), and with the option off those braces reach
+         * MDX's own expression parser and fail the build outright.
          *
-         * Turning the single-dollar form off rather than escaping the dollars
-         * in that post, because the same trap is set in every post that quotes
-         * two prices, and nobody writing one is going to remember. Checked
-         * before changing it: every `$…$` pair in `content/blog` is a shell
-         * variable or a template literal inside a code fence (which remark
-         * never parses as math anyway) or a price in prose. The only real
-         * expression on the site is a `$$…$$` display block, which this leaves
-         * exactly as it was.
+         * So the rule is on the writing side, in content/WRITING.md: a literal
+         * dollar in prose is `\$`. Only currency needs it; a lone `$` with no
+         * partner on the same line is already safe.
          */
-        [remarkMath, { singleDollarTextMath: false }],
+        remarkMath,
         remarkEmbeds,
         remarkFigures,
         remarkWikilinks,
