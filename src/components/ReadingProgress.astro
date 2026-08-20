@@ -107,11 +107,6 @@
      */
     let stops: number[] = []
     /*
-     * Whether the step from `stops[i]` to `stops[i + 1]` crosses the nav, which
-     * happens exactly once: at the seam between the two runs. See `moveHead`.
-     */
-    let jumps: boolean[] = []
-    /*
      * The distance from the cursor's home edge to the start of the first run,
      * measured once and then reused, because it is the one number here that
      * does not change: it is the cursor's own width (em, off a rem font-size),
@@ -203,22 +198,17 @@
        * that exist, so the head standing at `stops[lit]` is standing on the
        * one it is about to write.
        */
-      const index = Math.min(Math.max(lit, 0), last)
-      const next = Math.min(index + 1, last)
       /*
-       * The slide between two stops comes from how far `shown` has travelled
-       * toward the moment this dash lights, not from `shown`'s own fraction:
-       * the dash lights at `threshold(index)`, so measuring against that is
-       * what makes the head arrive exactly as the dash appears rather than
-       * reaching the next slot early and waiting there.
+       * One stop per dash, no interpolation between them. Sliding smoothly
+       * between two stops is what let the block drift away from its own trail:
+       * it was always somewhere between the dash just written and the one
+       * coming, while the trail only ever moves a whole character at a time.
+       * Stepping means the two are the same thing by construction, and it is
+       * what typing looks like: a cursor jumps a character, it does not glide
+       * across one.
        */
-      const from = index === 0 ? 0 : threshold(index - 1)
-      const to = threshold(index)
-      const span = to - from
-      const progress = span > 0 ? (shown - from) / span : 1
-      const fraction = jumps[index] === true ? 0 : Math.min(Math.max(progress, 0), 1)
-      const x = stops[index] + (stops[next] - stops[index]) * fraction
-      cursor.style.setProperty('--cursor-x', `${x.toFixed(2)}px`)
+      const index = Math.min(Math.max(lit, 0), last)
+      cursor.style.setProperty('--cursor-x', `${stops[index].toFixed(2)}px`)
     }
 
     /** Adds or removes only the spans the fill has actually crossed. */
@@ -235,17 +225,27 @@
      * the whole of what marks the seam: the step onto dash `i` crosses the nav
      * exactly when dash `i` and dash `i - 1` came from different runs.
      */
-    function measureHead(edges: number[], runs: number[]): void {
+    /*
+     * `lefts` and not the trailing edges this used to read. Two reasons, one
+     * of them a bug: a dash carries `letter-spacing: 0.4em`, and that space is
+     * part of its own advance, so its right edge is most of half an em past
+     * the glyph. Stacking that on the final dash put the head inside the
+     * search button. Standing the head on the LEFT edge of the dash it is
+     * about to write also says what the block means: the pen is on the
+     * character it is writing, not past it.
+     *
+     * The last stop is the last dash's own left edge as well, so a fully read
+     * post parks the block on the final dash rather than in the chrome beyond
+     * it. Nothing is lost: that dash is lit either way.
+     */
+    function measureHead(lefts: number[]): void {
       if (cursor === null) return
       const start = fills[0].getBoundingClientRect().left
       if (lead === null) lead = start - cursor.getBoundingClientRect().left
       const home = start - lead
+      const last = lefts.length - 1
       stops = [0]
-      jumps = []
-      for (const [index, edge] of edges.entries()) {
-        stops.push(edge - home)
-        jumps.push(index > 0 && runs[index] !== runs[index - 1])
-      }
+      for (let index = 0; index <= last; index += 1) stops.push(lefts[Math.min(index, last)] - home)
     }
 
     /*
@@ -257,8 +257,7 @@
       for (const dash of track) dash.classList.remove('lit')
       lit = 0
       track = []
-      const edges: number[] = []
-      const runs: number[] = []
+      const lefts: number[] = []
       for (const [run, fill] of fills.entries()) {
         const edge = fill.getBoundingClientRect().right
         for (const dash of fill.querySelectorAll<HTMLElement>('.dash')) {
@@ -267,15 +266,14 @@
           // the last dash that does in fact draw.
           if (box.right <= edge + 0.5) {
             track.push(dash)
-            edges.push(box.right)
-            runs.push(run)
+            lefts.push(box.left)
             continue
           }
           dash.classList.remove('lit')
         }
       }
       jitter = track.map(() => Math.random() * JITTER)
-      measureHead(edges, runs)
+      measureHead(lefts)
       paint()
     }
 
