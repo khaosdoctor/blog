@@ -2,42 +2,29 @@
 import { formatCoverByline } from '../lib/cover'
 
 /**
- * The post's own cover, drawn in the browser on load, over the same spot the
- * plain heading/date/byline occupy: "instead of rendering the title, date,
- * byline the way we are doing today, draw the entire cover at the top of the
- * page" (the request this answers). `src/scripts/cover-hero.ts` reads the
- * data-* attributes below and feeds them straight to `buildCoverSvg`
- * (src/lib/cover.ts), the exact function `scripts/cover.ts` also rasterises
- * with `sharp` at build, so the drawn cover and the static og:image are
- * never two different drawings of the same post.
+ * The post's cover, drawn in the browser on load over the spot the plain
+ * heading, date and byline occupy. `src/scripts/cover-hero.ts` feeds the
+ * data-* attributes below to `buildCoverSvg`, the same function the build-time
+ * raster uses, so the drawn cover and the og:image are never two drawings.
  *
- * The real `<h1>`, the real `<time>` and the real byline paragraph
- * (Authors.astro) stay exactly where the page already puts them; nothing
- * here duplicates their markup. This component only adds a decorative
- * container, empty and `hidden` until the script fills it, so a reader with
- * no JavaScript gets today's page, unchanged: the container never gets an
- * `hidden` removed, so it never takes up space or paints anything.
+ * The real `<h1>`, `<time>` and byline stay where the page puts them. This adds
+ * only a decorative container, empty and `hidden` until the script fills it, so
+ * a reader with no JavaScript gets today's page unchanged.
  *
- * Once the script does fill it, the real elements it repeats visually (the
- * `<h1>`, the `<time>` and its dot, and the byline paragraph) are hidden the
- * sr-only way, not removed: still in the accessibility tree, still what a
- * screen reader, the RSS reader, the social scraper and search all read,
- * just not painted twice on screen.
+ * Once filled, the elements it repeats visually go sr-only rather than being
+ * removed: still what a screen reader, an RSS reader, a scraper and search all
+ * read, just not painted twice.
  *
- * The category chip and the reading time are the exception, and the empty
- * `.cover-hero-meta` slot below is why it exists. The card's last line is
- * those two, but the chip is a real link to the category page and the reading
- * time is a real hover control with its own popup (ReadingTime.astro,
- * scripts/reading-time-hover.ts). Drawing them as SVG text and hiding the
- * originals would leave a picture of a link and a picture of a control, so
- * instead the SVG leaves that slot empty in the browser (`drawMeta: false`)
- * and cover-hero.ts moves the page's own `.meta` row into this slot, over the
- * card, at the coordinates `coverOverlay` reports. Nothing is copied and
- * nothing is redrawn: it is the same paragraph, the same anchor, the same
- * button, only somewhere else on the page. The one cost is reading order,
- * since the row now comes before the `<h1>` in the DOM rather than after it,
- * which reads as a dateline over a headline and is the ordinary way round for
- * a card like this.
+ * The chip and the reading time are the exception, and the empty
+ * `.cover-hero-meta` slot is why. The chip is a real link and the reading time a
+ * real hover control, so drawing them as SVG text would leave a PICTURE of a
+ * link and a picture of a control. The SVG omits them in the browser
+ * (`drawMeta: false`) and the script moves the page's own `.meta` row into this
+ * slot at the coordinates `coverOverlay` reports: same paragraph, same anchor,
+ * same button, somewhere else on the page.
+ *
+ * The one cost is reading order, since that row now precedes the `<h1>` in the
+ * DOM: a dateline over a headline, which is the ordinary way round for a card.
  */
 interface Props {
   slug: string

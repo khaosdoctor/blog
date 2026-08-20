@@ -3,21 +3,16 @@ import type { Page } from 'astro'
 import { t, type Locale } from '../i18n/ui'
 
 /**
- * The list's own page nav, at the bottom of every archive, section and tag
- * page long enough to page. Takes Astro's own `page` object straight from
- * `paginate()` (see the page files this renders on: they all use the
- * `[...page].astro` shape, page 1 bare and page N at `.../N/`), so the
- * previous/next targets (`page.url.prev`/`next`) come from Astro's own route
- * generator rather than being rebuilt here. The individual page numbers are
- * not something `paginate()` hands back, only prev/next/first/last, so those
- * are built from `basePath` plus the same `N/` convention every page file
- * already generates its own routes with.
+ * The page nav at the bottom of every list long enough to page.
  *
- * Every control (previous, next, each visible page number) is a link styled
- * as one of the header's own icon buttons (ThemeToggle.astro/
- * SettingsPanel.astro): they navigate, so they stay <a> even where they look
- * like buttons, the current page and a disabled previous/next render as a
- * plain <span> instead since neither one goes anywhere.
+ * Takes Astro's own `page` object from `paginate()`, so prev/next come from its
+ * route generator rather than being rebuilt here. The individual numbers are
+ * not something `paginate()` hands back, so those are built from `basePath`
+ * plus the same `N/` convention the page files already generate.
+ *
+ * Every control is a link styled as one of the header's icon buttons: they
+ * navigate, so they stay <a> even where they look like buttons. The current
+ * page and a disabled prev/next are plain <span>, since neither goes anywhere.
  */
 interface Props {
   page: Page<unknown>
@@ -34,24 +29,16 @@ function hrefFor(pageNumber: number): string {
 type Slot = number | 'ellipsis'
 
 /**
- * Which page numbers actually render, out of `count`. The rule is MUI's own
- * `usePagination` (boundaryCount 1, siblingCount 1), not an invented one:
- * page 1 and the last page always render as real numbers, the current page
- * always keeps one sibling on each side, and an ellipsis only ever replaces
- * a run of two or more hidden pages, since one hidden between two visible
- * numbers would read the same length as just printing it. Below 8 pages
- * (`COLLAPSE_FLOOR`, below) those three rules already cover every page
- * between them, so nothing ever collapses.
+ * Which page numbers render, out of `count`. MUI's own `usePagination` rule
+ * (boundaryCount 1, siblingCount 1) rather than an invented one: first and last
+ * always render, the current page keeps one sibling each side, and an ellipsis
+ * only ever replaces two or more hidden pages, since one hidden between two
+ * visible numbers would read the same length as printing it.
  *
- * The property this buys, and the reason it was picked over a plainer
- * "first four, ellipsis, last four": every render at 8 pages or past it
- * produces exactly 7 slots (2 boundary numbers, up to 2 ellipses, up to 3
- * sibling numbers, the current page), a constant width regardless of which
- * page is current, so the row of controls never shifts under a reader's
- * pointer as they move through it. And unlike a fixed first-N/last-N split,
- * the current page can never fall inside the hidden middle with nothing to
- * mark where it is: it is always one of the rendered numbers, or is covered
- * by the boundary/sibling numbers already on screen.
+ * What that buys over a plainer first-N/last-N split: every render at 8 pages or
+ * more produces exactly 7 slots, a constant width whichever page is current, so
+ * the row never shifts under the reader's pointer. And the current page can
+ * never fall inside the hidden middle with nothing marking where it is.
  */
 function paginationSlots(count: number, current: number): Slot[] {
   const BOUNDARY = 1
