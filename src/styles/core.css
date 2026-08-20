@@ -1,15 +1,11 @@
 /*
- * The page itself: the reset, the two grounds, the landmark layout, and the
- * handful of elements that are not prose, not chrome and not a component.
+ * The page itself: the reset, the two grounds, the landmark layout, the footer,
+ * and the elements that are not prose, not chrome and not a component.
  *
- * This was BaseLayout.astro's own <style is:global> block. It is a stylesheet,
- * not a layout concern, so it reads as one. Component-scoped styles stay in
- * their components; anything here applies to every page.
+ * Component-scoped styles stay in their components; anything here applies to
+ * every page.
  */
 
-/* Theming is native light-dark() + color-scheme. ThemeToggle.astro narrows
-   color-scheme to one keyword on an explicit choice; every token follows
-   without being rewritten. */
 *,
 *::before,
 *::after {
@@ -17,71 +13,47 @@
 }
 
 /*
- * The page ground lives on <html>, not on <body>, and that is load-bearing
- * rather than a style choice. ConwayField.astro draws a fixed canvas at
- * z-index: -1 so the header, main and footer paint above it as ordinary
- * in-flow boxes. But CSS paints a stacking context in a fixed order, and
- * step 2 is negative-z-index children while step 3 is the backgrounds of
- * non-positioned block descendants. <body> is one of those descendants, so
- * an opaque background on it paints over the canvas: the field was running
- * the whole time and simply invisible. On <html> the background propagates
- * to the canvas surface and is painted before step 2, so the field shows and
- * the ground still covers the viewport past the document's own height.
+ * The ground lives on <html>, not <body>, and that is load-bearing.
+ * ConwayField draws a fixed canvas at z-index: -1. CSS paints a stacking
+ * context in a fixed order: step 2 is negative-z-index children, step 3 is the
+ * backgrounds of non-positioned block descendants. <body> is one of those, so
+ * an opaque background there paints OVER the canvas. On <html> the background
+ * propagates to the canvas surface and is painted before step 2.
  */
 html {
   background: var(--bg);
   /*
-   * The header below is sticky, so it covers the top of the viewport, and an
-   * anchor jump (a TOC entry, a heading link, the skip link) would put its
-   * target underneath it. scroll-padding on the scrolling element is what
-   * moves every one of those stops down at once, rather than each target
-   * having to know a header exists.
+   * The header is sticky, so an anchor jump would put its target underneath it.
+   * scroll-padding on the scrolling element moves every stop down at once,
+   * rather than each target having to know a header exists.
    *
-   * The value is the header's own height, derived rather than measured: the
-   * tallest thing in that row is an icon button (--icon-btn-hit, the 44px
-   * touch target), and .chrome pads 0.4rem above and below it. Headings add
-   * their own 1.5rem on top of this (scroll-margin-block-start, in
-   * prose/headings.css), which is what gives a heading air above it instead
-   * of parking it flush against the header's bottom rule.
+   * The value is the header's own height, derived: the tallest thing in that
+   * row is a 44px icon button and .chrome pads 0.4rem either side. Headings add
+   * their own 1.5rem (prose/headings.css) so they get air rather than parking
+   * flush against the rule.
    */
   scroll-padding-block-start: calc(var(--icon-btn-hit) + 0.8rem);
 }
 
 /*
- * The site's actual font default lives here, on <body>, since every other
- * element without its own font-family declaration inherits from it. It
- * used to read --font-body: correct for a post's running text, but that
- * made --font-body the silent default for everything else too (the
- * footer's copyright line, 404, offline and search's own copy, the OSS
- * intro paragraph, the machine-translation banner), none of which ever
- * picked a body serif/sans on purpose. Departure Mono (--font-display) is
- * the actual, deliberate default for anything on the site that has not
- * picked a face: theme.css's own top comment already calls the coming
- * design "ASCII/ANSI, 8-bit, pixelated", prose is the one still-open
- * exception (docs/design.md), and a page's un-styled chrome text was never
- * meant to read as part of that exception too.
+ * Departure Mono is the site's real default, since everything without its own
+ * font-family inherits from here. This used to read --font-body, which made a
+ * body serif the silent default for the footer, 404, offline, search and the
+ * OSS page, none of which ever chose one.
  *
- * .prose (prose.css) now declares --font-body of its own accord, for
- * exactly that reason: a post's own body copy has to keep reading
- * whatever it reads today regardless of what <body> defaults to, so that
- * choice moved from relying on inheritance to being written down on
- * purpose. Everything else inside .prose already carried its own explicit
- * font-family before this change (headings, code, tables, links) and
- * still does: adding this one declaration is the whole fix .prose needed.
+ * .prose declares --font-body itself for exactly that reason (prose.css): a
+ * post's body copy must not follow this.
  */
 body {
   margin: 0;
   padding: 0 var(--gutter);
   /*
-   * A column flexbox at least as tall as the viewport, so the footer can be
-   * pushed to the bottom on a short page (a tag with two posts, 404, the
-   * offline page) instead of finishing halfway up with empty ground under
-   * it. `main` takes the leftover height below.
+   * A column flexbox at least as tall as the viewport, so the footer is pushed
+   * to the bottom on a short page instead of finishing halfway up.
    *
-   * 100dvh rather than 100vh: on mobile browsers the toolbar retracts as you
-   * scroll, and 100vh is the tall-toolbar figure, which pushes the footer a
-   * toolbar's height past the bottom of the screen on exactly the short
-   * pages this is meant to fix.
+   * 100dvh and not 100vh: on mobile 100vh is the tall-toolbar figure, which
+   * pushes the footer a toolbar's height off-screen on exactly the short pages
+   * this fixes.
    */
   min-block-size: 100dvh;
   display: flex;
@@ -91,14 +63,9 @@ body {
   font-family: var(--font-display);
   font-size: var(--text-base);
   line-height: var(--leading);
-  /* Both spacings come from the chosen face's own block in theme.css, so
-     switching to the sans changes the spacing with it. Left reading the
-     body tokens even though the default face above is no longer one: a
-     reader who never enters .prose never sees text at --text-base/
-     --leading/--tracking-body/--word-spacing-body zoomed in close enough
-     for a monospace face's own metrics to want different values, and
-     giving Departure Mono its own set here, sitewide, on a guess was not
-     part of what was asked this round. */
+  /* Still the body tokens even though the face above is not a body face: a
+     reader who never enters .prose never sees text close enough for a monospace
+     face's own metrics to want different values. */
   letter-spacing: var(--tracking-body);
   word-spacing: var(--word-spacing-body);
   -webkit-font-smoothing: var(--font-smoothing);
@@ -113,36 +80,27 @@ footer {
 }
 
 /*
- * Takes every pixel the header and footer leave, so a page with little
- * content still reaches the bottom of the viewport and the footer rides
- * there rather than floating in the middle.
+ * Takes every pixel the header and footer leave, so a short page still reaches
+ * the bottom of the viewport.
  *
- * `1 0 auto` rather than the usual `flex: 1`: that shorthand is `1 1 0%`,
- * which starts main at zero height and would let it shrink under a long
- * post. Growing from the content's own height only ever adds space.
+ * `1 0 auto` and not `flex: 1`: that shorthand is `1 1 0%`, which starts main
+ * at zero height and would let it shrink under a long post.
  */
 main {
   flex: 1 0 auto;
 }
 
 /*
- * The header rides along as the page scrolls, pinned where it already draws
- * rather than moved anywhere. Sticky, not fixed, so it keeps taking up its
- * own row in the flow above: fixed would take it out of flow and the first
- * thing on every page would start underneath it.
+ * Sticky rather than fixed, so the header keeps its row in the flow: fixed
+ * would start every page's first element underneath it.
  *
- * The opaque ground is what makes it readable while it does that. <body> is
- * deliberately transparent so the Conway field shows through (see the <html>
- * rule above), which means an unpainted header would have running text
- * scrolling visibly through the wordmark and the buttons. It reads --bg, the
- * same token <html> paints, so it follows a theme switch with no second
- * value to keep in step.
+ * The opaque ground is what makes it readable while scrolling. <body> is
+ * deliberately transparent so the Conway field shows through, so an unpainted
+ * header would have running text scrolling visibly through the wordmark.
  *
- * z-index above the skip link's own 1, so the skip link passes under the
- * header rather than over it. Nothing on the page draws above this any
- * more: the reading progress used to, as a fixed bar pinned over the top of
- * the window at z-index 3, and it is now drawn by this header's own dashes
- * (ReadingProgress.astro, BrandHeader.astro's `.dash`).
+ * z-index 2 is above the skip link's 1. Nothing draws above it any more: the
+ * reading progress used to, as a fixed bar at 3, and is now this header's own
+ * dashes (ReadingProgress.astro).
  */
 header {
   position: sticky;
@@ -168,14 +126,9 @@ header {
 }
 
 footer {
-  /*
-   * The top value was 5rem. A page that ends in Pagination.astro already
-   * closes with its own rule and top spacing (2.5rem margin, 1.5rem
-   * padding, then a border), so the two stacked read as an oversized
-   * empty run before the footer's own rule below. Halved rather than
-   * removed: a page with no pagination (a single post) still wants real
-   * separation from the footer, just not doubled up.
-   */
+  /* Was 5rem. A page ending in Pagination already closes with its own rule and
+     spacing, so the two stacked read as an oversized empty run. Halved rather
+     than removed: a page with no pagination still wants separation. */
   margin-block: 2.5rem 3rem;
   padding-block-start: 1rem;
   color: var(--muted);
@@ -183,22 +136,10 @@ footer {
 }
 
 /*
- * Same width as the header past the same breakpoint: BrandHeader.astro's
- * .chrome caps itself at 80vw past 70rem (the "there is room to spare"
- * breakpoint footnotes.css already uses) rather than the reading column,
- * since chrome across the top of the page is not prose. The footer is
- * chrome too, so it matches the exact property, value and breakpoint here
- * rather than only lining up at one width. Below 70rem both still share
- * the plain var(--measure) from the "header, main, footer" rule above, so
- * nothing here changes below the breakpoint.
- */
-/*
- * The header and the footer both widen past the reading column at the same
- * breakpoint, so the page's top and bottom edges line up with each other and
- * with the post list between them (PostList.astro and Pagination.astro read
- * the same `--chrome-width`). `main` itself deliberately stays at
- * `--measure`: a post's running text wants the narrow column, and the list
- * breaks out of it on its own rather than dragging every post wide with it.
+ * The header and footer widen past the reading column together, so the page's
+ * top and bottom edges line up with each other and with the post list between
+ * them. `main` stays at `--measure`: a post's running text wants the narrow
+ * column, and the list breaks out of it on its own.
  */
 @media (min-width: 70rem) {
   header,
@@ -208,27 +149,20 @@ footer {
 }
 
 /*
- * The footer's own rule, drawn the same way BrandHeader.astro's .chrome
- * draws its own top edge: box-drawing corners plus a run of dashes filling
- * whatever room is left between them, the same --muted, the same
- * font-display, the same 0.4em letter-spacing on the dash run, flex: 1 and
- * overflow: hidden on the fill so it crops to whatever width the footer
- * actually has rather than reflowing. Corners point down (└─ / ─┘) instead
- * of repeating the header's up-pointing ┌─/─┐: the header opens the frame
- * at the top of the page, this closes it at the bottom, so the two read as
- * one box rather than two unrelated bars. Duplicated by hand rather than
- * shared with BrandHeader.astro, which is held by another agent this pass;
- * if this pairing is meant to stay in lockstep going forward, the corner
- * treatment belongs in one shared place (styles/theme.css, or a small
- * chrome-rule partial) rather than two copies of the same characters.
+ * The footer's rule, drawn the way BrandHeader draws its own top edge: corners
+ * plus a run of dashes cropped to whatever room is left. These point down
+ * (└─ / ─┘) against the header's ┌─ / ─┐, so the two read as one box around
+ * the page rather than two unrelated bars.
+ *
+ * Duplicated by hand rather than shared. If the pairing is meant to stay in
+ * lockstep, the corner treatment belongs in one place.
  */
 footer .rule {
   display: flex;
   align-items: center;
-  /* 10px, the owner's own number, not 1rem: a rem here would move with the
-     reader's text-size setting, and the distance between a drawn rule and
-     the line under it is a fixed optical relationship rather than something
-     that should scale with the type. */
+  /* 10px and not 1rem: a rem would move with the reader's text-size setting,
+     and the distance between a drawn rule and the line under it is a fixed
+     optical relationship. */
   margin-block-end: 10px;
 }
 
@@ -247,15 +181,8 @@ footer .rule-fill {
   white-space: nowrap;
 }
 
-/*
- * Copyright left, the credits/licence/repo-icon group right, on one line
- * at desktop width. Below that there is not enough room for both without
- * crowding or truncating, so flex-wrap lets the whole `.links` group drop
- * to its own line under the copyright rather than overlapping or
- * shrinking either one. Spacing is margin rather than a shorthand
- * row/column property, so it survives both the wrapped and unwrapped
- * case with the same two declarations.
- */
+/* Copyright left, links right, on one line at desktop width. Wrapping lets the
+   whole group drop below rather than crowding either one. */
 footer .row {
   display: flex;
   flex-wrap: wrap;
@@ -263,10 +190,8 @@ footer .row {
   align-items: baseline;
 }
 
-/* Both children of `.row` are `<p>`, and the UA sheet's own top margin on
-   each was adding a full line between the rule above and this line, on top
-   of the rule's own 10px. Zeroed here so the rule's margin is the only thing
-   setting that distance. */
+/* Both are <p>, and the UA sheet's top margin was adding a full line on top of
+   the rule's own 10px. */
 footer .copyright,
 footer .links {
   margin-block-start: 0;
@@ -279,22 +204,17 @@ footer .copyright {
 
 footer .version {
   margin-block-start: 0.75rem;
-  /* Zero, so the only space between this line and the credits under it is
-     the one the credits set. Both are `<p>`, and the UA sheet's own bottom
-     margin was adding a full line of its own on top of that. */
+  /* Zero, so the only space below is the one the credits set. */
   margin-block-end: 0;
   text-align: center;
 }
 
 /*
- * Centred right under the version, 2pt smaller, and reading as the same dim
- * text rather than as a link: the quietest line in the footer, which is what
- * a licence attribution can be once it is reachable at all.
+ * The quietest line in the footer, which is what a licence attribution can be
+ * once it is reachable at all.
  *
- * `pt` is an absolute CSS length (1pt = 1/72in), so subtracting it from the
- * version's own size gives the owner's "2pt smaller" literally rather than a
- * rem guess standing in for it. The same technique the nav links use for
- * their own 2pt.
+ * `pt` is absolute (1pt = 1/72in), so subtracting it gives the "2pt smaller"
+ * literally rather than a rem guess standing in for it.
  */
 footer .credits {
   margin-block: 2px 0;
@@ -302,10 +222,9 @@ footer .credits {
   text-align: center;
 }
 
-/* Same opt-out as `.version a` above, for the same reason and with the same
-   hover and focus cues kept: no underline, no accent, inheriting the dim
-   colour of its own line, but still discoverable by pointer and reachable by
-   keyboard. Both are named exceptions in prose/links.css's own list. */
+/* Reads as the dim text around it rather than as a link. Hover and focus still
+   say it is interactive, which is the part that cannot be dropped. Both this
+   and `.version a` are named exceptions in prose/links.css. */
 footer .credits a {
   color: inherit;
   text-decoration: none;
@@ -321,9 +240,6 @@ footer .credits a:focus-visible {
   outline-offset: 2px;
 }
 
-/* Reads as the dim text around it, not as a link: no underline, no accent,
-   inheriting the colour of its own line. Hover and focus still say it is
-   interactive, which is the part that cannot be dropped. */
 footer .version a {
   color: inherit;
   text-decoration: none;
@@ -345,13 +261,8 @@ footer .links {
   font-size: 0.75rem;
 }
 
-/*
- * A flex row now, not plain inline text: the icon buttons carry real
- * height (--icon-btn-hit), and letting them sit in ordinary inline flow
- * next to the credits text would align them to it by baseline, low and
- * off-centre against their own chip. flex-wrap so a narrow screen drops
- * the buttons to their own line rather than crowding or clipping them.
- */
+/* A flex row, not inline text: the icon buttons carry real height, and inline
+   flow would align them to the text baseline, low against their own chip. */
 footer .links {
   display: flex;
   flex-wrap: wrap;
@@ -360,18 +271,12 @@ footer .links {
 }
 
 /*
- * The footer's own plain-text link (credits): the same hover treatment as
- * a nav link, since the real header (BrandHeader.astro) carries no plain
- * text nav of its own any more, only icon controls and the wordmark.
- * Padding stays present, and transparent, at rest, the same "reserve the
- * space before you need it" trick prose/links.css uses: a link that only
- * grew its padding on hover would push its neighbours, so the box is this
- * size in both states and only the fill changes.
+ * The padding is present and transparent at rest, the same trick
+ * prose/links.css uses: a link that grew its padding on hover would push its
+ * neighbours, so the box is this size in both states and only the fill changes.
  *
- * `.icon-link` (below) opts out of this rule outright rather than sharing
- * it: the header's button chrome it now matches has its own rest state,
- * its own chip and its own hover/focus treatment, none of which is this
- * inverted-fill/padding pair.
+ * `.icon-link` below opts out: it matches the header's button chrome, which has
+ * its own rest state and hover treatment.
  */
 footer a {
   padding-inline: 1px;
@@ -387,18 +292,13 @@ footer a:focus-visible {
 }
 
 /*
- * The header's own icon-button chrome, reused rather than reinvented:
- * ThemeToggle.astro's `.tt-open`/`.tt-open::before` pair, moved here
- * almost unchanged. `min-inline/block-size: var(--icon-btn-hit)` is the
- * WCAG 44px hit target; the *visible* square is smaller, drawn on
- * `::before` at `--icon-btn-chip` so it can shrink independently of the
- * box a pointer actually has to reach. `position: relative` puts the
- * glyph (an SVG, a sibling, not a pseudo-element) in the same painting
- * group as the absolutely positioned chip and later in it, so the chip's
- * own opaque `--bg` fill does not paint over the icon.
+ * The header's icon-button chrome, reused: 44px hit target, smaller chip drawn
+ * on `::before` so what is seen can shrink without shrinking what is clickable.
+ * `position: relative` puts the SVG in the same painting group as the
+ * absolutely positioned chip and later in it, so the chip's opaque fill does
+ * not paint over the icon.
  *
- * An <a>, not a <button>: every one of these goes straight to a
- * destination, nothing here opens a menu the way `.tt-open` does.
+ * An <a>, not a <button>: each one goes straight to a destination.
  */
 footer .icon-link {
   position: relative;
@@ -439,23 +339,21 @@ footer .icon-link:focus-visible::before {
   border-color: var(--accent);
 }
 
-/* Drawn on the real (larger) hit box, not the chip, so focus shows the
-   whole area a keyboard or switch-access user can actually activate: the
-   same reasoning `.tt-open:focus-visible` carries in ThemeToggle.astro. */
+/* On the real hit box, not the chip, so focus shows the whole area a keyboard
+   or switch-access user can activate. */
 footer .icon-link:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
 /*
- * Departure Mono, the decided display face, on every heading on the site and
- * not only the ones inside a post: the home page and the section pages have
- * titles too, and they were the ones still coming out in the body serif.
+ * Every heading on the site, not only the ones inside a post: the home and
+ * section pages have titles too, and they were the ones still coming out in the
+ * body serif.
  *
- * Weight 400 because the face ships one weight, and asking for bold gets a
- * synthesised smear. Being monospaced, a heading is wider than the same words
- * in the body face and a long h2 wraps sooner, which is a consequence of the
- * choice rather than something to correct.
+ * Weight 400 because the face ships one weight and asking for bold gets a
+ * synthesised smear. A monospaced heading wraps sooner than the same words in
+ * the body face, which is a consequence of the choice rather than a fault.
  */
 h1,
 h2,
@@ -475,11 +373,8 @@ h3 {
   text-wrap: balance;
 }
 
-/*
- * GFM stamps `class="sr-only"` on the footnotes heading and nothing defined it,
- * so a stray "Footnotes" showed up above the list on every post that has one.
- * It belongs in the accessibility tree and nowhere else.
- */
+/* GFM stamps this on the footnotes heading and nothing defined it, so a stray
+   "Footnotes" showed above the list on every post that has one. */
 .sr-only {
   position: absolute;
   inline-size: 1px;
@@ -502,34 +397,25 @@ img {
   height: auto;
 }
 
-/* Figures come from markdown now (remark-figures wraps a lone image and turns
-   its title into the caption), so they need global styles rather than the
-   scoped ones a component would carry. */
+/* Figures come from markdown (remark-figures), so they need global styles
+   rather than the scoped ones a component would carry. */
 figure {
   margin-block: var(--block-spacing);
   margin-inline: 0;
 }
 
 /*
- * A picture no longer fills the reading column edge to edge. At full width a
- * screenshot dropped into a post reads as a banner interrupting the text
- * rather than as an illustration inside it, so the default is 80% of the
- * column, centred, with the caption narrowing to match.
+ * A picture takes 80% of the column, not all of it: at full width a screenshot
+ * reads as a banner interrupting the text rather than an illustration in it.
  *
- * Applied to the figure and not to the image, so the caption tracks the
- * picture's width instead of running wider than what it describes. `figure
- * img` below still fills whatever box it is given, so nothing there changes.
+ * On the figure and not the image, so the caption tracks the picture's width
+ * instead of running wider than what it describes.
  *
- * `:has(img)` and the exclusion list together mean this only reaches a real
- * picture: every embed (a video, a tweet, a deck, a lab demo) is also a
- * <figure>, several of them contain an <img> of their own, and they carry
- * sizes that embeds.css and their own components already decided. A missing
- * image's placeholder frame is excluded for the same reason: it is drawn at
- * the size it means to be.
+ * The exclusion list matters: every embed is also a <figure>, several contain
+ * an <img>, and they carry sizes their own components decided.
  *
- * Full width again on a phone: 80% of an already narrow column leaves a
- * picture too small to read, and there is no surrounding text beside it for
- * the inset to separate it from.
+ * Full width on a phone, where 80% of an already narrow column is too small and
+ * there is no text beside it for the inset to separate it from.
  */
 figure:has(img):not(.video-figure, .raw-embed, .lab-demo, .missing, .deck, .spotify, .twitter-tweet) {
   inline-size: var(--figure-width, 80%);
@@ -548,26 +434,17 @@ figure > p {
 }
 
 /*
- * The house frame, on a picture: a double rule in the post's own colour and
- * one hard offset shadow, no blur, the same vocabulary a code block already
- * carries (--code-shadow-offset/--code-shadow-color, theme.css).
+ * The house frame: a double rule in the post's own colour over one hard offset
+ * shadow, the same vocabulary a code block carries.
  *
- * The colour is --post-accent, the tone this post's cover drew (coverTone,
- * lib/cover.ts), inherited from <body>. Two things it needs that a raw
- * var() would not give it: a fallback, since a page with no post (404, the
- * OSS list, a search result) never has the property written at all, and the
- * quote card's own per-ground recipe (variants/quotes.css), which uses the
- * brand tone straight on the sepia ground and lifts it 25% toward white on
- * the black one, where the same hue reads muddy.
+ * The colour needs two things a raw var() would not give it: a fallback, since
+ * a page with no post (404, OSS, search) never has `--post-accent` written, and
+ * the quote card's per-ground recipe, which uses the brand tone straight on
+ * sepia and lifts it 25% toward white on black where the hue reads muddy.
  *
- * `border-style: double` collapses to a single line under 3px, which is why
- * this is 4px and not 2, the same floor the bookmark card and the quote
- * frame both name.
- *
- * The shadow is deliberately near: 4px, the code block's own offset, so the
- * picture lifts off the page without reading as a sticker floating over it.
- * box-sizing is border-box globally (see the reset above), so the rule and
- * the 100% width share one box and the picture cannot overflow its figure.
+ * 4px because `border-style: double` collapses to one line under 3px.
+ * box-sizing is border-box, so the rule and the 100% width share one box and
+ * the picture cannot overflow its figure.
  */
 figure img {
   display: block;
@@ -589,8 +466,7 @@ figcaption {
   text-align: center;
 }
 
-/* Marks a wikilink whose target is still a draft. Same treatment as the
-   series table of contents, which carries its own scoped copy. */
+/* A wikilink whose target is still a draft. */
 .draft-note {
   color: var(--muted);
   font-size: 0.8rem;

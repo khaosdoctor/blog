@@ -1,133 +1,76 @@
 /*
- * Every design decision that is a value lives here. Nothing else in the site
- * should hardcode a colour, a font stack, a radius or a duration: if a component
- * needs one that does not exist yet, add the token here first.
+ * The site's roles. Components reference these (`--fg`, `--accent`, `--rule`),
+ * never a raw value and never a `--brand-*` directly.
  *
- * The palette is the brand's, traced from the favicon. The type stacks are
- * placeholders on purpose: the coming design is ASCII/ANSI, 8-bit, pixelated, and
- * the real faces get committed to the repo when they are picked. See
- * docs/design.md for the direction, the font licensing notes and the open
- * questions behind the values below.
+ * The raw values live in tweaks.css, which loads first. This file is where the
+ * reasoning lives: contrast measurements, and which values are deliberately
+ * below the floor.
  */
 
 :root {
   color-scheme: light dark;
 
   /*
-   * Brand, from the favicon. Each colour now carries a tone per ground rather
-   * than one hex for both: the palette lab (PaletteLab.vue, section 01 of
-   * /theme-lab/, archived once decided) measured every candidate as text
-   * against both real grounds, and a single blue that cleared black came out
-   * under 4.5:1 on the sepia one, so the arithmetic has to be redone per
-   * ground rather than assumed. Every consumer keeps reading one name, only
-   * this block changed shape.
+   * Each brand colour carries a tone per ground: one hex measured against black
+   * came out under 4.5:1 on the sepia page, so the arithmetic is redone per
+   * ground rather than shared.
    *
-   * Measured against #000000 dark / #f4efe0 light, WCAG 2.1, 4.5:1 the floor:
-   * red 4.67 / 4.72, blue 4.90 / 4.56, green 8.03 / 3.29, yellow 11.25 / 3.23.
-   * Green and yellow fail on the sepia ground. That is the owner's own call,
-   * made with the numbers in front of him: see the report for exactly where
-   * each is used today and whether that use is text.
+   * Measured as TEXT, WCAG 2.1, dark / light: red 4.67 / 4.72, blue 4.90 /
+   * 4.56, green 8.03 / 3.29, yellow 11.25 / 3.23. Green and yellow fail on
+   * sepia; Lucas accepted that with the numbers in front of him.
    */
   --brand-red: light-dark(var(--dial-red-on-light), var(--dial-red-on-dark));
   --brand-blue: light-dark(var(--dial-blue-on-light), var(--dial-blue-on-dark));
   --brand-yellow: light-dark(var(--dial-yellow-on-light), var(--dial-yellow-on-dark));
   --brand-green: light-dark(var(--dial-green-on-light), var(--dial-green-on-dark));
   /*
-   * Not from the favicon: the old Ghost theme painted the whole page in purple
-   * and never put one in the icon. This is that purple, lifted from the live
-   * site, where it was the accent against a near-black purple background
-   * (#080016, with #160731, #210a47 and #2f0f67 as the surface steps above it).
-   *
-   * 9.27:1 on the sepia page, chosen unchanged; 4.22:1 on the black one, under
-   * the 4.5 floor, also the owner's own call. Nothing uses the dark tone raw as
-   * text: --qc-border (variants/quotes.css) mixes it toward white first,
-   * which comes out at 6.72:1, over the 3:1 a border needs.
+   * Purple comes from the old Ghost theme, not the favicon. 9.27:1 on sepia,
+   * 4.22:1 on black, also an accepted failure: nothing uses the dark tone raw
+   * as text, and `--qc-border` (variants/quotes.css) mixes it toward white
+   * first, reaching 6.72:1 against the 3:1 a border needs.
    */
   --brand-purple: light-dark(var(--dial-purple-on-light), var(--dial-purple-on-dark));
 
   /*
-   * Roles. Components reference these, never the brand values above.
+   * Dark is true black so OLED pixels switch off, which is why the hint of
+   * purple lives in `--rule` and the quote frame instead of in the page.
    *
-   * Dark is true #000000, not a very dark grey: on an OLED panel those pixels
-   * are switched off, which is the point of asking for pitch black. The hint of
-   * purple therefore lives in --rule and in the quote frame (--qc-border, variants/quotes.css), where a few
-   * points of lightness are actually perceivable (a #05000b page would read as
-   * black on every screen while giving up the one thing black buys).
-   *
-   * Light is a faded sepia, NieR Automata's family rather than paper white. Its
-   * own ink is warm (#14120e, 16.26:1) because a cool near-black on a warm
-   * ground reads as a mistake. NieR's real background (#c8c3b4) is a game HUD
-   * and too dark to hold 3000 words, so this is that hue lightened until it is
-   * a reading surface.
-   *
-   * Every value here was measured, not eyeballed: fg 16.26:1 light / 18.61:1
-   * dark, muted 5.17:1 / 8.30:1, accent 6.06:1 / 10.84:1. The rule moved from a
-   * barely-there hint to an actual 3:1-class border, 4.41:1 light / 3.66:1
-   * dark, a border only needs 3:1, so both pass on their own terms.
+   * Measured: fg 16.26:1 light / 18.61:1 dark, muted 5.17 / 8.30, rule 4.41 /
+   * 3.66. A border only needs 3:1, so both rules pass on their own terms.
    */
   --bg: light-dark(var(--dial-page-light), var(--dial-page-dark));
   --fg: light-dark(var(--dial-text-light), var(--dial-text-dark));
   --muted: light-dark(var(--dial-text-quiet-light), var(--dial-text-quiet-dark));
   /*
-   * The chrome's accent, and now the same colour as everything else on the
-   * page rather than a blue of its own.
+   * An alias for the day colour, not a colour of its own. It was a fixed blue
+   * from before there was a day colour, which left ~50 rules (search hover, the
+   * language switch's focus ring, pagination, footnotes) blue while the site
+   * around them went yellow. All of them mean "the accent".
    *
-   * This used to be a fixed `light-dark(#1a5c96, #7cc0ff)`, from before there
-   * was a day colour at all. Once `--accent-day` started rotating (and then
-   * became pinnable in the settings panel, lib/accent.ts), every control still
-   * reading this one stayed blue while the site around it went yellow or
-   * green: the search box's hover, the language switch's focus ring, the
-   * pagination buttons, the settings menu's own options, the footnote and
-   * sidenote links. Fifty-odd rules, all of them meaning "the accent" and
-   * none of them meaning "blue specifically".
-   *
-   * So this is now an alias. Each brand token already carries its own tone per
-   * ground (`light-dark()` on each one above), so following the day colour
-   * also follows the theme: a control lightens on the black page and darkens
-   * on the sepia one without any rule here asking it to.
-   *
-   * The fallback is the old blue, and it is what a reader with JavaScript off
-   * gets, since `--accent-day`'s own value is only ever overwritten inline by
-   * `applyAccent()`. It is also the guard against this resolving to nothing if
-   * the token below is ever removed.
+   * The fallback is that old blue, and is what a reader with no JavaScript
+   * gets, since `--accent-day` is only ever overwritten inline by
+   * `applyAccent()` (lib/accent.ts).
    */
   --accent: var(--accent-day, light-dark(var(--dial-accent-fallback-light), var(--dial-accent-fallback-dark)));
   --rule: light-dark(var(--dial-line-light), var(--dial-line-dark));
 
   /*
-   * The header's own accent (BrandHeader.astro), day-hash coloured rather
-   * than fixed: header-brand.ts overwrites this every page load with
-   * `dayColor({ excludePurple: true })` (src/lib/day-color.ts), so the same
-   * calendar day always shows the same one of the four non-purple brand
-   * tokens. This value, the bench's own decided yellow, is only the pre-JS
-   * fallback: a reader with JS off, or before the script runs, still gets a
-   * real accent instead of an unset custom property. Purple is excluded at
-   * the hash's own pool (chip-color.ts's `excludePurple` option) rather than
-   * rejected here, so this token can safely be any of the four either way.
+   * Today's colour, or the one the reader pinned. `applyAccent()` overwrites
+   * this on every page load; the value here is only the pre-JS fallback.
    *
-   * Measured against this ground (`--bg` above), WCAG 2.1: red 4.67 dark /
-   * 4.72 light, blue 4.90 / 4.56, green 8.03 / 3.29, yellow 11.25 / 3.23.
-   * Green and yellow clear 4.5:1 in dark mode but fail it in light mode
-   * (3.29, 3.23); red and blue clear both. A day that hashes to green or
-   * yellow is under-contrast as header text in light mode, a real risk this
-   * token change introduces that the fixed yellow (9.70:1 measured in the
-   * lab, itself always in dark mode there) never had.
+   * Purple is excluded from the automatic rotation at the hash's own pool
+   * (chip-color.ts), so this token can safely be any of the other four.
+   *
+   * The risk it carries: green and yellow clear 4.5:1 on the black page and
+   * fail it on the sepia one (3.29, 3.23), so a day that hashes to either is
+   * under-contrast as header text in light mode.
    */
   --accent-day: var(--brand-yellow);
 
   /*
-   * A pixel face is right for chrome, labels and headings and punishing for a
-   * 3000 word article, so body copy keeps a readable face. All four are decided
-   * now and self-hosted, see src/styles/fonts.css.
-   *
-   * Body copy has two faces, not one, because the reader picks: Literata is the
-   * default and Atkinson Hyperlegible is the sans. `--font-body` is whichever is
-   * active, so every rule on the site keeps reading one variable.
-   *
-   * PxPlus IBM VGA8 is a 9x16 bitmap face traced to outlines, so it is crisp at
-   * 16px and at whole multiples of it, and muddy at 14px or 18px where its
-   * pixels land on fractions of a device pixel. Size anything using it in whole
-   * multiples of 16px rather than in rem.
+   * A pixel face suits chrome and punishes a 3000-word article, so body copy
+   * keeps a readable one. Two body faces because the reader picks between them;
+   * every rule reads `--font-body`, whichever is active.
    */
   --font-body-serif: var(--dial-face-reading-serif);
   --font-body-sans: var(--dial-face-reading-sans);
@@ -137,28 +80,16 @@
   --font-subtitle: var(--dial-face-subtitle);
 
   /*
-   * Literata's measurements, taken in the lab against a real post: 18px body,
-   * 163% leading, a touch of letter spacing and a wider word space. Written in
-   * rem rather than the 18px that was chosen, because an absolute body size
-   * overrides the reader's own browser font setting, and 1.125rem is exactly
-   * 18px for everyone who has not changed it.
+   * `--font-scale` is the settings panel's text-size control (50-160%), a
+   * unitless multiplier rather than a second absolute size: multiplying a rem
+   * keeps the result relative to the reader's own browser default instead of
+   * replacing it. settings-panel.ts writes it inline on the root element, and
+   * BaseLayout's pre-paint script does the same before first render.
    *
-   * --font-scale is the settings panel's text-size control, a unitless
-   * multiplier rather than a second absolute size: multiplying a rem value
-   * keeps the result relative to whatever the reader's own browser default
-   * is, so a reader who already set a larger default there keeps that gain
-   * scaled up rather than replaced by a fixed number.
-   *
-   * The reader's choice ranges 50% to 160%, twelve 10% stops, which is more
-   * than a fixed set of attribute blocks wants to carry (that shape held
-   * five steps, 80-120%, before this comment; the control opened at
-   * 10%-500% and the owner has since narrowed it to this).
-   * settings-panel.ts writes this custom property directly on the root
-   * element's inline style instead of picking one of a few named blocks,
-   * and BaseLayout's own pre-paint script does the same
-   * before first render. Default 1 (100%, no inline override), same
-   * "nothing stored means default" convention every other reader
-   * preference on this site already follows.
+   * At `:root` only `--text-base` reads it, so chrome keeps a fixed size
+   * whatever the reader picks. `.prose` (prose.css) redefines the two smaller
+   * steps in terms of the same scale, so a post's code, tables and quotes grow
+   * with its paragraphs.
    */
   --font-scale: 1;
   --text-base: calc(var(--dial-text-size) * var(--font-scale));
@@ -169,119 +100,65 @@
   --word-spacing-body: var(--dial-word-spacing);
 
   /*
-   * Antialiasing was off here, on the argument that smoothed type beside a
-   * bitmap heading reads as two different eras. It was tried and it lost: with
-   * no smoothing every stem rounds up to a whole device pixel, so on a 1x screen
-   * the body comes out heavy and blocky, and a reader's monitor is not something
-   * the design gets to choose. Grayscale rather than the platform default, which
-   * keeps the type lighter than subpixel rendering would.
+   * Antialiasing was off, on the argument that smoothed type beside a bitmap
+   * heading reads as two eras. It lost: with no smoothing every stem rounds up
+   * to a whole device pixel, so on a 1x screen the body comes out blocky, and a
+   * reader's monitor is not something the design gets to choose.
    *
-   * `font-smooth` is not standard CSS, so this only takes effect where the
-   * vendor property exists. The lab also used `filter: contrast(100.00001%)` to
-   * force the same thing in more engines, and that must never come here: a
-   * filter on a container makes it the containing block for every fixed
-   * descendant, which would unpin the outline panel, the reading progress bar
-   * and the sidenotes all at once.
+   * The lab also forced this in more engines with `filter: contrast(100.00001%)`.
+   * That must never come here: a filter makes its element the containing block
+   * for every fixed descendant, which would unpin the outline panel and the
+   * sidenotes at once.
    */
   --font-smoothing: antialiased;
 
   /*
-   * The reading column, in characters rather than pixels, so it follows whichever
-   * body face is active: `ch` is the width of that face's zero, which is 0.578em
-   * in Literata and 0.648em in Atkinson. 78ch is therefore about 812px in the
-   * serif at 18px and about 1010px in the sans at 20px, and the outline panel
-   * measures the room it has left rather than trusting a breakpoint.
+   * The reading column in characters, so it follows whichever body face is
+   * active: `ch` is 0.578em in Literata and 0.648em in Atkinson, so 78ch is
+   * ~812px in one and ~1010px in the other. The outline panel measures the room
+   * it has left rather than trusting a breakpoint.
    */
   --measure: var(--dial-reading-width);
   --gutter: var(--dial-page-margin);
 
-  /*
-   * The minimum vertical space between two block-level prose children of the
-   * same kind, two code frames or two figures, when they come one after
-   * another with nothing between them, so margin collapsing gives no minimum
-   * on its own. Figures already used this value on their own margin-block in
-   * BaseLayout; code frames now share it so two of either kind never touch.
-   */
+  /* Minimum space between two prose blocks of the same kind (two figures, two
+     code frames), where margin collapsing gives no minimum on its own. */
   --block-spacing: var(--dial-block-spacing);
 
-  /* Square by default: rounded corners fight a pixel grid. */
   --radius: var(--dial-corner-radius);
   --border: var(--dial-border-width);
-  /* Anything card-shaped carries a thick left edge, in its own border colour. */
+  /* Anything card-shaped carries a thick left edge in its own border colour. */
   --border-card-edge: var(--dial-card-edge-width);
 
-  /*
-   * Every chrome button draws the same frame: the double ANSI rule, in the
-   * day's own accent. One token rather than the same declaration written into
-   * ThemeToggle, SettingsPanel, SearchPalette, Pagination and the footer's
-   * icon links, which is how four of the five ended up on a plain 1px solid
-   * while the language switch alone carried the double rule the design asks
-   * for. `3px double` is the same weight chips.css already uses for a double
-   * rule at this scale, reused rather than picked fresh.
-   */
+  /* The double ANSI rule every chrome button draws. One token, or four of the
+     five components drift onto a plain 1px solid, which is what happened. */
   --btn-border: 3px double var(--accent-day);
 
-  /*
-   * How wide the page's chrome runs once there is room for it: the header, the
-   * footer, the post list and its pagination all read this, so the four line
-   * up by construction rather than by four files repeating 80vw and drifting.
-   * `main` keeps `--measure` instead, since a post's running text wants the
-   * narrow column; the list breaks out of `main` on its own.
-   */
+  /* The header, footer, post list and pagination all read this, so the four
+     line up by construction. `main` keeps `--measure`: a post's running text
+     wants the narrow column. */
   --chrome-width: var(--dial-chrome-width);
-
-  /*
-   * The header draws its own row inside `--chrome-width` with this much
-   * padding on each side ("breathing room 4" from the decided bench setting),
-   * so its visible edges finish inset by exactly this much. The post list and
-   * the pagination take the same inset, which is what makes the three line up
-   * on both sides rather than the list running slightly wider than the row
-   * above it.
-   */
+  /* How far inside that width the chrome's own contents finish. */
   --chrome-inset: var(--dial-chrome-inset);
 
   /*
-   * Prose decoration. Every one of these is a candidate the lab page shows
-   * variants of, so changing the look later is changing a value here, not a
-   * stylesheet. See the Lab feedback section of docs/design.md.
-   */
-
-  /*
-   * Bold is a highlighter chip, the way the old blog had it. Solid, not a wash:
-   * a tint of the yellow read as a smudge rather than a marker. The text on it is
-   * dark in both themes, because the chip itself is the same yellow in both and
-   * dark-on-yellow is the only legible pairing.
-   *
-   * --brand-yellow now carries a tone per ground, tuned for yellow as TEXT
-   * against each ground, which this chip is not: it is a filled background.
-   * Following the light tone down measured 3.69:1 for --em-bold-fg on it,
-   * under the 4.5 floor for running text, and bold body text failing that
-   * floor is not something a preference can decide. Fixed here at the bright
-   * tone in both themes instead, the value --brand-yellow's own dark branch
-   * already carries, which keeps this chip's whole reason for being (one
-   * yellow, two themes, dark ink the only legible pairing) intact and holds
-   * --em-bold-fg at 7.30:1 on both grounds.
+   * Bold is a highlighter chip, solid rather than a wash (a tint read as a
+   * smudge). Fixed at the bright yellow in BOTH themes rather than following
+   * `--brand-yellow`: that token is tuned for yellow as TEXT, and following its
+   * light tone measured 3.69:1 for the ink on this chip. Fixed, the pairing
+   * holds 7.30:1 on both grounds.
    */
   --em-bold-bg: #f5b200;
-  /* The page's warm ink rather than the cool near-black this used to be, so the
-   * chip belongs to the sepia palette. Fixed in both themes, because
-   * dark-on-yellow is the only legible pairing; 7.30:1, see the note above. */
   --em-bold-fg: #332d23;
-  /*
-   * Italic is the same yellow as bold, as text rather than a wash. The brand
-   * yellow is unreadable as text on a near-white page, so light mode drops to a
-   * dark amber of the same hue: #8a6400 against the sepia page is 4.68:1, which
-   * still clears 4.5 now that the page is warmer and slightly darker than white.
-   */
+  /* Italic is the same yellow as text. The brand tone is unreadable as text on
+     the sepia page, so light mode drops to a darker amber: 4.68:1. */
   --em-italic-fg: light-dark(#8a6400, var(--brand-yellow));
   --em-italic-weight: 500;
 
-  /* Wikipedia's red link: a post linked before it was written. A separately
-   * tuned red, chosen before the palette pass and left as it was: 6.39:1
-   * light, 9.37:1 dark, both against --bg. */
+  /* Wikipedia's red link: a post linked before it was written. 6.39:1 light,
+     9.37:1 dark. */
   --link-unwritten: light-dark(#a4232e, #ff8b93);
 
-  /* Headings: a rule that fades out, and a glow behind h1. */
   --heading-rule: var(--rule);
   --heading-glow: light-dark(
     color-mix(in oklab, var(--brand-green) 35%, transparent),
@@ -289,130 +166,68 @@
   );
   --heading-glow-blur: 0.5em;
 
-  /* Task list boxes: hollow square, green tick, no radius. */
-  /* Just lighter than the sepia page, so the box reads as a box without a white
-   * chip punched into a warm ground. */
+  /* Task list boxes. The light fill is just lighter than the page, so the box
+     reads as a box without punching a white chip into a warm ground. */
   --check-box: light-dark(#fbf7ec, transparent);
   --check-edge: var(--fg);
   --check-tick: var(--brand-green);
 
-  /*
-   * A section break: a short dotted bar, no glow. 150px at 1px, in the
-   * foreground colour at 80% alpha. The lab page carries a colour and alpha
-   * matrix; whichever wins becomes --rule-core here and the matrix goes.
-   */
+  /* The section break: a short dotted bar, no glow. */
   --rule-length: var(--dial-section-rule-length);
   --rule-weight: var(--dial-section-rule-weight);
   --rule-core: var(--fg);
   --rule-dot: var(--dial-section-rule-dot-size);
   --rule-gap: var(--dial-section-rule-dot-spacing);
 
-  /* The reading progress used to own five tokens here, for a bar of discrete
-     blocks pinned across the top of the window. It no longer draws a bar of
-     its own: it colours the header's existing dashes in the post's cover
-     colour instead (ReadingProgress.astro, BrandHeader.astro's `.dash`), so
-     there is no height, no block size, no track and no fill left to tune. */
-
-  /* Tables: every cell ruled, header tinted and bold, room around the text. */
-  /* The ink itself, so a table's rules follow the palette rather than pinning
-   * two hexes that were --fg before the page went sepia and OLED black. */
   --table-edge: var(--fg);
-  /* A glimpse of a tint, nothing more: at 12% the header read as a filled band
-   * and pulled the eye away from the rows, which are the content. */
+  /* A glimpse of a tint: at 12% the header read as a filled band and pulled the
+     eye off the rows, which are the content. */
   --table-head-bg: light-dark(
     color-mix(in oklab, var(--brand-blue) 5%, transparent),
     color-mix(in oklab, var(--brand-blue) 8%, transparent)
   );
   --table-cell-pad: 0.45rem 0.7rem;
 
-  /*
-   * Code block shadow: a hard offset block, no blur, the way a DOS window
-   * drops one. Same 4px as the frame's own border width (--cc-frame-width in
-   * code-blocks.css), so the shadow reads as part of the same pixel
-   * grid rather than a soft one from another era. Colour follows the theme
-   * through light-dark(): black on the sepia page, white on the black one.
-   * The minimum space between two stacked code blocks (--block-spacing
-   * above) is 2rem, well past this 4px offset, so the shadow of one block
-   * never reaches into the next.
-   */
+  /* A hard offset block, no blur, the way a DOS window drops one. Same 4px as
+     the code frame's own border width, so both read on one pixel grid. */
   --code-shadow-offset: var(--dial-shadow-offset);
   --code-shadow-color: light-dark(var(--dial-shadow-light), var(--dial-shadow-dark));
 
   /*
-   * The header brand's own shadow offset, a separate number from the code
-   * block's: `--code-shadow-offset` (4px) was tried there first and read as
-   * a second, offset copy of the wordmark rather than a shadow behind it,
-   * on a 0.85rem (13.6px) font. 4px against text that small is roughly a
-   * third of its own height with no blur to soften the join; the same 4px
-   * against a code frame's much larger box reads as subtle. 1px is
-   * proportionate to a small font the way 4px is to a code frame, still
-   * hard-edged (no blur, same `--code-shadow-color`), still reads as a
-   * shadow rather than a duplicate. Kept as its own token rather than
-   * changing `--code-shadow-offset` itself, since that value is also
-   * measured against the code frame's own border width and stacking
-   * distance (see that token's own comment) and changing it would move
-   * both.
+   * The wordmark needs its own, smaller offset: 4px against 13.6px text is a
+   * third of its height with no blur, which read as a second copy of the
+   * letters rather than a shadow.
    */
   --brand-shadow-offset: var(--dial-wordmark-shadow-offset);
   /*
-   * Its own colour rather than `--code-shadow-color`, and transparent on the
-   * dark ground on purpose. The brand's shadow exists only to hold the mark
-   * together on the sepia page, where two of the four day accents sit under
-   * the text floor; on black the same accents are comfortable and a shadow
-   * there only drew a second copy of the letters. Transparent rather than
-   * removing the filter on dark so the brand keeps one rule with one value
-   * that changes, instead of a rule that exists on one ground and not the
-   * other.
+   * Transparent on the dark ground on purpose. This shadow exists only to hold
+   * the mark together on sepia, where two of the four day accents fall under
+   * the text floor; on black it only drew a second copy of the letters.
+   * Transparent rather than dropping the filter, so the brand keeps one rule
+   * with one value that changes.
    */
   --brand-shadow-color: light-dark(rgb(0 0 0 / 0.55), transparent);
 
   /*
-   * Buttons: brackets, Departure Mono, brand yellow, decided on ChromeButton.vue
-   * (section 02 of /theme-lab/, archived once decided). An outline variant for
-   * every ordinary action (transparent fill, border and text in --brand-yellow)
-   * and a solid block reserved for one primary action per page (docs/theming.md
-   * section 11), fill --brand-yellow with --em-bold-fg's ink rather than white,
-   * the owner's own toggle in the demo.
+   * Buttons: brackets, Departure Mono, brand yellow.
    *
-   * His readout measured 9.70:1 for both variants against #14161a, the dark
-   * ground from before the palette decision. Recomputed against the real
-   * grounds: outline text is --brand-yellow itself, so it is the same 11.25:1
-   * dark / 3.23:1 light the brand table already gives, the light case a real
-   * failure of the button label's own text, applied as decided since that
-   * text-on-ground pairing is exactly what the brand table measured. The
-   * smallest fix that would clear it without changing the look is the move
-   * --em-italic-fg already made for yellow-as-text on this ground, a darker
-   * amber (#8a6400 clears 4.68:1) in place of the raw tone.
-   *
-   * The solid "one primary action" variant was measured alongside the outline
-   * one and never built: no control on the site turned out to be that, and its
-   * two tokens (`--btn-solid-bg`/`--btn-solid-fg`) stayed declared for a
-   * component that never arrived. They are gone rather than waiting: they read
-   * `--em-bold-bg`, which `.prose` has since overridden with the post's own
-   * cover colour, so what they resolved to at `:root` was not even the value a
-   * button inside a post would have drawn. Whoever builds that control gets to
-   * pick its fill against the palette as it is then.
+   * Outline text is `--brand-yellow` itself, so it carries that token's own
+   * 11.25:1 dark / 3.23:1 light, the light case a real failure applied as
+   * decided. The smallest fix that keeps the look is the move `--em-italic-fg`
+   * already made: a darker amber (#8a6400, 4.68:1).
    */
   --btn-face: var(--font-display);
   --btn-tracking: 0em;
-  --btn-pad-block: var(--dial-button-padding-block); /* 11px, his own respiro knob */
+  --btn-pad-block: var(--dial-button-padding-block);
   --btn-pad-inline: var(--dial-button-padding-inline);
-  --btn-touch-min: var(--dial-button-hit-area); /* 44px WCAG target; his demo measured ~38px at this padding alone */
+  --btn-touch-min: var(--dial-button-hit-area);
   --btn-fg: var(--brand-yellow);
 
   /*
-   * The header's icon-only controls (ThemeToggle today, the settings panel's
-   * opener beside it): one shared footprint so a third one someday lines up
-   * for free instead of three components each guessing the same three
-   * numbers. `--icon-btn-hit` is the button's own padded box, kept at
-   * `--btn-touch-min` (44px, WCAG 2.5.5's enhanced level, one step past the
-   * 24px 2.5.8 asks as a minimum) even though nothing that size is drawn
-   * inside it any more. `--icon-btn-chip` is the bordered square a reader
-   * actually sees, painted by a `::before` sized independently of the real
-   * (larger) clickable box, and `--icon-btn-glyph` is the icon's own
-   * font-size within it. Shrinking the visible chip and the glyph without
-   * shrinking the box they sit in is the point: a smaller target was never
-   * the ask, a smaller-looking one was.
+   * One footprint shared by every icon-only control, so a new one lines up for
+   * free. `--icon-btn-hit` is the real 44px box (WCAG 2.5.5); `--icon-btn-chip`
+   * is the smaller bordered square actually drawn, on a `::before`. Shrinking
+   * what is seen without shrinking what is clickable is the whole point.
    */
   --icon-btn-hit: var(--btn-touch-min);
   --icon-btn-chip: var(--dial-button-chip-size);
@@ -423,13 +238,10 @@
 }
 
 /*
- * The explicit colour-scheme choice. `color-scheme: light dark` on :root
- * already lets every `light-dark()` token above follow the OS; narrowing it
- * to one keyword is the whole mechanism, since a `light-dark()` call resolves
- * against the nearest `color-scheme` in effect and nothing else about it
- * changes. Set by the blocking script in BaseLayout's <head> so the right
- * ground is already painted at first paint, and by ThemeToggle.astro's script
- * afterwards. No attribute means "system", which is `light dark` above.
+ * Narrowing `color-scheme` to one keyword IS the theme switch: a `light-dark()`
+ * call resolves against the nearest one in effect, so every token above follows
+ * without being rewritten. Written by BaseLayout's pre-paint script, then by
+ * ThemeToggle. No attribute means system.
  */
 :root[data-theme='light'] {
   color-scheme: light;
@@ -440,14 +252,9 @@
 }
 
 /*
- * The sans reader. Set `data-body-face="sans"` on <html> and the whole site
- * switches: the preferences menu will be the thing that writes it, and until
- * that menu exists the attribute is the switch.
- *
- * It is not only the family that changes. Atkinson needs a larger body and a
- * tighter leading than Literata to read at the same apparent size, and it wants
- * no letter spacing at all, so each face carries the measurements it was chosen
- * with instead of borrowing the other's.
+ * Atkinson needs a larger body and tighter leading than Literata to read at the
+ * same apparent size, and wants no letter spacing, so each face carries the
+ * measurements it was chosen with rather than borrowing the other's.
  */
 :root[data-body-face='sans'] {
   --font-body: var(--font-body-sans);
@@ -455,25 +262,6 @@
   --leading: 1.53;
   --tracking-body: 0em;
 }
-
-/*
- * The settings panel's text-size control (SettingsPanel.astro,
- * settings-panel.ts) used to pick one of five named steps here (xs/sm/lg/xl,
- * 80-120%), each its own `:root[data-font-size='…']` block. That shape does
- * not reach the owner's actual ask, a stepped 50% to 160%: five blocks
- * would need to become twelve, and did need to become dozens while the
- * range was still the 10%-500% this control opened with. There is nothing
- * left to declare here now,
- * the mechanism moved instead of growing: settings-panel.ts sets
- * `--font-scale` straight on the root element's inline style
- * (`style.setProperty`), which wins over this stylesheet's own `--font-scale:
- * 1` above for exactly the property it sets, and BaseLayout's pre-paint
- * script does the same before first render. Here at :root only --text-base
- * reads it, so the site's own chrome keeps a fixed size whatever a reader
- * picks. .prose (prose.css) redefines --text-small and --text-tiny in terms
- * of the same scale for itself, so a post's code, tables, quotes, footnotes
- * and maths grow with its paragraphs instead of being left behind.
- */
 
 /* Motion is decoration everywhere on this site, so it can all go. */
 @media (prefers-reduced-motion: reduce) {
@@ -483,11 +271,9 @@
 }
 
 /*
- * Jumping to a section eases there instead of teleporting, so the reader keeps
- * the thread of where the new position is relative to the old one. Declared only
- * for readers who have not asked for less motion: a full-page animated scroll is
- * the single most nauseating thing this site could do to someone with vestibular
- * trouble, and the instant jump is the correct behaviour for them.
+ * An animated full-page scroll is the most nauseating thing this site could do
+ * to someone with vestibular trouble, so the instant jump is the correct
+ * behaviour for them and this is declared only for everyone else.
  */
 @media (prefers-reduced-motion: no-preference) {
   :root {
