@@ -2,28 +2,22 @@
 import { t, type Locale } from '../i18n/ui'
 
 /**
- * The reading time text PostList and a post's own header already render
- * ("11 min"), made hoverable: hovering, or focusing, reveals the clock time a
- * reader finishes at if they start now. Just the time, no date.
+ * The "11 min" the list and a post's header already render, made hoverable:
+ * hovering or focusing reveals the clock time the reader finishes at. Time
+ * only, no date.
  *
- * That finish time cannot exist here: "when will I finish" depends on the
- * moment the reader looks, not on when the page was built, so nothing about
- * it is computed in this file. What this file builds, at build time, is
- * exactly the same plain "%d min" text the site always rendered, plus two
- * data attributes reading-time-hover.ts needs to compute the rest client
- * side: the post's own minutes, and the locale's own "finish at %s" template
- * (so the popup's words are never hardcoded into a client script, the same
- * reason HoverPreviews/SearchPalette pass their copy through data-* rather
- * than importing ui.ts into the browser bundle).
+ * That finish time cannot be computed here, since it depends on the moment the
+ * reader looks rather than on when the page was built. This renders exactly the
+ * plain text it always did, plus two data attributes the script needs: the
+ * minutes, and the locale's own "finish at %s" template, so the popup's words
+ * are never hardcoded into a client script.
  *
- * With JavaScript off, or before the script below has run, this renders
- * nothing but that plain text: no button, no popup, the reading time exactly
- * as it always was. reading-time-hover.ts is what upgrades the span's own
- * text in place into a real <button> plus an empty popup <span>, the same
- * upgrade-in-place shape SearchPalette's real link already uses.
+ * With JavaScript off it stays that plain text: no button, no popup.
+ * reading-time-hover.ts upgrades the span in place into a real <button> plus an
+ * empty popup.
  *
- * Astro dedupes an identical component <script> across every instance on a
- * page, so PostList rendering this once per row still ships the script once.
+ * Astro dedupes an identical component <script> across every instance, so the
+ * list rendering this once per row still ships it once.
  */
 interface Props {
   minutes: number

@@ -1,34 +1,22 @@
 ---
 /**
- * <QuoteCopy /> — appends a copy-as-citation button to every rendered quote
- * card (src/styles/variants/quotes.css owns the look and the guarantee that
- * this control never overlaps the quote text) and wires its click.
+ * Appends a copy-as-citation button to every rendered quote card and wires its
+ * click. Neither markup shape a quote can take ever contains one, so this adds
+ * it at runtime rather than asking an author to write it.
  *
- * Same shape as src/components/FootnoteSidenotes.astro's own copy control,
- * `.note-copy-link`: a real `<button>`, an inline SVG mask icon so it takes
- * currentColor, hidden until the card is hovered or the button itself is
- * focused, and it reuses the site's one `.toast` confirmation with the same
- * 2-second removal, rather than growing a second copy-confirmation pattern.
+ * The same shape as the notes' own copy control: a real <button>, an SVG mask
+ * icon so it takes currentColor, hidden until hover or focus, reusing the
+ * site's one `.toast` confirmation rather than growing a second pattern.
  *
- * Neither markup shape a quote can take (the callout, or the plain
- * blockquote, see quotes.css's header comment for both) ever contains a copy
- * button on its own, so this appends one at runtime instead of requiring an
- * author to write it. One pass over every quote on the page, guarded against
- * appending twice for the same reason every other script in this file is
- * written defensively even though nothing today runs it more than once.
+ * The payload is built at click time from whatever text is on the page:
+ * `"body" » Author` for the callout shape, just `"body"` for the plain
+ * blockquote. The » is the same glyph the author line already shows, so a
+ * pasted citation matches the house style. Paragraphs join with one space and
+ * whitespace collapses, so a two-paragraph quote copies as one unit.
  *
- * The clipboard payload is built at click time from whatever text is on the
- * page right then: `"body text" » Author` when the card has an author (the
- * callout shape), or just `"body text"` when it does not (the plain
- * blockquote). The » is the same ANSI-prompt glyph the author line already
- * displays instead of an em dash (see quotes.css), not a new mark, chosen so
- * a pasted citation matches the house style the rest of the site already
- * committed to. Multiple paragraphs join with a single space, and all
- * whitespace collapses, so a two-paragraph quote copies as one sentence-like
- * unit rather than carrying its own line breaks. The author line's leading
- * » is a CSS `content` value, never part of its text, and the watermark is
- * the same, so neither actually needs stripping to keep them out, only
- * defended against in case that ever changes.
+ * The author's leading » and the watermark are both CSS `content`, never text,
+ * so neither needs stripping; they are only defended against in case that
+ * changes.
  */
 import { localeFromPath, t } from '../i18n/ui'
 

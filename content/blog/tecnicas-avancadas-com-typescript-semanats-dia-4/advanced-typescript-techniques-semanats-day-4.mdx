@@ -81,7 +81,7 @@ See how they're now fully inferred as readonly and with literal types, which let
 
 Branded types are a way to validate certain kinds of data against a specific pattern. For example, if we want to validate that a monetary value is valid, we need two pieces of information: the currency and the amount of that currency.
 
-But every currency, even with matching values, is completely different: we can't pay 100 reais for something that costs 100 dollars, because R$100 isn't the same as $100. That's what **branded types** are for.
+But every currency, even with matching values, is completely different: we can't pay 100 reais for something that costs 100 dollars, because R\$100 isn't the same as \$100. That's what **branded types** are for.
 
 Branded types are types that carry a _mark_ (brand) or _tag_, and they can be defined like this:
 
