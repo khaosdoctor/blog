@@ -1,38 +1,24 @@
 /**
- * The post cover: "capa · wireframe 3D", the candidate Lucas picked in the
- * theme lab (content/blog/theme-lab/components/CoverLab.vue, read-only
- * reference, do not port from it again once this file exists). A real
- * `<svg viewBox="0 0 1200 630">`, not canvas, not WebGL: `scripts/cover.ts`
- * feeds the exact string this file builds to `sharp` at build time, and
- * `src/scripts/cover-hero.ts` drops the same string into the page's DOM on
- * load. One implementation, two callers, so the built PNG and the drawn
- * hero can never draw a different cover for the same post.
+ * The post cover: an SVG at 1200x630, not canvas and not WebGL.
  *
- * Colour, seed and solid all come from `hashSlug(post.slug)` plus a fixed
- * salt, never `Math.random()`, so a post's cover is stable across rebuilds
- * and the social-card cache does not break every time the site builds.
+ * Two callers, one implementation: `scripts/cover.ts` feeds the exact string
+ * this builds to `sharp` at build time, and `src/scripts/cover-hero.ts` drops
+ * the same string into the DOM on load. The built PNG and the drawn hero can
+ * never differ for the same post.
  *
- * The card's last line, the category chip plus the reading time, is the one
- * part the two callers do not share glyph for glyph, and `drawMeta` is why.
- * The chip is a real link to the category page and the reading time is a real
- * hover control (ReadingTime.astro + scripts/reading-time-hover.ts); drawing
- * those as SVG text on the page and hiding the DOM originals would throw both
- * away. So the browser passes `drawMeta: false` and lays the real elements
- * over the card at the coordinates `coverOverlay` reports, while the
- * build-time raster (no DOM to lay over anything) draws them itself. Same
- * geometry, same inks, one layout function either way: `coverOverlay` reads
- * `layoutCard`, so the drawn line and the overlaid line cannot end up in two
- * different places.
+ * Colour, seed and solid all come from the slug plus a fixed salt, never
+ * `Math.random()`, so a cover is stable across rebuilds and the social-card
+ * cache does not break on every build.
  *
- * The knobs below are the lab's sliders baked to the values Lucas decided
- * on (docs/decisions-log.md once that entry ships): wireframe density 6px,
- * wireframe opacity 145%, the solid cursor on, and purple's own "% of the
- * brand kept" knob at 90% (`color-mix(in oklab, #4b15a8 90%, white)` =
- * #5937b3, 2.62:1 on black, which fails 4.5:1 on purpose. The lab's own
- * notes say why: an automatic floor sent purple "too dark" three times, so
- * this stays a per-brand number a human set, not a loop deciding on its
- * own). No other brand's knob was touched, so the rest keep the lab's own
- * default of 100%, full colour, no mix.
+ * The one part the two callers do NOT share is the last line, the chip plus the
+ * reading time, and `drawMeta` is why: the chip is a real link and the reading
+ * time a real hover control, so drawing them as SVG text on the page and hiding
+ * the originals would throw both away. The browser passes `drawMeta: false` and
+ * lays the real elements over the card at the coordinates `coverOverlay`
+ * reports; the raster, with no DOM to lay over anything, draws them itself.
+ * Both read `layoutCard`, so the two cannot end up in different places.
+ *
+ * The knobs below are the lab's sliders baked to the decided values.
  */
 
 // The extension is not decoration: scripts/cover.ts runs this file through
@@ -172,28 +158,22 @@ const BRANDS: Brand[] = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id
 const INK_MIX: Record<string, number> = { vermelho: 100, verde: 100, amarelo: 100, azul: 100, roxo: 90 }
 
 /**
- * The same brand, named as the CSS custom property theme.css already tunes
- * per ground. The SVG needs a literal hex because it always paints on its own
- * black card (`DARK_BG`); the page needs a token because a highlight has to
- * work on `--bg` in both themes, and theme.css has already measured each of
- * these five for exactly that. Handing the page the card's hex instead would
- * take the brand off its per-ground tone and drop the measurements with it:
- * the card's yellow is #f5b200, chosen against black, and 85% of that over
- * black on the sepia ground reads far lighter than `--brand-yellow`'s own
- * light tone (#ac7d00) that prose/emphasis.css scanned. The hue is the same
- * either way, which is the whole complaint being fixed; only the lightness is
- * allowed to follow the ground it is painted on.
+ * The same brands as CSS custom properties.
  *
- * The two neutrals have no brand token, and they cannot borrow one: a cover
- * that draws white draws white BECAUSE the hash picked "no colour", and the
- * page's own neutral per ground is its ink rather than a hue. `branco` maps
- * to `--fg` and `branco-apagado` to `--muted`, the same pairing the card
- * makes (full white for the title ink, white at 75% for the dim reading
- * time), just resolved against `--bg` instead of black, so a neutral post
- * reads as a black highlight on the sepia ground and a white one on the
- * black ground rather than white-on-white. Through prose/emphasis.css's own mix those
- * measure 16.99:1 light / 18.74:1 dark for `--fg` and 7.15 / 8.75 for
- * `--muted`, both well clear of the 4.5:1 that file's table holds to.
+ * The SVG needs a literal hex, since it always paints on its own black card.
+ * The page needs a TOKEN, because a highlight has to work on `--bg` in both
+ * themes and theme.css has already measured each brand for exactly that.
+ * Handing the page the card's hex would drop those measurements: the card's
+ * yellow is chosen against black, and 85% of it on the sepia ground reads far
+ * lighter than `--brand-yellow`'s own light tone. The hue matches either way,
+ * which is the complaint being fixed; only the lightness follows the ground.
+ *
+ * The two neutrals have no brand token and cannot borrow one: a white cover is
+ * the hash picking NO colour, and the page's neutral per ground is its ink
+ * rather than a hue. `--fg` and `--muted` are the same pairing the card makes
+ * (white title, white at 75% for the dim line), resolved against `--bg` instead
+ * of black, so a neutral post reads black-on-sepia and white-on-black rather
+ * than white-on-white. Measured 16.99:1 / 18.74:1 and 7.15 / 8.75.
  */
 const BRAND_TOKENS: Record<string, string> = {
   vermelho: 'var(--brand-red)',
@@ -225,21 +205,18 @@ export interface CoverTone {
 }
 
 /**
- * A post's colour, the only derivation of it there is.
+ * A post's colour, and the only derivation of it.
  *
- * There used to be two. The card resolved its own brand here, out of seven
- * entries, off a salted `hash * 31 + charCode`; the article element wrote
- * `--post-accent` from `chipColor(slug)`, out of five `var(--brand-*)`
- * tokens, off a sum of code points. Two hashes over two pools can only agree
- * by luck, and for `criptografia-assimetrica-com-rsa` they did not: the card
- * drew purple and every `<strong>` in the post came out red. The card's own
- * pick wins, since that is the colour a reader has already seen at the top of
- * the page by the time any bold text arrives, and everything else reads this.
+ * There used to be two: the card resolved its brand from a salted `hash * 31`
+ * over seven entries, while `--post-accent` came from `chipColor(slug)`, a sum
+ * of code points over five. Two hashes over two pools agree only by luck, and
+ * for `criptografia-assimetrica-com-rsa` they did not: a purple card with red
+ * bold text. The card's pick wins, since that is the colour a reader has
+ * already seen by the time any bold arrives.
  *
- * This is the cover's colour, so it follows the cover's split: bold, italic
- * and the other text treatments (prose/emphasis.css) read this; links, hovers
- * and anything else transient stay on the day colour (`--accent-day`,
- * day-color.ts, prose/links.css). Do not move a link onto this.
+ * This follows the cover's side of the split: bold, italic and the other text
+ * treatments read it; links and anything transient stay on the day colour. Do
+ * not move a link onto this.
  */
 export function coverTone(slug: string): CoverTone {
   const brand = BRANDS[coverSeed(slug) % BRANDS.length]
