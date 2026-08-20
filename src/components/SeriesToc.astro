@@ -81,8 +81,20 @@ const seriesHref = localePath(locale, `/series/${series}/`)
    * BaseLayout, and the fallback keeps this readable anywhere it is not.
    */
   .series-toc {
+    /* The card's own padding, and how far the list is indented inside it. Both
+       named, because the rows undo and redo them to span the full width. */
+    --toc-pad: 1.2rem;
+    --toc-indent: 5rem;
     margin-block: 2rem;
-    padding: 0.9rem 1.2rem;
+    /*
+     * Lines up with the frame the cover draws INSIDE its own box, rather than
+     * with the box itself: cover.ts strokes that frame at unit 36 of 1200 with
+     * a 4-wide stroke, so its outer edge is at 34. A percentage margin
+     * resolves against this element's containing block, which is the same
+     * <article> the cover fills, so the two edges stay aligned at every width.
+     */
+    margin-inline: calc(34 / 1200 * 100%);
+    padding: 0.9rem var(--toc-pad);
     border: 4px double var(--post-accent, var(--rule));
     border-radius: var(--radius);
     font-size: 0.9rem;
@@ -109,9 +121,29 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     color: inherit;
   }
 
+  /*
+   * The number is drawn inside the item rather than in the list's own indent,
+   * so the row is one box that covers everything on the line. That is what
+   * lets the current part be filled by a background on the row itself: an
+   * absolutely positioned band had to guess the card's padding in fixed units
+   * and overflowed the frame as soon as the card narrowed.
+   */
   ol {
     margin: 0;
-    padding-inline-start: 5rem;
+    padding-inline-start: 0;
+    list-style-position: inside;
+  }
+
+  /*
+   * Every row spans the card's full inner width: the negative margin pulls it
+   * out over the card's own padding and the padding puts the text back where
+   * it was, so the box a fill would paint reaches the frame on both sides at
+   * any width. The start padding carries the list indent too.
+   */
+  li {
+    margin-inline: calc(var(--toc-pad) * -1);
+    padding-inline: calc(var(--toc-indent) + var(--toc-pad)) var(--toc-pad);
+    padding-block: 0.15rem;
   }
 
   li + li {
@@ -124,8 +156,13 @@ const seriesHref = localePath(locale, `/series/${series}/`)
    * table and the footer, so "this one" reads the same way everywhere.
    */
   .current {
-    padding-inline: 0.3rem;
     background: var(--accent-day, var(--accent));
+    color: var(--bg);
+  }
+
+  /* The marker is its own box even when drawn inside, so it needs the
+     inverted ink named rather than inherited. */
+  .current::marker {
     color: var(--bg);
   }
 
