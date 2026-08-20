@@ -1,71 +1,37 @@
 ---
 /**
- * <FootnoteSidenotes /> — the pieces of this feature CSS cannot do alone.
+ * The parts of the notes feature CSS cannot do alone: four independent,
+ * feature-detected behaviours, none depending on the others.
  *
- * Four independent, feature-detected behaviours, none depending on the
- * others working:
+ * 1. Highlight the text a Sidenote or MarginNote is attached to, on hover or
+ *    focus. That text is not wrapped in anything, it is whatever prose sits
+ *    before the tag, so no `:hover` rule can reach it. The CSS Custom
+ *    Highlight API paints an arbitrary Range without touching the DOM; this
+ *    builds the Range and sidenotes.css paints it.
  *
- * 1. Hovering or focusing a Sidenote or MarginNote (src/components/Sidenote.astro,
- *    src/components/MarginNote.astro) should highlight the text it is attached
- *    to, but that text is not wrapped in anything: it is whatever plain prose
- *    sits right before the tag in the paragraph. There is no element for a
- *    `:hover` rule to select, and short of giving every note a second,
- *    author-written wrapper around "just the words this refers to" (a bigger
- *    surface than either needs), CSS alone cannot reach it.
+ *    One delegated pair of listeners on the document, since this runs on every
+ *    page whether it has zero notes or a dozen.
  *
- *    The CSS Custom Highlight API can: it paints an arbitrary Range without
- *    touching the DOM, so the text stays exactly as authored. This script's
- *    only job is to build that Range on hover/focus and hand it to
- *    `CSS.highlights`; the paint itself is `::highlight(note-bound)` in
- *    src/styles/sidenotes.css.
+ * 2. `.note-copy-link` copies a note's own anchor URL without navigating.
+ *    BaseLayout has a delegated handler for the same shape, but it exists to
+ *    let the browser FOLLOW the link after copying, which is exactly what a
+ *    note must not do (round 1 shipped that as an <a> and it jumped the page).
+ *    It reuses the same `.toast` and 2-second removal, so the site keeps one
+ *    copy-confirmation pattern rather than growing a second.
  *
- *    One delegated listener pair on the document, not one per note: this
- *    runs on every page whether that page has zero notes or a dozen.
- *    Feature-detected and wrapped, so a browser without the API, or any
- *    unexpected DOM shape, leaves the note working exactly as it does with CSS
- *    off, minus the tint, never a broken page.
+ * 3. The mirror of (1): hovering the bound text grows its note. That text has
+ *    no element at all, so `mouseover` has nothing to bubble from either. This
+ *    hit-tests the pointer instead, via `caretPositionFromPoint` or
+ *    `caretRangeFromPoint`, and checks whether the text node's `nextSibling`
+ *    is a `.note`.
  *
- * 2. Each note's `.note-copy-link` (a `<button>`, not a link) copies that
- *    note's own anchor URL to the clipboard without navigating anywhere.
- *    BaseLayout.astro already has a delegated handler for exactly this shape
- *    of interaction, `a[data-copy-link]`, but it exists to let the browser
- *    follow the link after copying, which is precisely the behaviour a note's
- *    reference number must not have (round 1 shipped that as an `<a>` and it
- *    jumped the page). So this is its own small handler, same shape as
- *    BaseLayout's (and src/components/MathCopy.astro's) but `preventDefault`
- *    is moot on a `<button>` with no default action to prevent, and it
- *    reuses the exact `.toast` confirmation and 2-second removal both of
- *    those already use, so the site still has exactly one copy-confirmation
- *    pattern rather than a second one growing here.
+ * 4. The same pairing for a footnote, where both ends ARE real elements, so a
+ *    class toggle does the whole job. The plugin stamps the aside with
+ *    `data-footnote-ref-id`, so this is `getElementById` one way and an
+ *    attribute selector the other, never text parsing.
  *
- * 3. The mirror of (1): hovering the bound text should grow the note it
- *    belongs to (`.note-grow`, src/styles/sidenotes.css), so the reader can
- *    tell which one it is from either direction. That text is still not
- *    wrapped in anything, which is exactly what made (1) need the Highlight
- *    API instead of a plain CSS selector; here there is not even an element
- *    for `mouseover` to bubble from, since a bare text node fires no events
- *    of its own. So this hit-tests the pointer's screen position instead:
- *    `document.caretPositionFromPoint`/`caretRangeFromPoint` (whichever the
- *    browser has) returns the exact text node under the cursor, and a note's
- *    bound text is always that node's `previousSibling` from the note's own
- *    side (see boundRange above), so checking the other direction, whether
- *    the text node's `nextSibling` is a `.note`, finds the note to grow.
- *    Feature-detected (bails out at the top if neither API exists) and
- *    wrapped, same as (1): a note that never grows is a cosmetic loss, not a
- *    broken page.
- *
- * 4. The same two-way pairing as (1) and (3), for a footnote instead of a
- *    Sidenote/MarginNote. Simpler here: both ends are real elements already
- *    (the `<sup>` around `<a data-footnote-ref>` in the text, and the
- *    `<aside class="footnote-aside">` src/plugins/rehype-footnote-sidenotes.mjs
- *    builds), so neither the Custom Highlight API nor pointer hit-testing is
- *    needed, a class toggle and a CSS rule (src/styles/footnotes.css) do the
- *    whole job. The plugin stamps the aside with `data-footnote-ref-id`, the
- *    id of its reference, so this only ever needs `getElementById` (aside ->
- *    reference) and a matching attribute selector (reference -> aside),
- *    never runtime text parsing. No feature detection needed, `classList`
- *    and `closest` are assumed everywhere this site runs; still wrapped, so
- *    an unexpected DOM shape is a cosmetic loss, not a broken page.
+ * Every one is wrapped and feature-detected: a missing API or an unexpected DOM
+ * shape is a cosmetic loss, never a broken page.
  */
 import { localeFromPath, t } from '../i18n/ui'
 
