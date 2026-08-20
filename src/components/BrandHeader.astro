@@ -1,37 +1,24 @@
 ---
 /**
- * The decided header, off the bench at
- * content/blog/theme-lab/components/ChromeHeader.vue: shape "barra de caixa
- * ┌─┐", mark "fio" (wireframe Elite) at 36px (under that candidate's own
- * 72px legibility floor, chosen knowingly, so nothing here clamps it), in all
- * four brand roles at once, logo plus wordmark, Departure Mono, letter-
- * spacing 6/100em, caps on. Ported into a plain Astro component plus
- * src/scripts/header-brand.ts rather than shipping the bench's Vue island:
- * this renders on every page (docs/design.md's Vue-on-every-page argument
- * that kept Conway off Vue applies here too), and every value below is
- * fixed rather than reader-adjustable, so there is nothing left for a
- * picker to drive.
+ * The site header: box-drawing edges, the wireframe mark, the wordmark, and a
+ * run of dashes filling whatever room the controls do not need.
  *
- * Two changes from the bench, both requested afterward rather than measured
- * on it:
+ * A plain component plus src/scripts/header-brand.ts rather than an island:
+ * this renders on every page, and every value here is fixed rather than
+ * reader-adjustable, so there is nothing for a picker to drive.
  *
- * - The wordmark's accent used to be a fixed yellow (#f5b200). It is now the
- *   day-hash colour (src/lib/day-color.ts, excluding purple), applied as
- *   `--accent-day` by header-brand.ts on every page load. `--accent-day` in
- *   theme.css is only the pre-JS fallback (a static yellow, the bench's own
- *   choice), so a reader with JS off still gets a sane header rather than an
- *   unset custom property.
- * - The scramble (decifra) used to replay on every hold, and the wordmark
- *   also had a "falha" glitch mode as an alternative animation rather than a
- *   companion to it. Now the scramble runs once per browser session (see the
- *   script for why session rather than page load or forever) and never
- *   replays; in its place, an occasional glitch burst (1-3 pulses, a random
- *   4-20s apart) hits both the wordmark and the mark, replacing the mark's
- *   own fixed 2.2-4s glitch cadence from the bench.
+ * Two behaviours worth knowing:
  *
- * The mark's hover swap to its five true colours (LogoMark.vue's own
- * behaviour) is kept as pure CSS, disabled the same way: no rule at all
- * under prefers-reduced-motion.
+ * - The wordmark's accent is the day-hash colour (lib/day-color.ts, purple
+ *   excluded), applied by header-brand.ts on load. theme.css's `--accent-day`
+ *   is only the pre-JS fallback, so a reader with JS off still gets a real
+ *   accent rather than an unset property.
+ * - The scramble runs once per browser session and never replays. In its place
+ *   a glitch burst (1-3 pulses, 4-20s apart) hits the wordmark and the mark
+ *   together.
+ *
+ * The mark's hover swap to its five true colours is pure CSS, and has no rule
+ * at all under prefers-reduced-motion.
  */
 import LangSwitcher from './LangSwitcher.astro'
 import NavLinks from './NavLinks.astro'
@@ -53,18 +40,15 @@ const WORD = 'lsantos.dev'
 const CELLS = markCells()
 
 /**
- * The run of dashes between the brackets, one `<span>` per character rather
- * than one text node.
+ * The run of dashes, one `<span>` per character rather than one text node.
  *
- * The characters are the same 38 they have always been, and at rest they
- * render exactly as they did as plain text: same face, same letter-spacing,
- * same colour, same trailing-space correction on `.fill`. Splitting them into
- * elements is what lets ReadingProgress.astro colour them one at a time as
- * the reader scrolls, since a text node has no per-character handle to hold
- * on to and a gradient mask over the whole run could only ever fill smoothly
- * rather than a character at a time. Nothing here depends on that script: with
- * JS off (or on a page that is not a post) not one of these spans is ever
- * touched, and the row reads as the plain dashed rule it always was.
+ * At rest they render exactly as plain text did: same face, spacing, colour and
+ * trailing-space correction. Splitting them is what lets ReadingProgress colour
+ * them ONE AT A TIME, since a text node has no per-character handle and a
+ * gradient mask could only ever fill smoothly.
+ *
+ * Nothing here depends on that script: with JS off, or on a page that is not a
+ * post, no span is ever touched and the row is the plain dashed rule it was.
  */
 const RULE = '──────────────────────────────────────'
 ---
@@ -117,24 +101,13 @@ const RULE = '──────────────────────
 
 <style>
   /*
-   * "barra de caixa": the box-drawing edges plus a stretch of dashes that
-   * absorb whatever room the controls do not need, the same flex row the
-   * bench's `.bar` used. `.fill` (flex: 1, overflow hidden) is what pushes
-   * `.controls` to the right edge, replacing the old `margin-inline-end:
-   * auto` on the home link, since that link is no longer the only thing on
-   * this row that can carry the push.
+   * The box-drawing edges plus a stretch of dashes absorbing whatever room the
+   * controls do not need. `.fill` is what pushes `.controls` to the right edge.
    *
-   * `max-inline-size: 80vw` (below, past 70rem) is what makes the row read
-   * as 80% of the row's own available width rather than the reading column
-   * (`--measure`, 78ch): the header is chrome across the top, not prose, so
-   * measuring it against the viewport reads truer than against a column
-   * meant for running text. Applied only past 70rem (the same breakpoint
-   * footnotes.css already uses for "there is room to spare"), so nothing
-   * changes below it: brand, the switch, and three icon buttons need real
-   * room of their own, and narrowing the row further on a phone, where
-   * `flex-wrap` already has to wrap `.controls` onto its own line, would
-   * only make that wrap happen sooner. `margin-inline: auto` centres the
-   * row once it is narrower than its container; a no-op at full width.
+   * Past 70rem the row measures against the VIEWPORT rather than the reading
+   * column: the header is chrome across the top, not prose. Below that nothing
+   * changes, since the brand, the switch and three icon buttons need real room
+   * and narrowing further would only make `flex-wrap` wrap sooner.
    */
   .chrome {
     display: flex;
@@ -181,17 +154,15 @@ const RULE = '──────────────────────
     font-family: var(--font-display);
     letter-spacing: 0.4em;
     /*
-     * Letter-spacing adds its space after every character, the last one
-     * included, so a run of dashes ends with 0.4em of empty air that belongs
-     * to no glyph. Between the left run and POSTS that read as a wider space
-     * than the one after SOBRE, where the right run's own trailing space falls
-     * off the end of the row instead.
+     * Letter-spacing adds its space after EVERY character, the last included,
+     * so a run of dashes ends with 0.4em belonging to no glyph. That read as a
+     * wider space before POSTS than after SOBRE, where the right run's own
+     * trailing space falls off the end of the row.
      *
-     * This only cancels that phantom space. The row's real spacing comes from
-     * the container (see `.chrome` above), which is why the two can coexist:
-     * an earlier attempt put both jobs on this one property, where the row's
-     * own measure and the correction kept overwriting each other and the run
-     * came out too tight on one side or overlapping on the other.
+     * This cancels only that phantom space. The row's real spacing comes from
+     * the container: an earlier attempt put both jobs on this one property,
+     * where the two kept overwriting each other and the run came out tight on
+     * one side or overlapping on the other.
      */
     margin-inline-end: -0.4em;
     flex: 1;
@@ -199,36 +170,25 @@ const RULE = '──────────────────────
   }
 
   /*
-   * One dash of the run, and the whole of the reading progress meter's paint:
-   * a dash the reader has already scrolled past reads in the post's own cover
-   * colour, everything past it stays the plain `--muted` it inherits from
-   * `.fill`. Colour is the only property either state touches, so a dash
-   * lighting up cannot move anything on this row.
+   * One dash, and the whole of the reading progress meter's paint: a dash the
+   * reader has passed takes the post's cover colour, the rest stay `--muted`.
+   * Colour is the only property either state touches, so a dash lighting up
+   * cannot move this row.
    *
-   * `--post-accent` is the cover's brand, written on <body> by
-   * BaseLayout.astro (see the prop there for why it cannot live on <article>
-   * any more, which is where it used to be written). The header is not inside
-   * the article, so this is the nearest ancestor both can read. `--accent-day`
-   * is the fallback for a page that has no post and therefore no cover colour,
-   * which no reader ever sees today: the class is only ever added by
-   * ReadingProgress.astro, and that renders on posts alone.
+   * `--post-accent` is written on <body> rather than <article>, since the
+   * header is not inside the article. `--accent-day` is the fallback for a page
+   * with no cover colour, which no reader sees: the class is only ever added by
+   * ReadingProgress, which renders on posts alone.
    *
-   * No transition: the meter's own script decides when a dash appears (and
-   * jitters that), and a CSS fade on top would smear the one-at-a-time read
-   * the owner asked for into a gradient.
+   * No transition: the script decides when each dash appears and jitters it, so
+   * a CSS fade would smear the one-at-a-time read into a gradient.
    *
-   * The stroke is not decoration, it is what keeps the meter readable on the
-   * cover's two NEUTRAL tones. `coverTone()` draws from seven entries, and two
-   * of them have no brand colour at all: `branco` resolves to --fg and
-   * `branco-apagado` to --muted (lib/cover.ts's BRAND_TOKENS says why the
-   * page's own ink is the right neutral there). --muted is exactly the colour
-   * `.fill` already paints every dash, so on those posts a colour change alone
-   * would be no change at all and the progress would be invisible. Thickening
-   * the glyph reads as the rule filling in regardless of which of the seven
-   * the post drew. `-webkit-text-stroke` rather than a weight or a size: it is
-   * paint only, it changes no advance and no line box, so a dash lighting up
-   * still cannot move this row (the same technique, and the same reason,
-   * `.mark-cell` and `.word` below already use it).
+   * The stroke is not decoration. Two of `coverTone()`'s seven entries are
+   * neutral, and `branco-apagado` resolves to `--muted`, which is exactly what
+   * `.fill` already paints: on those posts a colour change alone would be no
+   * change at all. Thickening the glyph reads as the rule filling in whichever
+   * tone the post drew. `-webkit-text-stroke` because it is paint only and
+   * changes no advance, so the row still cannot move.
    */
   .dash.lit {
     color: var(--post-accent, var(--accent-day));
@@ -302,14 +262,6 @@ const RULE = '──────────────────────
   }
 
   /*
-   * The theme and settings openers carry the 44px hit target while drawing a
-   * 32px chip, so each has 6px of invisible box on either side that the
-   * search box and the switch do not. Left alone, that reads as a wider run
-   * between those two than between search and the switch, even though the
-   * margins are identical. Pulling both back by that 6px makes the drawn
-   * distance match rather than the box distance.
-   */
-  /*
    * The theme opener starts a second group. Search and the language switch
    * are about this page (find something here, read it in another language);
    * the theme and settings openers are about the reader's own setup and
@@ -364,19 +316,13 @@ const RULE = '──────────────────────
    * colours that read weak on the sepia ground.
    */
   /*
-   * `position: relative` + `z-index: 1` is not about the brand, it is about the
-   * cursor inside it: once that block travels out over the dash runs (see
-   * `.cursor` below) it has to paint ON TOP of the dash it is standing on, or
-   * the write head reads as sliding under its own trail. `.fill` is a plain
-   * inline span later in document order, so by default it paints after this
-   * flex item. It happens to lose anyway today, because `filter` above already
-   * makes this a stacking context and a filtered element paints with the
-   * z-index:0 group rather than with inline content, but that is a side effect
-   * of a drop shadow that exists for unrelated reasons and would silently take
-   * the cursor with it if the shadow were ever dropped. Two declarations say it
-   * outright instead. Neither changes a single measured box, and 1 stays well
-   * under the 60 the theme and settings menus claim, so an open menu still
-   * covers the brand.
+   * `position: relative` + `z-index: 1` is about the CURSOR, not the brand:
+   * once that block travels out over the dash runs it has to paint on top of
+   * the dash it is standing on, or the write head reads as sliding under its
+   * own trail. It happens to win today anyway, because `filter` already makes
+   * this a stacking context, but that is a side effect of a shadow that exists
+   * for unrelated reasons and would take the cursor with it if ever dropped.
+   * 1 stays well under the 60 the menus claim, so an open menu still covers it.
    */
   .brand {
     position: relative;
@@ -386,17 +332,14 @@ const RULE = '──────────────────────
     color: inherit;
     text-decoration: none;
     /*
-     * Not `--code-shadow-color`, which is `light-dark(#000000, #ffffff)`: that
-     * token is white on the dark page, because a code block's own shadow needs
-     * to read against a dark ground. Behind the brand it drew a white offset
-     * copy around the accent-coloured letters, which is the doubled wordmark
-     * reported three separate times.
+     * Not `--code-shadow-color`, which is white on the dark page: behind the
+     * brand that drew a white offset copy around the letters, the doubled
+     * wordmark reported three separate times.
      *
-     * The shadow only ever existed for the light ground, where two of the four
-     * day accents (green 3.28, yellow 3.23) fall under the 4.5:1 text floor and
-     * the mark reads washed out. On the dark ground the same accents measure
-     * 8.03 and 11.25 and need no help. So this draws dark on the light page and
-     * nothing at all on the dark one.
+     * The shadow only ever existed for the LIGHT ground, where two of the four
+     * day accents (green 3.28, yellow 3.23) fall under the 4.5:1 text floor. On
+     * black the same two measure 8.03 and 11.25 and need no help, so this draws
+     * dark on the light page and nothing at all on the dark one.
      */
     filter: drop-shadow(var(--brand-shadow-offset) var(--brand-shadow-offset) 0 var(--brand-shadow-color));
   }
