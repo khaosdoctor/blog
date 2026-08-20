@@ -161,7 +161,23 @@ export default defineConfig({
       // being mistaken for something to embed.
       remarkPlugins: [
         remarkReadingTime,
-        remarkMath,
+        /*
+         * Display math only. With `$...$` inline math on (remark-math's own
+         * default), any two dollar signs in one paragraph are a math span, and
+         * these posts are full of prices: "It cost $4,950 Canadian dollars […]
+         * and $9,800 for the one with 8Kb" rendered as one KaTeX expression,
+         * every letter between the two prices stacked on its own line.
+         *
+         * Turning the single-dollar form off rather than escaping the dollars
+         * in that post, because the same trap is set in every post that quotes
+         * two prices, and nobody writing one is going to remember. Checked
+         * before changing it: every `$…$` pair in `content/blog` is a shell
+         * variable or a template literal inside a code fence (which remark
+         * never parses as math anyway) or a price in prose. The only real
+         * expression on the site is a `$$…$$` display block, which this leaves
+         * exactly as it was.
+         */
+        [remarkMath, { singleDollarTextMath: false }],
         remarkEmbeds,
         remarkFigures,
         remarkWikilinks,
