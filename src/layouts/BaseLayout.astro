@@ -10,8 +10,12 @@ import 'rehype-callouts/theme/obsidian'
 // The two faces that are decided, self-hosted. First, so a @font-face exists
 // before any rule below asks for the family.
 import '../styles/fonts.css'
-// Every colour, font stack, size and duration the site uses. Nothing below
-// should hardcode one.
+// The dials: every value worth changing, named in plain language and grouped
+// into blocks. First, because theme.css reads its raw numbers from here.
+import '../styles/tweaks.css'
+// Every colour, font stack, size and duration the site uses, as roles rather
+// than raw values, with the reasoning behind each. Nothing below should
+// hardcode one.
 import '../styles/theme.css'
 // How the body of a post reads: headings, emphasis, lists, tables, links, code.
 import '../styles/prose.css'

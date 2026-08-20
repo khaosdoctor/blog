@@ -1,0 +1,210 @@
+/*
+ * ============================================================================
+ * THE DIALS
+ * ============================================================================
+ *
+ * Every value on this site you might reasonably want to change, in one file,
+ * with a plain-English name and a one-line note on each. Change a number here
+ * and the whole site follows.
+ *
+ * How this relates to theme.css: that file holds the site's *roles* (`--fg`,
+ * `--accent`, `--rule`) and the long reasoning behind each decision, including
+ * the measured contrast ratios. It reads its raw values from here. So this
+ * file is the only place these numbers are written down; nothing is duplicated
+ * between the two, and editing one of these changes the site rather than
+ * fighting a second declaration somewhere else.
+ *
+ * Two rules if you edit this:
+ *
+ * 1. Every colour comes in a PAIR, light page first, dark page second. The
+ *    site runs both grounds and picks per reader, so changing only one half
+ *    leaves the other theme on the old value.
+ * 2. If you change a colour, its contrast against the page changes with it.
+ *    theme.css records what each one measures today and which ones already
+ *    sit below the 4.5:1 readability floor on purpose. Worth a look before
+ *    picking something much lighter or much darker.
+ *
+ * Loaded before theme.css (BaseLayout.astro), so these are declared by the
+ * time anything reads them.
+ */
+
+:root {
+  /* ==========================================================================
+   * 1. BRAND COLOURS
+   *
+   * The five the site draws with. One of them is picked per day for the
+   * header, links and buttons, and per post for its cover and bold text. A
+   * reader can pin one in the settings panel instead.
+   * ======================================================================== */
+
+  --dial-red-on-light: #d50612;
+  --dial-red-on-dark: #e6242f;
+
+  --dial-blue-on-light: #0571b3;
+  --dial-blue-on-dark: #1480c2;
+
+  --dial-yellow-on-light: #ac7d00;
+  --dial-yellow-on-dark: #f5b200;
+
+  --dial-green-on-light: #39936c;
+  --dial-green-on-dark: #45b384;
+
+  /* Purple is the old Ghost theme's, not from the favicon like the four above.
+     It is left out of the daily rotation on purpose and can only be chosen by
+     hand in the settings panel. */
+  --dial-purple-on-light: #4b15a8;
+  --dial-purple-on-dark: #815bc2;
+
+  /* ==========================================================================
+   * 2. THE PAGE
+   *
+   * The ground everything is drawn on, and the three inks used on it.
+   * ======================================================================== */
+
+  /* The page itself. Light is a warm sepia (NieR Automata's family, not paper
+     white); dark is true black so OLED pixels switch off. */
+  --dial-page-light: #f4efe0;
+  --dial-page-dark: #000000;
+
+  /* Body text. Warm on the sepia page, because a cool near-black on a warm
+     ground reads as a mistake. */
+  --dial-text-light: #14120e;
+  --dial-text-dark: #f3f1ee;
+
+  /* Quieter text: dates, captions, the byline, anything secondary. */
+  --dial-text-quiet-light: #6b6353;
+  --dial-text-quiet-dark: #a8a29a;
+
+  /* Lines and borders. Carries the only hint of purple on the black page. */
+  --dial-line-light: #736e62;
+  --dial-line-dark: #6b627b;
+
+  /* The accent a reader sees before JavaScript runs, or with it turned off.
+     With JavaScript, the day's colour (or a pinned one) replaces it. */
+  --dial-accent-fallback-light: #1a5c96;
+  --dial-accent-fallback-dark: #7cc0ff;
+
+  /* The hard drop shadow behind a picture. White on the black page so it
+     reads as depth rather than disappearing into the ground. */
+  --dial-shadow-light: #000000;
+  --dial-shadow-dark: #ffffff;
+
+  /* ==========================================================================
+   * 3. TYPEFACES
+   *
+   * All four are self-hosted in public/fonts. Adding one means a @font-face
+   * in fonts.css as well as a change here.
+   * ======================================================================== */
+
+  /* Running text in a post. The reader picks between these two in settings. */
+  --dial-face-reading-serif: 'Literata', ui-serif, Georgia, serif;
+  --dial-face-reading-sans: 'Atkinson Hyperlegible', ui-sans-serif, sans-serif;
+
+  /* Everything that is not a post's body: the header, buttons, labels, the
+     post list, the footer. The site's own voice. */
+  --dial-face-interface: 'Departure Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Subtitles and kickers. A 9x16 bitmap face traced to outlines, so it is
+     only crisp at 16px and whole multiples of it. Size it in px, not rem. */
+  --dial-face-subtitle: 'PxPlus IBM VGA8', ui-monospace, SFMono-Regular, monospace;
+
+  /* Code, and anything that has to line up in columns. */
+  --dial-face-code: ui-monospace, SFMono-Regular, monospace;
+
+  /* ==========================================================================
+   * 4. TEXT SIZE AND SPACING
+   *
+   * Sizes are in rem so they scale with the reader's own browser setting
+   * rather than overriding it. 1rem is 16px unless they changed it.
+   * ======================================================================== */
+
+  /* Body text in a post. 1.125rem is 18px. */
+  --dial-text-size: 1.125rem;
+  /* Captions, tables, quotes, footnotes. */
+  --dial-text-size-small: 0.9rem;
+  /* Code, chips, the smallest labels. */
+  --dial-text-size-tiny: 0.75rem;
+
+  /* Line height for running text, as a multiple of the font size. */
+  --dial-line-height: 1.63;
+  /* Extra air between letters and between words. Measured for Literata. */
+  --dial-letter-spacing: 0.05em;
+  --dial-word-spacing: 0.15em;
+
+  /* Space between two blocks in a post: a paragraph and the figure after it. */
+  --dial-block-spacing: 2rem;
+
+  /* ==========================================================================
+   * 5. WIDTHS
+   * ======================================================================== */
+
+  /* How wide a paragraph is allowed to get, in characters. Past roughly 80 the
+     eye loses its place returning to the start of the next line. */
+  --dial-reading-width: 78ch;
+
+  /* Breathing room at the sides of the screen on a narrow window. */
+  --dial-page-margin: 1.5rem;
+
+  /* The header, the footer and the post list are wider than the reading
+     column, and share this width. */
+  --dial-chrome-width: 88vw;
+  /* How far the header's own contents sit in from that edge. */
+  --dial-chrome-inset: 0.667rem;
+
+  /* ==========================================================================
+   * 6. SHAPE
+   * ======================================================================== */
+
+  /* Corner rounding. 0 everywhere, because rounded corners fight a pixel
+     grid. Raising this softens every box on the site at once. */
+  --dial-corner-radius: 0;
+
+  /* An ordinary hairline border. */
+  --dial-border-width: 1px;
+  /* The thick left edge every card carries: quotes, callouts, bookmarks. */
+  --dial-card-edge-width: 8px;
+
+  /* How far a hard shadow is offset. No blur anywhere on this site: the
+     shadows are solid blocks, like a pixel-art drop shadow. */
+  --dial-shadow-offset: 4px;
+  /* The wordmark's own, smaller because the letters are small. */
+  --dial-wordmark-shadow-offset: 1px;
+
+  /* ==========================================================================
+   * 7. BUTTONS
+   * ======================================================================== */
+
+  /* The real clickable area of an icon button. 44px is the size WCAG asks for
+     a touch target; do not go below it. */
+  --dial-button-hit-area: 2.75rem;
+  /* The visible square drawn inside that area, which can be smaller. */
+  --dial-button-chip-size: 2rem;
+  /* The icon or letter inside it. */
+  --dial-button-glyph-size: 1rem;
+
+  /* Padding inside a full-size text button. */
+  --dial-button-padding-block: 0.6875rem;
+  --dial-button-padding-inline: 1.25rem;
+
+  /* ==========================================================================
+   * 8. MOTION
+   *
+   * Deliberately almost nothing: a hover state, and the Conway background.
+   * Everything here is switched off for a reader who asks for reduced motion.
+   * ======================================================================== */
+
+  /* How long a hover or focus change takes. */
+  --dial-transition-duration: 120ms;
+  --dial-transition-easing: ease;
+
+  /* ==========================================================================
+   * 9. THE SECTION BREAK
+   *
+   * The dotted rule between sections of a post.
+   * ======================================================================== */
+
+  --dial-section-rule-length: 150px;
+  --dial-section-rule-weight: 1px;
+  --dial-section-rule-dot-size: 2px;
+  --dial-section-rule-dot-spacing: 8px;
+}
