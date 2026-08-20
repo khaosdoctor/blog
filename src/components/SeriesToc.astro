@@ -47,10 +47,7 @@ const seriesHref = localePath(locale, `/series/${series}/`)
 {
   parts.length > 1 && (
     <nav class="series-toc" aria-label={t(locale, 'series')}>
-      <p class="heading">
-        {linkHeading ? <a href={seriesHref}>{title}</a> : title} &middot;{' '}
-        {t(locale, 'seriesContents', parts.length)}
-      </p>
+      <p class="heading">{linkHeading ? <a href={seriesHref}>{title}</a> : title}</p>
       <ol>
         {parts.map((part) => (
           <li class:list={{ current: part.id === current, unwritten: !isPublished(part) }}>
@@ -74,27 +71,68 @@ const seriesHref = localePath(locale, `/series/${series}/`)
 }
 
 <style>
+  /*
+   * The house card: a double rule on all four edges, square corners. 4px
+   * because border-style: double collapses to one line under 3px, the same
+   * width the bookmark card and the code frame settled on.
+   *
+   * Drawn in the post cover colour rather than --rule, so the block belongs to
+   * the article it is inside. --post-accent is written onto <body> by
+   * BaseLayout, and the fallback keeps this readable anywhere it is not.
+   */
   .series-toc {
     margin-block: 2rem;
     padding: 0.9rem 1.2rem;
-    border: 1px solid var(--rule);
-    border-radius: 6px;
+    border: 4px double var(--post-accent, var(--rule));
+    border-radius: var(--radius);
     font-size: 0.9rem;
   }
 
+  /* The series name owns its own line, in ink rather than muted: it is the
+     title of the block, not a label above it. */
   .heading {
-    margin: 0 0 0.5rem;
-    color: var(--muted);
-    font-size: 0.8rem;
+    margin: 0 0 0.7rem;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+
+  /* A shell prompt, the same mark the search palette puts before its input, so
+     the line reads as something typed. In the cover colour, matching the frame
+     around it. */
+  .heading::before {
+    content: '> ';
+    color: var(--post-accent, var(--accent));
+  }
+
+  .heading a {
+    color: inherit;
   }
 
   ol {
     margin: 0;
-    padding-inline-start: 1.2rem;
+    padding-inline-start: 5rem;
   }
 
   li + li {
     margin-block-start: 0.25rem;
+  }
+
+  /*
+   * The part being read, filled with the day colour and its text inverted to
+   * the page ground: the same treatment a hovered title takes in the listing
+   * table and the footer, so "this one" reads the same way everywhere.
+   */
+  .current {
+    padding-inline: 0.3rem;
+    background: var(--accent-day, var(--accent));
+    color: var(--bg);
+  }
+
+  /* Inherits the inverted ink rather than staying muted, which would fall to
+     near-invisible against the fill. */
+  .current .marker {
+    color: inherit;
   }
 
   /* Wikipedia's red link, the same token an unwritten wikilink uses. */

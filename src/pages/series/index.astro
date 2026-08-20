@@ -10,13 +10,13 @@
 // its own list out of getSeries('en'), so neither index lists a series the
 // reader's own language cannot show.
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import SeriesList from '../../components/SeriesList.astro'
 import { getSeries, seriesTitle } from '../../lib/taxonomy'
 import { HREFLANG, t } from '../../i18n/ui'
 
 const series = [...(await getSeries()).entries()]
   .filter(([, posts]) => posts.length > 1)
-  .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), count: posts.length }))
-  .sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'))
+  .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), posts }))
 
 const alternates = [
   { lang: HREFLANG.pt, href: new URL('/series/', Astro.site).href },
@@ -27,43 +27,12 @@ const alternates = [
 <BaseLayout title={`${t('pt', 'allSeries')} | Lucas Santos`} description={t('pt', 'seriesIntro')} alternates={alternates}>
   <h1>{t('pt', 'allSeries')}</h1>
   <p class="intro">{t('pt', 'seriesIntro')}</p>
-  <ul class="series-list">
-    {
-      series.map((entry) => (
-        <li>
-          <a href={`/series/${entry.slug}/`}>{entry.title}</a>
-          <span class="count">
-            {entry.count} {t('pt', 'articles')}
-          </span>
-        </li>
-      ))
-    }
-  </ul>
+  <SeriesList entries={series} locale="pt" />
 </BaseLayout>
 
 <style>
   .intro {
     max-inline-size: var(--measure);
     color: var(--muted);
-  }
-
-  .series-list {
-    margin-block-start: 1.5rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .series-list li {
-    display: flex;
-    align-items: baseline;
-    padding-block: 0.4rem;
-    border-block-end: var(--border) solid color-mix(in oklab, var(--muted) 45%, transparent);
-  }
-
-  .count {
-    margin-inline-start: 0.5rem;
-    color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
   }
 </style>

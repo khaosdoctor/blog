@@ -1,0 +1,79 @@
+---
+import type { Post } from '../lib/posts'
+import { estimateReadingTime, formatDate } from '../lib/posts'
+import { t, type Locale } from '../i18n/ui'
+import PostList from './PostList.astro'
+import ReadingTime from './ReadingTime.astro'
+
+/**
+ * The series index, in the same listing table PostList uses
+ * (src/styles/listing.css). A series row answers the same three questions a
+ * post row does, one level up: when it was last touched, how much of it there
+ * is, and how long it takes.
+ *
+ * Each row opens in place instead of navigating, through a native <details>:
+ * the open state, the keyboard handling and the screen reader announcement all
+ * belong to the element, so this ships no script and works with JS off. A part
+ * is chosen from here directly, so nothing on this page links to the
+ * per-series page; SeriesToc inside a post still does.
+ *
+ * The part count takes the label column and its day colour, without the hover
+ * fill the section link carries: a count is nothing to click.
+ */
+interface Props {
+  entries: { slug: string; title: string; posts: Post[] }[]
+  locale: Locale
+}
+
+const { entries, locale } = Astro.props
+
+const LEADER = '·'.repeat(200)
+
+// The most recent part's date, so the column means the same thing it does in a
+// post row: when this last had something new in it. Sorted by that too, since
+// a date column ordered alphabetically reads as broken.
+const rows = entries
+  .map((entry) => ({
+    ...entry,
+    updated: entry.posts.reduce(
+      (latest, post) => (post.data.pubDate > latest ? post.data.pubDate : latest),
+      entry.posts[0].data.pubDate,
+    ),
+    minutes: entry.posts.reduce((total, post) => total + estimateReadingTime(post.body ?? ''), 0),
+    parts: [...entry.posts].sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0)),
+  }))
+  .sort((a, b) => b.updated.getTime() - a.updated.getTime())
+---
+
+<ol class="listing listing-accordion">
+  {
+    rows.map((row) => (
+      <li>
+        <details>
+          <summary class="listing-row">
+            <span class="listing-marker" aria-hidden="true" />
+            <span class="listing-date">
+              <time datetime={row.updated.toISOString()}>{formatDate(row.updated, locale)}</time>
+            </span>
+            <span class="listing-title">{row.title}</span>
+            <span class="listing-leader" aria-hidden="true">
+              {LEADER}
+            </span>
+            <span class="listing-label-plain">
+              {row.posts.length} {t(locale, 'articles')}
+            </span>
+            <span class="listing-figure">
+              <ReadingTime minutes={row.minutes} locale={locale} />
+            </span>
+          </summary>
+          <div class="listing-panel">
+            {/* Ordered by seriesOrder rather than by date: this is the reading
+                order the parts were written in. */}
+            <PostList posts={row.parts} showCategory={false} />
+          </div>
+        </details>
+      </li>
+    ))
+  }
+</ol>
+

@@ -33,6 +33,8 @@ import '../styles/math.css'
 import '../styles/variants/quotes.css'
 // Tag and category chips, which live outside the prose wrapper.
 import '../styles/chips.css'
+// The dense listing table, shared by PostList and the series index.
+import '../styles/listing.css'
 // The page itself: reset, grounds, landmarks. Last, so a component's own
 // stylesheet above can be overridden by nothing but a component's scoped style.
 import '../styles/core.css'
@@ -434,7 +436,21 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       // reads it back to name its caches. Keyed on the commit rather than the
       // release, so every deploy retires the previous deploy's caches instead
       // of only those from before the last version bump.
-      if ('serviceWorker' in navigator) {
+      // Never on localhost. A worker that answers from cache makes an edit look
+      // like it did nothing, and the offline behaviour it exists for is not
+      // what anyone is testing on a dev server. Any worker a previous visit
+      // installed is unregistered, since it would otherwise keep serving this
+      // origin long after this guard arrived.
+      var isLocal = ['localhost', '127.0.0.1', '[::1]', '::1'].indexOf(location.hostname) !== -1
+      if ('serviceWorker' in navigator && isLocal) {
+        navigator.serviceWorker
+          .getRegistrations()
+          .then((registrations) => {
+            for (const registration of registrations) registration.unregister()
+          })
+          .catch(() => {})
+      }
+      if ('serviceWorker' in navigator && !isLocal) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js?v=' + commitShort).catch(() => {
             // A failed registration must never break the page.

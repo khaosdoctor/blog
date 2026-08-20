@@ -49,7 +49,6 @@ type UIKey =
   | 'searchDescription'
   | 'series'
   | 'partOfSeriesNamed'
-  | 'seriesContents'
   | 'seriesNav'
   | 'seriesDescription'
   | 'youAreHere'
@@ -186,7 +185,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     searchDescription: 'Buscar artigos no blog de Lucas Santos.',
     series: 'Série',
     partOfSeriesNamed: 'Parte %d de %d da série',
-    seriesContents: 'Esta série tem %d partes:',
     seriesNav: 'Navegação da série',
     seriesDescription: 'Todos os artigos da série %s.',
     youAreHere: 'você está aqui',
@@ -327,7 +325,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     searchDescription: 'Search every article on the blog.',
     series: 'Series',
     partOfSeriesNamed: 'Part %d of %d of the series',
-    seriesContents: 'This series has %d parts:',
     seriesNav: 'Series navigation',
     seriesDescription: 'Every article in the %s series.',
     youAreHere: 'you are here',

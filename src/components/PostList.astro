@@ -5,17 +5,16 @@ import { localePath } from '../i18n/ui'
 import ReadingTime from './ReadingTime.astro'
 
 /**
- * The dense four-column table: date, title, section and reading time in one
- * row, with a dotted leader from the end of the title to the trailing columns.
+ * Posts in the shared listing table (src/styles/listing.css): date, title,
+ * dotted leader, section and reading time in one row.
  *
  * Dense on purpose. A reader scanning the archive sees many posts per screen,
  * the eye runs down the title column, and the leader only carries it sideways
  * when they go looking for a date or a section. That is what makes this
- * candidate survive a hundred posts.
+ * survive a hundred posts.
  *
- * No thumbnails and no excerpt, both deliberate: this candidate draws no image
- * at all, and the description still exists, HoverPreviews reads it from each
- * post's own built page.
+ * No thumbnails and no excerpt, both deliberate: the description still exists,
+ * HoverPreviews reads it from each post's own built page.
  */
 interface Props {
   posts: Post[]
@@ -31,29 +30,26 @@ function categoryUrl(post: Post): string {
   return localePath(post.data.lang, `/${post.data.category}/`)
 }
 
-// The bench's own leader was "─" (a box-drawing dash), a solid run that read
-// as a hard rule once titles could wrap: see .leader's own comment below for
-// why this is now a short, fixed-width, dimmed run of dots instead. 24 of
-// them at this font-size overflows any width .leader is ever given, clipped
-// by its own overflow:hidden the same way the old run was.
+// 200 of them overflows any width the leader is ever given, clipped by its own
+// overflow: hidden.
 const LEADER = '·'.repeat(200)
 ---
 
-<ol class="posts">
+<ol class="listing">
   {
     posts.map((post) => (
-      <li>
-        <span class="date">
+      <li class="listing-row">
+        <span class="listing-date">
           <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, post.data.lang)}</time>
         </span>
-        <a href={urlOf(post)} class="title">
+        <a href={urlOf(post)} class="listing-title">
           {post.data.title}
         </a>
-        <span class="leader" aria-hidden="true">
+        <span class="listing-leader" aria-hidden="true">
           {LEADER}
         </span>
         {showCategory && (
-          <a href={categoryUrl(post)} class="category">
+          <a href={categoryUrl(post)} class="listing-label">
             {post.data.category}
           </a>
         )}
@@ -61,272 +57,10 @@ const LEADER = '·'.repeat(200)
             entry; see estimateReadingTime's own comment for why this reads
             that instead of calling render() again per post. ReadingTime.astro
             owns the "min" abbreviation. */}
-        <span class="read">
+        <span class="listing-figure">
           <ReadingTime minutes={estimateReadingTime(post.body ?? '')} locale={post.data.lang} />
         </span>
       </li>
     ))
   }
 </ol>
-
-<style>
-  /*
-   * Tracking -1/100em, the row height (13, as rows.value / 20 in rem) and the
-   * muted mono baseline every column but the title and the section keeps:
-   * set here, on the real elements this file renders. DateCopy used to be
-   * one of them, a child component with its own class this file could only
-   * reach through plain inheritance; it is gone now, and <time> is a plain
-   * child of `.date` instead, so that inheritance is all this ever needed.
-   */
-  .posts {
-    padding: 0;
-    list-style: none;
-    letter-spacing: -0.01em;
-  }
-
-  /*
-   * Past 70rem this list widens to the same `--chrome-width` the header and
-   * footer already use. Below that it measured `--measure`, `main`'s own width
-   * and exactly the column a post's prose reads at, which made a table of many
-   * posts read as a strip of running text under a much wider header.
-   *
-   * `main` keeps `--measure`, so the list breaks OUT of it: `main` is this
-   * box's containing block, and a margin percentage resolves against that
-   * block's width, so `margin-inline-start: 50%` always puts this box's start
-   * edge at `main`'s horizontal centre. `main` and `body` are both centred, so
-   * that is the viewport's centre too, and translating back by half this box's
-   * own width lands its centre there. The full-bleed trick every framework uses
-   * for 100vw, at this width instead.
-   */
-  @media (min-width: 70rem) {
-    .posts {
-      inline-size: var(--chrome-width);
-      /* The same inset the header's own row carries, so the rows begin and end
-         exactly where the header's drawn edges do rather than a few pixels
-         wider on both sides. */
-      padding-inline: var(--chrome-inset);
-      margin-inline-start: 50%;
-      transform: translateX(calc(var(--chrome-width) / -2));
-    }
-  }
-
-  .posts li {
-    display: flex;
-    /*
-     * Centred, not baseline: the row mixes a small date and read-time with a
-     * visibly larger title, and baseline alignment sizes the line from the
-     * tallest item's ascent, which pushes every smaller item off-centre.
-     *
-     * This still holds when the title wraps: the row grows and the small
-     * cluster stays in the middle of the taller box. flex-start was tried and
-     * rejected, since it pins everything to the title's first line, which
-     * re-introduces the same problem against cap-height instead of baseline.
-     */
-    align-items: center;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    padding-block: 0.65rem;
-    /*
-     * The quotes' own dashed recipe (quotes.css, 10px on and 6px off), the
-     * same mark the pagination rule above the row of controls now draws, so
-     * every horizontal rule on a listing page reads as one thing used three
-     * times rather than three unrelated lines.
-     *
-     * Two differences from those two, both deliberate: it keeps the 1px weight
-     * a row separator wants rather than the 2px a section break carries, and
-     * it runs the row's full width instead of a centred half, because this
-     * separates two rows rather than closing a block. And it draws in
-     * `--muted` rather than `--rule`, whose dark tone carries a hint of purple
-     * that read as coloured against the dim white of the row's own text.
-     */
-    border-block-end: 0;
-    position: relative;
-  }
-
-  /*
-   * The separator, on its own pseudo-element rather than as a background on
-   * the row itself. It has to be its own box because it is masked, and a mask
-   * applies to everything an element renders: on the `li` it would fade the
-   * row's own text along with the rule.
-   *
-   * Three quarters of the row, fading out toward the right rather than
-   * stopping at a hard edge. Two layers doing two jobs: the repeating gradient
-   * draws the dashes (the same 10px on, 6px off the quotes and the pagination
-   * use), and the mask ramps its alpha away over the last stretch. One
-   * gradient cannot do both, since the dashes need a repeating pattern and the
-   * fade needs a continuous one.
-   */
-  .posts li::after {
-    content: '';
-    position: absolute;
-    inset-inline-start: 0;
-    inset-block-end: 0;
-    inline-size: 75%;
-    block-size: 1px;
-    background-image: repeating-linear-gradient(
-      to right,
-      color-mix(in oklab, var(--muted) 45%, transparent) 0 10px,
-      transparent 10px 16px
-    );
-    mask-image: linear-gradient(to right, #000 0 55%, transparent 100%);
-  }
-
-  /* No rule above the first row. The list already begins where the header's
-     own row ends, so a line here reads as a second header edge rather than as
-     the start of a table. Every row still carries its own bottom rule, so the
-     rows stay separated from each other. */
-
-  /* The last row drops its own bottom rule: Pagination.astro draws its own
-     border-block-start immediately below, and the two stacked read as a
-     doubled line with an empty band between them. */
-  /* The separator is a pseudo-element now, so the last row removes it rather
-     than zeroing a border width. */
-  .posts li:last-child::after {
-    content: none;
-  }
-
-  .date {
-    flex: none;
-    /* Departure Mono, not the inherited system mono stack: the reader asked
-       for the same face the page numbers now use to reach the dates and
-       reading times in this list too. */
-    font-family: var(--font-display);
-  }
-
-  /*
-   * A title, so it takes the display face. It is a bare <a> rather than a
-   * heading, which is why the global heading rule does not reach it.
-   *
-   * The colour is explicit rather than the global `a { color: accent }`: the
-   * title reads in ink (16.26:1 light / 18.61:1 dark), keeping the accent for
-   * the section label alone.
-   *
-   * Weight 400, not 600: Departure Mono ships one weight and a browser asked
-   * for 600 synthesises it by smearing the glyphs sideways.
-   */
-  /*
-   * `flex-grow: 1`, so the title is the row's one growing item and claims
-   * whatever its fixed-width siblings leave. A title that does not fit wraps
-   * rather than clipping to an ellipsis: reading every title in full is the one
-   * thing a list whose job is scanning titles cannot compromise on.
-   *
-   * `min-inline-size: 0` is what lets a flex item wrap below its content's
-   * natural one-line width at all.
-   */
-  .title {
-    /* Shrinks but does not grow, so a title takes exactly the room its own
-       text needs and the leader claims what is left. If both grew they would
-       split the leftover space between them and the leader would never reach
-       the columns it is meant to guide the eye toward. */
-    flex: 0 1 auto;
-    min-inline-size: 0;
-    margin-inline-start: 0.9rem;
-    color: var(--fg);
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    font-weight: 400;
-    text-decoration: none;
-    overflow-wrap: break-word;
-  }
-
-  /*
-   * The one hover convention this site already has for a plain-text link
-   * (BaseLayout's `footer a:hover`): fill with the day colour, invert the
-   * text to the page ground. Reused here rather than invented again.
-   */
-  .title:hover,
-  .title:focus-visible {
-    background: var(--accent-day, var(--accent));
-    color: var(--bg);
-  }
-
-  /*
-   * A short, fixed-width run of dots rather than the bench's full-width rule.
-   * That one stretched to whatever a single-line, ellipsis-clipped title left,
-   * which makes no sense once a title can wrap: there is no one line for it to
-   * run from, and a rule drawn at the row's vertical centre would connect to
-   * neither. `flex: none`, so the title claims the freed space instead.
-   *
-   * Dimmed past `--muted` with opacity, the same mechanism Pagination uses for
-   * "present but not the point". It carries no required information (the row
-   * reads in full through its own text), so WCAG 1.4.11's decorative exemption
-   * applies and there is no 3:1 floor to hold it to.
-   */
-  /*
-   * The leader fills the room between the title and the trailing columns
-   * rather than being a fixed stub. That is the whole job of a leader: it
-   * carries the eye from a title across to the date and section on the far
-   * side of a wide row. Cut to a fixed 1.75rem it guided nothing and read as
-   * punctuation after the title.
-   *
-   * `flex: 1` with `min-inline-size: 0` so it takes what is left and can also
-   * be squeezed to nothing on a narrow row, where the title needs every pixel
-   * and there is no distance worth guiding across anyway.
-   */
-  .leader {
-    /*
-     * Basis 0, not `auto`. The dot run is 200 characters long, and with an
-     * `auto` basis that whole string counts as this item's own ideal width, so
-     * the row overflowed and flexbox shrank every shrinkable item to
-     * compensate, the title included: titles were wrapping after three or four
-     * words with empty room to their right. A zero basis means this item asks
-     * for nothing and takes only what the title leaves, which is what a leader
-     * is: the dots are decoration cut to fit, never a width the row owes them.
-     */
-    flex: 1 1 0;
-    min-inline-size: 0;
-    margin-inline: 0.6rem;
-    overflow: hidden;
-    white-space: nowrap;
-    opacity: 0.5;
-  }
-
-  /*
-   * The section label: this list's own "destaque" colour is the day colour,
-   * not the post's own per-slug hash and not a fixed accent, since a list of
-   * many posts belongs to no single post's cover. Text, not a border or a
-   * rule, so its contrast is the 4.5:1 text floor, not the 3:1 non-text one:
-   * red 4.67:1 dark / 4.72:1 light and blue 4.90:1 dark / 4.56:1 light clear
-   * it, green 8.03:1 dark / 3.29:1 light and yellow 11.25:1 dark / 3.23:1
-   * light do not on the light page (measured in theme.css against --bg,
-   * WCAG 2.1). That shortfall already exists everywhere else --accent-day is
-   * text (the header wordmark, prose links) and is not this list's to fix.
-   */
-  .category {
-    flex: none;
-    color: var(--accent-day, var(--accent));
-    text-decoration: none;
-  }
-
-  .category:hover,
-  .category:focus-visible {
-    background: var(--accent-day, var(--accent));
-    color: var(--bg);
-  }
-
-  .read {
-    flex: none;
-    margin-inline-start: 0.7rem;
-    font-variant-numeric: tabular-nums;
-    /* Departure Mono, matching .date above: same reader ask, same reason. */
-    font-family: var(--font-display);
-  }
-
-  @media (max-width: 34rem) {
-    .posts li {
-      flex-wrap: wrap;
-    }
-
-    .title {
-      order: -1;
-      flex-basis: 100%;
-      margin-inline-start: 0;
-      margin-block-end: 0.3rem;
-    }
-
-    .leader {
-      display: none;
-    }
-  }
-</style>

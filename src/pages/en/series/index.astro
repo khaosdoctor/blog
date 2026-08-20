@@ -7,17 +7,15 @@
 // carries in its own frontmatter, so the count beside a title is how many parts
 // exist in English and every link goes to /en/series/<name>/, which
 // src/pages/en/series/[name].astro builds. Nothing here sends an English reader
-// into the Portuguese tree, which is what the "these exist in Portuguese only"
-// notice this page once carried used to apologise for. That string is gone from
-// src/i18n/ui.ts now that the tag index has stopped needing it either.
+// into the Portuguese tree.
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import SeriesList from '../../../components/SeriesList.astro'
 import { getSeries, seriesTitle } from '../../../lib/taxonomy'
 import { HREFLANG, t } from '../../../i18n/ui'
 
 const series = [...(await getSeries('en')).entries()]
   .filter(([, posts]) => posts.length > 1)
-  .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), count: posts.length }))
-  .sort((a, b) => a.title.localeCompare(b.title, 'en'))
+  .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), posts }))
 
 const alternates = [
   { lang: HREFLANG.pt, href: new URL('/series/', Astro.site).href },
@@ -33,43 +31,12 @@ const alternates = [
 >
   <h1>{t('en', 'allSeries')}</h1>
   <p class="intro">{t('en', 'seriesIntro')}</p>
-  <ul class="series-list">
-    {
-      series.map((entry) => (
-        <li>
-          <a href={`/en/series/${entry.slug}/`}>{entry.title}</a>
-          <span class="count">
-            {entry.count} {t('en', 'articles')}
-          </span>
-        </li>
-      ))
-    }
-  </ul>
+  <SeriesList entries={series} locale="en" />
 </BaseLayout>
 
 <style>
   .intro {
     max-inline-size: var(--measure);
     color: var(--muted);
-  }
-
-  .series-list {
-    margin-block-start: 1.5rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .series-list li {
-    display: flex;
-    align-items: baseline;
-    padding-block: 0.4rem;
-    border-block-end: var(--border) solid color-mix(in oklab, var(--muted) 45%, transparent);
-  }
-
-  .count {
-    margin-inline-start: 0.5rem;
-    color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
   }
 </style>
