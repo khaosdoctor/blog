@@ -19,9 +19,9 @@ import '../styles/tweaks.css'
 import '../styles/theme.css'
 // How the body of a post reads: headings, emphasis, lists, tables, links, code.
 import '../styles/prose.css'
-// Callout cards and the code block frame, which are both dense enough to want
-// their own file. Ordered after prose.css so they win where they overlap.
-import '../styles/code-and-callouts.css'
+// Both override a plugin's own stylesheet, so both come after prose.css.
+import '../styles/callouts.css'
+import '../styles/code-blocks.css'
 // Footnotes rendered beside the text instead of only at the foot of the page.
 import '../styles/footnotes.css'
 // Every embed centred in the reading column instead of hugging its left edge.

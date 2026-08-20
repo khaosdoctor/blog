@@ -4,7 +4,7 @@
  * there is one. The lab page shows the other placements.
  *
  * The frame itself, the filename tab and the marked lines live in
- * src/styles/code-and-callouts.css.
+ * src/styles/code-blocks.css.
  */
 .expressive-code figure {
   position: relative;

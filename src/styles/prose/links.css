@@ -77,7 +77,7 @@
   /*
    * The image-link popped shadow (below): a hard offset, no blur, same
    * pixel-grid vocabulary as --code-shadow-offset in theme.css, just its own
-   * tokens rather than reused ones, since code-and-callouts.css repeats that
+   * tokens rather than reused ones, since code-blocks.css repeats that
    * same "own copy, not a cross-file reference" choice for --note-grow-ease
    * in sidenotes.css/footnotes.css. Duration is slow on purpose: a "drift"
    * read as a nudge, the same reasoning --note-grow-duration gives for the

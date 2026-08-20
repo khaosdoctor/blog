@@ -1,0 +1,81 @@
+/*
+ * Callout cards (rehype-callouts, obsidian theme).
+ *
+ * The plugin ships rounded corners and blue neutrals, which fight the
+ * ASCII/ANSI direction, so this overrides rather than restyling from scratch.
+ */
+
+:root {
+  /* How much the callout's own colour washes into its title band. */
+  --cc-callout-tint: 14%;
+
+  /* Double rule on three edges, thick solid bar on the left. 4px because
+     `border-style: double` collapses to one line under 3px. Same frame the
+     quote cards use (variants/quotes.css). */
+  --cc-frame-width: 4px;
+}
+
+/*
+ * Obsidian colours every type through `--rc-color-light`/`--rc-color-dark`,
+ * switched by a `.dark` class this site never adds (theming here is native
+ * `light-dark()`). Reading both through `light-dark()` makes all ~26 of its
+ * types work in both schemes without naming a single one.
+ *
+ * Quote is excluded: variants/quotes.css owns that look.
+ */
+.callout:not([data-callout='quote']) {
+  --callout-color: light-dark(
+    var(--rc-color-light, var(--rc-color-default, #888)),
+    var(--rc-color-dark, var(--rc-color-default, #888))
+  );
+
+  padding: 0;
+  border-style: double;
+  border-color: var(--callout-color);
+  border-width: var(--cc-frame-width);
+  border-inline-start-style: solid;
+  border-inline-start-width: var(--border-card-edge);
+  border-radius: var(--radius);
+  background: none;
+  /* Obsidian fakes transparency over a light-or-dark page with this. Our
+     background is already correct per scheme, so it has nothing left to do. */
+  mix-blend-mode: normal;
+}
+
+/*
+ * Obsidian's palette collides for the types this blog uses most: warning and
+ * caution are both orange, tip and important both cyan, so four callouts read
+ * as two. Warning keeps its orange; the rest are reassigned to what they mean.
+ */
+.callout:is([data-callout='tip'], [data-callout='hint']) {
+  --callout-color: var(--brand-green);
+}
+
+.callout:is([data-callout='caution'], [data-callout='important']) {
+  --callout-color: var(--brand-red);
+}
+
+/* Asking the reader something is not a warning, and the theme paints question,
+   help and faq the same orange, so a real caution and an open question looked
+   identical. Blue is the site's "think about this" colour. */
+.callout:is([data-callout='question'], [data-callout='help'], [data-callout='faq']) {
+  --callout-color: var(--brand-blue);
+}
+
+/* Fixes the icon and text colour in dark mode as a side effect: the upstream
+   rule only ever used the light value. */
+.callout:not([data-callout='quote']) > .callout-title {
+  margin: 0;
+  padding: 0.5em 0.75em;
+  border-block-end: var(--border) solid var(--callout-color);
+  background: color-mix(in oklab, var(--callout-color) var(--cc-callout-tint), transparent);
+  color: var(--callout-color);
+}
+
+.callout:not([data-callout='quote']) > .callout-title > .callout-title-text {
+  font-weight: 700;
+}
+
+.callout:not([data-callout='quote']) > .callout-content {
+  padding: 0.75em 1em;
+}
