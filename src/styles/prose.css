@@ -22,8 +22,8 @@
  * still belongs beside the rest of what a post's own text looks like; see
  * that file's own top comment for the exact split and why.
  *
- * The lab page at /lab/ renders variants of most of this side by side; see the
- * Lab feedback section of docs/design.md for what is still undecided.
+ * The archived bench at /theme-lab-arquivo/ still renders the variants side by
+ * side; docs/design.md records which of them was chosen.
  */
 
 @import './prose/headings.css';

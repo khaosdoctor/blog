@@ -79,7 +79,7 @@
    * (see sidenotes.css for the derivation), `--note-grow-duration`/
    * `--note-grow-ease` the slow, custom-cubic-bezier nudge `.note-grow`
    * uses. Harmless if both files do end up on the same page (a Sidenote or
-   * MarginNote next to a footnote, see /lab/): two identical `:root`
+   * MarginNote next to a footnote, see /theme-lab-arquivo/): two identical `:root`
    * declarations of the same custom property is not a conflict.
    */
   --note-highlight: light-dark(

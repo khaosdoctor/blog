@@ -110,4 +110,3 @@ export function markCells(): MarkCell[] {
   return cells
 }
 
-export const MARK_GRID_SIDE = COLS

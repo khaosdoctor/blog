@@ -22,7 +22,7 @@ import {
   setOpacity,
   setPaused,
 } from './conway'
-import { getShortcutLetter, resetShortcutLetter, setShortcutLetter } from './search-palette'
+import { getShortcutLetter, resetShortcutLetter, RESERVED_LETTERS, setShortcutLetter } from './search-palette'
 import { resetCodeTheme } from './code-theme'
 import { setAccent, storedAccent } from '../lib/accent'
 
@@ -425,6 +425,24 @@ function init(): void {
   // setters above. ---
   const searchKey = menu.querySelector<HTMLSelectElement>('#sp-search-key')
   if (searchKey !== null) {
+    /*
+     * Seven of the 26 letters are a shortcut the browser itself owns, and its
+     * chrome intercepts the combination before any listener on this page runs
+     * (see RESERVED_LETTERS' own comment in search-palette.ts for which and
+     * why). Picking one used to leave the setting looking broken: it saved,
+     * and then did nothing at all.
+     *
+     * They are disabled rather than removed from the list, so the alphabet
+     * stays whole and a reader looking for D finds it and can see it is not
+     * available, instead of wondering whether the list is just missing letters.
+     * The reason rides along in `title`, since a disabled option cannot be
+     * focused to announce anything longer.
+     */
+    for (const option of searchKey.options) {
+      if (!RESERVED_LETTERS.has(option.value)) continue
+      option.disabled = true
+      option.title = searchKey.dataset.reserved ?? 'Reserved by the browser'
+    }
     const syncSearchKey = (): void => {
       searchKey.value = getShortcutLetter()
     }
