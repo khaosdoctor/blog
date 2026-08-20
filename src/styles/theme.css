@@ -68,7 +68,30 @@
   --bg: light-dark(#f4efe0, #000000);
   --fg: light-dark(#14120e, #f3f1ee);
   --muted: light-dark(#6b6353, #a8a29a);
-  --accent: light-dark(#1a5c96, #7cc0ff);
+  /*
+   * The chrome's accent, and now the same colour as everything else on the
+   * page rather than a blue of its own.
+   *
+   * This used to be a fixed `light-dark(#1a5c96, #7cc0ff)`, from before there
+   * was a day colour at all. Once `--accent-day` started rotating (and then
+   * became pinnable in the settings panel, lib/accent.ts), every control still
+   * reading this one stayed blue while the site around it went yellow or
+   * green: the search box's hover, the language switch's focus ring, the
+   * pagination buttons, the settings menu's own options, the footnote and
+   * sidenote links. Fifty-odd rules, all of them meaning "the accent" and
+   * none of them meaning "blue specifically".
+   *
+   * So this is now an alias. Each brand token already carries its own tone per
+   * ground (`light-dark()` on each one above), so following the day colour
+   * also follows the theme: a control lightens on the black page and darkens
+   * on the sepia one without any rule here asking it to.
+   *
+   * The fallback is the old blue, and it is what a reader with JavaScript off
+   * gets, since `--accent-day`'s own value is only ever overwritten inline by
+   * `applyAccent()`. It is also the guard against this resolving to nothing if
+   * the token below is ever removed.
+   */
+  --accent: var(--accent-day, light-dark(#1a5c96, #7cc0ff));
   --rule: light-dark(#736e62, #6b627b);
 
   /*
