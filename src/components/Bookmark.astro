@@ -1,20 +1,16 @@
 ---
 /**
- * The old Ghost "bookmark card": a link rendered with its title, description
- * and site name.
+ * The old Ghost "bookmark card": a link with its title, description and host.
  *
- * This deliberately does NOT fetch anything. astro-embed's
- * LinkPreview refetches OG data for every bookmark at build time, which means
- * hundreds of requests to third-party sites, a build that fails when one of
- * them has no OG tags, and output that changes depending on the network. Ghost
- * already captured this metadata when the card was created, and the migration
- * carries it over, so the build stays offline and deterministic.
+ * It deliberately fetches NOTHING. astro-embed's LinkPreview refetches OG data
+ * for every bookmark at build time, which means hundreds of third-party
+ * requests, a build that fails when one has no OG tags, and output that changes
+ * with the network. Ghost captured this metadata when the card was created and
+ * the migration carries it over, so the build stays offline and deterministic.
  *
- * `image` follows the same rule: nothing here ever fetches one. It only shows
- * up once something upstream (content/bookmarks.json plus a vendor-media.ts
- * pass that does not exist yet) vendors a local copy and threads it through
- * remark-embeds as a prop. Until then, every card falls back to a drawn
- * placeholder rather than an empty gap in the layout.
+ * `image` follows the same rule. It only appears once something upstream
+ * vendors a local copy and threads it through as a prop; until then every card
+ * falls back to a drawn placeholder rather than an empty hole in the layout.
  */
 interface Props {
   url: string

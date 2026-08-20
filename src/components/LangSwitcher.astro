@@ -147,28 +147,21 @@ const otherLabel = other?.label ?? ''
   }
 
   /*
-   * The one solid half: exactly one square (50% of the rectangle's own
-   * width, which is itself twice the square size, so this resolves to the
-   * same 32px on a side as the frame's own height). Left by default
-   * (Portuguese, the site's own default locale); the `[data-current='en']`
-   * rule below moves it to the right instead via `transform`, not by
-   * changing which inset property is set, so the property stays animatable
-   * (see the component comment for why this transition exists at all).
+   * The one solid half: exactly one square, half the rectangle's width, which
+   * is itself twice the square size. Left by default (Portuguese, the source
+   * locale); `[data-current='en']` moves it right via `transform` rather than
+   * by changing which inset is set, so the property stays animatable.
    *
-   * Fill and ink are both fixed literals, not `light-dark()`: the brand
-   * green/red tokens already carry their own per-ground tone (theme.css),
-   * so the ink only has to clear both of those resolved shades, not the
-   * page ground the old slab design painted its word against.
+   * Fill and ink are fixed literals rather than `light-dark()`: the brand
+   * tokens already carry their own per-ground tone, so the ink only has to
+   * clear both resolved shades, not the page ground.
    *
-   * Measured (WCAG 2.1, relative luminance, 4.5:1 the running-text floor):
-   * black on green, this square's PT state, 8.04:1 dark (`--brand-green`
-   * #45b384), 5.56:1 light (#39936c), comfortable on both, which is why
-   * black rather than `--em-bold-fg`'s warmer near-black was chosen (that
-   * tone only reaches 5.22:1 dark and 3.61:1 light, failing on light).
-   * White on red, the EN state, per the owner's own spec: 4.51:1 dark
-   * (`--brand-red` #e6242f), a hair over the floor with almost no margin,
-   * reported here rather than silently swapped for a safer ink since white
-   * was specified explicitly; 5.43:1 light (#d50612), comfortable.
+   * Measured (WCAG 2.1, 4.5:1 the floor): black on green, the PT state, 8.04:1
+   * dark and 5.56:1 light, which is why black rather than `--em-bold-fg`'s
+   * warmer near-black (that reaches only 5.22 / 3.61, failing light). White on
+   * red, the EN state, 4.51:1 dark, a hair over the floor with almost no
+   * margin, reported rather than silently swapped since white was specified;
+   * 5.43:1 light.
    */
   .lang-square {
     position: absolute;
