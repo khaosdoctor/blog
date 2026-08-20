@@ -28,10 +28,10 @@
    * made with the numbers in front of him: see the report for exactly where
    * each is used today and whether that use is text.
    */
-  --brand-red: light-dark(#d50612, #e6242f);
-  --brand-blue: light-dark(#0571b3, #1480c2);
-  --brand-yellow: light-dark(#ac7d00, #f5b200);
-  --brand-green: light-dark(#39936c, #45b384);
+  --brand-red: light-dark(var(--dial-red-on-light), var(--dial-red-on-dark));
+  --brand-blue: light-dark(var(--dial-blue-on-light), var(--dial-blue-on-dark));
+  --brand-yellow: light-dark(var(--dial-yellow-on-light), var(--dial-yellow-on-dark));
+  --brand-green: light-dark(var(--dial-green-on-light), var(--dial-green-on-dark));
   /*
    * Not from the favicon: the old Ghost theme painted the whole page in purple
    * and never put one in the icon. This is that purple, lifted from the live
@@ -43,7 +43,7 @@
    * text: --qc-border (variants/quotes.css) mixes it toward white first,
    * which comes out at 6.72:1, over the 3:1 a border needs.
    */
-  --brand-purple: light-dark(#4b15a8, #815bc2);
+  --brand-purple: light-dark(var(--dial-purple-on-light), var(--dial-purple-on-dark));
 
   /*
    * Roles. Components reference these, never the brand values above.
@@ -65,9 +65,9 @@
    * barely-there hint to an actual 3:1-class border, 4.41:1 light / 3.66:1
    * dark, a border only needs 3:1, so both pass on their own terms.
    */
-  --bg: light-dark(#f4efe0, #000000);
-  --fg: light-dark(#14120e, #f3f1ee);
-  --muted: light-dark(#6b6353, #a8a29a);
+  --bg: light-dark(var(--dial-page-light), var(--dial-page-dark));
+  --fg: light-dark(var(--dial-text-light), var(--dial-text-dark));
+  --muted: light-dark(var(--dial-text-quiet-light), var(--dial-text-quiet-dark));
   /*
    * The chrome's accent, and now the same colour as everything else on the
    * page rather than a blue of its own.
@@ -91,8 +91,8 @@
    * `applyAccent()`. It is also the guard against this resolving to nothing if
    * the token below is ever removed.
    */
-  --accent: var(--accent-day, light-dark(#1a5c96, #7cc0ff));
-  --rule: light-dark(#736e62, #6b627b);
+  --accent: var(--accent-day, light-dark(var(--dial-accent-fallback-light), var(--dial-accent-fallback-dark)));
+  --rule: light-dark(var(--dial-line-light), var(--dial-line-dark));
 
   /*
    * The header's own accent (BrandHeader.astro), day-hash coloured rather
@@ -129,12 +129,12 @@
    * pixels land on fractions of a device pixel. Size anything using it in whole
    * multiples of 16px rather than in rem.
    */
-  --font-body-serif: 'Literata', ui-serif, Georgia, serif;
-  --font-body-sans: 'Atkinson Hyperlegible', ui-sans-serif, sans-serif;
+  --font-body-serif: var(--dial-face-reading-serif);
+  --font-body-sans: var(--dial-face-reading-sans);
   --font-body: var(--font-body-serif);
-  --font-mono: ui-monospace, SFMono-Regular, monospace;
-  --font-display: 'Departure Mono', ui-monospace, SFMono-Regular, monospace;
-  --font-subtitle: 'PxPlus IBM VGA8', ui-monospace, SFMono-Regular, monospace;
+  --font-mono: var(--dial-face-code);
+  --font-display: var(--dial-face-interface);
+  --font-subtitle: var(--dial-face-subtitle);
 
   /*
    * Literata's measurements, taken in the lab against a real post: 18px body,
@@ -161,12 +161,12 @@
    * preference on this site already follows.
    */
   --font-scale: 1;
-  --text-base: calc(1.125rem * var(--font-scale));
-  --text-small: 0.9rem;
-  --text-tiny: 0.75rem;
-  --leading: 1.63;
-  --tracking-body: 0.05em;
-  --word-spacing-body: 0.15em;
+  --text-base: calc(var(--dial-text-size) * var(--font-scale));
+  --text-small: var(--dial-text-size-small);
+  --text-tiny: var(--dial-text-size-tiny);
+  --leading: var(--dial-line-height);
+  --tracking-body: var(--dial-letter-spacing);
+  --word-spacing-body: var(--dial-word-spacing);
 
   /*
    * Antialiasing was off here, on the argument that smoothed type beside a
@@ -192,8 +192,8 @@
    * serif at 18px and about 1010px in the sans at 20px, and the outline panel
    * measures the room it has left rather than trusting a breakpoint.
    */
-  --measure: 78ch;
-  --gutter: 1.5rem;
+  --measure: var(--dial-reading-width);
+  --gutter: var(--dial-page-margin);
 
   /*
    * The minimum vertical space between two block-level prose children of the
@@ -202,13 +202,13 @@
    * on its own. Figures already used this value on their own margin-block in
    * BaseLayout; code frames now share it so two of either kind never touch.
    */
-  --block-spacing: 2rem;
+  --block-spacing: var(--dial-block-spacing);
 
   /* Square by default: rounded corners fight a pixel grid. */
-  --radius: 0;
-  --border: 1px;
+  --radius: var(--dial-corner-radius);
+  --border: var(--dial-border-width);
   /* Anything card-shaped carries a thick left edge, in its own border colour. */
-  --border-card-edge: 8px;
+  --border-card-edge: var(--dial-card-edge-width);
 
   /*
    * Every chrome button draws the same frame: the double ANSI rule, in the
@@ -228,7 +228,7 @@
    * `main` keeps `--measure` instead, since a post's running text wants the
    * narrow column; the list breaks out of `main` on its own.
    */
-  --chrome-width: 88vw;
+  --chrome-width: var(--dial-chrome-width);
 
   /*
    * The header draws its own row inside `--chrome-width` with this much
@@ -238,7 +238,7 @@
    * on both sides rather than the list running slightly wider than the row
    * above it.
    */
-  --chrome-inset: 0.667rem;
+  --chrome-inset: var(--dial-chrome-inset);
 
   /*
    * Prose decoration. Every one of these is a candidate the lab page shows
@@ -301,11 +301,11 @@
    * foreground colour at 80% alpha. The lab page carries a colour and alpha
    * matrix; whichever wins becomes --rule-core here and the matrix goes.
    */
-  --rule-length: 150px;
-  --rule-weight: 1px;
+  --rule-length: var(--dial-section-rule-length);
+  --rule-weight: var(--dial-section-rule-weight);
   --rule-core: var(--fg);
-  --rule-dot: 2px;
-  --rule-gap: 8px;
+  --rule-dot: var(--dial-section-rule-dot-size);
+  --rule-gap: var(--dial-section-rule-dot-spacing);
 
   /* The reading progress used to own five tokens here, for a bar of discrete
      blocks pinned across the top of the window. It no longer draws a bar of
@@ -335,8 +335,8 @@
    * above) is 2rem, well past this 4px offset, so the shadow of one block
    * never reaches into the next.
    */
-  --code-shadow-offset: 4px;
-  --code-shadow-color: light-dark(#000000, #ffffff);
+  --code-shadow-offset: var(--dial-shadow-offset);
+  --code-shadow-color: light-dark(var(--dial-shadow-light), var(--dial-shadow-dark));
 
   /*
    * The header brand's own shadow offset, a separate number from the code
@@ -353,7 +353,7 @@
    * distance (see that token's own comment) and changing it would move
    * both.
    */
-  --brand-shadow-offset: 1px;
+  --brand-shadow-offset: var(--dial-wordmark-shadow-offset);
   /*
    * Its own colour rather than `--code-shadow-color`, and transparent on the
    * dark ground on purpose. The brand's shadow exists only to hold the mark
@@ -395,9 +395,9 @@
    */
   --btn-face: var(--font-display);
   --btn-tracking: 0em;
-  --btn-pad-block: 0.6875rem; /* 11px, his own respiro knob */
-  --btn-pad-inline: 1.25rem;
-  --btn-touch-min: 2.75rem; /* 44px WCAG target; his demo measured ~38px at this padding alone */
+  --btn-pad-block: var(--dial-button-padding-block); /* 11px, his own respiro knob */
+  --btn-pad-inline: var(--dial-button-padding-inline);
+  --btn-touch-min: var(--dial-button-hit-area); /* 44px WCAG target; his demo measured ~38px at this padding alone */
   --btn-fg: var(--brand-yellow);
 
   /*
@@ -415,11 +415,11 @@
    * the ask, a smaller-looking one was.
    */
   --icon-btn-hit: var(--btn-touch-min);
-  --icon-btn-chip: 2rem;
-  --icon-btn-glyph: 1rem;
+  --icon-btn-chip: var(--dial-button-chip-size);
+  --icon-btn-glyph: var(--dial-button-glyph-size);
 
-  --duration: 120ms;
-  --ease: ease;
+  --duration: var(--dial-transition-duration);
+  --ease: var(--dial-transition-easing);
 }
 
 /*
