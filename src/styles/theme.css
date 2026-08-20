@@ -328,7 +328,7 @@
   /*
    * Code block shadow: a hard offset block, no blur, the way a DOS window
    * drops one. Same 4px as the frame's own border width (--cc-frame-width in
-   * code-and-callouts.css), so the shadow reads as part of the same pixel
+   * code-blocks.css), so the shadow reads as part of the same pixel
    * grid rather than a soft one from another era. Colour follows the theme
    * through light-dark(): black on the sepia page, white on the black one.
    * The minimum space between two stacked code blocks (--block-spacing

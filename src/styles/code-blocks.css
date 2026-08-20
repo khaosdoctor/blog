@@ -1,0 +1,93 @@
+/*
+ * Code blocks (astro-expressive-code).
+ *
+ * The plugin injects its stylesheet inline, LATER in the document than this
+ * one, so a specificity tie would let it win. Every selector here carries one
+ * extra class (`.prose`, which is real: code always renders inside it). Where
+ * the plugin only sets a custom property on `:root`, redeclaring it on
+ * `.expressive-code` wins through inheritance instead.
+ */
+
+:root {
+  /* Highlighter marker: a wash, not a solid fill, so the syntax colours still
+     show through. At 40% the yellow buried the code it was pointing at. */
+  --cc-marker-fill: 13%;
+  --cc-marker-edge: 35%;
+
+  /* The tab's decorative close cross. Inline SVG mask, so it takes the tab's
+     own text colour. */
+  --cc-tab-close-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='square'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E");
+}
+
+.expressive-code {
+  /* Flattens every radius the plugin computes from these two, without touching
+     astro.config.mjs. */
+  --ec-brdRad: 0;
+  --ec-frm-edTabBrdRad: 0;
+
+  /* `mark` lines go yellow instead of the default blue. `ins` and `del` keep
+     green and red, since those mean added and removed. */
+  --ec-tm-markBg: color-mix(in oklab, var(--brand-yellow) var(--cc-marker-fill), transparent);
+  --ec-tm-markBrdCol: color-mix(in oklab, var(--brand-yellow) var(--cc-marker-edge), transparent);
+}
+
+/* The tokens above only zero the calc() chains, which still leave a fraction of
+   a pixel from the border width. This forces the visible corners to 0. */
+.prose .expressive-code .frame,
+.prose .expressive-code .frame .header,
+.prose .expressive-code pre {
+  border-radius: 0;
+}
+
+/*
+ * No shadow on a code frame: on the black page the hard offset one is a white
+ * bar down the right edge, which reads as a stray highlight rather than depth.
+ * A picture still wears that treatment (figure img, BaseLayout.astro), where
+ * the frame has a real edge for it to fall from.
+ *
+ * `none` rather than deleting the rule, because the plugin sets its own soft
+ * shadow through `--ec-frm-frameBoxShdCssVal` and removing this would restore
+ * that instead of leaving the frame flat.
+ */
+.prose .expressive-code .frame {
+  box-shadow: none;
+}
+
+/*
+ * A filename on a code block's first line is detected by the frames plugin,
+ * which promotes it to the title and deletes the comment. This only restyles
+ * the resulting header so it reads as an IDE tab.
+ */
+.prose .expressive-code .frame.has-title:not(.is-terminal) .header {
+  border-radius: 0;
+  background: var(--rule);
+}
+
+.prose .expressive-code .frame.has-title:not(.is-terminal) .title {
+  position: relative;
+  border-radius: 0;
+  background: var(--rule);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding-inline-end: calc(var(--ec-uiPadInl) + 1.4em);
+}
+
+/* Decorative only: no button, no focus stop, and a pseudo-element is never
+   exposed to assistive tech. */
+.prose .expressive-code .frame.has-title:not(.is-terminal) .title::after {
+  content: '';
+  position: absolute;
+  inset: 0 0.6em 0 auto;
+  margin-block: auto;
+  inline-size: 0.7em;
+  block-size: 0.7em;
+  border: none;
+  background-color: var(--muted);
+  opacity: 0.85;
+  pointer-events: none;
+  mask: var(--cc-tab-close-icon) center / contain no-repeat;
+  -webkit-mask: var(--cc-tab-close-icon) center / contain no-repeat;
+}

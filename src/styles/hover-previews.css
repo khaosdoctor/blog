@@ -8,7 +8,7 @@
    * this is the one that gets it on all four edges instead of three plus a
    * thick solid spine, since it floats over the page rather than sitting
    * embedded in the article flow. 4px matches what the other double-rule
-   * cards settled on (--cc-frame-width in code-and-callouts.css,
+   * cards settled on (--cc-frame-width in code-blocks.css,
    * --qc-border-width in quotes.css): border-style: double collapses to a
    * single line under 3px, and 4px is the first width that splits cleanly
    * into line-gap-line. Bright white means --fg, not a literal white, so the

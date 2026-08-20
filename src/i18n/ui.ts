@@ -256,12 +256,11 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Idioma',
     switchLanguage: 'Mudar para %s',
     version: 'Versão',
-    // 2019 é o ano do primeiro post publicado (content/blog), fixo. O ano final
-    // vem de new Date().getFullYear() no momento do build, então nunca fica
-    // desatualizado sozinho: cada novo build já traz o ano certo.
+    // 2019 is the first published post's year, fixed. The closing year comes
+    // from the build, so it never goes stale on its own.
     copyright: '© 2019–%d Lucas Santos. Todos os direitos reservados.',
-    // A licença CC BY-SA da PxPlus IBM VGA exige atribuição alcançável do site.
-    // A página /oss/ é essa atribuição hoje; veja docs/theming.md.
+    // PxPlus IBM VGA's CC BY-SA licence needs attribution reachable from the
+    // site. /oss/ is that attribution; see docs/theming.md.
     credits: 'Créditos',
     githubRepo: 'Repositório no GitHub',
     linkedinProfile: 'Perfil no LinkedIn',

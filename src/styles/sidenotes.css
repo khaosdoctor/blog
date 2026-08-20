@@ -351,7 +351,7 @@ main {
 
 /*
  * The double-ANSI border is the house style for card-shaped things now (see
- * src/styles/variants/quotes.css's quote-c variant and code-and-callouts.css):
+ * src/styles/variants/quotes.css's quote-c variant and callouts.css):
  * the thick solid left edge above stays exactly as it is, the other three
  * sides get a thin double rule. A round of feedback ago this only applied to
  * Sidenote, MarginNote having been called "perfectly fine the way it is" in
