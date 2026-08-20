@@ -39,6 +39,12 @@ const { locale } = Astro.props
     <Cog class="sp-icon" />
   </button>
 
+  {/* Shown once, on a reader's first visit, then never again (settings-panel.ts
+     stores a flag). aria-hidden and out of the tab order: the button beside it
+     already announces itself, and a screen reader reaching a second copy of
+     "preferences" would be reading the same control twice. */}
+  <span class="sp-nudge" data-nudge hidden aria-hidden="true">{t(locale, 'settingsNudge')}</span>
+
   <div id="sp-menu" class="sp-menu" hidden>
     <p class="sp-heading">{t(locale, 'settingsPanel')}</p>
 
@@ -641,6 +647,56 @@ const { locale } = Astro.props
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-size: 0.68rem;
+  }
+
+  /*
+   * The first-visit nudge: a small label under the cog, pointing at it with a
+   * caret. Absolutely positioned and `pointer-events: none`, so it cannot move
+   * the header row or intercept a click meant for the button underneath it.
+   *
+   * It reads --accent-day like the rest of the chrome, and it disappears the
+   * first time the panel is opened, so it never becomes something a reader has
+   * to dismiss.
+   */
+  .sp-nudge {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-end: 0;
+    z-index: 4;
+    inline-size: max-content;
+    max-inline-size: 11rem;
+    margin-block-start: 0.35rem;
+    padding: 0.35rem 0.5rem;
+    border: var(--border) solid var(--accent-day, var(--accent));
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: var(--text-tiny);
+    line-height: 1.3;
+    pointer-events: none;
+  }
+
+  .sp-nudge::before {
+    content: '';
+    position: absolute;
+    inset-block-end: 100%;
+    inset-inline-end: 0.75rem;
+    border: 0.35rem solid transparent;
+    border-block-end-color: var(--accent-day, var(--accent));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sp-nudge {
+      animation: sp-nudge-in var(--duration) var(--ease) both;
+    }
+  }
+
+  @keyframes sp-nudge-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.25rem);
+    }
   }
 
   .sp-accent-row {
