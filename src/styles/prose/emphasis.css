@@ -1,73 +1,49 @@
 /* Bold and italic, which the old blog treated as colour rather than weight. */
 
 /*
- * The cover colour: a mark on the post's own text reads the same hue as its
- * cover (--post-accent, which both [...slug].astro pages hand to
- * BaseLayout.astro and it writes onto <body>, so the header can read the same
- * value for its reading progress; it used to go on <article>, and the prose
- * inherits it either way), rather than the day's. That is the split the owner drew: a link, a
- * hover, any transient effect follows today (--accent-day, see
- * prose/links.css); strong and em belong to the article itself and stay put
- * when today rolls over. --post-accent went unused when the header work
- * repointed prose/links.css's fill at --accent-day; this brings it back.
+ * A mark on the post's own text reads the same hue as its cover
+ * (--post-accent, written onto <body> by BaseLayout so the header can read it
+ * too), rather than the day's. That is the split: a link, a hover, any
+ * transient effect follows today (--accent-day, see prose/links.css); strong
+ * and em belong to the article and stay put when today rolls over.
  *
- * "The same hue as its cover" was only ever an intention until now, and it
- * was wrong on real posts. --post-accent used to be chipColor(slugOf(post)):
- * a sum of code points over five tokens, while the cover picked its brand
- * from a salted hash*31 over seven entries (lib/cover.ts). Two hashes over
- * two pools agree only by luck, and criptografia-assimetrica-com-rsa is one
- * where they did not: a purple cover over red bold text, which is the bug
- * this now fixes. Both sides read lib/cover.ts's coverTone() instead, the
- * cover's own derivation, so the card cannot draw one colour while the prose
- * paints another.
+ * "The same hue as its cover" was wrong on real posts until both sides were
+ * pointed at lib/cover.ts's coverTone(). --post-accent used to be
+ * chipColor(slug), a sum of code points over five tokens, while the cover
+ * picked from a hash*31 over seven entries. Two hashes over two pools agree
+ * only by luck, and criptografia-assimetrica-com-rsa is one where they did
+ * not: a purple cover over red bold text.
  *
- * --post-accent resolves to one of the five brand tokens, or to --fg /
- * --muted for the cover's two neutral entries (branco, branco-apagado, which
- * have no brand token of their own; lib/cover.ts's BRAND_TOKENS says why the
- * page's ink is the right neutral here). Each is already light-dark()-aware
- * but tuned in theme.css for that colour as
- * TEXT on --bg, not as a filled background, and not always at the exact
- * lightness a solid chip or a paragraph's worth of italic needs on its own.
- * --em-bold-bg used to be exactly this raw brand colour and regressed once
- * already, when --brand-yellow grew a light-mode tone and the fixed dark ink
- * paired with it fell to 3.69:1 (theme.css's own note on --em-bold-bg).
- * Pinning the chip to one bright yellow in both themes was the fix then,
- * because only one colour ever reached it; five colours reach it now, so
- * fixing the fill again would only move which of the five regresses.
+ * --post-accent resolves to one of the five brand tokens, or to --fg/--muted
+ * for the cover's two neutral entries. Each is tuned in theme.css as TEXT on
+ * --bg, not as a filled background, which is why the fill is mixed rather
+ * than used raw: --em-bold-bg was the raw brand colour once and regressed
+ * when --brand-yellow grew a light-mode tone and its fixed dark ink fell to
+ * 3.69:1. Pinning one bright yellow fixed it while only one colour reached
+ * here; five do now, so a fixed fill would only move which one regresses.
  *
- * The correction: the same recipe prose/links.css already scanned for this
- * exact pool of five (--post-accent-fill's own comment), just re-run here
- * against --post-accent instead of --accent-day, since the two draw from the
- * same five tokens and the fill/ground pairing is identical either way.
- * light-dark(85% colour + 15% black, 95% colour + 5% white) against --bg
- * measured (WCAG, this pair symmetric either way round):
+ * The recipe is the one prose/links.css already scanned for this same pool,
+ * re-run against --post-accent. light-dark(85% colour + 15% black, 95% colour
+ * + 5% white) against --bg, measured (WCAG, symmetric either way round):
  *
  *   light  red 6.62  blue 6.40  yellow 4.71  green 4.80  purple 11.44
  *   dark   red 5.10  blue 5.34  yellow 11.65 green 8.48  purple 4.64
  *
- * All ten clear 4.5:1, worst case light yellow 4.71 and dark purple 4.64,
- * both with the same small margin the fill formula already banks on rather
- * than the exact float.
+ * All ten clear 4.5:1, worst case light yellow 4.71 and dark purple 4.64.
  *
- * The two neutrals were re-scanned when the cover derivation arrived, since
- * they are new to this pool and neither is a brand token:
+ * The two neutrals, new to this pool and not brand tokens:
  *
  *   --fg     light 16.99  dark 18.74
  *   --muted  light  7.15  dark  8.75
  *
- * Both far over the floor, which follows: the page's ink against the page's
- * ground is the highest-contrast pair the theme has. That number holds for
- * both roles this token plays
- * below: as --em-bold-bg, a filled background with --bg (page ground) as
- * the ink on top, the same inverted pairing --post-accent-fill already uses
- * for a link's hover fill; and as --em-italic-fg, plain coloured text
- * directly on --bg. Same two colours either way, so the same ratio.
+ * Far over the floor, which follows: the page's ink on the page's ground is
+ * the highest-contrast pair the theme has. That holds for both roles this
+ * token plays below, as a filled background with --bg as the ink on top, and
+ * as plain coloured text on --bg. Same two colours either way.
  *
- * --em-bold-fg moves off its fixed dark ink (#332d23, tuned for one bright
- * yellow) to --bg, the page ground: light-dark's other branch already reads
- * as dark ink on a light chip in light mode and light ink on a dark chip in
- * dark mode, which is the inversion above, so the ink follows automatically
- * rather than needing five more fixed values of its own.
+ * --em-bold-fg is --bg rather than a fixed dark ink: light-dark's other
+ * branch already gives dark ink on a light chip and light ink on a dark one,
+ * so the ink follows the fill instead of needing five values of its own.
  */
 .prose {
   --post-accent-cover: light-dark(
