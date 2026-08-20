@@ -2,42 +2,28 @@
 /**
  * How far down the post you are, drawn on the header's own dashed rule.
  *
- * This component renders no markup of its own any more. The track it drives is
- * the two runs of dashes BrandHeader.astro already draws between the bracket
- * corners (`.fill > .dash`, one span per character), read as ONE meter running
- * left to right across the row: the left run's dashes first, then the right
- * run's, so progress starts at the `┌─` corner and finishes at the `─┐` one.
- * A dash the reader has passed takes the post's cover colour (`--post-accent`,
- * BrandHeader's own `.dash.lit` rule); the rest stay the muted dashes they
- * always were. That replaces the fixed bar this used to pin to the top of the
- * window, and its `--progress-*` tokens went with it.
+ * This renders no markup of its own. The track is the two runs of dashes
+ * BrandHeader already draws, read as ONE meter left to right: the left run's
+ * dashes, then the right run's, so progress starts at the `┌─` corner and
+ * finishes at the `─┐` one. A dash the reader has passed takes the post's cover
+ * colour; the rest stay muted.
  *
  * The wordmark's block cursor is the head of that run rather than a fixture
- * beside the brand: at the top of a post it is exactly where it always was, and
- * as the reader scrolls it travels along the dashes, which are its trail. It is
- * writing them. See `measureHead`/`moveHead` in the script below for the
- * geometry, and `.cursor` in BrandHeader.astro for the two declarations that
- * make it possible from the stylesheet's side.
+ * beside the brand: at the top of a post it is where it always was, and as the
+ * reader scrolls it travels along the dashes, which are its trail.
  *
- * The reveal is not a straight readout of the scroll position, per the owner's
- * own ask. Two things stay between them:
+ * The reveal is not a straight readout of scroll position. Two things stay
+ * between them, and both are motion, so both are off under reduced motion (the
+ * count then tracks the scroll exactly and every dash lights evenly):
  *
- * - Lag. The lit count eases toward where the reader actually is instead of
- *   snapping to it, so on a fast scroll the dashes visibly catch up rather
- *   than arriving with the page.
- * - Jitter. Each dash carries a small random offset in WHEN it lights within
- *   its own slot, so the run types itself out unevenly, the way a person
- *   types, instead of at a metronome's cadence.
+ * - Lag: the lit count eases toward where the reader is, so on a fast scroll
+ *   the dashes visibly catch up rather than arriving with the page.
+ * - Jitter: each dash carries a small random offset in WHEN it lights within
+ *   its own slot, so the run types itself out unevenly.
  *
- * Both are motion, so under reduced motion both are off: the lit count tracks
- * the scroll exactly and every dash lights at its own even position. The bar
- * still reports the reader's position, which is the part that is information
- * rather than decoration.
- *
- * It stays out of the accessibility tree (the dash spans are inside
- * BrandHeader's own `aria-hidden` runs): a screen reader announcing a
- * percentage on every scroll tick is noise, and the reader already knows where
- * they are in the document.
+ * It stays out of the accessibility tree, since the dash spans are inside
+ * BrandHeader's `aria-hidden` runs: announcing a percentage on every scroll
+ * tick is noise, and the reader knows where they are.
  */
 ---
 
@@ -55,24 +41,15 @@
    */
   const fills = Array.from(document.querySelectorAll<HTMLElement>('.chrome .fill'))
   /*
-   * The write head, which is the wordmark's own block cursor, borrowed rather
-   * than duplicated: the owner asked for "that same block", and a second block
-   * drawn somewhere else would have to hide the first to avoid two cursors on
-   * one row.
+   * The write head is the wordmark's own cursor, borrowed rather than
+   * duplicated: a second block drawn elsewhere would have to hide the first.
    *
-   * It is NOT moved in the DOM. Reparenting it next to the dash it is writing
-   * would put it inside `.fill`, which is the one place on this row it cannot
-   * survive: `.fill` crops itself with `overflow: hidden` exactly where the
-   * meter ends, so the head would be clipped away at the very moment it
-   * finished a run; `.fill`'s 0.4em letter-spacing would add a slot of air
-   * after it and shove every remaining dash along, so the track would change
-   * shape as the head crossed it; its `0.55em`/`1.1em`/`0.2em` metrics would
-   * re-resolve against `.fill`'s font-size instead of `.word`'s 0.85rem, so
-   * the block would change size the instant it left home; and it would step
-   * outside `.brand`'s drop shadow, which is the only reason the wordmark
-   * reads at all on the light ground. A transform from where it already lives
-   * keeps every one of those: same box, same blink, same shadow, and the crop
-   * never applies to it because it is never inside the cropped element.
+   * It is NOT moved in the DOM. Reparenting it into `.fill` breaks four things
+   * at once: `overflow: hidden` would clip it exactly where each run ends, the
+   * 0.4em letter-spacing would add a slot of air and shove every remaining dash
+   * along, its em-based metrics would re-resolve against a different font-size
+   * so the block would change size, and it would step outside `.brand`'s drop
+   * shadow. A transform from where it already lives keeps all four.
    */
   const cursor = document.querySelector<HTMLElement>('.chrome .cursor')
 
@@ -107,24 +84,18 @@
      */
     let stops: number[] = []
     /*
-     * The distance from the cursor's home edge to the start of the first run,
-     * measured once and then reused, because it is the one number here that
-     * does not change: it is the cursor's own width (em, off a rem font-size),
-     * `.word`'s 1px padding and `.chrome`'s 0.6rem column spacing, none of
-     * which move when the display face loads or when the wordmark's letters do.
+     * The distance from the cursor's home edge to the first run, measured once:
+     * it is the cursor's own width, `.word`'s padding and `.chrome`'s column
+     * spacing, none of which move when the display face loads.
      *
-     * Measured rather than written out because it is three values from two
-     * other files, but measured ONLY on the first pass, which is the only pass
-     * guaranteed to catch the wordmark whole: this script runs at module time
-     * and header-brand.ts starts its scramble on DOMContentLoaded, after it, so
-     * the first measurement sees eleven real letters. Every later one (the font
+     * Measured ONLY on the first pass, which is the only one guaranteed to
+     * catch the wordmark whole: this runs at module time, before header-brand
+     * starts its scramble on DOMContentLoaded. Any later measurement (a font
      * swap, a resize) can arrive mid-scramble, where the letters are blanked
-     * one by one and `.word` collapses onto its own `min-inline-size`; reading
-     * the cursor's live position there would put home some 30px to the left and
-     * the head would disagree with its trail by a whole dash for the rest of
-     * the session. Anchoring to `.fill` instead keeps the font swap's real
-     * effect, which is that every dash edge moves, without importing the
-     * wordmark's transient width into it.
+     * and `.word` collapses onto its `min-inline-size`; reading the cursor
+     * there would put home ~30px off for the rest of the session. Anchoring to
+     * `.fill` keeps the font swap's real effect, which is that every dash edge
+     * moves, without importing that transient width.
      */
     let lead: number | null = null
     // How many leading dashes are lit. The thresholds below only ever increase
@@ -160,53 +131,25 @@
     }
 
     /**
-     * Where the head is drawn for the current `shown`, in px from home.
+     * Where the head is drawn, in px from home.
      *
-     * It rides the eased count, not `scrollY`: the trail is painted from the
-     * same number one line above, so the two cannot drift out of step no matter
-     * how hard the reader flings the page. Writes one custom property and reads
-     * nothing, so it is safe on every frame; all the geometry it needs was
-     * measured in `measureHead` below.
+     * It rides `lit`, the count of dashes actually written, not `shown` and not
+     * `scrollY`. `threshold()` pushes each dash's lighting back by up to JITTER
+     * of its slot, so `shown` can be well past a dash the trail has not drawn:
+     * placing from it ran the block ahead of its own trail, further ahead the
+     * more jitter that dash drew.
      *
-     * Between two stops it interpolates, so the head slides rather than
-     * stepping character to character. The one exception is the seam between
-     * the two runs, where the nav is: interpolating there would walk a solid
-     * block straight across POSTS/SERIES/TAGS/ABOUT, which reads as a bug, and
-     * hiding it for the crossing reads as the cursor blinking out at a random
-     * point in the post. So it holds at the end of the left run for that one
-     * slot and then appears at the head of the right one. It is never drawn
-     * over a link and it is never not drawn. The trail does exactly the same
-     * thing at exactly the same moment (the left run finishes, the right run
-     * starts), and the rule is already drawn as though it passed BEHIND the
-     * links rather than stopping at them, so the head skipping the same
-     * distance reads as the rule continuing, which is what it is.
+     * One stop per dash, no interpolation. Sliding between two stops is what
+     * let the head drift from its trail, which only ever moves a whole
+     * character at a time. Stepping makes the two the same thing by
+     * construction, and it is what typing looks like: a cursor jumps a
+     * character, it does not glide across one.
+     *
+     * Writes one custom property and reads nothing, so it is safe every frame.
      */
     function moveHead(): void {
       if (cursor === null || stops.length === 0) return
       const last = stops.length - 1
-      /*
-       * The head is placed from `lit`, the count of dashes actually written,
-       * not from `shown`. The two are the same number in the reduced-motion
-       * path and can be most of a dash apart otherwise: `threshold()` pushes
-       * each dash's own lighting back by up to JITTER of its slot, so `shown`
-       * can be well past a dash the trail has not drawn yet. Placing from
-       * `shown` therefore ran the block ahead of its own trail, further ahead
-       * the more jitter that dash happened to draw, which is the drift the
-       * owner reported.
-       *
-       * `lit` is the pen's real position: it is exactly the number of dashes
-       * that exist, so the head standing at `stops[lit]` is standing on the
-       * one it is about to write.
-       */
-      /*
-       * One stop per dash, no interpolation between them. Sliding smoothly
-       * between two stops is what let the block drift away from its own trail:
-       * it was always somewhere between the dash just written and the one
-       * coming, while the trail only ever moves a whole character at a time.
-       * Stepping means the two are the same thing by construction, and it is
-       * what typing looks like: a cursor jumps a character, it does not glide
-       * across one.
-       */
       const index = Math.min(Math.max(lit, 0), last)
       cursor.style.setProperty('--cursor-x', `${stops[index].toFixed(2)}px`)
     }
@@ -219,19 +162,17 @@
     }
 
     /*
-     * The head's stops, from the dash edges the crop left visible.
+     * The head's stops, from the LEFT edge of each dash the crop left visible.
      *
-     * `lefts` and not the trailing edges this used to read. Two reasons, one
-     * of them a bug: a dash carries `letter-spacing: 0.4em`, and that space is
-     * part of its own advance, so its right edge is most of half an em past
-     * the glyph. Stacking that on the final dash put the head inside the
-     * search button. Standing the head on the LEFT edge of the dash it is
-     * about to write also says what the block means: the pen is on the
-     * character it is writing, not past it.
+     * Not the trailing edges this used to read: a dash carries 0.4em of
+     * letter-spacing as part of its own advance, so its right edge is most of
+     * half an em past the glyph, and stacking that on the final dash put the
+     * head inside the search button. The left edge also says what the block
+     * means, since the pen is on the character it is writing.
      *
-     * The last stop is the last dash's own left edge as well, so a fully read
-     * post parks the block on the final dash rather than in the chrome beyond
-     * it. Nothing is lost: that dash is lit either way.
+     * The last stop is that final dash's left edge too, so a fully read post
+     * parks the block on it rather than in the chrome beyond. Nothing is lost:
+     * that dash is lit either way.
      */
     function measureHead(lefts: number[]): void {
       if (cursor === null) return
