@@ -41,8 +41,8 @@ const { action = '/search/', locale = 'pt' } = Astro.props
   // Pagefind ships its own ranked index + snippet extraction, we only
   // glue its JS API to our own markup so results keep the site's styling
   // instead of Pagefind's default UI CSS. Import is dynamic + try/caught: the
-  // bundle at /pagefind/pagefind.js only exists after the owner adds the
-  // pagefind postbuild step, so it's a normal 404 in dev, not an error.
+  // bundle at /pagefind/pagefind.js is written by the postbuild step, so its
+  // absence is a normal 404 in dev, not an error.
   interface PagefindResult {
     data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }>
   }
@@ -168,15 +168,12 @@ const { action = '/search/', locale = 'pt' } = Astro.props
       return
     }
 
-    // Pagefind builds one index per language (en 183 pages, pt 276 as of the
-    // 2026-08-19 build), and picks between them from the page's own lang when
-    // init() is called bare. That already scopes a search to the language being
-    // read, but its miss path is `findIndex`: an unknown or variant tag falls
-    // back to whichever index has the most pages, which here is always pt. A
-    // reader on an English page would silently get Portuguese results and
-    // nothing would report an error. Passing the tag explicitly keeps the same
-    // behaviour on the happy path and turns that quiet fallback into a thrown
-    // error we handle below, rather than wrong results that look right.
+    // Called bare, init() picks between the per-language indexes from the
+    // page's own lang, which is right on the happy path. Its miss path is
+    // `findIndex`, so an unknown or variant tag falls back to whichever index
+    // has the most pages (pt): a reader on an English page would silently get
+    // Portuguese results and nothing would report it. Passing the tag turns
+    // that quiet fallback into a thrown error, handled below.
     if (pagefind.init) {
       try {
         await pagefind.init(document.documentElement.lang)

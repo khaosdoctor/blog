@@ -1,26 +1,22 @@
-/* Gwern/Quartz-style hover preview cards. Injected by HoverPreviews.astro;
-   targets DOM nodes created at runtime by hover-previews.ts, so this stays a
-   plain global stylesheet instead of an Astro scoped <style>. */
+/* Hover preview cards. Injected by HoverPreviews.astro and targeting nodes
+   hover-previews.ts creates at runtime, so this is a plain global stylesheet
+   rather than an Astro scoped <style>. */
 
 :root {
   /*
-   * House style: every card on the site carries a double-rule border, and
-   * this is the one that gets it on all four edges instead of three plus a
-   * thick solid spine, since it floats over the page rather than sitting
-   * embedded in the article flow. 4px matches what the other double-rule
-   * cards settled on (--cc-frame-width in code-blocks.css,
-   * --qc-border-width in quotes.css): border-style: double collapses to a
-   * single line under 3px, and 4px is the first width that splits cleanly
-   * into line-gap-line. Bright white means --fg, not a literal white, so the
-   * frame still inverts correctly in light theme.
+   * Every card on the site carries a double rule; this is the one that gets it
+   * on all four edges rather than three plus a thick spine, since it floats
+   * over the page instead of embedding in the article flow. 4px matches the
+   * other double-rule cards (--cc-frame-width, --qc-border-width):
+   * border-style: double collapses to one line under 3px, and 4px is the first
+   * width that splits into line-gap-line.
    */
   --hp-border-width: 4px;
 
   /*
-   * The unwritten-link card's watermark: same technique as the quote card's
-   * `"` (see src/styles/variants/quotes.css), independent tokens since that
-   * file belongs to another pass. --fg rather than a literal black/white for
-   * the same reason as the border above.
+   * The unwritten-link card's watermark, same technique as the quote card's
+   * `"` in variants/quotes.css. --fg rather than a literal white so it
+   * inverts with the theme.
    */
   --hp-glyph-size: 3.5rem;
   --hp-glyph: light-dark(
@@ -51,9 +47,8 @@
   margin: 0;
   padding: 0.85rem 1rem;
   overflow: auto;
-  /* Double rule, all four sides, no thick left spine: see --hp-border-width.
-   * Square corners, matching the site's own --radius: 0 (this card hardcoded
-   * a rounded corner before, which a double-rule border renders poorly). */
+  /* Square corners, matching the site's --radius: 0. A double-rule border
+   * renders poorly on a rounded one. */
   border-style: double;
   border-color: var(--fg);
   border-width: var(--hp-border-width);
@@ -65,8 +60,8 @@
   font-size: 0.85rem;
   line-height: 1.45;
   cursor: grab;
-  /* Drag-to-reposition is mouse/pen only (see pointerType check in
-     startDrag); touch keeps native vertical scrolling of the description. */
+  /* Drag is mouse/pen only (see startDrag's pointerType check); touch keeps
+     native vertical scrolling of the description. */
   touch-action: pan-y;
   opacity: 0;
   transition: opacity 120ms ease;
@@ -91,8 +86,8 @@
   width: 1.4rem;
   height: 1.4rem;
   padding: 0;
-  /* Solid, not double, same colour as the card frame: at this size a
-   * double rule would not have room to split into two visible lines. */
+  /* Solid, not double: at this size a double rule has no room to split into
+   * two visible lines. */
   border: var(--border) solid var(--fg);
   border-radius: 0;
   background: transparent;
@@ -189,22 +184,20 @@
   display: none;
 }
 
-/* A link to a post that has not been written yet (remark-wikilinks.mjs,
-   class="link-unwritten"): the underlying <a> still resolves, it just looks
-   unavailable while hovered, see the cursor rule below. */
+/* A link to a post not written yet (remark-wikilinks.mjs). The <a> still
+   resolves, it just looks unavailable while hovered. */
 a.link-unwritten {
   cursor: not-allowed;
 }
 
-/* The unwritten-link card: no title/description/host, just a watermark and a
-   short note (see buildCard()'s unwritten branch in hover-previews.ts). The
-   usual three fields stay in the DOM, hidden, so savePinned()/restorePinned()
-   keep reading .hp-title's href unchanged. */
+/* The unwritten-link card: a watermark and a short note instead of
+   title/description/host, which stay in the DOM hidden so savePinned() and
+   restorePinned() keep reading .hp-title's href. */
 .hp-card.hp-unwritten {
-  /* NOT `position: relative`. The base card is `position: fixed` and place()
-     writes top/left onto it, so relaxing it here dropped the card back into the
-     document flow and it never appeared where the link was. `fixed` is already
-     a containing block for the absolutely positioned watermark below. */
+  /* NOT `position: relative`. The base card is `fixed` and place() writes
+     top/left onto it, so relaxing it here dropped the card back into the
+     document flow and it never appeared where the link was. `fixed` is
+     already a containing block for the watermark below. */
   isolation: isolate;
   display: grid;
   place-items: center;
@@ -235,9 +228,8 @@ a.link-unwritten {
   font-style: italic;
 }
 
-/* Only the stacking needs to change here: the hint keeps its own spacing and
-   colour rules above, it just has to paint above the watermark like the
-   message does. */
+/* Only the stacking changes: the hint keeps its spacing and colour from above,
+   it just has to paint over the watermark like the message does. */
 .hp-card.hp-unwritten .hp-hint {
   position: relative;
   z-index: 1;
