@@ -1,32 +1,24 @@
-// Wires up the code-block theme picker from CodeTheme.astro, now a single
-// row inside SettingsPanel.astro rather than a shared popover with one opener
-// button injected per code block (docs/design.md, Settled). This is the
-// interactive half only: the blocking snippet that applies a stored choice
-// before first paint lives directly in BaseLayout's <head> (see the report),
-// since this module is deferred and would otherwise let the wrong theme show
-// for a moment. That snippet and this module read and write the same key, and
-// resolve the unstored "auto" case the same way (see applyTheme below), so
-// they must be kept in sync if either one changes.
+// The code-block theme picker, one row inside SettingsPanel.astro.
 //
-// The empty export makes this a real module: without one, a script with no
-// other import or export is global rather than file-scoped, and its names
-// collide with theme-toggle.ts and hover-previews.ts, which have the same
-// shape for the same reason.
+// The interactive half only: the blocking snippet in BaseLayout's <head>
+// applies a stored choice before first paint, since this module is deferred.
+// Both read the same key AND resolve the unstored "auto" case the same way
+// (see applyTheme), so the two have to be kept in step.
+//
+// The empty export makes this a real module, or its names would be global.
 export {}
 
 const STORAGE_KEY = 'code-theme'
 const ATTR = 'data-code-theme'
-// theme-toggle.ts's own attribute, read here and never written: the page's
-// light/dark choice is what "auto" has to follow (see applyTheme).
+// theme-toggle.ts's attribute, read here and never written: the page's
+// light/dark choice is what "auto" follows.
 const PAGE_THEME_ATTR = 'data-theme'
 
-// The unstored default, the owner's own pairing: ayu-dark on the dark page,
-// ayu-light on the light one. These two also lead astro.config.mjs's `themes`
-// array, which is what makes expressive-code emit the same pair for a reader
-// with no JavaScript at all; the two have to keep matching.
+// The unstored default. These two also lead astro.config.mjs's `themes` array,
+// which is what makes expressive-code emit the same pair for a reader with no
+// JavaScript at all. The two have to keep matching.
 const AUTO_LIGHT = 'ayu-light'
 const AUTO_DARK = 'ayu-dark'
-
 type ThemeName =
   | 'github-light'
   | 'github-dark'
@@ -59,15 +51,13 @@ const THEMES: ThemeName[] = [
   'ayu-dark',
   'snazzy-light',
 ]
-
 function isThemeName(value: string): value is ThemeName {
   return (THEMES as string[]).includes(value)
 }
 
-// Raw localStorage read, unvalidated: used once at startup to tell "nothing
-// stored" apart from "something stored that is no longer a real theme" (e.g.
-// solarized-dark, dropped from the list below), so the latter can be cleaned
-// up instead of quietly lingering.
+// Unvalidated, used once at startup to tell "nothing stored" apart from
+// "something stored that is no longer a real theme", so the latter can be
+// cleaned up rather than lingering.
 function rawStored(): string | null {
   try {
     return localStorage.getItem(STORAGE_KEY)
@@ -81,7 +71,7 @@ function storedTheme(): ThemeName | null {
   return value !== null && isThemeName(value) ? value : null
 }
 
-/** The site's own explicit light/dark choice, or null when it is following the OS. */
+/** The site's own light/dark choice, or null when it follows the OS. */
 function pageScheme(): 'light' | 'dark' | null {
   const value = document.documentElement.getAttribute(PAGE_THEME_ATTR)
   return value === 'light' || value === 'dark' ? value : null
@@ -90,19 +80,16 @@ function pageScheme(): 'light' | 'dark' | null {
 /*
  * A stored theme is set outright. "Auto" is the interesting half.
  *
- * With no site-wide light/dark choice, no attribute at all is correct:
- * expressive-code's own generated CSS puts ayu-light at `:root` and overrides
- * it with ayu-dark under `@media (prefers-color-scheme: dark)`, which is
- * exactly the pairing asked for, arrived at with no JavaScript and no flash.
+ * With no site-wide choice, no attribute at all is correct: expressive-code's
+ * generated CSS already puts ayu-light at `:root` and ayu-dark under the dark
+ * media query, with no JavaScript and no flash.
  *
- * With a site-wide choice, that media query is answering the wrong question:
- * it reports the OS, while the page is showing whatever ThemeToggle was told.
- * A reader on a dark OS who picked light here would get ayu-dark code on a
- * light page. So the matching ayu is named outright as the attribute instead.
- * ayu-light is astro.config.mjs's themes[0], and the generated dark media
- * query is scoped `:not([data-code-theme='ayu-light'])`, so naming it is what
- * switches that override back off; ayu-dark has its own
- * `[data-code-theme='ayu-dark']` rule, the same one the picker uses.
+ * With a site-wide choice, that media query answers the wrong question: it
+ * reports the OS while the page shows what ThemeToggle was told, so a reader on
+ * a dark OS who picked light here would get ayu-dark code on a light page. The
+ * matching ayu is named outright instead. Naming ayu-light is also what
+ * switches the generated dark override back off, since it is scoped
+ * `:not([data-code-theme='ayu-light'])`.
  */
 function applyTheme(theme: ThemeName | null): void {
   if (theme !== null) {
@@ -114,17 +101,16 @@ function applyTheme(theme: ThemeName | null): void {
   else document.documentElement.setAttribute(ATTR, scheme === 'dark' ? AUTO_DARK : AUTO_LIGHT)
 }
 
-// Held at module level so resetCodeTheme() below can put the picker back to
-// "auto" as well as clearing the key; init() is the only writer.
+// Module level so resetCodeTheme() can put the picker back to "auto" as well as
+// clearing the key. init() is the only writer.
 let picker: HTMLSelectElement | null = null
 
 /*
- * Back to the unstored default, for settings-panel.ts's reset-all. Clearing
- * the key is not enough on its own: `data-code-theme` may still be on <html>
- * from the reader's old choice, and the picker would still be showing that
- * theme's name. applyTheme(null) is the same path a reader picking "auto"
- * takes, so this resolves to ayu the same way they would, not to github and
- * not to whatever happened to be showing.
+ * Back to the unstored default, for reset-all. Clearing the key is not enough:
+ * the attribute may still be on <html> from the old choice and the picker would
+ * still show that theme's name. This takes the same path a reader picking
+ * "auto" takes, so it resolves to ayu rather than to github or to whatever
+ * happened to be showing.
  */
 export function resetCodeTheme(): void {
   try {
@@ -144,8 +130,8 @@ function init(): void {
   const select = selectEl
   picker = select
 
-  // Static <option>s ship with no text: the labels come from data attributes
-  // (see CodeTheme.astro) since this plain module has no access to t().
+  // The <option>s ship with no text: the labels come from data attributes,
+  // since a plain module has no access to t().
   const strings = wrapper.dataset
   const label = wrapper.querySelector('label')
   if (label) label.textContent = strings.label ?? 'Code theme'
@@ -171,15 +157,11 @@ function init(): void {
     option.textContent = captions[option.value] ?? option.value
   }
 
-  // A value stored before a theme was dropped from the list (solarized-dark,
-  // formerly) is neither "auto" nor a theme any CSS selector still matches.
-  // The blocking script in BaseLayout's <head> cannot tell the difference and
-  // may already have set that stale name as the attribute; since no
-  // `[data-code-theme='...']` rule matches it, the page silently falls back
-  // to the prefers-color-scheme default, but the stale name lingers in
-  // storage and would keep doing this on every visit. Once this module is
-  // able to validate it, it clears it and resets the attribute right below,
-  // exactly as if the reader had picked "auto".
+  // A value stored before a theme was dropped from the list is neither "auto"
+  // nor something any selector matches. The blocking script cannot tell the
+  // difference and may already have set that stale name, which silently falls
+  // back to the media query while lingering in storage forever. This is the
+  // first point able to validate it, so it clears it.
   const raw = rawStored()
   const valid = storedTheme()
   if (raw !== null && valid === null) {
@@ -191,10 +173,6 @@ function init(): void {
   }
   applyTheme(valid)
 
-  // No stored choice selects "auto": the ayu pair, resolved against the page
-  // (applyTheme above), which for a reader who has picked nothing anywhere is
-  // exactly the media query in astro.config.mjs deciding, the same as a
-  // first-time visitor with JavaScript off.
   select.value = valid ?? 'auto'
 
   select.addEventListener('change', () => {
@@ -217,14 +195,11 @@ function init(): void {
   })
 
   /*
-   * "Auto" now depends on the page's own light/dark choice, and that choice
-   * can change under this module's feet: theme-toggle.ts writes `data-theme`
-   * and dispatches nothing when it does. A MutationObserver is the plain
-   * platform way to notice a change made by a script this one has no other
-   * reason to import, the same technique conway.ts already uses on the same
-   * attribute. Re-reading the stored theme rather than caching it keeps the
-   * stored branch a no-op: only "auto" actually resolves to something new.
-   * No loop is possible, since the attribute written here is a different one.
+   * "Auto" depends on the page's light/dark choice, and theme-toggle.ts changes
+   * that attribute without dispatching anything. Re-reading the stored theme
+   * rather than caching it keeps the stored branch a no-op: only "auto"
+   * resolves to something new. No loop, since the attribute written here is a
+   * different one.
    */
   new MutationObserver(() => applyTheme(storedTheme())).observe(document.documentElement, {
     attributes: true,
