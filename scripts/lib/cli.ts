@@ -56,8 +56,8 @@ export function list(items: string[], options: { indent?: number; max?: number }
 }
 
 /**
- * A GitHub Actions annotation, so a CI failure lands on the file in the PR diff
- * instead of only in the log. Silent outside GITHUB_ACTIONS.
+ * A GitHub Actions annotation, so a CI failure shows up on the file in the PR
+ * diff instead of only in the log. Silent outside GITHUB_ACTIONS.
  */
 export function annotate(level: 'error' | 'warning', target: { file: string; line?: number; message: string }): void {
   if (!process.env.GITHUB_ACTIONS) return

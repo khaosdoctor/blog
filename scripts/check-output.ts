@@ -18,7 +18,7 @@ const CONTENT = 'content/blog'
 
 // The file each failure is annotated against. A dist page or a manifest file is
 // exact; a content slug falls back to its source post so the annotation still
-// lands somewhere a human can act on it.
+// points somewhere a human can act on it.
 type Failure = { check: string; detail: string; file: string }
 
 const failures: Failure[] = []
@@ -86,7 +86,7 @@ const expected = postFolders.filter((slug) => !scheduled.has(slug))
 
 /**
  * Where a folder's own index actually renders. Almost always `/<folder>/`, but a
- * folder whose index is English lands at `/en/<slug>/` instead: twelve drafts are
+ * folder whose index is English resolves to `/en/<slug>/` instead: twelve drafts are
  * already in that shape, and publishing one used to fail this check for a page
  * that had built perfectly well. Same rule as everywhere else, imported rather
  * than restated.

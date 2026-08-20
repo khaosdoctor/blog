@@ -329,7 +329,7 @@ const tree = treeOf(flat)
     // article stops growing while the room beside it keeps shrinking.
     addEventListener('resize', fitMode, { passive: true })
     // A heading level with the window top is already behind the reader, so the
-    // line reads a little below it. Same figure as the heading scroll margin.
+    // line reads a little below it.
     const LOOKAHEAD = 120
 
     let current: HTMLAnchorElement | null = null

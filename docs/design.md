@@ -139,7 +139,7 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   that row share `--icon-btn-hit`, `--icon-btn-chip` and `--icon-btn-glyph` (`theme.css`): the button's own hit box
   stays at the WCAG 44px floor, but the border and background move to a `::before` sized at the smaller chip value,
   so what a reader sees can shrink without the target underneath it shrinking too.
-- **Settings panel.** A sliders button beside `ThemeToggle`, same shape: hidden until `settings-panel.ts` confirms
+- **Settings panel.** A cog button beside `ThemeToggle`, same shape: hidden until `settings-panel.ts` confirms
   it can run, a popover menu, `data-*` attributes carrying option labels a plain script has no `t()` for. Four
   things live in it. **Motion**, a light/dark/system-shaped three-way (`reduce` / `allow` / system, stored under
   `motion`) that overrides `prefers-reduced-motion` in either direction rather than only following it. **The Conway

@@ -14,8 +14,7 @@ const OUT = 'src/data/redirects.ts'
 // Not imported from src/lib/taxonomy.ts: that file pulls in ./posts, which
 // pulls in the astro:content virtual module, which only exists inside
 // Astro/Vite. This script runs under plain node, so that import chain cannot
-// resolve here. See the report for this task for the two ways to fix this
-// properly without duplicating the function forever.
+// resolve here; src/lib/slugify.ts is the leaf module both sides import instead.
 
 // The newsletter section has no published posts yet, so /newsletter/ is not a
 // page. Sending 48 URLs to a 404 is worse than sending them home, and sending

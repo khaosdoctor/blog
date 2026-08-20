@@ -26,7 +26,7 @@ const hasFrame = /<(iframe|embed)[\s>]/i.test(html)
 const embedHtml = hasFrame ? patchFrameAttrs(html, title) : html
 
 // Backfills accessibility/perf/privacy attributes onto <iframe>/<embed> tags without
-// clobbering ones the source markup already set, scoped per-tag (not per-document) so
+// overwriting ones the source markup already set, scoped per-tag (not per-document) so
 // multiple frames in one embed all get patched and none get double-patched.
 function patchFrameAttrs(source: string, frameTitle: string): string {
   const escapedTitle = frameTitle.replaceAll('"', '&quot;')

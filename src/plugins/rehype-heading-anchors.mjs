@@ -13,10 +13,9 @@
 const HEADINGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 
 /**
- * The label a screen reader announces. Kept here rather than in src/i18n/ui.ts
- * because a remark plugin cannot import from `astro:`-flavoured modules, the same
- * reason rehype-footnote-sidenotes.mjs carries its own table. Both are mirrored
- * against the real table by scripts/check-i18n.ts.
+ * The label a screen reader announces. Kept here rather than in src/i18n/ui.ts:
+ * the plugin layer keeps its own copy rather than importing from the app's i18n
+ * module, the same choice rehype-footnote-sidenotes.mjs makes for its own table.
  */
 const ANCHOR_LABEL = { pt: 'link para esta seção', en: 'link to this section' }
 
