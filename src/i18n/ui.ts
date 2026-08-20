@@ -63,6 +63,7 @@ type UIKey =
   | 'themeDark'
   | 'themeSystem'
   | 'settingsPanel'
+  | 'settingsNudge'
   | 'motionLabel'
   | 'motionReduce'
   | 'motionAllow'
@@ -199,6 +200,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     themeDark: 'Escuro',
     themeSystem: 'Sistema',
     settingsPanel: 'Preferências',
+    settingsNudge: 'Ajuste a leitura do jeito que você gosta',
     motionLabel: 'Movimento',
     motionReduce: 'Reduzido',
     motionAllow: 'Sempre ativo',
@@ -339,6 +341,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     themeDark: 'Dark',
     themeSystem: 'System',
     settingsPanel: 'Preferences',
+    settingsNudge: 'Set the reading up the way you like it',
     motionLabel: 'Motion',
     motionReduce: 'Reduced',
     motionAllow: 'Always on',

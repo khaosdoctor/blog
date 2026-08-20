@@ -71,19 +71,23 @@ function run(): void {
     return
   }
 
-  // No stated choice, so the browser's own order decides, and only once.
+  // No stated choice, so the browser decides, and only once.
+  //
+  // Two outcomes, never more: the site speaks Portuguese and English, so a
+  // reader whose top preference is any flavour of Portuguese (pt-BR, pt-PT,
+  // bare pt) gets Portuguese and EVERYONE else gets English. A French or
+  // Japanese reader is better served by English than by a language they did
+  // not ask for at all, which is what matching only exact hits would have
+  // given them.
   if (alreadyRedirected()) return
-  for (const tag of navigator.languages ?? [navigator.language]) {
-    const code = subtag(tag)
-    if (code === '') continue
-    // The reader's top preference the site actually speaks. Anything below it
-    // in their list is a worse match than where they already are.
-    if (!alternates.has(code)) continue
-    if (code === current) return
-    markRedirected()
-    location.replace(alternates.get(code) as string)
-    return
-  }
+  const top = subtag(navigator.languages?.[0] ?? navigator.language ?? '')
+  if (top === '') return
+  const wanted = top === 'pt' ? 'pt' : 'en'
+  if (wanted === current) return
+  const target = alternates.get(wanted)
+  if (target === undefined) return
+  markRedirected()
+  location.replace(target)
 }
 
 run()

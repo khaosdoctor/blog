@@ -37,6 +37,10 @@ import { setAccent, storedAccent } from '../lib/accent'
 // reader opens a post.
 const HP_PERSIST_KEY = 'hp-persist'
 
+// Written the first time the nudge under the cog is shown, so it only ever
+// appears once per browser.
+const NUDGE_KEY = 'settings-nudge-seen'
+
 // Same key BaseLayout's own blocking <script is:inline> reads before first
 // paint, so the reader never sees a flash at the default size. A raw
 // percentage, 50 to 160 (the owner's own range, narrowed from the 10-500 this
@@ -527,6 +531,31 @@ function init(): void {
   }
 
   wrapper.removeAttribute('hidden')
+
+  /*
+   * The first-visit nudge. Shown once, then never again: the flag is written
+   * the moment it appears rather than when the reader opens the panel, so a
+   * visitor who ignores it does not meet it again on the next page.
+   *
+   * Storage throwing (private mode) means "shown already", which errs toward
+   * not pestering someone whose browser cannot remember the answer.
+   */
+  const nudge = wrapper.querySelector<HTMLElement>('[data-nudge]')
+  if (nudge !== null) {
+    let seen = true
+    try {
+      seen = localStorage.getItem(NUDGE_KEY) === '1'
+      if (!seen) localStorage.setItem(NUDGE_KEY, '1')
+    } catch {
+      // Left as seen.
+    }
+    if (!seen) {
+      nudge.hidden = false
+      // Opening the panel answers it, so it goes at that point rather than
+      // waiting for a navigation.
+      opener.addEventListener('click', () => nudge.remove(), { once: true })
+    }
+  }
 }
 
 if (document.readyState === 'loading') {
