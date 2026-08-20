@@ -12,7 +12,7 @@
 // with its own `lang` frontmatter. A wikilink resolves in the locale of the page
 // it is written on, so an English page links the English file in that folder.
 // When that file does not exist yet the link falls back to another locale, with
-// that locale's title: the reader is going to land on a Portuguese article, so
+// that locale's title: the reader is going to arrive at a Portuguese article, so
 // the link should say so.
 
 import { readFileSync, readdirSync } from 'node:fs'
@@ -80,9 +80,9 @@ function resolve(slug, locale) {
 }
 
 /**
- * Same copy as the `notWrittenYet` key in src/i18n/ui.ts. It is duplicated here
- * because this is a build-time .mjs plugin and cannot import the TS module; keep
- * the two in step if the wording changes.
+ * Same copy as the `notWrittenYet` key in src/i18n/ui.ts. The plugin layer
+ * keeps its own copy here rather than importing from that module; keep the two
+ * in step if the wording changes.
  */
 const NOT_WRITTEN_YET = { pt: 'ainda não escrito', en: 'not written yet' }
 

@@ -1,9 +1,9 @@
 ---
 // The four header nav links Lucas asked for: POSTS, SERIES, TAGS, ABOUT, in
-// that order, sitting between the search trigger and the language switcher
-// in BrandHeader's `.controls` row (BrandHeader.astro itself is owned by
-// another pass right now; this component only exists so that wiring is a
-// one-line import + placement once it arrives there).
+// that order. BrandHeader.astro imports this component and renders it between
+// its own two runs of dashes, ahead of the `.controls` row (the search
+// trigger, the language switch, the theme toggle, settings): a separate
+// cluster from that row, not a child inside it.
 //
 // POSTS, SERIES and TAGS all have a real destination now: the locale's own
 // home page, /series/ and /tags/ (this last pair built by this same pass,

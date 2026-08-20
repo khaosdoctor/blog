@@ -286,8 +286,8 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
         readers search with JS on. The old link's own /search/ page still
         exists and still works with JS off (which the palette never will).
         It no longer lives in this footer, but it is not orphaned: the 404
-        page and the home page's own no-JS notice both link to it directly,
-        and robots.txt/the sitemap filter still know it by name. */}
+        page links to it directly, and robots.txt/the sitemap filter still
+        know it by name. */}
     <BrandHeader locale={locale} home={home} alternates={alternates} />
     <main id="main-content">
       <slot />

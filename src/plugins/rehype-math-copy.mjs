@@ -241,10 +241,10 @@ function isKatexDisplay(node) {
 }
 
 /**
- * Both strings a reader can perceive. Kept here rather than in src/i18n/ui.ts
- * because a rehype plugin cannot import from `astro:`-flavoured modules, the
- * same reason rehype-footnote-sidenotes.mjs carries its own table. Mirrored
- * against the real table by scripts/check-i18n.ts.
+ * Both strings a reader can perceive. Kept here rather than in src/i18n/ui.ts:
+ * the plugin layer keeps its own copy rather than importing from the app's
+ * i18n module, the same choice rehype-footnote-sidenotes.mjs makes for its own
+ * table.
  */
 const COPY_LABEL = { pt: 'copiar a fórmula como texto', en: 'copy formula as text' }
 const COPY_TEXT = { pt: 'copiar', en: 'copy' }

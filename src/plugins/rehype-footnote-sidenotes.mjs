@@ -42,9 +42,9 @@
 const BLOCK_TAGS = new Set(['p', 'li', 'td', 'th', 'dd'])
 
 /**
- * Same copy as the `footnotes` key in src/i18n/ui.ts. Duplicated here
- * because this is a build-time .mjs plugin and cannot import the TS module;
- * keep the two in step if the wording changes.
+ * Same copy as the `footnotes` key in src/i18n/ui.ts. The plugin layer
+ * keeps its own copy here rather than importing from that module; keep the
+ * two in step if the wording changes.
  */
 const FOOTNOTES_LABEL = { pt: 'Notas de rodapé', en: 'Footnotes' }
 
@@ -130,7 +130,7 @@ function findListItems(node, out = []) {
 /**
  * Walks a children array in place, splicing a footnote-aside after every
  * block element that contains a reference. `handled` stops a reference from
- * getting a second aside if it sits inside more than one BLOCK_TAGS ancestor
+ * getting a second aside if it falls inside more than one BLOCK_TAGS ancestor
  * (a footnote in a list item's own paragraph: both the `<p>` and the `<li>`
  * qualify, and the `<p>` should win since it is the closer match).
  */

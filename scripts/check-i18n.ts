@@ -87,9 +87,10 @@ const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
 const BILINGUAL_PAGES = new Set(['404.astro', 'offline.astro'])
 
 /**
- * Tables outside src/i18n/ui.ts that hold the same copy, because a build-time
- * .mjs plugin cannot import the TypeScript module. Each one has to cover every
- * language and match the key it mirrors, which is the part a person forgets.
+ * Tables outside src/i18n/ui.ts that hold the same copy: the plugin layer
+ * keeps its own copy rather than importing from that module. Each one has to
+ * cover every language and match the key it mirrors, which is the part a
+ * person forgets.
  */
 const MIRRORED_TABLES = [
   { file: 'src/plugins/remark-wikilinks.mjs', constant: 'NOT_WRITTEN_YET', key: 'notWrittenYet' },
@@ -164,7 +165,7 @@ for (const locale of LOCALES) {
   }
 }
 
-// 2. The placeholders t() fills have to line up, or an argument lands in the
+// 2. The placeholders t() fills have to line up, or an argument ends up in the
 // wrong slot or is dropped without a trace.
 const placeholders = (value: string) => (value.match(/%[ds]/g) ?? []).join('')
 for (const key of keys) {
@@ -193,8 +194,8 @@ for (const locale of LOCALES) {
   announced.add(value)
 }
 
-// 4. The source language is stated twice, in two modules that cannot import each
-// other. They have to say the same thing.
+// 4. The source language is stated twice, in two modules only one of which can
+// import the other. They have to say the same thing.
 const POSTS = 'src/lib/posts.ts'
 const declared = /export const SOURCE_LANG = '([a-z-]+)'/.exec(readFileSync(POSTS, 'utf8'))?.[1]
 if (declared === undefined) {

@@ -44,7 +44,7 @@ import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 import { bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
-// Sits directly in content/blog, not one level down inside a post folder like
+// Lives directly in content/blog, not one level down inside a post folder like
 // every real post and translation does, so it never matches the collection's
 // glob and never looks like a translation to check-translations.ts either.
 const CACHE_FILE = join(SOURCE_DIR, '.translation-cache.json')

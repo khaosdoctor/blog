@@ -59,11 +59,8 @@ const LEADER = '·'.repeat(200)
         )}
         {/* post.body is the raw markdown/MDX Astro already loaded for this
             entry; see estimateReadingTime's own comment for why this reads
-            that instead of calling render() again per post. "min", not a t()
-            call: the post's own page (src/pages/[...slug].astro) already
-            hardcodes the same abbreviation rather than the unused
-            `readingTime` ui key, and this matches that existing choice
-            rather than fixing it under a different task. */}
+            that instead of calling render() again per post. ReadingTime.astro
+            owns the "min" abbreviation. */}
         <span class="read">
           <ReadingTime minutes={estimateReadingTime(post.body ?? '')} locale={post.data.lang} />
         </span>

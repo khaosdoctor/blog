@@ -56,9 +56,9 @@ function syncThemeColor(scheme: Scheme | null): void {
   else if (ownDark !== null) dark.setAttribute('content', ownDark)
 }
 
-// Where the native popover API exists the menu sits in the top layer, with no
-// stacking context or outside-click bookkeeping of its own. Where it does not,
-// the same element is toggled with `hidden` and positioned manually.
+// Where the native popover API exists the menu is promoted to the top layer,
+// with no stacking context or outside-click bookkeeping of its own. Where it
+// does not, the same element is toggled with `hidden` and positioned manually.
 const canPopover = 'popover' in HTMLElement.prototype
 
 /**
