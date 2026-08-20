@@ -1,18 +1,12 @@
-// The Conway "game of life" background, ported from the bench
-// (content/blog/theme-lab/components/GameOfLife.vue) onto the real site. Same
-// mechanism, four differences: this canvas covers the whole viewport instead
-// of a bench "stage" div, the excluded region is the real reading column
-// (`main`, see BaseLayout) rather than a simulated article box, the settings
-// this file does not own (cell size, per-ground fade, click mode, the bench's
-// simulated column width) are fixed at the owner's decided values instead of
-// reader-adjustable knobs, and this module exports a small control surface
-// (setMotion, setBackgroundEnabled, setPaused, setDensity, setGps, setAutoFeed,
-// reseed, getSettings) that SettingsPanel.astro's script calls directly rather
-// than the bench's own Vue knobs.
+// The Conway "game of life" background.
 //
-// The empty export makes this a real module, same reason as theme-toggle.ts
-// and code-theme.ts: a script with no other import or export is global rather
-// than file-scoped, and its names would otherwise collide with theirs.
+// Ported from the theme lab's bench with four differences: the canvas covers
+// the viewport rather than a bench div, the excluded region is the real article
+// rather than a simulated one, the values Lucas decided are fixed rather than
+// knobs, and this module exports a control surface settings-panel.ts calls.
+//
+// The empty export makes this a real module: a script with no import or export
+// is global, and its names would collide with the other scripts here.
 export {}
 
 const MOTION_KEY = 'motion'
@@ -32,51 +26,32 @@ function isMotion(value: string): value is Motion {
   return value === 'reduce' || value === 'allow'
 }
 
-/*
- * Decided configuration (docs/design.md, docs/decisions-log.md). Cell size,
- * click-adds-a-glider and the two per-ground fades are the owner's own
- * values, fixed here rather than reader knobs; density, generations per
- * second and the auto-feed interval are the same numbers as *defaults*, but
- * the settings panel can move all three (see the exported setters below).
- */
+// Cell size and click-adds-a-glider are fixed. Density, generations per second,
+// the auto-feed interval and opacity are defaults the settings panel can move.
 const CELL_SIZE = 12
-// The three the owner settled on after watching the field run at each of
-// them: 10% seed, 6 generations a second, a glider every 3 seconds.
 const DEFAULT_DENSITY = 10
 const DEFAULT_GPS = 6
 const DEFAULT_AUTOFEED = 3
+const MIN_GPS = 1
+const MAX_GPS = 25
 /*
- * Cell opacity, now one reader-adjustable value rather than two fixed ones.
+ * One value for both grounds, which is a real trade: the light page now draws
+ * at whatever the dark page does, and 9% on sepia is stronger than the 3% that
+ * ground had when the two were separate. A knob whose meaning changes with the
+ * theme is worse than one that holds still.
  *
- * This went through three positions worth recording, because the last one
- * looks like a regression from the second and is not. It started as a fixed
- * pair, 16% on the dark ground and 3% on the sepia one, chosen so each would
- * read as the same faint texture from opposite ends of the lightness scale.
- * Then the field proved to have been invisible the whole time for an unrelated
- * reason (the fill resolved to black on black, see `currentFg()`), so no one
- * had ever actually judged those numbers against a drawn field. With it
- * finally visible the owner asked for 5% off, then decided the value should be
- * a knob in the settings panel instead, at 0.09 to open on.
- *
- * So the per-ground split is gone from here: one knob cannot mean two numbers,
- * and a knob whose meaning changes with the theme is worse than one that holds
- * still. **The consequence is that the light ground now draws at whatever the
- * dark ground draws at**, and 9% on sepia is stronger than the 3% that ground
- * was given when the two were separate. That is a real change in how the light
- * page reads, and it is reported rather than hidden behind a scale factor.
- *
- * Measured lit-cell contrast stays around 1.05:1, a deliberate failure of the
- * 3:1 non-text-contrast criterion: this draws texture, not content.
+ * Lit-cell contrast is around 1.05:1, a deliberate failure of the 3:1
+ * non-text-contrast criterion: this draws texture, not content.
  */
 const DEFAULT_OPACITY = 0.09
 const MIN_OPACITY = 0
 const MAX_OPACITY = 0.5
-/* Cells of slack around a glider so it does not spawn already touching the
-   viewport edge and die within a few generations. */
+/* Slack around a glider so it does not spawn touching the viewport edge and die
+   within a few generations. */
 const EDGE_MARGIN = 3
 const GLIDER_BOX = 3
 
-/** Offsets of the classic glider from the clicked/seeded cell, in a 3x3 box. */
+/** The classic glider, as offsets from the seeded cell in a 3x3 box. */
 const GLIDER_BASE: Array<[number, number]> = [
   [1, 0],
   [2, 1],
@@ -85,7 +60,7 @@ const GLIDER_BASE: Array<[number, number]> = [
   [2, 2],
 ]
 
-/** Rotates a shape 90 degrees inside a `size`x`size` box, so every glider does not travel the same diagonal. */
+/** Rotates a shape 90 degrees, so every glider does not travel one diagonal. */
 function rotate90(cells: Array<[number, number]>, size: number): Array<[number, number]> {
   return cells.map(([c, r]) => [size - 1 - r, c])
 }
@@ -116,9 +91,8 @@ function writeStorage(key: string, value: string | null): void {
   }
 }
 
-// Mutable simulation state. Kept as plain module-level variables rather than
-// anything reactive: a cell is read and written thousands of times per
-// generation, and this is a canvas loop, not a component tree.
+// Plain module-level variables rather than anything reactive: a cell is read
+// and written thousands of times per generation, and this is a canvas loop.
 let motionOverride: Motion | null = null
 let backgroundEnabled = true
 let manualPaused = false
@@ -140,12 +114,8 @@ function osReduced(): boolean {
   return matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/*
- * The master switch overrides the OS setting in both directions: an explicit
- * "reduce" wins even when the OS has no preference, and an explicit "allow"
- * wins even when the OS asks for less motion. Absent, today's behaviour is
- * exactly the OS query, unchanged.
- */
+/* The override wins in BOTH directions: an explicit "allow" beats an OS that
+   asks for less motion, as well as the other way round. */
 function effectiveReduced(): boolean {
   if (motionOverride === 'reduce') return true
   if (motionOverride === 'allow') return false
@@ -165,26 +135,19 @@ function currentFade(): number {
 }
 
 /*
- * The page's own ink, read off the canvas element's own resolved `color`
- * rather than the `--fg` custom property directly. This is not a stylistic
- * preference: `getComputedStyle(html).getPropertyValue('--fg')` returns the
- * *specified* value of a custom property, which for an untyped property is
- * the literal text `light-dark(#14120e, #f3f1ee)`, unresolved, because
- * custom properties carry a raw token stream and only get resolved when
- * actually consumed by a real, typed property. Handing that literal string
- * to `ctx.fillStyle` asks the canvas to resolve `light-dark()` outside any
- * element's used `color-scheme`, which is not guaranteed to work, and a
- * fillStyle the canvas cannot parse is silently left at its default, black.
- * Black cells at 16% alpha over the dark ground's own black page read as
- * nothing, which matches the report exactly.
+ * Read off the canvas's own resolved `color`, NOT the `--fg` custom property.
+ * This is the fix for the field being invisible for weeks.
  *
- * `body` already sets `color: var(--fg)`, a real property, and this canvas
- * inherits it (no `color` of its own). Reading `.color` off the canvas
- * itself asks the browser for that property's *computed* value, which by
- * definition is always a resolved colour (rgb()/color()), never a bare
- * function call, so it still follows a palette change for free, the same
- * as before, without depending on light-dark() being resolvable outside a
- * styled element.
+ * `getPropertyValue('--fg')` returns the SPECIFIED value of a custom property,
+ * which for an untyped one is the literal text `light-dark(#14120e, #f3f1ee)`:
+ * custom properties carry a raw token stream and only resolve when consumed by
+ * a real typed property. Handing that to `fillStyle` asks the canvas to resolve
+ * `light-dark()` outside any element's used `color-scheme`, and a fillStyle it
+ * cannot parse is silently left at its default, black. Black cells on the black
+ * page read as nothing.
+ *
+ * `body` sets `color: var(--fg)` and this canvas inherits it, so reading
+ * `.color` gets the COMPUTED value, which is always a resolved colour.
  */
 function currentFg(): string {
   if (canvas === null) return 'currentColor'
@@ -192,20 +155,16 @@ function currentFg(): string {
 }
 
 /*
- * The reading column, measured for real off `main` (BaseLayout gives it
- * `max-width: var(--measure)`), with a cell of slack around it: the same
- * technique PostToc.astro uses for its own outline, applied here as a cell
- * mask instead of a pixel position. Any live cell the mask starts covering
- * is cleared immediately, so a reflow never leaves one stuck behind the text.
+ * The mask that keeps the field off the text, measured with a cell of slack.
+ * Any live cell the mask starts covering is cleared, so a reflow never leaves
+ * one stuck behind the words.
  */
 function computeExclusion(): void {
   /*
-   * The article, not `main`. The mask exists so the field never draws behind
-   * the text of a post, and only a post has one: `main` on a listing page is
-   * the post list, the pagination and nothing a reader is reading through, so
-   * measuring against it blanked the middle of the page and left the field
-   * confined to the margins. With no article on the page there is nothing to
-   * keep clear, so the field takes the whole viewport.
+   * The article, not `main`. Only a post has one: `main` on a listing page is
+   * the post list and the pagination, so measuring against it blanked the
+   * middle of the page and confined the field to the margins. With no article
+   * there is nothing to keep clear, so the field takes the whole viewport.
    */
   const article = document.querySelector('main article')
   if (canvas === null || cols === 0 || rows === 0) return
@@ -324,8 +283,8 @@ function boxOverlapsExclusion(col: number, row: number): boolean {
   return false
 }
 
-/** `Math.random()` here is live-effect decoration (a glider's position and
- * rotation), not the deterministic seed a build-time image would need. */
+/** `Math.random()` here is live decoration, not the deterministic seed a
+ * build-time image would need. */
 function feedGlider(): void {
   const c = cols
   const r = rows
@@ -376,13 +335,11 @@ function stopLoop(): void {
 }
 
 /*
- * The strong rule for reduced motion: never start the loop rather than
- * starting it and pausing partway. Whenever the effective state crosses into
- * "reduced", the loop stops and the field reseeds once, so what stays on
- * screen is a fresh static frame rather than whatever instant the loop
- * happened to be cut at. Anything else that stops the loop (manual pause,
- * the reader's own toggle, a hidden tab) leaves the current frame exactly as
- * it was.
+ * Reduced motion never starts the loop rather than pausing it partway: crossing
+ * into "reduced" stops and reseeds, so what stays on screen is a fresh static
+ * frame rather than whatever instant the loop was cut at. Every other reason to
+ * stop (manual pause, the reader's toggle, a hidden tab) leaves the frame as it
+ * was.
  */
 function syncRunning(): void {
   const reducedNow = effectiveReduced()
@@ -409,10 +366,8 @@ function applyBgLifeAttr(): void {
   else document.documentElement.setAttribute(BG_LIFE_ATTR, 'off')
 }
 
-// --- Public control surface, called directly by settings-panel.ts. Plain
-// exported functions rather than a custom event bus: both modules are ES
-// modules bundled together, so a direct import is the simplest way for the
-// panel to reach the field it controls. ---
+// --- The control surface settings-panel.ts calls. Plain exports rather than an
+// event bus: both are ES modules bundled together. ---
 
 export function setMotion(value: Motion | null): void {
   motionOverride = value
@@ -441,7 +396,7 @@ export function setDensity(pct: number): void {
 }
 
 export function setGps(value: number): void {
-  gps = Math.min(25, Math.max(1, value))
+  gps = Math.min(MAX_GPS, Math.max(MIN_GPS, value))
   writeStorage(GPS_KEY, String(gps))
 }
 
@@ -463,20 +418,14 @@ export function reseed(): void {
 }
 
 /*
- * Every key this module owns, back to its default, for the settings panel's
- * reset-all. One call rather than seven setters, because the setters are the
- * wrong shape for a reset: setDensity(10) writes the literal "10", which is
- * a stored value that happens to equal the default rather than the
- * "nothing stored means default" this site stores its defaults as. Only
- * setBackgroundEnabled and setPaused already remove their key, and only
- * because their default is the falsy side of a flag.
+ * Every key this module owns, back to default, for reset-all.
  *
- * It re-applies as well as clearing: the attributes go back on <html>, the
- * field reseeds at the default density and the loop restarts if it had been
- * paused, so what is on screen matches what is now stored rather than only
- * the storage being right. seed() and syncRunning() are both safe on a page
- * with no canvas (cols and rows are 0 there and draw() returns early), which
- * is every page but a post.
+ * One call rather than seven setters, because the setters are the wrong shape:
+ * `setDensity(10)` writes the literal "10", a stored value that happens to
+ * equal the default, where this site stores a default as nothing stored.
+ *
+ * It re-applies as well as clearing, so the screen matches what is now stored.
+ * `seed()` and `syncRunning()` are both safe on a page with no canvas.
  */
 export function resetSettings(): void {
   motionOverride = null
@@ -506,28 +455,18 @@ export function getSettings(): {
 }
 
 /*
- * Listened for on the document, not on the canvas, and that is the whole
- * reason clicking used to do nothing.
+ * On the document, not the canvas, and that is why clicking used to do nothing.
  *
- * The canvas is `position: fixed; z-index: -1` so the header, main and footer
- * paint over it as ordinary in-flow boxes. But a negative z-index element is
- * not just painted behind them, it is behind them for hit testing too, and
- * `body` covers the entire viewport: it is the topmost element under the
- * pointer everywhere the page's own content is not, including the gutters.
- * So the canvas never received a click anywhere, and the component's comment
- * claiming clicks reach it "in the gutters" was wrong.
+ * The canvas is `z-index: -1`, and a negative-z-index element is behind for HIT
+ * TESTING as well as painting. `body` covers the viewport, so it is the topmost
+ * element under the pointer everywhere the content is not, including the
+ * gutters: the canvas never received a click anywhere.
  *
- * Listening on the document avoids stacking altogether, at the cost of having
- * to decide what a click means. Two rules do that:
- *
- * A click on something interactive or selectable belongs to the page, never to
- * the field. `closest()` on an anchor, button, input, label, summary or any
- * focusable thing bails out, so a link still navigates and a caption is still
- * selectable. A drag that selected text is also not a click on the background,
- * which is what the collapsed-selection check is for.
- *
- * A click inside the reading column is already excluded by the mask, so it
- * needs no separate rule: `excluded[idx]` covers it, the same as before.
+ * Listening on the document means deciding what a click means. Anything
+ * interactive or selectable belongs to the page, so `closest()` bails out and a
+ * link still navigates. A drag that selected text is not a click either, which
+ * is what the collapsed-selection check is for. A click inside the reading
+ * column needs no rule: the mask already covers it.
  */
 const CLICK_THROUGH = 'a, button, input, select, textarea, label, summary, details, [role="button"], [tabindex]'
 
@@ -538,7 +477,6 @@ function onDocumentClick(event: MouseEvent): void {
   const target = event.target
   if (target instanceof Element && target.closest(CLICK_THROUGH) !== null) return
 
-  // A click that ends a text selection is a drag, not a tap on the background.
   const selection = document.getSelection()
   if (selection !== null && !selection.isCollapsed) return
 
@@ -553,12 +491,9 @@ function onDocumentClick(event: MouseEvent): void {
 }
 
 /*
- * State hydration and attribute application happen before the canvas check
- * below, not after: SettingsPanel.astro's script imports this module and
- * calls getSettings() regardless of whether the field itself is on the
- * current page, and it needs the real stored values rather than this
- * module's hardcoded defaults on a page where `.conway-field` is somehow
- * missing.
+ * State is hydrated before the canvas check, not after: settings-panel.ts
+ * imports this module and calls getSettings() whether or not the field is on
+ * the current page, and it needs the stored values rather than these defaults.
  */
 function init(): void {
   const storedMotion = readStorage(MOTION_KEY)
@@ -566,7 +501,10 @@ function init(): void {
   backgroundEnabled = readStorage(BG_LIFE_KEY) !== '0'
   manualPaused = readStorage(PAUSED_KEY) === '1'
   density = clampNumber(readStorage(DENSITY_KEY), DEFAULT_DENSITY, 1, 20)
-  gps = clampNumber(readStorage(GPS_KEY), DEFAULT_GPS, 0.5, 8)
+  // The same bounds setGps clamps to. They drifted apart once, when the range
+  // moved from 0.5-8 to 1-25 and only the setter was updated: a stored 20 was
+  // then pulled back to 8 on every load.
+  gps = clampNumber(readStorage(GPS_KEY), DEFAULT_GPS, MIN_GPS, MAX_GPS)
   autoFeedSeconds = clampNumber(readStorage(AUTOFEED_KEY), DEFAULT_AUTOFEED, 0, 20)
   opacity = clampNumber(readStorage(OPACITY_KEY), DEFAULT_OPACITY, MIN_OPACITY, MAX_OPACITY)
   wasReduced = effectiveReduced()
@@ -584,9 +522,9 @@ function init(): void {
 
   matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', syncRunning)
 
-  // theme-toggle.ts owns data-theme and does not dispatch anything when it
-  // changes it; a MutationObserver is the plain platform way to notice a
-  // change made by a script this one has no other reason to import.
+  // theme-toggle.ts owns data-theme and dispatches nothing when it changes it,
+  // so an observer is the plain way to notice a change made by a script this
+  // one has no other reason to import.
   new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: [THEME_ATTR] })
 
   document.addEventListener('visibilitychange', () => {
