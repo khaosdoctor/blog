@@ -1,14 +1,12 @@
-// Wires up the light/dark/system control from ThemeToggle.astro. This is the
-// interactive half only: the blocking snippet that applies a stored choice
-// before first paint lives directly in BaseLayout's <head> (same reason as
-// code-theme.ts's split), since this module is deferred and would otherwise
-// let the wrong ground show for a moment. That snippet and this module read
-// and write the same key, so they must be kept in sync if either one changes.
+// The light/dark/system control from ThemeToggle.astro.
 //
-// The empty export makes this a real module: without one, a script with no
-// other import or export is global rather than file-scoped, and its names
-// would collide with code-theme.ts and hover-previews.ts, which have the same
-// shape for the same reason.
+// The interactive half only: the blocking snippet that applies a stored choice
+// before first paint lives in BaseLayout's <head>, since this module is
+// deferred and would otherwise let the wrong ground show for a moment. Both
+// read and write the same key and have to be kept in step.
+//
+// The empty export makes this a real module, or its names would be global and
+// collide with the other scripts here.
 export {}
 
 const STORAGE_KEY = 'color-scheme'
@@ -35,17 +33,13 @@ function applyScheme(scheme: Scheme | null): void {
 }
 
 // BaseLayout ships two <meta name="theme-color"> tags, one per
-// prefers-color-scheme value, hardcoded to --bg's two hexes because a meta
-// tag cannot read a CSS custom property. An explicit choice makes them
-// disagree with the page whenever the OS preference differs from it, so both
-// get the resolved colour: whichever one the browser's media query still
-// matches, the colour it reports is now the page's actual one. Restored to
-// their own per-scheme colour when the choice goes back to "system".
+// prefers-color-scheme, hardcoded because a meta tag cannot read a custom
+// property. An explicit choice makes them disagree with the page whenever the
+// OS differs from it, so both get the resolved colour and revert on "system".
 //
-// Each meta's own `content`, as BaseLayout wrote it, already is that scheme's
-// colour, so it is read off the DOM rather than repeated here as a third copy
-// of theme.css's two hexes. Cached on first read, before this function ever
-// overwrites it, since a later call would otherwise cache its own overwrite.
+// Each meta's own content already IS that scheme's colour, so it is read off
+// the DOM rather than repeated here. Cached before this ever overwrites it, or
+// a later call would cache its own overwrite.
 let ownLight: string | null = null
 let ownDark: string | null = null
 
@@ -62,19 +56,15 @@ function syncThemeColor(scheme: Scheme | null): void {
   else if (ownDark !== null) dark.setAttribute('content', ownDark)
 }
 
-// Same feature check as code-theme.ts's canPopover: true wherever the native
-// popover API exists, which lets the menu sit in the top layer instead of
-// needing its own stacking context and outside-click bookkeeping. Where it
-// does not exist, the same element is toggled with the `hidden` attribute and
-// positioned manually instead (see openMenu).
+// Where the native popover API exists the menu sits in the top layer, with no
+// stacking context or outside-click bookkeeping of its own. Where it does not,
+// the same element is toggled with `hidden` and positioned manually.
 const canPopover = 'popover' in HTMLElement.prototype
 
 /**
- * Places the menu next to the button that opened it, clamped to the viewport.
- * Same shape as code-theme.ts's place(): getBoundingClientRect is
- * viewport-relative, which lines up with `position: fixed` (set in CSS for
- * the no-popover fallback, and imposed by the UA itself once `popover` is
- * set).
+ * Places the menu next to its opener, clamped to the viewport.
+ * getBoundingClientRect is viewport-relative, which lines up with the `fixed`
+ * positioning the fallback sets and the popover API imposes.
  */
 function place(el: HTMLElement, anchor: HTMLElement): void {
   const rect = anchor.getBoundingClientRect()
@@ -99,17 +89,15 @@ function init(): void {
   const openerEl = document.querySelector<HTMLButtonElement>('.tt-open')
   const menuEl = document.querySelector<HTMLElement>('.tt-menu')
   if (wrapperEl === null || openerEl === null || menuEl === null) return
-  // Reassigned to plain consts, the way code-theme.ts does: the nested
-  // functions below close over these, and TypeScript cannot carry the null
-  // check above into a closure that might run later.
+  // TypeScript cannot carry the null check above into a closure that runs
+  // later, so the nested functions read these aliases.
   const wrapper = wrapperEl
   const opener = openerEl
   const menu = menuEl
 
-  // Tracked here rather than read back off the element, for the same reason
-  // as code-theme.ts's `open`: `:popover-open` and the `hidden` attribute are
-  // two different sources of truth, and the close paths below have to work
-  // the same way whichever one is in play.
+  // Tracked here rather than read off the element: `:popover-open` and the
+  // `hidden` attribute are two different sources of truth, and the close paths
+  // have to work the same way whichever is in play.
   let open = false
 
   function openMenu(): void {
@@ -142,13 +130,10 @@ function init(): void {
     if (returnFocus) opener.focus()
   }
 
-  // The opener carries only icons now (see ThemeToggle.astro), so its
-  // accessible name lives only in aria-label; there is no text node left to
-  // duplicate it. The menu itself gets none: it is a plain div with no ARIA
-  // role, and a role-less element's aria-label is ignored by every screen
-  // reader, so each option's own visible text is what actually names it, and
-  // that text comes from data attributes since this plain module has no
-  // access to t().
+  // The opener is icon-only, so its accessible name lives in aria-label. The
+  // menu gets none: a role-less element's aria-label is ignored by every screen
+  // reader, so each option's visible text is what names it. That text comes
+  // from data attributes, since a plain module has no access to t().
   const strings = wrapper.dataset
   const label = strings.label ?? 'Theme'
   opener.setAttribute('aria-label', label)
@@ -166,9 +151,8 @@ function init(): void {
     if (labelEl !== null) labelEl.textContent = captions[value] ?? value
   }
 
-  // The opener's three icons (see ThemeToggle.astro), one per scheme, only
-  // one ever unhidden: the button then shows what is on without opening
-  // anything.
+  // Three icons, one per scheme, only one ever unhidden: the button shows what
+  // is on without opening anything.
   const openerIcons = [...opener.querySelectorAll<SVGElement>('.tt-icon')]
 
   function markCurrent(scheme: Scheme | null): void {
@@ -202,8 +186,8 @@ function init(): void {
     })
   }
 
-  // Matches code-theme.ts: hidden is cleared before popover is set, since a
-  // popover-attributed element that is still `hidden` refuses to show.
+  // `hidden` is cleared before `popover` is set: a popover-attributed element
+  // that is still hidden refuses to show.
   if (canPopover) {
     menu.removeAttribute('hidden')
     menu.setAttribute('popover', 'auto')
