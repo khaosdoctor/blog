@@ -64,11 +64,15 @@ const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
 const otherLabel = other?.label ?? ''
 ---
 
+{/* `data-goes-to` is what the click handler at the bottom stores: using this
+   switch is the reader stating a language, and a stated choice outranks the
+   browser's own header from then on (see core-lang.ts). */}
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
   <a
     class="lang-track"
     href={otherHref}
     hreflang={other?.code}
+    data-goes-to={other?.code}
     aria-label={t(locale, 'switchLanguage', otherName)}
     title={t(locale, 'switchLanguage', otherName)}
   >
@@ -227,3 +231,21 @@ const otherLabel = other?.label ?? ''
     transform: translateX(-100%);
   }
 </style>
+
+<script>
+  // Clicking the switch is the reader stating a language. Stored here rather
+  // than in the redirect script, which only ever reads it.
+  document.querySelector<HTMLAnchorElement>(".lang-switch .lang-track")?.addEventListener("click", (event) => {
+    const code = (event.currentTarget as HTMLElement).dataset.goesTo
+    if (code === undefined) return
+    try {
+      localStorage.setItem("lang", code)
+    } catch {
+      // Private mode: the click still navigates, the preference just does not stick.
+    }
+  })
+</script>
+
+<script>
+  import '../scripts/lang-preference'
+</script>
