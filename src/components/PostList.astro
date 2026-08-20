@@ -5,27 +5,17 @@ import { localePath } from '../i18n/ui'
 import ReadingTime from './ReadingTime.astro'
 
 /**
- * The decided candidate from the theme lab (content/blog/theme-lab/components/
- * ChromeList.vue, "tabela densa, 4 colunas"): date, title, section and reading
- * time in one row, a dotted leader running from the end of the title to the
- * trailing columns. Dense enough that a reader scanning the archive sees many
- * posts per screen rather than few, which per the bench's own note is the
- * whole reason this candidate, and not one of the six others on the same
- * bench, survives a hundred posts: the eye runs down the title column, and
- * the leader only carries it sideways to the date or the section when the
- * reader goes looking for one of those.
+ * The dense four-column table: date, title, section and reading time in one
+ * row, with a dotted leader from the end of the title to the trailing columns.
  *
- * An earlier pass of this file drew an 88px cover thumbnail on every row
- * (the "cartões"/grade candidate on the same bench) after reading the
- * decision settings as asking for both a table and a cover. They do not
- * combine: the table candidate draws no image at all, in the bench or here.
- * Every thumbnail, the astro:assets Image import, the cover/no-cover branch
- * and their CSS are removed; nothing about images belongs to this candidate.
+ * Dense on purpose. A reader scanning the archive sees many posts per screen,
+ * the eye runs down the title column, and the leader only carries it sideways
+ * when they go looking for a date or a section. That is what makes this
+ * candidate survive a hundred posts.
  *
- * The excerpt (post.data.description) that used to sit under every title is
- * also gone: the bench's own dense table never carried one, that is part of
- * what "dense" means for it, and the description still exists, HoverPreviews
- * reads it straight from each post's own built page.
+ * No thumbnails and no excerpt, both deliberate: this candidate draws no image
+ * at all, and the description still exists, HoverPreviews reads it from each
+ * post's own built page.
  */
 interface Props {
   posts: Post[]
@@ -98,22 +88,18 @@ const LEADER = '·'.repeat(200)
   }
 
   /*
-   * Past the same 70rem breakpoint BrandHeader's `.chrome` and the footer
-   * already widen at (theme.css/BaseLayout.astro), this list does too: below
-   * this it measured `var(--measure)` (78ch), `main`'s own default width and
-   * exactly the column a post's own prose reads at, which made a table of
-   * many posts read as a strip of running text rather than the header's own
-   * wider row above it. `main` itself keeps `--measure` (a real post's
-   * reading column still wants that), so the list breaks out of it instead
-   * of `main` changing: `main` is this box's containing block, and margin
-   * percentages resolve against a containing block's width regardless of
-   * what that width actually is, so `margin-inline-start: 50%` always puts
-   * this box's start edge at `main`'s own horizontal centre. `main` and
-   * `body` are both centred and equally padded, so that centre is the
-   * viewport's centre too; translateX(-40vw), half this box's own 80vw
-   * width, pulls the box back so its centre ends up there instead of its
-   * edge. The same full-bleed trick every CSS framework already uses for
-   * 100vw/50vw, generalised to 80vw/40vw.
+   * Past 70rem this list widens to the same `--chrome-width` the header and
+   * footer already use. Below that it measured `--measure`, `main`'s own width
+   * and exactly the column a post's prose reads at, which made a table of many
+   * posts read as a strip of running text under a much wider header.
+   *
+   * `main` keeps `--measure`, so the list breaks OUT of it: `main` is this
+   * box's containing block, and a margin percentage resolves against that
+   * block's width, so `margin-inline-start: 50%` always puts this box's start
+   * edge at `main`'s horizontal centre. `main` and `body` are both centred, so
+   * that is the viewport's centre too, and translating back by half this box's
+   * own width lands its centre there. The full-bleed trick every framework uses
+   * for 100vw, at this width instead.
    */
   @media (min-width: 70rem) {
     .posts {
@@ -130,24 +116,14 @@ const LEADER = '·'.repeat(200)
   .posts li {
     display: flex;
     /*
-     * Centred, not baseline: the row mixes a small date/section/read-time
-     * with a visibly larger title, and baseline alignment sizes the flex
-     * line from the tallest item's own ascent/descent, which pushes every
-     * smaller item off-centre inside the row's own (equal top and bottom)
-     * padding-block. Centring keeps every item in the middle of the line
-     * regardless of its own font-size, which is what reads as one row
-     * centred in its own box rather than closer to the rule above.
+     * Centred, not baseline: the row mixes a small date and read-time with a
+     * visibly larger title, and baseline alignment sizes the line from the
+     * tallest item's ascent, which pushes every smaller item off-centre.
      *
-     * This still holds once the title wraps to two or three lines: the row's
-     * own height grows to match, and centring puts the date/category/read
-     * cluster in the middle of that taller box rather than pinned to its
-     * top. flex-start was tried first and rejected: it aligns every item to
-     * the title's own first line, which looks right for a one-line title but
-     * re-introduces exactly the "smaller item reads as misplaced" problem
-     * the comment above already solved, only against the title's cap-height
-     * instead of its baseline. Centring is the one rule that already
-     * generalises to both a one-line and a wrapped title without a second
-     * special case.
+     * This still holds when the title wraps: the row grows and the small
+     * cluster stays in the middle of the taller box. flex-start was tried and
+     * rejected, since it pins everything to the title's first line, which
+     * re-introduces the same problem against cap-height instead of baseline.
      */
     align-items: center;
     color: var(--muted);
@@ -222,32 +198,24 @@ const LEADER = '·'.repeat(200)
   }
 
   /*
-   * A post title, so it takes the display face like every other title. It is
-   * a bare <a> rather than a heading, which is why the global heading rule in
-   * BaseLayout does not reach it and the face has to be named here.
+   * A title, so it takes the display face. It is a bare <a> rather than a
+   * heading, which is why the global heading rule does not reach it.
    *
-   * color is set explicitly rather than left to the global `a { color: accent }`
-   * rule (BaseLayout.astro's `is:global` block): the decided candidate reads
-   * the title in ink, at 16.26:1 light / 18.61:1 dark against the real page
-   * grounds (both clear the bench's own measured 14.26:1 against its darker
-   * bench-only ground), keeping the accent for the section label alone.
+   * The colour is explicit rather than the global `a { color: accent }`: the
+   * title reads in ink (16.26:1 light / 18.61:1 dark), keeping the accent for
+   * the section label alone.
    *
    * Weight 400, not 600: Departure Mono ships one weight and a browser asked
    * for 600 synthesises it by smearing the glyphs sideways.
    */
   /*
-   * flex-grow: 1, not 0: the title is now the row's one growing item, so its
-   * assigned width is the row's own width minus whatever its flex: none
-   * siblings (date, category, read) and the leader's own fixed width
-   * actually reserve, a fixed number this box's content cannot inflate.
-   * Titles that don't fit that width on one line wrap onto as many as they
-   * need instead of the ellipsis this used to clip to: reading every title in
-   * full is the one thing a list whose whole job is letting someone scan
-   * titles cannot compromise on. min-inline-size: 0 is still what lets a flex
-   * item shrink (and here, wrap) below its own content's natural one-line
-   * width in the first place; flex-basis: auto would fight that by handing
-   * shrink/wrap pressure to whichever item the algorithm favours instead of
-   * a size decided by layout the way this one now is.
+   * `flex-grow: 1`, so the title is the row's one growing item and claims
+   * whatever its fixed-width siblings leave. A title that does not fit wraps
+   * rather than clipping to an ellipsis: reading every title in full is the one
+   * thing a list whose job is scanning titles cannot compromise on.
+   *
+   * `min-inline-size: 0` is what lets a flex item wrap below its content's
+   * natural one-line width at all.
    */
   .title {
     /* Shrinks but does not grow, so a title takes exactly the room its own
@@ -277,28 +245,16 @@ const LEADER = '·'.repeat(200)
   }
 
   /*
-   * The bench's own leader was a solid box-drawing run (flex: 1 1 auto,
-   * stretching to whatever the row had left after a single-line, ellipsis-
-   * clipped title), which read as a hard rule once dimmed, and made no sense
-   * once the title above could wrap to two or three lines: there is no one
-   * line left for a full-width leader to run from and clip against, and a
-   * rule drawn mid-way down a wrapped title, at the row's own vertical
-   * centre, would connect to neither. Rather than invent a per-line leader
-   * (unreachable in CSS without measuring rendered text), this is now a
-   * short, fixed-width run of dots: flex: none, not flex: 1, so the title
-   * (now the row's one growing item) is what claims the freed space instead.
-   * A small width is enough for it to still read as connective punctuation
-   * between the title and the date/category/read cluster, in both the
-   * one-line and the wrapped case.
+   * A short, fixed-width run of dots rather than the bench's full-width rule.
+   * That one stretched to whatever a single-line, ellipsis-clipped title left,
+   * which makes no sense once a title can wrap: there is no one line for it to
+   * run from, and a rule drawn at the row's vertical centre would connect to
+   * neither. `flex: none`, so the title claims the freed space instead.
    *
-   * Dimmed past `--muted` itself (5.17:1 light / 8.30:1 dark against `--bg`,
-   * theme.css) via opacity, the same mechanism Pagination.astro's own
-   * disabled prev/next already use for "present but not the point". A
-   * decorative rule like this one carries no required information (the row
-   * still reads in full through its date, title, category and read-time text
-   * alone), so WCAG 1.4.11's exemption for purely decorative graphics applies
-   * and there is no 3:1 floor to hold it to the way a meaningful border or
-   * icon would be.
+   * Dimmed past `--muted` with opacity, the same mechanism Pagination uses for
+   * "present but not the point". It carries no required information (the row
+   * reads in full through its own text), so WCAG 1.4.11's decorative exemption
+   * applies and there is no 3:1 floor to hold it to.
    */
   /*
    * The leader fills the room between the title and the trailing columns
