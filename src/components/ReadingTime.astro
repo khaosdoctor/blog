@@ -45,6 +45,16 @@ const { minutes, locale } = Astro.props
     display: inline-block;
   }
 
+  /* The arrow, not the text I-beam the span would otherwise show and not the
+     hand its inner button defaults to: hovering only reveals a finish time, so
+     nothing here goes anywhere. The whole selector is global rather than just
+     the inner class, because Astro leaves a :global() nested inside :has()
+     uncompiled and the rule then never matches. */
+  :global(.reading-time:has(.rt-trigger)),
+  :global(.reading-time .rt-trigger) {
+    cursor: default;
+  }
+
   /*
    * A plain reset, not `all: unset`: that would also drop `display` and this
    * button still needs to sit inline like the text it replaces. Every other
@@ -58,13 +68,11 @@ const { minutes, locale } = Astro.props
     background: none;
     font: inherit;
     color: inherit;
-    cursor: pointer;
   }
 
   /*
-   * The one hover convention this site already has for a plain-text control
-   * (PostList's own `.title:hover`): fill with the day colour, invert the
-   * text. Reused here rather than invented again.
+   * The site's one hover convention for a plain-text control (listing.css's
+   * own `.listing-title:hover`): fill with the day colour, invert the text.
    */
   .reading-time :global(.rt-trigger:hover),
   .reading-time :global(.rt-trigger:focus-visible) {
