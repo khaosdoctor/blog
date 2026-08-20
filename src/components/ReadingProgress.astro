@@ -218,14 +218,9 @@
       moveHead()
     }
 
-    /**
+    /*
      * The head's stops, from the dash edges the crop left visible.
      *
-     * `runs[i]` is which of the two `.fill` spans dash `i` came from, and it is
-     * the whole of what marks the seam: the step onto dash `i` crosses the nav
-     * exactly when dash `i` and dash `i - 1` came from different runs.
-     */
-    /*
      * `lefts` and not the trailing edges this used to read. Two reasons, one
      * of them a bug: a dash carries `letter-spacing: 0.4em`, and that space is
      * part of its own advance, so its right edge is most of half an em past
