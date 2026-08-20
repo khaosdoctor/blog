@@ -55,7 +55,7 @@ Why each plugin exists, in the order they run:
 | Plugin | Turns this | Into this |
 |---|---|---|
 | `remark-reading-time` | the body | a `readingTime` number in the frontmatter |
-| `remark-math` + `rehype-katex` | `$...$` | rendered maths |
+| `remark-math` + `rehype-katex` | `$$...$$` | rendered maths. Single-dollar `$x$` is off, so prices in prose stay prices |
 | `remark-embeds` | a bare URL or `![](url)` alone in a paragraph | `<YouTube>`, `<Vimeo>`, `<Tweet>`, `<SpeakerDeck>`, `<Spotify>`, `<Bookmark>` |
 | `remark-figures` | a lone image whose title is set | `<figure>` plus `<figcaption>` |
 | `remark-wikilinks` | `[[folder]]` | a link to that article in the reader's language |
@@ -208,7 +208,31 @@ src/components/              rendering. Injected into MDX, so content needs no i
 src/plugins/                 the remark chain, and the rehype plugins after it
 src/integrations/            build hooks: redirect stubs
 src/lib/                     posts, taxonomy, seo, embed-hosts, version
+src/scripts/                 the client modules: conway, header, search, settings
+src/styles/                  one file per thing being styled, see below
 src/i18n/ui.ts               every string the chrome shows, both languages
 scripts/                     build steps and guards
 worker/                      the Cloudflare scheduler
 ```
+
+## The stylesheets
+
+One file per thing being styled, imported in this order by `BaseLayout.astro`. Order matters twice: `tweaks.css` before
+`theme.css` because the second reads the first, and `callouts.css`/`code-blocks.css` after `prose.css` because both
+override a plugin's own stylesheet.
+
+| File | What it owns |
+|---|---|
+| `tweaks.css` | **every value worth changing**, in plain-English names, grouped into nine blocks. Start here |
+| `theme.css` | the roles (`--fg`, `--accent`, `--rule`) and the reasoning, including measured contrast. Reads its numbers from `tweaks.css` |
+| `core.css` | the page itself: reset, grounds, landmarks, figures. Was `BaseLayout`'s own global block |
+| `fonts.css` | the four `@font-face` declarations |
+| `prose.css` + `prose/*` | a post's body, split per element: headings, links, lists, tables, code, emphasis, rules |
+| `callouts.css` | callout cards |
+| `code-blocks.css` | the expressive-code frame and its tab |
+| `variants/quotes.css` | quotes |
+| `footnotes.css`, `sidenotes.css` | notes at the foot and in the margin. `sidenotes.css` is shared by `<Sidenote>` and `<MarginNote>`, which render the same shape |
+| `chips.css` | tag and category chips, which live outside `.prose` |
+| `hover-previews.css`, `embeds.css`, `math.css` | link previews, embedded media, equations |
+
+Component-scoped styles stay in their component. Anything in `src/styles/` applies to every page that imports it.
