@@ -40,7 +40,7 @@
    *
    * 9.27:1 on the sepia page, chosen unchanged; 4.22:1 on the black one, under
    * the 4.5 floor, also the owner's own call. Nothing uses the dark tone raw as
-   * text: the quote tokens below and --qc-border mix it toward white first,
+   * text: --qc-border (variants/quotes.css) mixes it toward white first,
    * which comes out at 6.72:1, over the 3:1 a border needs.
    */
   --brand-purple: light-dark(#4b15a8, #815bc2);
@@ -50,7 +50,7 @@
    *
    * Dark is true #000000, not a very dark grey: on an OLED panel those pixels
    * are switched off, which is the point of asking for pitch black. The hint of
-   * purple therefore lives in --rule and in the quote tints below, where a few
+   * purple therefore lives in --rule and in the quote frame (--qc-border, variants/quotes.css), where a few
    * points of lightness are actually perceivable (a #05000b page would read as
    * black on every screen while giving up the one thing black buys).
    *
@@ -165,7 +165,6 @@
   --text-small: 0.9rem;
   --text-tiny: 0.75rem;
   --leading: 1.63;
-  --leading-tight: 1.25;
   --tracking-body: 0.05em;
   --word-spacing-body: 0.15em;
 
@@ -290,21 +289,6 @@
   );
   --heading-glow-blur: 0.5em;
 
-  /* Quotes, and where the purple hint shows on the black page: mixing it into
-   * --bg at 22% is what tints a quote card without lifting the whole page. */
-  --quote-bg: light-dark(
-    color-mix(in oklab, var(--brand-purple) 12%, var(--bg)),
-    color-mix(in oklab, var(--brand-purple) 22%, var(--bg))
-  );
-  --quote-edge: light-dark(
-    color-mix(in oklab, var(--brand-purple) 45%, transparent),
-    color-mix(in oklab, var(--brand-purple) 55%, transparent)
-  );
-  --quote-mark: light-dark(
-    color-mix(in oklab, var(--brand-purple) 18%, transparent),
-    color-mix(in oklab, var(--brand-purple) 30%, transparent)
-  );
-
   /* Task list boxes: hollow square, green tick, no radius. */
   /* Just lighter than the sepia page, so the box reads as a box without a white
    * chip punched into a warm ground. */
@@ -400,15 +384,14 @@
    * --em-italic-fg already made for yellow-as-text on this ground, a darker
    * amber (#8a6400 clears 4.68:1) in place of the raw tone.
    *
-   * Solid block fill is --em-bold-bg, not --brand-yellow: a filled background
-   * has the same shape of problem the bold chip had, and the same fix, the
-   * fixed bright tone rather than the per-ground one. Text is --em-bold-fg,
-   * so this holds the same 7.30:1 on both grounds as the chip.
-   *
-   * No control on the site today matches the solid block's "one primary
-   * action" bar, so only the outline variant is wired up (Search.astro); these
-   * two solid tokens are declared for when one appears, per this file's own
-   * rule that a token comes before the component that needs it.
+   * The solid "one primary action" variant was measured alongside the outline
+   * one and never built: no control on the site turned out to be that, and its
+   * two tokens (`--btn-solid-bg`/`--btn-solid-fg`) stayed declared for a
+   * component that never arrived. They are gone rather than waiting: they read
+   * `--em-bold-bg`, which `.prose` has since overridden with the post's own
+   * cover colour, so what they resolved to at `:root` was not even the value a
+   * button inside a post would have drawn. Whoever builds that control gets to
+   * pick its fill against the palette as it is then.
    */
   --btn-face: var(--font-display);
   --btn-tracking: 0em;
@@ -416,8 +399,6 @@
   --btn-pad-inline: 1.25rem;
   --btn-touch-min: 2.75rem; /* 44px WCAG target; his demo measured ~38px at this padding alone */
   --btn-fg: var(--brand-yellow);
-  --btn-solid-bg: var(--em-bold-bg);
-  --btn-solid-fg: var(--em-bold-fg);
 
   /*
    * The header's icon-only controls (ThemeToggle today, the settings panel's

@@ -31,11 +31,6 @@ export function localePath(locale: Locale, path: string): string {
 }
 
 type UIKey =
-  | 'tagline'
-  | 'readMore'
-  | 'publishedOn'
-  | 'updatedOn'
-  | 'readingTime'
   | 'finishReadingAt'
   | 'machineTranslated'
   | 'readOriginal'
@@ -53,7 +48,6 @@ type UIKey =
   | 'searchTitle'
   | 'searchDescription'
   | 'series'
-  | 'partOfSeries'
   | 'partOfSeriesNamed'
   | 'seriesContents'
   | 'seriesNav'
@@ -61,11 +55,9 @@ type UIKey =
   | 'youAreHere'
   | 'linkCopied'
   | 'footnotes'
-  | 'openInNewTab'
   | 'showSource'
   | 'codeTheme'
   | 'codeThemeAuto'
-  | 'codeThemePick'
   | 'themeToggle'
   | 'themeLight'
   | 'themeDark'
@@ -102,20 +94,18 @@ type UIKey =
   | 'conwayResume'
   | 'conwayReseed'
   | 'searchShortcutLabel'
+  | 'searchShortcutReserved'
   | 'writtenBy'
   | 'contents'
   | 'openContents'
   | 'foldSection'
   | 'notWrittenYet'
-  | 'allPosts'
-  | 'categories'
   | 'tags'
   | 'tag'
   | 'tagDescription'
   | 'tagsIntro'
   | 'allSeries'
   | 'seriesIntro'
-  | 'sections'
   | 'sectionDescription'
   | 'primaryNav'
   | 'navPosts'
@@ -125,7 +115,6 @@ type UIKey =
   | 'article'
   | 'articles'
   | 'homeDescription'
-  | 'showingLatest'
   | 'noTranslatedPosts'
   | 'skipToContent'
   | 'language'
@@ -176,11 +165,6 @@ type UIKey =
 
 export const ui: Record<Locale, Record<UIKey, string>> = {
   pt: {
-    tagline: 'Um blog sobre JavaScript, TypeScript, web e ferramentas',
-    readMore: 'Ler mais',
-    publishedOn: 'Publicado em',
-    updatedOn: 'Atualizado em',
-    readingTime: 'minutos',
     finishReadingAt: 'termina às %s',
     machineTranslated: 'Esta página foi traduzida automaticamente.',
     readOriginal: 'Ler original',
@@ -200,7 +184,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     searchTitle: 'Busca',
     searchDescription: 'Buscar artigos no blog de Lucas Santos.',
     series: 'Série',
-    partOfSeries: 'Parte %d de %d',
     partOfSeriesNamed: 'Parte %d de %d da série',
     seriesContents: 'Esta série tem %d partes:',
     seriesNav: 'Navegação da série',
@@ -208,11 +191,9 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     youAreHere: 'você está aqui',
     linkCopied: 'link copiado',
     footnotes: 'Notas de rodapé',
-    openInNewTab: 'abrir em uma aba',
     showSource: 'ver o código',
     codeTheme: 'Tema do código',
     codeThemeAuto: 'Automático (segue o tema da página)',
-    codeThemePick: 'mudar o tema do código',
     themeToggle: 'Tema',
     themeLight: 'Claro',
     themeDark: 'Escuro',
@@ -249,20 +230,18 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwayResume: 'Retomar',
     conwayReseed: 'Reiniciar',
     searchShortcutLabel: 'Tecla de atalho da busca',
+    searchShortcutReserved: 'O navegador já usa esta tecla',
     writtenBy: 'por',
     contents: 'Neste post',
     openContents: 'abrir o índice',
     foldSection: 'recolher ou expandir esta seção',
     notWrittenYet: 'ainda não escrito',
-    allPosts: 'Todos os posts',
-    categories: 'Categorias',
     tags: 'Tags',
     tag: 'Tag',
     tagDescription: 'Artigos marcados com %s.',
     tagsIntro: 'Todas as tags usadas nos artigos, com quantos artigos cada uma tem.',
     allSeries: 'Séries',
     seriesIntro: 'Todas as séries de artigos publicadas.',
-    sections: 'Seções',
     sectionDescription: 'Todos os artigos da seção %s.',
     primaryNav: 'Navegação principal',
     navPosts: 'Posts',
@@ -272,7 +251,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     article: 'artigo',
     articles: 'artigos',
     homeDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
-    showingLatest: 'Mostrando os %d mais recentes de %d.',
     noTranslatedPosts: 'Nenhum artigo traduzido ainda.',
     skipToContent: 'Pular para o conteúdo',
     language: 'Idioma',
@@ -328,11 +306,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     appDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
   },
   en: {
-    tagline: 'A blog about JavaScript, TypeScript, web and tooling',
-    readMore: 'Read more',
-    publishedOn: 'Published on',
-    updatedOn: 'Updated on',
-    readingTime: 'minutes',
     finishReadingAt: 'finish at %s',
     machineTranslated: 'This page was machine translated.',
     readOriginal: 'Read original',
@@ -352,7 +325,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     searchTitle: 'Search',
     searchDescription: 'Search every article on the blog.',
     series: 'Series',
-    partOfSeries: 'Part %d of %d',
     partOfSeriesNamed: 'Part %d of %d of the series',
     seriesContents: 'This series has %d parts:',
     seriesNav: 'Series navigation',
@@ -360,11 +332,9 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     youAreHere: 'you are here',
     linkCopied: 'link copied',
     footnotes: 'Footnotes',
-    openInNewTab: 'open in a tab',
     showSource: 'show the source',
     codeTheme: 'Code theme',
     codeThemeAuto: 'Automatic (follows the page theme)',
-    codeThemePick: 'change the code theme',
     themeToggle: 'Theme',
     themeLight: 'Light',
     themeDark: 'Dark',
@@ -401,20 +371,18 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     conwayResume: 'Resume',
     conwayReseed: 'Reseed',
     searchShortcutLabel: 'Search shortcut key',
+    searchShortcutReserved: 'The browser already uses this key',
     writtenBy: 'by',
     contents: 'In this post',
     openContents: 'open the contents',
     foldSection: 'fold or unfold this section',
     notWrittenYet: 'not written yet',
-    allPosts: 'All posts',
-    categories: 'Categories',
     tags: 'Tags',
     tag: 'Tag',
     tagDescription: 'Articles tagged %s.',
     tagsIntro: 'Every tag used across the articles, with how many articles carry each one.',
     allSeries: 'Series',
     seriesIntro: 'Every series of articles published so far.',
-    sections: 'Sections',
     sectionDescription: 'Every article in the %s section.',
     primaryNav: 'Main navigation',
     navPosts: 'Posts',
@@ -424,7 +392,6 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     article: 'article',
     articles: 'articles',
     homeDescription: 'Articles about software development, technology and opinion.',
-    showingLatest: 'Showing the %d most recent of %d.',
     noTranslatedPosts: 'No translated articles yet.',
     skipToContent: 'Skip to content',
     language: 'Language',

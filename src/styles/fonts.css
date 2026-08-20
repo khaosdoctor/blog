@@ -3,7 +3,7 @@
  * is `font-src 'self'`, which blocks a Google Fonts link outright.
  *
  * Only the four that are decided are here. Every other face is a candidate and
- * lives in content/blog/theme-lab/components/fonts.css, which loads on that page
+ * lives in content/blog/theme-lab-arquivo/components/fonts.css, which loads on that page
  * alone: a candidate should cost nothing on a real post. The two files below are
  * declared in both places, with the same URL, so the lab reuses the same cache
  * entry rather than fetching a second copy.

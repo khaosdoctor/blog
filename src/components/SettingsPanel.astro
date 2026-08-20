@@ -208,7 +208,11 @@ const { locale } = Astro.props
 
     <fieldset class="sp-search-shortcut">
       <legend>{t(locale, 'searchShortcutLabel')}</legend>
-      <select id="sp-search-key">
+      {/* Every letter is offered; settings-panel.ts disables the seven the
+         browser owns and puts this sentence on each of them as its title. The
+         string is passed in rather than written there because that file is a
+         plain script with no access to t(). */}
+      <select id="sp-search-key" data-reserved={t(locale, 'searchShortcutReserved')}>
         {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
           <option value={letter}>{letter}</option>
         ))}

@@ -14,7 +14,7 @@
  * which are UTF-8 everywhere.
  *
  * latexToAscii only understands the LaTeX this blog actually writes (see
- * the self-check at the bottom, sourced from content/blog/lab/index.mdx and
+ * the self-check at the bottom, sourced from content/blog/theme-lab-arquivo/index.mdx and
  * content/blog/criptografia-assimetrica-com-rsa/index.mdx). Anything it
  * does not recognise is left exactly as written rather than mangled.
  */
@@ -330,7 +330,7 @@ function selfCheck() {
       '54 = 2×27 ∴ 216 = 2×2×2×27',
       'RSA: factorization, times and therefore together, no source spacing to invent',
     ],
-    // content/blog/lab/index.mdx, the one real $$ block on the site today.
+    // content/blog/theme-lab-arquivo/index.mdx, the one real $$ block on the site today.
     [
       '\\lambda(n) = \\frac{|(p-1)(q-1)|}{mdc((p-1),(q-1))}',
       'λ(n) = (|(p-1)(q-1)|)/(mdc((p-1),(q-1)))',

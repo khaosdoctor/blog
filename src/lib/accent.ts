@@ -24,7 +24,7 @@
  */
 import { dayColor } from './day-color'
 
-export const ACCENT_KEY = 'accent'
+const ACCENT_KEY = 'accent'
 
 /**
  * The pickable colours, in the order the panel draws them. Keys are stored
@@ -32,7 +32,7 @@ export const ACCENT_KEY = 'accent'
  * `var(--brand-red)` would be a stylesheet detail written into a reader's
  * browser, and unreadable if the token were ever renamed.
  */
-export const ACCENT_TOKENS: Record<string, string> = {
+const ACCENT_TOKENS: Record<string, string> = {
   red: 'var(--brand-red)',
   green: 'var(--brand-green)',
   yellow: 'var(--brand-yellow)',
@@ -60,7 +60,7 @@ export function storedAccent(): string | null {
 }
 
 /** The token to paint with right now: the override if there is one, else today's. */
-export function resolveAccent(): string {
+function resolveAccent(): string {
   const stored = storedAccent()
   if (stored !== null) return ACCENT_TOKENS[stored]
   return dayColor(undefined, { excludePurple: true })
