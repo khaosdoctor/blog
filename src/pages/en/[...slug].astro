@@ -2,18 +2,14 @@
 import type { GetStaticPaths } from 'astro'
 import { render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import Authors from '../../components/Authors.astro'
-import CoverHero from '../../components/CoverHero.astro'
 import LangBanner from '../../components/LangBanner.astro'
+import PostArticle from '../../components/PostArticle.astro'
 import PostToc from '../../components/PostToc.astro'
-import ReadingTime from '../../components/ReadingTime.astro'
-import SeriesToc from '../../components/SeriesToc.astro'
-import { parseAuthors } from '../../lib/authors'
 import { coverTone } from '../../lib/cover'
 import { mdxComponents } from '../../lib/mdx-components'
-import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../../lib/taxonomy'
-import { HREFLANG, t } from '../../i18n/ui'
-import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
+import { buildSeriesMap, getSeriesNavigation } from '../../lib/taxonomy'
+import { HREFLANG } from '../../i18n/ui'
+import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
 
 // English lives under /en/, Portuguese stays unprefixed at the root so every
 // URL Ghost ever published keeps working. The slug is this file's own, so an
@@ -52,7 +48,6 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   lang,
   href: new URL(path, Astro.site).href,
 }))
-const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
 
 // The post's own colour, read off the cover's derivation (coverTone) so bold
 // and italic inside the article match the card at the top; links follow the
@@ -80,122 +75,14 @@ const postAccent = coverTone(slugOf(post)).token
   postAccent={postAccent}
 >
   <PostToc headings={headings} locale="en" />
-  <article>
-    <CoverHero
-      slug={slugOf(post)}
-      title={post.data.title}
-      category={post.data.category}
-      pubDate={post.data.pubDate}
-      lang="en"
-      authorName={authorName}
-    />
-    <h1>{post.data.title}</h1>
-    <p class="meta">
-      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, 'en')}</time>
-      <span aria-hidden="true">·</span>
-      <a
-        href={`/en/${post.data.category}/`}
-        class="chip"
-        style={`--chip-color: ${chipColor(post.data.category)}`}
-      >
-        {post.data.category}
-      </a>
+  <PostArticle post={post} series={series} readingTime={readingTime} locale="en">
+    <Fragment slot="banner">
       {
-        readingTime !== undefined && (
-          <>
-            <span aria-hidden="true">·</span>
-            <ReadingTime minutes={readingTime} locale="en" />
-          </>
+        post.data.machineTranslated && sourcePath !== null && (
+          <LangBanner lang="en" originalHref={sourcePath} />
         )
       }
-    </p>
-    <Authors authors={post.data.authors} locale={'en'} />
-    {
-      post.data.machineTranslated && sourcePath !== null && (
-        <LangBanner lang="en" originalHref={sourcePath} />
-      )
-    }
-    {/* Both series blocks read the English map, so every link points inside /en/. */}
-    {post.data.series && <SeriesToc series={post.data.series} current={post.id} locale="en" />}
-    {
-      series !== null && (
-        <p class="series">
-          {t('en', 'partOfSeriesNamed', series.index, series.total)}{' '}
-          <a href={`/en/series/${series.name}/`}>{series.title}</a>
-        </p>
-      )
-    }
-    <div class="prose">
-      <Content components={mdxComponents} />
-    </div>
-    {/* The tag string is the same in both languages, so slugify() gives the
-        same segment on both sides and every chip stays inside /en/. */}
-    {
-      post.data.tags.length > 0 && (
-        <ul class="chips">
-          {post.data.tags.map((tag) => (
-            <li>
-              <a href={`/en/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}`}>
-                {tag}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
-    {
-      series !== null && (
-        <nav class="series-nav" aria-label={t('en', 'seriesNav')}>
-          {series.previous !== null && (
-            <a href={urlOf(series.previous)} rel="prev">
-              ← {series.previous.data.title}
-            </a>
-          )}
-          {series.next !== null && (
-            <a href={urlOf(series.next)} rel="next" class="next">
-              {series.next.data.title} →
-            </a>
-          )}
-        </nav>
-      )
-    }
-  </article>
+    </Fragment>
+    <Content components={mdxComponents} />
+  </PostArticle>
 </BaseLayout>
-
-<style>
-  .meta {
-    display: flex;
-    /* Without this the chip is a stretched flex item and its text rides at the
-       top of a box as tall as the row. */
-    align-items: center;
-    gap: 0.5rem;
-    margin-block: -0.5rem 2.5rem;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-  }
-
-  /* Same rules as the pt post page, which is the reference rendering: the
-     two trees must not drift apart visually. */
-  .series {
-    padding: 0.6rem 0.9rem;
-    border-inline-start: 3px solid var(--accent);
-    background: color-mix(in oklab, var(--accent) 8%, transparent);
-    font-size: var(--text-small);
-  }
-
-  .series-nav {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-block-start: 2.5rem;
-    padding-block-start: 1.5rem;
-    border-block-start: 1px solid var(--rule);
-    font-size: var(--text-small);
-  }
-
-  .series-nav .next {
-    margin-inline-start: auto;
-    text-align: end;
-  }
-</style>

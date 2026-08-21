@@ -1,0 +1,143 @@
+---
+import Authors from './Authors.astro'
+import CoverHero from './CoverHero.astro'
+import ReadingTime from './ReadingTime.astro'
+import SeriesToc from './SeriesToc.astro'
+import { parseAuthors } from '../lib/authors'
+import { formatDate, slugOf, urlOf, type Post } from '../lib/posts'
+import { chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
+import { localePath, t, type Locale } from '../i18n/ui'
+
+/**
+ * The article body both post pages (src/pages/[...slug].astro and
+ * src/pages/en/[...slug].astro) render: cover, heading, meta row, series
+ * blocks, prose, tag chips and series navigation, with every internal link
+ * routed through localePath so each tree stays inside its own language. The
+ * prose comes in through the default slot because only the page has the
+ * rendered Content, and the `banner` slot is where the English page drops
+ * its machine-translation notice.
+ */
+interface Props {
+  post: Post
+  series: ReturnType<typeof getSeriesNavigation>
+  readingTime: number | undefined
+  locale: Locale
+}
+
+const { post, series, readingTime, locale } = Astro.props
+const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
+---
+
+<article>
+  <CoverHero
+    slug={slugOf(post)}
+    title={post.data.title}
+    category={post.data.category}
+    pubDate={post.data.pubDate}
+    lang={locale}
+    authorName={authorName}
+  />
+  <h1>{post.data.title}</h1>
+  <p class="meta">
+    <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
+    <span aria-hidden="true">·</span>
+    <a
+      href={localePath(locale, `/${post.data.category}/`)}
+      class="chip"
+      style={`--chip-color: ${chipColor(post.data.category)}`}
+    >
+      {post.data.category}
+    </a>
+    {
+      readingTime !== undefined && (
+        <>
+          <span aria-hidden="true">·</span>
+          <ReadingTime minutes={readingTime} locale={locale} />
+        </>
+      )
+    }
+  </p>
+  <Authors authors={post.data.authors} locale={locale} />
+  <slot name="banner" />
+  {post.data.series && <SeriesToc series={post.data.series} current={post.id} locale={locale} />}
+  {
+    series !== null && (
+      <p class="series">
+        {t(locale, 'partOfSeriesNamed', series.index, series.total)}{' '}
+        <a href={localePath(locale, `/series/${series.name}/`)}>{series.title}</a>
+      </p>
+    )
+  }
+  <div class="prose">
+    <slot />
+  </div>
+  {
+    post.data.tags.length > 0 && (
+      <ul class="chips">
+        {post.data.tags.map((tag) => (
+          <li>
+            <a
+              href={localePath(locale, `/tags/${slugify(tag)}/`)}
+              class="chip"
+              style={`--chip-color: ${chipColor(tag)}`}
+            >
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    series !== null && (
+      <nav class="series-nav" aria-label={t(locale, 'seriesNav')}>
+        {series.previous !== null && (
+          <a href={urlOf(series.previous)} rel="prev">
+            ← {series.previous.data.title}
+          </a>
+        )}
+        {series.next !== null && (
+          <a href={urlOf(series.next)} rel="next" class="next">
+            {series.next.data.title} →
+          </a>
+        )}
+      </nav>
+    )
+  }
+</article>
+
+<style>
+  .meta {
+    display: flex;
+    /* Without this the chip is a stretched flex item and its text rides at the
+       top of a box as tall as the row. */
+    align-items: center;
+    gap: 0.5rem;
+    margin-block: -0.5rem 2.5rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .series {
+    padding: 0.6rem 0.9rem;
+    border-inline-start: 3px solid var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    font-size: var(--text-small);
+  }
+
+  .series-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-start: 2.5rem;
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--text-small);
+  }
+
+  .series-nav .next {
+    margin-inline-start: auto;
+    text-align: end;
+  }
+</style>
