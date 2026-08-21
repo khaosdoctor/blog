@@ -229,6 +229,12 @@ footer .credits a {
   color: inherit;
   text-decoration: none;
   background: none;
+  /* Invisible padding pulled back by the same margin: the thumb gets a 44px
+     target (WCAG 2.5.8) while the line keeps its metrics. Inline-block so the
+     padding actually counts toward the hit box. */
+  display: inline-block;
+  padding: 0.9rem 0.5rem;
+  margin: -0.9rem -0.5rem;
 }
 
 footer .credits a:hover {

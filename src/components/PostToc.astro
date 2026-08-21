@@ -168,6 +168,10 @@ const tree = treeOf(flat)
     inset-block-end: var(--gutter);
     inset-inline-start: var(--gutter);
     z-index: 2;
+    /* The only way to open the outline on a phone, so it holds the same 44px
+       floor as every other icon control (WCAG 2.5.8). */
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
     padding: 0.35rem 0.6rem;
     border: 3px double var(--toc-ink);
     background: var(--bg);
