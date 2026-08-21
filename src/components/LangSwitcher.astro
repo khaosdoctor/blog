@@ -66,14 +66,19 @@ const otherLabel = other?.label ?? ''
 
 {/* `data-goes-to` is what the click handler at the bottom stores: using this
    switch is the reader stating a language, and a stated choice outranks the
-   browser's own header from then on (see core-lang.ts). */}
+   browser's own header from then on (see core-lang.ts).
+
+   The accessible name starts with the visible "PT EN" (WCAG 2.5.3: a
+   speech-input user addresses the control by the text they can see), then
+   says what the click does. LOCALES order matches the rendered order in both
+   states, since the square and the dim half swap places, never order. */}
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
   <a
     class="lang-track"
     href={otherHref}
     hreflang={other?.code}
     data-goes-to={other?.code}
-    aria-label={t(locale, 'switchLanguage', otherName)}
+    aria-label={`${LOCALES.map((entry) => entry.label).join(' ')}: ${t(locale, 'switchLanguage', otherName)}`}
     title={t(locale, 'switchLanguage', otherName)}
   >
     {/* The 44px hit target is .lang-track (the link itself, above); .lang-rect

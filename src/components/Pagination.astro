@@ -97,6 +97,9 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
           there is one such mark on the site rather than two. A flex item of its
           own row, since the controls below it are the other row. */}
       <hr class="pg-rule" />
+      {/* The disabled arrows are aria-hidden with no label: aria-label is
+          prohibited on a bare span (WAI-ARIA generic role), and a dead arrow
+          says nothing a screen reader needs. */}
       {page.url.prev ? (
         <a class="pg-btn" href={page.url.prev} rel="prev" aria-label={t(locale, 'paginationPrev')}>
           <span class="pg-glyph" aria-hidden="true">
@@ -104,8 +107,8 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
           </span>
         </a>
       ) : (
-        <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationPrev')}>
-          <span class="pg-glyph" aria-hidden="true">
+        <span class="pg-btn" aria-hidden="true">
+          <span class="pg-glyph">
             {'<<'}
           </span>
         </span>
@@ -138,8 +141,8 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
           </span>
         </a>
       ) : (
-        <span class="pg-btn" aria-disabled="true" aria-label={t(locale, 'paginationNext')}>
-          <span class="pg-glyph" aria-hidden="true">
+        <span class="pg-btn" aria-hidden="true">
+          <span class="pg-glyph">
             {'>>'}
           </span>
         </span>
