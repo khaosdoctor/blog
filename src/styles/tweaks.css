@@ -157,6 +157,14 @@
      too far out to read as belonging to it. 87.5rem is 80vw of a 1750px window,
      so every laptop width is untouched and only the wide monitors clamp. */
   --dial-shell-width: min(80vw, 87.5rem);
+
+  /* What the header and footer measure below the 70rem breakpoint, where they
+     line up with the reading column instead of framing it. In rem rather than
+     reading --dial-reading-width, because `ch` resolves against each element's
+     own font and those three landmarks are set in three different ones (see
+     core.css). 56rem is 80vw of 70rem, so this meets --dial-shell-width exactly
+     at the breakpoint and the row does not jump width as the window crosses it. */
+  --dial-shell-narrow-width: 56rem;
   /* How far the header's own contents sit in from that edge. */
   --dial-shell-inset: 0.667rem;
 

@@ -138,6 +138,8 @@
   /* The header and footer read this. `main` keeps `--measure`: a post's running
      text wants the narrow column. */
   --shell-width: var(--dial-shell-width);
+  /* The same two, below the breakpoint where they stop framing the column. */
+  --shell-narrow-width: var(--dial-shell-narrow-width);
   /* Every wide block between them reads this instead, which is the same width
      less an inset on each side. */
   --content-width: calc(var(--dial-shell-width) - var(--dial-content-inset) * 2);

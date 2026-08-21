@@ -83,8 +83,24 @@ header,
 main,
 footer {
   inline-size: 100%;
-  max-width: var(--measure);
   margin-inline: auto;
+}
+
+/*
+ * Only `main` is capped in `ch`. That unit resolves against the font of the
+ * element reading it, so one shared `--measure` on all three landmarks was
+ * three different widths: 843px on the header (its own --font-mono), 893px on
+ * main, and 675px on the footer, whose 0.85rem type makes its `ch` smaller
+ * again. The footer drew 218px narrower than the content above it on every
+ * window under 70rem. PostToc.astro's placement comment names the same trap.
+ */
+main {
+  max-inline-size: var(--measure);
+}
+
+header,
+footer {
+  max-inline-size: var(--shell-narrow-width);
 }
 
 /*
