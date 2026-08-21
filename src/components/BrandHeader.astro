@@ -297,8 +297,6 @@ const RULE = '──────────────────────
       margin-block-start: 1rem;
     }
 
-    /* Bottom row: the language switch on the left, screen-mode and settings
-       together on the right. */
     .shell[data-menu-open] .controls {
       margin-block-start: auto;
       padding-block-start: 1.5rem;
@@ -311,7 +309,6 @@ const RULE = '──────────────────────
       margin-inline-start: auto;
     }
 
-    .shell[data-menu-open] .controls :global(.lang-switch),
     .shell[data-menu-open] .controls :global(.tt-open),
     .shell[data-menu-open] .controls :global(.sp-open) {
       font-size: 1.3rem;
@@ -336,8 +333,7 @@ const RULE = '──────────────────────
       justify-content: flex-start;
     }
 
-    /* A tap needs no keyboard shortcut, and the hint's reserved space kept
-       the drawer's search line from filling its row. */
+    /* A tap needs no keyboard shortcut. */
     .shell[data-menu-open] .controls :global(.sx-hint) {
       display: none;
     }
