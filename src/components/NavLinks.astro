@@ -137,10 +137,16 @@ function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): bool
    * rather than borrowing prose's own decorated one.
    */
   .nav-links a {
+    /* The block padding pulled back by the same margin buys the 44px tap
+       floor (WCAG 2.5.8) without fattening the header row; background-clip
+       keeps the hover fill on the visible line, off the invisible padding. */
+    display: inline-block;
     padding-inline: 1px;
-    padding-block: 2px;
+    padding-block: 0.7rem;
+    margin-block: -0.7rem;
+    background-clip: content-box;
     color: inherit;
-    background: transparent;
+    background-color: transparent;
     text-decoration-line: underline;
     text-underline-offset: 3px;
   }
@@ -162,7 +168,9 @@ function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): bool
   .nav-links a:hover,
   .nav-links a:focus-visible,
   .nav-links a[aria-current='page'] {
-    background: var(--accent-day);
+    /* background-color, never the shorthand: the shorthand resets
+       background-clip and the fill would flood the invisible tap padding. */
+    background-color: var(--accent-day);
     color: var(--bg);
     text-decoration-line: none;
   }

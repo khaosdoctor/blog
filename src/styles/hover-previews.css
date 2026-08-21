@@ -354,3 +354,29 @@ a.link-unwritten {
 .hp-card:not(.hp-docked) .hp-title {
   padding-inline-end: 4.6rem;
 }
+
+/* A long-press opens a card on touch, so these three are the only way to
+   close it: at 1.4rem a thumb misses them. Respaced to keep their order
+   (dock, pin, close from the left) without overlap at the bigger size.
+   Last in the file on purpose: the base .hp-min rule above would otherwise
+   win the same-specificity tie by source order. */
+@media (hover: none), (pointer: coarse) {
+  .hp-close,
+  .hp-pin,
+  .hp-min {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .hp-pin {
+    right: 3.4rem;
+  }
+
+  .hp-min {
+    right: 6.4rem;
+  }
+
+  .hp-card:not(.hp-docked) .hp-title {
+    padding-inline-end: 9.4rem;
+  }
+}

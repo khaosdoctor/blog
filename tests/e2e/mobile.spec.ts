@@ -56,6 +56,21 @@ for (const { name, selector, path } of TAP_TARGETS) {
   })
 }
 
+test('long unbroken tokens wrap instead of scrolling the page', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 850 })
+  await page.goto('/en/a-deep-dive-into-container-images-part-1/', { waitUntil: 'networkidle' })
+  const grew = await page.evaluate(() => {
+    const doc = document.documentElement
+    const token = 'a'.repeat(61)
+    const paragraph = document.querySelector('.prose p')
+    const seriesRow = document.querySelector('.series-toc li a')
+    if (paragraph) paragraph.append(` ${token}`)
+    if (seriesRow) seriesRow.append(token)
+    return doc.scrollWidth - doc.clientWidth
+  })
+  expect(grew).toBeLessThanOrEqual(0)
+})
+
 test('search returns results on the built site', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 850 })
   await page.goto('/en/search/?q=typescript', { waitUntil: 'networkidle' })

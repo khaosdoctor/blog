@@ -72,9 +72,17 @@ body {
   text-wrap: pretty;
 }
 
+/*
+ * inline-size: 100% is what kept every page from scrolling sideways on a
+ * phone. body is a column flex container, and `margin-inline: auto` on a flex
+ * item cancels align-items: stretch, so each landmark fell back to
+ * fit-content: Chromium sizes a flex-wrap container's intrinsic width as its
+ * single-line sum, which made the header 723px wide at a 360px viewport.
+ */
 header,
 main,
 footer {
+  inline-size: 100%;
   max-width: var(--measure);
   margin-inline: auto;
 }
@@ -233,8 +241,8 @@ footer .credits a {
      target (WCAG 2.5.8) while the line keeps its metrics. Inline-block so the
      padding actually counts toward the hit box. */
   display: inline-block;
-  padding: 0.9rem 0.5rem;
-  margin: -0.9rem -0.5rem;
+  padding: 0.95rem 0.5rem;
+  margin: -0.95rem -0.5rem;
 }
 
 footer .credits a:hover {
