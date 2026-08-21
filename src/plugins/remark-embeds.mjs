@@ -1,6 +1,7 @@
 // A bare URL or `![](url)` on its own line becomes an embed, decided by host.
 // See docs/architecture.md.
 import { readFileSync } from 'node:fs'
+import { attribute, jsxElement } from './mdx-util.mjs'
 
 /** Read once per process, not per file. */
 let bookmarks = null
@@ -76,10 +77,6 @@ function embeddableUrl(node) {
   return only.url
 }
 
-function attribute(name, value) {
-  return { type: 'mdxJsxAttribute', name, value }
-}
-
 function statusUrl(href) {
   try {
     const url = new URL(href)
@@ -117,10 +114,6 @@ function tweetQuote(node) {
   return { href, children: node.children.slice(0, -1) }
 }
 
-function component(name, attributes) {
-  return { type: 'mdxJsxFlowElement', name, attributes, children: [] }
-}
-
 function embedFor(href) {
   let url
   try {
@@ -130,21 +123,21 @@ function embedFor(href) {
   }
 
   const youtube = youTubeId(url)
-  if (youtube !== null) return component('YouTube', [attribute('id', youtube)])
+  if (youtube !== null) return jsxElement('YouTube', [attribute('id', youtube)])
 
   const vimeo = vimeoId(url)
-  if (vimeo !== null) return component('Vimeo', [attribute('id', vimeo)])
+  if (vimeo !== null) return jsxElement('Vimeo', [attribute('id', vimeo)])
 
   // A bare status URL in a new post: no cached text to fall back to, so the
   // widget either expands it or the reader gets the link.
-  if (statusUrl(href) !== null) return component('Tweet', [attribute('url', href)])
+  if (statusUrl(href) !== null) return jsxElement('Tweet', [attribute('url', href)])
 
   const deck = speakerDeckId(url)
-  if (deck !== null) return component('SpeakerDeck', [attribute('id', deck)])
+  if (deck !== null) return jsxElement('SpeakerDeck', [attribute('id', deck)])
 
   const spotify = spotifyEmbed(url)
   if (spotify !== null) {
-    return component('Spotify', [attribute('kind', spotify.kind), attribute('id', spotify.id)])
+    return jsxElement('Spotify', [attribute('kind', spotify.kind), attribute('id', spotify.id)])
   }
 
   const meta = bookmarkMetadata()[href] ?? bookmarkMetadata()[href.replace(/\/$/, '')]
@@ -154,7 +147,7 @@ function embedFor(href) {
   for (const key of ['title', 'description', 'publisher']) {
     if (typeof meta[key] === 'string' && meta[key] !== '') attributes.push(attribute(key, meta[key]))
   }
-  return component('Bookmark', attributes)
+  return jsxElement('Bookmark', attributes)
 }
 
 export function remarkEmbeds() {

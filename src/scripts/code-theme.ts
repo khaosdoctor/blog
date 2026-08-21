@@ -5,8 +5,8 @@
 // Both read the same key AND resolve the unstored "auto" case the same way
 // (see applyTheme), so the two have to be kept in step.
 //
-// The empty export makes this a real module, or its names would be global.
-export {}
+import { readStorage, removeStorage, writeStorage } from '../lib/storage'
+import { onReady } from './ready'
 
 const STORAGE_KEY = 'code-theme'
 const ATTR = 'data-code-theme'
@@ -59,11 +59,7 @@ function isThemeName(value: string): value is ThemeName {
 // "something stored that is no longer a real theme", so the latter can be
 // cleaned up rather than lingering.
 function rawStored(): string | null {
-  try {
-    return localStorage.getItem(STORAGE_KEY)
-  } catch {
-    return null
-  }
+  return readStorage(STORAGE_KEY)
 }
 
 function storedTheme(): ThemeName | null {
@@ -113,11 +109,7 @@ let picker: HTMLSelectElement | null = null
  * happened to be showing.
  */
 export function resetCodeTheme(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    // Nothing to clean up if storage was never available.
-  }
+  removeStorage(STORAGE_KEY)
   applyTheme(null)
   if (picker !== null) picker.value = 'auto'
 }
@@ -164,33 +156,19 @@ function init(): void {
   // first point able to validate it, so it clears it.
   const raw = rawStored()
   const valid = storedTheme()
-  if (raw !== null && valid === null) {
-    try {
-      localStorage.removeItem(STORAGE_KEY)
-    } catch {
-      // Nothing to clean up if storage was never available.
-    }
-  }
+  if (raw !== null && valid === null) removeStorage(STORAGE_KEY)
   applyTheme(valid)
 
   select.value = valid ?? 'auto'
 
   select.addEventListener('change', () => {
     if (select.value === 'auto') {
-      try {
-        localStorage.removeItem(STORAGE_KEY)
-      } catch {
-        // Nothing to clean up if storage was never available.
-      }
+      removeStorage(STORAGE_KEY)
       applyTheme(null)
       return
     }
     if (!isThemeName(select.value)) return
-    try {
-      localStorage.setItem(STORAGE_KEY, select.value)
-    } catch {
-      // Private mode, storage disabled: the theme still applies for this page.
-    }
+    writeStorage(STORAGE_KEY, select.value)
     applyTheme(select.value)
   })
 
@@ -209,8 +187,4 @@ function init(): void {
   wrapper.removeAttribute('hidden')
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)

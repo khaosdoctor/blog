@@ -1,9 +1,6 @@
-// The preferences panel from SettingsPanel.astro. Same open/close, keyboard and
-// focus handling as theme-toggle.ts; the Conway controls call conway.ts's own
-// exported setters rather than duplicating its storage logic.
-//
-// The empty export makes this a real module, or its names would be global.
-export {}
+// The preferences panel from SettingsPanel.astro. The open/close, keyboard and
+// focus handling is the shared popover-menu shell; the Conway controls call
+// conway.ts's own exported setters rather than duplicating its storage logic.
 
 import {
   getSettings,
@@ -20,6 +17,9 @@ import {
 import { getShortcutLetter, resetShortcutLetter, RESERVED_LETTERS, setShortcutLetter } from './search-palette'
 import { resetCodeTheme } from './code-theme'
 import { setAccent, storedAccent } from '../lib/accent'
+import { readStorage, removeStorage, writeStorage } from '../lib/storage'
+import { promoteToPopover, wireMenu } from './popover-menu'
+import { onReady } from './ready'
 
 // hover-previews.ts binds its own listener to the same checkbox on post pages
 // and additionally moves the pinned set between storages. This binding is what
@@ -56,14 +56,10 @@ function clampFontSize(value: number): number {
 // pulled inside rather than discarded, so a past choice still means the closest
 // thing to itself if the range moves again.
 function storedFontSize(): number {
-  try {
-    const raw = localStorage.getItem(FONT_SIZE_KEY)
-    if (raw === null) return FONT_SIZE_DEFAULT
-    const value = Number(raw)
-    return Number.isFinite(value) ? clampFontSize(value) : FONT_SIZE_DEFAULT
-  } catch {
-    return FONT_SIZE_DEFAULT
-  }
+  const raw = readStorage(FONT_SIZE_KEY)
+  if (raw === null) return FONT_SIZE_DEFAULT
+  const value = Number(raw)
+  return Number.isFinite(value) ? clampFontSize(value) : FONT_SIZE_DEFAULT
 }
 
 function applyFontSize(value: number): void {
@@ -77,37 +73,13 @@ function applyFontSize(value: number): void {
 const BODY_FACE_KEY = 'body-face'
 
 function storedBodyFace(): 'sans' | null {
-  try {
-    return localStorage.getItem(BODY_FACE_KEY) === 'sans' ? 'sans' : null
-  } catch {
-    return null
-  }
+  return readStorage(BODY_FACE_KEY) === 'sans' ? 'sans' : null
 }
 
 function applyBodyFace(face: 'sans' | null): void {
   if (face === null) document.documentElement.removeAttribute('data-body-face')
   else document.documentElement.setAttribute('data-body-face', face)
 }
-
-function place(el: HTMLElement, anchor: HTMLElement): void {
-  const rect = anchor.getBoundingClientRect()
-  const space = 8
-  const w = el.offsetWidth
-  const h = el.offsetHeight
-  const vw = innerWidth
-  const vh = innerHeight
-
-  let top = rect.bottom + space
-  if (top + h > vh && rect.top - h - space > 0) top = rect.top - h - space
-  top = Math.min(Math.max(top, space), Math.max(space, vh - h - space))
-
-  const left = Math.min(Math.max(rect.right - w, space), Math.max(space, vw - w - space))
-
-  el.style.top = `${top}px`
-  el.style.left = `${left}px`
-}
-
-const canPopover = 'popover' in HTMLElement.prototype
 
 function init(): void {
   const wrapperEl = document.querySelector<HTMLElement>('.settings-panel')
@@ -130,52 +102,7 @@ function init(): void {
    */
   const resetHandlers: Array<() => void> = []
 
-  let open = false
-
-  function openMenu(): void {
-    menu.style.visibility = 'hidden'
-    if (canPopover) {
-      try {
-        menu.hidePopover?.()
-        menu.showPopover?.()
-      } catch {
-        menu.hidden = false
-      }
-    } else {
-      menu.hidden = false
-    }
-    open = true
-    opener.setAttribute('aria-expanded', 'true')
-    place(menu, opener)
-    menu.style.visibility = ''
-  }
-
-  function closeMenu(returnFocus: boolean): void {
-    open = false
-    opener.setAttribute('aria-expanded', 'false')
-    try {
-      menu.hidePopover?.()
-    } catch {
-      // Not currently showing as a popover.
-    }
-    if (!canPopover) menu.hidden = true
-    if (returnFocus) opener.focus()
-  }
-
-  opener.addEventListener('click', () => {
-    if (open) closeMenu(true)
-    else openMenu()
-  })
-
-  document.addEventListener('click', (event) => {
-    if (!open) return
-    const target = event.target as Element
-    if (!wrapper.contains(target)) closeMenu(false)
-  })
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && open) closeMenu(true)
-  })
+  wireMenu(wrapper, opener, menu)
 
 
   // --- Motion: the same three-way shape as theme-toggle.ts, "system" written
@@ -223,12 +150,8 @@ function init(): void {
     // be recognised as a default everywhere it is read.
     const setFontSize = (next: number): void => {
       value = clampFontSize(next)
-      try {
-        if (value === FONT_SIZE_DEFAULT) localStorage.removeItem(FONT_SIZE_KEY)
-        else localStorage.setItem(FONT_SIZE_KEY, String(value))
-      } catch {
-        // Private mode, or storage disabled: the choice still applies for this page.
-      }
+      if (value === FONT_SIZE_DEFAULT) removeStorage(FONT_SIZE_KEY)
+      else writeStorage(FONT_SIZE_KEY, String(value))
       applyFontSize(value)
       syncFontSize()
     }
@@ -258,12 +181,8 @@ function init(): void {
   // One write path, same shape as setFontSize: null is the default and is
   // stored as nothing stored, so a reset is this called with null.
   const setBodyFace = (face: 'sans' | null): void => {
-    try {
-      if (face === null) localStorage.removeItem(BODY_FACE_KEY)
-      else localStorage.setItem(BODY_FACE_KEY, face)
-    } catch {
-      // Private mode, or storage disabled: the choice still applies for this page.
-    }
+    if (face === null) removeStorage(BODY_FACE_KEY)
+    else writeStorage(BODY_FACE_KEY, face)
     applyBodyFace(face)
     const current = face ?? 'serif'
     for (const option of fontFamilyOptions) option.setAttribute('aria-current', String(option.dataset.value === current))
@@ -402,18 +321,10 @@ function init(): void {
     // On by default, so the stored value marks OFF and an absent key reads as
     // checked. hover-previews.ts's own persistent() reads the same direction;
     // both files write this key and have to agree on which value means what.
-    try {
-      hpPersist.checked = localStorage.getItem(HP_PERSIST_KEY) !== '0'
-    } catch {
-      hpPersist.checked = true
-    }
+    hpPersist.checked = readStorage(HP_PERSIST_KEY) !== '0'
     hpPersist.addEventListener('change', () => {
-      try {
-        if (hpPersist.checked) localStorage.removeItem(HP_PERSIST_KEY)
-        else localStorage.setItem(HP_PERSIST_KEY, '0')
-      } catch {
-        // Private mode, or storage disabled: the choice still applies for this page.
-      }
+      if (hpPersist.checked) removeStorage(HP_PERSIST_KEY)
+      else writeStorage(HP_PERSIST_KEY, '0')
     })
     /*
      * The one reset that dispatches an event rather than doing the work itself.
@@ -455,10 +366,7 @@ function init(): void {
     for (const handler of resetHandlers) handler()
   })
 
-  if (canPopover) {
-    menu.removeAttribute('hidden')
-    menu.setAttribute('popover', 'auto')
-  }
+  promoteToPopover(menu)
 
   wrapper.removeAttribute('hidden')
 
@@ -484,8 +392,4 @@ function init(): void {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)

@@ -2,16 +2,12 @@
 // configurable Ctrl/Cmd+letter, opening a native <dialog> that live-searches
 // through Pagefind.
 //
-// The loadPagefind/init dance is duplicated from Search.astro's own <script>
-// rather than shared: that file has to work with JS off and before an index
-// exists, and both copies are short. If one changes, change both.
-//
-// The empty export makes this a real module, same as theme-toggle.ts,
-// code-theme.ts and conway.ts: a script with no import or export is global,
-// and its names would collide with theirs.
-export {}
-
+// The Pagefind loader and label reader are shared with Search.astro's own
+// <script> through ./pagefind.
 import { dayColor } from '../lib/day-color'
+import { readStorage, removeStorage, writeStorage } from '../lib/storage'
+import { loadPagefind, searchLabel as label, type PagefindModule } from './pagefind'
+import { onReady } from './ready'
 
 // --- The shortcut letter. Stored like every other reader preference here: a
 // plain localStorage key, written on change, read once at startup, wrapped for
@@ -31,12 +27,8 @@ const DEFAULT_LETTER = 'K'
 export const RESERVED_LETTERS = new Set(['D', 'L', 'N', 'Q', 'R', 'T', 'W'])
 
 function readStoredLetter(): string {
-  try {
-    const stored = localStorage.getItem(SHORTCUT_KEY)
-    return stored !== null && /^[A-Z]$/.test(stored) ? stored : DEFAULT_LETTER
-  } catch {
-    return DEFAULT_LETTER
-  }
+  const stored = readStorage(SHORTCUT_KEY)
+  return stored !== null && /^[A-Z]$/.test(stored) ? stored : DEFAULT_LETTER
 }
 
 let shortcutLetter = readStoredLetter()
@@ -49,11 +41,7 @@ export function setShortcutLetter(letter: string): void {
   const upper = letter.toUpperCase()
   if (!/^[A-Z]$/.test(upper)) return
   shortcutLetter = upper
-  try {
-    localStorage.setItem(SHORTCUT_KEY, upper)
-  } catch {
-    // Private mode: the choice still applies for this page.
-  }
+  writeStorage(SHORTCUT_KEY, upper)
   applyHint()
 }
 
@@ -65,11 +53,7 @@ export function setShortcutLetter(letter: string): void {
  */
 export function resetShortcutLetter(): void {
   shortcutLetter = DEFAULT_LETTER
-  try {
-    localStorage.removeItem(SHORTCUT_KEY)
-  } catch {
-    // Private mode: the reset still applies for this page.
-  }
+  removeStorage(SHORTCUT_KEY)
   applyHint()
 }
 
@@ -89,35 +73,10 @@ function applyHint(): void {
 // --- Pagefind, loaded once and cached: the dialog opens many times per page
 // view, and init() is not something Pagefind expects twice. ---
 
-interface PagefindResult {
-  data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }>
-}
-
-interface PagefindModule {
-  init?: (language?: string) => Promise<void>
-  debouncedSearch: (
-    term: string,
-    options?: Record<string, unknown>,
-    timeoutMs?: number,
-  ) => Promise<{ results: PagefindResult[] } | null>
-}
-
 type PagefindState = PagefindModule | null | 'unready'
 
 let pagefindState: PagefindState = 'unready'
 let pagefindLoad: Promise<PagefindModule | null> | null = null
-
-async function loadPagefind(): Promise<PagefindModule | null> {
-  try {
-    // Pagefind writes this into dist/ after the build, so it is not a source
-    // module: the specifier goes through a variable to keep Vite and the
-    // typechecker from resolving something that only exists in the output.
-    const module = '/pagefind/pagefind.js'
-    return (await import(/* @vite-ignore */ module)) as PagefindModule
-  } catch {
-    return null
-  }
-}
 
 /**
  * Resolves to null both when the index does not exist (dev, or before a build)
@@ -145,17 +104,6 @@ async function ensurePagefind(): Promise<PagefindModule | null> {
 
   pagefindState = await pagefindLoad
   return pagefindState
-}
-
-// t()'s server-side strings read back off the input's own data attributes:
-// this plain script module has no access to t(). Same as Search.astro.
-
-function label(
-  input: HTMLInputElement,
-  name: 'searching' | 'noResults' | 'moreResults' | 'resultsFound',
-  value = '',
-): string {
-  return (input.dataset[name] ?? '').replace(/%[ds]/, value)
 }
 
 const MAX_RESULTS = 5 // Matches the numbered 1-5 shortcut; past this is a link to /search/ instead of a 6th row.
@@ -407,8 +355,4 @@ function init(): void {
   })
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)
