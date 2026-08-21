@@ -1,9 +1,13 @@
+import type { PaginateFunction } from 'astro'
 import { hashString } from './chip-color'
-import { getPublishedPosts, type Post } from './posts'
+import { getPublishedPosts, LIST_PAGE_SIZE, type Post } from './posts'
+import { slugify } from './slugify'
+import { LOCALES, type Locale } from '../i18n/ui'
 
-/** A section is the `category` field: exactly one per post. */
-export async function getCategories(): Promise<Map<string, Post[]>> {
-  const posts = await getPublishedPosts()
+/** A section is the `category` field: exactly one per post. One language at
+    a time, defaulting to the source one, the same shape getTags() takes. */
+export async function getCategories(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
+  const posts = await getPublishedPosts(lang)
   const byCategory = new Map<string, Post[]>()
   for (const post of posts) {
     const current = byCategory.get(post.data.category) ?? []
@@ -11,6 +15,20 @@ export async function getCategories(): Promise<Map<string, Post[]>> {
     byCategory.set(post.data.category, current)
   }
   return byCategory
+}
+
+/**
+ * Which categories each locale has a section page for. A section page only
+ * exists in a language that has a post in it, so the alternates (and the
+ * language switcher) are built from this rather than assumed.
+ */
+export async function categoryLocales(): Promise<(readonly [Locale, Set<string>])[]> {
+  const languages = await Promise.all(
+    LOCALES.map(async (locale) => [locale, await getPublishedPosts(locale)] as const),
+  )
+  return languages.map(
+    ([locale, localePosts]) => [locale, new Set(localePosts.map((post) => post.data.category))] as const,
+  )
 }
 
 /**
@@ -41,6 +59,29 @@ export async function getTags(lang?: Post['data']['lang']): Promise<Map<string, 
     }
   }
   return byTag
+}
+
+/**
+ * The paginated routes for one language's per-tag pages, shared by
+ * src/pages/tags/[tag]/[...page].astro and its /en/ twin so the two cannot
+ * drift. `languages` names only the locales that actually build a page for
+ * this tag: the switcher must never offer a URL no route emits.
+ */
+export async function tagListingRoutes(paginate: PaginateFunction, lang?: Locale) {
+  const [tags, byLocale] = await Promise.all([
+    getTags(lang),
+    Promise.all(LOCALES.map(async (locale) => [locale, await getTags(locale)] as const)),
+  ])
+  return [...tags.entries()].flatMap(([tag, posts]) =>
+    paginate(posts, {
+      pageSize: LIST_PAGE_SIZE,
+      params: { tag: slugify(tag) },
+      props: {
+        tag,
+        languages: byLocale.filter(([, entries]) => entries.has(tag)).map(([locale]) => locale),
+      },
+    }),
+  )
 }
 
 export type Series = { name: string; posts: Post[] }

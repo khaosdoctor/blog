@@ -1,65 +1,31 @@
 ---
 import type { GetStaticPaths } from 'astro'
 import { render } from 'astro:content'
-import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Authors from '../components/Authors.astro'
-import Bookmark from '../components/Bookmark.astro'
 import CoverHero from '../components/CoverHero.astro'
-import HtmlLab from '../components/HtmlLab.astro'
-import LabDemo from '../components/LabDemo.astro'
-import MarginNote from '../components/MarginNote.astro'
-import MissingImage from '../components/MissingImage.astro'
 import PostToc from '../components/PostToc.astro'
-import RawEmbed from '../components/RawEmbed.astro'
 import ReadingTime from '../components/ReadingTime.astro'
 import SeriesToc from '../components/SeriesToc.astro'
-import Sidenote from '../components/Sidenote.astro'
-import SpeakerDeck from '../components/SpeakerDeck.astro'
-import Spotify from '../components/Spotify.astro'
-import Tweet from '../components/Tweet.astro'
-import Video from '../components/Video.astro'
 import { parseAuthors } from '../lib/authors'
 import { coverTone } from '../lib/cover'
+import { mdxComponents } from '../lib/mdx-components'
 import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
 import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
 import { HREFLANG, t } from '../i18n/ui'
 
-/**
- * Injected into every post so migrated MDX can use these tags with no import
- * lines. 246 files stay clean markdown, and the component set can be renamed
- * here in one place instead of across the content.
- */
-const mdxComponents = {
-  Bookmark,
-  HtmlLab,
-  LabDemo,
-  MarginNote,
-  MissingImage,
-  RawEmbed,
-  Sidenote,
-  SpeakerDeck,
-  Spotify,
-  Tweet,
-  Video,
-  Vimeo,
-  YouTube,
-}
-
 // Flat URLs: /{slug}/ exactly as Ghost had them, so moving a post between
-// sections only ever changes its `category`, never its URL.
-//
-// Series navigation and hreflang alternates both used to be looked up once per
-// post page (an O(N) collection fetch each, N times over). Build the shared
-// indices here instead, once, and hand each post its own slice.
+// sections only ever changes its `category`, never its URL. The series map
+// and sibling index are built once here rather than per post page, which used
+// to cost an O(N) collection fetch N times over.
 export const getStaticPaths = (async () => {
   const [posts, byFolder] = await Promise.all([getPublishedPosts(), getPublishedByFolder()])
   const seriesMap = buildSeriesMap(posts)
   return posts.map((post) => ({
     params: { slug: slugOf(post) },
-    // Alternates come from the post's own folder: every language of the same
-    // article is a file in there, so a post with no translation yields a list
-    // of one, itself.
+    // Alternates come from the post's own content directory: every language
+    // of the same article is a file in there, so an untranslated post yields
+    // a list of one, itself.
     props: {
       post,
       series: getSeriesNavigation(post, seriesMap),
@@ -81,19 +47,10 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   href: new URL(path, Astro.site).href,
 }))
 
-/**
- * The post's own colour: whatever brand its cover drew, read straight off the
- * cover's own derivation (coverTone, lib/cover.ts) so bold and italic inside
- * the article cannot come out a different colour from the card at the top of
- * the page. Links do NOT read this, they follow the day colour
- * (prose/links.css).
- *
- * Handed to the layout rather than written onto <article> here, which is where
- * it used to sit: the header now draws the reading progress in this same
- * colour (ReadingProgress.astro), and the header is not inside the article, so
- * the property has to be written on an element that contains both. BaseLayout
- * puts it on <body>; the article inherits it exactly as before.
- */
+// The post's own colour, read off the cover's derivation (coverTone) so bold
+// and italic inside the article match the card at the top; links follow the
+// day colour instead (prose/links.css). Handed to the layout because the
+// header's reading progress reads it too and only <body> contains both.
 const postAccent = coverTone(slugOf(post)).token
 ---
 
@@ -201,7 +158,7 @@ const postAccent = coverTone(slugOf(post)).token
     gap: 0.5rem;
     margin-block: -0.5rem 2.5rem;
     color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
   }
 
@@ -209,7 +166,7 @@ const postAccent = coverTone(slugOf(post)).token
     padding: 0.6rem 0.9rem;
     border-inline-start: 3px solid var(--accent);
     background: color-mix(in oklab, var(--accent) 8%, transparent);
-    font-size: 0.9rem;
+    font-size: var(--text-small);
   }
 
   .series-nav {
@@ -219,7 +176,7 @@ const postAccent = coverTone(slugOf(post)).token
     margin-block-start: 2.5rem;
     padding-block-start: 1.5rem;
     border-block-start: 1px solid var(--rule);
-    font-size: 0.9rem;
+    font-size: var(--text-small);
   }
 
   .series-nav .next {

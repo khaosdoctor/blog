@@ -1,17 +1,8 @@
 ---
-// The English half of the per-series page (src/pages/series/[name].astro is the
-// Portuguese one). A translation carries its own `series` and `seriesOrder`, so
-// this is the same page over getSeries('en'): English parts, English titles,
-// English URLs, and no Portuguese post can reach it.
-//
-// The slug is the shared one, so this page is the Portuguese page's URL with the
-// /en/ prefix in front of it, and the switcher moves between them by prefix like
-// it does everywhere else on the site.
-//
-// A series with fewer than two English parts gets no page here, the same rule
-// the Portuguese route has always applied to itself: half of a translated series
-// is still a series, one part of it is not one yet. The Portuguese page keeps
-// all of its own parts either way, since neither language reads the other's map.
+// The English per-series page (src/pages/series/[name].astro is the
+// Portuguese one), built from getSeries('en'): English parts, English URLs.
+// A series with fewer than two English parts gets no page here, the same
+// rule the Portuguese route has always applied to itself.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import PostList from '../../../components/PostList.astro'
@@ -19,9 +10,9 @@ import { getSeries, seriesTitle } from '../../../lib/taxonomy'
 import { HREFLANG, t } from '../../../i18n/ui'
 
 export const getStaticPaths = (async () => {
-  // The Portuguese map is read only to know whether the Portuguese page for this
-  // series exists, which decides whether the switcher has a counterpart to
-  // offer. A series written in English first would have none.
+  // The Portuguese map only says whether the Portuguese counterpart exists,
+  // which decides whether the switcher has one to offer. A series written in
+  // English first would have none.
   const [series, portuguese] = await Promise.all([getSeries('en'), getSeries()])
   return [...series.entries()]
     .filter(([, posts]) => posts.length > 1)
@@ -56,18 +47,3 @@ const alternates = [
   </h1>
   <PostList posts={posts} />
 </BaseLayout>
-
-<style>
-  .kicker {
-    margin-block-end: 0;
-    color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  h1 {
-    margin-block-start: 0.2rem;
-  }
-</style>
