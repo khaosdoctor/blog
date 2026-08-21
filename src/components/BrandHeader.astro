@@ -66,7 +66,8 @@ const RULE = '──────────────────────
     data-label-open={t(locale, 'openMenu')}
     data-label-close={t(locale, 'closeMenu')}
   >
-    <span aria-hidden="true">≡</span>
+    <span class="menu-toggle-open" aria-hidden="true">≡</span>
+    <span class="menu-toggle-close" aria-hidden="true">✕ {t(locale, 'closeMenu')}</span>
   </button>
   <span class="edge" aria-hidden="true">┌─</span>
   <a href={home} class="brand" aria-label={WORD}>
@@ -202,6 +203,23 @@ const RULE = '──────────────────────
       position: relative;
     }
 
+    .menu-toggle-close {
+      display: none;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .menu-toggle[aria-expanded='true'] .menu-toggle-open {
+      display: none;
+    }
+
+    .menu-toggle[aria-expanded='true'] .menu-toggle-close {
+      display: inline;
+    }
+
     .menu-toggle[aria-expanded='true'],
     .menu-toggle:hover,
     .menu-toggle:focus-visible {
@@ -230,6 +248,14 @@ const RULE = '──────────────────────
       position: absolute;
       inset-inline-start: var(--shell-inset);
       z-index: 2;
+    }
+
+    .shell[data-menu-open] .menu-toggle {
+      inset-inline-start: 1.2rem;
+    }
+
+    .shell[data-menu-open] .menu-toggle::before {
+      inset-inline: 0;
     }
 
     /*
@@ -278,6 +304,16 @@ const RULE = '──────────────────────
 
     .shell[data-menu-open] .controls :global(.theme-toggle) {
       margin-inline-start: auto;
+    }
+
+    .shell[data-menu-open] .controls :global(.lang-switch),
+    .shell[data-menu-open] .controls :global(.tt-open),
+    .shell[data-menu-open] .controls :global(.sp-open) {
+      font-size: 1.3rem;
+    }
+
+    .shell[data-menu-open] .controls :global(.lang-switch) {
+      font-size: 1.1rem;
     }
 
     /* The search opener leaves the row and becomes the drawer's own first
