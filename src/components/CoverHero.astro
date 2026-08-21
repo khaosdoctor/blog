@@ -86,7 +86,9 @@ const byline = formatCoverByline(pubDate, lang, authorName)
     inset-inline-start: calc(var(--cover-meta-x, 160) * (100cqw / 1200));
     inset-block-start: calc(var(--cover-meta-y, 470) * (100cqw / 1200));
     transform: translateY(-50%);
-    font-size: calc(var(--cover-meta-size, 20) * (100cqw / 1200));
+    /* The max() floors (here and on the chip) exist because pure cqw scaling
+       took SVG unit 20 down to ~5px inside a 312px card on a phone. */
+    font-size: max(11px, calc(var(--cover-meta-size, 20) * (100cqw / 1200)));
     /*
      * The card paints its own black ground in both page themes, so every
      * `light-dark()` reached from in here has to take its dark branch,
@@ -130,7 +132,7 @@ const byline = formatCoverByline(pubDate, lang, authorName)
     font-family: var(--font-display);
     /* Its own size rather than the row's, from the same CHIP_SIZE the
        rasteriser draws with. The fallback is that constant's current value. */
-    font-size: calc(var(--cover-chip-size, 17) * (100cqw / 1200));
+    font-size: max(10px, calc(var(--cover-chip-size, 17) * (100cqw / 1200)));
   }
 
   /*

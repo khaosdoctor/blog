@@ -308,6 +308,11 @@ function init(): void {
     resultLinks = []
     cursor.style.background = dayColor()
     dialog.showModal()
+    // Focusing the input on touch opens the keyboard over half the dialog
+    // before the reader has seen it; on a phone the tap on the field is what
+    // asks for the keyboard, so the dialog itself takes the initial focus.
+    if (matchMedia('(pointer: fine)').matches) input.focus()
+    else dialog.focus()
     updateCaret()
   }
 

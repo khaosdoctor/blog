@@ -99,6 +99,14 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     font-size: 0.9rem;
   }
 
+  /* At 360px the 5rem indent left titles a ~187px column; readability, since
+     the overflow itself is handled by overflow-wrap on the rows. */
+  @media (max-width: 30rem) {
+    .series-toc {
+      --toc-indent: 2rem;
+    }
+  }
+
   /* The series name owns its own line, in ink rather than muted: it is the
      title of the block, not a label above it. */
   .heading {
@@ -143,6 +151,9 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     margin-inline: calc(var(--toc-pad) * -1);
     padding-inline: calc(var(--toc-indent) + var(--toc-pad)) var(--toc-pad);
     padding-block: 0.15rem;
+    /* A part title with one unbroken 20+ character token was the one thing
+       that could still scroll a phone sideways. */
+    overflow-wrap: break-word;
   }
 
   li + li {
