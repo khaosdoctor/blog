@@ -1,3 +1,4 @@
+import { hashString } from './chip-color'
 import { getPublishedPosts, type Post } from './posts'
 
 /** A section is the `category` field: exactly one per post. */
@@ -82,6 +83,23 @@ export function tagCloudScale(count: number, min: number, max: number): number {
   const span = Math.log1p(max) - Math.log1p(min)
   const position = (Math.log1p(count) - Math.log1p(min)) / span
   return Math.round((TAG_SCALE_MIN + position * (TAG_SCALE_MAX - TAG_SCALE_MIN)) * 1000) / 1000
+}
+
+/* How far off the row's centre line a chip may be nudged, in em of its own
+   size. Small: past about a third of a line the rows start colliding. */
+const TAG_LIFT_STEPS = [-0.3, 0.15, -0.15, 0.3, 0, 0.22, -0.22]
+
+/**
+ * A small vertical offset per tag, so the cloud stops reading as text on ruled
+ * lines. Sizes alone did not break that up: every chip still shared a row's
+ * centre, which the eye joins into a line whatever the sizes are.
+ *
+ * From the tag's own name, so it is stable: the same tag takes the same spot on
+ * every build, and a rebuild never reshuffles the page. Math.random() would also
+ * disagree between the two language trees for one tag.
+ */
+export function tagCloudLift(tag: string): number {
+  return TAG_LIFT_STEPS[hashString(tag) % TAG_LIFT_STEPS.length]
 }
 
 export function seriesTitle(slug: string, members: Post[]): string {

@@ -12,7 +12,7 @@
 // use of it, so it is gone from src/i18n/ui.ts too. A tag with no English post
 // is simply absent rather than linked at a page in the wrong language.
 import BaseLayout from '../../../layouts/BaseLayout.astro'
-import { chipColor, getTags, slugify, tagCloudScale } from '../../../lib/taxonomy'
+import { chipColor, getTags, slugify, tagCloudLift, tagCloudScale } from '../../../lib/taxonomy'
 import { HREFLANG, t } from '../../../i18n/ui'
 
 const tags = [...(await getTags('en')).entries()].sort(([a], [b]) => a.localeCompare(b, 'en'))
@@ -41,7 +41,11 @@ const alternates = [
     {
       tags.map(([tag, posts]) => (
         <li>
-          <a href={`/en/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}; --chip-scale: ${tagCloudScale(posts.length, fewest, most)}`}>
+          <a
+            href={`/en/tags/${slugify(tag)}/`}
+            class="chip"
+            style={`--chip-color: ${chipColor(tag)}; --chip-scale: ${tagCloudScale(posts.length, fewest, most)}; --chip-lift: ${tagCloudLift(tag)}em`}
+          >
             {tag} ({posts.length})
           </a>
         </li>
@@ -56,8 +60,15 @@ const alternates = [
     /* Pulls the run in from both edges of its own box, so the cloud reads a
        little more centred without any chip changing shape. */
     padding-inline: 5px;
-    /* A cloud, so the rows are as tall as their tallest chip. */
-    align-items: baseline;
+    /*
+     * Rows centre on themselves, and the run centres in the page. On a baseline
+     * every chip hung off one line, which is what made the cloud read as ruled
+     * text; centred, a row is a band of mixed sizes instead. The last row is
+     * short by however many chips it is missing, and left-aligned that made the
+     * whole block look unfinished.
+     */
+    align-items: center;
+    justify-content: center;
   }
 
   /*
@@ -74,17 +85,17 @@ const alternates = [
   /* The title shares the cloud's left edge, so it breaks out the same way. */
   @media (min-width: 70rem) {
     .cloud-heading {
-      inline-size: 90vw;
+      inline-size: 85vw;
       margin-inline-start: 50%;
-      transform: translateX(-45vw);
+      transform: translateX(-42.5vw);
     }
   }
 
   @media (min-width: 70rem) {
     .chips {
-      inline-size: 90vw;
+      inline-size: 85vw;
       margin-inline-start: 50%;
-      transform: translateX(-45vw);
+      transform: translateX(-42.5vw);
     }
   }
 
@@ -101,5 +112,9 @@ const alternates = [
     font-size: calc(var(--text-tiny) * var(--chip-scale, 1));
     padding: 0.15em 0.55em;
     border-width: 0.2em;
+    /* Nudged off the row's centre by tagCloudLift, so the chips scatter instead
+       of queueing. In `em`, so a large chip drifts further than a small one and
+       the offsets stay in proportion to the sizes around them. */
+    transform: translateY(var(--chip-lift, 0em));
   }
 </style>
