@@ -12,6 +12,7 @@ import {
   hoverPreviewLongPressMilliseconds as LONG_PRESS_DELAY,
   hoverPreviewOpenDelayMilliseconds as HOVER_DELAY,
   hoverPreviewPinnedCardLimit as CARD_MAX,
+  hoverPreviewViewportMarginPixels as VIEWPORT_MARGIN,
 } from '../lib/tweaks'
 import { onReady } from './ready'
 
@@ -249,7 +250,7 @@ async function getMeta(href: string, linkText: string): Promise<Meta | null> {
 
 function place(card: HTMLElement, anchor: HTMLElement): void {
   const rect = anchor.getBoundingClientRect()
-  const gap = 8
+  const gap = VIEWPORT_MARGIN
   const cw = card.offsetWidth
   const ch = card.offsetHeight
   const vw = innerWidth
@@ -272,7 +273,7 @@ function place(card: HTMLElement, anchor: HTMLElement): void {
  * of left/top that does not come through place() goes through this.
  */
 function clampToViewport(card: HTMLElement): void {
-  const inset = 8
+  const inset = VIEWPORT_MARGIN
   const cw = card.offsetWidth
   const ch = card.offsetHeight
   const left = parseFloat(card.style.left) || 0
