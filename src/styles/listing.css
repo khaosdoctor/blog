@@ -291,3 +291,21 @@
 .listing-panel .listing > li.listing-row:last-child::after {
   content: '';
 }
+
+/*
+ * A heading that belongs to the table below it, not to the reading column.
+ *
+ * The list breaks out to --chrome-width past 70rem while `main` stays at
+ * --measure, so a heading left in the reading column started well inside the
+ * rows it names. Same break-out arithmetic as `.listing`, and the same inset,
+ * so the title and the first row share a left edge. Kept here rather than in
+ * section-header.css because it is the list's own geometry it has to match.
+ */
+@media (min-width: 70rem) {
+  .listing-heading {
+    inline-size: var(--chrome-width);
+    padding-inline: var(--chrome-inset);
+    margin-inline-start: 50%;
+    transform: translateX(calc(var(--chrome-width) / -2));
+  }
+}

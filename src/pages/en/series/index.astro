@@ -29,14 +29,9 @@ const alternates = [
   lang="en"
   alternates={alternates}
 >
-  <h1>{t('en', 'allSeries')}</h1>
-  <p class="intro">{t('en', 'seriesIntro')}</p>
+  <h1 class="listing-heading">
+    {t('en', 'allSeries')} <span class="page-count">[{series.length}]</span>
+  </h1>
   <SeriesList entries={series} locale="en" />
 </BaseLayout>
 
-<style>
-  .intro {
-    max-inline-size: var(--measure);
-    color: var(--muted);
-  }
-</style>
