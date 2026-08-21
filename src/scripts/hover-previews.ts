@@ -18,6 +18,14 @@ interface StoredCard {
   top: number
   /** Docked at the foot of the window rather than floating where it was left. */
   docked?: boolean
+  /**
+   * The words the card is showing. Nothing else can recover them for a link to
+   * another site: that title comes from the link's own text (see
+   * getExternalMeta), which belongs to the page the card was pinned from, and
+   * on any later page that text is gone. Without it every restored external
+   * card fell back to its bare hostname.
+   */
+  title?: string
 }
 
 /**
@@ -298,6 +306,7 @@ function savePinned(): void {
       left: parseFloat(isDocked(card) ? (card.dataset.hpLeft ?? '') : card.style.left) || 0,
       top: parseFloat(isDocked(card) ? (card.dataset.hpTop ?? '') : card.style.top) || 0,
       docked: isDocked(card),
+      title: (card.querySelector('.hp-title') as HTMLAnchorElement).textContent ?? '',
     }))
     store()?.setItem(STORAGE_KEY, JSON.stringify(state))
   } catch {
@@ -577,11 +586,13 @@ async function restorePinned(): Promise<void> {
 
   for (const entry of stored.slice(0, CARD_MAX)) {
     if (typeof entry?.href !== 'string') continue
+    const stored = typeof entry.title === 'string' ? entry.title : ''
     const card = buildCard(entry.href)
     card.style.left = `${entry.left}px`
     card.style.top = `${entry.top}px`
     pinned.push(card)
     markPinned(card, true)
+    if (stored !== '') (card.querySelector('.hp-title') as HTMLAnchorElement).textContent = stored
     if (entry.docked === true) {
       dockCard(card)
     } else {
@@ -589,8 +600,8 @@ async function restorePinned(): Promise<void> {
     }
     requestAnimationFrame(() => card.classList.add('hp-open'))
 
-    const meta = await getMeta(entry.href, '')
-    ;(card.querySelector('.hp-title') as HTMLAnchorElement).textContent = meta?.title ?? entry.href
+    const meta = await getMeta(entry.href, stored)
+    ;(card.querySelector('.hp-title') as HTMLAnchorElement).textContent = meta?.title ?? (stored || entry.href)
     ;(card.querySelector('.hp-desc') as HTMLParagraphElement).textContent = meta?.description ?? ''
     ;(card.querySelector('.hp-host') as HTMLSpanElement).textContent = meta?.host ?? ''
   }

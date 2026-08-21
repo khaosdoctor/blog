@@ -64,10 +64,23 @@ function run(): void {
   }
   if (alternates.size < 2) return
 
+  /*
+   * The alternates are absolute and point at the production host, which is what
+   * SEO wants and what SEO.astro builds them from (Astro.site). Following one
+   * verbatim therefore walks a reader off whatever origin they are actually on:
+   * on a dev server or a preview deploy it sent them to the live blog.
+   *
+   * Only the path is ours to reuse. The origin has to stay the one being read.
+   */
+  const samePath = (target: string): string => {
+    const url = new URL(target, location.href)
+    return `${url.pathname}${url.search}${url.hash}`
+  }
+
   const chosen = storedChoice()
   if (chosen !== null) {
     const target = alternates.get(subtag(chosen))
-    if (target !== undefined && subtag(chosen) !== current) location.replace(target)
+    if (target !== undefined && subtag(chosen) !== current) location.replace(samePath(target))
     return
   }
 
@@ -87,7 +100,7 @@ function run(): void {
   const target = alternates.get(wanted)
   if (target === undefined) return
   markRedirected()
-  location.replace(target)
+  location.replace(samePath(target))
 }
 
 run()
