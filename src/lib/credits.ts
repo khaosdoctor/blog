@@ -80,7 +80,7 @@ type Repository = string | { url?: string } | undefined
  * `git://` scheme into `https://`, and expand the `github:owner/repo` shorthand.
  * Returns undefined when neither field yields anything usable.
  */
-export function resolvePackageUrl(homepage: unknown, repository: Repository): string | undefined {
+function resolvePackageUrl(homepage: unknown, repository: Repository): string | undefined {
   if (typeof homepage === 'string' && homepage.trim() !== '') return homepage
 
   const repoUrl = typeof repository === 'string' ? repository : repository?.url
@@ -94,14 +94,14 @@ export function resolvePackageUrl(homepage: unknown, repository: Repository): st
 }
 
 /** The name and resolved URL of one installed package, read from its own package.json. */
-export function readPackageCredit(name: string): Credit {
+function readPackageCredit(name: string): Credit {
   const raw = readFileSync(`node_modules/${name}/package.json`, 'utf8')
   const meta = JSON.parse(raw) as { homepage?: string; repository?: Repository }
   return { name, url: resolvePackageUrl(meta.homepage, meta.repository) ?? '' }
 }
 
 /** The runtime dependency names declared in package.json, alphabetised. */
-export function dependencyNames(): string[] {
+function dependencyNames(): string[] {
   const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { dependencies?: Record<string, string> }
   return Object.keys(pkg.dependencies ?? {}).sort((a, b) => a.localeCompare(b))
 }

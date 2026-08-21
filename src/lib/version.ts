@@ -53,7 +53,7 @@ function currentSha(): string | null {
 export const siteVersion = build()
 
 /** Full commit the site was built from, or null outside a git checkout. */
-export const commitSha = currentSha()
+const commitSha = currentSha()
 
 /** Short form, used to bust the service worker cache once per deploy. */
 export const commitShort = commitSha?.slice(0, 7) ?? siteVersion

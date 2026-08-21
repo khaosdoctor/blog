@@ -9,6 +9,7 @@
  * The click handler that copies the URL and shows the toast lives in
  * src/layouts/BaseLayout.astro, because it is one listener for the whole page.
  */
+import { localeFromFile } from './mdx-util.mjs'
 
 const HEADINGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 
@@ -18,10 +19,6 @@ const HEADINGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
  * module, the same choice rehype-footnote-sidenotes.mjs makes for its own table.
  */
 const ANCHOR_LABEL = { pt: 'link para esta seção', en: 'link to this section' }
-
-function localeFromFile(file) {
-  return file?.data?.astro?.frontmatter?.lang === 'en' ? 'en' : 'pt'
-}
 
 export function rehypeHeadingAnchors() {
   return (tree, file) => {

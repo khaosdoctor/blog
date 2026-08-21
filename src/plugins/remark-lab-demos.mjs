@@ -24,10 +24,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { basename, extname, resolve } from 'node:path'
 import { Parser } from 'acorn'
-
-function attribute(name, value) {
-  return { type: 'mdxJsxAttribute', name, value }
-}
+import { attribute, jsxElement } from './mdx-util.mjs'
 
 function plainAttributes(node) {
   return node.attributes.filter((attr) => attr.type === 'mdxJsxAttribute')
@@ -40,10 +37,6 @@ function attributeValue(node, name) {
 /** Every attribute except the named plain ones. A `{...spread}` is left alone. */
 function withoutAttributes(node, names) {
   return node.attributes.filter((attr) => attr.type !== 'mdxJsxAttribute' || !names.includes(attr.name))
-}
-
-function jsxElement(name, attributes, children = []) {
-  return { type: 'mdxJsxFlowElement', name, attributes, children }
 }
 
 /** The lang comes from the file's own extension, so a future third component

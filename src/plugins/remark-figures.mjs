@@ -8,6 +8,7 @@
 // migrated posts carry.
 
 import { readFileSync } from 'node:fs'
+import { attribute, jsxElement } from './mdx-util.mjs'
 
 /**
  * Remote images whose host stopped serving them. They stay in the markdown so
@@ -36,14 +37,6 @@ function loneImage(node) {
   return meaningful[0].type === 'image' ? meaningful[0] : null
 }
 
-function jsx(name, children, attributes = []) {
-  return { type: 'mdxJsxFlowElement', name, attributes, children }
-}
-
-function attribute(name, value) {
-  return { type: 'mdxJsxAttribute', name, value }
-}
-
 function figureFor(image) {
   // The alt text stays on the image untouched: it is what a search engine and a
   // screen reader read when the file itself will not load.
@@ -55,12 +48,12 @@ function figureFor(image) {
     const attributes = [attribute('src', image.url)]
     if (image.alt) attributes.push(attribute('alt', image.alt))
     if (caption !== '') attributes.push(attribute('caption', caption))
-    return jsx('MissingImage', [], attributes)
+    return jsxElement('MissingImage', attributes)
   }
 
   const children = [{ type: 'paragraph', children: [image] }]
-  if (caption !== '') children.push(jsx('figcaption', [{ type: 'text', value: caption }]))
-  return jsx('figure', children)
+  if (caption !== '') children.push(jsxElement('figcaption', [], [{ type: 'text', value: caption }]))
+  return jsxElement('figure', [], children)
 }
 
 export function remarkFigures() {

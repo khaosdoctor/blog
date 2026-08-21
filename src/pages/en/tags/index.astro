@@ -1,26 +1,16 @@
 ---
-// The English half of the tag index (see src/pages/tags/index.astro for the
-// Portuguese one).
-//
-// This page builds its own list rather than borrowing the Portuguese one:
-// getTags('en') groups the English posts by the tags each translation repeats
-// in its own frontmatter, so the count beside a chip is how many English
-// articles carry it and every link goes to /en/tags/<tag>/, which
-// src/pages/en/tags/[tag]/[...page].astro builds. Nothing here sends an English
-// reader into the Portuguese tree, which is what the "these exist in Portuguese
-// only" notice this page used to carry apologised for; that string was the last
-// use of it, so it is gone from src/i18n/ui.ts too. A tag with no English post
-// is simply absent rather than linked at a page in the wrong language.
+// The English tag index (src/pages/tags/index.astro is the Portuguese one).
+// Built from getTags('en') so counts reflect English articles, every link
+// stays inside /en/, and a tag with no English post is simply absent rather
+// than linked at a page in the wrong language.
 import BaseLayout from '../../../layouts/BaseLayout.astro'
-import { chipColor, getTags, slugify, tagCloudLift, tagCloudScale } from '../../../lib/taxonomy'
+import TagCloud from '../../../components/TagCloud.astro'
+import { getTags } from '../../../lib/taxonomy'
 import { HREFLANG, t } from '../../../i18n/ui'
 
-const tags = [...(await getTags('en')).entries()].sort(([a], [b]) => a.localeCompare(b, 'en'))
-
-// The range the cloud is scaled across, from the counts actually present.
-const counts = tags.map(([, posts]) => posts.length)
-const fewest = Math.min(...counts)
-const most = Math.max(...counts)
+const tags = [...(await getTags('en')).entries()]
+  .sort(([a], [b]) => a.localeCompare(b, 'en'))
+  .map(([name, posts]) => ({ name, count: posts.length }))
 
 const alternates = [
   { lang: HREFLANG.pt, href: new URL('/tags/', Astro.site).href },
@@ -34,87 +24,5 @@ const alternates = [
   lang="en"
   alternates={alternates}
 >
-  <h1 class="cloud-heading">
-    {t('en', 'tags')} <span class="page-count">[{tags.length}]</span>
-  </h1>
-  <ul class="chips">
-    {
-      tags.map(([tag, posts]) => (
-        <li>
-          <a
-            href={`/en/tags/${slugify(tag)}/`}
-            class="chip"
-            style={`--chip-color: ${chipColor(tag)}; --chip-scale: ${tagCloudScale(posts.length, fewest, most)}; --chip-lift: ${tagCloudLift(tag)}em`}
-          >
-            {tag} ({posts.length})
-          </a>
-        </li>
-      ))
-    }
-  </ul>
+  <TagCloud locale="en" tags={tags} />
 </BaseLayout>
-
-<style>
-  .chips {
-    margin-block-start: 1.5rem;
-    /* Pulls the run in from both edges of its own box, so the cloud reads a
-       little more centred without any chip changing shape. */
-    padding-inline: 5px;
-    /*
-     * Rows centre on themselves, and the run centres in the page. On a baseline
-     * every chip hung off one line, which is what made the cloud read as ruled
-     * text; centred, a row is a band of mixed sizes instead. The last row is
-     * short by however many chips it is missing, and left-aligned that made the
-     * whole block look unfinished.
-     */
-    align-items: center;
-    justify-content: center;
-  }
-
-  /*
-   * The cloud breaks out of the reading column: 85 chips at up to three times
-   * the base size need the room, and a paragraph's measure is the wrong
-   * constraint for something nobody reads line by line.
-   *
-   * Same technique listing.css uses for the post list. `main` is this box's
-   * containing block, and a margin percentage resolves against that block's
-   * width, so `margin-inline-start: 50%` puts the start edge at main's own
-   * centre; main and body are both centred, so that is the viewport's centre,
-   * and translating back by half this box's width puts its centre there.
-   */
-  /* The title shares the cloud's left edge, so it breaks out the same way. */
-  @media (min-width: 70rem) {
-    .cloud-heading {
-      inline-size: var(--content-width);
-      margin-inline-start: 50%;
-      transform: translateX(calc(var(--content-width) / -2));
-    }
-  }
-
-  @media (min-width: 70rem) {
-    .chips {
-      inline-size: var(--content-width);
-      margin-inline-start: 50%;
-      transform: translateX(calc(var(--content-width) / -2));
-    }
-  }
-
-  /*
-   * Size carries the count. The padding and the rule go to `em` here so a big
-   * chip keeps a chip's proportions instead of a small box around large text;
-   * chips.css keeps its own fixed lengths everywhere else, where every chip is
-   * the same size.
-   *
-   * The number stays in the label. Size alone is a visual-only signal, and this
-   * page is the one place a reader might want to compare two tags exactly.
-   */
-  .chips .chip {
-    font-size: calc(var(--text-tiny) * var(--chip-scale, 1));
-    padding: 0.15em 0.55em;
-    border-width: 0.2em;
-    /* Nudged off the row's centre by tagCloudLift, so the chips scatter instead
-       of queueing. In `em`, so a large chip drifts further than a small one and
-       the offsets stay in proportion to the sizes around them. */
-    transform: translateY(var(--chip-lift, 0em));
-  }
-</style>

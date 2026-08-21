@@ -5,9 +5,23 @@
 // rather than a simulated one, the values Lucas decided are fixed rather than
 // knobs, and this module exports a control surface settings-panel.ts calls.
 //
-// The empty export makes this a real module: a script with no import or export
-// is global, and its names would collide with the other scripts here.
-export {}
+import { readStorage, writeStorage } from '../lib/storage'
+import {
+  conwayCellSizePixels as CELL_SIZE,
+  conwayDefaultAutoFeedSeconds as DEFAULT_AUTOFEED,
+  conwayDefaultDensityPercent as DEFAULT_DENSITY,
+  conwayDefaultGenerationsPerSecond as DEFAULT_GPS,
+  conwayDefaultOpacity as DEFAULT_OPACITY,
+  conwayMaximumAutoFeedSeconds as MAX_AUTOFEED,
+  conwayMaximumDensityPercent as MAX_DENSITY,
+  conwayMaximumGenerationsPerSecond as MAX_GPS,
+  conwayMaximumOpacity as MAX_OPACITY,
+  conwayMinimumAutoFeedSeconds as MIN_AUTOFEED,
+  conwayMinimumDensityPercent as MIN_DENSITY,
+  conwayMinimumGenerationsPerSecond as MIN_GPS,
+  conwayMinimumOpacity as MIN_OPACITY,
+} from '../lib/tweaks'
+import { onReady } from './ready'
 
 const MOTION_KEY = 'motion'
 const BG_LIFE_KEY = 'background-life'
@@ -26,26 +40,14 @@ function isMotion(value: string): value is Motion {
   return value === 'reduce' || value === 'allow'
 }
 
-// Cell size and click-adds-a-glider are fixed. Density, generations per second,
-// the auto-feed interval and opacity are defaults the settings panel can move.
-const CELL_SIZE = 12
-const DEFAULT_DENSITY = 10
-const DEFAULT_GPS = 6
-const DEFAULT_AUTOFEED = 3
-const MIN_GPS = 1
-const MAX_GPS = 25
 /*
- * One value for both grounds, which is a real trade: the light page now draws
- * at whatever the dark page does, and 9% on sepia is stronger than the 3% that
- * ground had when the two were separate. A knob whose meaning changes with the
- * theme is worse than one that holds still.
- *
- * Lit-cell contrast is around 1.05:1, a deliberate failure of the 3:1
- * non-text-contrast criterion: this draws texture, not content.
+ * Cell size and click-adds-a-glider are fixed; density, generations per
+ * second, auto-feed and opacity are lib/tweaks.ts dials the settings panel
+ * can move. Opacity is one value for both grounds on purpose: a knob whose
+ * meaning changes with the theme is worse than one that holds still, and the
+ * lit cells deliberately fail the 3:1 non-text criterion (texture, not
+ * content).
  */
-const DEFAULT_OPACITY = 0.04
-const MIN_OPACITY = 0
-const MAX_OPACITY = 0.5
 /* Slack around a glider so it does not spawn touching the viewport edge and die
    within a few generations. */
 const EDGE_MARGIN = 3
@@ -72,23 +74,6 @@ function clampNumber(raw: string | null, fallback: number, min: number, max: num
   if (raw === null) return fallback
   const parsed = Number(raw)
   return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback
-}
-
-function readStorage(key: string): string | null {
-  try {
-    return localStorage.getItem(key)
-  } catch {
-    return null
-  }
-}
-
-function writeStorage(key: string, value: string | null): void {
-  try {
-    if (value === null) localStorage.removeItem(key)
-    else localStorage.setItem(key, value)
-  } catch {
-    // Private mode, or storage disabled: the choice still applies for this page.
-  }
 }
 
 // Plain module-level variables rather than anything reactive: a cell is read
@@ -390,7 +375,7 @@ export function setPaused(paused: boolean): void {
 }
 
 export function setDensity(pct: number): void {
-  density = Math.min(20, Math.max(1, pct))
+  density = Math.min(MAX_DENSITY, Math.max(MIN_DENSITY, pct))
   writeStorage(DENSITY_KEY, String(density))
   seed()
 }
@@ -401,7 +386,7 @@ export function setGps(value: number): void {
 }
 
 export function setAutoFeed(seconds: number): void {
-  autoFeedSeconds = Math.min(20, Math.max(0, seconds))
+  autoFeedSeconds = Math.min(MAX_AUTOFEED, Math.max(MIN_AUTOFEED, seconds))
   writeStorage(AUTOFEED_KEY, String(autoFeedSeconds))
 }
 
@@ -500,12 +485,12 @@ function init(): void {
   motionOverride = storedMotion !== null && isMotion(storedMotion) ? storedMotion : null
   backgroundEnabled = readStorage(BG_LIFE_KEY) !== '0'
   manualPaused = readStorage(PAUSED_KEY) === '1'
-  density = clampNumber(readStorage(DENSITY_KEY), DEFAULT_DENSITY, 1, 20)
+  density = clampNumber(readStorage(DENSITY_KEY), DEFAULT_DENSITY, MIN_DENSITY, MAX_DENSITY)
   // The same bounds setGps clamps to. They drifted apart once, when the range
   // moved from 0.5-8 to 1-25 and only the setter was updated: a stored 20 was
   // then pulled back to 8 on every load.
   gps = clampNumber(readStorage(GPS_KEY), DEFAULT_GPS, MIN_GPS, MAX_GPS)
-  autoFeedSeconds = clampNumber(readStorage(AUTOFEED_KEY), DEFAULT_AUTOFEED, 0, 20)
+  autoFeedSeconds = clampNumber(readStorage(AUTOFEED_KEY), DEFAULT_AUTOFEED, MIN_AUTOFEED, MAX_AUTOFEED)
   opacity = clampNumber(readStorage(OPACITY_KEY), DEFAULT_OPACITY, MIN_OPACITY, MAX_OPACITY)
   wasReduced = effectiveReduced()
   applyMotionAttr()
@@ -540,8 +525,4 @@ function init(): void {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)
