@@ -1,6 +1,6 @@
 /*
  * The page itself: the reset, the two grounds, the landmark layout, the footer,
- * and the elements that are not prose, not chrome and not a component.
+ * and the elements that are not prose, not shell and not a component.
  *
  * Component-scoped styles stay in their components; anything here applies to
  * every page.
@@ -28,7 +28,7 @@ html {
    * rather than each target having to know a header exists.
    *
    * The value is the header's own height, derived: the tallest thing in that
-   * row is a 44px icon button and .chrome pads 0.4rem either side. Headings add
+   * row is a 44px icon button and .shell pads 0.4rem either side. Headings add
    * their own 1.5rem (prose/headings.css) so they get air rather than parking
    * flush against the rule.
    */
@@ -144,7 +144,7 @@ footer {
 @media (min-width: 70rem) {
   header,
   footer {
-    max-inline-size: var(--chrome-width);
+    max-inline-size: var(--shell-width);
   }
 }
 
@@ -275,7 +275,7 @@ footer .links {
  * prose/links.css uses: a link that grew its padding on hover would push its
  * neighbours, so the box is this size in both states and only the fill changes.
  *
- * `.icon-link` below opts out: it matches the header's button chrome, which has
+ * `.icon-link` below opts out: it matches the header's button shell, which has
  * its own rest state and hover treatment.
  */
 footer a {
@@ -292,7 +292,7 @@ footer a:focus-visible {
 }
 
 /*
- * The header's icon-button chrome, reused: 44px hit target, smaller chip drawn
+ * The header's icon-button shell, reused: 44px hit target, smaller chip drawn
  * on `::before` so what is seen can shrink without shrinking what is clickable.
  * `position: relative` puts the SVG in the same painting group as the
  * absolutely positioned chip and later in it, so the chip's opaque fill does

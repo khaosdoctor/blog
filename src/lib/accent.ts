@@ -3,7 +3,7 @@
  *
  * By default the accent is today's colour: `dayColor()` hashes the calendar
  * day into one of the brand tokens, so the whole site shifts once a day on
- * its own (header wordmark, link hovers, the chrome buttons, anything reading
+ * its own (header wordmark, link hovers, the shell buttons, anything reading
  * `--accent-day`). That stays the default, under the name "auto".
  *
  * A reader who wants one colour and not a rotation can pick it here instead.

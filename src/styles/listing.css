@@ -34,7 +34,7 @@
     inline-size: var(--content-width);
     /* The header's own inset, so rows begin and end exactly where the header's
        drawn edges do rather than a few pixels wider on both sides. */
-    padding-inline: var(--chrome-inset);
+    padding-inline: var(--shell-inset);
     margin-inline-start: 50%;
     transform: translateX(calc(var(--content-width) / -2));
   }
@@ -305,7 +305,7 @@
 @media (min-width: 70rem) {
   .listing-heading {
     inline-size: var(--content-width);
-    padding-inline: var(--chrome-inset);
+    padding-inline: var(--shell-inset);
     margin-inline-start: 50%;
     transform: translateX(calc(var(--content-width) / -2));
   }

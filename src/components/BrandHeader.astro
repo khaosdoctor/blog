@@ -53,7 +53,7 @@ const CELLS = markCells()
 const RULE = '──────────────────────────────────────'
 ---
 
-<header class="chrome">
+<header class="shell">
   <span class="edge" aria-hidden="true">┌─</span>
   <a href={home} class="brand" aria-label={WORD}>
     <span class="mark" aria-hidden="true">
@@ -105,18 +105,18 @@ const RULE = '──────────────────────
    * controls do not need. `.fill` is what pushes `.controls` to the right edge.
    *
    * Past 70rem the row measures against the VIEWPORT rather than the reading
-   * column: the header is chrome across the top, not prose. Below that nothing
+   * column: the header is shell across the top, not prose. Below that nothing
    * changes, since the brand, the switch and three icon buttons need real room
    * and narrowing further would only make `flex-wrap` wrap sooner.
    */
-  .chrome {
+  .shell {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     margin-inline: auto;
     /* "Breathing room 4" from the bench's density knob (range 4-30, in
        tenths of a rem block / sixths of a rem inline). */
-    padding: 0.4rem var(--chrome-inset);
+    padding: 0.4rem var(--shell-inset);
     /* The row spaces its own children from here rather than each child
        carrying a trailing margin and the last one resetting it: `.fill` below
        needs a negative margin of its own to cancel the empty run its
@@ -127,8 +127,8 @@ const RULE = '──────────────────────
   }
 
   @media (min-width: 70rem) {
-    .chrome {
-      max-inline-size: var(--chrome-width);
+    .shell {
+      max-inline-size: var(--shell-width);
     }
   }
 

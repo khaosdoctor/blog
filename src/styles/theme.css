@@ -68,7 +68,7 @@
   --accent-day: var(--brand-yellow);
 
   /*
-   * A pixel face suits chrome and punishes a 3000-word article, so body copy
+   * A pixel face suits shell and punishes a 3000-word article, so body copy
    * keeps a readable one. Two body faces because the reader picks between them;
    * every rule reads `--font-body`, whichever is active.
    */
@@ -86,7 +86,7 @@
    * replacing it. settings-panel.ts writes it inline on the root element, and
    * BaseLayout's pre-paint script does the same before first render.
    *
-   * At `:root` only `--text-base` reads it, so chrome keeps a fixed size
+   * At `:root` only `--text-base` reads it, so shell keeps a fixed size
    * whatever the reader picks. `.prose` (prose.css) redefines the two smaller
    * steps in terms of the same scale, so a post's code, tables and quotes grow
    * with its paragraphs.
@@ -131,18 +131,18 @@
   /* Anything card-shaped carries a thick left edge in its own border colour. */
   --border-card-edge: var(--dial-card-edge-width);
 
-  /* The double ANSI rule every chrome button draws. One token, or four of the
+  /* The double ANSI rule every shell button draws. One token, or four of the
      five components drift onto a plain 1px solid, which is what happened. */
   --btn-border: 3px double var(--accent-day);
 
   /* The header and footer read this. `main` keeps `--measure`: a post's running
      text wants the narrow column. */
-  --chrome-width: var(--dial-chrome-width);
+  --shell-width: var(--dial-shell-width);
   /* Every wide block between them reads this instead, which is the same width
      less an inset on each side. */
-  --content-width: calc(var(--dial-chrome-width) - var(--dial-content-inset) * 2);
-  /* How far inside that width the chrome's own contents finish. */
-  --chrome-inset: var(--dial-chrome-inset);
+  --content-width: calc(var(--dial-shell-width) - var(--dial-content-inset) * 2);
+  /* How far inside that width the shell's own contents finish. */
+  --shell-inset: var(--dial-shell-inset);
 
   /*
    * Bold is a highlighter chip, solid rather than a wash (a tint read as a

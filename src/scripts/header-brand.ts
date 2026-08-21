@@ -84,7 +84,7 @@ function buildCursorFrames(): number[] {
   return frames
 }
 function init(): void {
-  const header = document.querySelector<HTMLElement>('.chrome')
+  const header = document.querySelector<HTMLElement>('.shell')
   if (header === null) return
 
   const wordEl = header.querySelector<HTMLElement>('.word')

@@ -81,7 +81,7 @@
  * The permalink control, shown only while the note is being read: top-right for
  * a sidenote, top-left for a margin note. A real <button>, since it copies
  * rather than navigates, sized for a pointer (the previous 0.9em icon-only
- * version was too small to hit) and reset back to plain chrome.
+ * version was too small to hit) and reset back to plain shell.
  */
 .note-copy-link {
   position: absolute;

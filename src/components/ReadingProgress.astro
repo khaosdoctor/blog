@@ -39,7 +39,7 @@
    * load, on resize and once the display face has loaded (a font swap changes
    * every advance, and with it how many dashes fit), never on a scroll tick.
    */
-  const fills = Array.from(document.querySelectorAll<HTMLElement>('.chrome .fill'))
+  const fills = Array.from(document.querySelectorAll<HTMLElement>('.shell .fill'))
   /*
    * The write head is the wordmark's own cursor, borrowed rather than
    * duplicated: a second block drawn elsewhere would have to hide the first.
@@ -51,7 +51,7 @@
    * so the block would change size, and it would step outside `.brand`'s drop
    * shadow. A transform from where it already lives keeps all four.
    */
-  const cursor = document.querySelector<HTMLElement>('.chrome .cursor')
+  const cursor = document.querySelector<HTMLElement>('.shell .cursor')
 
   if (fills.length > 0) {
     // How much of a dash's own slot its appearance can be pushed back by. Under
@@ -85,7 +85,7 @@
     let stops: number[] = []
     /*
      * The distance from the cursor's home edge to the first run, measured once:
-     * it is the cursor's own width, `.word`'s padding and `.chrome`'s column
+     * it is the cursor's own width, `.word`'s padding and `.shell`'s column
      * spacing, none of which move when the display face loads.
      *
      * Measured ONLY on the first pass, which is the only one guaranteed to
@@ -171,7 +171,7 @@
      * means, since the pen is on the character it is writing.
      *
      * The last stop is that final dash's left edge too, so a fully read post
-     * parks the block on it rather than in the chrome beyond. Nothing is lost:
+     * parks the block on it rather than in the shell beyond. Nothing is lost:
      * that dash is lit either way.
      */
     function measureHead(lefts: number[]): void {
