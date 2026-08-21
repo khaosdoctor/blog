@@ -46,12 +46,6 @@ QUESTIONS.md
 SECURITY-INCIDENT.md
 # scratch build output from review agents
 dist-review/
-
-# A copy of dist/pagefind/, so search works on the dev server too: the real
-# index is written by the postbuild step and only exists in dist/. Regenerate
-# with `npm run build && cp -R dist/pagefind public/pagefind`; it goes stale as
-# soon as a post changes.
-public/pagefind/
 .serena/
 .vscode/
 .claude/
