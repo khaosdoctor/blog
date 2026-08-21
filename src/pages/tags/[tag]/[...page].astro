@@ -48,8 +48,10 @@ const title = page.currentPage > 1 ? `${tag} | Lucas Santos | página ${page.cur
 ---
 
 <BaseLayout title={title} description={t('pt', 'tagDescription', tag)} alternates={alternates}>
-  <p class="kicker">{t('pt', 'tag')}</p>
-  <h1>{tag}</h1>
+  <p class="kicker listing-heading">{t('pt', 'tag')}</p>
+  <h1 class="listing-heading">
+    {tag} <span class="page-count">[{page.total}]</span>
+  </h1>
   <PostList posts={page.data} />
   <Pagination page={page} basePath={`/tags/${slugify(tag)}/`} locale="pt" />
 </BaseLayout>

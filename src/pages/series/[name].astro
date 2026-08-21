@@ -43,8 +43,10 @@ const alternates = [
   description={t('pt', 'seriesDescription', name)}
   alternates={alternates}
 >
-  <p class="kicker">{t('pt', 'series')}</p>
-  <h1>{name}</h1>
+  <p class="kicker listing-heading">{t('pt', 'series')}</p>
+  <h1 class="listing-heading">
+    {name} <span class="page-count">[{posts.length}]</span>
+  </h1>
   <PostList posts={posts} />
 </BaseLayout>
 

@@ -145,9 +145,11 @@
   /* Breathing room at the sides of the screen on a narrow window. */
   --dial-page-margin: 1.5rem;
 
-  /* The header, the footer and the post list are wider than the reading
-     column, and share this width. */
-  --dial-chrome-width: 88vw;
+  /* The header, the footer, the post list, every listing heading and the tag
+     cloud are wider than the reading column, and share this width. 80vw leaves
+     10% of the window clear on each side: at 88 the rows ran almost to the
+     edges, which read as the page having no margin at all. */
+  --dial-chrome-width: 80vw;
   /* How far the header's own contents sit in from that edge. */
   --dial-chrome-inset: 0.667rem;
 

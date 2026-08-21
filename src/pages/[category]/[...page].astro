@@ -64,11 +64,10 @@ const title = page.currentPage > 1 ? `${category} | Lucas Santos | página ${pag
   alternates={alternates}
   section={{ name: category, url: `/${category}/` }}
 >
-  <h1>{category}</h1>
-  {described !== null && <p class="about">{described}</p>}
-  <p class="count">
-    {page.total} {t('pt', page.total === 1 ? 'article' : 'articles')}
-  </p>
+  <h1 class="listing-heading">
+    {category} <span class="page-count">[{page.total}]</span>
+  </h1>
+  {described !== null && <p class="about listing-heading">{described}</p>}
   <PostList posts={page.data} />
   <Pagination page={page} basePath={`/${category}/`} locale="pt" />
 </BaseLayout>
@@ -84,9 +83,6 @@ const title = page.currentPage > 1 ? `${category} | Lucas Santos | página ${pag
     line-height: 1.5;
   }
 
-  .count {
-    color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
-  }
+  /* The count moved into the heading, in brackets, like every other section
+     title (section-header.css). */
 </style>
