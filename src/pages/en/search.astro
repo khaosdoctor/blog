@@ -13,6 +13,8 @@ import { t } from '../../i18n/ui'
     { lang: 'en', href: new URL('/en/search/', Astro.site).href },
   ]}
 >
-  <h1>{t('en', 'searchTitle')}</h1>
-  <Search action="/en/search/" locale="en" />
+  <h1 class="listing-heading">{t('en', 'searchTitle')}</h1>
+  <div class="listing-heading">
+    <Search action="/en/search/" locale="en" />
+  </div>
 </BaseLayout>

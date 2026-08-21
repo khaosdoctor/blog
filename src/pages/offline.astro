@@ -6,12 +6,14 @@ import { t } from '../i18n/ui'
 {/* The service worker serves this single page for any uncached URL in either
     language, so like the 404 it carries both. */}
 <BaseLayout title={`${t('pt', 'offlineTitle')} | Lucas Santos`} description={t('pt', 'offlineDescription')}>
-  <h1>{t('pt', 'offlineTitle')}</h1>
-  <p>{t('pt', 'offlineBody')}</p>
-  <p lang="en">{t('en', 'offlineBody')}</p>
-  <p>
-    <a href="/">{t('pt', 'backHome')}</a>
-    {' / '}
-    <a href="/en/" hreflang="en">{t('en', 'backHome')}</a>
-  </p>
+  <h1 class="listing-heading">{t('pt', 'offlineTitle')}</h1>
+  <div class="listing-heading">
+    <p>{t('pt', 'offlineBody')}</p>
+    <p lang="en">{t('en', 'offlineBody')}</p>
+    <p>
+      <a href="/">{t('pt', 'backHome')}</a>
+      {' / '}
+      <a href="/en/" hreflang="en">{t('en', 'backHome')}</a>
+    </p>
+  </div>
 </BaseLayout>

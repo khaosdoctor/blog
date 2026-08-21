@@ -135,10 +135,12 @@
      five components drift onto a plain 1px solid, which is what happened. */
   --btn-border: 3px double var(--accent-day);
 
-  /* The header, footer, post list and pagination all read this, so the four
-     line up by construction. `main` keeps `--measure`: a post's running text
-     wants the narrow column. */
+  /* The header and footer read this. `main` keeps `--measure`: a post's running
+     text wants the narrow column. */
   --chrome-width: var(--dial-chrome-width);
+  /* Every wide block between them reads this instead, which is the same width
+     less an inset on each side. */
+  --content-width: calc(var(--dial-chrome-width) - var(--dial-content-inset) * 2);
   /* How far inside that width the chrome's own contents finish. */
   --chrome-inset: var(--dial-chrome-inset);
 
