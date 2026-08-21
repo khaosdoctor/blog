@@ -153,6 +153,11 @@
   /* How far the header's own contents sit in from that edge. */
   --dial-chrome-inset: 0.667rem;
 
+  /* How much narrower than the header and footer the page's own content runs,
+     per side, so those two read as a frame around it rather than as more of
+     the same column. */
+  --dial-content-inset: 2.5rem;
+
   /* How far a post's own contents step in from the edge of the cover above
      them. The cover fills the article, but the frame it DRAWS is inset: cover.ts
      strokes it at unit 36 of 1200 with a 4-wide stroke, so its visible edge is

@@ -177,11 +177,20 @@
     function measureHead(lefts: number[]): void {
       if (cursor === null) return
       const start = fills[0].getBoundingClientRect().left
-      if (lead === null) lead = start - cursor.getBoundingClientRect().left
+      const box = cursor.getBoundingClientRect()
+      if (lead === null) lead = start - box.left
       const home = start - lead
       const last = lefts.length - 1
+      /*
+       * A stop positions the block's LEFT edge, so on the final dashes its own
+       * width still carried it past the run and into the search button. This is
+       * the furthest left edge that keeps the whole block inside the dashes.
+       */
+      const limit = fills[fills.length - 1].getBoundingClientRect().right - box.width - home
       stops = [0]
-      for (let index = 0; index <= last; index += 1) stops.push(lefts[Math.min(index, last)] - home)
+      for (let index = 0; index <= last; index += 1) {
+        stops.push(Math.min(lefts[Math.min(index, last)] - home, limit))
+      }
     }
 
     /*

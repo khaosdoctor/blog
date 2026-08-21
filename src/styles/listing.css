@@ -16,8 +16,9 @@
 }
 
 /*
- * Past 70rem this list widens to the same --chrome-width the header and footer
- * use. Below that it measured --measure, main's own width and the column a
+ * Past 70rem this list widens to --content-width, which is the header and
+ * footer's own width less an inset each side, so those two frame it rather than
+ * matching it. Below that it measured --measure, main's own width and the column a
  * post's prose reads at, which made a table of many rows read as a strip of
  * running text under a much wider header.
  *
@@ -30,12 +31,12 @@
  */
 @media (min-width: 70rem) {
   .listing {
-    inline-size: var(--chrome-width);
+    inline-size: var(--content-width);
     /* The header's own inset, so rows begin and end exactly where the header's
        drawn edges do rather than a few pixels wider on both sides. */
     padding-inline: var(--chrome-inset);
     margin-inline-start: 50%;
-    transform: translateX(calc(var(--chrome-width) / -2));
+    transform: translateX(calc(var(--content-width) / -2));
   }
 }
 
@@ -295,7 +296,7 @@
 /*
  * A heading that belongs to the table below it, not to the reading column.
  *
- * The list breaks out to --chrome-width past 70rem while `main` stays at
+ * The list breaks out to --content-width past 70rem while `main` stays at
  * --measure, so a heading left in the reading column started well inside the
  * rows it names. Same break-out arithmetic as `.listing`, and the same inset,
  * so the title and the first row share a left edge. Kept here rather than in
@@ -303,9 +304,9 @@
  */
 @media (min-width: 70rem) {
   .listing-heading {
-    inline-size: var(--chrome-width);
+    inline-size: var(--content-width);
     padding-inline: var(--chrome-inset);
     margin-inline-start: 50%;
-    transform: translateX(calc(var(--chrome-width) / -2));
+    transform: translateX(calc(var(--content-width) / -2));
   }
 }

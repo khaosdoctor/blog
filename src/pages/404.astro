@@ -1,25 +1,45 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import PostList from '../components/PostList.astro'
 import { t } from '../i18n/ui'
-import { getPublishedPosts, urlOf } from '../lib/posts'
+import { getPublishedPosts } from '../lib/posts'
 
 const recent = (await getPublishedPosts()).slice(0, 5)
 ---
 
-{/* One 404 answers for the whole host, /en/ paths included, and a static page
-    cannot know which language the reader wanted. So it says it in both rather
-    than guessing, Portuguese first. */}
+{/* One 404 answers for the whole host, /en/ paths included, so both languages
+    are rendered and the script below keeps only the one this reader reads. With
+    no JS both stay, which is what this page did before. */}
 <BaseLayout title={`${t('pt', 'notFoundTitle')} | Lucas Santos`} description={t('pt', 'notFoundBody')}>
-  <h1>404</h1>
-  <p>{t('pt', 'notFoundBody')}</p>
-  <p lang="en">{t('en', 'notFoundBody')}</p>
-  <p>
-    <a href="/search/">{t('pt', 'searchLabel')}</a>
-    {' / '}
-    <a href="/en/search/" hreflang="en">{t('en', 'searchLabel')}</a>
-  </p>
-  <p>{t('pt', 'notFoundRecent')}</p>
-  <ul>
-    {recent.map((post) => <li><a href={urlOf(post)}>{post.data.title}</a></li>)}
-  </ul>
+  <h1 class="listing-heading">404</h1>
+  <div class="listing-heading">
+    <div data-lang="pt">
+      <p>{t('pt', 'notFoundBody')}</p>
+      <p><a href="/search/">{t('pt', 'searchLabel')}</a></p>
+      <p class="recent">{t('pt', 'notFoundRecent')}</p>
+    </div>
+    <div data-lang="en" lang="en">
+      <p>{t('en', 'notFoundBody')}</p>
+      <p><a href="/en/search/">{t('en', 'searchLabel')}</a></p>
+      <p class="recent">{t('en', 'notFoundRecent')}</p>
+    </div>
+  </div>
+  <PostList posts={recent} />
 </BaseLayout>
+
+<script>
+  // The reader's own choice first, then the browser's, the same order
+  // lang-preference.ts resolves in.
+  const stored = (() => {
+    try {
+      return localStorage.getItem('lang')
+    } catch {
+      return null
+    }
+  })()
+  const top = (stored ?? navigator.languages?.[0] ?? navigator.language ?? '').toLowerCase().split('-')[0]
+  const wanted = top === 'pt' ? 'pt' : 'en'
+  for (const block of document.querySelectorAll<HTMLElement>('[data-lang]')) {
+    if (block.dataset.lang !== wanted) block.remove()
+  }
+</script>

@@ -195,7 +195,11 @@ const RULE = '──────────────────────
     -webkit-text-stroke: 0.4px currentColor;
   }
 
+  /* Above `.brand`, so the write head passes behind these buttons rather than
+     over them when a post is read to the end. */
   .controls {
+    position: relative;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
     column-gap: 0.5rem;
