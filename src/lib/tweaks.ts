@@ -24,6 +24,8 @@ export const hoverPreviewLongPressMilliseconds = 500
 export const hoverPreviewDragThresholdPixels = 6
 /** Characters shown of a footnote before its card truncates. */
 export const hoverPreviewFootnoteCharacterLimit = 480
+/** Closest a preview card may come to the viewport edge, in pixels. */
+export const hoverPreviewViewportMarginPixels = 8
 
 // ---------------------------------------------------------------------------
 // Conway background (scripts/conway.ts)
