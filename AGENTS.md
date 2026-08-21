@@ -43,6 +43,7 @@ node scripts/check-output.ts
 The author is strict about prose, in code comments as much as anywhere else.
 
 - **Comments are rare and say why, never what.** Only comment code a reader would otherwise stop at. Rationale belongs in `docs/`, not in a block above a function.
+- **Never comment your own reasoning.** What you tried, what the browser reported, which property was overriding which, why the previous attempt failed: none of that belongs in the file. A comment that would read as a changelog entry, a debugging note, or an explanation addressed to the person who asked for the change is not a comment, it is a message in the wrong place. If a declaration genuinely needs defending, one short line about the code as it is. Otherwise nothing.
 - **No em-dashes.** Anywhere. Use a comma, parentheses, or a new sentence.
 - **Banned words**, in code and prose alike: land/lands/landed, sweep, gap, flip, surface as a verb, flag as a verb, gate/gated, sits, cheap, entirely, turns out, clobber, delve, leverage, utilize, seamless, crucial, showcase.
 - **No "it's X, not Y"** negated contrast, and no setting up a wrong reading to knock it down.
