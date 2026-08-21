@@ -169,9 +169,33 @@ const postAccent = coverTone(slugOf(post)).token
        top of a box as tall as the row. */
     align-items: center;
     gap: 0.5rem;
-    margin-block: -0.5rem 2rem;
+    margin-block: -0.5rem 2.5rem;
     color: var(--muted);
     font-family: var(--font-mono);
     font-size: 0.8rem;
+  }
+
+  /* Same rules as the pt post page, which is the reference rendering: the
+     two trees must not drift apart visually. */
+  .series {
+    padding: 0.6rem 0.9rem;
+    border-inline-start: 3px solid var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    font-size: var(--text-small);
+  }
+
+  .series-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-start: 2.5rem;
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--rule);
+    font-size: var(--text-small);
+  }
+
+  .series-nav .next {
+    margin-inline-start: auto;
+    text-align: end;
   }
 </style>
