@@ -41,6 +41,7 @@ const searchHref = localePath(locale, '/search/')
 */}
 <div class="search-trigger">
   <a href={searchHref} class="sx-open" aria-label={t(locale, 'search')} data-base-label={t(locale, 'search')}>
+    <span class="sx-label">{t(locale, 'search')}</span>
     <Magnifier class="sx-open-icon" />
     {/* Reserved space, invisible content, see the component comment. The
        bracket vocabulary matches every other button on this site, and the
@@ -143,6 +144,15 @@ const searchHref = localePath(locale, '/search/')
   .sx-open-icon,
   .sx-hint {
     position: relative;
+  }
+
+  .sx-label {
+    display: none;
+    position: relative;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-inline-end: 0.4rem;
   }
 
   .sx-hint {
