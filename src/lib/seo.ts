@@ -75,14 +75,14 @@ export function sectionOgImage(sectionUrl?: string): string {
   return '/og/default.png'
 }
 
-export type PageType = 'website' | 'article'
+type PageType = 'website' | 'article'
 
 export interface BreadcrumbItem {
   name: string
   url: string
 }
 
-export interface JsonLdInput {
+interface JsonLdInput {
   title: string
   description: string
   canonical: string

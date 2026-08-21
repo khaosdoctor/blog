@@ -130,7 +130,10 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
 ---
 
 <!doctype html>
-<html lang={lang}>
+{/* data-copied-label feeds scripts/copy-toast.ts, the copy-confirmation every
+    copy control on the site shares: a translated string a module script has
+    no t() to ask for. */}
+<html lang={lang} data-copied-label={t(locale, 'linkCopied')}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -393,7 +396,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
         <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
       </p>
     </footer>
-    <MathCopy locale={locale} />
+    <MathCopy />
     <FootnoteSidenotes />
     <QuoteCopy />
     {/* Every page, not just a post: the reader's pinned set is restored by this
@@ -410,30 +413,17 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
         />
       )
     }
-    <script is:inline define:vars={{ copiedLabel: t(locale, 'linkCopied') }}>
+    <script>
+      import { copyWithToast } from '../scripts/copy-toast'
+
       // Clicking a heading's # both jumps to the section and puts the full URL on
       // the clipboard. One delegated listener rather than one per heading, and
       // the jump is left to the browser: preventDefault would break opening the
       // anchor in a new tab and lose the history entry.
-      document.addEventListener('click', async (event) => {
-        const anchor = event.target.closest('a[data-copy-link]')
+      document.addEventListener('click', (event) => {
+        const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[data-copy-link]')
         if (anchor === null) return
-
-        try {
-          await navigator.clipboard.writeText(anchor.href)
-        } catch {
-          // No clipboard permission, or an insecure origin. The jump still works,
-          // which is the part that matters, so say nothing.
-          return
-        }
-
-        document.querySelector('.toast')?.remove()
-        const toast = document.createElement('div')
-        toast.className = 'toast'
-        toast.setAttribute('role', 'status')
-        toast.textContent = copiedLabel
-        document.body.append(toast)
-        setTimeout(() => toast.remove(), 2000)
+        void copyWithToast(anchor.href)
       })
     </script>
     <script is:inline define:vars={{ commitShort }}>

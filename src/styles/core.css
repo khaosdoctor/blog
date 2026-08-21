@@ -480,12 +480,6 @@ figcaption {
   text-align: center;
 }
 
-/* A wikilink whose target is still a draft. */
-.draft-note {
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
 pre {
   padding: 1rem;
   overflow-x: auto;
