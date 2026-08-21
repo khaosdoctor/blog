@@ -33,7 +33,7 @@ const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
 }))
 const described = categoryDescription(category, 'en')
 const description = described ?? t('en', 'sectionDescription', category)
-const title = page.currentPage > 1 ? `${category} | Lucas Santos | page ${page.currentPage}` : `${category} | Lucas Santos`
+const title = page.currentPage > 1 ? `LS: ${category} | page ${page.currentPage}` : `LS: ${category}`
 ---
 
 <BaseLayout

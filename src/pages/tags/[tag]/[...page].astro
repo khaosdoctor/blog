@@ -18,7 +18,7 @@ const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
   lang: HREFLANG[locale],
   href: new URL(localePath(locale, `/tags/${slugify(tag)}/`), Astro.site).href,
 }))
-const title = page.currentPage > 1 ? `${tag} | Lucas Santos | página ${page.currentPage}` : `${tag} | Lucas Santos`
+const title = page.currentPage > 1 ? `LS: ${tag} | página ${page.currentPage}` : `LS: ${tag}`
 ---
 
 <BaseLayout title={title} description={t('pt', 'tagDescription', tag)} alternates={alternates}>
