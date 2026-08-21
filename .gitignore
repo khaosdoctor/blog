@@ -53,3 +53,6 @@ playwright-report/
 .serena/
 .vscode/
 .claude/
+
+# playwright-mcp session artifacts
+.playwright-mcp/
