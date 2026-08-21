@@ -26,7 +26,7 @@ import SearchPalette from './SearchPalette.astro'
 import SettingsPanel from './SettingsPanel.astro'
 import ThemeToggle from './ThemeToggle.astro'
 import { markCells, MARK_RECTS, ROLE_TOKEN } from '../lib/logo-mark'
-import type { Locale } from '../i18n/ui'
+import { t, type Locale } from '../i18n/ui'
 
 interface Props {
   locale: Locale
@@ -54,6 +54,20 @@ const RULE = '──────────────────────
 ---
 
 <header class="shell">
+  {/* Phone-only. On a narrow screen the header keeps just the brand; nav and
+      controls collapse behind this button (mobile-menu.ts toggles it). */}
+  <button
+    class="menu-toggle"
+    type="button"
+    hidden
+    aria-expanded="false"
+    aria-controls="shell-menu"
+    aria-label={t(locale, 'openMenu')}
+    data-label-open={t(locale, 'openMenu')}
+    data-label-close={t(locale, 'closeMenu')}
+  >
+    <span aria-hidden="true">≡</span>
+  </button>
   <span class="edge" aria-hidden="true">┌─</span>
   <a href={home} class="brand" aria-label={WORD}>
     <span class="mark" aria-hidden="true">
@@ -84,19 +98,25 @@ const RULE = '──────────────────────
     the links end up in the middle of the row without anything being positioned
     absolutely or having to know the other's width.
   */}
-  <NavLinks locale={locale} />
-  <span class="fill" aria-hidden="true">{RULE.split('').map((ch) => <span class="dash">{ch}</span>)}</span>
-  <nav class="controls">
-    <SearchPalette locale={locale} />
-    <LangSwitcher locale={locale} alternates={alternates} />
-    <ThemeToggle locale={locale} />
-    <SettingsPanel locale={locale} />
-  </nav>
+  {/* display: contents on desktop, so these still lay out as direct flex
+      children of the row; on a phone the same wrapper becomes the slide-in
+      drawer the hamburger opens. */}
+  <div class="shell-menu" id="shell-menu">
+    <NavLinks locale={locale} />
+    <span class="fill" aria-hidden="true">{RULE.split('').map((ch) => <span class="dash">{ch}</span>)}</span>
+    <nav class="controls">
+      <SearchPalette locale={locale} />
+      <LangSwitcher locale={locale} alternates={alternates} />
+      <ThemeToggle locale={locale} />
+      <SettingsPanel locale={locale} />
+    </nav>
+  </div>
   <span class="edge" aria-hidden="true">─┐</span>
 </header>
 
 <script>
   import '../scripts/header-brand'
+  import '../scripts/mobile-menu'
 </script>
 
 <style>
@@ -129,6 +149,149 @@ const RULE = '──────────────────────
   @media (min-width: 70rem) {
     .shell {
       max-inline-size: var(--shell-width);
+    }
+  }
+
+  /* Off until mobile-menu.ts is running AND the viewport is narrow: with JS
+     off the phone header keeps the plain stacked rows, nothing is lost. */
+  .menu-toggle {
+    display: none;
+  }
+
+  /* Invisible on desktop: its children participate in the header row exactly
+     as if the wrapper were not there. It only becomes a box (the drawer)
+     inside the phone media query below. */
+  .shell-menu {
+    display: contents;
+  }
+
+  /*
+   * The phone header: hamburger + brand on one line, everything else behind
+   * the button. 48rem because the full row measures ~723px, so anything
+   * narrower was wrapping at arbitrary points anyway.
+   */
+  @media (max-width: 47.99rem) {
+    .menu-toggle:not([hidden]) {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-inline-size: var(--icon-btn-hit);
+      min-block-size: var(--icon-btn-hit);
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    /* The same drawn-chip-inside-a-bigger-hit-box every header control uses. */
+    .menu-toggle:not([hidden])::before {
+      content: '';
+      position: absolute;
+      inline-size: var(--icon-btn-chip);
+      block-size: var(--icon-btn-chip);
+      border: var(--btn-border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      pointer-events: none;
+    }
+
+    .menu-toggle > span {
+      position: relative;
+    }
+
+    .menu-toggle[aria-expanded='true'],
+    .menu-toggle:hover,
+    .menu-toggle:focus-visible {
+      color: var(--accent);
+    }
+
+    .menu-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Collapsed state only exists once the script owns the button. */
+    .shell[data-menu-ready] .edge,
+    .shell[data-menu-ready] .fill,
+    .shell[data-menu-ready]:not([data-menu-open]) .shell-menu {
+      display: none;
+    }
+
+    /* Brand centered on the top line; the hamburger holds the left corner
+       without pushing it (it is out of the flow). */
+    .shell[data-menu-ready] {
+      justify-content: center;
+    }
+
+    .shell[data-menu-ready] .menu-toggle {
+      position: absolute;
+      inset-inline-start: var(--shell-inset);
+      z-index: 2;
+    }
+
+    /*
+     * The drawer: a side block over the content, never displacing it. Fixed
+     * inside the sticky header's own stacking context, so it paints above the
+     * page (header is z-index 2 in core.css) and below the hamburger, which
+     * stays reachable as the close button. Links in a column, the icon
+     * controls in a row underneath, pushed to the bottom.
+     */
+    .shell[data-menu-open] .shell-menu {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-start: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      inline-size: min(16rem, 80vw);
+      /* Room above the links for the hamburger row and the full-width
+         search line the .controls rules below pull up here. */
+      padding: calc(var(--icon-btn-hit) * 2 + 2rem) 1.2rem 1.2rem;
+      border-inline-end: 3px double var(--fg);
+      background: var(--bg);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .shell[data-menu-open] :global(.nav-links) {
+      flex-direction: column;
+      align-items: start;
+      font-size: 1.1rem;
+    }
+
+    .shell[data-menu-open] :global(.nav-links a + a) {
+      margin-block-start: 1rem;
+    }
+
+    /* Bottom row: the language switch on the left, screen-mode and settings
+       together on the right. */
+    .shell[data-menu-open] .controls {
+      margin-block-start: auto;
+      padding-block-start: 1.5rem;
+      /* Static, or the absolutely-placed search line below would measure its
+         offsets from this row at the drawer's bottom instead of the drawer. */
+      position: static;
+    }
+
+    .shell[data-menu-open] .controls :global(.theme-toggle) {
+      margin-inline-start: auto;
+    }
+
+    /* The search opener leaves the row and becomes the drawer's own first
+       line, full width, above the nav links. */
+    .shell[data-menu-open] .controls :global(.search-trigger) {
+      position: absolute;
+      inset-block-start: calc(var(--icon-btn-hit) + 1.2rem);
+      inset-inline: 1.2rem;
+    }
+
+    .shell[data-menu-open] .controls :global(.search-trigger),
+    .shell[data-menu-open] .controls :global(.sx-open) {
+      inline-size: auto;
+      display: flex;
     }
   }
 

@@ -40,21 +40,51 @@ for (const { name, path } of PAGES) {
 
 /** Controls a thumb has to be able to hit on every page that shows them. */
 const TAP_TARGETS = [
-  { name: 'nav link', selector: '.nav-links a', path: '/en/' },
-  { name: 'credits link', selector: 'footer .credits a', path: '/en/' },
-  { name: 'toc handle', selector: '.handle', path: '/en/a-deep-dive-into-container-images-part-1/' },
+  { name: 'credits link', selector: 'footer .credits a', path: '/en/', minWidth: 44, minHeight: 44 },
+  { name: 'hamburger', selector: '.menu-toggle', path: '/en/', minWidth: 44, minHeight: 44 },
+  // The TOC pull tab is half an icon button wide by design (flush with the
+  // screen edge, cannot be overshot); the height is what carries the target.
+  {
+    name: 'toc handle',
+    selector: '.handle',
+    path: '/en/a-deep-dive-into-container-images-part-1/',
+    minWidth: 20,
+    minHeight: 100,
+  },
 ]
 
-for (const { name, selector, path } of TAP_TARGETS) {
+for (const { name, selector, path, minWidth, minHeight } of TAP_TARGETS) {
   test(`${name} is tappable at 393px`, async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 850 })
     await page.goto(path, { waitUntil: 'networkidle' })
     const box = await page.locator(selector).first().boundingBox()
     expect(box, `${selector} not found on ${path}`).not.toBeNull()
-    expect(box!.width, `${selector} width`).toBeGreaterThanOrEqual(44)
-    expect(box!.height, `${selector} height`).toBeGreaterThanOrEqual(44)
+    expect(box!.width, `${selector} width`).toBeGreaterThanOrEqual(minWidth)
+    expect(box!.height, `${selector} height`).toBeGreaterThanOrEqual(minHeight)
   })
 }
+
+test('hamburger opens the drawer with nav links at 393px', async ({ page }) => {
+  await page.setViewportSize({ width: 393, height: 850 })
+  await page.goto('/en/', { waitUntil: 'networkidle' })
+  await expect(page.locator('.nav-links')).toBeHidden()
+  await page.click('.menu-toggle')
+  await expect(page.locator('.nav-links a', { hasText: 'SERIES' })).toBeVisible()
+})
+
+test('the toc tab slides the outline in at 393px', async ({ page }) => {
+  await page.setViewportSize({ width: 393, height: 850 })
+  await page.goto('/en/a-deep-dive-into-container-images-part-1/', { waitUntil: 'networkidle' })
+  await page.click('.handle')
+  await expect(page.locator('.toc')).toBeVisible()
+  // Polled: the panel is mid-slide right after the click.
+  await expect
+    .poll(async () => {
+      const box = await page.locator('.toc').boundingBox()
+      return box ? box.x + box.width : Number.POSITIVE_INFINITY
+    })
+    .toBeLessThanOrEqual(394)
+})
 
 test('long unbroken tokens wrap instead of scrolling the page', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 850 })
