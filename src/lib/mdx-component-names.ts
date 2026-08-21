@@ -12,7 +12,7 @@
  * A leaf module on purpose: it imports nothing, so the plain node scripts under
  * `scripts/` can read it without dragging in `astro:content`.
  */
-export const MDX_COMPONENT_NAMES = [
+const MDX_COMPONENT_NAMES = [
   'Bookmark',
   'HtmlLab',
   'LabDemo',
@@ -36,7 +36,7 @@ export const MDX_COMPONENT_PATTERN = [...MDX_COMPONENT_NAMES].sort((a, b) => b.l
  * or a machine translation that resurrects one should fail loudly rather than
  * render the literal tag text into the page.
  */
-export const RETIRED_COMPONENT_NAMES = ['Epigraph', 'Figure', 'CourseCTA'] as const
+const RETIRED_COMPONENT_NAMES = ['Epigraph', 'Figure', 'CourseCTA'] as const
 
 export const RETIRED_COMPONENT_PATTERN = [...RETIRED_COMPONENT_NAMES]
   .sort((a, b) => b.length - a.length)

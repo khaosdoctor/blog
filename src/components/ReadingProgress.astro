@@ -28,6 +28,8 @@
 ---
 
 <script>
+  import { prefersReducedMotion as reducedMotion } from '../scripts/motion'
+
   /*
    * The track, in visual order: the left run's dashes, then the right run's.
    * DOM order is left-to-right order here, so no sorting is needed.
@@ -106,24 +108,6 @@
     let target = 0
     let animating = false
     let queued = false
-
-    /*
-     * Reduced motion: the same convention conway.ts and header-brand.ts
-     * already read, an explicit `data-motion` override (written by the
-     * settings panel) wins in both directions, and the OS query decides when
-     * it is absent.
-     */
-    function motionOverride(): 'reduce' | 'allow' | null {
-      const attr = document.documentElement.getAttribute('data-motion')
-      return attr === 'reduce' || attr === 'allow' ? attr : null
-    }
-
-    function reducedMotion(): boolean {
-      const override = motionOverride()
-      if (override === 'reduce') return true
-      if (override === 'allow') return false
-      return matchMedia('(prefers-reduced-motion: reduce)').matches
-    }
 
     /** Where in the run dash `index` lights up, in dashes. */
     function threshold(index: number): number {

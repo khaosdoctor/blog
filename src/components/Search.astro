@@ -44,11 +44,9 @@ const { action = '/search/', locale = 'pt' } = Astro.props
   // its JS API to our own markup so results keep the site's styling instead
   // of Pagefind's default UI CSS.
   import { loadPagefind, searchLabel as label, type PagefindModule } from '../scripts/pagefind'
-
-  // Cap how many results get rendered: an unqualified term (e.g. "de") can
-  // match a large share of the site, and Pagefind returns every match with
-  // no limit of its own.
-  const MAX_RESULTS = 20
+  // Capped because an unqualified term (e.g. "de") can match a large share of
+  // the site, and Pagefind returns every match with no limit of its own.
+  import { searchPageResultLimit as MAX_RESULTS } from '../lib/tweaks'
 
   // Bumped on every search; a stale async response checks it before writing
   // to the DOM so a slow earlier query can't overwrite a faster later one.
