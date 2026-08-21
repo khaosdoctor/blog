@@ -1,45 +1,19 @@
 ---
-// The Portuguese half of the per-tag listing. Its English twin is
-// src/pages/en/tags/[tag]/[...page].astro, built the same way out of the
-// English posts.
-//
-// The slug is shared: a translation repeats its original's `tags:` line word
-// for word, so the two pages are /tags/<tag>/ and /en/tags/<tag>/ and switching
-// language is a prefix change like it is on a post or a section. Only the posts
-// listed differ, and this half never changes shape because of the other one:
-// neither language reads the other's map.
+// The Portuguese per-tag listing; src/pages/en/tags/[tag]/[...page].astro is
+// the English twin. The slug is shared because a translation repeats its
+// original's `tags:` line, so switching language is a prefix change.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import PostList from '../../../components/PostList.astro'
 import Pagination from '../../../components/Pagination.astro'
-import { LIST_PAGE_SIZE } from '../../../lib/posts'
-import { getTags, slugify } from '../../../lib/taxonomy'
+import { slugify, tagListingRoutes } from '../../../lib/taxonomy'
 import { HREFLANG, localePath, LOCALES, t } from '../../../i18n/ui'
 
-export const getStaticPaths = (async ({ paginate }) => {
-  // Every language's own map, so the alternates name only the languages that
-  // build a page for this tag: `design`, `escrita` and `meta` have no English
-  // post today, and the switcher must not offer a URL no route emits.
-  const [tags, byLocale] = await Promise.all([
-    getTags(),
-    Promise.all(LOCALES.map(async (locale) => [locale, await getTags(locale)] as const)),
-  ])
-  return [...tags.entries()].flatMap(([tag, posts]) =>
-    paginate(posts, {
-      pageSize: LIST_PAGE_SIZE,
-      params: { tag: slugify(tag) },
-      props: {
-        tag,
-        languages: byLocale.filter(([, entries]) => entries.has(tag)).map(([locale]) => locale),
-      },
-    }),
-  )
-}) satisfies GetStaticPaths
+export const getStaticPaths = (async ({ paginate }) => tagListingRoutes(paginate)) satisfies GetStaticPaths
 
 const { tag, languages, page } = Astro.props
 // Page 1 of the counterpart, whatever page this is: the two languages hold
-// different numbers of posts under the same tag, so page 3 here need not exist
-// there. That is the same choice the section pages already made.
+// different post counts under one tag, so page 3 here need not exist there.
 const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
   lang: HREFLANG[locale],
   href: new URL(localePath(locale, `/tags/${slugify(tag)}/`), Astro.site).href,
@@ -55,18 +29,3 @@ const title = page.currentPage > 1 ? `${tag} | Lucas Santos | página ${page.cur
   <PostList posts={page.data} />
   <Pagination page={page} basePath={`/tags/${slugify(tag)}/`} locale="pt" />
 </BaseLayout>
-
-<style>
-  .kicker {
-    margin-block-end: 0;
-    color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  h1 {
-    margin-block-start: 0.2rem;
-  }
-</style>

@@ -32,17 +32,6 @@ export const MARK_RECTS = [
 /** Glyphs the mark's own occasional glitch swaps a cell to, the same vocabulary the wordmark's glitch uses. */
 export const GLITCH_GLYPHS = ['#', '%', '&', '$', '@', '?', '~']
 
-/**
- * A character grid has a legibility floor a vector does not: below it the
- * glyph shrinks to a blur rather than just getting smaller. 72px was that
- * floor for this 8x8 candidate (~9px/cell, enough to tell a corner from a
- * straight run) in the lab's own advisory note. The header renders this mark
- * at 36px, below the floor, on purpose: the owner chose that size knowing it,
- * so nothing here clamps to it. Kept as a constant only so the choice and the
- * number it is below stay next to each other in the source.
- */
-export const MARK_MIN_PX = 72
-
 const ROWS = SHAPE.length
 const COLS = SHAPE[0].length
 
@@ -64,7 +53,7 @@ function roleAt(row: number, col: number): string {
  * falls back to the role `SHAPE` already traced by hand for that position,
  * which is never undefined for a filled cell.
  */
-export function rectRoleAt(row: number, col: number): string {
+function rectRoleAt(row: number, col: number): string {
   const cx = col * 8 + 4
   const cy = row * 8 + 4
   const hit = MARK_RECTS.find((rect) => cx >= rect.x && cx < rect.x + rect.w && cy >= rect.y && cy < rect.y + rect.h)
@@ -77,7 +66,7 @@ export function rectRoleAt(row: number, col: number): string {
  * with no exposed edge stays blank on purpose. The same idea the Elite (1984)
  * reference draws with: vector outline, no fill, few polygons.
  */
-export function wireGlyph(row: number, col: number): string {
+function wireGlyph(row: number, col: number): string {
   if (!filledAt(row, col)) return ' '
   const top = !filledAt(row - 1, col)
   const bottom = !filledAt(row + 1, col)

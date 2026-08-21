@@ -6,7 +6,7 @@ import { parseAuthors } from './authors'
 
 export const SITE_NAME = 'lsantos.dev'
 export const AUTHOR_NAME = 'Lucas Santos'
-export const AUTHOR_GITHUB = 'https://github.com/khaosdoctor'
+const AUTHOR_GITHUB = 'https://github.com/khaosdoctor'
 export const AUTHOR_TWITTER_HANDLE = '@khaosdoctor'
 export const DEFAULT_LOCALE = 'pt'
 
@@ -15,7 +15,7 @@ export const DEFAULT_LOCALE = 'pt'
  * This is how a search engine ties the byline on 169 posts to one entity rather
  * than to a name that happens to recur.
  */
-export const AUTHOR_PROFILES = [
+const AUTHOR_PROFILES = [
   AUTHOR_GITHUB,
   'https://x.com/khaosdoctor',
   'https://www.linkedin.com/in/khaosdoctor/',
@@ -51,7 +51,7 @@ export function toOgLocale(lang: string): string {
  * carry `newsletter`, which is neither a category any post uses nor a drawn
  * card, and to omit `opinion`, which is both.
  */
-export const OG_SECTION_CARDS = [
+const OG_SECTION_CARDS = [
   'career',
   'infra',
   'javascript',
@@ -127,7 +127,7 @@ export function buildArticleJsonLd(input: JsonLdInput): Record<string, unknown> 
   }
 }
 
-export function buildWebSiteJsonLd(input: JsonLdInput): Record<string, unknown> {
+function buildWebSiteJsonLd(input: JsonLdInput): Record<string, unknown> {
   const { title, description, canonical, lang } = input
   return {
     '@context': 'https://schema.org',

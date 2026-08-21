@@ -12,7 +12,6 @@
  * keep being adjusted on its own.
  */
 
-.page-title::before,
 main h1::before {
   content: '> ';
   color: var(--accent-day, var(--accent));
@@ -25,7 +24,6 @@ main h1::before {
  * same pair the quote rule, the pagination rule and the listing row separators
  * draw with.
  */
-.page-title::after,
 main h1::after {
   content: '';
   display: block;

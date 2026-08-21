@@ -1,46 +1,19 @@
 ---
 import type { GetStaticPaths } from 'astro'
 import { render } from 'astro:content'
-import { Vimeo, YouTube } from 'astro-embed'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Authors from '../../components/Authors.astro'
-import Bookmark from '../../components/Bookmark.astro'
 import CoverHero from '../../components/CoverHero.astro'
-import HtmlLab from '../../components/HtmlLab.astro'
-import LabDemo from '../../components/LabDemo.astro'
 import LangBanner from '../../components/LangBanner.astro'
-import MarginNote from '../../components/MarginNote.astro'
-import MissingImage from '../../components/MissingImage.astro'
 import PostToc from '../../components/PostToc.astro'
-import RawEmbed from '../../components/RawEmbed.astro'
 import ReadingTime from '../../components/ReadingTime.astro'
 import SeriesToc from '../../components/SeriesToc.astro'
-import Sidenote from '../../components/Sidenote.astro'
-import SpeakerDeck from '../../components/SpeakerDeck.astro'
-import Spotify from '../../components/Spotify.astro'
-import Tweet from '../../components/Tweet.astro'
-import Video from '../../components/Video.astro'
 import { parseAuthors } from '../../lib/authors'
 import { coverTone } from '../../lib/cover'
+import { mdxComponents } from '../../lib/mdx-components'
 import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../../lib/taxonomy'
 import { HREFLANG, t } from '../../i18n/ui'
 import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
-
-const mdxComponents = {
-  Bookmark,
-  HtmlLab,
-  LabDemo,
-  MarginNote,
-  MissingImage,
-  RawEmbed,
-  Sidenote,
-  SpeakerDeck,
-  Spotify,
-  Tweet,
-  Video,
-  Vimeo,
-  YouTube,
-}
 
 // English lives under /en/, Portuguese stays unprefixed at the root so every
 // URL Ghost ever published keeps working. The slug is this file's own, so an
@@ -52,7 +25,7 @@ export const getStaticPaths = (async () => {
   // in English rather than what exists in Portuguese.
   const seriesMap = buildSeriesMap(posts)
   return posts.map((post) => {
-    // Every language of this article is a file in the same folder.
+    // Every language of this article is a file in the same content directory.
     const siblings = byFolder.get(folderOf(post)) ?? [post]
     const source = siblings.find((entry) => entry.data.lang === SOURCE_LANG)
     return {
@@ -60,8 +33,8 @@ export const getStaticPaths = (async () => {
       props: {
         post,
         series: getSeriesNavigation(post, seriesMap),
-        // The original to link back to. A translation of a post that is still a
-        // draft has nowhere to point, so the banner has to cope with null.
+        // The original to link back to. A translation of a still-draft post
+        // has nowhere to point, so the banner has to cope with null.
         sourcePath: source === undefined ? null : urlOf(source),
         alternates: siblings.map((entry) => ({
           lang: HREFLANG[entry.data.lang],
@@ -73,11 +46,6 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths
 
 const { post, series, sourcePath, alternates: folderAlternates } = Astro.props
-// Same render() the Portuguese page makes, read for the same two things: the
-// content, and the exact reading time remark-reading-time.mjs computed for it.
-// This page went without one until the cover's meta line started carrying the
-// reading time, at which point an English post would have drawn a chip and
-// nothing beside it.
 const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
 const alternates = folderAlternates.map(({ lang, path }) => ({
@@ -86,20 +54,11 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
 }))
 const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
 
-/**
- * The post's own colour: whatever brand its cover drew, read straight off the
- * cover's own derivation (coverTone, lib/cover.ts) so bold and italic inside
- * the article cannot come out a different colour from the card at the top of
- * the page. Links do NOT read this, they follow the day colour
- * (prose/links.css). The English translation has its own slug and so its own
- * cover colour, same as it has its own cover.
- *
- * Handed to the layout rather than written onto <article> here, which is where
- * it used to sit: the header now draws the reading progress in this same
- * colour (ReadingProgress.astro), and the header is not inside the article, so
- * the property has to be written on an element that contains both. BaseLayout
- * puts it on <body>; the article inherits it exactly as before.
- */
+// The post's own colour, read off the cover's derivation (coverTone) so bold
+// and italic inside the article match the card at the top; links follow the
+// day colour instead (prose/links.css). The translation has its own slug and
+// therefore its own cover colour. Handed to the layout because the header's
+// reading progress reads it too and only <body> contains both.
 const postAccent = coverTone(slugOf(post)).token
 ---
 
@@ -120,11 +79,6 @@ const postAccent = coverTone(slugOf(post)).token
   progress
   postAccent={postAccent}
 >
-  {/* The outline, which this page never rendered: a reader of a translated
-      post got no way to see its shape or jump inside it, purely because this
-      file was written without the component rather than by any decision. The
-      headings it reads are the translated ones, from this post's own render(),
-      so the outline is in English like the text it points at. */}
   <PostToc headings={headings} locale="en" />
   <article>
     <CoverHero
@@ -161,10 +115,7 @@ const postAccent = coverTone(slugOf(post)).token
         <LangBanner lang="en" originalHref={sourcePath} />
       )
     }
-    {/* The series box and the line under it, both of which this page used to
-        leave out: a reader of a translated part was told nothing about the
-        series it belongs to. Every link either draws comes from the English
-        map, so it points inside /en/. */}
+    {/* Both series blocks read the English map, so every link points inside /en/. */}
     {post.data.series && <SeriesToc series={post.data.series} current={post.id} locale="en" />}
     {
       series !== null && (
@@ -177,13 +128,8 @@ const postAccent = coverTone(slugOf(post)).token
     <div class="prose">
       <Content components={mdxComponents} />
     </div>
-    {/* The tag row under the article, which this page never drew: a translation
-        carries the same `tags:` line as its original, but there was nowhere in
-        English to send a reader who clicked one, so the chips were left out
-        rather than pointed at Portuguese listings. Now that /en/tags/<tag>/
-        exists (src/pages/en/tags/[tag]/[...page].astro) every chip stays inside
-        /en/. The tag string is the same one in both languages, so slugify()
-        gives the same segment on both sides. */}
+    {/* The tag string is the same in both languages, so slugify() gives the
+        same segment on both sides and every chip stays inside /en/. */}
     {
       post.data.tags.length > 0 && (
         <ul class="chips">
@@ -225,7 +171,7 @@ const postAccent = coverTone(slugOf(post)).token
     gap: 0.5rem;
     margin-block: -0.5rem 2rem;
     color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
   }
 </style>

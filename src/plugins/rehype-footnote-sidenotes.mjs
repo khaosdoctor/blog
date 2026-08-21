@@ -39,6 +39,8 @@
 // item, a table cell). The aside goes right after whichever of these is the
 // nearest ancestor, so nested cases (a footnote inside a blockquote's <p>)
 // are handled by recursing into children before checking the node itself.
+import { localeFromFile } from './mdx-util.mjs'
+
 const BLOCK_TAGS = new Set(['p', 'li', 'td', 'th', 'dd'])
 
 /**
@@ -71,14 +73,6 @@ export function rehypeFootnoteSidenotes() {
 
     insertAsides(tree.children, definitions, new Set())
   }
-}
-
-// Mirrors remarkWikilinks (src/plugins/remark-wikilinks.mjs), the other
-// build-time plugin that needs the page's locale: Astro attaches the
-// frontmatter it already parsed to the same VFile every remark/rehype
-// plugin receives, so the URL does not have to be reverse-engineered here.
-function localeFromFile(file) {
-  return file?.data?.astro?.frontmatter?.lang === 'en' ? 'en' : 'pt'
 }
 
 function relabelHeading(section, locale) {

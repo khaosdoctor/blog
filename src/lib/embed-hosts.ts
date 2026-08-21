@@ -23,7 +23,7 @@ export interface EmbedProvider {
   note?: string
 }
 
-export const EMBED_PROVIDERS: EmbedProvider[] = [
+const EMBED_PROVIDERS: EmbedProvider[] = [
   {
     component: 'YouTube',
     frame: ['www.youtube-nocookie.com', 'www.youtube.com'],
@@ -70,7 +70,7 @@ function hostsFor(...keys: Array<'frame' | 'script' | 'connect' | 'referenced'>)
 
 export const FRAME_HOSTS = hostsFor('frame')
 export const SCRIPT_HOSTS = hostsFor('script')
-export const CONNECT_HOSTS = hostsFor('connect')
+const CONNECT_HOSTS = hostsFor('connect')
 
 /**
  * What a URL inside the output may point at without failing the guard: anything

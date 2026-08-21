@@ -8,9 +8,8 @@ import { t } from '../../i18n/ui'
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPublishedPosts('en')
-  // paginate() always returns at least one page, even for an empty array (one
-  // page of zero posts), which is what lets the "no translated posts yet"
-  // notice below still render on /en/ rather than the route failing to exist.
+  // paginate() returns one page even for an empty array, which is what lets
+  // the "no translated posts yet" notice still render on /en/.
   return paginate(posts, { pageSize: LIST_PAGE_SIZE })
 }) satisfies GetStaticPaths
 
@@ -27,9 +26,6 @@ const title = page.currentPage > 1 ? `Lucas Santos | page ${page.currentPage}` :
     { lang: 'en', href: new URL('/en/', Astro.site).href },
   ]}
 >
-  {/* Was visually hidden, carrying the site name only so the page had an h1
-      at all. It says what the page is now and takes the same prompt and rule
-      every other section title does (section-header.css). */}
   <h1 class="listing-heading">
     {t('en', 'navPosts')} <span class="page-count">[{page.total}]</span>
   </h1>

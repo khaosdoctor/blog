@@ -1,17 +1,27 @@
+import type { APIRoute } from 'astro'
 import type { CollectionEntry } from 'astro:content'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from './mdx-component-names'
 import { urlOf } from './posts'
 
 type Post = CollectionEntry<'blog'>
 
+/** The GET both markdown-twin routes re-export; each route's own
+    getStaticPaths decides which language's posts feed it. */
+export const markdownTwinRoute: APIRoute = ({ props, site }) => {
+  const { post } = props as { post: Post }
+  return new Response(toAgentMarkdown(post, site), {
+    headers: {
+      'content-type': 'text/markdown; charset=utf-8',
+      'cache-control': 'public, max-age=3600',
+    },
+  })
+}
+
 /**
- * By name, never by shape. A catch-all `<[A-Z]...>` also eats `Promise<T>`,
- * `<C-l>` and `<Home />` quoted in prose, and its `[^>]*` crosses newlines, so a
- * multi-line generic argument took the rest of the snippet with it.
- * The names come from src/lib/mdx-component-names.ts, shared with both guards,
- * so the three lists cannot drift apart again. Retired components are included:
- * one resurrected by a migration or a translation should be stripped here rather
- * than printed as literal tag text into the markdown twin.
+ * By name, never by shape: a catch-all `<[A-Z]...>` also eats `Promise<T>`
+ * and `<Home />` quoted in prose. Names come from mdx-component-names.ts,
+ * shared with both guards so the lists cannot drift; retired components are
+ * stripped too rather than printed as literal tag text.
  */
 const COMPONENT = new RegExp(
   `</?(?:${MDX_COMPONENT_PATTERN}|${RETIRED_COMPONENT_PATTERN})\\b[^>]*>`,

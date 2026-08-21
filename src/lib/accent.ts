@@ -23,6 +23,7 @@
  * `astro:content`, so it stays safe in a browser bundle.
  */
 import { dayColor } from './day-color'
+import { readStorage, writeStorage } from './storage'
 
 const ACCENT_KEY = 'accent'
 
@@ -51,12 +52,8 @@ const ACCENT_TOKENS: Record<string, string> = {
 
 /** The reader's own choice, or null for the day rotation. */
 export function storedAccent(): string | null {
-  try {
-    const raw = localStorage.getItem(ACCENT_KEY)
-    return raw !== null && raw in ACCENT_TOKENS ? raw : null
-  } catch {
-    return null
-  }
+  const raw = readStorage(ACCENT_KEY)
+  return raw !== null && raw in ACCENT_TOKENS ? raw : null
 }
 
 /** The token to paint with right now: the override if there is one, else today's. */
@@ -84,11 +81,6 @@ export function applyAccent(): void {
 
 /** Picking a colour, or null to go back to the day rotation. */
 export function setAccent(name: string | null): void {
-  try {
-    if (name === null || !(name in ACCENT_TOKENS)) localStorage.removeItem(ACCENT_KEY)
-    else localStorage.setItem(ACCENT_KEY, name)
-  } catch {
-    // Private mode, or storage disabled: the choice still applies for this page.
-  }
+  writeStorage(ACCENT_KEY, name !== null && name in ACCENT_TOKENS ? name : null)
   applyAccent()
 }

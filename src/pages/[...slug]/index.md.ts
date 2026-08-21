@@ -1,19 +1,10 @@
-import type { APIRoute, GetStaticPaths } from 'astro'
+import type { GetStaticPaths } from 'astro'
 import { getPublishedPosts, slugOf } from '../../lib/posts'
-import { toAgentMarkdown } from '../../lib/markdown-twin'
+import { markdownTwinRoute } from '../../lib/markdown-twin'
 
 export const getStaticPaths = (async () => {
   const posts = await getPublishedPosts()
   return posts.map((post) => ({ params: { slug: slugOf(post) }, props: { post } }))
 }) satisfies GetStaticPaths
 
-export const GET: APIRoute = ({ props, site }) => {
-  const { post } = props as { post: Awaited<ReturnType<typeof getPublishedPosts>>[number] }
-
-  return new Response(toAgentMarkdown(post, site), {
-    headers: {
-      'content-type': 'text/markdown; charset=utf-8',
-      'cache-control': 'public, max-age=3600',
-    },
-  })
-}
+export const GET = markdownTwinRoute

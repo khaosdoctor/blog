@@ -1,27 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import CreditList from '../components/CreditList.astro'
-import { t } from '../i18n/ui'
+import OssPage from '../components/OssPage.astro'
 ---
 
-<BaseLayout
-  title={`${t('pt', 'ossTitle')} | Lucas Santos`}
-  description={t('pt', 'ossDescription')}
-  alternates={[
-    { lang: 'pt-BR', href: new URL('/oss/', Astro.site).href },
-    { lang: 'en', href: new URL('/en/oss/', Astro.site).href },
-  ]}
->
-  <h1 class="listing-heading">{t('pt', 'ossTitle')}</h1>
-  <p class="intro listing-heading">{t('pt', 'ossIntro')}</p>
-  <div class="listing-heading">
-    <CreditList locale="pt" />
-  </div>
-</BaseLayout>
-
-<style>
-  .intro {
-    margin-block-end: 2.5rem;
-    color: var(--muted);
-  }
-</style>
+<OssPage locale="pt" />

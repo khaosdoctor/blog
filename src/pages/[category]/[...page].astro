@@ -5,17 +5,16 @@ import PostList from '../../components/PostList.astro'
 import Pagination from '../../components/Pagination.astro'
 import { getPublishedPosts, LIST_PAGE_SIZE } from '../../lib/posts'
 import { categoryDescription } from '../../lib/categories'
-import { getCategories } from '../../lib/taxonomy'
+import { categoryLocales, getCategories } from '../../lib/taxonomy'
 import { HREFLANG, localePath, LOCALES, t } from '../../i18n/ui'
 
 // Section index pages live at /{category}/, the same shape as a post URL.
-// Astro gives this dynamic route priority over the [...slug] rest route, so the
-// only real hazard is a category named exactly like a post: fail the build
-// instead of silently shadowing an article.
+// Astro gives this route priority over the [...slug] rest route, so the only
+// real hazard is a category named exactly like a post: fail the build instead
+// of silently shadowing an article.
 //
-// [...page] rather than [page]: page 1 stays bare (/{category}/), and page
-// 2+ gets a real /{category}/2/, the same rest-param convention as the
-// paginated home page (see src/pages/[...page].astro's own comment).
+// [...page] rather than [page]: page 1 stays bare, page 2+ gets /{category}/2/,
+// the same rest-param convention as the paginated home page.
 export const getStaticPaths = (async ({ paginate }) => {
   const [categories, posts] = await Promise.all([getCategories(), getPublishedPosts()])
   const slugs = new Set(posts.map((post) => post.id))
@@ -26,15 +25,7 @@ export const getStaticPaths = (async ({ paginate }) => {
       )
     }
   }
-  // Which languages have a section index for each category. A section page only
-  // exists in a language that has a post in it, so the alternates (and with
-  // them the language switcher) are built from that rather than assumed.
-  const languages = await Promise.all(
-    LOCALES.map(async (locale) => [locale, await getPublishedPosts(locale)] as const),
-  )
-  const sectionsByLocale = languages.map(
-    ([locale, localePosts]) => [locale, new Set(localePosts.map((post) => post.data.category))] as const,
-  )
+  const sectionsByLocale = await categoryLocales()
   return [...categories.entries()].flatMap(([category, categoryPosts]) =>
     paginate(categoryPosts, {
       pageSize: LIST_PAGE_SIZE,
@@ -71,18 +62,3 @@ const title = page.currentPage > 1 ? `${category} | Lucas Santos | página ${pag
   <PostList posts={page.data} />
   <Pagination page={page} basePath={`/${category}/`} locale="pt" />
 </BaseLayout>
-
-<style>
-  /* The decided subtitle face, at a whole 16px: see --font-subtitle. */
-  .about {
-    margin-block: 0.5rem 1rem;
-    color: var(--muted);
-    max-inline-size: var(--measure);
-    font-family: var(--font-subtitle);
-    font-size: 16px;
-    line-height: 1.5;
-  }
-
-  /* The count moved into the heading, in brackets, like every other section
-     title (section-header.css). */
-</style>

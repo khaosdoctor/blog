@@ -1,11 +1,8 @@
 ---
-// The Portuguese half of the per-series page. Its English twin is
-// src/pages/en/series/[name].astro, built the same way out of the English posts.
-//
-// The slug is shared: `series: grpc` in the frontmatter is the same word in
-// every language, so the two pages are /series/grpc/ and /en/series/grpc/, and
-// switching language is a prefix change like it is on a post or a section.
-// Only the display title (seriesName) and the parts themselves differ.
+// The Portuguese per-series page; src/pages/en/series/[name].astro is the
+// English twin. `series:` in the frontmatter is the same word in every
+// language, so switching language is a prefix change: /series/grpc/ and
+// /en/series/grpc/. Only the display title and the parts themselves differ.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
@@ -13,9 +10,9 @@ import { getSeries, seriesTitle } from '../../lib/taxonomy'
 import { HREFLANG, t } from '../../i18n/ui'
 
 export const getStaticPaths = (async () => {
-  // The English map is read only to know whether the English page for this
-  // series is built at all: the switcher must not offer a URL that route never
-  // emits, which is any series with fewer than two translated parts.
+  // The English map only says whether the English page for this series is
+  // built at all: the switcher must not offer a URL that route never emits,
+  // which is any series with fewer than two translated parts.
   const [series, english] = await Promise.all([getSeries(), getSeries('en')])
   return [...series.entries()]
     .filter(([, posts]) => posts.length > 1)
@@ -49,18 +46,3 @@ const alternates = [
   </h1>
   <PostList posts={posts} />
 </BaseLayout>
-
-<style>
-  .kicker {
-    margin-block-end: 0;
-    color: var(--muted);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  h1 {
-    margin-block-start: 0.2rem;
-  }
-</style>

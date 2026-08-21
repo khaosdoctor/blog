@@ -33,11 +33,7 @@ const host = (() => {
 </figure>
 
 <style>
-  .missing {
-    margin-block: 2rem;
-    margin-inline: 0;
-  }
-
+  /* The block margin comes from core.css's own `figure` rule. */
   .frame {
     position: relative;
     display: flex;
@@ -75,13 +71,13 @@ const host = (() => {
 
   .label {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: var(--text-small);
   }
 
   .host {
     margin: 0;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
     opacity: 0.8;
   }
 </style>

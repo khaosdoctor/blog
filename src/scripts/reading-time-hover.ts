@@ -4,11 +4,7 @@
 // ahead of time (the answer depends on the moment the reader looks), so
 // nothing here runs until this script does, and everything it computes is
 // thrown away and recomputed on the next hover rather than cached.
-//
-// The empty export makes this a real module, same reason as cover-hero.ts
-// and the rest of src/scripts/: without one a script with no other import or
-// export is global, not file-scoped, and would collide with them.
-export {}
+import { onReady } from './ready'
 
 const OPEN_ATTR = 'data-open'
 
@@ -105,8 +101,4 @@ function init(): void {
   })
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)
