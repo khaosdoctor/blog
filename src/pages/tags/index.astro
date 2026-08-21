@@ -24,8 +24,9 @@ const alternates = [
 ---
 
 <BaseLayout title={`${t('pt', 'tags')} | Lucas Santos`} description={t('pt', 'tagsIntro')} alternates={alternates}>
-  <h1>{t('pt', 'tags')}</h1>
-  <p class="intro">{t('pt', 'tagsIntro')}</p>
+  <h1 class="cloud-heading">
+    {t('pt', 'tags')} <span class="page-count">[{tags.length}]</span>
+  </h1>
   <ul class="chips">
     {
       tags.map(([tag, posts]) => (
@@ -40,15 +41,41 @@ const alternates = [
 </BaseLayout>
 
 <style>
-  .intro {
-    max-inline-size: var(--measure);
-    color: var(--muted);
-  }
-
   .chips {
     margin-block-start: 1.5rem;
+    /* Pulls the run in from both edges of its own box, so the cloud reads a
+       little more centred without any chip changing shape. */
+    padding-inline: 5px;
     /* A cloud, so the rows are as tall as their tallest chip. */
     align-items: baseline;
+  }
+
+  /*
+   * The cloud breaks out of the reading column: 85 chips at up to three times
+   * the base size need the room, and a paragraph's measure is the wrong
+   * constraint for something nobody reads line by line.
+   *
+   * Same technique listing.css uses for the post list. `main` is this box's
+   * containing block, and a margin percentage resolves against that block's
+   * width, so `margin-inline-start: 50%` puts the start edge at main's own
+   * centre; main and body are both centred, so that is the viewport's centre,
+   * and translating back by half this box's width puts its centre there.
+   */
+  /* The title shares the cloud's left edge, so it breaks out the same way. */
+  @media (min-width: 70rem) {
+    .cloud-heading {
+      inline-size: 90vw;
+      margin-inline-start: 50%;
+      transform: translateX(-45vw);
+    }
+  }
+
+  @media (min-width: 70rem) {
+    .chips {
+      inline-size: 90vw;
+      margin-inline-start: 50%;
+      transform: translateX(-45vw);
+    }
   }
 
   /*

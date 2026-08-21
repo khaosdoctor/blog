@@ -27,22 +27,13 @@ const title = page.currentPage > 1 ? `Lucas Santos | page ${page.currentPage}` :
     { lang: 'en', href: new URL('/en/', Astro.site).href },
   ]}
 >
-  <h1 class="visually-hidden">Lucas Santos</h1>
+  {/* Was visually hidden, carrying the site name only so the page had an h1
+      at all. It says what the page is now and takes the same prompt and rule
+      every other section title does (section-header.css). */}
+  <h1 class="listing-heading">
+    {t('en', 'navPosts')} <span class="page-count">[{page.total}]</span>
+  </h1>
   {page.total === 0 ? <p>{t('en', 'noTranslatedPosts')}</p> : <PostList posts={page.data} />}
   <Pagination page={page} basePath="/en/" locale="en" />
 </BaseLayout>
 
-<style>
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-</style>

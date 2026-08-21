@@ -7,10 +7,12 @@
  */
 
 /*
- * A rule that fades out instead of a border that stops dead, on the top three
- * levels only. h4 and deeper are rare here and get nothing, on purpose.
+ * A rule that fades out instead of a border that stops dead. h1 is not here:
+ * section-header.css draws the same mark under every h1 on the site, a post's
+ * included, and two owners for one pseudo-element is how a duplicate rule
+ * appears. h4 and deeper are rare here and get nothing, on purpose.
  */
-article :is(h1, h2, h3)::after {
+article :is(h2, h3)::after {
   content: '';
   display: block;
   block-size: 1px;
