@@ -257,11 +257,11 @@ const { action = '/search/', locale = 'pt' } = Astro.props
   }
 
   .search-results :global(.search-results-more) {
-    font-size: 0.9rem;
+    font-size: var(--text-small);
   }
 
   .search-noscript {
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: var(--text-small);
   }
 </style>

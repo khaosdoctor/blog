@@ -1,20 +1,8 @@
-// Draws a post's own cover into CoverHero.astro's empty container, from the
-// exact same function scripts/cover.ts rasterises with sharp at build
-// (buildCoverSvg, src/lib/cover.ts): one implementation, two callers, so the
-// og:image and the on-page cover can never draw differently for one post.
-//
-// With one exception, and it is the reason `drawMeta: false` is passed below.
-// The card's last line is the category chip and the reading time, and both are
-// real, working things on the page: the chip is a link to the category and the
-// reading time is a hover control with its own popup (ReadingTime.astro,
-// scripts/reading-time-hover.ts). Painting those as SVG text and hiding the
-// originals would leave a picture of a link. So the SVG leaves that slot
-// empty, this script moves the page's own `.meta` row into the card's overlay
-// slot, and `coverOverlay` (the same layout the drawing itself reads) says
-// where and in what inks it goes.
-//
-// Draws once, plainly, on load; nothing here animates, so there is nothing
-// prefers-reduced-motion needs to turn off.
+// Draws a post's cover into CoverHero.astro's empty container from the same
+// buildCoverSvg the og:image rasterises with, so the two can never differ.
+// `drawMeta: false` because the chip and the reading time are real, working
+// controls on the page: the SVG leaves that slot empty and this script moves
+// the page's own `.meta` row into the overlay, placed by coverOverlay.
 import { buildCoverSvg, coverOverlay } from '../lib/cover'
 import { onReady } from './ready'
 
@@ -46,16 +34,10 @@ function init(): void {
   hero.removeAttribute('hidden')
   article?.setAttribute('data-cover-active', '')
 
-  // Last, and deliberately so: everything above can be undone by the reader
-  // reloading, but a `.meta` moved into a container that never had its
-  // `hidden` taken off would be a chip and a reading time nobody can see. Move
-  // it once the card is already on the page and there is somewhere visible to
-  // put it.
-  //
-  // Moved, not copied: the same `<a>` with the same href, the same span the
-  // reading-time script upgrades into a button, the same everything. The
-  // `<time>` inside it and the separator glued to it are hidden the sr-only
-  // way by the stylesheet, since the byline over the rule now draws that date.
+  // Moved (not copied) last, once the card is visibly on the page: a `.meta`
+  // put into a still-hidden container would be a chip and a reading time
+  // nobody can see. Its <time> is hidden sr-only by the stylesheet, since the
+  // byline over the rule now draws that date.
   const meta = article?.querySelector<HTMLElement>('.meta') ?? null
   const slot = hero.querySelector<HTMLElement>('.cover-hero-meta')
   if (meta === null || slot === null) return

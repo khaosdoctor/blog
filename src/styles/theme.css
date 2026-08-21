@@ -238,6 +238,17 @@
 
   --duration: var(--dial-transition-duration);
   --ease: var(--dial-transition-easing);
+
+  /* Sidenote/footnote grow timing and the tint on the text a note is bound
+     to. Declared here rather than in sidenotes.css/footnotes.css because
+     sidenotes.css only loads on a page that renders a note, and both files
+     used to carry identical copies. */
+  --note-grow-duration: var(--dial-note-grow-duration);
+  --note-grow-ease: var(--dial-note-grow-easing);
+  --note-highlight: light-dark(
+    color-mix(in oklab, var(--brand-yellow) 22%, transparent),
+    color-mix(in oklab, var(--brand-yellow) 30%, transparent)
+  );
 }
 
 /*
@@ -270,6 +281,7 @@
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration: 0ms;
+    --note-grow-duration: 0ms;
   }
 }
 

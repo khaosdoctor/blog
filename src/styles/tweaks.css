@@ -211,6 +211,11 @@
   --dial-transition-duration: 120ms;
   --dial-transition-easing: ease;
 
+  /* How long a sidenote or footnote takes to grow open on hover. Slower than
+     the hover transition on purpose: at 120ms the enlarge cue reads as a zoom. */
+  --dial-note-grow-duration: 700ms;
+  --dial-note-grow-easing: cubic-bezier(0.65, 0, 0.35, 1);
+
   /* ==========================================================================
    * 9. THE SECTION BREAK
    *

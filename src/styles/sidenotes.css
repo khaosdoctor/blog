@@ -30,15 +30,9 @@
    rendered width of a `ch`-based column. It comfortably clears a 68ch serif
    column plus a 13rem note and its spacing. Hardcoded in the blocks below. */
 
+/* --note-highlight and the grow timing live in theme.css, shared with
+   footnotes.css. */
 :root {
-  /* The run of text a note is bound to, tinted on hover so a reader sees what
-     it attaches to before opening it. The faded brand yellow rather than the
-     solid bold chip: a solid fill would fight the text sitting on it. */
-  --note-highlight: light-dark(
-    color-mix(in oklab, var(--brand-yellow) 22%, transparent),
-    color-mix(in oklab, var(--brand-yellow) 30%, transparent)
-  );
-
   /* "White border" here means the foreground colour, so it inverts per theme. */
   --note-border-width: var(--border-card-edge);
   /* `border-style: double` needs 3px to draw as two lines; under that a browser
@@ -52,14 +46,6 @@
      just its top corner: text never lays out inside this padding, so the icon
      stays clear of every line rather than only the first. */
   --note-icon-gutter: 1.9rem;
-
-  /* Its own timing rather than the site's 120ms hover: at that speed a
-     "slightly enlarge" cue reads as a zoom. Shared with footnotes.css so an
-     aside and a note grow alike. `--duration` collapses to 0ms under reduced
-     motion in theme.css, but that only touches `--duration`, so this repeats
-     the query below. */
-  --note-grow-duration: 700ms;
-  --note-grow-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .note {
@@ -342,10 +328,6 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    --note-grow-duration: 0ms;
-  }
-
   .note-text {
     transition: none;
   }

@@ -38,37 +38,9 @@ const locale = localeFromPath(Astro.url.pathname)
 </figure>
 
 <style>
-  .lab-demo {
-    margin-block: 2rem;
-    margin-inline: 0;
-    border: var(--border) double var(--rule);
-    border-inline-start: var(--border-card-edge) solid var(--rule);
-    border-radius: var(--radius);
-  }
-
+  /* The card frame and the source disclosure live in styles/lab-demo.css,
+     shared with HtmlLab.astro. */
   .stage {
     padding: 1.25rem;
-  }
-
-  details {
-    border-block-start: var(--border) solid var(--rule);
-  }
-
-  summary {
-    padding: 0.4rem 0.75rem;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: var(--font-mono);
-    font-size: var(--text-tiny);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  summary:hover {
-    color: var(--accent);
-  }
-
-  summary code {
-    text-transform: none;
   }
 </style>
