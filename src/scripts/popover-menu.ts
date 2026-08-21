@@ -29,7 +29,7 @@ function placeMenu(el: HTMLElement, anchor: HTMLElement): void {
   el.style.left = `${left}px`
 }
 
-export interface MenuController {
+interface MenuController {
   isOpen(): boolean
   open(): void
   close(returnFocus: boolean): void

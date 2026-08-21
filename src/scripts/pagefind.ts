@@ -2,7 +2,7 @@
 // search-palette.ts, which carried identical copies of the loader, the types
 // and the data-attribute label reader.
 
-export interface PagefindResult {
+interface PagefindResult {
   data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }>
 }
 

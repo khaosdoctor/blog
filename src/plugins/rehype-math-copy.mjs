@@ -209,7 +209,7 @@ function convert(str) {
 }
 
 /** Converts a LaTeX string into a small, honest plain-text rendering. */
-export function latexToAscii(tex) {
+function latexToAscii(tex) {
   return convert(tex)
     .replace(/\( +/g, '(')
     .replace(/ +\)/g, ')')
