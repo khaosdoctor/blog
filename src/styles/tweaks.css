@@ -148,8 +148,15 @@
   /* The header, the footer, the post list, every listing heading and the tag
      cloud are wider than the reading column, and share this width. 80vw leaves
      10% of the window clear on each side: at 88 the rows ran almost to the
-     edges, which read as the page having no margin at all. */
-  --dial-shell-width: 80vw;
+     edges, which read as the page having no margin at all.
+
+     The cap is what keeps that percentage from outgrowing the column it frames.
+     The reading column stops at --dial-reading-width, so past a point 80vw is
+     still widening while the text is not: on a 2560px monitor the bare
+     percentage put the header's controls 577px outside the article's own edge,
+     too far out to read as belonging to it. 87.5rem is 80vw of a 1750px window,
+     so every laptop width is untouched and only the wide monitors clamp. */
+  --dial-shell-width: min(80vw, 87.5rem);
   /* How far the header's own contents sit in from that edge. */
   --dial-shell-inset: 0.667rem;
 
