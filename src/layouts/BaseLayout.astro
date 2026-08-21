@@ -38,6 +38,8 @@ import '../styles/variants/quotes.css'
 import '../styles/chips.css'
 // The dense listing table, shared by PostList and the series index.
 import '../styles/listing.css'
+// The lab demo card frame, shared by LabDemo and HtmlLab.
+import '../styles/lab-demo.css'
 // The page itself: reset, grounds, landmarks. Last, so a component's own
 // stylesheet above can be overridden by nothing but a component's scoped style.
 import '../styles/core.css'
@@ -55,11 +57,8 @@ import ReadingProgress from '../components/ReadingProgress.astro'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
-// Baked in at build time: the semver the release workflow last tagged, plus a
-// count of commits since that tag. See src/lib/version.ts. It counted posts
-// once, which left every change that was not a post invisible. REPO is the
-// same string the footer's GitHub icon link points at, so both read off one
-// constant rather than spelling the host out twice.
+// Baked in at build time (src/lib/version.ts). REPO is the same string the
+// footer's GitHub icon link points at, so both read one constant.
 import { commitShort, commitUrl, REPO, siteVersion as version } from '../lib/version'
 
 interface Props {
@@ -82,20 +81,10 @@ interface Props {
   /** Only a post gets the reading progress bar; an index has nothing to read through. */
   progress?: boolean
   /**
-   * The post's own colour, as one of the `var(--brand-*)` (or `var(--fg)` /
-   * `var(--muted)`) tokens `coverTone()` hands out. Written onto <body> below
-   * as `--post-accent`.
-   *
-   * It used to be written onto <article> by each post page, which was enough
-   * while only the prose read it (bold, italic, prose/emphasis.css). The
-   * header's reading progress now reads it too, and the header is a sibling of
-   * <main>, not a descendant of the article, so an <article>-level custom
-   * property can never reach it. <body> is the nearest element that contains
-   * both, which is the whole reason this prop exists.
-   *
-   * Still exactly one derivation: the post pages pass `coverTone(slug).token`
-   * straight through, the same call the cover itself paints with. Do not
-   * re-derive a post's colour anywhere else (lib/cover.ts's own note says why).
+   * The post's own colour, one of the tokens coverTone() hands out, written
+   * onto <body> as `--post-accent`: the header's reading progress reads it as
+   * well as the article's prose, and <body> is the nearest element containing
+   * both. Always pass `coverTone(slug).token`, never a re-derivation.
    */
   postAccent?: string
 }

@@ -64,7 +64,7 @@
      native vertical scrolling of the description. */
   touch-action: pan-y;
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity var(--duration) var(--ease);
 }
 
 .hp-card.hp-open {
@@ -113,7 +113,7 @@
   fill: currentColor;
   /* Upright when loose, driven into the card when pinned. */
   rotate: -35deg;
-  transition: rotate 120ms ease;
+  transition: rotate var(--duration) var(--ease);
 }
 
 .hp-pin[aria-pressed='true'] {
@@ -176,7 +176,7 @@
   display: block;
   margin-block-start: 0.5rem;
   color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
 }
 
@@ -233,13 +233,6 @@ a.link-unwritten {
 .hp-card.hp-unwritten .hp-hint {
   position: relative;
   z-index: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hp-card,
-  .hp-pin svg {
-    transition: none;
-  }
 }
 
 /* --- Minimised cards --- */

@@ -25,11 +25,7 @@ const { id } = Astro.props
 </figure>
 
 <style>
-  .deck {
-    margin-block: 2rem;
-    margin-inline: 0;
-  }
-
+  /* The block margin comes from core.css's own `figure` rule. */
   .deck iframe {
     /* Speaker Deck renders 16:10, not 16:9. */
     aspect-ratio: 16 / 10;

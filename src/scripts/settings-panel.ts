@@ -37,11 +37,10 @@ const HP_PERSIST_KEY = 'hp-persist'
 // appears once per browser.
 const NUDGE_KEY = 'settings-nudge-seen'
 
-// The same key BaseLayout's pre-paint script reads, so there is no flash at the
-// default size. A raw percentage rather than named steps: 50-160 in 10s is
-// twelve stops, more than a fixed set of attribute blocks wants to carry, so
-// this writes --font-scale inline instead. 160 is on the grid (160 - 50 = 110),
-// so both ends are reachable. Nothing stored means the stylesheet's own 100%.
+// The same key BaseLayout's pre-paint script reads, so there is no flash at
+// the default size. A raw percentage rather than named steps: the range is
+// more stops than attribute blocks want to carry, so this writes --font-scale
+// inline. Nothing stored means the stylesheet's own 100%.
 const FONT_SIZE_KEY = 'font-size'
 
 // Clamped, then snapped to the same grid the control steps on, so a value read
@@ -344,21 +343,11 @@ function init(): void {
   }
 
   /*
-   * --- Reset all. ---
-   *
-   * The three modules that own their own keys go first, then every control's
-   * handler re-reads what they left, so nothing here has to know which key
-   * belongs to which control.
-   *
-   * It deliberately does NOT touch the light/dark choice. Lucas asked for that
-   * to stay out of this panel, so a reader would have no way to see it change
-   * from in here and would only find out by watching the page invert under a
-   * button labelled as a preferences reset. ThemeToggle already carries its own
-   * reset, the "system" option, one button over.
-   *
-   * 'hp-pinned' is left for a different reason: the pinned cards are the
-   * reader's content, not a preference. Clearing the flag above already moves
-   * that set back to the session.
+   * Reset all: the modules that own their own keys go first, then every
+   * control's handler re-reads what they left. Deliberately does NOT touch
+   * the light/dark choice (Lucas asked for that to stay out of this panel;
+   * ThemeToggle has its own reset, "system") nor 'hp-pinned' (the pinned
+   * cards are the reader's content, not a preference).
    */
   const resetAll = menu.querySelector<HTMLButtonElement>('#sp-reset-all')
   resetAll?.addEventListener('click', () => {

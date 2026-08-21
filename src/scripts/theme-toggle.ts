@@ -27,14 +27,10 @@ function applyScheme(scheme: Scheme | null): void {
   else document.documentElement.setAttribute(ATTR, scheme)
 }
 
-// BaseLayout ships two <meta name="theme-color"> tags, one per
-// prefers-color-scheme, hardcoded because a meta tag cannot read a custom
-// property. An explicit choice makes them disagree with the page whenever the
-// OS differs from it, so both get the resolved colour and revert on "system".
-//
-// Each meta's own content already IS that scheme's colour, so it is read off
-// the DOM rather than repeated here. Cached before this ever overwrites it, or
-// a later call would cache its own overwrite.
+// BaseLayout ships two <meta name="theme-color"> tags, one per OS scheme; an
+// explicit choice makes them disagree with the page, so both get the resolved
+// colour and revert on "system". Each meta's own content IS that scheme's
+// colour, read off the DOM and cached before it is ever overwritten.
 let ownLight: string | null = null
 let ownDark: string | null = null
 

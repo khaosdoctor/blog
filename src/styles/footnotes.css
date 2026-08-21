@@ -36,25 +36,8 @@
   --footnote-aside-width: 9rem;
   --footnote-aside-gap: 1.5rem;
 
-  /*
-   * Duplicated from sidenotes.css rather than shared: this file is imported
-   * globally, sidenotes.css only on a page that actually renders a note, so a
-   * footnote-only post cannot rely on its `:root` having run. Same values, kept
-   * in step by hand. Two identical declarations of one custom property is not a
-   * conflict if both files do end up on a page.
-   */
-  --note-highlight: light-dark(
-    color-mix(in oklab, var(--brand-yellow) 22%, transparent),
-    color-mix(in oklab, var(--brand-yellow) 30%, transparent)
-  );
-  --note-grow-duration: 700ms;
-  --note-grow-ease: cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --note-grow-duration: 0ms;
-  }
+  /* --note-highlight and the grow timing live in theme.css, shared with
+     sidenotes.css. */
 }
 
 /* --------------------------------------------------------------- section */
