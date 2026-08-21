@@ -141,11 +141,24 @@ const tree = treeOf(flat)
    * to fall back to, so the alpha was doing all of it and the words read as a
    * ghost of the frame around them.
    */
+  /* The entries step in from the heading above them, the same shape the series
+     card uses inside its own frame: the label names the block and the list
+     hangs under it. Padding rather than a margin on the rows, so the current
+     entry's fill still starts where its text does. */
+  .list {
+    padding-inline-start: 1.2rem;
+  }
+
   .title {
     margin: 0 0 0.35rem;
     padding-inline-start: 0.3rem;
     font-family: var(--font-display);
     font-size: 0.75rem;
+    /* Bold without font-weight: Departure Mono ships one weight (fonts.css), so
+       700 would be synthesised by smearing the glyphs sideways. A one-pixel
+       copy offset along the inline axis doubles each stem instead, which is how
+       a bitmap face gets a bold, and it works in every engine. */
+    text-shadow: 1px 0 currentColor;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }

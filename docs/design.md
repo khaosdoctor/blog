@@ -212,11 +212,21 @@ The order the work goes in from here, Lucas's own list.
    and given a fallback rather than a design: the header row wraps, the outline becomes a drawer, the post list drops
    to the plain measure, and the cover overlay's own coordinates were reasoned about rather than seen. This is the one
    item that touches every surface already built.
+
+   Three things were found at a narrow window and deliberately left for this pass rather than patched: the series card
+   on a post overflows the frame, because its rows carry a fixed indent and the longest title then sets a minimum row
+   width, and content wider than the viewport extends the document so the whole page scrolls sideways; the cover needs
+   to resize rather than be cropped; and a pinned hover preview restored from a wider window can land off-screen. An
+   attempt at collapsing the series card into a disclosure was built and reverted, it was not the behaviour wanted.
 2. **Reading the existing posts.** A pass through what is already published to judge what reads well and what does
    not, now that the type, the rules, the code frames and the callouts are all decided. Content review feeding
    design rather than a code task: expect it to reopen a few settled values.
-3. **The series header.** The current layout is not good enough. The series box on a post and the series pages
-   themselves both need a real treatment rather than the plain list they carry today.
+3. ~~**The series header.**~~ Done. The series index in both languages now renders through the same listing table
+   the post list uses (`src/styles/listing.css`, shared by `PostList` and `SeriesList`), one row per series with its
+   latest date, part count in the day colour and total reading time, and each row opens its parts in place through a
+   native `<details>` instead of navigating. The per-series pages stay, since that is the URL worth sharing. The card
+   on a post took the house double rule in the cover colour, a bigger title on its own line behind a shell prompt, the
+   current part filled edge to edge in the day colour, and alignment with the frame the cover draws inside its own box.
 4. **Individual page layouts.** `/about/` has no content and 404s from the nav. The tag, series and category index
    pages exist but were built to be correct rather than designed. Same for `/search/`, `/oss/`, 404 and offline.
 5. **A pass over what already exists**, together, so Lucas sees the whole thing in one sitting rather than one

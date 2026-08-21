@@ -43,6 +43,7 @@ function init(): void {
   hero.style.setProperty('--cover-meta-x', String(overlay.x))
   hero.style.setProperty('--cover-meta-y', String(overlay.centerY))
   hero.style.setProperty('--cover-meta-size', String(overlay.size))
+  hero.style.setProperty('--cover-chip-size', String(overlay.chipSize))
   hero.style.setProperty('--cover-chip-ink', overlay.chipInk)
   hero.style.setProperty('--cover-meta-ink', overlay.textInk)
 

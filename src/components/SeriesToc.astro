@@ -85,7 +85,10 @@ const seriesHref = localePath(locale, `/series/${series}/`)
        named, because the rows undo and redo them to span the full width. */
     --toc-pad: 1.2rem;
     --toc-indent: 5rem;
-    margin-block: 2rem;
+    /* The cover carries 2.5rem below it and adjacent margins collapse to the
+       larger, so a smaller positive value here changes nothing. A negative one
+       is added to it instead: 2.5 - 2 leaves 0.5rem between the two frames. */
+    margin-block: -2rem 2rem;
     /*
      * Lines up with the frame the cover draws INSIDE its own box, rather than
      * with the box itself: cover.ts strokes that frame at unit 36 of 1200 with

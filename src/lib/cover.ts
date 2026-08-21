@@ -410,6 +410,13 @@ const CARD_PAD_Y = 140
  * 20px: padding .15rem/.55rem becomes 5/14, `border: 3px double` becomes
  * 2+2+2, and the `.meta` row's own .5rem spacing becomes 14.
  */
+/*
+ * The chip runs smaller than the reading time next to it: at one shared size
+ * the boxed label was the loudest thing under the title. Its own constant, so
+ * the rasteriser and the real chip the page lays over the card cannot disagree,
+ * which is the whole reason this layout lives in one module.
+ */
+const CHIP_SIZE = 17
 const CHIP_PAD_X = 14
 const CHIP_PAD_Y = 5
 const CHIP_BORDER = 2
@@ -417,7 +424,7 @@ const CHIP_BORDER_SPACING = 2
 const CHIP_LETTER_SPACING = 1
 const META_LETTER_SPACING = 2
 const META_SPACING = 14
-const META_BOX_H = META_SIZE + CHIP_PAD_Y * 2
+const META_BOX_H = CHIP_SIZE + CHIP_PAD_Y * 2
 
 /**
  * The advance of one character, in em, measured off a rasterised card: the
@@ -434,7 +441,7 @@ const CHIP_ADVANCE = 0.6
  * 0.8em over its baseline, so the box clears the label's own ascenders by the
  * padding and no more.
  */
-const META_BOX_RISE = META_SIZE * 0.8 + CHIP_PAD_Y
+const META_BOX_RISE = CHIP_SIZE * 0.8 + CHIP_PAD_Y
 
 function titleFontSize(length: number): number {
   if (length <= 30) return 66
@@ -479,7 +486,7 @@ function layoutCard(title: string): Card {
   const lines = wrapTitle(displayTitle, CARD_W - padX * 2, fontSize)
   const lineHeight = fontSize * LINE_HEIGHT_RATIO
   const spaceAfterByline = fontSize * 0.55
-  const spaceBeforeMeta = fontSize * 0.5
+  const spaceBeforeMeta = fontSize * 0.85
   // The meta line is a box, not a text line: its own height is what the block
   // has to reserve, or the chip's rule would hang below the padding the card
   // centres itself inside.
@@ -586,6 +593,8 @@ export interface CoverOverlay {
   centerY: number
   /** The meta line's font size. */
   size: number
+  /** The chip label, smaller than `size`, see CHIP_SIZE. */
+  chipSize: number
   /** The chip's ink on the card's black ground. */
   chipInk: string
   /** The reading time's dim white, white at 75% over black. */
@@ -598,6 +607,7 @@ export function coverOverlay(title: string, category: string): CoverOverlay {
     x: card.padX,
     centerY: card.metaY - META_BOX_RISE + META_BOX_H / 2,
     size: META_SIZE,
+    chipSize: CHIP_SIZE,
     chipInk: coverChipInk(category),
     textInk: DIMMED_WHITE,
   }
@@ -639,7 +649,7 @@ export function buildCoverSvg({ slug, title, category, byline, readingMinutes, d
   //
   // Letter-spacing is added after every glyph, the last one included, so the
   // label's own width is one of those short of the sum.
-  const chipTextWidth = category.length * (META_SIZE * CHIP_ADVANCE + CHIP_LETTER_SPACING) - CHIP_LETTER_SPACING
+  const chipTextWidth = category.length * (CHIP_SIZE * CHIP_ADVANCE + CHIP_LETTER_SPACING) - CHIP_LETTER_SPACING
   const chipWidth = chipTextWidth + CHIP_PAD_X * 2
   const chipTop = card.metaY - META_BOX_RISE
   const readingText = readingMinutes === undefined ? null : `· ${readingMinutes} min`
@@ -657,7 +667,7 @@ export function buildCoverSvg({ slug, title, category, byline, readingMinutes, d
       // since an SVG stroke straddles its own path.
       chipRule(x, y, CHIP_BORDER / 2, chipInk),
       chipRule(x, y, CHIP_BORDER * 1.5 + CHIP_BORDER_SPACING, chipInk),
-      `<text x="${n(x + CHIP_PAD_X)}" y="${n(card.metaY + dy)}" font-family="${TITLE_FONT}" font-size="${META_SIZE}" letter-spacing="${CHIP_LETTER_SPACING}" fill="${chipInk}">${escapeXml(category)}</text>`,
+      `<text x="${n(x + CHIP_PAD_X)}" y="${n(card.metaY + dy)}" font-family="${TITLE_FONT}" font-size="${CHIP_SIZE}" letter-spacing="${CHIP_LETTER_SPACING}" fill="${chipInk}">${escapeXml(category)}</text>`,
     ]
     if (readingText !== null)
       parts.push(
