@@ -7,30 +7,25 @@
 import { applyAccent } from '../lib/accent'
 import { runDecode, SCRAMBLE_TICK_MS, SCRAMBLE_LOCK_TICKS, type DecodeRun } from '../lib/decode-scramble'
 import { GLITCH_GLYPHS } from '../lib/logo-mark'
+import {
+  cursorBlinkPhaseMilliseconds as CURSOR_RATE_MS,
+  cursorRampFrameCount as CURSOR_RAMP_FRAMES,
+  cursorRampMilliseconds as CURSOR_RAMP_MS,
+  glitchMaximumIntervalMilliseconds as GLITCH_MAX_MS,
+  glitchMinimumIntervalMilliseconds as GLITCH_MIN_MS,
+  glitchPulseGapMaximumMilliseconds as PULSE_GAP_MAX_MS,
+  glitchPulseGapMinimumMilliseconds as PULSE_GAP_MIN_MS,
+  glitchPulseMaximumMilliseconds as PULSE_MAX_MS,
+  glitchPulseMinimumMilliseconds as PULSE_MIN_MS,
+} from '../lib/tweaks'
+import { prefersReducedMotion as reduced } from './motion'
 
 const SCRAMBLE_GLYPHS = '!<>-_\\/[]{}=+*^?#'.split('')
 
-// Terminal rate, 530ms a phase. The crossing between phases is 2 hard opacity
-// steps of 90ms rather than a CSS transition, which would smooth the
-// low-frame-rate read into a fade.
-const CURSOR_RATE_MS = 530
-const CURSOR_RAMP_MS = 90
-const CURSOR_RAMP_FRAMES = 2
-
-/*
- * The scramble's per-letter stagger shares the cursor's own 90ms clock, so the
- * two read as one tempo rather than two unrelated ones. The tick and lock
- * timings live in lib/decode-scramble, shared with the reading progress.
- */
+// The scramble's per-letter stagger shares the cursor's own ramp clock, so
+// the two read as one tempo. The tick and lock timings live in
+// lib/decode-scramble, shared with the reading progress.
 const STAGGER_MS = CURSOR_RAMP_MS
-
-// A burst of 1-3 pulses, 4-20s apart, on the wordmark and the mark together.
-const GLITCH_MIN_MS = 4000
-const GLITCH_MAX_MS = 20000
-const PULSE_MIN_MS = 80
-const PULSE_MAX_MS = 150
-const PULSE_GAP_MIN_MS = 60
-const PULSE_GAP_MAX_MS = 160
 
 // sessionStorage, not localStorage: the scramble should play again in a new
 // browser session but never while clicking around the site in one sitting.
@@ -44,24 +39,6 @@ function randomBetween(min: number, max: number): number {
 
 function randomGlyph(glyphs: string[]): string {
   return glyphs[Math.floor(Math.random() * glyphs.length)] ?? ''
-}
-
-/* The same convention conway.ts reads: an explicit `data-motion` wins in both
-   directions, and the OS query decides when it is absent. */
-function motionOverride(): 'reduce' | 'allow' | null {
-  const attr = document.documentElement.getAttribute('data-motion')
-  return attr === 'reduce' || attr === 'allow' ? attr : null
-}
-
-function osReduced(): boolean {
-  return matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
-function reduced(): boolean {
-  const override = motionOverride()
-  if (override === 'reduce') return true
-  if (override === 'allow') return false
-  return osReduced()
 }
 
 /**

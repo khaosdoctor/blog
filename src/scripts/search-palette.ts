@@ -6,6 +6,11 @@
 // <script> through ./pagefind.
 import { dayColor } from '../lib/day-color'
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
+import {
+  searchPaletteDebounceMilliseconds as DEBOUNCE_MS,
+  searchPaletteResultLimit as MAX_RESULTS,
+  searchShortcutDefaultLetter as DEFAULT_LETTER,
+} from '../lib/tweaks'
 import { loadPagefind, searchLabel as label, type PagefindModule } from './pagefind'
 import { onReady } from './ready'
 
@@ -15,7 +20,6 @@ import { onReady } from './ready'
 // of duplicating the key. ---
 
 const SHORTCUT_KEY = 'search-shortcut'
-const DEFAULT_LETTER = 'K'
 
 /*
  * Seven letters are a shortcut the browser itself owns (bookmark, address bar,
@@ -106,7 +110,9 @@ async function ensurePagefind(): Promise<PagefindModule | null> {
   return pagefindState
 }
 
-const MAX_RESULTS = 5 // Matches the numbered 1-5 shortcut; past this is a link to /search/ instead of a 6th row.
+// MAX_RESULTS rows each get a numbered shortcut (NUMBER_SHORTCUT below);
+// past it the palette links to /search/ instead of a further row.
+const NUMBER_SHORTCUT = new RegExp(`^[1-${MAX_RESULTS}]$`)
 
 function searchPageHref(query: string): string {
   const base = document.documentElement.lang === 'en' ? '/en/search/' : '/search/'
@@ -192,7 +198,7 @@ function init(): void {
     // Pagefind's own coalescing rather than a hand-rolled setTimeout: a call
     // superseded by a newer keystroke resolves to null instead of running,
     // which keeps the live region from announcing once per key.
-    const outcome = await pagefind.debouncedSearch(query, {}, 200)
+    const outcome = await pagefind.debouncedSearch(query, {}, DEBOUNCE_MS)
     if (outcome === null || generation !== searchGeneration) return
 
     const { results } = outcome
@@ -281,7 +287,7 @@ function init(): void {
     // Cmd/Ctrl+1-5 jumps to that result. Most browsers also use Ctrl/Cmd+1-9
     // to switch tabs, so this preventDefault may lose that race depending on
     // the browser, the same way GitHub's and Linear's number shortcuts do.
-    if (metaHeld && /^[1-5]$/.test(event.key)) {
+    if (metaHeld && NUMBER_SHORTCUT.test(event.key)) {
       event.preventDefault()
       resultLinks[Number(event.key) - 1]?.click()
       return

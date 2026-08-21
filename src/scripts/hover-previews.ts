@@ -4,6 +4,15 @@
 // is the exception: its note is already in this DOM, so its card is read from
 // there (see getMeta).
 import { readStorage } from '../lib/storage'
+import {
+  hoverPreviewCacheEntryLimit as CACHE_MAX,
+  hoverPreviewCloseDelayMilliseconds as CLOSE_DELAY,
+  hoverPreviewDragThresholdPixels as DRAG_THRESHOLD,
+  hoverPreviewFootnoteCharacterLimit as FOOTNOTE_TEXT_MAX,
+  hoverPreviewLongPressMilliseconds as LONG_PRESS_DELAY,
+  hoverPreviewOpenDelayMilliseconds as HOVER_DELAY,
+  hoverPreviewPinnedCardLimit as CARD_MAX,
+} from '../lib/tweaks'
 import { onReady } from './ready'
 
 interface Meta {
@@ -37,13 +46,6 @@ interface StoredCard {
 interface PopoverHTMLElement extends HTMLElement {
   hpLink?: HTMLAnchorElement
 }
-
-const CACHE_MAX = 40
-const CARD_MAX = 6
-const HOVER_DELAY = 200
-const CLOSE_DELAY = 150
-const LONG_PRESS_DELAY = 500
-const DRAG_THRESHOLD = 6
 
 const STORAGE_KEY = 'hp-pinned'
 /** Reader opted into keeping the pinned set past the end of the session. */
@@ -172,10 +174,6 @@ async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
     host: known?.publisher?.trim() || host,
   }
 }
-
-// Past this a footnote would grow the card beyond what a hover popover should
-// be. (.hp-card still scrolls past 60vh, but that is a safety net.)
-const FOOTNOTE_TEXT_MAX = 480
 
 /**
  * The note's text, read from the foot of the page rather than fetched: it is

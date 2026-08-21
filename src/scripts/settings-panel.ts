@@ -18,6 +18,12 @@ import { getShortcutLetter, resetShortcutLetter, RESERVED_LETTERS, setShortcutLe
 import { resetCodeTheme } from './code-theme'
 import { setAccent, storedAccent } from '../lib/accent'
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
+import {
+  fontSizeDefaultPercent as FONT_SIZE_DEFAULT,
+  fontSizeMaximumPercent as FONT_SIZE_MAX,
+  fontSizeMinimumPercent as FONT_SIZE_MIN,
+  fontSizeStepPercent as FONT_SIZE_STEP,
+} from '../lib/tweaks'
 import { promoteToPopover, wireMenu } from './popover-menu'
 import { onReady } from './ready'
 
@@ -37,10 +43,6 @@ const NUDGE_KEY = 'settings-nudge-seen'
 // this writes --font-scale inline instead. 160 is on the grid (160 - 50 = 110),
 // so both ends are reachable. Nothing stored means the stylesheet's own 100%.
 const FONT_SIZE_KEY = 'font-size'
-const FONT_SIZE_MIN = 50
-const FONT_SIZE_MAX = 160
-const FONT_SIZE_STEP = 10
-const FONT_SIZE_DEFAULT = 100
 
 // Clamped, then snapped to the same grid the control steps on, so a value read
 // back from storage always resolves to a stop the control can rest on. This is
