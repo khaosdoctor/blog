@@ -7,10 +7,15 @@
 // own list out of getTags('en'), so neither index links a tag the reader's own
 // language has no page for.
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { chipColor, getTags, slugify } from '../../lib/taxonomy'
+import { chipColor, getTags, slugify, tagCloudScale } from '../../lib/taxonomy'
 import { HREFLANG, t } from '../../i18n/ui'
 
 const tags = [...(await getTags()).entries()].sort(([a], [b]) => a.localeCompare(b, 'pt-BR'))
+
+// The range the cloud is scaled across, from the counts actually present.
+const counts = tags.map(([, posts]) => posts.length)
+const fewest = Math.min(...counts)
+const most = Math.max(...counts)
 
 const alternates = [
   { lang: HREFLANG.pt, href: new URL('/tags/', Astro.site).href },
@@ -25,7 +30,7 @@ const alternates = [
     {
       tags.map(([tag, posts]) => (
         <li>
-          <a href={`/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}`}>
+          <a href={`/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}; --chip-scale: ${tagCloudScale(posts.length, fewest, most)}`}>
             {tag} ({posts.length})
           </a>
         </li>
@@ -42,5 +47,22 @@ const alternates = [
 
   .chips {
     margin-block-start: 1.5rem;
+    /* A cloud, so the rows are as tall as their tallest chip. */
+    align-items: baseline;
+  }
+
+  /*
+   * Size carries the count. The padding and the rule go to `em` here so a big
+   * chip keeps a chip's proportions instead of a small box around large text;
+   * chips.css keeps its own fixed lengths everywhere else, where every chip is
+   * the same size.
+   *
+   * The number stays in the label. Size alone is a visual-only signal, and this
+   * page is the one place a reader might want to compare two tags exactly.
+   */
+  .chips .chip {
+    font-size: calc(var(--text-tiny) * var(--chip-scale, 1));
+    padding: 0.15em 0.55em;
+    border-width: 0.2em;
   }
 </style>

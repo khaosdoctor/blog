@@ -54,6 +54,36 @@ export type Series = { name: string; posts: Post[] }
  * back to the bare slug. Nothing here reads across languages on purpose, since
  * borrowing the Portuguese name would put Portuguese in an English heading.
  */
+/* The smallest and largest a tag chip is allowed to read in the cloud. The
+   floor is 1, the chip's own size, so the cloud only ever grows a tag: with a
+   floor below 1 the many one-post tags all shrank by a hair, which reads as
+   nothing having happened. */
+const TAG_SCALE_MIN = 1
+const TAG_SCALE_MAX = 3
+
+/**
+ * How large a tag reads in the cloud on the tag index, as a multiplier on the
+ * chip's own size. Shared so the two language trees cannot drift apart.
+ *
+ * A logarithm, not the raw count and not a square root. The counts here are
+ * heavily skewed: most tags carry one or two posts and a few carry dozens. On a
+ * linear scale the big ones flatten everything else into one size, and a square
+ * root still puts one post and two within a hundredth of each other, which is
+ * the difference nobody can see. A log spreads the crowded low end, which is
+ * where nearly every tag actually is.
+ *
+ * log1p, so a count of 1 is not log(1) = 0 fighting a zero-width span.
+ *
+ * Returns the floor for every tag when they all have the same number of posts,
+ * since there is nothing to compare and the range would divide by zero.
+ */
+export function tagCloudScale(count: number, min: number, max: number): number {
+  if (max <= min) return TAG_SCALE_MIN
+  const span = Math.log1p(max) - Math.log1p(min)
+  const position = (Math.log1p(count) - Math.log1p(min)) / span
+  return Math.round((TAG_SCALE_MIN + position * (TAG_SCALE_MAX - TAG_SCALE_MIN)) * 1000) / 1000
+}
+
 export function seriesTitle(slug: string, members: Post[]): string {
   for (const member of members) {
     const name = member.data.seriesName?.trim()
