@@ -14,7 +14,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 }) satisfies GetStaticPaths
 
 const { page } = Astro.props
-const title = page.currentPage > 1 ? `Lucas Santos | page ${page.currentPage}` : 'Lucas Santos'
+const title = page.currentPage > 1 ? `Lucas Santos: Blog | page ${page.currentPage}` : 'Lucas Santos: Blog'
 ---
 
 <BaseLayout
