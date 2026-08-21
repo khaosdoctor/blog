@@ -153,12 +153,7 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    /* Centred in its own row rather than aligned to the start: the controls
-       are a small cluster in a box as wide as the list above, and left-aligned
-       they read as the last row of that list instead of as its own thing. */
     justify-content: center;
-    /* 5px from the last row of the list. The separator carries its own space
-       below it, which is what keeps the controls off the rule. */
     margin-block-start: 5px;
     border-block-start: 0;
     font-family: var(--font-display);
@@ -166,18 +161,20 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
   }
 
   /*
-   * Its own row, so the controls sit under it rather than beside it. The mark
-   * itself comes from prose/rules.css; only the spacing is this file's, since a
-   * post's `---` wants far more air around it than a row of page numbers.
+   * The box spans the row so the controls fall below it, and only the paint is
+   * cut to --rule-length. `inline-size` cannot do that here: as a flex item its
+   * main size is `flex-basis`, which wins. The mask is re-declared at the same
+   * size for the same reason, or it would fade the row's edges instead of the
+   * mark's.
    */
   .pg-rule {
     flex-basis: 100%;
     margin-block: 0 1.2rem;
-    /* A short mark rather than the full --rule-length a post's `---` takes: this
-       one separates a row of controls from a list, not one section of an article
-       from the next. `margin-inline: auto` from the shared rule keeps it
-       centred at any width. */
-    inline-size: 30px;
+    background-size: var(--rule-length) var(--rule-weight);
+    background-position: center;
+    background-repeat: no-repeat;
+    mask: linear-gradient(to right, transparent, black 35%, black 65%, transparent) center / var(--rule-length) 100%
+      no-repeat;
   }
 
   /*
