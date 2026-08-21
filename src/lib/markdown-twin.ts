@@ -51,7 +51,7 @@ function replaceComponents(prose: string): string {
     .replace(COMPONENT, '')
 }
 
-export function toAgentMarkdown(post: Post, site: URL | undefined): string {
+function toAgentMarkdown(post: Post, site: URL | undefined): string {
   const path = urlOf(post)
   const url = site === undefined ? path : new URL(path, site).href
   const { title, description, pubDate, updatedDate, category, tags, series, lang } = post.data

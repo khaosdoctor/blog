@@ -96,7 +96,7 @@ export interface JsonLdInput {
   authors?: string[]
 }
 
-export function buildArticleJsonLd(input: JsonLdInput): Record<string, unknown> {
+function buildArticleJsonLd(input: JsonLdInput): Record<string, unknown> {
   const { title, description, canonical, lang, image, publishedAt, updatedAt, tags, series, authors } =
     input
   return {
