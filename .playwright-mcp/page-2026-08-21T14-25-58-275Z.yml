@@ -1,0 +1,1635 @@
+- generic [active] [ref=f2e1]:
+  - link "Pular para o conteúdo" [ref=f2e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f2e4]:
+    - generic [ref=f2e5]: ┌─
+    - link "lsantos.dev" [ref=f2e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=f2e8]:
+        - generic [ref=f2e9]: ┌
+        - generic [ref=f2e10]: ┐
+        - generic [ref=f2e12]: ┌
+        - generic [ref=f2e13]: ─
+        - generic [ref=f2e14]: ─
+        - generic [ref=f2e15]: ─
+        - generic [ref=f2e16]: ┐
+        - generic [ref=f2e17]: │
+        - generic [ref=f2e18]: │
+        - generic [ref=f2e20]: │
+        - generic [ref=f2e24]: │
+        - generic [ref=f2e25]: │
+        - generic [ref=f2e26]: │
+        - generic [ref=f2e28]: └
+        - generic [ref=f2e29]: ─
+        - generic [ref=f2e30]: ─
+        - generic [ref=f2e31]: ─
+        - generic [ref=f2e32]: ┘
+        - generic [ref=f2e33]: │
+        - generic [ref=f2e34]: │
+        - generic [ref=f2e41]: │
+        - generic [ref=f2e43]: ─
+        - generic [ref=f2e44]: ─
+        - generic [ref=f2e45]: ┐
+        - generic [ref=f2e47]: ┌
+        - generic [ref=f2e48]: ┐
+        - generic [ref=f2e49]: └
+        - generic [ref=f2e50]: ─
+        - generic [ref=f2e51]: ─
+        - generic [ref=f2e52]: ─
+        - generic [ref=f2e53]: ┘
+        - generic [ref=f2e55]: └
+        - generic [ref=f2e56]: ┘
+        - generic [ref=f2e66]: ┌
+        - generic [ref=f2e67]: ─
+        - generic [ref=f2e68]: ─
+        - generic [ref=f2e69]: ─
+        - generic [ref=f2e70]: ─
+        - generic [ref=f2e71]: ─
+        - generic [ref=f2e72]: ┐
+      - generic [ref=f2e73]:
+        - generic [ref=f2e74]: l
+        - generic [ref=f2e75]: s
+        - generic [ref=f2e76]: a
+        - generic [ref=f2e77]: "n"
+        - generic [ref=f2e78]: t
+        - generic [ref=f2e79]: o
+        - generic [ref=f2e80]: s
+        - generic [ref=f2e81]: .
+        - generic [ref=f2e82]: d
+        - generic [ref=f2e83]: e
+        - generic [ref=f2e84]: v
+    - generic [ref=f2e86]: ──────────────────────────────────────
+    - generic [ref=f2e87]:
+      - navigation "Navegação principal" [ref=f2e88]:
+        - link "Posts" [ref=f2e89] [cursor=pointer]:
+          - /url: /
+        - link "Séries" [ref=f2e90] [cursor=pointer]:
+          - /url: /series/
+        - link "Tags" [ref=f2e91] [cursor=pointer]:
+          - /url: /tags/
+        - link "Sobre" [ref=f2e92] [cursor=pointer]:
+          - /url: /about/
+      - generic [ref=f2e93]: ──────────────────────────────────────
+      - navigation [ref=f2e94]:
+        - link "Buscar <Cmd+K>" [ref=f2e96] [cursor=pointer]:
+          - /url: /search/
+          - generic [ref=f2e99]: <Cmd+K>
+        - navigation "Idioma" [ref=f2e100]:
+          - 'link "PT EN: Mudar para English" [ref=f2e101] [cursor=pointer]':
+            - /url: /en/
+            - generic [ref=f2e102]:
+              - generic [ref=f2e103]: PT
+              - generic [ref=f2e104]: EN
+        - button "Tema" [ref=f2e106] [cursor=pointer]
+        - button "Preferências" [ref=f2e110] [cursor=pointer]
+    - generic [ref=f2e113]: ─┐
+  - main [ref=f2e114]:
+    - button "abrir o índice" [ref=f2e115] [cursor=pointer]:
+      - generic [ref=f2e116]: ‹
+    - article [ref=f2e117]:
+      - generic [ref=f2e118]:
+        - img [ref=f2e120]:
+          - generic [ref=f2e122]:
+            - generic [ref=f2e123]: +
+            - generic [ref=f2e124]: +
+            - generic [ref=f2e125]: +
+            - generic [ref=f2e126]: +
+            - generic [ref=f2e127]: +
+            - generic [ref=f2e128]: +
+            - generic [ref=f2e129]: +
+            - generic [ref=f2e130]: +
+            - generic [ref=f2e131]: +
+            - generic [ref=f2e132]: +
+            - generic [ref=f2e133]: +
+            - generic [ref=f2e134]: +
+            - generic [ref=f2e135]: +
+            - generic [ref=f2e136]: +
+            - generic [ref=f2e137]: +
+            - generic [ref=f2e138]: +
+            - generic [ref=f2e139]: +
+            - generic [ref=f2e140]: +
+            - generic [ref=f2e141]: +
+            - generic [ref=f2e142]: +
+            - generic [ref=f2e143]: +
+            - generic [ref=f2e144]: +
+            - generic [ref=f2e145]: +
+            - generic [ref=f2e146]: +
+            - generic [ref=f2e147]: +
+            - generic [ref=f2e148]: +
+            - generic [ref=f2e149]: +
+            - generic [ref=f2e150]: +
+            - generic [ref=f2e151]: +
+            - generic [ref=f2e152]: +
+            - generic [ref=f2e153]: +
+            - generic [ref=f2e154]: +
+            - generic [ref=f2e155]: +
+            - generic [ref=f2e156]: +
+            - generic [ref=f2e157]: +
+            - generic [ref=f2e158]: +
+            - generic [ref=f2e159]: +
+            - generic [ref=f2e160]: +
+            - generic [ref=f2e161]: +
+            - generic [ref=f2e162]: +
+            - generic [ref=f2e163]: +
+            - generic [ref=f2e164]: +
+            - generic [ref=f2e165]: +
+            - generic [ref=f2e166]: +
+            - generic [ref=f2e167]: +
+            - generic [ref=f2e168]: +
+            - generic [ref=f2e169]: +
+            - generic [ref=f2e170]: +
+            - generic [ref=f2e171]: +
+            - generic [ref=f2e172]: +
+            - generic [ref=f2e173]: +
+            - generic [ref=f2e174]: +
+            - generic [ref=f2e175]: +
+            - generic [ref=f2e176]: +
+            - generic [ref=f2e177]: +
+            - generic [ref=f2e178]: +
+            - generic [ref=f2e179]: +
+            - generic [ref=f2e180]: +
+            - generic [ref=f2e181]: +
+            - generic [ref=f2e182]: +
+            - generic [ref=f2e183]: +
+            - generic [ref=f2e184]: +
+            - generic [ref=f2e185]: +
+            - generic [ref=f2e186]: +
+            - generic [ref=f2e187]: +
+            - generic [ref=f2e188]: +
+            - generic [ref=f2e189]: +
+            - generic [ref=f2e190]: +
+            - generic [ref=f2e191]: +
+            - generic [ref=f2e192]: +
+            - generic [ref=f2e193]: +
+            - generic [ref=f2e194]: +
+            - generic [ref=f2e195]: +
+            - generic [ref=f2e196]: +
+            - generic [ref=f2e197]: +
+            - generic [ref=f2e198]: +
+            - generic [ref=f2e199]: +
+            - generic [ref=f2e200]: +
+            - generic [ref=f2e201]: +
+            - generic [ref=f2e202]: +
+            - generic [ref=f2e203]: +
+            - generic [ref=f2e204]: +
+            - generic [ref=f2e205]: +
+            - generic [ref=f2e206]: +
+            - generic [ref=f2e207]: +
+            - generic [ref=f2e208]: +
+            - generic [ref=f2e209]: +
+            - generic [ref=f2e210]: +
+            - generic [ref=f2e211]: +
+            - generic [ref=f2e212]: +
+            - generic [ref=f2e213]: +
+            - generic [ref=f2e214]: +
+            - generic [ref=f2e215]: +
+            - generic [ref=f2e216]: +
+            - generic [ref=f2e217]: +
+            - generic [ref=f2e218]: +
+            - generic [ref=f2e219]: +
+            - generic [ref=f2e220]: +
+            - generic [ref=f2e221]: +
+            - generic [ref=f2e222]: +
+            - generic [ref=f2e223]: +
+            - generic [ref=f2e224]: +
+            - generic [ref=f2e225]: +
+            - generic [ref=f2e226]: +
+            - generic [ref=f2e227]: +
+            - generic [ref=f2e228]: +
+            - generic [ref=f2e229]: +
+            - generic [ref=f2e230]: +
+            - generic [ref=f2e231]: +
+            - generic [ref=f2e232]: +
+            - generic [ref=f2e233]: +
+            - generic [ref=f2e234]: +
+            - generic [ref=f2e235]: +
+            - generic [ref=f2e236]: +
+            - generic [ref=f2e237]: +
+            - generic [ref=f2e238]: +
+            - generic [ref=f2e239]: +
+            - generic [ref=f2e240]: +
+            - generic [ref=f2e241]: +
+            - generic [ref=f2e242]: +
+            - generic [ref=f2e243]: +
+            - generic [ref=f2e244]: +
+            - generic [ref=f2e245]: +
+            - generic [ref=f2e246]: +
+            - generic [ref=f2e247]: +
+            - generic [ref=f2e248]: +
+            - generic [ref=f2e249]: +
+            - generic [ref=f2e250]: +
+            - generic [ref=f2e251]: +
+            - generic [ref=f2e252]: +
+            - generic [ref=f2e253]: +
+            - generic [ref=f2e254]: +
+            - generic [ref=f2e255]: +
+            - generic [ref=f2e256]: +
+            - generic [ref=f2e257]: +
+            - generic [ref=f2e258]: +
+            - generic [ref=f2e259]: +
+            - generic [ref=f2e260]: +
+            - generic [ref=f2e261]: +
+            - generic [ref=f2e262]: +
+            - generic [ref=f2e263]: +
+            - generic [ref=f2e264]: +
+            - generic [ref=f2e265]: +
+            - generic [ref=f2e266]: +
+            - generic [ref=f2e267]: +
+            - generic [ref=f2e268]: +
+            - generic [ref=f2e269]: +
+            - generic [ref=f2e270]: +
+            - generic [ref=f2e271]: +
+            - generic [ref=f2e272]: +
+            - generic [ref=f2e273]: +
+            - generic [ref=f2e274]: +
+            - generic [ref=f2e275]: +
+            - generic [ref=f2e276]: +
+            - generic [ref=f2e277]: +
+            - generic [ref=f2e278]: +
+            - generic [ref=f2e279]: +
+            - generic [ref=f2e280]: +
+            - generic [ref=f2e281]: +
+            - generic [ref=f2e282]: +
+            - generic [ref=f2e283]: +
+            - generic [ref=f2e284]: +
+            - generic [ref=f2e285]: +
+            - generic [ref=f2e286]: +
+          - generic [ref=f2e289]: Lucas Santos / 13 AGO 2026
+          - generic [ref=f2e290]: "Laboratório: tudo o que"
+          - generic [ref=f2e291]: este blog consegue
+          - generic [ref=f2e292]: renderizar.█
+          - generic [ref=f2e293]: Lucas Santos / 13 AGO 2026
+          - generic [ref=f2e294]: "Laboratório: tudo o que"
+          - generic [ref=f2e295]: este blog consegue
+          - generic [ref=f2e296]: renderizar.█
+        - paragraph [ref=f2e298]:
+          - time [ref=f2e299]: 13 de agosto de 2026
+          - generic [ref=f2e300]: ·
+          - link "meta" [ref=f2e301] [cursor=pointer]:
+            - /url: /meta/
+          - generic [ref=f2e302]: ·
+          - button "9 min" [ref=f2e304]
+      - 'heading "> Laboratório: tudo o que este blog consegue renderizar" [level=1] [ref=f2e305]'
+      - paragraph [ref=f2e306]:
+        - generic [ref=f2e307]: por
+        - link "Lucas Santos" [ref=f2e308] [cursor=pointer]:
+          - /url: https://lsantos.dev
+      - generic [ref=f2e309]:
+        - paragraph [ref=f2e310]: Esta página existe para ser aberta no navegador. Cada seção abaixo nomeia um recurso, explica em uma ou duas frases para que ele serve, mostra o código exato que você digitaria e, logo em seguida, o resultado renderizado. Se algo aqui aparecer quebrado, o recurso está quebrado.
+        - paragraph [ref=f2e311]:
+          - text: "As duas ilhas interativas do final são a única seção sem um bloco de código igual ao que se digita:"
+          - code [ref=f2e312]: <LabDemo>
+          - text: e
+          - code [ref=f2e313]: <HtmlLab>
+          - text: nomeiam o arquivo com
+          - code [ref=f2e314]: src
+          - text: ", e um plugin remark lê esse arquivo na hora do build, monta a importação que a diretiva de cliente precisa e injeta o próprio código-fonte destacado. Os dois arquivos moram em"
+          - code [ref=f2e315]: components/
+          - text: ", dentro da pasta deste post. Nenhum post sem ilha importa nada, porque todos os outros componentes já são injetados em todos os posts."
+        - heading [level=2] [ref=f2e316]:
+          - text: Frontmatter
+          - link "link para esta seção" [ref=f2e317] [cursor=pointer]:
+            - /url: "#frontmatter"
+            - text: "#"
+        - paragraph [ref=f2e318]: O frontmatter é o cabeçalho YAML que define título, data, seção e tudo mais.
+        - figure [ref=f2e320]:
+          - generic [ref=f2e321]:
+            - code [ref=f2e322]:
+              - generic [ref=f2e323]:
+                - generic [ref=f2e324]: "1"
+                - generic [ref=f2e325]: "---"
+              - generic [ref=f2e326]:
+                - generic [ref=f2e327]: "2"
+                - generic [ref=f2e328]: "title: \"Laboratório: tudo o que este blog consegue renderizar\""
+              - generic [ref=f2e329]:
+                - generic [ref=f2e330]: "3"
+                - generic [ref=f2e331]: "pubDate: 2026-08-13"
+              - generic [ref=f2e332]:
+                - generic [ref=f2e333]: "4"
+                - generic [ref=f2e334]: "lang: \"pt\""
+              - generic [ref=f2e335]:
+                - generic [ref=f2e336]: "5"
+                - generic [ref=f2e337]: "category: \"meta\""
+              - generic [ref=f2e338]:
+                - generic [ref=f2e339]: "6"
+                - generic [ref=f2e340]: "tags: [\"meta\", \"escrita\"]"
+              - generic [ref=f2e341]:
+                - generic [ref=f2e342]: "7"
+                - generic [ref=f2e343]: "description: \"Uma página de bancada com todos os recursos de escrita do site.\""
+              - generic [ref=f2e344]:
+                - generic [ref=f2e345]: "8"
+                - generic [ref=f2e346]: "draft: false"
+              - generic [ref=f2e347]:
+                - generic [ref=f2e348]: "9"
+                - generic [ref=f2e349]: "noindex: true"
+              - generic [ref=f2e350]:
+                - generic [ref=f2e351]: "10"
+                - generic [ref=f2e352]: "---"
+            - text: yaml
+          - button "Copy to clipboard" [ref=f2e354] [cursor=pointer]
+        - paragraph [ref=f2e356]:
+          - text: "O resultado está no topo da página: o título e a linha de data e seção. O"
+          - code [ref=f2e357]: "noindex: true"
+          - text: mantém esta página fora dos mecanismos de busca e do sitemap, que é exatamente o que uma bancada precisa.
+        - heading [level=2] [ref=f2e358]:
+          - text: Títulos
+          - link "link para esta seção" [ref=f2e359] [cursor=pointer]:
+            - /url: "#títulos"
+            - text: "#"
+        - paragraph [ref=f2e360]:
+          - text: O título do post já é o
+          - code [ref=f2e361]: h1
+          - text: da página, então o texto começa em
+          - code [ref=f2e362]: "##"
+          - text: e desce um nível de cada vez. Pular de
+          - code [ref=f2e363]: "##"
+          - text: para
+          - code [ref=f2e364]: "####"
+          - text: quebra a estrutura de leitura para quem usa leitor de tela.
+        - figure [ref=f2e366]:
+          - generic [ref=f2e367]:
+            - code [ref=f2e368]:
+              - generic [ref=f2e369]:
+                - generic [ref=f2e370]: "1"
+                - generic [ref=f2e371]: "## Um título de segundo nível"
+              - generic [ref=f2e372]: "2"
+              - generic [ref=f2e375]:
+                - generic [ref=f2e376]: "3"
+                - generic [ref=f2e377]: "### Um título de terceiro nível"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e379] [cursor=pointer]
+        - heading [level=3] [ref=f2e381]:
+          - text: Este é um título de terceiro nível
+          - link "link para esta seção" [ref=f2e382] [cursor=pointer]:
+            - /url: "#este-é-um-título-de-terceiro-nível"
+            - text: "#"
+        - paragraph [ref=f2e383]: E este parágrafo está dentro dele, para você ver o espaçamento entre os dois níveis.
+        - heading [level=2] [ref=f2e384]:
+          - text: Ênfase e código inline
+          - link "link para esta seção" [ref=f2e385] [cursor=pointer]:
+            - /url: "#ênfase-e-código-inline"
+            - text: "#"
+        - paragraph [ref=f2e386]: Negrito para o que precisa ser lido mesmo em leitura diagonal, itálico para ênfase leve, riscado para mostrar o que mudou, e código inline para nomes de arquivos, funções e comandos.
+        - figure [ref=f2e388]:
+          - region [ref=f2e389]:
+            - code [ref=f2e390]:
+              - generic [ref=f2e391]:
+                - generic [ref=f2e392]: "1"
+                - generic [ref=f2e393]: "Texto **em negrito**, texto _em itálico_, texto ~~riscado~~ e `código inline`."
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e395] [cursor=pointer]
+        - paragraph [ref=f2e397]:
+          - text: Texto
+          - strong [ref=f2e398]: em negrito
+          - text: ", texto"
+          - emphasis [ref=f2e399]: em itálico
+          - text: ", texto"
+          - deletion [ref=f2e400]: riscado
+          - text: e
+          - code [ref=f2e401]: código inline
+          - text: .
+        - heading [level=2] [ref=f2e402]:
+          - text: Links
+          - link "link para esta seção" [ref=f2e403] [cursor=pointer]:
+            - /url: "#links"
+            - text: "#"
+        - paragraph [ref=f2e404]: Links normais, e links com título que aparece ao passar o mouse. Links internos para outros posts têm uma sintaxe própria, mostrada mais adiante.
+        - figure [ref=f2e406]:
+          - region [ref=f2e407]:
+            - code [ref=f2e408]:
+              - generic [ref=f2e409]:
+                - generic [ref=f2e410]: "1"
+                - generic [ref=f2e411]:
+                  - text: Um [link comum
+                  - generic [ref=f2e412]: "]("
+                  - text: https://blog.lsantos.dev) e um [link com título
+                  - generic [ref=f2e413]: "]("
+                  - text: https://blog.lsantos.dev "Aparece no hover").
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e415] [cursor=pointer]
+        - paragraph [ref=f2e417]:
+          - text: Um
+          - link "link comum" [ref=f2e418] [cursor=pointer]:
+            - /url: https://blog.lsantos.dev
+          - text: e um
+          - link "link com título" [ref=f2e419] [cursor=pointer]:
+            - /url: https://blog.lsantos.dev
+          - text: .
+        - heading [level=2] [ref=f2e420]:
+          - text: Citação
+          - link "link para esta seção" [ref=f2e421] [cursor=pointer]:
+            - /url: "#citação"
+            - text: "#"
+        - paragraph [ref=f2e422]:
+          - text: Uma citação em bloco para trechos de outra pessoa ou de outro documento. Com autor, é um callout
+          - code [ref=f2e423]: "[!quote]"
+          - text: ", mostrado mais abaixo."
+        - figure [ref=f2e425]:
+          - generic [ref=f2e426]:
+            - code [ref=f2e427]:
+              - generic [ref=f2e428]:
+                - generic [ref=f2e429]: "1"
+                - generic [ref=f2e430]: "> Toda abstração vaza, a questão é apenas quando."
+              - generic [ref=f2e432]:
+                - generic [ref=f2e433]: "2"
+                - generic [ref=f2e434]: ">"
+              - generic [ref=f2e435]:
+                - generic [ref=f2e436]: "3"
+                - generic [ref=f2e437]: "> Um segundo parágrafo dentro da mesma citação."
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e440] [cursor=pointer]
+        - blockquote [ref=f2e442]:
+          - text: “
+          - paragraph [ref=f2e443]: Toda abstração vaza, a questão é apenas quando.
+          - paragraph [ref=f2e444]: Um segundo parágrafo dentro da mesma citação.
+          - button "copiar esta citação" [ref=f2e445] [cursor=pointer]
+        - heading [level=2] [ref=f2e446]:
+          - text: Listas
+          - link "link para esta seção" [ref=f2e447] [cursor=pointer]:
+            - /url: "#listas"
+            - text: "#"
+        - paragraph [ref=f2e448]: Listas sem ordem para conjuntos, com ordem para passos, aninhadas quando um item tem detalhes próprios, e listas de tarefas quando o post é um checklist.
+        - figure [ref=f2e450]:
+          - generic [ref=f2e451]:
+            - code [ref=f2e452]:
+              - generic [ref=f2e453]:
+                - generic [ref=f2e454]: "1"
+                - generic [ref=f2e455]: "- Um item"
+              - generic [ref=f2e456]:
+                - generic [ref=f2e457]: "2"
+                - generic [ref=f2e458]: "- Outro item"
+              - generic [ref=f2e459]:
+                - generic [ref=f2e460]: "3"
+                - generic [ref=f2e461]: "- Um item aninhado"
+              - generic [ref=f2e463]:
+                - generic [ref=f2e464]: "4"
+                - generic [ref=f2e465]: "- E outro"
+              - generic [ref=f2e467]:
+                - generic [ref=f2e468]: "5"
+                - generic [ref=f2e469]: "- O terceiro item"
+              - generic [ref=f2e470]: "6"
+              - generic [ref=f2e473]:
+                - generic [ref=f2e474]: "7"
+                - generic [ref=f2e475]: 1. Primeiro passo
+              - generic [ref=f2e476]:
+                - generic [ref=f2e477]: "8"
+                - generic [ref=f2e478]: 2. Segundo passo
+              - generic [ref=f2e479]:
+                - generic [ref=f2e480]: "9"
+                - generic [ref=f2e481]: 1. Um sub-passo
+              - generic [ref=f2e483]:
+                - generic [ref=f2e484]: "10"
+                - generic [ref=f2e485]: 2. Outro sub-passo
+              - generic [ref=f2e487]:
+                - generic [ref=f2e488]: "11"
+                - generic [ref=f2e489]: 3. Terceiro passo
+              - generic [ref=f2e490]: "12"
+              - generic [ref=f2e493]:
+                - generic [ref=f2e494]: "13"
+                - generic [ref=f2e495]: "- [x] Uma tarefa feita"
+              - generic [ref=f2e496]:
+                - generic [ref=f2e497]: "14"
+                - generic [ref=f2e498]: "- [ ] Uma tarefa pendente"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e500] [cursor=pointer]
+        - list [ref=f2e502]:
+          - listitem [ref=f2e503]: Um item
+          - listitem [ref=f2e504]:
+            - text: Outro item
+            - list [ref=f2e505]:
+              - listitem [ref=f2e506]: Um item aninhado
+              - listitem [ref=f2e507]: E outro
+          - listitem [ref=f2e508]: O terceiro item
+        - list [ref=f2e509]:
+          - listitem [ref=f2e510]: Primeiro passo
+          - listitem [ref=f2e511]:
+            - text: Segundo passo
+            - list [ref=f2e512]:
+              - listitem [ref=f2e513]: Um sub-passo
+              - listitem [ref=f2e514]: Outro sub-passo
+          - listitem [ref=f2e515]: Terceiro passo
+        - list [ref=f2e516]:
+          - listitem [ref=f2e517]:
+            - checkbox [checked] [disabled] [ref=f2e518]
+            - text: Uma tarefa feita
+          - listitem [ref=f2e519]:
+            - checkbox [disabled] [ref=f2e520]
+            - text: Uma tarefa pendente
+        - heading [level=2] [ref=f2e521]:
+          - text: Tabela
+          - link "link para esta seção" [ref=f2e522] [cursor=pointer]:
+            - /url: "#tabela"
+            - text: "#"
+        - paragraph [ref=f2e523]: Tabelas do GitHub Flavored Markdown, com alinhamento por coluna. Servem para comparações curtas; qualquer coisa maior fica melhor como lista.
+        - figure [ref=f2e525]:
+          - generic [ref=f2e526]:
+            - code [ref=f2e527]:
+              - generic [ref=f2e528]:
+                - generic [ref=f2e529]: "1"
+                - generic [ref=f2e530]: "| Recurso | Sintaxe | Alinhado à direita |"
+              - generic [ref=f2e531]:
+                - generic [ref=f2e532]: "2"
+                - generic [ref=f2e533]: "| -------- | -------------- | -----------------: |"
+              - generic [ref=f2e534]:
+                - generic [ref=f2e535]: "3"
+                - generic [ref=f2e536]: "| Negrito | `**texto**` | 1 |"
+              - generic [ref=f2e537]:
+                - generic [ref=f2e538]: "4"
+                - generic [ref=f2e539]: "| Itálico | `_texto_` | 22 |"
+              - generic [ref=f2e540]:
+                - generic [ref=f2e541]: "5"
+                - generic [ref=f2e542]: "| Riscado | `~~texto~~` | 333 |"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e544] [cursor=pointer]
+        - table [ref=f2e546]:
+          - rowgroup [ref=f2e547]:
+            - row [ref=f2e548]:
+              - columnheader "Recurso" [ref=f2e549]
+              - columnheader "Sintaxe" [ref=f2e550]
+              - columnheader "Alinhado à direita" [ref=f2e551]
+          - rowgroup [ref=f2e552]:
+            - row [ref=f2e553]:
+              - cell "Negrito" [ref=f2e554]
+              - cell [ref=f2e555]:
+                - code [ref=f2e556]: "**texto**"
+              - cell "1" [ref=f2e557]
+            - row [ref=f2e558]:
+              - cell "Itálico" [ref=f2e559]
+              - cell [ref=f2e560]:
+                - code [ref=f2e561]: _texto_
+              - cell "22" [ref=f2e562]
+            - row [ref=f2e563]:
+              - cell "Riscado" [ref=f2e564]
+              - cell [ref=f2e565]:
+                - code [ref=f2e566]: ~~texto~~
+              - cell "333" [ref=f2e567]
+        - heading [level=2] [ref=f2e568]:
+          - text: Régua horizontal
+          - link "link para esta seção" [ref=f2e569] [cursor=pointer]:
+            - /url: "#régua-horizontal"
+            - text: "#"
+        - paragraph [ref=f2e570]: Uma separação visual entre duas partes do texto que não merecem um título novo.
+        - figure [ref=f2e572]:
+          - generic [ref=f2e573]:
+            - code [ref=f2e574]:
+              - generic [ref=f2e575]:
+                - generic [ref=f2e576]: "1"
+                - generic [ref=f2e577]: "---"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e579] [cursor=pointer]
+        - separator [ref=f2e581]
+        - heading [level=2] [ref=f2e582]:
+          - text: Notas de rodapé
+          - link "link para esta seção" [ref=f2e583] [cursor=pointer]:
+            - /url: "#notas-de-rodapé"
+            - text: "#"
+        - paragraph [ref=f2e584]: Uma nota de rodapé para a fonte de uma afirmação, ou para um detalhe que interromperia a frase. Ela vira um link para o pé da página, com um link de volta.
+        - figure [ref=f2e586]:
+          - generic [ref=f2e587]:
+            - code [ref=f2e588]:
+              - generic [ref=f2e589]:
+                - generic [ref=f2e590]: "1"
+                - generic [ref=f2e591]: Uma afirmação que precisa de fonte.[^1]
+              - generic [ref=f2e592]: "2"
+              - generic [ref=f2e595]:
+                - generic [ref=f2e596]: "3"
+                - generic [ref=f2e597]: "[^1]: A fonte, no pé da página."
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e599] [cursor=pointer]
+        - paragraph [ref=f2e601]:
+          - text: Uma afirmação que precisa de fonte.
+          - superscript [ref=f2e602]:
+            - text: "["
+            - link "1" [ref=f2e603] [cursor=pointer]:
+              - /url: "#user-content-fn-1"
+            - text: "]"
+        - complementary [ref=f2e604]:
+          - text: "[1]"
+          - paragraph [ref=f2e605]: A fonte, no pé da página. Note o link de volta para o ponto de origem no texto.
+        - heading [level=2] [ref=f2e606]:
+          - text: Callouts
+          - link "link para esta seção" [ref=f2e607] [cursor=pointer]:
+            - /url: "#callouts"
+            - text: "#"
+        - paragraph [ref=f2e608]:
+          - text: "A mesma sintaxe do Obsidian, então o que você vê enquanto escreve é o que vai para o site. Os cinco mais usados estão abaixo, e todo o vocabulário do Obsidian funciona:"
+          - code [ref=f2e609]: question
+          - text: ","
+          - code [ref=f2e610]: example
+          - text: ","
+          - code [ref=f2e611]: success
+          - text: ","
+          - code [ref=f2e612]: failure
+          - text: ","
+          - code [ref=f2e613]: danger
+          - text: ","
+          - code [ref=f2e614]: bug
+          - text: ","
+          - code [ref=f2e615]: abstract
+          - text: ","
+          - code [ref=f2e616]: todo
+          - text: ","
+          - code [ref=f2e617]: quote
+          - text: e o resto.
+        - figure [ref=f2e619]:
+          - generic [ref=f2e620]:
+            - code [ref=f2e621]:
+              - generic [ref=f2e622]:
+                - generic [ref=f2e623]: "1"
+                - generic [ref=f2e624]:
+                  - generic [ref=f2e625]: "> ["
+                  - text: "!NOTE]"
+              - generic [ref=f2e626]:
+                - generic [ref=f2e627]: "2"
+                - generic [ref=f2e628]: "> Algo que vale saber, mas que não muda o que você vai fazer."
+              - generic [ref=f2e630]: "3"
+              - generic [ref=f2e633]:
+                - generic [ref=f2e634]: "4"
+                - generic [ref=f2e635]:
+                  - generic [ref=f2e636]: "> ["
+                  - text: "!TIP]"
+              - generic [ref=f2e637]:
+                - generic [ref=f2e638]: "5"
+                - generic [ref=f2e639]: "> Um atalho, uma alternativa mais rápida."
+              - generic [ref=f2e641]: "6"
+              - generic [ref=f2e644]:
+                - generic [ref=f2e645]: "7"
+                - generic [ref=f2e646]:
+                  - generic [ref=f2e647]: "> ["
+                  - text: "!WARNING]"
+              - generic [ref=f2e648]:
+                - generic [ref=f2e649]: "8"
+                - generic [ref=f2e650]: "> Algo que vai te morder se você ignorar."
+              - generic [ref=f2e652]: "9"
+              - generic [ref=f2e655]:
+                - generic [ref=f2e656]: "10"
+                - generic [ref=f2e657]:
+                  - generic [ref=f2e658]: "> ["
+                  - text: "!CAUTION]"
+              - generic [ref=f2e659]:
+                - generic [ref=f2e660]: "11"
+                - generic [ref=f2e661]: "> Algo irreversível: apagar dados, publicar uma chave."
+              - generic [ref=f2e663]: "12"
+              - generic [ref=f2e666]:
+                - generic [ref=f2e667]: "13"
+                - generic [ref=f2e668]:
+                  - generic [ref=f2e669]: "> ["
+                  - text: "!IMPORTANT]"
+              - generic [ref=f2e670]:
+                - generic [ref=f2e671]: "14"
+                - generic [ref=f2e672]: "> O ponto que, se você ler só uma coisa, deveria ser esta."
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e675] [cursor=pointer]
+        - generic [ref=f2e677]:
+          - generic [ref=f2e678]: Note
+          - paragraph [ref=f2e685]: Algo que vale saber, mas que não muda o que você vai fazer.
+        - generic [ref=f2e686]:
+          - generic [ref=f2e687]: Tip
+          - paragraph [ref=f2e693]: Um atalho, uma alternativa mais rápida.
+        - generic [ref=f2e694]:
+          - generic [ref=f2e695]: Warning
+          - paragraph [ref=f2e701]: Algo que vai te morder se você ignorar.
+        - generic [ref=f2e702]:
+          - generic [ref=f2e703]: Caution
+          - paragraph [ref=f2e709]: "Algo irreversível: apagar dados, publicar uma chave."
+        - generic [ref=f2e710]:
+          - generic [ref=f2e711]: Important
+          - paragraph [ref=f2e717]: O ponto que, se você ler só uma coisa, deveria ser esta.
+        - heading [level=2] [ref=f2e718]:
+          - text: Blocos de código
+          - link "link para esta seção" [ref=f2e719] [cursor=pointer]:
+            - /url: "#blocos-de-código"
+            - text: "#"
+        - paragraph [ref=f2e720]:
+          - text: "Um bloco cercado com a linguagem declarada ganha destaque de sintaxe. Use uma linguagem que o destacador conhece:"
+          - code [ref=f2e721]: dockerfile
+          - text: ","
+          - code [ref=f2e722]: text
+          - text: e
+          - code [ref=f2e723]: bash
+          - text: ", não"
+          - code [ref=f2e724]: Dockerfile
+          - text: ","
+          - code [ref=f2e725]: output
+          - text: ou
+          - code [ref=f2e726]: ssh
+          - text: .
+        - figure [ref=f2e728]:
+          - generic [ref=f2e729]:
+            - code [ref=f2e730]:
+              - generic [ref=f2e731]:
+                - generic [ref=f2e732]: "1"
+                - generic [ref=f2e733]: "```ts"
+              - generic [ref=f2e734]:
+                - generic [ref=f2e735]: "2"
+                - generic [ref=f2e736]:
+                  - text: "export function soma(a: number,"
+                  - generic [ref=f2e737]: b
+                  - text: ": number"
+                  - generic [ref=f2e738]: "):"
+                  - text: "number {"
+              - generic [ref=f2e739]:
+                - generic [ref=f2e740]: "3"
+                - generic [ref=f2e741]: return a + b
+              - generic [ref=f2e742]:
+                - generic [ref=f2e743]: "4"
+                - generic [ref=f2e744]: "}"
+              - generic [ref=f2e745]:
+                - generic [ref=f2e746]: "5"
+                - generic [ref=f2e747]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e749] [cursor=pointer]
+        - figure [ref=f2e752]:
+          - generic [ref=f2e753]:
+            - code [ref=f2e754]:
+              - generic [ref=f2e755]:
+                - generic [ref=f2e756]: "1"
+                - generic [ref=f2e757]:
+                  - text: "export function soma(a: number,"
+                  - generic [ref=f2e758]: b
+                  - text: ": number"
+                  - generic [ref=f2e759]: "):"
+                  - text: "number {"
+              - generic [ref=f2e760]:
+                - generic [ref=f2e761]: "2"
+                - generic [ref=f2e762]: return a + b
+              - generic [ref=f2e763]:
+                - generic [ref=f2e764]: "3"
+                - generic [ref=f2e765]: "}"
+            - text: ts
+          - button "Copy to clipboard" [ref=f2e767] [cursor=pointer]
+        - heading [level=3] [ref=f2e769]:
+          - text: Com nome de arquivo e linhas destacadas
+          - link "link para esta seção" [ref=f2e770] [cursor=pointer]:
+            - /url: "#com-nome-de-arquivo-e-linhas-destacadas"
+            - text: "#"
+        - paragraph [ref=f2e771]:
+          - text: O
+          - code [ref=f2e772]: title
+          - text: coloca o nome do arquivo na moldura do bloco, e as chaves com um intervalo destacam as linhas que importam na explicação.
+        - figure [ref=f2e774]:
+          - region [ref=f2e775]:
+            - code [ref=f2e776]:
+              - generic [ref=f2e777]:
+                - generic [ref=f2e778]: "1"
+                - generic [ref=f2e779]: "```ts title=\"src/soma.ts\" {2-3}"
+              - generic [ref=f2e780]:
+                - generic [ref=f2e781]: "2"
+                - generic [ref=f2e782]:
+                  - text: "export function soma(a: number,"
+                  - generic [ref=f2e783]: b
+                  - text: ": number"
+                  - generic [ref=f2e784]: "):"
+                  - text: "number {"
+              - generic [ref=f2e785]:
+                - generic [ref=f2e786]: "3"
+                - generic [ref=f2e787]: if (Number.isNaN(a) || Number.isNaN(b)) throw new TypeError('argumento inválido')
+              - generic [ref=f2e788]:
+                - generic [ref=f2e789]: "4"
+                - generic [ref=f2e790]: return a + b
+              - generic [ref=f2e791]:
+                - generic [ref=f2e792]: "5"
+                - generic [ref=f2e793]: "}"
+              - generic [ref=f2e794]:
+                - generic [ref=f2e795]: "6"
+                - generic [ref=f2e796]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e798] [cursor=pointer]
+        - figure "src/soma.ts" [ref=f2e801]:
+          - region [ref=f2e804]:
+            - code [ref=f2e805]:
+              - generic [ref=f2e806]:
+                - generic [ref=f2e807]: "1"
+                - generic [ref=f2e808]:
+                  - text: "export function soma(a: number,"
+                  - generic [ref=f2e809]: b
+                  - text: ": number"
+                  - generic [ref=f2e810]: "):"
+                  - text: "number {"
+              - generic [ref=f2e811]:
+                - generic [ref=f2e812]: "2"
+                - generic [ref=f2e813]: if (Number.isNaN(a) || Number.isNaN(b)) throw new TypeError('argumento inválido')
+              - generic [ref=f2e814]:
+                - generic [ref=f2e815]: "3"
+                - generic [ref=f2e816]: return a + b
+              - generic [ref=f2e817]:
+                - generic [ref=f2e818]: "4"
+                - generic [ref=f2e819]: "}"
+            - text: ts
+          - button "Copy to clipboard" [ref=f2e821] [cursor=pointer]
+        - heading [level=3] [ref=f2e823]:
+          - text: O nome do arquivo vindo do primeiro comentário
+          - link "link para esta seção" [ref=f2e824] [cursor=pointer]:
+            - /url: "#o-nome-do-arquivo-vindo-do-primeiro-comentário"
+            - text: "#"
+        - paragraph [ref=f2e825]:
+          - text: Você não precisa escrever
+          - code [ref=f2e826]: title
+          - text: ". Se a primeira linha do bloco for um comentário que parece um caminho de arquivo, ela vira a aba e sai do código. Se não parecer, nada acontece: o comentário fica onde está."
+        - figure "src/soma.ts" [ref=f2e828]:
+          - generic [ref=f2e831]:
+            - code [ref=f2e832]:
+              - generic [ref=f2e833]:
+                - generic [ref=f2e834]: "1"
+                - generic [ref=f2e835]: "```ts"
+              - generic [ref=f2e836]:
+                - generic [ref=f2e837]: "2"
+                - generic [ref=f2e838]:
+                  - text: "export const soma = (a: number,"
+                  - generic [ref=f2e839]: b
+                  - text: ": number) => a + b"
+              - generic [ref=f2e840]:
+                - generic [ref=f2e841]: "3"
+                - generic [ref=f2e842]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e844] [cursor=pointer]
+        - figure "src/soma.ts" [ref=f2e847]:
+          - generic [ref=f2e850]:
+            - code [ref=f2e851]:
+              - generic [ref=f2e852]:
+                - generic [ref=f2e853]: "1"
+                - generic [ref=f2e854]:
+                  - text: "export const soma = (a: number,"
+                  - generic [ref=f2e855]: b
+                  - text: ": number) => a + b"
+            - text: ts
+          - button "Copy to clipboard" [ref=f2e857] [cursor=pointer]
+        - paragraph [ref=f2e859]:
+          - text: Um shebang é um comentário na primeira linha e
+          - strong [ref=f2e860]: não
+          - text: "é um nome de arquivo, então continua sendo código:"
+        - figure [ref=f2e862]:
+          - generic [ref=f2e863]:
+            - code [ref=f2e864]:
+              - generic [ref=f2e865]:
+                - generic [ref=f2e866]: "1"
+                - generic [ref=f2e867]: "```bash"
+              - generic [ref=f2e868]:
+                - generic [ref=f2e869]: "2"
+                - generic [ref=f2e870]: "#!/usr/bin/env bash"
+              - generic [ref=f2e871]:
+                - generic [ref=f2e872]: "3"
+                - generic [ref=f2e873]: echo "continua no código"
+              - generic [ref=f2e874]:
+                - generic [ref=f2e875]: "4"
+                - generic [ref=f2e876]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e878] [cursor=pointer]
+        - figure [ref=f2e881]:
+          - generic [ref=f2e882]:
+            - code [ref=f2e883]:
+              - generic [ref=f2e884]:
+                - generic [ref=f2e885]: "1"
+                - generic [ref=f2e886]: "#!/usr/bin/env bash"
+              - generic [ref=f2e887]:
+                - generic [ref=f2e888]: "2"
+                - generic [ref=f2e889]: echo "continua no código"
+            - text: bash
+          - button "Copy to clipboard" [ref=f2e891] [cursor=pointer]
+        - paragraph [ref=f2e893]: "E um comentário comum também fica:"
+        - figure [ref=f2e895]:
+          - generic [ref=f2e896]:
+            - code [ref=f2e897]:
+              - generic [ref=f2e898]:
+                - generic [ref=f2e899]: "1"
+                - generic [ref=f2e900]: "```ts"
+              - generic [ref=f2e901]:
+                - generic [ref=f2e902]: "2"
+                - generic [ref=f2e903]: // isto é só uma observação, não um arquivo
+              - generic [ref=f2e904]:
+                - generic [ref=f2e905]: "3"
+                - generic [ref=f2e906]:
+                  - text: export const
+                  - generic [ref=f2e907]: dois
+                  - text: = 2
+              - generic [ref=f2e908]:
+                - generic [ref=f2e909]: "4"
+                - generic [ref=f2e910]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e912] [cursor=pointer]
+        - figure [ref=f2e915]:
+          - generic [ref=f2e916]:
+            - code [ref=f2e917]:
+              - generic [ref=f2e918]:
+                - generic [ref=f2e919]: "1"
+                - generic [ref=f2e920]: // isto é só uma observação, não um arquivo
+              - generic [ref=f2e921]:
+                - generic [ref=f2e922]: "2"
+                - generic [ref=f2e923]:
+                  - text: export const
+                  - generic [ref=f2e924]: dois
+                  - text: = 2
+            - text: ts
+          - button "Copy to clipboard" [ref=f2e926] [cursor=pointer]
+        - heading [level=3] [ref=f2e928]:
+          - text: Com linhas inseridas e removidas
+          - link "link para esta seção" [ref=f2e929] [cursor=pointer]:
+            - /url: "#com-linhas-inseridas-e-removidas"
+            - text: "#"
+        - paragraph [ref=f2e930]:
+          - text: Os marcadores
+          - code [ref=f2e931]: ins
+          - text: e
+          - code [ref=f2e932]: del
+          - text: mostram um diff sem sair do bloco de código, o que é melhor que colar duas versões inteiras do arquivo.
+        - figure [ref=f2e934]:
+          - generic [ref=f2e935]:
+            - code [ref=f2e936]:
+              - generic [ref=f2e937]:
+                - generic [ref=f2e938]: "1"
+                - generic [ref=f2e939]: "```ts title=\"src/soma.ts\" del={2} ins={3}"
+              - generic [ref=f2e940]:
+                - generic [ref=f2e941]: "2"
+                - generic [ref=f2e942]:
+                  - text: "export function soma(a: number,"
+                  - generic [ref=f2e943]: b
+                  - text: ": number"
+                  - generic [ref=f2e944]: "):"
+                  - text: "number {"
+              - generic [ref=f2e945]:
+                - generic [ref=f2e946]: "3"
+                - generic [ref=f2e947]: return a + b
+              - generic [ref=f2e948]:
+                - generic [ref=f2e949]: "4"
+                - generic [ref=f2e950]: return Number(a) + Number(b)
+              - generic [ref=f2e951]:
+                - generic [ref=f2e952]: "5"
+                - generic [ref=f2e953]: "}"
+              - generic [ref=f2e954]:
+                - generic [ref=f2e955]: "6"
+                - generic [ref=f2e956]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e958] [cursor=pointer]
+        - figure "src/soma.ts" [ref=f2e961]:
+          - generic [ref=f2e964]:
+            - code [ref=f2e965]:
+              - generic [ref=f2e966]:
+                - generic [ref=f2e967]: "1"
+                - generic [ref=f2e968]:
+                  - text: "export function soma(a: number,"
+                  - generic [ref=f2e969]: b
+                  - text: ": number"
+                  - generic [ref=f2e970]: "):"
+                  - text: "number {"
+              - generic [ref=f2e971]:
+                - generic [ref=f2e972]: "2"
+                - generic [ref=f2e973]: "- return a + b"
+              - generic [ref=f2e974]:
+                - generic [ref=f2e975]: "3"
+                - generic [ref=f2e976]: + return Number(a) + Number(b)
+              - generic [ref=f2e977]:
+                - generic [ref=f2e978]: "4"
+                - generic [ref=f2e979]: "}"
+            - text: ts
+          - button "Copy to clipboard" [ref=f2e981] [cursor=pointer]
+        - heading [level=3] [ref=f2e983]:
+          - text: Terminal
+          - link "link para esta seção" [ref=f2e984] [cursor=pointer]:
+            - /url: "#terminal"
+            - text: "#"
+        - paragraph [ref=f2e985]: Blocos de shell ganham uma moldura de terminal automaticamente, sem precisar de nenhuma opção.
+        - figure [ref=f2e987]:
+          - generic [ref=f2e988]:
+            - code [ref=f2e989]:
+              - generic [ref=f2e990]:
+                - generic [ref=f2e991]: "1"
+                - generic [ref=f2e992]: "```bash"
+              - generic [ref=f2e993]:
+                - generic [ref=f2e994]: "2"
+                - generic [ref=f2e995]: npm run build
+              - generic [ref=f2e996]:
+                - generic [ref=f2e997]: "3"
+                - generic [ref=f2e998]: node scripts/check-output.ts
+              - generic [ref=f2e999]:
+                - generic [ref=f2e1000]: "4"
+                - generic [ref=f2e1001]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1003] [cursor=pointer]
+        - figure "Terminal window" [ref=f2e1006]:
+          - generic [ref=f2e1010]:
+            - code [ref=f2e1011]:
+              - generic [ref=f2e1012]:
+                - generic [ref=f2e1013]: "1"
+                - generic [ref=f2e1014]: npm run build
+              - generic [ref=f2e1015]:
+                - generic [ref=f2e1016]: "2"
+                - generic [ref=f2e1017]: node scripts/check-output.ts
+            - text: bash
+          - button "Copy to clipboard" [ref=f2e1019] [cursor=pointer]
+        - heading [level=2] [ref=f2e1021]:
+          - text: Matemática
+          - link "link para esta seção" [ref=f2e1022] [cursor=pointer]:
+            - /url: "#matemática"
+            - text: "#"
+        - paragraph [ref=f2e1023]: Fórmulas em LaTeX, renderizadas por KaTeX. Use um par de sinais de dólar para uma fórmula no meio da frase, e dois pares em linhas próprias para uma fórmula em bloco. As chaves do LaTeX se escrevem normalmente, sem escape.
+        - figure [ref=f2e1025]:
+          - region [ref=f2e1026]:
+            - code [ref=f2e1027]:
+              - generic [ref=f2e1028]:
+                - generic [ref=f2e1029]: "1"
+                - generic [ref=f2e1030]: "A energia de repouso é $E = mc^2$, e uma fração entre $a$ e $b$ se escreve $\\frac{a}{b}$."
+              - generic [ref=f2e1031]: "2"
+              - generic [ref=f2e1034]:
+                - generic [ref=f2e1035]: "3"
+                - generic [ref=f2e1036]: $$
+              - generic [ref=f2e1037]:
+                - generic [ref=f2e1038]: "4"
+                - generic [ref=f2e1039]: "\\lambda(n) = \\frac{|(p-1)(q-1)|}{mdc((p-1),(q-1))}"
+              - generic [ref=f2e1040]:
+                - generic [ref=f2e1041]: "5"
+                - generic [ref=f2e1042]: $$
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1044] [cursor=pointer]
+        - paragraph [ref=f2e1046]:
+          - text: A energia de repouso é
+          - generic [ref=f2e1047]:
+            - math [ref=f2e1049]:
+              - generic [ref=f2e1051]:
+                - generic [ref=f2e1052]: E
+                - generic [ref=f2e1053]: =
+                - generic [ref=f2e1054]: m
+                - generic [ref=f2e1055]:
+                  - generic [ref=f2e1056]: c
+                  - generic [ref=f2e1057]: "2"
+            - generic [ref=f2e1058]:
+              - generic [ref=f2e1059]: E =
+              - generic [ref=f2e1060]:
+                - text: m
+                - generic [ref=f2e1061]:
+                  - text: c
+                  - generic [ref=f2e1062]: "2"
+          - text: ", e uma fração entre"
+          - generic [ref=f2e1067]:
+            - math [ref=f2e1069]:
+              - generic [ref=f2e1070]: a
+            - generic [ref=f2e1073]: a
+          - text: e
+          - generic [ref=f2e1075]:
+            - math [ref=f2e1077]:
+              - generic [ref=f2e1078]: b
+            - generic [ref=f2e1081]: b
+          - text: se escreve
+          - generic [ref=f2e1083]:
+            - math [ref=f2e1085]:
+              - generic [ref=f2e1088]:
+                - generic [ref=f2e1089]: a
+                - generic [ref=f2e1090]: b
+            - generic [ref=f2e1097]:
+              - generic [ref=f2e1098]: b
+              - generic [ref=f2e1101]: a
+          - text: .
+        - generic [ref=f2e1106]:
+          - generic [ref=f2e1107]:
+            - math [ref=f2e1109]:
+              - generic [ref=f2e1111]:
+                - generic [ref=f2e1112]: λ
+                - generic [ref=f2e1113]: (
+                - generic [ref=f2e1114]: "n"
+                - generic [ref=f2e1115]: )
+                - generic [ref=f2e1116]: =
+                - generic [ref=f2e1117]:
+                  - generic [ref=f2e1118]:
+                    - generic [ref=f2e1119]: ∣
+                    - generic [ref=f2e1120]: (
+                    - generic [ref=f2e1121]: p
+                    - generic [ref=f2e1122]: −
+                    - generic [ref=f2e1123]: "1"
+                    - generic [ref=f2e1124]: )
+                    - generic [ref=f2e1125]: (
+                    - generic [ref=f2e1126]: q
+                    - generic [ref=f2e1127]: −
+                    - generic [ref=f2e1128]: "1"
+                    - generic [ref=f2e1129]: )
+                    - generic [ref=f2e1130]: ∣
+                  - generic [ref=f2e1131]:
+                    - generic [ref=f2e1132]: m
+                    - generic [ref=f2e1133]: d
+                    - generic [ref=f2e1134]: c
+                    - generic [ref=f2e1135]: (
+                    - generic [ref=f2e1136]: (
+                    - generic [ref=f2e1137]: p
+                    - generic [ref=f2e1138]: −
+                    - generic [ref=f2e1139]: "1"
+                    - generic [ref=f2e1140]: )
+                    - generic [ref=f2e1141]: ","
+                    - generic [ref=f2e1142]: (
+                    - generic [ref=f2e1143]: q
+                    - generic [ref=f2e1144]: −
+                    - generic [ref=f2e1145]: "1"
+                    - generic [ref=f2e1146]: )
+                    - generic [ref=f2e1147]: )
+            - generic [ref=f2e1148]:
+              - generic [ref=f2e1149]: λ(n) =
+              - generic [ref=f2e1155]:
+                - generic [ref=f2e1156]: mdc((p − 1), (q − 1))
+                - generic [ref=f2e1158]: ∣(p − 1)(q − 1)∣
+          - button "copiar a fórmula como texto" [ref=f2e1162] [cursor=pointer]: copiar
+        - heading [level=2] [ref=f2e1163]:
+          - text: Diagramas
+          - link "link para esta seção" [ref=f2e1164] [cursor=pointer]:
+            - /url: "#diagramas"
+            - text: "#"
+        - paragraph [ref=f2e1165]:
+          - text: Um bloco com a linguagem
+          - code [ref=f2e1166]: mermaid
+          - text: vira um diagrama desenhado no navegador. O script do Mermaid só é carregado nas páginas que têm pelo menos um diagrama.
+        - figure [ref=f2e1168]:
+          - generic [ref=f2e1169]:
+            - code [ref=f2e1170]:
+              - generic [ref=f2e1171]:
+                - generic [ref=f2e1172]: "1"
+                - generic [ref=f2e1173]: "```mermaid"
+              - generic [ref=f2e1174]:
+                - generic [ref=f2e1175]: "2"
+                - generic [ref=f2e1176]: graph TD
+              - generic [ref=f2e1177]:
+                - generic [ref=f2e1178]: "3"
+                - generic [ref=f2e1179]: A[Post em markdown] --> B[remark-embeds]
+              - generic [ref=f2e1181]:
+                - generic [ref=f2e1182]: "4"
+                - generic [ref=f2e1183]: B --> C[remark-figures]
+              - generic [ref=f2e1185]:
+                - generic [ref=f2e1186]: "5"
+                - generic [ref=f2e1187]: C --> D[remark-wikilinks]
+              - generic [ref=f2e1189]:
+                - generic [ref=f2e1190]: "6"
+                - generic [ref=f2e1191]: D --> E[HTML estático]
+              - generic [ref=f2e1193]:
+                - generic [ref=f2e1194]: "7"
+                - generic [ref=f2e1195]: "```"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1197] [cursor=pointer]
+        - document [ref=f2e1200]:
+          - generic [ref=f2e1203]:
+            - paragraph [ref=f2e1210]: Post em markdown
+            - paragraph [ref=f2e1217]: remark-embeds
+            - paragraph [ref=f2e1224]: remark-figures
+            - paragraph [ref=f2e1231]: remark-wikilinks
+            - paragraph [ref=f2e1238]: HTML estático
+        - heading [level=2] [ref=f2e1239]:
+          - text: Imagens
+          - link "link para esta seção" [ref=f2e1240] [cursor=pointer]:
+            - /url: "#imagens"
+            - text: "#"
+        - paragraph [ref=f2e1241]:
+          - text: Uma imagem sozinha em um parágrafo vira uma
+          - code [ref=f2e1242]: figure
+          - text: de verdade, e o título entre aspas vira a legenda. Imagens locais são redimensionadas e servidas em webp automaticamente.
+        - figure [ref=f2e1244]:
+          - region [ref=f2e1245]:
+            - code [ref=f2e1246]:
+              - generic [ref=f2e1247]:
+                - generic [ref=f2e1248]: "1"
+                - generic [ref=f2e1249]:
+                  - generic [ref=f2e1250]: "![]("
+                  - text: ./exemplo.png "Uma imagem sozinha no parágrafo vira uma figure, e este texto vira a legenda")
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1252] [cursor=pointer]
+        - figure "Uma imagem sozinha no parágrafo vira uma figure, e este texto vira a legenda" [ref=f2e1254]:
+          - paragraph [ref=f2e1255]
+        - paragraph [ref=f2e1257]:
+          - text: Sem o título entre aspas, você fica com a
+          - code [ref=f2e1258]: figure
+          - text: mas sem legenda. Aqui o texto alternativo é o que descreve a imagem, porque não há legenda para fazer isso.
+        - figure [ref=f2e1260]:
+          - region [ref=f2e1261]:
+            - code [ref=f2e1262]:
+              - generic [ref=f2e1263]:
+                - generic [ref=f2e1264]: "1"
+                - generic [ref=f2e1265]:
+                  - text: "![Um retângulo azul claro com a palavra sem-legenda no centro"
+                  - generic [ref=f2e1266]: "]("
+                  - text: ./sem-legenda.png)
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1268] [cursor=pointer]
+        - figure [ref=f2e1270]:
+          - paragraph [ref=f2e1271]:
+            - img "Um retângulo azul claro com a palavra sem-legenda no centro" [ref=f2e1272]
+        - paragraph [ref=f2e1273]: "E uma imagem no meio de uma frase continua sendo só uma imagem, sem moldura nem legenda: esta frase continua depois dela."
+        - heading [level=3] [ref=f2e1274]:
+          - text: Imagens de outro lugar
+          - link "link para esta seção" [ref=f2e1275] [cursor=pointer]:
+            - /url: "#imagens-de-outro-lugar"
+            - text: "#"
+        - paragraph [ref=f2e1276]:
+          - text: Se você colar a URL de uma imagem remota no lugar do caminho local, o passo de
+          - code [ref=f2e1277]: prebuild
+          - text: baixa o arquivo para a pasta do post e reescreve a referência para o arquivo local antes de o site ser gerado. Depois disso o post não depende mais do servidor de ninguém.
+        - paragraph [ref=f2e1278]:
+          - text: "Este é o recurso único desta página que não consegue mostrar a fonte literal: o script que baixa as imagens remotas lê o arquivo"
+          - code [ref=f2e1279]: .mdx
+          - text: "inteiro, inclusive o que está dentro dos blocos de código, então uma URL remota escrita como exemplo aqui seria baixada de verdade. Depois do build, a linha fica assim:"
+        - figure [ref=f2e1281]:
+          - generic [ref=f2e1282]:
+            - code [ref=f2e1283]:
+              - generic [ref=f2e1284]:
+                - generic [ref=f2e1285]: "1"
+                - generic [ref=f2e1286]:
+                  - text: "![Um gráfico"
+                  - generic [ref=f2e1287]: "]("
+                  - text: ./grafico-a1b2c3.png)
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1289] [cursor=pointer]
+        - heading [level=2] [ref=f2e1291]:
+          - text: Vídeo local
+          - link "link para esta seção" [ref=f2e1292] [cursor=pointer]:
+            - /url: "#vídeo-local"
+            - text: "#"
+        - paragraph [ref=f2e1293]:
+          - text: Um
+          - code [ref=f2e1294]: .mp4
+          - text: hospedado por você precisa do componente, porque ele aceita um frame de pôster e uma legenda. O arquivo vive em
+          - code [ref=f2e1295]: public/videos/
+          - text: .
+        - figure [ref=f2e1297]:
+          - generic [ref=f2e1298]:
+            - code [ref=f2e1299]:
+              - generic [ref=f2e1300]:
+                - generic [ref=f2e1301]: "1"
+                - generic [ref=f2e1302]:
+                  - text: <Video
+                  - generic [ref=f2e1303]: src
+                  - text: ="/videos/deno-1-38/deno-hmr.mp4"
+                  - generic [ref=f2e1304]: caption
+                  - text: ="Legenda opcional" />
+            - text: mdx
+          - button "Copy to clipboard" [ref=f2e1306] [cursor=pointer]
+        - figure "O HMR do Deno 1.38, um arquivo que já existe no repositório" [ref=f2e1308]
+        - heading [level=2] [ref=f2e1311]:
+          - text: Imagem que morreu
+          - link "link para esta seção" [ref=f2e1312] [cursor=pointer]:
+            - /url: "#imagem-que-morreu"
+            - text: "#"
+        - paragraph [ref=f2e1313]:
+          - text: Quando um host remoto para de servir uma imagem, a URL entra em
+          - code [ref=f2e1314]: content/dead-images.json
+          - text: "e o post continua igual: só a renderização muda, para uma moldura que preserva a legenda e o nome do host. Aqui o componente está escrito à mão, porque a lista de imagens mortas está vazia hoje."
+        - figure [ref=f2e1316]:
+          - region [ref=f2e1317]:
+            - code [ref=f2e1318]:
+              - generic [ref=f2e1319]:
+                - generic [ref=f2e1320]: "1"
+                - generic [ref=f2e1321]:
+                  - text: <MissingImage
+                  - generic [ref=f2e1322]: src
+                  - text: ="https://i.imgur.com/exemplo.png"
+                  - generic [ref=f2e1323]: caption
+                  - text: ="A legenda sobrevive à imagem" />
+            - text: mdx
+          - button "Copy to clipboard" [ref=f2e1325] [cursor=pointer]
+        - figure "A legenda sobrevive à imagem" [ref=f2e1327]:
+          - img "Imagem indisponível, hospedada em i.imgur.com" [ref=f2e1328]:
+            - paragraph [ref=f2e1329]: =(
+            - paragraph [ref=f2e1330]: Esta imagem não existe mais
+            - paragraph [ref=f2e1331]: i.imgur.com
+        - heading [level=2] [ref=f2e1333]:
+          - text: YouTube
+          - link "link para esta seção" [ref=f2e1334] [cursor=pointer]:
+            - /url: "#youtube"
+            - text: "#"
+        - paragraph [ref=f2e1335]: Uma URL do YouTube sozinha em uma linha. O Obsidian mostra o player enquanto você escreve, e o site troca por uma fachada que só contata o YouTube quando alguém aperta o play.
+        - figure [ref=f2e1337]:
+          - generic [ref=f2e1338]:
+            - code [ref=f2e1339]:
+              - generic [ref=f2e1340]:
+                - generic [ref=f2e1341]: "1"
+                - generic [ref=f2e1342]:
+                  - generic [ref=f2e1343]: "![]("
+                  - text: https://www.youtube.com/watch?v=2LYPyUk-L0k)
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1345] [cursor=pointer]
+        - button "Play" [ref=f2e1348] [cursor=pointer]
+        - heading [level=2] [ref=f2e1350]:
+          - text: Vimeo
+          - link "link para esta seção" [ref=f2e1351] [cursor=pointer]:
+            - /url: "#vimeo"
+            - text: "#"
+        - paragraph [ref=f2e1352]: Mesma coisa, com uma URL do Vimeo.
+        - figure [ref=f2e1354]:
+          - generic [ref=f2e1355]:
+            - code [ref=f2e1356]:
+              - generic [ref=f2e1357]:
+                - generic [ref=f2e1358]: "1"
+                - generic [ref=f2e1359]:
+                  - generic [ref=f2e1360]: "![]("
+                  - text: https://vimeo.com/476516779)
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1362] [cursor=pointer]
+        - button "Play" [ref=f2e1365] [cursor=pointer]
+        - heading [level=2] [ref=f2e1366]:
+          - text: Speaker Deck
+          - link "link para esta seção" [ref=f2e1367] [cursor=pointer]:
+            - /url: "#speaker-deck"
+            - text: "#"
+        - paragraph [ref=f2e1368]: Slides do Speaker Deck. A URL precisa ser a de player, que é o que o botão de embed do deck te dá.
+        - figure [ref=f2e1370]:
+          - generic [ref=f2e1371]:
+            - code [ref=f2e1372]:
+              - generic [ref=f2e1373]:
+                - generic [ref=f2e1374]: "1"
+                - generic [ref=f2e1375]:
+                  - generic [ref=f2e1376]: "![]("
+                  - text: https://speakerdeck.com/player/e21b68c7db134ade9b2dad81246a3e53)
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1378] [cursor=pointer]
+        - figure [ref=f2e1380]:
+          - iframe [ref=f2e1381]:
+            
+        - heading [level=2] [ref=f2e1382]:
+          - text: Spotify
+          - link "link para esta seção" [ref=f2e1383] [cursor=pointer]:
+            - /url: "#spotify"
+            - text: "#"
+        - paragraph [ref=f2e1384]: Um episódio, faixa, álbum, playlist ou show do Spotify. O player carrega em lazy e não contata nada até entrar na tela.
+        - figure [ref=f2e1386]:
+          - generic [ref=f2e1387]:
+            - code [ref=f2e1388]:
+              - generic [ref=f2e1389]:
+                - generic [ref=f2e1390]: "1"
+                - generic [ref=f2e1391]:
+                  - generic [ref=f2e1392]: "![]("
+                  - text: https://open.spotify.com/episode/1kXjNnp8qKpHRipeAriVDw)
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1394] [cursor=pointer]
+        - figure [ref=f2e1396]:
+          - iframe [ref=f2e1397]:
+            
+        - heading [level=2] [ref=f2e1398]:
+          - text: Tweet
+          - link "link para esta seção" [ref=f2e1399] [cursor=pointer]:
+            - /url: "#tweet"
+            - text: "#"
+        - paragraph [ref=f2e1400]: Um tweet se escreve como uma citação cuja última linha é o link do status. Assim o texto sobrevive mesmo se o embed não carregar, o que acontece cada vez mais.
+        - figure [ref=f2e1402]:
+          - generic [ref=f2e1403]:
+            - code [ref=f2e1404]:
+              - generic [ref=f2e1405]:
+                - generic [ref=f2e1406]: "1"
+                - generic [ref=f2e1407]: "> O texto do tweet, colado."
+              - generic [ref=f2e1409]:
+                - generic [ref=f2e1410]: "2"
+                - generic [ref=f2e1411]: ">"
+              - generic [ref=f2e1412]:
+                - generic [ref=f2e1413]: "3"
+                - generic [ref=f2e1414]:
+                  - generic [ref=f2e1415]: "> — !["
+                  - text: via Twitter
+                  - generic [ref=f2e1416]: "]("
+                  - text: https://twitter.com/_StaticVoid/status/1285626274225041409)
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1418] [cursor=pointer]
+        - blockquote [ref=f2e1420]:
+          - paragraph [ref=f2e1421]: Node.js é single-threaded, mas isso não significa o que a maioria das pessoas acha que significa.
+          - link "https://twitter.com/_StaticVoid/status/1285626274225041409" [ref=f2e1422] [cursor=pointer]:
+            - /url: https://twitter.com/_StaticVoid/status/1285626274225041409
+        - heading [level=2] [ref=f2e1423]:
+          - text: Cartão de bookmark
+          - link "link para esta seção" [ref=f2e1424] [cursor=pointer]:
+            - /url: "#cartão-de-bookmark"
+            - text: "#"
+        - paragraph [ref=f2e1425]:
+          - text: Qualquer outra URL sozinha em uma linha vira um cartão com título, descrição e nome do site, mas só se
+          - code [ref=f2e1426]: content/bookmarks.json
+          - text: já tiver os metadados dela. O build nunca busca nada na rede, então uma URL nova continua sendo um link comum até alguém capturar os metadados.
+        - figure [ref=f2e1428]:
+          - generic [ref=f2e1429]:
+            - code [ref=f2e1430]:
+              - generic [ref=f2e1431]:
+                - generic [ref=f2e1432]: "1"
+                - generic [ref=f2e1433]: https://news.lsantos.dev
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1435] [cursor=pointer]
+        - link "ls -news | Um newsletter por Lucas Santos Um newsletter mensal! Tudo sobre o mundo tech através de pílulas simples e rápidas para quem tem pressa! Lucas Santos" [ref=f2e1437] [cursor=pointer]:
+          - /url: https://news.lsantos.dev
+          - generic [ref=f2e1445]:
+            - generic [ref=f2e1446]: ls -news | Um newsletter por Lucas Santos
+            - generic [ref=f2e1447]: Um newsletter mensal! Tudo sobre o mundo tech através de pílulas simples e rápidas para quem tem pressa!
+            - generic [ref=f2e1448]: Lucas Santos
+        - heading [level=2] [ref=f2e1449]:
+          - text: Notas na margem
+          - link "link para esta seção" [ref=f2e1450] [cursor=pointer]:
+            - /url: "#notas-na-margem"
+            - text: "#"
+        - paragraph [ref=f2e1451]:
+          - text: Uma
+          - code [ref=f2e1452]: Sidenote
+          - text: é numerada e ancorada na palavra que ela segue. Uma
+          - code [ref=f2e1453]: MarginNote
+          - text: "é igual, mas sem número. As duas aceitam só conteúdo inline: texto, negrito, itálico, links e código."
+        - figure [ref=f2e1455]:
+          - generic [ref=f2e1456]:
+            - code [ref=f2e1457]:
+              - generic [ref=f2e1458]:
+                - generic [ref=f2e1459]: "1"
+                - generic [ref=f2e1460]: Alguma afirmação no texto.<Sidenote>Uma nota numerada, na margem.</Sidenote>
+              - generic [ref=f2e1461]: "2"
+              - generic [ref=f2e1464]:
+                - generic [ref=f2e1465]: "3"
+                - generic [ref=f2e1466]: Outra frase.<MarginNote>Igual, mas sem número.</MarginNote>
+            - text: mdx
+          - button "Copy to clipboard" [ref=f2e1468] [cursor=pointer]
+        - paragraph [ref=f2e1470]:
+          - text: Toda abstração vaza.
+          - generic [ref=f2e1471]:
+            - checkbox "mostrar nota" [ref=f2e1472]
+            - generic [ref=f2e1473] [cursor=pointer]
+            - generic [ref=f2e1474]:
+              - text: Uma nota numerada, que fica na margem em telas largas e vira um popover em telas estreitas, sem JavaScript nos dois casos. Aceita
+              - strong [ref=f2e1475]: negrito
+              - text: ","
+              - code [ref=f2e1476]: código
+              - text: e
+              - link "links" [ref=f2e1477] [cursor=pointer]:
+                - /url: https://blog.lsantos.dev
+              - text: .
+              - button "link para esta nota" [ref=f2e1478] [cursor=pointer]
+          - text: E esta segunda frase carrega uma nota sem número.
+          - generic [ref=f2e1479]:
+            - checkbox "mostrar nota lateral" [ref=f2e1480]
+            - generic [ref=f2e1481] [cursor=pointer]: •
+            - generic [ref=f2e1482]:
+              - text: Igual à de cima, mas sem a marca numerada no meio do texto.
+              - button "link para esta nota" [ref=f2e1483] [cursor=pointer]
+        - heading [level=2] [ref=f2e1484]:
+          - text: Citação com autor
+          - link "link para esta seção" [ref=f2e1485] [cursor=pointer]:
+            - /url: "#citação-com-autor"
+            - text: "#"
+        - paragraph [ref=f2e1486]: "Epígrafe deixou de existir: era a mesma coisa que uma citação com outro nome. Uma citação com autor é um callout do Obsidian cujo título é o autor, que é exatamente como você já escreve no vault."
+        - figure [ref=f2e1488]:
+          - region [ref=f2e1489]:
+            - code [ref=f2e1490]:
+              - generic [ref=f2e1491]:
+                - generic [ref=f2e1492]: "1"
+                - generic [ref=f2e1493]:
+                  - generic [ref=f2e1494]: "> ["
+                  - text: "!quote"
+                  - generic [ref=f2e1495]: "] Phil Karlton"
+              - generic [ref=f2e1496]:
+                - generic [ref=f2e1497]: "2"
+                - generic [ref=f2e1498]: "> Só existem dois problemas difíceis em computação: invalidação de cache e dar nome às coisas."
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1501] [cursor=pointer]
+        - generic [ref=f2e1503]:
+          - text: “
+          - generic [ref=f2e1504]: » Phil Karlton
+          - paragraph [ref=f2e1507]: "Só existem dois problemas difíceis em computação: invalidação de cache e dar nome às coisas."
+          - button "copiar esta citação" [ref=f2e1508] [cursor=pointer]
+        - paragraph [ref=f2e1509]: Sem autor, é uma citação comum, e o cartão vem sem a linha de autoria.
+        - figure [ref=f2e1511]:
+          - generic [ref=f2e1512]:
+            - code [ref=f2e1513]:
+              - generic [ref=f2e1514]:
+                - generic [ref=f2e1515]: "1"
+                - generic [ref=f2e1516]: "> Toda abstração vaza, mais cedo ou mais tarde."
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1519] [cursor=pointer]
+        - blockquote [ref=f2e1521]:
+          - text: “
+          - paragraph [ref=f2e1522]: Toda abstração vaza, mais cedo ou mais tarde.
+          - button "copiar esta citação" [ref=f2e1523] [cursor=pointer]
+        - heading [level=2] [ref=f2e1524]:
+          - text: Links para outros posts
+          - link "link para esta seção" [ref=f2e1525] [cursor=pointer]:
+            - /url: "#links-para-outros-posts"
+            - text: "#"
+        - paragraph [ref=f2e1526]: Um wikilink aponta para a pasta de outro post. O Obsidian autocompleta e o grafo enxerga, e o site transforma em um link comum. Sem rótulo, o link usa o título do post de destino. Um wikilink para um post que não existe quebra o build de propósito, então um erro de digitação nunca chega ao site.
+        - figure [ref=f2e1528]:
+          - generic [ref=f2e1529]:
+            - code [ref=f2e1530]:
+              - generic [ref=f2e1531]:
+                - generic [ref=f2e1532]: "1"
+                - generic [ref=f2e1533]: "[[error-cause]]"
+              - generic [ref=f2e1534]:
+                - generic [ref=f2e1535]: "2"
+                - generic [ref=f2e1536]: "[[error-cause|leia o artigo sobre error.cause]]"
+              - generic [ref=f2e1537]:
+                - generic [ref=f2e1538]: "3"
+                - generic [ref=f2e1539]: "[[error-cause#Conclusão]]"
+              - generic [ref=f2e1540]:
+                - generic [ref=f2e1541]: "4"
+                - generic [ref=f2e1542]: "[[hashes]]"
+            - text: markdown
+          - button "Copy to clipboard" [ref=f2e1544] [cursor=pointer]
+        - list [ref=f2e1546]:
+          - listitem [ref=f2e1547]:
+            - link "O que são erros e para que serve o error.cause no JavaScript?" [ref=f2e1548] [cursor=pointer]:
+              - /url: /error-cause/
+          - listitem [ref=f2e1549]:
+            - link "leia o artigo sobre error.cause" [ref=f2e1550] [cursor=pointer]:
+              - /url: /error-cause/
+          - listitem [ref=f2e1551]:
+            - link "O que são erros e para que serve o error.cause no JavaScript?" [ref=f2e1552] [cursor=pointer]:
+              - /url: /error-cause/#conclus%C3%A3o
+          - listitem [ref=f2e1553]:
+            - 'link "Criptografia #3 - Entendendo Hashes" [ref=f2e1554]':
+              - /url: /hashes/
+        - paragraph [ref=f2e1555]: "O último aponta para um rascunho: o link continua funcionando, mas vem seguido da marca de que o texto ainda não foi escrito."
+        - heading [level=2] [ref=f2e1556]:
+          - text: Uma ilha interativa em Vue
+          - link "link para esta seção" [ref=f2e1557] [cursor=pointer]:
+            - /url: "#uma-ilha-interativa-em-vue"
+            - text: "#"
+        - paragraph [ref=f2e1558]:
+          - text: O componente mora na pasta do próprio post, em
+          - code [ref=f2e1559]: components/
+          - text: ", junto com as imagens."
+          - code [ref=f2e1560]: src
+          - text: "aponta para o arquivo, e é a única coisa que se escreve à mão: o plugin resolve o caminho, importa o componente de verdade (é disso que a diretiva de cliente precisa) e mostra o arquivo em"
+          - code [ref=f2e1561]: ver o código
+          - text: ", destacado como qualquer outro bloco da página."
+          - code [ref=f2e1562]: client:visible
+          - text: significa que o JavaScript do contador só é baixado quando ele entra na tela; o resto da página continua sendo HTML estático.
+        - figure [ref=f2e1564]:
+          - generic [ref=f2e1565]:
+            - code [ref=f2e1566]:
+              - generic [ref=f2e1567]:
+                - generic [ref=f2e1568]: "1"
+                - generic [ref=f2e1569]:
+                  - text: <LabDemo
+                  - generic [ref=f2e1570]: src
+                  - text: ="./components/Counter.vue"
+                  - generic [ref=f2e1571]: client
+                  - text: ":"
+                  - generic [ref=f2e1572]: visible
+                  - text: />
+            - text: mdx
+          - button "Copy to clipboard" [ref=f2e1574] [cursor=pointer]
+        - figure [ref=f2e1576]:
+          - generic [ref=f2e1579]:
+            - status [ref=f2e1580]: "0"
+            - generic [ref=f2e1581]:
+              - button "−" [ref=f2e1582] [cursor=pointer]
+              - button "+" [ref=f2e1583] [cursor=pointer]
+              - button "reset" [ref=f2e1584] [cursor=pointer]
+          - group [ref=f2e1585]:
+            - generic [ref=f2e1586] [cursor=pointer]:
+              - text: ver o código
+              - code [ref=f2e1587]: Counter.vue
+            - text: vue
+        - paragraph [ref=f2e1588]:
+          - text: Some, subtraia, zere, e navegue pelos três botões com Tab e Espaço para confirmar que a ilha hidratou. Abra
+          - code [ref=f2e1589]: ver o código
+          - text: para ver o arquivo inteiro.
+        - heading [level=2] [ref=f2e1590]:
+          - text: Uma ilha que é só HTML
+          - link "link para esta seção" [ref=f2e1591] [cursor=pointer]:
+            - /url: "#uma-ilha-que-é-só-html"
+            - text: "#"
+        - paragraph [ref=f2e1592]:
+          - text: Quando a demonstração já é uma página HTML completa, com script e estilo próprios, ela entra inteira. O arquivo também mora em
+          - code [ref=f2e1593]: components/
+          - text: e é embutido em um iframe, então o CSS dele não briga com o do post e o script dele não vê nada desta página.
+        - figure [ref=f2e1595]:
+          - generic [ref=f2e1596]:
+            - code [ref=f2e1597]:
+              - generic [ref=f2e1598]:
+                - generic [ref=f2e1599]: "1"
+                - generic [ref=f2e1600]:
+                  - text: <HtmlLab
+                  - generic [ref=f2e1601]: src
+                  - text: ="./components/counter.html"
+                  - generic [ref=f2e1602]: title
+                  - text: ="um contador em HTML puro" />
+            - text: mdx
+          - button "Copy to clipboard" [ref=f2e1604] [cursor=pointer]
+        - figure [ref=f2e1606]:
+          - iframe [ref=f2e1607]:
+            - generic [ref=f5e2]:
+              - status [ref=f5e3]: "0"
+              - button "count" [ref=f5e4] [cursor=pointer]
+          - group [ref=f2e1608]:
+            - generic [ref=f2e1609] [cursor=pointer]:
+              - text: ver o código
+              - code [ref=f2e1610]: counter.html
+            - text: html
+      - list [ref=f2e1611]:
+        - listitem [ref=f2e1612]:
+          - link "meta" [ref=f2e1613] [cursor=pointer]:
+            - /url: /tags/meta/
+        - listitem [ref=f2e1614]:
+          - link "escrita" [ref=f2e1615] [cursor=pointer]:
+            - /url: /tags/escrita/
+  - contentinfo [ref=f2e1616]:
+    - generic [ref=f2e1617]:
+      - generic [ref=f2e1618]: └─
+      - generic [ref=f2e1619]: ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      - generic [ref=f2e1620]: ─┘
+    - generic [ref=f2e1621]:
+      - paragraph [ref=f2e1622]: © 2019–2026 Lucas Santos. Todos os direitos reservados.
+      - paragraph [ref=f2e1623]:
+        - link "Repositório no GitHub" [ref=f2e1624] [cursor=pointer]:
+          - /url: https://github.com/khaosdoctor/blog
+        - link "Perfil no LinkedIn" [ref=f2e1627] [cursor=pointer]:
+          - /url: https://linkedin.lsantos.dev
+        - link "Perfil no Twitter" [ref=f2e1630] [cursor=pointer]:
+          - /url: https://twitter.lsantos.dev
+        - link "Canal no YouTube" [ref=f2e1633] [cursor=pointer]:
+          - /url: https://youtube.lsantos.dev
+    - paragraph [ref=f2e1636]:
+      - text: "Versão:"
+      - link "0.0.1+363" [ref=f2e1637] [cursor=pointer]:
+        - /url: https://github.com/khaosdoctor/blog/tree/e444118a5b682c76dfcd062e58651cc7ad1019dc
+    - paragraph [ref=f2e1638]:
+      - link "Créditos" [ref=f2e1639] [cursor=pointer]:
+        - /url: /oss/

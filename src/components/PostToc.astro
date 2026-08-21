@@ -66,7 +66,7 @@ const tree = treeOf(flat)
         aria-controls="post-toc"
         aria-label={t(locale, 'openContents')}
       >
-        <span aria-hidden="true">≡</span>
+        <span class="handle-glyph" aria-hidden="true">‹</span>
       </button>
       <nav id="post-toc" class="toc" aria-labelledby="toc-title" data-open="false">
         <p class="title" id="toc-title">{t(locale, 'contents')}</p>
@@ -163,23 +163,48 @@ const tree = treeOf(flat)
     text-transform: uppercase;
   }
 
+  /*
+   * A page marker on the middle-right edge: flush against the window, no
+   * border on the attached side, arrow pointing the way the panel will come.
+   * When the panel opens both slide 15rem together, so the marker rides the
+   * panel's left edge and the same button closes it.
+   */
   .handle {
     position: fixed;
-    inset-block-end: var(--gutter);
-    inset-inline-start: var(--gutter);
-    z-index: 2;
-    /* The only way to open the outline on a phone, so it holds the same 44px
-       floor as every other icon control (WCAG 2.5.8). */
-    min-inline-size: var(--icon-btn-hit);
-    min-block-size: var(--icon-btn-hit);
-    padding: 0.35rem 0.6rem;
+    inset-block-start: 50%;
+    inset-inline: auto 0;
+    transform: translateY(-50%);
+    z-index: 3;
+    /* Tall and thin, a pull tab: the arrow rides the middle. Half an icon
+       button wide; the 7rem height is what keeps it easy to hit, and being
+       flush with the screen edge means a thumb cannot overshoot it. */
+    display: grid;
+    place-items: center;
+    min-inline-size: calc(var(--icon-btn-hit) / 2);
+    block-size: 7rem;
+    padding: 0;
     border: 3px double var(--toc-ink);
+    border-inline-end: 0;
     background: var(--bg);
     color: var(--toc-ink);
     font-family: var(--font-mono);
-    font-size: 1rem;
+    font-size: 1.2rem;
     line-height: 1;
     cursor: pointer;
+    transition: transform var(--duration) var(--ease);
+  }
+
+  .handle:has(+ .toc[data-open='true']) {
+    transform: translate(-15rem, -50%);
+  }
+
+  .handle-glyph {
+    display: inline-block;
+    transition: transform var(--duration) var(--ease);
+  }
+
+  .handle[aria-expanded='true'] .handle-glyph {
+    transform: rotate(180deg);
   }
 
   /*
@@ -213,48 +238,50 @@ const tree = treeOf(flat)
    */
   @media (max-width: 77.99rem) {
     .toc {
-      inset-block: auto calc(var(--gutter) + 3rem);
-      inset-inline-start: var(--gutter);
-      transform: none;
+      /* Docked to the right edge beside the marker, off-canvas until opened:
+         the whole panel slides 15rem left, its own width. */
+      inset-block: 50% auto;
+      inset-inline: auto 0;
+      transform: translate(100%, -50%);
       max-block-size: 60vh;
       background: var(--bg);
+      border-inline-end: 0;
       /* Opening eases in rather than appearing: `display` is animatable in
          browsers that support `allow-discrete`, and in the rest the panel just
          shows up, which is the pre-animation behaviour. */
       display: none;
-      opacity: 0;
       transition:
-        opacity var(--duration) var(--ease),
+        transform var(--duration) var(--ease),
         display var(--duration) var(--ease) allow-discrete;
     }
 
     .toc[data-open='true'] {
       display: block;
-      opacity: 1;
+      transform: translate(0, -50%);
       @starting-style {
-        opacity: 0;
+        transform: translate(100%, -50%);
       }
     }
   }
 
   :root[data-toc-mode='handle'] .toc {
-    inset-block: auto calc(var(--gutter) + 3rem);
-    inset-inline-start: var(--gutter);
-    transform: none;
+    inset-block: 50% auto;
+    inset-inline: auto 0;
+    transform: translate(100%, -50%);
     max-block-size: 60vh;
     background: var(--bg);
+    border-inline-end: 0;
     display: none;
-    opacity: 0;
     transition:
-      opacity var(--duration) var(--ease),
+      transform var(--duration) var(--ease),
       display var(--duration) var(--ease) allow-discrete;
   }
 
   :root[data-toc-mode='handle'] .toc[data-open='true'] {
     display: block;
-    opacity: 1;
+    transform: translate(0, -50%);
     @starting-style {
-      opacity: 0;
+      transform: translate(100%, -50%);
     }
   }
 
@@ -266,11 +293,11 @@ const tree = treeOf(flat)
   :root[data-toc-mode='panel'] .toc {
     inset-block-start: 38%;
     inset-block-end: auto;
-    inset-inline-start: var(--toc-left, var(--gutter));
+    inset-inline: var(--toc-left, var(--gutter)) auto;
     transform: translateY(-50%);
     max-block-size: 64vh;
     display: block;
-    opacity: 1;
+    border: 3px double var(--toc-ink);
     background: transparent;
   }
 

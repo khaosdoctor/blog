@@ -97,6 +97,8 @@ type UIKey =
   | 'searchShortcutReserved'
   | 'writtenBy'
   | 'contents'
+  | 'openMenu'
+  | 'closeMenu'
   | 'openContents'
   | 'foldSection'
   | 'notWrittenYet'
@@ -235,6 +237,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     searchShortcutReserved: 'O navegador já usa esta tecla',
     writtenBy: 'por',
     contents: 'Neste post',
+    openMenu: 'abrir o menu',
+    closeMenu: 'fechar o menu',
     openContents: 'abrir o índice',
     foldSection: 'recolher ou expandir esta seção',
     notWrittenYet: 'ainda não escrito',
@@ -377,6 +381,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     searchShortcutReserved: 'The browser already uses this key',
     writtenBy: 'by',
     contents: 'In this post',
+    openMenu: 'open the menu',
+    closeMenu: 'close the menu',
     openContents: 'open the contents',
     foldSection: 'fold or unfold this section',
     notWrittenYet: 'not written yet',
