@@ -266,6 +266,22 @@ function place(card: HTMLElement, anchor: HTMLElement): void {
 }
 
 /**
+ * Stored positions come from whatever viewport the card was pinned on, so a
+ * card pinned on a desktop restores off-screen on a phone: fixed-position, so
+ * it scrolls nothing, but it is unreachable and cannot be closed. Any write
+ * of left/top that does not come through place() goes through this.
+ */
+function clampToViewport(card: HTMLElement): void {
+  const inset = 8
+  const cw = card.offsetWidth
+  const ch = card.offsetHeight
+  const left = parseFloat(card.style.left) || 0
+  const top = parseFloat(card.style.top) || 0
+  card.style.left = `${Math.min(Math.max(left, inset), Math.max(inset, innerWidth - cw - inset))}px`
+  card.style.top = `${Math.min(Math.max(top, inset), Math.max(inset, innerHeight - ch - inset))}px`
+}
+
+/**
  * Pinned cards are the reader's working set, so the set is mirrored into
  * storage and restored on the next page.
  *
@@ -387,6 +403,7 @@ function undockCard(card: PopoverHTMLElement): void {
   card.style.left = card.dataset.hpLeft ?? '0px'
   card.style.top = card.dataset.hpTop ?? '0px'
   card.showPopover?.()
+  clampToViewport(card)
   markDocked(card, false)
   savePinned()
 }
@@ -593,6 +610,7 @@ async function restorePinned(): Promise<void> {
       dockCard(card)
     } else {
       card.showPopover?.()
+      clampToViewport(card)
     }
     requestAnimationFrame(() => card.classList.add('hp-open'))
 
@@ -698,6 +716,14 @@ function init(): void {
       if (isDocked(card)) continue
       if (card.matches(':popover-open')) continue
       card.showPopover?.()
+    }
+  })
+
+  // Rotating a phone (or shrinking the window) can leave a floating card
+  // outside the new viewport, and nothing else re-places an open card.
+  addEventListener('resize', () => {
+    for (const card of pinned) {
+      if (!isDocked(card)) clampToViewport(card)
     }
   })
 

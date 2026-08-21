@@ -75,6 +75,10 @@ export default defineConfig({
         'kanagawa-lotus',
         'snazzy-light',
       ],
+      // Inline <style> instead of a <link> dropped beside the first code
+      // block: that link arrived after first paint and re-laid out every post
+      // that has code (measured CLS 0.10 on phones). Inline applies at parse.
+      emitExternalStylesheet: false,
       // This default only turns on automatically for exactly one light and
       // one dark theme, so with fourteen it needs to stay explicit.
       //

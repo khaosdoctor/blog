@@ -70,8 +70,17 @@ let hintModEl: HTMLElement | null = null
 let hintKeyEl: HTMLElement | null = null
 
 function applyHint(): void {
-  if (hintModEl !== null) hintModEl.textContent = isApple ? 'Cmd' : 'Ctrl'
+  const mod = isApple ? 'Cmd' : 'Ctrl'
+  if (hintModEl !== null) hintModEl.textContent = mod
   if (hintKeyEl !== null) hintKeyEl.textContent = shortcutLetter
+  // WCAG 2.5.3: once the hint is visible, "<Cmd+K>" is the control's visible
+  // text and the accessible name has to contain it, or a speech-input user
+  // reading the screen aloud cannot address the button.
+  const opener = hintModEl?.closest('a')
+  const base = opener?.getAttribute('data-base-label')
+  if (opener && base !== null && base !== undefined) {
+    opener.setAttribute('aria-label', `${base} <${mod}+${shortcutLetter}>`)
+  }
 }
 
 // --- Pagefind, loaded once and cached: the dialog opens many times per page
@@ -253,6 +262,11 @@ function init(): void {
     resultLinks = []
     cursor.style.background = dayColor()
     dialog.showModal()
+    // Focusing the input on touch opens the keyboard over half the dialog
+    // before the reader has seen it; on a phone the tap on the field is what
+    // asks for the keyboard, so the dialog itself takes the initial focus.
+    if (matchMedia('(pointer: fine)').matches) input.focus()
+    else dialog.focus()
     updateCaret()
   }
 

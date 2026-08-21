@@ -42,6 +42,35 @@
 }
 
 /*
+ * Metric-matched fallbacks, one per display face: while the real file is in
+ * flight the local mono renders at the same line height and advance width, so
+ * the swap repaints glyphs without moving a single box. Without these the
+ * wordmark's box changed height on arrival and the wrapped phone header
+ * re-flowed under the reader (measured CLS 0.10 on posts).
+ *
+ * The numbers come from the font files themselves (fontkit: ascent/descent/
+ * advance per em), divided by size-adjust, which is the target advance over
+ * the local face's ~0.60em.
+ */
+@font-face {
+  font-family: 'Departure Mono Fallback';
+  src: local('Menlo'), local('Courier New'), local('Liberation Mono');
+  size-adjust: 106.06%;
+  ascent-override: 94.29%;
+  descent-override: 25.71%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'PxPlus IBM VGA8 Fallback';
+  src: local('Menlo'), local('Courier New'), local('Liberation Mono');
+  size-adjust: 93.75%;
+  ascent-override: 80%;
+  descent-override: 26.67%;
+  line-gap-override: 0%;
+}
+
+/*
  * Body copy, two faces rather than one, because the reader chooses: Literata is
  * the default and Atkinson Hyperlegible is the sans alternative. Both were
  * picked in /theme-lab/ against real multi-paragraph prose, and each carries its

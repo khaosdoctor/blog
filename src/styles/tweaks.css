@@ -102,11 +102,11 @@
 
   /* Everything that is not a post's body: the header, buttons, labels, the
      post list, the footer. The site's own voice. */
-  --dial-face-interface: 'Departure Mono', ui-monospace, SFMono-Regular, monospace;
+  --dial-face-interface: 'Departure Mono', 'Departure Mono Fallback', ui-monospace, SFMono-Regular, monospace;
 
   /* Subtitles and kickers. A 9x16 bitmap face traced to outlines, so it is
      only crisp at 16px and whole multiples of it. Size it in px, not rem. */
-  --dial-face-subtitle: 'PxPlus IBM VGA8', ui-monospace, SFMono-Regular, monospace;
+  --dial-face-subtitle: 'PxPlus IBM VGA8', 'PxPlus IBM VGA8 Fallback', ui-monospace, SFMono-Regular, monospace;
 
   /* Code, and anything that has to line up in columns. */
   --dial-face-code: ui-monospace, SFMono-Regular, monospace;

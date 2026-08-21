@@ -40,7 +40,7 @@ const searchHref = localePath(locale, '/search/')
   square: the hint's reserved space widens it before any script runs.
 */}
 <div class="search-trigger">
-  <a href={searchHref} class="sx-open" aria-label={t(locale, 'search')}>
+  <a href={searchHref} class="sx-open" aria-label={t(locale, 'search')} data-base-label={t(locale, 'search')}>
     <Magnifier class="sx-open-icon" />
     {/* Reserved space, invisible content, see the component comment. The
        bracket vocabulary matches every other button on this site, and the
@@ -51,7 +51,9 @@ const searchHref = localePath(locale, '/search/')
     >
   </a>
 
-  <dialog id="sx-dialog" class="sx-dialog" aria-label={t(locale, 'searchLabel')}>
+  {/* tabindex so the dialog itself can hold the initial focus on touch,
+      where focusing the input would open the keyboard over the results. */}
+  <dialog id="sx-dialog" class="sx-dialog" tabindex="-1" aria-label={t(locale, 'searchLabel')}>
     <div class="sx-row">
       <span class="sx-prompt" aria-hidden="true">&gt;</span>
       <input
@@ -59,7 +61,6 @@ const searchHref = localePath(locale, '/search/')
         class="sx-input"
         autocomplete="off"
         spellcheck="false"
-        autofocus
         aria-label={t(locale, 'searchLabel')}
         placeholder={t(locale, 'searchPlaceholder')}
         data-searching={t(locale, 'searching')}
@@ -182,7 +183,7 @@ const searchHref = localePath(locale, '/search/')
    */
   .sx-dialog {
     inline-size: min(92vw, 36rem);
-    max-block-size: 70vh;
+    max-block-size: 70dvh;
     border: 3px double var(--fg);
     border-radius: var(--radius);
     background: var(--bg);
