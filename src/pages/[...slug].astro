@@ -2,17 +2,13 @@
 import type { GetStaticPaths } from 'astro'
 import { render } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import Authors from '../components/Authors.astro'
-import CoverHero from '../components/CoverHero.astro'
+import PostArticle from '../components/PostArticle.astro'
 import PostToc from '../components/PostToc.astro'
-import ReadingTime from '../components/ReadingTime.astro'
-import SeriesToc from '../components/SeriesToc.astro'
-import { parseAuthors } from '../lib/authors'
 import { coverTone } from '../lib/cover'
 import { mdxComponents } from '../lib/mdx-components'
-import { folderOf, formatDate, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
-import { buildSeriesMap, chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
-import { HREFLANG, t } from '../i18n/ui'
+import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
+import { buildSeriesMap, getSeriesNavigation } from '../lib/taxonomy'
+import { HREFLANG } from '../i18n/ui'
 
 // Flat URLs: /{slug}/ exactly as Ghost had them, so moving a post between
 // sections only ever changes its `category`, never its URL. The series map
@@ -40,7 +36,6 @@ export const getStaticPaths = (async () => {
 const { post, series, alternates: folderAlternates } = Astro.props
 const { Content, headings, remarkPluginFrontmatter } = await render(post)
 const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
-const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
 
 const alternates = folderAlternates.map(({ lang, path }) => ({
   lang,
@@ -73,114 +68,7 @@ const postAccent = coverTone(slugOf(post)).token
   postAccent={postAccent}
 >
   <PostToc headings={headings} locale={post.data.lang} />
-  <article>
-    <CoverHero
-      slug={slugOf(post)}
-      title={post.data.title}
-      category={post.data.category}
-      pubDate={post.data.pubDate}
-      lang={post.data.lang}
-      authorName={authorName}
-    />
-    <h1>{post.data.title}</h1>
-    <p class="meta">
-      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, post.data.lang)}</time>
-      <span aria-hidden="true">·</span>
-      <a
-        href={`/${post.data.category}/`}
-        class="chip"
-        style={`--chip-color: ${chipColor(post.data.category)}`}
-      >
-        {post.data.category}
-      </a>
-      {
-        readingTime !== undefined && (
-          <>
-            <span aria-hidden="true">·</span>
-            <ReadingTime minutes={readingTime} locale={post.data.lang} />
-          </>
-        )
-      }
-    </p>
-    <Authors authors={post.data.authors} locale={post.data.lang} />
-    {
-      post.data.series && <SeriesToc series={post.data.series} current={post.id} locale={post.data.lang} />
-    }
-    {
-      series !== null && (
-        <p class="series">
-          {t(post.data.lang, 'partOfSeriesNamed', series.index, series.total)}{' '}
-          <a href={`/series/${series.name}/`}>{series.title}</a>
-        </p>
-      )
-    }
-    <div class="prose">
-      <Content components={mdxComponents} />
-    </div>
-    {
-      post.data.tags.length > 0 && (
-        <ul class="chips">
-          {post.data.tags.map((tag) => (
-            <li>
-              <a href={`/tags/${slugify(tag)}/`} class="chip" style={`--chip-color: ${chipColor(tag)}`}>
-                {tag}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
-    {
-      series !== null && (
-        <nav class="series-nav" aria-label={t(post.data.lang, 'seriesNav')}>
-          {series.previous !== null && (
-            <a href={urlOf(series.previous)} rel="prev">
-              ← {series.previous.data.title}
-            </a>
-          )}
-          {series.next !== null && (
-            <a href={urlOf(series.next)} rel="next" class="next">
-              {series.next.data.title} →
-            </a>
-          )}
-        </nav>
-      )
-    }
-  </article>
+  <PostArticle post={post} series={series} readingTime={readingTime} locale={post.data.lang}>
+    <Content components={mdxComponents} />
+  </PostArticle>
 </BaseLayout>
-
-<style>
-  .meta {
-    display: flex;
-    /* Without this the chip is a stretched flex item and its text rides at the
-       top of a box as tall as the row. */
-    align-items: center;
-    gap: 0.5rem;
-    margin-block: -0.5rem 2.5rem;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-  }
-
-  .series {
-    padding: 0.6rem 0.9rem;
-    border-inline-start: 3px solid var(--accent);
-    background: color-mix(in oklab, var(--accent) 8%, transparent);
-    font-size: var(--text-small);
-  }
-
-  .series-nav {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-block-start: 2.5rem;
-    padding-block-start: 1.5rem;
-    border-block-start: 1px solid var(--rule);
-    font-size: var(--text-small);
-  }
-
-  .series-nav .next {
-    margin-inline-start: auto;
-    text-align: end;
-  }
-</style>

@@ -121,9 +121,9 @@ const byline = formatCoverByline(pubDate, lang, authorName)
   }
 
   /*
-   * The moved row. `:global()` because it is the post page's own `.meta`
+   * The moved row. `:global()` because it is PostArticle.astro's own `.meta`
    * paragraph, another component's scope, and the two class ancestors give
-   * these rules more weight than that page's scoped `.meta` rule so the row's
+   * these rules more weight than that component's scoped `.meta` rule so the row's
    * page margins and its screen-sized text give way to the card's.
    */
   .cover-hero .cover-hero-meta :global(.meta) {
