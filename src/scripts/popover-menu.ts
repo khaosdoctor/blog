@@ -11,7 +11,7 @@ export const canPopover = 'popover' in HTMLElement.prototype
  * getBoundingClientRect is viewport-relative, which lines up with the `fixed`
  * positioning the fallback sets and the popover API imposes.
  */
-export function placeMenu(el: HTMLElement, anchor: HTMLElement): void {
+function placeMenu(el: HTMLElement, anchor: HTMLElement): void {
   const rect = anchor.getBoundingClientRect()
   const space = 8
   const w = el.offsetWidth
