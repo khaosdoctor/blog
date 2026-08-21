@@ -89,7 +89,10 @@ const https = (hosts: string[]): string => hosts.map((host) => `https://${host}`
 export function contentSecurityPolicy(): string {
   return [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' ${https(SCRIPT_HOSTS)}`,
+    // 'wasm-unsafe-eval' is for Pagefind, which is a WebAssembly module: without
+    // it the browser blocks the search index from ever compiling, and the page
+    // reports no index rather than an error. It permits WASM only, not eval().
+    `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${https(SCRIPT_HOSTS)}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self'",
