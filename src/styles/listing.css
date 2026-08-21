@@ -214,6 +214,13 @@
   .listing-leader {
     display: none;
   }
+
+  /* The leader was the space between date and label; without it they touched
+     ("6 March 2025opinion"). */
+  .listing-label,
+  .listing-label-plain {
+    margin-inline-start: 0.6rem;
+  }
 }
 
 /* --- The accordion variant, used by the series index --- */

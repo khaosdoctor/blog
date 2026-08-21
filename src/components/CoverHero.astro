@@ -47,6 +47,24 @@ const byline = formatCoverByline(pubDate, lang, authorName)
   <div class="cover-hero-meta"></div>
 </div>
 
+{/* The layout half of what cover-hero.ts does, done synchronously during
+    parse: un-hiding the (empty, aspect-ratio-sized) box and collapsing the
+    text header happened after first paint before, and the whole article
+    jumped on every post (measured CLS 0.10 on phones). The module only paints
+    into a box this already reserved. Guarded on module support so a no-JS or
+    ancient reader keeps the text header; a failed network fetch of the module
+    is the one case left showing an empty box. */}
+<script is:inline>
+  if ('noModule' in HTMLScriptElement.prototype) {
+    const hero = document.querySelector('[data-cover-hero]')
+    if (hero) {
+      hero.removeAttribute('hidden')
+      const article = hero.closest('article')
+      if (article) article.setAttribute('data-cover-active', '')
+    }
+  }
+</script>
+
 <script>
   import '../scripts/cover-hero'
 </script>
@@ -156,5 +174,16 @@ const byline = formatCoverByline(pubDate, lang, authorName)
     clip-path: inset(50%);
     white-space: nowrap;
     border: 0;
+  }
+
+  /*
+   * Direct child on purpose: while the meta row still lives in the article it
+   * takes no flow height (the last late 55px shift on every post), and the
+   * moment cover-hero.ts adopts it into the overlay slot the selector stops
+   * matching and it paints normally there.
+   */
+  :global(article[data-cover-active] > .meta) {
+    position: absolute;
+    visibility: hidden;
   }
 </style>

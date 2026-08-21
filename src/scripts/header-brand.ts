@@ -135,6 +135,11 @@ function init(): void {
   }
 
   function runScramble(onDone: () => void): void {
+    // Locked to the resolved text's width before the letters empty out:
+    // without this the wordmark narrows to its min for the whole animation,
+    // the wrapped phone header re-flows around it and the page shifts
+    // (measured CLS 0.10 on every post).
+    word.style.minInlineSize = `${word.getBoundingClientRect().width}px`
     for (const el of letterEls) el.textContent = ''
     const items = letterEls.map((el, i) => {
       const ch = el.dataset.ch ?? ''
