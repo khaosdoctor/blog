@@ -37,22 +37,24 @@ const locale = localeFromPath(Astro.url.pathname)
   })()
 </script>
 
-<script is:inline define:vars={{ copiedLabel: t(locale, 'linkCopied') }}>
-  document.addEventListener('click', async (event) => {
-    const button = event.target.closest('.qc-copy')
+<script>
+  import { copyWithToast } from '../scripts/copy-toast'
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest('.qc-copy')
     if (button === null) return
 
     const card = button.closest('.callout[data-callout="quote"], blockquote:not(.callout):not(.twitter-tweet)')
-    if (!card) return
+    if (card === null) return
 
     // A container's own text, from its direct <p> children when it has any
     // (both markup shapes normally do), falling back to the container's
     // whole text otherwise, so a quote with no paragraph wrapper still
     // copies something rather than an empty string.
-    function textOf(container) {
+    function textOf(container: Element): string {
       const paragraphs = container.querySelectorAll(':scope > p')
-      const nodes = paragraphs.length ? paragraphs : [container]
-      return Array.from(nodes)
+      const nodes = paragraphs.length ? [...paragraphs] : [container]
+      return nodes
         .map((node) => node.textContent)
         .join(' ')
         .replace(/\s+/g, ' ')
@@ -62,23 +64,7 @@ const locale = localeFromPath(Astro.url.pathname)
     const authorEl = card.querySelector(':scope > .callout-title .callout-title-text')
     const bodyContainer = authorEl ? card.querySelector(':scope > .callout-content') : card
     const body = bodyContainer ? textOf(bodyContainer) : ''
-    const author = authorEl ? authorEl.textContent.replace(/^\s*»\s*/, '').trim() : ''
-    const citation = author ? `"${body}" » ${author}` : `"${body}"`
-
-    try {
-      await navigator.clipboard.writeText(citation)
-    } catch {
-      // No clipboard permission, or an insecure origin. Silent, same as
-      // every other copy control on this site.
-      return
-    }
-
-    document.querySelector('.toast')?.remove()
-    const toast = document.createElement('div')
-    toast.className = 'toast'
-    toast.setAttribute('role', 'status')
-    toast.textContent = copiedLabel
-    document.body.append(toast)
-    setTimeout(() => toast.remove(), 2000)
+    const author = authorEl ? (authorEl.textContent ?? '').replace(/^\s*»\s*/, '').trim() : ''
+    void copyWithToast(author ? `"${body}" » ${author}` : `"${body}"`)
   })
 </script>
