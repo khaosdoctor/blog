@@ -43,7 +43,7 @@ const MAX_GPS = 25
  * Lit-cell contrast is around 1.05:1, a deliberate failure of the 3:1
  * non-text-contrast criterion: this draws texture, not content.
  */
-const DEFAULT_OPACITY = 0.09
+const DEFAULT_OPACITY = 0.04
 const MIN_OPACITY = 0
 const MAX_OPACITY = 0.5
 /* Slack around a glider so it does not spawn touching the viewport edge and die

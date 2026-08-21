@@ -129,6 +129,8 @@ type UIKey =
   | 'previewUnpin'
   | 'previewDrag'
   | 'previewUnwritten'
+  | 'previewMinimize'
+  | 'previewRestore'
   | 'showNote'
   | 'showMarginNote'
   | 'linkToNote'
@@ -281,6 +283,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     previewUnpin: 'Soltar esta prévia',
     previewDrag: 'arraste para mover',
     previewUnwritten: 'ainda não escrito, mas em breve!',
+    previewMinimize: 'Minimizar prévia',
+    previewRestore: 'Restaurar prévia',
     showNote: 'mostrar nota',
     showMarginNote: 'mostrar nota lateral',
     linkToNote: 'link para esta nota',
@@ -422,6 +426,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     previewUnpin: 'Unpin this preview',
     previewDrag: 'drag to move',
     previewUnwritten: 'not yet written, but soon!',
+    previewMinimize: 'Minimise preview',
+    previewRestore: 'Restore preview',
     showNote: 'show note',
     showMarginNote: 'show margin note',
     linkToNote: 'link to this note',

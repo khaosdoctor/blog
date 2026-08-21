@@ -151,6 +151,13 @@
   /* How far the header's own contents sit in from that edge. */
   --dial-chrome-inset: 0.667rem;
 
+  /* How far a post's own contents step in from the edge of the cover above
+     them. The cover fills the article, but the frame it DRAWS is inset: cover.ts
+     strokes it at unit 36 of 1200 with a 4-wide stroke, so its visible edge is
+     at 34. Everything under the cover lines up with that drawn edge rather than
+     with the card's outer box. A percentage, so it holds at every width. */
+  --dial-cover-frame-inset: calc(34 / 1200 * 100%);
+
   /* ==========================================================================
    * 6. SHAPE
    * ======================================================================== */

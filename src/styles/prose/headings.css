@@ -15,7 +15,15 @@ article :is(h1, h2, h3)::after {
   display: block;
   block-size: 1px;
   margin-block-start: 0.3em;
-  background: linear-gradient(to right, var(--heading-rule), transparent);
+  /*
+   * The same dashed mark every other rule on the site draws: 10px on, 6px off,
+   * the recipe quotes.css, the pagination rule and the listing row separator
+   * all share. Two layers doing two jobs, because one gradient cannot do both:
+   * the repeating one draws the dashes, the mask ramps its alpha away so the
+   * run still fades out instead of stopping at a hard edge.
+   */
+  background-image: repeating-linear-gradient(to right, var(--heading-rule) 0 10px, transparent 10px 16px);
+  mask-image: linear-gradient(to right, #000 0 55%, transparent 100%);
 }
 
 /* h1 only. On an h2 it read as a blur rather than a glow. */
