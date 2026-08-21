@@ -311,11 +311,16 @@ const searchHref = localePath(locale, '/search/')
     overflow-y: auto;
   }
 
-  .sx-results li + li {
+  /*
+   * :global() from here down: every row is built with createElement in
+   * search-palette.ts, so none of these elements carries this file's
+   * data-astro-cid and a scoped selector matches nothing.
+   */
+  .sx-results :global(li + li) {
     border-block-start: var(--border) solid var(--rule);
   }
 
-  .sx-results a {
+  .sx-results :global(a) {
     display: flex;
     align-items: baseline;
     padding-block: 0.5rem;
@@ -323,17 +328,17 @@ const searchHref = localePath(locale, '/search/')
     text-decoration: none;
   }
 
-  .sx-results a:hover,
-  .sx-results a:focus-visible {
+  .sx-results :global(a:hover),
+  .sx-results :global(a:focus-visible) {
     color: var(--accent);
   }
 
-  .sx-results a:focus-visible {
+  .sx-results :global(a:focus-visible) {
     outline: 2px solid var(--accent);
     outline-offset: -2px;
   }
 
-  .sx-num {
+  .sx-results :global(.sx-num) {
     flex-shrink: 0;
     inline-size: 1.4em;
     margin-inline-end: 0.6rem;
@@ -346,7 +351,7 @@ const searchHref = localePath(locale, '/search/')
     display: none;
   }
 
-  .sx-more a {
+  .sx-more :global(a) {
     color: var(--accent);
     font-size: var(--text-tiny);
   }

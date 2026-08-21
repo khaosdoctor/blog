@@ -254,6 +254,11 @@ function init(): void {
     }
   }
 
+  // Inside the phone drawer the palette is not a modal: it opens as a dropdown
+  // anchored over the drawer's own search row, so the menu behind it stays
+  // readable and nothing in it moves.
+  const inDrawer = (): boolean => document.querySelector('header.shell')?.matches('[data-menu-open]') === true
+
   function openDialog(): void {
     input.value = ''
     list.replaceChildren()
@@ -261,6 +266,16 @@ function init(): void {
     status.textContent = ''
     resultLinks = []
     cursor.style.background = dayColor()
+
+    if (inDrawer()) {
+      dialog.show()
+      // The dropdown is pinned to the top of the drawer, so the keyboard rising
+      // over the lower half covers nothing the reader still needs.
+      input.focus()
+      updateCaret()
+      return
+    }
+
     dialog.showModal()
     // Focusing the input on touch opens the keyboard over half the dialog
     // before the reader has seen it; on a phone the tap on the field is what
@@ -285,6 +300,14 @@ function init(): void {
   // content, only happens on the ::backdrop area: every real child has a box.
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close()
+  })
+
+  // The dropdown has no backdrop to catch that click, so light dismiss is a
+  // document listener instead.
+  document.addEventListener('click', (event) => {
+    if (!dialog.open || dialog.matches(':modal')) return
+    const target = event.target as HTMLElement
+    if (target.closest('.sx-dialog') === null && target.closest('.sx-open') === null) dialog.close()
   })
 
   input.addEventListener('input', () => {

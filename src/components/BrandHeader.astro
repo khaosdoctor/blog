@@ -338,6 +338,19 @@ const RULE = '──────────────────────
       display: none;
     }
 
+    /* Absolute against .search-trigger above, so the field covers the closed
+       row it replaces and the results hang below it. */
+    .shell[data-menu-open] .controls :global(.sx-dialog[open]) {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline: 0;
+      z-index: 3;
+      inline-size: auto;
+      max-block-size: 60dvh;
+      margin: 0;
+      padding: 0.6rem;
+    }
+
     .shell[data-menu-open] .controls :global(.sx-label) {
       display: inline;
     }
