@@ -8,8 +8,13 @@
  *
  * The footnotes section reuses these tokens for its own separator, so the two
  * never drift apart. See src/styles/footnotes.css.
+ *
+ * `.pg-rule` is the same mark above a pagination row, matched here rather than
+ * redrawn there: that row used to carry a dashed rule of its own, which made
+ * two different marks do one job on the same page.
  */
-.prose hr {
+.prose hr,
+.pg-rule {
   inline-size: var(--rule-length);
   block-size: var(--rule-weight);
   margin-block: 3rem;

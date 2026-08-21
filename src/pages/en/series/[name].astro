@@ -50,8 +50,10 @@ const alternates = [
   lang="en"
   alternates={alternates}
 >
-  <p class="kicker">{t('en', 'series')}</p>
-  <h1>{name}</h1>
+  <p class="kicker listing-heading">{t('en', 'series')}</p>
+  <h1 class="listing-heading">
+    {name} <span class="page-count">[{posts.length}]</span>
+  </h1>
   <PostList posts={posts} />
 </BaseLayout>
 

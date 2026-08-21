@@ -75,17 +75,17 @@ const alternates = [
   /* The title shares the cloud's left edge, so it breaks out the same way. */
   @media (min-width: 70rem) {
     .cloud-heading {
-      inline-size: 85vw;
+      inline-size: var(--chrome-width);
       margin-inline-start: 50%;
-      transform: translateX(-42.5vw);
+      transform: translateX(calc(var(--chrome-width) / -2));
     }
   }
 
   @media (min-width: 70rem) {
     .chips {
-      inline-size: 85vw;
+      inline-size: var(--chrome-width);
       margin-inline-start: 50%;
-      transform: translateX(-42.5vw);
+      transform: translateX(calc(var(--chrome-width) / -2));
     }
   }
 

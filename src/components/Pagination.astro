@@ -93,6 +93,10 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
 {
   page.lastPage > 1 && (
     <nav class="pagination" aria-label={t(locale, 'pagination')}>
+      {/* The section break a post draws for `---`, styled by prose/rules.css so
+          there is one such mark on the site rather than two. A flex item of its
+          own row, since the controls below it are the other row. */}
+      <hr class="pg-rule" />
       {page.url.prev ? (
         <a class="pg-btn" href={page.url.prev} rel="prev" aria-label={t(locale, 'paginationPrev')}>
           <span class="pg-glyph" aria-hidden="true">
@@ -153,23 +157,27 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
        are a small cluster in a box as wide as the list above, and left-aligned
        they read as the last row of that list instead of as its own thing. */
     justify-content: center;
-    margin-block-start: 2.5rem;
-    padding-block-start: 1.5rem;
-    /*
-     * The quotes' own dashed rule rather than a solid hairline: the same
-     * `repeating-linear-gradient` recipe quotes.css draws its author line
-     * with (10px on, 6px off, 2px weight), so the two read as one mark used
-     * twice instead of two different rules. Drawn as a background rather than
-     * a border so it can be centred and cut to a share of the row's width,
-     * which a border cannot do.
-     */
+    /* 5px from the last row of the list. The separator carries its own space
+       below it, which is what keeps the controls off the rule. */
+    margin-block-start: 5px;
     border-block-start: 0;
-    background-image: repeating-linear-gradient(to right, var(--rule) 0 10px, transparent 10px 16px);
-    background-repeat: no-repeat;
-    background-position: top center;
-    background-size: 50% 2px;
     font-family: var(--font-display);
     font-size: 0.85rem;
+  }
+
+  /*
+   * Its own row, so the controls sit under it rather than beside it. The mark
+   * itself comes from prose/rules.css; only the spacing is this file's, since a
+   * post's `---` wants far more air around it than a row of page numbers.
+   */
+  .pg-rule {
+    flex-basis: 100%;
+    margin-block: 0 1.2rem;
+    /* A short mark rather than the full --rule-length a post's `---` takes: this
+       one separates a row of controls from a list, not one section of an article
+       from the next. `margin-inline: auto` from the shared rule keeps it
+       centred at any width. */
+    inline-size: 30px;
   }
 
   /*
