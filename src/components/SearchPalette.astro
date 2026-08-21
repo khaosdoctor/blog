@@ -40,7 +40,7 @@ const searchHref = localePath(locale, '/search/')
   square: the hint's reserved space widens it before any script runs.
 */}
 <div class="search-trigger">
-  <a href={searchHref} class="sx-open" aria-label={t(locale, 'search')}>
+  <a href={searchHref} class="sx-open" aria-label={t(locale, 'search')} data-base-label={t(locale, 'search')}>
     <Magnifier class="sx-open-icon" />
     {/* Reserved space, invisible content, see the component comment. The
        bracket vocabulary matches every other button on this site, and the
