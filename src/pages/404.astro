@@ -10,7 +10,7 @@ const recent = (await getPublishedPosts()).slice(0, 5)
 {/* One 404 answers for the whole host, /en/ paths included, so both languages
     are rendered and the script below keeps only the one this reader reads. With
     no JS both stay, which is what this page did before. */}
-<BaseLayout title={`${t('pt', 'notFoundTitle')} | Lucas Santos`} description={t('pt', 'notFoundBody')}>
+<BaseLayout title={`LS: ${t('pt', 'notFoundTitle')}`} description={t('pt', 'notFoundBody')}>
   <h1 class="listing-heading">404</h1>
   <div class="listing-heading">
     <div data-lang="pt">

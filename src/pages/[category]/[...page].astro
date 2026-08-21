@@ -46,7 +46,7 @@ const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
 // A written description when there is one, otherwise the generated sentence.
 const described = categoryDescription(category)
 const description = described ?? t('pt', 'sectionDescription', category)
-const title = page.currentPage > 1 ? `${category} | Lucas Santos | página ${page.currentPage}` : `${category} | Lucas Santos`
+const title = page.currentPage > 1 ? `LS: ${category} | página ${page.currentPage}` : `LS: ${category}`
 ---
 
 <BaseLayout
