@@ -51,6 +51,10 @@
  */
 .prose {
   font-family: var(--font-body);
+  /* break-word, never anywhere: it leaves intrinsic sizes alone and only
+     breaks a token that would otherwise scroll the page sideways on a phone
+     (a bare hash, a long URL). Code blocks keep their own scroll container. */
+  overflow-wrap: break-word;
   /*
    * The reader's text-size control (--font-scale, theme.css) reaches
    * --text-base only, so the running paragraph grows and everything sized off

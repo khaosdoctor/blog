@@ -54,26 +54,23 @@ function hrefFor(code: Locale): string {
 const other = LOCALES.find((entry) => entry.code !== locale)
 const otherHref = other === undefined ? '/' : hrefFor(other.code)
 const otherName = other?.name ?? ''
-// The square names the language the reader is on right now, not the
-// destination: see the component comment above for why the fill and the
-// position agree with this instead of pointing onward.
-const currentLabel = LOCALES.find((entry) => entry.code === locale)?.label ?? ''
-// The destination's own code, printed dim in the hollow half so both sides of
-// the switch are legible: the solid square says where you are, the dim half
-// says where the click goes.
-const otherLabel = other?.label ?? ''
 ---
 
 {/* `data-goes-to` is what the click handler at the bottom stores: using this
    switch is the reader stating a language, and a stated choice outranks the
-   browser's own header from then on (see core-lang.ts). */}
+   browser's own header from then on (see core-lang.ts).
+
+   The accessible name starts with the visible "PT EN" (WCAG 2.5.3: a
+   speech-input user addresses the control by the text they can see), then
+   says what the click does. LOCALES order matches the rendered order in both
+   states, since the square and the dim half swap places, never order. */}
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
   <a
     class="lang-track"
     href={otherHref}
     hreflang={other?.code}
     data-goes-to={other?.code}
-    aria-label={t(locale, 'switchLanguage', otherName)}
+    aria-label={`${LOCALES.map((entry) => entry.label).join(' ')}: ${t(locale, 'switchLanguage', otherName)}`}
     title={t(locale, 'switchLanguage', otherName)}
   >
     {/* The 44px hit target is .lang-track (the link itself, above); .lang-rect
@@ -81,15 +78,23 @@ const otherLabel = other?.label ?? ''
        split every other header control uses. .lang-square is the one solid
        half, carrying the current language's colour and its word together. */}
     {/*
-      `.lang-other` is first in source order so the solid square paints over it
-      if the two ever overlap. It fills the whole rectangle and centres its own
-      text in the half the square is not on, rather than being positioned per
-      state: one rule, and the `[data-current]` selector below moves it with
-      the square instead of a second set of insets to keep in step.
+      `.lang-other` fills the whole rectangle and centres its own text in the
+      half the square is not on, rather than being positioned per state: one
+      rule, and the `[data-current]` selector below moves it with the square
+      instead of a second set of insets to keep in step.
     */}
     <span class="lang-rect" aria-hidden="true">
-      <span class="lang-other">{otherLabel}</span>
-      <span class="lang-square">{currentLabel}</span>
+      {/* Rendered in LOCALES order with a literal space, so the flattened
+          text reads "PT EN" in both locales and matches the accessible name
+          (WCAG 2.5.3); which span is the solid square follows the locale.
+          The square's own z-index keeps it painting over the dim half, so
+          source order no longer decides that. */}
+      {LOCALES.map((entry, index) => (
+        <Fragment>
+          {index > 0 && ' '}
+          <span class={entry.code === locale ? 'lang-square' : 'lang-other'}>{entry.label}</span>
+        </Fragment>
+      ))}
     </span>
   </a>
 </nav>
@@ -165,6 +170,9 @@ const otherLabel = other?.label ?? ''
    */
   .lang-square {
     position: absolute;
+    /* Paints over the dim half during the transition, whatever the source
+       order: the markup orders the spans for the text reading now. */
+    z-index: 1;
     inset-block: 0;
     inset-inline-start: 0;
     inline-size: 50%;

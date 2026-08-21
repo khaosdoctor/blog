@@ -230,6 +230,15 @@ const { locale } = Astro.props
     display: inline-flex;
   }
 
+  /* Same reserved-while-hidden treatment as ThemeToggle, same reason: the
+     late un-hide re-wrapped the phone header and shifted the page. */
+  .settings-panel[hidden] {
+    display: inline-flex;
+    visibility: hidden;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+  }
+
   .sp-icon[hidden] {
     display: none;
   }
@@ -296,7 +305,7 @@ const { locale } = Astro.props
     z-index: 60;
     margin: 0;
     inline-size: 18rem;
-    max-block-size: 80vh;
+    max-block-size: 80dvh;
     overflow-y: auto;
     border: 3px double var(--fg);
     border-radius: var(--radius);

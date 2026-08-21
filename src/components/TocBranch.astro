@@ -185,7 +185,10 @@ const { items, locale } = Astro.props
   }
 
   .fold {
-    padding: 0;
+    /* Invisible padding pulled back by the margin: a 44px thumb target
+       (WCAG 2.5.8) around a 0.6rem glyph, with the row metrics untouched. */
+    padding: 1.1rem;
+    margin: -1.1rem;
     border: 0;
     background: none;
     color: var(--toc-ink);
