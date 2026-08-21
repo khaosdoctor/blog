@@ -210,7 +210,7 @@ src/integrations/            build hooks: redirect stubs
 src/lib/                     posts, taxonomy, seo, embed-hosts, version
 src/scripts/                 the client modules: conway, header, search, settings
 src/styles/                  one file per thing being styled, see below
-src/i18n/ui.ts               every string the chrome shows, both languages
+src/i18n/ui.ts               every string the shell shows, both languages
 scripts/                     build steps and guards
 worker/                      the Cloudflare scheduler
 ```

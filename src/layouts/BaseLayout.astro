@@ -299,7 +299,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       <slot />
     </main>
     <footer>
-      {/* Drawn the same way BrandHeader.astro's .chrome draws its own top
+      {/* Drawn the same way BrandHeader.astro's .shell draws its own top
           edge: box-drawing corners plus a run of dashes filling whatever
           room is left, same --muted, same font-display, same 0.4em
           letter-spacing on the dashes. Corners point down (└─ / ─┘) rather
@@ -324,7 +324,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
             the glyph out of the accessibility tree, so the label is the only
             thing a screen reader announces on any of them.
 
-            The header's own icon-button chrome now, not the quieter
+            The header's own icon-button shell now, not the quieter
             treatment this GitHub link had last pass: the owner asked for it
             explicitly, reversing that earlier call. `.icon-link` (below)
             matches ThemeToggle.astro's `.tt-open`/`.tt-open::before` pair

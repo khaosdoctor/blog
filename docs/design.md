@@ -53,7 +53,7 @@ styling pass applying this table is done. Full reasoning is in `docs/theming.md`
 
 ## Fonts
 
-Three stacks. A pixel face is right for chrome, labels and headings and punishing for a 3000 word article, so
+Three stacks. A pixel face is right for shell, labels and headings and punishing for a 3000 word article, so
 `--font-body` stays readable while `--font-display` and `--font-subtitle` carry the pixel faces. All candidates below
 are free and self-hosted (CSP is `font-src 'self'`).
 
@@ -64,7 +64,7 @@ at 22px.
 
 | Face | Licence | Good for | Watch out |
 |---|---|---|---|
-| [Departure Mono](https://departuremono.com) | OFL | display, chrome, code | lowercase x-height is small at body sizes |
+| [Departure Mono](https://departuremono.com) | OFL | display, shell, code | lowercase x-height is small at body sizes |
 | [Silkscreen](https://fonts.google.com/specimen/Silkscreen) | OFL | tiny labels, badges | uppercase only in practice, no italics |
 | [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans) | OFL | headings with more weight | four weights, no mono |
 | [PxPlus IBM VGA8](https://int10h.org/oldschool-pc-fonts/) | CC BY-SA 4.0 | authentic DOS terminal | share-alike plus attribution, bitmap so it only looks right at exact multiples |

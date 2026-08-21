@@ -20,7 +20,7 @@ turn an automatic artifact into a manual one.
 | JSON-LD Person | Yes | `buildPersonJsonLd` in `src/lib/seo.ts`, static author profile, same on every page |
 | Sitemap | Yes | `astro.config.mjs` sitemap integration, filters out `/search/`, `/offline/`, and anything in `noindexPaths` |
 | Sitemap `lastmod` | Yes | `astro.config.mjs` `serialize`, reads `lastModified` from `src/lib/post-dates.mjs` (frontmatter `updatedDate` or `pubDate`) |
-| `robots.txt` | Yes | `src/pages/robots.txt.ts`, now derives `Disallow` from `noindexPaths` + a short chrome list instead of a hand-maintained one (this change) |
+| `robots.txt` | Yes | `src/pages/robots.txt.ts`, now derives `Disallow` from `noindexPaths` + a short shell list instead of a hand-maintained one (this change) |
 | RSS | Yes | `src/pages/rss.xml.ts` and `src/pages/en/rss.xml.ts`, built from `getPublishedPosts()` |
 | 404 | Yes | `src/pages/404.astro`; the page itself carries no `noindex`, but a static host serves it with an actual HTTP 404 status, which is what stops indexing regardless of the meta tag |
 | `llms.txt` | Yes | `src/pages/llms.txt.ts`, one entry per published post pointing at its markdown twin |
@@ -29,7 +29,7 @@ turn an automatic artifact into a manual one.
 
 `src/pages/robots.txt.ts` used to hardcode its `Disallow` list. A post marked `noindex: true` was already excluded
 from the sitemap (`src/lib/post-dates.mjs` collects it into `noindexPaths`) but stayed crawlable, so `robots.txt` and
-the sitemap disagreed. The route now builds `Disallow` from `noindexPaths` plus a fixed three-line list of chrome
+the sitemap disagreed. The route now builds `Disallow` from `noindexPaths` plus a fixed three-line list of shell
 paths (`/search/`, `/en/search/`, `/offline/`) that will never carry `noindex` frontmatter because they aren't posts.
 A new noindex post needs no edit here.
 

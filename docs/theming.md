@@ -43,7 +43,7 @@ Resolved, in dark mode: background `#1b1b1f`, the box `#202127`, the accent `#a8
 
 Three things are worth taking from this, and one is worth leaving.
 
-**Worth taking.** The accent is a single word inside an otherwise plain heading. That is a very small amount of colour doing a very large amount of work, and it costs nothing. The brackets around the button label are pure `::before`/`::after`: the button is still a button, still focusable, still readable by a screen reader without the brackets being announced as content. And the terminal box is one rule, one background, one vertical divider after the prompt. There is no chrome pretending to be a window.
+**Worth taking.** The accent is a single word inside an otherwise plain heading. That is a very small amount of colour doing a very large amount of work, and it costs nothing. The brackets around the button label are pure `::before`/`::after`: the button is still a button, still focusable, still readable by a screen reader without the brackets being announced as content. And the terminal box is one rule, one background, one vertical divider after the prompt. There is no shell pretending to be a window.
 
 **Worth leaving.** The `border-radius: 8px` on the terminal box. The rest of the design is on a character grid and the rounded corner is the one thing fighting it. `docs/design.md` already sets `--radius: 0` for exactly this reason, and that decision holds.
 
@@ -81,7 +81,7 @@ The pattern across all five: **they distil two or three cues and drop the rest.*
 
 ### The counter-example, and the line it draws
 
-**[98.css](https://jdan.github.io/98.css/)** and **[XP.css](https://botoxparty.github.io/XP.css/)** reproduce a historical UI faithfully, down to the bevels. They are wonderful and they are cosplay. The distinction that matters for this site: the references above take *cues* from the terminal, and these take *chrome* from it. "Modern enough so people can navigate" belongs on the first side of that line. Anything that reproduces a Game Boy screen or a DOS window frame is on the second, and that is the reason the Game Boy menu candidates in section 7 are marked as the least scalable option rather than the most attractive one.
+**[98.css](https://jdan.github.io/98.css/)** and **[XP.css](https://botoxparty.github.io/XP.css/)** reproduce a historical UI faithfully, down to the bevels. They are wonderful and they are cosplay. The distinction that matters for this site: the references above take *cues* from the terminal, and these take *shell* from it. "Modern enough so people can navigate" belongs on the first side of that line. Anything that reproduces a Game Boy screen or a DOS window frame is on the second, and that is the reason the Game Boy menu candidates in section 7 are marked as the least scalable option rather than the most attractive one.
 
 One more piece of context worth knowing before committing hard: trend data has retro-brutalist UI peaking around March 2026 and declining since. That is not an argument against the direction, it is an argument for the distilled version of it rather than the maximal version, because the distilled version ages into "a monospace site" and the maximal version ages into "a 2026 site".
 
@@ -190,7 +190,7 @@ Purple was already the one exception to "traced from the favicon", since the bra
 
 Decided after the lab: **`#000000` in dark, a NieR Automata sepia in light.**
 
-The dark ground is true black rather than the near-black `#14161a` it replaced, because on an OLED panel a `#000000` pixel is switched off. That is the entire reason to ask for pitch black, and any lift, however small, gives it up. So when a hint of purple was wanted in the page, it went into `--rule` (`#2b1f42`) and into the quote tints instead of into `--bg`: at the lightness a "hint" implies, roughly `#05000b`, the page reads as black on every display anyway, so the token would have cost the OLED benefit and returned nothing visible. The hint belongs where a few points of lightness are actually perceivable, which is the chrome.
+The dark ground is true black rather than the near-black `#14161a` it replaced, because on an OLED panel a `#000000` pixel is switched off. That is the entire reason to ask for pitch black, and any lift, however small, gives it up. So when a hint of purple was wanted in the page, it went into `--rule` (`#2b1f42`) and into the quote tints instead of into `--bg`: at the lightness a "hint" implies, roughly `#05000b`, the page reads as black on every display anyway, so the token would have cost the OLED benefit and returned nothing visible. The hint belongs where a few points of lightness are actually perceivable, which is the shell.
 
 The light ground is `#f4efe0`, warm and slightly down from white. Worth knowing before copying NieR's palette directly: its real background is about `#c8c3b4` with ink near `#4e4b42`, which is a game HUD designed to be read in glances and is too dark to hold 3000 words. What was taken is the hue, lightened until it works as a reading surface. Its ink is warm too (`#332d23`), because a cool near-black on a warm ground is the specific error that makes a sepia page look like a white page with a filter over it.
 
@@ -239,7 +239,7 @@ Genuinely viable for 3000 words of Portuguese:
 - **VT323** (OFL). Traced from the DEC VT320. Thin strokes, tall, needs 20px and up and needs high contrast to hold.
 - **DotGothic16** (OFL). Dot-matrix, proportional, and the closest thing here to a Game Boy that stays readable in running text.
 
-Headings and chrome only:
+Headings and shell only:
 
 - **Pixelify Sans** (variable weight, rare in a pixel face), **Jersey 10** (condensed, scoreboard, good for a very large title on one line), **PxPlus IBM VGA** (the literal DOS, with the grid and licence caveats above).
 

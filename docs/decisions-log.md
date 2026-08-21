@@ -486,7 +486,7 @@ and the generated footnotes heading is out. A post with fewer than two headings 
 
 The frame is a 3px `double` border rather than box-drawing characters: the ANSI look without a monospace grid to
 maintain, which also survives a font change. Full black on the sepia page and full white on the dark one, which is
-the one place on this site that ignores the muted greys, because chrome that fades into the page is chrome the
+the one place on this site that ignores the muted greys, because shell that fades into the page is shell the
 reader has to hunt for. The line the reader is inside is painted edge to edge in the inverse.
 
 Where the reader is comes from the last heading above a 120px line, not an `IntersectionObserver`: a long section

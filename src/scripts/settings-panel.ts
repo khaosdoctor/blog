@@ -375,7 +375,7 @@ function init(): void {
   const searchKey = menu.querySelector<HTMLSelectElement>('#sp-search-key')
   if (searchKey !== null) {
     /*
-     * Seven letters are shortcuts the browser owns, and its chrome intercepts
+     * Seven letters are shortcuts the browser owns, and the browser intercepts
      * them before any listener here runs, so picking one used to save and then
      * do nothing at all.
      *

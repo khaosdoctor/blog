@@ -1,5 +1,5 @@
 /**
- * Every language the chrome speaks, source language first. Adding one is this
+ * Every language the shell speaks, source language first. Adding one is this
  * array plus its table below, and `scripts/check-i18n.ts` reads this same
  * constant, so the checker never needs a list of its own.
  */
