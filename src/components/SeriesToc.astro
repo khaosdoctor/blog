@@ -89,14 +89,10 @@ const seriesHref = localePath(locale, `/series/${series}/`)
        larger, so a smaller positive value here changes nothing. A negative one
        is added to it instead: 2.5 - 2 leaves 0.5rem between the two frames. */
     margin-block: -2rem 2rem;
-    /*
-     * Lines up with the frame the cover draws INSIDE its own box, rather than
-     * with the box itself: cover.ts strokes that frame at unit 36 of 1200 with
-     * a 4-wide stroke, so its outer edge is at 34. A percentage margin
-     * resolves against this element's containing block, which is the same
-     * <article> the cover fills, so the two edges stay aligned at every width.
-     */
-    margin-inline: calc(34 / 1200 * 100%);
+    /* Lines up with the frame the cover draws inside its own box; the token
+       carries the reasoning (tweaks.css). Inherited from the article rule in
+       core.css, restated because this element also sets margin-block. */
+    margin-inline: var(--cover-frame-inset);
     padding: 0.9rem var(--toc-pad);
     border: 4px double var(--post-accent, var(--rule));
     border-radius: var(--radius);

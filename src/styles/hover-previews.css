@@ -241,3 +241,116 @@ a.link-unwritten {
     transition: none;
   }
 }
+
+/* --- Minimised cards --- */
+
+/*
+ * One strip along the foot of the window holding every minimised card, in the
+ * order they were minimised. `pointer-events: none` on the strip and `auto` on
+ * its children, so the empty room beside them never eats a click meant for the
+ * page. Wraps, so a long row becomes two rather than running off the side.
+ */
+.hp-dock {
+  position: fixed;
+  z-index: 2147483000;
+  inset-inline: 0;
+  inset-block-end: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  pointer-events: none;
+}
+
+.hp-dock > * {
+  pointer-events: auto;
+}
+
+/*
+ * A docked card is one line: its title, and the three buttons. `position:
+ * static` hands its placement to the strip, which is the whole point of taking
+ * it out of the top layer to get here.
+ *
+ * The buttons come out of their absolute corners and sit in the row. The title
+ * takes `order: -1` so it reads first, even though the buttons come before it
+ * in the DOM, where they are in tab order after the title.
+ */
+.hp-card.hp-docked {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  inline-size: auto;
+  max-inline-size: min(18rem, calc(100vw - 2rem));
+  max-block-size: none;
+  overflow: hidden;
+  padding: 0.3rem 0.5rem;
+  cursor: default;
+}
+
+.hp-card.hp-docked .hp-title {
+  order: -1;
+  padding-inline-end: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hp-card.hp-docked :is(.hp-close, .hp-pin, .hp-min) {
+  position: static;
+  flex: none;
+}
+
+/* Nothing but the title survives the collapse: a description and a host need
+   the room the strip does not have, and the drag hint is a lie in here. */
+.hp-card.hp-docked :is(.hp-desc, .hp-host, .hp-hint, .hp-unwritten-msg) {
+  display: none;
+}
+
+/* The watermark is drawn on the card itself, so the unwritten variant has to
+   drop it too rather than paint it behind one line of text. */
+.hp-card.hp-docked.hp-unwritten {
+  display: flex;
+  min-block-size: 0;
+  padding-block-start: 0.3rem;
+  text-align: start;
+}
+
+.hp-card.hp-docked.hp-unwritten::before {
+  content: none;
+}
+
+.hp-min {
+  position: absolute;
+  top: 0.4rem;
+  right: 3.6rem;
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: var(--border) solid var(--fg);
+  border-radius: 0;
+  background: transparent;
+  color: var(--fg);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hp-min svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: currentColor;
+}
+
+.hp-min:hover,
+.hp-min:focus-visible {
+  background: var(--rule);
+  color: var(--fg);
+}
+
+/* Room for the third button, so a long title never runs under the row. */
+.hp-card:not(.hp-docked) .hp-title {
+  padding-inline-end: 4.6rem;
+}

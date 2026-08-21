@@ -41,6 +41,7 @@ import '../styles/core.css'
 import BrandHeader from '../components/BrandHeader.astro'
 import ConwayField from '../components/ConwayField.astro'
 import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
+import HoverPreviews from '../components/HoverPreviews.astro'
 import Github from '../components/icons/Github.astro'
 import LinkedIn from '../components/icons/LinkedIn.astro'
 import Twitter from '../components/icons/Twitter.astro'
@@ -392,6 +393,11 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     <MathCopy locale={locale} />
     <FootnoteSidenotes />
     <QuoteCopy />
+    {/* Every page, not just a post: the reader's pinned set is restored by this
+        script, so a page without it dropped the cards they were keeping. Pages
+        with no <article> attach no new previews, which is the same behaviour
+        they had before. */}
+    <HoverPreviews locale={locale} />
     {
       analyticsToken && (
         <script

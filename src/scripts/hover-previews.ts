@@ -16,6 +16,8 @@ interface StoredCard {
   href: string
   left: number
   top: number
+  /** Docked at the foot of the window rather than floating where it was left. */
+  docked?: boolean
 }
 
 /**
@@ -46,6 +48,8 @@ const strings = {
     pin: 'Fixar',
     unpin: 'Soltar',
     drag: 'arraste para mover',
+    minimize: 'Minimizar prévia',
+    restore: 'Restaurar prévia',
     unwritten: 'not yet written, but soon!',
   },
   ...(document.querySelector<HTMLElement>('.hp-settings')?.dataset ?? {}),
@@ -66,6 +70,25 @@ function loadExternalMeta(): NonNullable<typeof externalMeta> {
 }
 
 const canPopover = 'popover' in HTMLElement.prototype
+
+/**
+ * Minimised cards live in one fixed strip at the foot of the window, in DOM
+ * order, so several of them stack along it instead of each keeping its own
+ * coordinates.
+ *
+ * A card is taken OUT of the top layer to get there (hidePopover): an open
+ * popover is laid out against the viewport whatever its parent is, so it would
+ * ignore the strip's own flex layout entirely.
+ */
+let dock: HTMLElement | null = null
+
+function ensureDock(): HTMLElement {
+  if (dock !== null) return dock
+  dock = document.createElement('div')
+  dock.className = 'hp-dock'
+  document.body.append(dock)
+  return dock
+}
 
 // The breakpoint above which footnotes.css floats a margin aside and hides
 // section[data-footnotes]. Read from the stylesheet rather than hardcoded a
@@ -270,8 +293,11 @@ function savePinned(): void {
   try {
     const state: StoredCard[] = pinned.map((card) => ({
       href: (card.querySelector('.hp-title') as HTMLAnchorElement).href,
-      left: parseFloat(card.style.left) || 0,
-      top: parseFloat(card.style.top) || 0,
+      // A docked card has no inline position of its own, so the one it will be
+      // restored to is read back from where dockCard parked it.
+      left: parseFloat(isDocked(card) ? (card.dataset.hpLeft ?? '') : card.style.left) || 0,
+      top: parseFloat(isDocked(card) ? (card.dataset.hpTop ?? '') : card.style.top) || 0,
+      docked: isDocked(card),
     }))
     store()?.setItem(STORAGE_KEY, JSON.stringify(state))
   } catch {
@@ -320,6 +346,46 @@ function unpinCard(card: PopoverHTMLElement): void {
   savePinned()
 }
 
+function isDocked(card: PopoverHTMLElement): boolean {
+  return card.classList.contains('hp-docked')
+}
+
+function markDocked(card: PopoverHTMLElement, on: boolean): void {
+  const button = card.querySelector('.hp-min')
+  button?.setAttribute('aria-pressed', String(on))
+  button?.setAttribute('aria-label', on ? strings.restore : strings.minimize)
+}
+
+/**
+ * Minimising pins as well: a loose card closes the next time the pointer
+ * leaves, which would throw away the thing the reader just asked to keep.
+ */
+function dockCard(card: PopoverHTMLElement): void {
+  if (isDocked(card)) return
+  pinCard(card)
+  // Where to put it back, since the strip takes over its position.
+  card.dataset.hpLeft = card.style.left
+  card.dataset.hpTop = card.style.top
+  card.hidePopover?.()
+  card.classList.add('hp-docked')
+  card.style.left = ''
+  card.style.top = ''
+  ensureDock().append(card)
+  markDocked(card, true)
+  savePinned()
+}
+
+function undockCard(card: PopoverHTMLElement): void {
+  if (!isDocked(card)) return
+  card.classList.remove('hp-docked')
+  document.body.append(card)
+  card.style.left = card.dataset.hpLeft ?? '0px'
+  card.style.top = card.dataset.hpTop ?? '0px'
+  card.showPopover?.()
+  markDocked(card, false)
+  savePinned()
+}
+
 function scheduleClose(): void {
   clearTimeout(closeTimer)
   closeTimer = window.setTimeout(() => {
@@ -330,7 +396,8 @@ function scheduleClose(): void {
 
 function startDrag(event: PointerEvent, card: PopoverHTMLElement): void {
   const target = event.target as HTMLElement
-  if (target.closest('.hp-close, .hp-pin, .hp-title')) return
+  if (target.closest('.hp-close, .hp-pin, .hp-min, .hp-title')) return
+  if (isDocked(card)) return
   // Touch stays a native scroll gesture inside the card (touch-action: pan-y
   // in the stylesheet): the two gestures overlap on the same axis, and
   // dragging is not essential on touch.
@@ -398,6 +465,20 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
     else pinCard(card)
   })
 
+  // A chevron rather than a word: the row is three small square buttons and a
+  // label would not fit any of them.
+  const minimize = document.createElement('button')
+  minimize.type = 'button'
+  minimize.className = 'hp-min'
+  minimize.setAttribute('aria-pressed', 'false')
+  minimize.setAttribute('aria-label', strings.minimize)
+  minimize.innerHTML =
+    '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 9h10v2H3z"/></svg>'
+  minimize.addEventListener('click', () => {
+    if (isDocked(card)) undockCard(card)
+    else dockCard(card)
+  })
+
   const title = document.createElement('a')
   title.id = `${card.id}-title`
   title.className = 'hp-title'
@@ -426,10 +507,10 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
     msg.className = 'hp-unwritten-msg'
     msg.textContent = strings.unwritten
     card.setAttribute('aria-labelledby', msg.id)
-    card.append(pin, close, title, desc, host, msg, hint)
+    card.append(pin, minimize, close, title, desc, host, msg, hint)
   } else {
     card.setAttribute('aria-labelledby', title.id)
-    card.append(pin, close, title, desc, host, hint)
+    card.append(pin, minimize, close, title, desc, host, hint)
   }
 
   card.addEventListener('pointerdown', (event) => startDrag(event, card))
@@ -501,7 +582,11 @@ async function restorePinned(): Promise<void> {
     card.style.top = `${entry.top}px`
     pinned.push(card)
     markPinned(card, true)
-    card.showPopover?.()
+    if (entry.docked === true) {
+      dockCard(card)
+    } else {
+      card.showPopover?.()
+    }
     requestAnimationFrame(() => card.classList.add('hp-open'))
 
     const meta = await getMeta(entry.href, '')
@@ -587,6 +672,26 @@ function init(): void {
     if (event.key !== 'Escape') return
     if (current) closeCard(current.card)
     for (const card of [...pinned]) closeCard(card)
+  })
+
+  /*
+   * Coming back through history restores the page from the back/forward cache,
+   * which means no reload and no second run of this script. The DOM comes back
+   * intact, but the top layer does not: a manual popover is no longer open, and
+   * the UA sheet gives a closed `[popover]` `display: none`, so every floating
+   * card was still there and invisible. Docked cards were unaffected, their own
+   * `display: flex` outranks that rule.
+   *
+   * showPopover() throws on an already-open popover, hence the check rather
+   * than a bare call.
+   */
+  addEventListener('pageshow', (event) => {
+    if (!event.persisted) return
+    for (const card of pinned) {
+      if (isDocked(card)) continue
+      if (card.matches(':popover-open')) continue
+      card.showPopover?.()
+    }
   })
 
   const links = document.querySelectorAll<HTMLAnchorElement>('article a[href]')

@@ -120,6 +120,7 @@
    */
   --measure: var(--dial-reading-width);
   --gutter: var(--dial-page-margin);
+  --cover-frame-inset: var(--dial-cover-frame-inset);
 
   /* Minimum space between two prose blocks of the same kind (two figures, two
      code frames), where margin collapsing gives no minimum on its own. */

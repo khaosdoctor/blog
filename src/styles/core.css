@@ -478,3 +478,26 @@ pre {
   border: 1px solid var(--rule);
   border-radius: 4px;
 }
+
+/*
+ * A post's contents line up with the frame the cover DRAWS, not with the card's
+ * outer box: the cover fills the article edge to edge, and its own frame is
+ * inset (see --dial-cover-frame-inset in tweaks.css for the numbers). Without
+ * this the title, the byline and every paragraph started a few pixels outside
+ * the line above them.
+ *
+ * On the children rather than as padding on `article`, because the cover has to
+ * stay full width and a percentage padding here plus a negative percentage
+ * margin there resolve against different boxes, so the two would not cancel.
+ *
+ * Only direct children: anything inside `.prose` keeps its own measure, and the
+ * figures that break out of it are positioned against `.prose`, which has
+ * already been moved.
+ */
+article > * {
+  margin-inline: var(--cover-frame-inset);
+}
+
+article > .cover-hero {
+  margin-inline: 0;
+}
