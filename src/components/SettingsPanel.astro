@@ -565,29 +565,30 @@ const { locale } = Astro.props
       width: 2.75rem;
       height: 2.75rem;
       border-radius: var(--radius);
-      border: var(--border) solid var(--rule);
-      background: var(--bg);
+      border: var(--border) solid var(--muted);
+      background: var(--fg);
       appearance: none;
+      margin-top: calc((2.75rem - 0.5rem) / -2);
     }
 
     .sp-knob input[type='range']::-moz-range-thumb {
       width: 2.75rem;
       height: 2.75rem;
       border-radius: var(--radius);
-      border: var(--border) solid var(--rule);
-      background: var(--bg);
+      border: var(--border) solid var(--muted);
+      background: var(--fg);
     }
 
     .sp-knob input[type='range']::-webkit-slider-runnable-track {
       height: 0.5rem;
       border-radius: var(--radius);
-      background: var(--rule);
+      background: var(--muted);
     }
 
     .sp-knob input[type='range']::-moz-range-track {
       height: 0.5rem;
       border-radius: var(--radius);
-      background: var(--rule);
+      background: var(--muted);
     }
   }
 
