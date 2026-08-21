@@ -4,7 +4,7 @@
  * output: an allowlist that grows to fit the page grants permission to
  * whatever wrote the page.
  */
-export interface EmbedProvider {
+interface EmbedProvider {
   /** Component or feature that produces this traffic. */
   component: string
   /** Becomes `frame-src`. */

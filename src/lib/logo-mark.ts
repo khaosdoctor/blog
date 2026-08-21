@@ -81,7 +81,7 @@ function wireGlyph(row: number, col: number): string {
   return ' '
 }
 
-export interface MarkCell {
+interface MarkCell {
   row: number
   col: number
   glyph: string
