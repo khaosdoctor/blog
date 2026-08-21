@@ -5,9 +5,8 @@
 // rather than a simulated one, the values Lucas decided are fixed rather than
 // knobs, and this module exports a control surface settings-panel.ts calls.
 //
-// The empty export makes this a real module: a script with no import or export
-// is global, and its names would collide with the other scripts here.
-export {}
+import { readStorage, writeStorage } from '../lib/storage'
+import { onReady } from './ready'
 
 const MOTION_KEY = 'motion'
 const BG_LIFE_KEY = 'background-life'
@@ -72,23 +71,6 @@ function clampNumber(raw: string | null, fallback: number, min: number, max: num
   if (raw === null) return fallback
   const parsed = Number(raw)
   return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback
-}
-
-function readStorage(key: string): string | null {
-  try {
-    return localStorage.getItem(key)
-  } catch {
-    return null
-  }
-}
-
-function writeStorage(key: string, value: string | null): void {
-  try {
-    if (value === null) localStorage.removeItem(key)
-    else localStorage.setItem(key, value)
-  } catch {
-    // Private mode, or storage disabled: the choice still applies for this page.
-  }
 }
 
 // Plain module-level variables rather than anything reactive: a cell is read
@@ -540,8 +522,4 @@ function init(): void {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)

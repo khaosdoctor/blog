@@ -40,26 +40,10 @@ const { action = '/search/', locale = 'pt' } = Astro.props
 </noscript>
 
 <script>
-  // Pagefind ships its own ranked index + snippet extraction, we only
-  // glue its JS API to our own markup so results keep the site's styling
-  // instead of Pagefind's default UI CSS. Import is dynamic + try/caught: the
-  // bundle at /pagefind/pagefind.js is written by the postbuild step, so its
-  // absence is a normal 404 in dev, not an error.
-  interface PagefindResult {
-    data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }>
-  }
-
-  interface PagefindModule {
-    init?: (language?: string) => Promise<void>
-    search: (query: string) => Promise<{ results: PagefindResult[] }>
-  }
-
-  // Localised on the server and read back from the input's data attributes, so
-  // this script carries no translation strings of its own. %s / %d in a template
-  // is the placeholder, matching the t() helper the markup above uses.
-  function label(input: HTMLInputElement, name: 'searching' | 'noResults' | 'moreResults', value = ''): string {
-    return (input.dataset[name] ?? '').replace(/%[ds]/, value)
-  }
+  // Pagefind ships its own ranked index + snippet extraction; this only glues
+  // its JS API to our own markup so results keep the site's styling instead
+  // of Pagefind's default UI CSS.
+  import { loadPagefind, searchLabel as label, type PagefindModule } from '../scripts/pagefind'
 
   // Cap how many results get rendered: an unqualified term (e.g. "de") can
   // match a large share of the site, and Pagefind returns every match with
@@ -69,19 +53,6 @@ const { action = '/search/', locale = 'pt' } = Astro.props
   // Bumped on every search; a stale async response checks it before writing
   // to the DOM so a slow earlier query can't overwrite a faster later one.
   let searchGeneration = 0
-
-  async function loadPagefind(): Promise<PagefindModule | null> {
-    try {
-      // Pagefind writes this file into dist/ after the build, so it is not a
-      // source module: the specifier goes through a variable to keep both Vite
-      // and the typechecker from trying to resolve something that only exists
-      // in the built output.
-      const module = '/pagefind/pagefind.js'
-      return (await import(/* @vite-ignore */ module)) as PagefindModule
-    } catch {
-      return null
-    }
-  }
 
   function showMessage(target: HTMLElement, message: string): void {
     target.replaceChildren(document.createTextNode(message))

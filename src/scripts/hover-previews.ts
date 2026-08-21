@@ -3,6 +3,8 @@
 // page's built HTML is fetched and parsed at hover time. A footnote reference
 // is the exception: its note is already in this DOM, so its card is read from
 // there (see getMeta).
+import { readStorage } from '../lib/storage'
+import { onReady } from './ready'
 
 interface Meta {
   title: string
@@ -281,11 +283,7 @@ function place(card: HTMLElement, anchor: HTMLElement): void {
  * that reader chose. Storage throwing (private mode) also reads as on.
  */
 function persistent(): boolean {
-  try {
-    return localStorage.getItem(PERSIST_KEY) !== '0'
-  } catch {
-    return true
-  }
+  return readStorage(PERSIST_KEY) !== '0'
 }
 
 function store(): Storage | null {
@@ -712,8 +710,4 @@ function init(): void {
   void restorePinned()
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)

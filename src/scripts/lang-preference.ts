@@ -13,7 +13,7 @@
 // `<link rel="alternate" hreflang>` tags SEO.astro emits for this exact page,
 // so a post with no translation stays where it is rather than bouncing to a
 // language home.
-export {}
+import { readStorage } from '../lib/storage'
 
 const CHOICE_KEY = 'lang'
 // Per tab, not per browser. A reader who hits back after an automatic redirect
@@ -22,11 +22,7 @@ const CHOICE_KEY = 'lang'
 const REDIRECTED_KEY = 'lang-redirected'
 
 function storedChoice(): string | null {
-  try {
-    return localStorage.getItem(CHOICE_KEY)
-  } catch {
-    return null
-  }
+  return readStorage(CHOICE_KEY)
 }
 
 function alreadyRedirected(): boolean {

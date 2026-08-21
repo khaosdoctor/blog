@@ -22,6 +22,8 @@
 // Real Unicode Greek letters, not their spelled-out names: \lambda is λ, not
 // the seven characters "lambda". The paste target is Slack and chat, both
 // UTF-8 everywhere, so there is no reason to fall back to a word.
+import { localeFromFile } from './mdx-util.mjs'
+
 const GREEK = {
   alpha: 'α',
   beta: 'β',
@@ -248,10 +250,6 @@ function isKatexDisplay(node) {
  */
 const COPY_LABEL = { pt: 'copiar a fórmula como texto', en: 'copy formula as text' }
 const COPY_TEXT = { pt: 'copiar', en: 'copy' }
-
-function localeFromFile(file) {
-  return file?.data?.astro?.frontmatter?.lang === 'en' ? 'en' : 'pt'
-}
 
 function makeCopyButton(ascii, locale) {
   return {

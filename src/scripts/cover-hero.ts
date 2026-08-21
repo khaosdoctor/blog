@@ -15,13 +15,8 @@
 //
 // Draws once, plainly, on load; nothing here animates, so there is nothing
 // prefers-reduced-motion needs to turn off.
-//
-// The empty export makes this a real module, same reason as theme-toggle.ts
-// and the rest of src/scripts/: without one a script with no other import or
-// export is global, not file-scoped, and would collide with them.
-export {}
-
 import { buildCoverSvg, coverOverlay } from '../lib/cover'
+import { onReady } from './ready'
 
 function init(): void {
   const hero = document.querySelector<HTMLElement>('[data-cover-hero]')
@@ -67,8 +62,4 @@ function init(): void {
   slot.append(meta)
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init)
-} else {
-  init()
-}
+onReady(init)
