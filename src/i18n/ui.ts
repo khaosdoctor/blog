@@ -99,6 +99,7 @@ type UIKey =
   | 'contents'
   | 'openMenu'
   | 'closeMenu'
+  | 'closeMenuShort'
   | 'openContents'
   | 'foldSection'
   | 'notWrittenYet'
@@ -239,6 +240,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     contents: 'Neste post',
     openMenu: 'abrir o menu',
     closeMenu: 'fechar o menu',
+    closeMenuShort: 'Fechar',
     openContents: 'abrir o índice',
     foldSection: 'recolher ou expandir esta seção',
     notWrittenYet: 'ainda não escrito',
@@ -383,6 +385,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     contents: 'In this post',
     openMenu: 'open the menu',
     closeMenu: 'close the menu',
+    closeMenuShort: 'Close',
     openContents: 'open the contents',
     foldSection: 'fold or unfold this section',
     notWrittenYet: 'not written yet',

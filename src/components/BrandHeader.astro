@@ -67,7 +67,7 @@ const RULE = '──────────────────────
     data-label-close={t(locale, 'closeMenu')}
   >
     <span class="menu-toggle-open" aria-hidden="true">≡</span>
-    <span class="menu-toggle-close" aria-hidden="true">✕ {t(locale, 'closeMenu')}</span>
+    <span class="menu-toggle-close" aria-hidden="true">X {t(locale, 'closeMenuShort')}</span>
   </button>
   <span class="edge" aria-hidden="true">┌─</span>
   <a href={home} class="brand" aria-label={WORD}>
@@ -251,11 +251,16 @@ const RULE = '──────────────────────
     }
 
     .shell[data-menu-open] .menu-toggle {
+      position: fixed;
+      inset-block-start: 1.2rem;
       inset-inline-start: 1.2rem;
+      justify-items: start;
+      padding-inline: 0.6rem;
     }
 
     .shell[data-menu-open] .menu-toggle::before {
       inset-inline: 0;
+      inline-size: auto;
     }
 
     /*
