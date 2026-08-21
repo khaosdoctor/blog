@@ -190,7 +190,7 @@ function coverSeed(slug: string): number {
   return (hashString(slug) + SEED_SALT) >>> 0
 }
 
-export interface CoverTone {
+interface CoverTone {
   /** The brand the hash drew, by the lab's own name: `roxo`, `branco`, ... */
   id: string
   /** The literal colour the card paints, already through that brand's `INK_MIX`. */
@@ -553,7 +553,7 @@ function coverChipInk(label: string): string {
 }
 
 // --- assembly ----------------------------------------------------------------
-export interface CoverInput {
+interface CoverInput {
   /** Hashed for colour, seed and solid. The post's own URL slug. */
   slug: string
   title: string
@@ -581,7 +581,7 @@ export interface CoverInput {
  * drawing itself reads, which is what keeps the drawn line and the overlaid
  * line the same line.
  */
-export interface CoverOverlay {
+interface CoverOverlay {
   /** Left edge of the meta line. */
   x: number
   /** Vertical centre of the chip's box, the row's own centre. */

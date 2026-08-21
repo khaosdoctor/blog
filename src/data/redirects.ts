@@ -3,7 +3,7 @@
 // Every entry becomes a stub page at build: a meta-refresh with a canonical
 // pointing at the target and a visible link, since static hosting cannot issue
 // a real 301. Google treats meta-refresh as a redirect and passes the ranking.
-export interface Redirect {
+interface Redirect {
   /** Path Ghost served, always with a trailing slash unless it is a file. */
   from: string
   to: string

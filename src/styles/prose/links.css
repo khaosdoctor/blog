@@ -196,8 +196,3 @@ html :is(main, footer) figure a:focus-visible {
   background: var(--link-unwritten);
   color: var(--bg);
 }
-
-.prose .draft-note {
-  color: var(--muted);
-  font-size: 0.8em;
-}

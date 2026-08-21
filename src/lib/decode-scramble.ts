@@ -24,7 +24,7 @@
 export const SCRAMBLE_TICK_MS = 133
 export const SCRAMBLE_LOCK_TICKS = 4
 
-export interface DecodeItem {
+interface DecodeItem {
   /** ms after the run starts before this item begins scrambling. */
   start: number
   /** Called once per tick while the item is still scrambling. */
@@ -37,7 +37,7 @@ export interface DecodeItem {
   lock: () => void
 }
 
-export interface DecodeTiming {
+interface DecodeTiming {
   tickMs: number
   lockTicks: number
 }

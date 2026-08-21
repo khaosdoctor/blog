@@ -33,34 +33,18 @@
  * Every one is wrapped and feature-detected: a missing API or an unexpected DOM
  * shape is a cosmetic loss, never a broken page.
  */
-import { localeFromPath, t } from '../i18n/ui'
-
-const locale = localeFromPath(Astro.url.pathname)
 ---
 
-<script is:inline define:vars={{ copiedLabel: t(locale, 'linkCopied') }}>
-  document.addEventListener('click', async (event) => {
-    const button = event.target.closest('.note-copy-link')
+<script>
+  import { copyWithToast } from '../scripts/copy-toast'
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLElement>('.note-copy-link')
     if (button === null) return
 
     const anchor = button.dataset.copyAnchor
     if (!anchor) return
-
-    try {
-      await navigator.clipboard.writeText(location.href.split('#')[0] + anchor)
-    } catch {
-      // No clipboard permission, or an insecure origin. Silent: there is
-      // nothing else for this button to do.
-      return
-    }
-
-    document.querySelector('.toast')?.remove()
-    const toast = document.createElement('div')
-    toast.className = 'toast'
-    toast.setAttribute('role', 'status')
-    toast.textContent = copiedLabel
-    document.body.append(toast)
-    setTimeout(() => toast.remove(), 2000)
+    void copyWithToast(location.href.split('#')[0] + anchor)
   })
 </script>
 

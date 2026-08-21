@@ -20,6 +20,7 @@
 import Cog from './icons/Cog.astro'
 import CodeTheme from './CodeTheme.astro'
 import { t, type Locale } from '../i18n/ui'
+import { fontSizeMaximumPercent, fontSizeMinimumPercent, fontSizeStepPercent } from '../lib/tweaks'
 
 interface Props {
   locale: Locale
@@ -69,7 +70,14 @@ const { locale } = Astro.props
            hold a bare number the browser can step and validate; the
            accessible name comes from the legend plus the live region below. */}
         <button type="button" class="sp-step" id="sp-font-size-down" aria-label={t(locale, 'fontSizeDecrease')}>&minus;</button>
-        <input type="number" id="sp-font-size" min="50" max="160" step="10" inputmode="numeric" />
+        <input
+          type="number"
+          id="sp-font-size"
+          min={fontSizeMinimumPercent}
+          max={fontSizeMaximumPercent}
+          step={fontSizeStepPercent}
+          inputmode="numeric"
+        />
         <span class="sp-font-size-unit" aria-hidden="true">%</span>
         <button type="button" class="sp-step" id="sp-font-size-up" aria-label={t(locale, 'fontSizeIncrease')}>+</button>
         {/* Back to 100%, which this panel stores as *nothing stored*: reset
