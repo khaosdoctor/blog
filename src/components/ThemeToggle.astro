@@ -75,6 +75,20 @@ const { locale } = Astro.props
   }
 
   /*
+   * Space reserved while still hidden: the un-hide happens when the module
+   * runs, and adding a 44px button to the header at that point re-wrapped the
+   * phone header and shifted the whole page (measured CLS 0.10). A reader
+   * with JS off gets a blank slot instead of a dead control, which is the
+   * cost of the page not jumping for everyone else.
+   */
+  .theme-toggle[hidden] {
+    display: inline-flex;
+    visibility: hidden;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+  }
+
+  /*
    * Icon-only, so the touch target comes from the button's own box rather
    * than from a bigger glyph: min-inline/block-size holds --icon-btn-hit (the
    * WCAG 44px floor, theme.css) regardless of how small the drawn chip below

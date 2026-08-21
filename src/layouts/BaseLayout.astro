@@ -237,6 +237,12 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
         measured CLS 1.5 on a phone. Preloading starts the fetch with the HTML
         instead of after the CSS, which is what removes that swap shift. */}
     <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    {/* The wordmark's bitmap face: its swap resized .word, which re-wrapped
+        the header rows on a phone and shifted everything below by a full row. */}
+    <link rel="preload" href="/fonts/PxPlusIBMVGA8-9x16.woff" as="font" type="font/woff" crossorigin />
+    {/* progress doubles as "this is a post": only a post renders body copy in
+        Literata, and its swap was the last measurable layout shift left. */}
+    {progress && <link rel="preload" href="/fonts/Literata-400-700.woff2" as="font" type="font/woff2" crossorigin />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- iOS ignores the manifest and looks for this one specifically. -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
