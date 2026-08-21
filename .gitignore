@@ -46,6 +46,10 @@ QUESTIONS.md
 SECURITY-INCIDENT.md
 # scratch build output from review agents
 dist-review/
+
+# playwright run artifacts
+test-results/
+playwright-report/
 .serena/
 .vscode/
 .claude/
