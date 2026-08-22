@@ -1,30 +1,6 @@
-/*
- * Tags and categories, as chips.
- *
- * Same frame as every other card on the site, shrunk: a double rule, square
- * corners, and text a shade darker than its own border so the two read as one
- * object. Hovering fills the chip solid and inverts the text.
- *
- * The colour comes from `--chip-color`, set per chip by the page that renders
- * it, so a tag row can be many colours without a class per tag. It is picked
- * from the tag's own name in src/lib/chip-color.ts, so the same tag is always
- * the same colour and adding a tag needs no CSS.
- */
-
 .chip {
-  /*
-   * The chip's ink: its colour carried toward whichever end of the page is
-   * readable, black on the sepia ground and white on the black one. Both
-   * directions used to mix toward black, so on the dark page the ink moved
-   * toward the background rather than away from it: the brand red went from
-   * 4.30:1 to 2.82:1, a red outline with something unreadable inside it.
-   *
-   * Measured against the per-ground brand tones in theme.css. Dark: blue
-   * 10.58, green 13.16, yellow 15.44, red 10.35, purple 9.92. Light: blue
-   * 13.26, green 11.63, yellow 11.52, red 13.45, purple 16.29. All clear the
-   * 7:1 floor this mix was chosen for. The frame and the hover fill read from
-   * this rather than from the raw brand colour.
-   */
+  /* Both halves are needed: each carries --chip-color away from its own ground,
+     and mixing toward black in both makes the ink unreadable on the dark page. */
   --chip-ink: light-dark(
     color-mix(in oklab, var(--chip-color) 50%, black),
     color-mix(in oklab, var(--chip-color) 52%, white)
@@ -48,8 +24,6 @@
 .chip:hover,
 .chip:focus-visible {
   background: var(--chip-ink);
-  /* Filling with the ink rather than the raw brand colour means the ratio is
-     the one measured above, read the other way round. */
   color: var(--bg);
 }
 

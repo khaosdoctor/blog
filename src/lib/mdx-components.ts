@@ -11,12 +11,7 @@ import Spotify from '../components/Spotify.astro'
 import Tweet from '../components/Tweet.astro'
 import Video from '../components/Video.astro'
 
-/**
- * Injected into every post so migrated MDX can use these tags with no import
- * lines. One module because both language post pages hand out the same set;
- * the names must stay in step with MDX_COMPONENT_NAMES (mdx-component-names.ts),
- * which the guard scripts read.
- */
+/** Must stay in sync with MDX_COMPONENT_NAMES in mdx-component-names.ts. */
 export const mdxComponents = {
   Bookmark,
   HtmlLab,

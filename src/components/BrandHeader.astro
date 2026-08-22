@@ -1,25 +1,4 @@
 ---
-/**
- * The site header: box-drawing edges, the wireframe mark, the wordmark, and a
- * run of dashes filling whatever room the controls do not need.
- *
- * A plain component plus src/scripts/header-brand.ts rather than an island:
- * this renders on every page, and every value here is fixed rather than
- * reader-adjustable, so there is nothing for a picker to drive.
- *
- * Two behaviours worth knowing:
- *
- * - The wordmark's accent is the day-hash colour (lib/day-color.ts, purple
- *   excluded), applied by header-brand.ts on load. theme.css's `--accent-day`
- *   is only the pre-JS fallback, so a reader with JS off still gets a real
- *   accent rather than an unset property.
- * - The scramble runs once per browser session and never replays. In its place
- *   a glitch burst (1-3 pulses, 4-20s apart) hits the wordmark and the mark
- *   together.
- *
- * The mark's hover swap to its five true colours is pure CSS, and has no rule
- * at all under prefers-reduced-motion.
- */
 import LangSwitcher from './LangSwitcher.astro'
 import NavLinks from './NavLinks.astro'
 import SearchPalette from './SearchPalette.astro'
@@ -39,23 +18,10 @@ const { locale, home, alternates = [] } = Astro.props
 const WORD = 'lsantos.dev'
 const CELLS = markCells()
 
-/**
- * The run of dashes, one `<span>` per character rather than one text node.
- *
- * At rest they render exactly as plain text did: same face, spacing, colour and
- * trailing-space correction. Splitting them is what lets ReadingProgress colour
- * them ONE AT A TIME, since a text node has no per-character handle and a
- * gradient mask could only ever fill smoothly.
- *
- * Nothing here depends on that script: with JS off, or on a page that is not a
- * post, no span is ever touched and the row is the plain dashed rule it was.
- */
 const RULE = '──────────────────────────────────────'
 ---
 
 <header class="shell">
-  {/* Phone-only. On a narrow screen the header keeps just the brand; nav and
-      controls collapse behind this button (mobile-menu.ts toggles it). */}
   <button
     class="menu-toggle"
     type="button"
@@ -91,17 +57,6 @@ const RULE = '──────────────────────
     </span>
   </a>
   <span class="fill" aria-hidden="true">{RULE.split('').map((ch) => <span class="dash">{ch}</span>)}</span>
-  {/*
-    The nav links break out of `.controls` and sit between two runs of dashes,
-    so the rule reads as running behind them and on to the search button rather
-    than stopping short of the whole cluster. Two `.fill` spans rather than one
-    with the links overlaid: each claims its own share of the leftover room, so
-    the links end up in the middle of the row without anything being positioned
-    absolutely or having to know the other's width.
-  */}
-  {/* display: contents on desktop, so these still lay out as direct flex
-      children of the row; on a phone the same wrapper becomes the slide-in
-      drawer the hamburger opens. */}
   <div class="shell-menu" id="shell-menu">
     <NavLinks locale={locale} />
     <span class="fill" aria-hidden="true">{RULE.split('').map((ch) => <span class="dash">{ch}</span>)}</span>
@@ -121,28 +76,12 @@ const RULE = '──────────────────────
 </script>
 
 <style>
-  /*
-   * The box-drawing edges plus a stretch of dashes absorbing whatever room the
-   * controls do not need. `.fill` is what pushes `.controls` to the right edge.
-   *
-   * Past 70rem the row measures against the VIEWPORT rather than the reading
-   * column: the header is shell across the top, not prose. Below that nothing
-   * changes, since the brand, the switch and three icon buttons need real room
-   * and narrowing further would only make `flex-wrap` wrap sooner.
-   */
   .shell {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     margin-inline: auto;
-    /* "Breathing room 4" from the bench's density knob (range 4-30, in
-       tenths of a rem block / sixths of a rem inline). */
     padding: 0.4rem var(--shell-inset);
-    /* The row spaces its own children from here rather than each child
-       carrying a trailing margin and the last one resetting it: `.fill` below
-       needs a negative margin of its own to cancel the empty run its
-       letter-spacing leaves after the final dash, and one margin property
-       cannot both space the row and cancel that without the two fighting. */
     column-gap: 0.6rem;
     font-family: var(--font-mono);
   }
@@ -153,24 +92,14 @@ const RULE = '──────────────────────
     }
   }
 
-  /* Off until mobile-menu.ts is running AND the viewport is narrow: with JS
-     off the phone header keeps the plain stacked rows, nothing is lost. */
   .menu-toggle {
     display: none;
   }
 
-  /* Invisible on desktop: its children participate in the header row exactly
-     as if the wrapper were not there. It only becomes a box (the drawer)
-     inside the phone media query below. */
   .shell-menu {
     display: contents;
   }
 
-  /*
-   * The phone header: hamburger + brand on one line, everything else behind
-   * the button. 48rem because the full row measures ~723px, so anything
-   * narrower was wrapping at arbitrary points anyway.
-   */
   @media (max-width: 47.99rem) {
     .menu-toggle:not([hidden]) {
       position: relative;
@@ -187,7 +116,6 @@ const RULE = '──────────────────────
       cursor: pointer;
     }
 
-    /* The same drawn-chip-inside-a-bigger-hit-box every header control uses. */
     .menu-toggle:not([hidden])::before {
       content: '';
       position: absolute;
@@ -231,15 +159,12 @@ const RULE = '──────────────────────
       outline-offset: 2px;
     }
 
-    /* Collapsed state only exists once the script owns the button. */
     .shell[data-menu-ready] .edge,
     .shell[data-menu-ready] .fill,
     .shell[data-menu-ready]:not([data-menu-open]) .shell-menu {
       display: none;
     }
 
-    /* Brand centered on the top line; the hamburger holds the left corner
-       without pushing it (it is out of the flow). */
     .shell[data-menu-ready] {
       justify-content: center;
     }
@@ -263,13 +188,7 @@ const RULE = '──────────────────────
       inline-size: auto;
     }
 
-    /*
-     * The drawer: a side block over the content, never displacing it. Fixed
-     * inside the sticky header's own stacking context, so it paints above the
-     * page (header is z-index 2 in core.css) and below the hamburger, which
-     * stays reachable as the close button. Links in a column, the icon
-     * controls in a row underneath, pushed to the bottom.
-     */
+    /* Fixed inside the sticky header's stacking context: paints above the page and below the hamburger. */
     .shell[data-menu-open] .shell-menu {
       position: fixed;
       inset-block: 0;
@@ -278,8 +197,6 @@ const RULE = '──────────────────────
       display: flex;
       flex-direction: column;
       inline-size: min(16rem, 80vw);
-      /* Room above the links for the hamburger row and the full-width
-         search line the .controls rules below pull up here. */
       padding: calc(var(--icon-btn-hit) * 2 + 2rem) 1.2rem 1.2rem;
       border-inline-end: 3px double var(--fg);
       background: var(--bg);
@@ -300,8 +217,7 @@ const RULE = '──────────────────────
     .shell[data-menu-open] .controls {
       margin-block-start: auto;
       padding-block-start: 1.5rem;
-      /* Static, or the absolutely-placed search line below would measure its
-         offsets from this row at the drawer's bottom instead of the drawer. */
+      /* Static, or the absolutely-placed search line below would measure its offsets from this row instead of the drawer. */
       position: static;
     }
 
@@ -318,8 +234,6 @@ const RULE = '──────────────────────
       font-size: 1.1rem;
     }
 
-    /* The search opener leaves the row and becomes the drawer's own first
-       line, full width, above the nav links. */
     .shell[data-menu-open] .controls :global(.search-trigger) {
       position: absolute;
       inset-block-start: calc(var(--icon-btn-hit) + 1.2rem);
@@ -333,13 +247,10 @@ const RULE = '──────────────────────
       justify-content: flex-start;
     }
 
-    /* A tap needs no keyboard shortcut. */
     .shell[data-menu-open] .controls :global(.sx-hint) {
       display: none;
     }
 
-    /* Absolute against .search-trigger above, so the field covers the closed
-       row it replaces and the results hang below it. */
     .shell[data-menu-open] .controls :global(.sx-dialog[open]) {
       position: absolute;
       inset-block-start: 0;
@@ -362,65 +273,21 @@ const RULE = '──────────────────────
     letter-spacing: 0.06em;
   }
 
-  /*
-   * The dashes read from the same fixed 38-character string regardless of
-   * viewport (`overflow: hidden` crops whatever the flex box does not need,
-   * `flex: 1` is what actually claims the row's own leftover space, see the
-   * component comment above); wider letter-spacing here does not change how
-   * much of the row `.fill` claims, only how loosely the dash glyphs read
-   * within it, which is the owner's own separate ask ("larger space between
-   * the characters", not a different count). 0.4em rather than `.edge`'s
-   * 0.06em: enough to read as an openly spaced dashed line rather than the
-   * near-solid rule the box-drawing "─" glyph draws edge-to-edge at.
-   */
   .fill {
     color: var(--muted);
     font-family: var(--font-display);
     letter-spacing: 0.4em;
-    /*
-     * Letter-spacing adds its space after EVERY character, the last included,
-     * so a run of dashes ends with 0.4em belonging to no glyph. That read as a
-     * wider space before POSTS than after SOBRE, where the right run's own
-     * trailing space falls off the end of the row.
-     *
-     * This cancels only that phantom space. The row's real spacing comes from
-     * the container: an earlier attempt put both jobs on this one property,
-     * where the two kept overwriting each other and the run came out tight on
-     * one side or overlapping on the other.
-     */
     margin-inline-end: -0.4em;
     flex: 1;
     overflow: hidden;
   }
 
-  /*
-   * One dash, and the whole of the reading progress meter's paint: a dash the
-   * reader has passed takes the post's cover colour, the rest stay `--muted`.
-   * Colour is the only property either state touches, so a dash lighting up
-   * cannot move this row.
-   *
-   * `--post-accent` is written on <body> rather than <article>, since the
-   * header is not inside the article. `--accent-day` is the fallback for a page
-   * with no cover colour, which no reader sees: the class is only ever added by
-   * ReadingProgress, which renders on posts alone.
-   *
-   * No transition: the script decides when each dash appears and jitters it, so
-   * a CSS fade would smear the one-at-a-time read into a gradient.
-   *
-   * The stroke is not decoration. Two of `coverTone()`'s seven entries are
-   * neutral, and `branco-apagado` resolves to `--muted`, which is exactly what
-   * `.fill` already paints: on those posts a colour change alone would be no
-   * change at all. Thickening the glyph reads as the rule filling in whichever
-   * tone the post drew. `-webkit-text-stroke` because it is paint only and
-   * changes no advance, so the row still cannot move.
-   */
+  /* Paint properties only, so a lit dash can't move the row or need a transition. */
   .dash.lit {
     color: var(--post-accent, var(--accent-day));
     -webkit-text-stroke: 0.4px currentColor;
   }
 
-  /* Above `.brand`, so the write head passes behind these buttons rather than
-     over them when a post is read to the end. */
   .controls {
     position: relative;
     z-index: 2;
@@ -429,98 +296,32 @@ const RULE = '──────────────────────
     column-gap: 0.5rem;
   }
 
-  /*
-   * `:global()` on the wildcard: SearchPalette, LangSwitcher, ThemeToggle and
-   * SettingsPanel are each a separate component's own root element, and
-   * Astro would otherwise scope both sides of the combinator to this file's
-   * own cid, matching neither.
-   */
-  /*
-   * The container spaces its own children (see `.controls` above), rather
-   * than every child carrying a trailing margin and the last one resetting
-   * it: container spacing cannot be doubled by what a child does inside
-   * itself.
-   */
   .controls > :global(*) {
     margin-inline-end: 0;
   }
 
-  /*
-   * The switch and the two icon buttons read as one group, set apart from the
-   * links: they act on the page, where the links navigate away from it. So the
-   * group's own members stay close and the run in front of it is wider, which
-   * is the whole reason this is not one even measure across the row.
-   */
-  /* No lead in front of search any more: the second run of dashes is what
-     separates the links from this cluster now, and a margin on top of it
-     would read as the dashes stopping early. */
   .controls :global(.search-trigger) {
     margin-inline-start: 0;
   }
 
-  /*
-   * Search, the switch, the theme toggle and the settings opener read as one
-   * cluster of controls, so they close up to the smallest space that still
-   * separates them, against the row's own 0.5rem elsewhere. The negative
-   * margin pulls each back against the container's own measure rather than
-   * narrowing that measure, which still has to hold the nav links apart.
-   */
+  /* Negative: the container's 0.5rem column spacing also separates the nav links, so pulling controls back tightens just this cluster. */
   .controls :global(.lang-switch),
   .controls :global(.theme-toggle),
   .controls :global(.settings-panel) {
     margin-inline-start: -0.25rem;
   }
 
-  /*
-   * The theme opener starts a second group. Search and the language switch
-   * are about this page (find something here, read it in another language);
-   * the theme and settings openers are about the reader's own setup and
-   * apply everywhere. They are drawn as two runs with a real step between
-   * them rather than one undifferentiated row of four.
-   *
-   * Positive against the row's own measure, minus the one side of invisible
-   * box the opener carries and the switch does not, so the step is the drawn
-   * distance rather than the box distance.
-   */
+  /* Starts the second group: subtracts the one side of invisible hit box the opener carries and the switch does not, so the step is chip-to-chip. */
   .controls :global(.theme-toggle) {
     margin-inline-start: calc(0.25rem - ((var(--icon-btn-hit) - var(--icon-btn-chip)) / 2));
   }
 
-  /*
-   * The settings opener closes up against the theme opener, the pair being
-   * the second group. Both carry the invisible box here, not just one, so
-   * this subtracts both sides: pulling back only one, as the search and
-   * switch steps need, still left this step drawing 6px wider than it
-   * measured.
-   */
+  /* Both neighbours carry the invisible hit box here, not just one, so this subtracts both sides rather than the single side the rule above does. */
   .controls :global(.settings-panel) {
     margin-inline-start: calc(-0.25rem - (var(--icon-btn-hit) - var(--icon-btn-chip)));
   }
 
-  /*
-   * One shadow behind the whole lockup rather than two: `drop-shadow()` traces
-   * the alpha of everything under it, and the mark and word are separate shapes
-   * with clear space between them, so one filter already throws a shadow behind
-   * each. It goes on `.brand` and not `.mark`, which keeps its own
-   * `overflow: hidden` and would clip its own shadow off at that boundary.
-   *
-   * `--brand-shadow-offset`, not `--code-shadow-offset`: at 4px against a
-   * 13.6px font with no blur, the wordmark read as drawn twice rather than
-   * shadowed. The COLOUR token is still shared, since it carries no size
-   * assumption.
-   *
-   * This does not change the wordmark's measured contrast: a shadow is not a
-   * WCAG-recognised way to clear a text ratio.
-   */
-  /*
-   * `position: relative` + `z-index: 1` is about the CURSOR, not the brand:
-   * once that block travels out over the dash runs it has to paint on top of
-   * the dash it is standing on, or the write head reads as sliding under its
-   * own trail. It happens to win today anyway, because `filter` already makes
-   * this a stacking context, but that is a side effect of a shadow that exists
-   * for unrelated reasons and would take the cursor with it if ever dropped.
-   * 1 stays well under the 60 the menus claim, so an open menu still covers it.
-   */
+  /* Stacking context is for the cursor. The shadow filter lives here, not on `.mark`, which would clip it. */
   .brand {
     position: relative;
     z-index: 1;
@@ -528,16 +329,6 @@ const RULE = '──────────────────────
     align-items: center;
     color: inherit;
     text-decoration: none;
-    /*
-     * Not `--code-shadow-color`, which is white on the dark page: behind the
-     * brand that drew a white offset copy around the letters, the doubled
-     * wordmark reported three separate times.
-     *
-     * The shadow only ever existed for the LIGHT ground, where two of the four
-     * day accents (green 3.28, yellow 3.23) fall under the 4.5:1 text floor. On
-     * black the same two measure 8.03 and 11.25 and need no help, so this draws
-     * dark on the light page and nothing at all on the dark one.
-     */
     filter: drop-shadow(var(--brand-shadow-offset) var(--brand-shadow-offset) 0 var(--brand-shadow-color));
   }
 
@@ -550,7 +341,6 @@ const RULE = '──────────────────────
     outline-offset: 3px;
   }
 
-  /* --- the mark: an 8x8 character grid, wireframe Elite, all four brand roles at once --- */
   .mark {
     position: relative;
     display: inline-flex;
@@ -577,21 +367,6 @@ const RULE = '──────────────────────
     font-weight: 900;
   }
 
-  /*
-   * At 36px (4.5px per cell, logo-mark.ts's own MARK_MIN_PX notes the 72px
-   * floor this is knowingly under), the box-drawing glyphs (┌┐└┘─│) read as a
-   * faint smudge at the font's own regular stroke width, and font-weight
-   * alone is not a reliable fix: a system monospace stack's bold variant is
-   * not guaranteed to touch box-drawing glyphs at all (bumped to 900 above
-   * regardless, since it costs nothing where it does help). `-webkit-text-
-   * stroke` is the part doing the real work: it adds stroke width around
-   * each glyph's own path independent of whatever weight variants the font
-   * ships, which is what actually thickens a hairline character at this
-   * size. `currentColor` picks up each cell's own inline `color` (its brand
-   * role, set server-side in the template), so the stroke matches the fill
-   * rather than a second flat colour. Widely supported (Chrome, Safari,
-   * Firefox 49+).
-   */
   .mark-cell {
     display: flex;
     flex: 0 0 12.5%;
@@ -600,21 +375,6 @@ const RULE = '──────────────────────
     align-items: center;
     justify-content: center;
     font-size: 4.5px;
-    /*
-     * A stroke, because the underlying problem cannot be solved any other way
-     * here: the mark is drawn at 36px against this candidate's own 72px
-     * legibility floor (MARK_MIN_PX in the bench's logoMarks.ts), a size the
-     * owner chose knowingly. Each cell is an eighth of that, so a glyph comes
-     * out around 4.5px and the wireframe's strokes render as hairlines.
-     *
-     * 0.25px, not the 0.5px this carried before. Half a pixel against a 4.5px
-     * glyph is over a tenth of the character's own size: it closed the
-     * wireframe's interior and the mark read as smeared rather than bold, which
-     * is what the owner reported as "shadows". Removing it outright then read
-     * as too dim, which is this line's real justification. This is the knob to
-     * reach for if it needs tuning again; the floor is the actual constraint
-     * and only a larger mark escapes it.
-     */
     -webkit-text-stroke: 0.25px currentColor;
   }
 
@@ -623,10 +383,6 @@ const RULE = '──────────────────────
     overflow: visible;
   }
 
-  /* A hard swap to the mark's true five-rectangle colours on hover, no
-     cross-fade: the site's pixel-era vocabulary trades frames, it does not
-     dissolve between them. Off under reduced motion, so a reduced-motion
-     reader gets the same wireframe on hover as at rest. */
   @media (prefers-reduced-motion: no-preference) {
     .brand:hover .mark-chars,
     .brand:focus-visible .mark-chars {
@@ -639,41 +395,20 @@ const RULE = '──────────────────────
     }
   }
 
-  /* --- the wordmark: the header's own accent, day-hash coloured --- */
   .word {
     position: relative;
     display: inline-flex;
-    /* The letters and the block cursor are flex items of this box, and a flex
-       container ignores `vertical-align` on its children: alignment comes from
-       here instead. Baseline puts the cursor's own bottom edge on the same line
-       the letters sit on, which is where a terminal draws it. Without this the
-       default `stretch` gave the cursor the full line height and it rode above
-       the text. */
+    /* `stretch` would give the cursor the full line height instead of the baseline. */
     align-items: baseline;
     min-inline-size: 11ch;
     color: var(--accent-day);
     font-family: var(--font-display);
     font-size: 0.85rem;
     font-weight: 900;
-    /*
-     * Departure Mono ships one weight (fonts.css: DepartureMono-Regular.woff2,
-     * no bold file), so `font-weight: 900` above is a request the browser may
-     * or may not honour by synthesising, the exact reason `.mark-cell`'s own
-     * legibility fix (dark-ground complaint, further down) does not rely on
-     * weight alone either. `-webkit-text-stroke` is what actually thickens
-     * the letterforms regardless: same technique, same 0.5px, reused rather
-     * than re-derived. `currentColor` follows `.word`'s own `color`, so the
-     * stroke matches the fill at rest and the hover/focus inversion below.
-     */
+    /* Departure Mono ships one weight; `font-weight: 900` is only a synthesis request, the stroke is what actually thickens. */
     -webkit-text-stroke: 0.5px currentColor;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    /*
-     * The hover fill's own padding, kept present (and transparent) at rest:
-     * the same "reserve the space before you need it" trick prose/links.css
-     * uses, so filling the background on hover changes no box size and
-     * nothing around the wordmark moves.
-     */
     padding-inline: 1px;
     padding-block: 2px;
   }
@@ -682,76 +417,29 @@ const RULE = '──────────────────────
     display: inline-block;
   }
 
-  /*
-   * Hover/focus fills the wordmark with the day accent and inverts the text,
-   * the same treatment src/styles/prose/links.css gives a link. The mark's
-   * own hover swap above fires at the same time, from the same `:hover` on
-   * `.brand`, since both read as "this is the one clickable thing."
-   */
   .brand:hover .word,
   .brand:focus-visible .word {
     background: var(--accent-day);
     color: var(--bg);
   }
 
-  /*
-   * The block cursor: opacity is set inline, per frame, by header-brand.ts;
-   * no CSS transition here on purpose, a stepped opacity change is the low-
-   * frame-rate read the decided cursor asks for, and a transition would
-   * smooth it into a fade.
-   *
-   * On a post it is also the reading progress meter's write head: the lit
-   * dashes are its trail, and ReadingProgress.astro pushes it along the run
-   * by writing `--cursor-x` (see that file for the whole mechanism, and for
-   * why it moves by transform from here instead of being reparented into
-   * `.fill`). Unset it reads as `0px`, which makes the declaration below
-   * exactly the `translateY(0.2em)` it replaces, so a page with no meter (any
-   * listing, and any post before the reader scrolls) draws this element in
-   * precisely the position it always did. `transform` is also the only
-   * property either state touches: it is paint, not layout, so the head
-   * travelling the length of the row cannot move the wordmark, the dashes or
-   * anything else on it.
-   */
+  /* No transition on opacity, or the stepped blink smooths into a fade; transform only, so the head can't move the wordmark or dashes. */
   .cursor {
     display: inline-block;
     inline-size: 0.55em;
     block-size: 1.1em;
     margin-inline-start: 1px;
     background: currentColor;
-    /* Not `vertical-align`, which a flex parent ignores (see `.word` above).
-       The block carries no text, so its own baseline is its bottom margin
-       edge; nudging it down by roughly the font's descender depth draws it
-       straddling the baseline the way a terminal cursor does, rather than
-       balanced exactly on top of it. */
+    /* 0.2em approximates the descender depth, keeping the empty block's baseline edge straddled correctly. */
     align-self: baseline;
     transform: translate(var(--cursor-x, 0px), 0.2em);
   }
 
-  /*
-   * Solid while it is writing. A terminal cursor blinks when it is waiting for
-   * you and holds steady while characters are going down, and the two readings
-   * are worth keeping apart here: a block that blinks while it slides along the
-   * rule reads as flicker rather than as a cursor. ReadingProgress.astro sets
-   * this for exactly as long as the eased count is still moving and drops it on
-   * arrival, so the blink resumes wherever the head parks, at the brand or
-   * mid-run.
-   *
-   * `!important` because the thing being overridden is an inline `opacity`,
-   * written per frame by header-brand.ts (which owns the blink and knows
-   * nothing about the meter). Beating an inline declaration from a stylesheet
-   * is the one job `!important` exists for, and it keeps the two scripts from
-   * having to import each other or share a clock. Under reduced motion this
-   * never comes up from either side: header-brand.ts freezes the cursor solid,
-   * and the meter has no eased travel to mark.
-   */
+  /* `!important` beats the inline per-frame `opacity` header-brand.ts writes. */
   .cursor[data-writing='true'] {
     opacity: 1 !important;
   }
 
-  /* Falha glitch: two ghost copies of the wordmark, red and cyan, shifted
-     and screen-blended over the real one, only while header-brand.ts marks
-     a pulse active. Off under reduced motion; the script itself never
-     schedules a pulse in that case, this is the belt to that brace. */
   @media (prefers-reduced-motion: no-preference) {
     .word[data-glitch='true']::before,
     .word[data-glitch='true']::after {

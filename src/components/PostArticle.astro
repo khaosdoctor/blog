@@ -8,15 +8,6 @@ import { formatDate, slugOf, urlOf, type Post } from '../lib/posts'
 import { chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
 import { localePath, t, type Locale } from '../i18n/ui'
 
-/**
- * The article body both post pages (src/pages/[...slug].astro and
- * src/pages/en/[...slug].astro) render: cover, heading, meta row, series
- * blocks, prose, tag chips and series navigation, with every internal link
- * routed through localePath so each tree stays inside its own language. The
- * prose comes in through the default slot because only the page has the
- * rendered Content, and the `banner` slot is where the English page drops
- * its machine-translation notice.
- */
 interface Props {
   post: Post
   series: ReturnType<typeof getSeriesNavigation>
@@ -109,8 +100,8 @@ const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
 <style>
   .meta {
     display: flex;
-    /* Without this the chip is a stretched flex item and its text rides at the
-       top of a box as tall as the row. */
+    /* Without this the chip stretches to the row height and its text rides at
+       the top of that box. */
     align-items: center;
     gap: 0.5rem;
     margin-block: -0.5rem 2.5rem;

@@ -8,8 +8,8 @@ import { t } from '../../i18n/ui'
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPublishedPosts('en')
-  // paginate() returns one page even for an empty array, which is what lets
-  // the "no translated posts yet" notice still render on /en/.
+  // paginate() returns one page even for an empty array, which is what lets the
+  // "no translated posts yet" notice render on /en/.
   return paginate(posts, { pageSize: LIST_PAGE_SIZE })
 }) satisfies GetStaticPaths
 

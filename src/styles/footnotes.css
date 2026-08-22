@@ -1,46 +1,13 @@
-/*
- * GFM footnotes. Astro puts a numbered link in the text and the full body at
- * the foot of the post; rehype-footnote-sidenotes.mjs copies that body into an
- * `<aside class="footnote-aside">` after the paragraph that references it.
- *
- * Three states, and which copy of a note the reader gets in each:
- *
- *   - wide: the margin aside, plus the reference's hover-preview card
- *     (hover-previews.ts) on demand. The foot-of-post section is hidden.
- *   - narrow: neither the aside nor the card (previewable() checks the same
- *     breakpoint live, a hover card being a poor primary mechanism on touch),
- *     so the section stays visible and the reference is an ordinary anchor.
- *   - print: the section, forced visible at any width, since neither the aside
- *     nor the card exists on paper.
- *
- * The section is only ever HIDDEN, never removed: the reference anchor needs
- * somewhere to resolve to, and a reader with CSS off gets the notes at the foot
- * of the post the way GFM always rendered them.
- *
- * The reference mark is bracketed "[1]" rather than a bare underlined number,
- * so it reads as a citation and is never mistaken for a Sidenote's marker.
- *
- * Both ends of the hover pairing are real elements here (the <sup> and the
- * <aside>), unlike a Sidenote's bound text, so FootnoteSidenotes.astro just
- * toggles classes on them: no Custom Highlight API, no hit-testing.
- */
+/* The foot-of-post section is only ever hidden, never removed: the reference
+   anchor needs somewhere to resolve to. */
 
 :root {
-  /* One source for the wide breakpoint. The media query below still repeats the
-     literal (a query cannot take a var()), but hover-previews.ts reads this
-     property at runtime rather than hardcoding a second 70rem. */
+  /* Read by JS; the media query below repeats the literal since it can't take a var(). */
   --footnote-wide-breakpoint: 70rem;
 
-  /* Narrower than a Sidenote's 13rem: a footnote is usually a short citation,
-     and the narrower box is what justifies the lower breakpoint. */
   --footnote-aside-width: 9rem;
   --footnote-aside-gap: 1.5rem;
-
-  /* --note-highlight and the grow timing live in theme.css, shared with
-     sidenotes.css. */
 }
-
-/* --------------------------------------------------------------- section */
 
 .prose section[data-footnotes] {
   color: var(--muted);
@@ -51,14 +18,8 @@
   margin-block: 0.4rem;
 }
 
-/* ------------------------------------------------------------- reference */
-
-/*
- * Generated content on the wrapping <sup> rather than text in the tree, so
- * copying the sentence never copies a stray bracket. Targeting <sup> and not
- * the <a> also sidesteps links.css's `::after { content: none }` rule, which
- * only reaches the anchor.
- */
+/* On the wrapping <sup>, not the <a>: keeps the brackets out of copied text and
+   avoids links.css's `::after { content: none }`, which reaches the anchor. */
 .prose sup:has(> a[data-footnote-ref])::before,
 .prose sup:has(> a[data-footnote-ref])::after {
   color: var(--accent);
@@ -73,34 +34,19 @@
   content: ']';
 }
 
-/* The brackets are the signal now, so the underline goes: it was the only thing
-   telling a footnote apart from a Sidenote before. */
 .prose a[data-footnote-ref] {
   text-decoration: none;
 }
 
-/* On the <sup>, not the <a>, so the background paints behind the bracket
-   pseudo-elements too and not only the digit. */
 .prose sup.footnote-ref-highlighted {
   background-color: var(--note-highlight);
 }
 
-/* ------------------------------------------------------------------ aside */
-
-/*
- * Out of the layout below the breakpoint. A CSS-only hover panel used to live
- * here and fired on the same pointer-enter as the hover card, one instantly and
- * one after a delay, both showing the same note.
- */
 .footnote-aside {
   display: none;
-  /* On the base rule so it applies in every state, the same way sidenotes.css
-     keeps its transition on `.note-text`. */
   transition: transform var(--note-grow-duration) var(--note-grow-ease);
 }
 
-/* Hovering the reference grows the aside: the same nudge and token
-   `.note-grow` uses, so a footnote and a Sidenote read as one gesture. */
 .footnote-aside.footnote-aside-grow {
   transform: scale(1.02);
   transform-origin: top left;
@@ -114,20 +60,13 @@
   margin-block-start: 0.5rem;
 }
 
-/*
- * A footnote can contain a markdown *emphasis* run, and emphasis.css reaches
- * into it (the aside is inside `.prose`), painting that word the bold
- * treatment's yellow instead of leaving it grey. Outside the media query, since
- * it corrects colour regardless of layout and costs nothing while hidden.
- */
+/* The aside is inside `.prose`, so emphasis.css would otherwise paint an
+   *emphasis* run in it the accent colour. */
 .footnote-aside em {
   color: inherit;
   font-weight: inherit;
 }
 
-/* Margin room exists, so the note floats beside its paragraph. Not
-   hover-triggered, so it does not compete with the card: this is a permanent
-   margin note, that is an on-demand popup. */
 @media (min-width: 70rem) {
   .prose section[data-footnotes] {
     display: none;
@@ -147,22 +86,12 @@
     font-style: italic;
     line-height: 1.5;
     color: var(--muted);
-    /*
-     * The house frame, left edge only: a footnote gets the spine, a Sidenote
-     * gets the full double frame. `--border-card-edge` and not sidenotes.css's
-     * own token, since this file loads on every page with a footnote whether or
-     * not that page renders a Sidenote.
-     */
     border-inline-start: var(--border-card-edge) solid var(--fg);
   }
 }
 
-/*
- * The aside is hidden here rather than left to the width query above: some
- * browsers evaluate a print query's width against the SCREEN, not the page, so
- * a wide screen could otherwise print the aside and the section both and show
- * the same note twice.
- */
+/* Explicit: some browsers evaluate a print query's width against the screen,
+   which would print both copies of the note. */
 @media print {
   .prose section[data-footnotes] {
     display: block;

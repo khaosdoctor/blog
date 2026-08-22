@@ -1,8 +1,5 @@
-/**
- * localStorage with the failure modes swallowed: private mode, storage
- * disabled, or quota errors must never break the page, only lose the
- * preference. Every client script used to hand-roll this try/catch.
- */
+// Private mode, disabled storage and quota errors must lose the preference
+// rather than break the page.
 
 export function readStorage(key: string): string | null {
   try {
@@ -12,7 +9,6 @@ export function readStorage(key: string): string | null {
   }
 }
 
-/** null clears the key: this site stores every default as nothing stored. */
 export function writeStorage(key: string, value: string | null): void {
   if (value === null) {
     removeStorage(key)
@@ -20,15 +16,11 @@ export function writeStorage(key: string, value: string | null): void {
   }
   try {
     localStorage.setItem(key, value)
-  } catch {
-    // The choice still applies for this page; it just will not persist.
-  }
+  } catch {}
 }
 
 export function removeStorage(key: string): void {
   try {
     localStorage.removeItem(key)
-  } catch {
-    // Nothing to clear if storage is unreachable.
-  }
+  } catch {}
 }

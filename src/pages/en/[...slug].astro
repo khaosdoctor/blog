@@ -11,17 +11,10 @@ import { buildSeriesMap, getSeriesNavigation } from '../../lib/taxonomy'
 import { HREFLANG } from '../../i18n/ui'
 import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
 
-// English lives under /en/, Portuguese stays unprefixed at the root so every
-// URL Ghost ever published keeps working. The slug is this file's own, so an
-// English article reads as English in the address bar.
 export const getStaticPaths = (async () => {
   const [posts, byFolder] = await Promise.all([getPublishedPosts('en'), getPublishedByFolder()])
-  // Built from the English posts alone, so previous/next inside a series can
-  // only ever reach another English part, and "part N of M" counts what exists
-  // in English rather than what exists in Portuguese.
   const seriesMap = buildSeriesMap(posts)
   return posts.map((post) => {
-    // Every language of this article is a file in the same content directory.
     const siblings = byFolder.get(folderOf(post)) ?? [post]
     const source = siblings.find((entry) => entry.data.lang === SOURCE_LANG)
     return {
@@ -29,8 +22,6 @@ export const getStaticPaths = (async () => {
       props: {
         post,
         series: getSeriesNavigation(post, seriesMap),
-        // The original to link back to. A translation of a still-draft post
-        // has nowhere to point, so the banner has to cope with null.
         sourcePath: source === undefined ? null : urlOf(source),
         alternates: siblings.map((entry) => ({
           lang: HREFLANG[entry.data.lang],
@@ -49,11 +40,6 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   href: new URL(path, Astro.site).href,
 }))
 
-// The post's own colour, read off the cover's derivation (coverTone) so bold
-// and italic inside the article match the card at the top; links follow the
-// day colour instead (prose/links.css). The translation has its own slug and
-// therefore its own cover colour. Handed to the layout because the header's
-// reading progress reads it too and only <body> contains both.
 const postAccent = coverTone(slugOf(post)).token
 ---
 

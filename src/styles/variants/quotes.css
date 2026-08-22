@@ -1,43 +1,16 @@
-/*
- * Quotes. One look for every quote: no fill, italic body, bold underlined
- * author line.
- *
- * `> [!quote] Author` is an Obsidian callout, and rehype-callouts emits
- * `div.callout[data-callout="quote"] > .callout-title + .callout-content`. Both
- * the `blockquote.callout[...]` and the tag-less `.callout[...]` selectors are
- * kept, so this keeps working if the container tag is ever reconfigured.
- *
- * A plain `>` blockquote gets the same look minus the author row.
- * `.twitter-tweet` is excluded: it is also a bare <blockquote>, from the Ghost
- * migration, and is not a quote.
- *
- * The author arrives as the callout's TITLE, its first child, and has to render
- * at the BOTTOM. Flex order does it with no markup change: the container is a
- * column, the title is `order: 2`, the content `order: 1`.
- *
- * The divider above the author is built like the fading `hr` in
- * prose/rules.css: a background pattern clipped by a mask, which a border
- * cannot do.
- */
+/* Both `blockquote.callout` and tag-less `.callout` are kept so this survives a
+   container-tag change in rehype-callouts; `.twitter-tweet` is excluded as a bare <blockquote>. */
 
 :root {
   --qc-pad: 1.5rem 1.75rem;
   --qc-radius: 0;
   --qc-gap: 0.6rem;
-  /* Between consecutive paragraphs inside one quote, deliberately smaller than
-     --qc-gap: a full 1em read as two separate blocks. Roughly the distance the
-     body's own line-height already leaves between wrapped lines, so it reads as
-     a paragraph break inside one quotation. */
   --qc-para-gap: 0.5em;
   --qc-indent: 2rem;
   --qc-dropcap-size: 2.75em;
 
-  /* 3px is the floor for `border-style: double` to draw two lines at all; 4px
-     splits cleanly into line-space-line rather than rounding down. */
   --qc-border-width: 4px;
 
-  /* No fill: the frame does the separating and the quote reads off the page.
-     --fg comes out ~16.8:1 light / ~14.3:1 dark, --muted ~6.1 / ~6.7. */
   --qc-bg: transparent;
   --qc-fg: var(--fg);
   --qc-muted-fg: var(--muted);
@@ -47,16 +20,6 @@
   );
   --qc-dropcap-fg: var(--qc-border);
 
-  /*
-   * A `"` watermark behind the text, clipped at the top-left corner: the inset
-   * is negative so the glyph pushes past the padding edge, which `overflow:
-   * hidden` on the card then crops. It reads as running off the corner without
-   * losing the shape.
-   *
-   * It is decoration and the real content always paints above it, but it is not
-   * opaque, so it tints --bg under any text it sits behind. At these alphas the
-   * worst case is still ~12:1 dark / ~16:1 light for --fg.
-   */
   --qc-glyph-size: 240px;
   --qc-glyph-inset: -0.08em;
   --qc-glyph: light-dark(
@@ -64,23 +27,14 @@
     color-mix(in oklab, white 6%, transparent)
   );
 
-  /* --qc-rule-extent is the only value to change to make the divider longer or
-     shorter: the mask always fades the last 30% of whatever length results. */
   --qc-rule-weight: 2px;
   --qc-rule-extent: 50%;
   --qc-rule-image: repeating-linear-gradient(to right, var(--qc-border) 0 10px, transparent 10px 16px);
   --qc-rule-mask: linear-gradient(to right, black 70%, transparent);
 
-  /* An SVG as a mask, so the icon takes currentColor and costs no request.
-     Square corners on the glyph itself, per house style. */
   --qc-icon-copy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Crect x='3' y='3' width='13' height='13'/%3E%3Crect x='8' y='8' width='13' height='13'/%3E%3C/svg%3E");
-  /* The copy button is 1.5rem square inset 0.1rem, so it clears at 1.6rem. This
-     reuses --qc-pad's own 1.75rem but as its own token, so a later edit to the
-     padding alone cannot silently reopen the overlap. */
   --qc-copy-gutter: 1.75rem;
 }
-
-/* ---------------------------------------------------------- card shape */
 
 .prose blockquote.callout[data-callout='quote'],
 .prose .callout[data-callout='quote'],
@@ -89,27 +43,21 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  /* No flex spacing here on purpose: it would apply between every paragraph in
-     the plain-blockquote shape, where the paragraphs ARE the flex children.
-     The callout shape gets its content/author separation from
-     `.callout-title`'s own margin below. */
-  /* Indented left, flush right: set apart from the paragraph before it without
-     losing width. */
+  /* No flex spacing here: in the plain-blockquote shape the paragraphs are the
+     flex children, so it would apply between all of them. */
   margin-block: 1.75rem;
   margin-inline: var(--qc-indent) 0;
   padding: var(--qc-pad);
   padding-inline-end: var(--qc-copy-gutter);
   overflow: hidden;
-  /* Double on three sides, thick solid left: the house frame. */
   border-style: double;
   border-color: var(--qc-border);
   border-width: var(--qc-border-width);
   border-inline-start-style: solid;
   border-inline-start-width: var(--border-card-edge);
   border-radius: var(--qc-radius);
-  /* The obsidian theme uses mix-blend-mode so its variants can share one
-     colour. It would blend an opaque background against the page and shift
-     every colour below; ours are already picked per theme. */
+  /* Cancels the obsidian theme's mix-blend-mode, which would shift every
+     colour below this card. */
   mix-blend-mode: normal;
   background: var(--qc-bg);
   color: var(--qc-fg);
@@ -121,8 +69,6 @@
   z-index: 1;
 }
 
-/* --------------------------------------------------- author, bottom row */
-
 .prose .callout[data-callout='quote'] .callout-title-icon {
   display: none;
 }
@@ -131,8 +77,6 @@
   position: relative;
   order: 2;
   margin: 0;
-  /* The one place --qc-gap still applies, in the slot the flex spacing used to
-     occupy. */
   margin-block-start: var(--qc-gap);
   padding-block-start: calc(0.5rem + var(--qc-rule-weight));
   font-family: var(--font-mono);
@@ -152,11 +96,9 @@
 }
 
 .prose .callout[data-callout='quote'] .callout-title-text::before {
-  content: '\00bb  '; /* the ANSI-prompt » rather than an em dash */
+  content: '\00bb  ';
 }
 
-/* The author name is the one line on the card carrying no italic, so it needs
-   its own weight to read as set apart. */
 .prose .callout[data-callout='quote'] .callout-title-text {
   font-weight: 700;
   text-decoration: underline;
@@ -166,24 +108,17 @@
   order: 1;
 }
 
-/*
- * The obsidian theme sets `overflow-x: auto`, and per spec `visible` on the
- * other axis then computes to `auto` too, so a wrapping quote grew a vertical
- * scrollbar instead of growing the card. A quote has nothing to scroll.
- */
+/* Cancels the obsidian theme's `overflow-x: auto`, which would give the card
+   a scrollbar. */
 .prose .callout[data-callout='quote'] > .callout-content {
   overflow: visible;
 }
-
-/* -------------------------------------------------------------- body */
 
 .prose .callout[data-callout='quote'] .callout-content,
 .prose blockquote:not(.callout):not(.twitter-tweet) {
   font-style: italic;
 }
 
-/* Zeroed, then spaced only between one paragraph and the next, never before the
-   first or after the last. */
 .prose .callout[data-callout='quote'] .callout-content > p,
 .prose blockquote:not(.callout):not(.twitter-tweet) > p {
   margin: 0;
@@ -193,8 +128,6 @@
 .prose blockquote:not(.callout):not(.twitter-tweet) > p + p {
   margin-block-start: var(--qc-para-gap);
 }
-
-/* ------------------------------------------------------- watermark glyph */
 
 .prose .callout[data-callout='quote']::before,
 .prose blockquote:not(.callout):not(.twitter-tweet)::before {
@@ -211,8 +144,6 @@
   pointer-events: none;
 }
 
-/* ------------------------------------------------------------- drop cap */
-
 .prose .callout[data-callout='quote'] .callout-content > p:first-of-type::first-letter,
 .prose blockquote:not(.callout):not(.twitter-tweet) > p:first-of-type::first-letter {
   float: inline-start;
@@ -224,11 +155,8 @@
   color: var(--qc-dropcap-fg);
 }
 
-/* --------------------------------------------------------- copy button */
-
-/* Appended at runtime by QuoteCopy.astro; neither markup shape contains one.
-   Scoped to the card's own direct child so it out-specifies the `> *` rule
-   above, which would otherwise leave it relative instead of absolute. */
+/* Appended at runtime by JS. Scoped to the card's direct child so it
+   out-specifies the `> *` rule above, which would leave it relative. */
 .prose .callout[data-callout='quote'] > .qc-copy,
 .prose blockquote:not(.callout):not(.twitter-tweet) > .qc-copy {
   position: absolute;
@@ -263,8 +191,6 @@
   color: var(--accent);
 }
 
-/* Hovering anywhere on the card reveals it, plus the button's own focus so a
-   keyboard user tabbing to it still sees it appear. */
 .prose .callout[data-callout='quote']:hover .qc-copy,
 .prose .callout[data-callout='quote']:focus-within .qc-copy,
 .prose blockquote:not(.callout):not(.twitter-tweet):hover .qc-copy,

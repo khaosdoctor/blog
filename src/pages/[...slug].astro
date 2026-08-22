@@ -10,18 +10,11 @@ import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from
 import { buildSeriesMap, getSeriesNavigation } from '../lib/taxonomy'
 import { HREFLANG } from '../i18n/ui'
 
-// Flat URLs: /{slug}/ exactly as Ghost had them, so moving a post between
-// sections only ever changes its `category`, never its URL. The series map
-// and sibling index are built once here rather than per post page, which used
-// to cost an O(N) collection fetch N times over.
 export const getStaticPaths = (async () => {
   const [posts, byFolder] = await Promise.all([getPublishedPosts(), getPublishedByFolder()])
   const seriesMap = buildSeriesMap(posts)
   return posts.map((post) => ({
     params: { slug: slugOf(post) },
-    // Alternates come from the post's own content directory: every language
-    // of the same article is a file in there, so an untranslated post yields
-    // a list of one, itself.
     props: {
       post,
       series: getSeriesNavigation(post, seriesMap),
@@ -42,10 +35,6 @@ const alternates = folderAlternates.map(({ lang, path }) => ({
   href: new URL(path, Astro.site).href,
 }))
 
-// The post's own colour, read off the cover's derivation (coverTone) so bold
-// and italic inside the article match the card at the top; links follow the
-// day colour instead (prose/links.css). Handed to the layout because the
-// header's reading progress reads it too and only <body> contains both.
 const postAccent = coverTone(slugOf(post)).token
 ---
 

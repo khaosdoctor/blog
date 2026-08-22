@@ -1,50 +1,12 @@
-/*
- * <Sidenote> and <MarginNote>. Both render the same shape, which is why one
- * file styles both:
- *
- *   <span class="note sidenote|marginnote">
- *     <input class="note-toggle" type="checkbox" id="…" />
- *     <label class="note-marker" for="…"></label>
- *     <span class="note-text">…inline content…<button class="note-copy-link">…</button></span>
- *   </span>
- *
- * `.note-text` is real inline content in the paragraph flow, never moved and
- * never duplicated, so it reads correctly with CSS off. Everything here is
- * decoration on top of that baseline, in three states:
- *
- *   - narrow: a tap-to-reveal popover, toggled by a checkbox (no JS, and
- *     deliberately not <details>).
- *   - wide (90rem): the popover switches off and the text floats into the right
- *     margin, Tufte-style, always visible.
- *   - print: inlined next to its marker as a parenthetical.
- *
- * The text a note refers to is NOT wrapped in anything, it is whatever prose
- * sits before the tag, so nothing here can select it. FootnoteSidenotes.astro
- * paints it as a Range instead (see `::highlight` below).
- *
- * Notes are INLINE ONLY. The block neutraliser near the bottom is a safety net
- * for stray markup, not a licence to put a heading in one.
- */
+/* The bound text has no wrapper element, so nothing here can select it;
+   it's painted as a Range instead. */
 
-/* 90rem is an approximation: a media query sees viewport width, not the
-   rendered width of a `ch`-based column. It comfortably clears a 68ch serif
-   column plus a 13rem note and its spacing. Hardcoded in the blocks below. */
-
-/* --note-highlight and the grow timing live in theme.css, shared with
-   footnotes.css. */
 :root {
-  /* "White border" here means the foreground colour, so it inverts per theme. */
   --note-border-width: var(--border-card-edge);
-  /* `border-style: double` needs 3px to draw as two lines; under that a browser
-     collapses it to one. Same 3px the quote frame uses. */
   --note-border-thin: 3px;
 
-  /* An inline SVG as a mask, so it takes currentColor and costs no request. */
   --note-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'/%3E%3Cpath d='M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'/%3E%3C/svg%3E");
 
-  /* A column reserved for `.note-copy-link` down the box's FULL height, not
-     just its top corner: text never lays out inside this padding, so the icon
-     stays clear of every line rather than only the first. */
   --note-icon-gutter: 1.9rem;
 }
 
@@ -53,22 +15,10 @@
   display: inline;
 }
 
-/*
- * The paint step for the bound text. No wrapper element exists, so this styles
- * whatever Range FootnoteSidenotes.astro puts in the highlight. A browser
- * without the Custom Highlight API never populates it, so the rule never
- * matches and the note works as before, minus the tint.
- */
 ::highlight(note-bound) {
   background-color: var(--note-highlight);
 }
 
-/*
- * The permalink control, shown only while the note is being read: top-right for
- * a sidenote, top-left for a margin note. A real <button>, since it copies
- * rather than navigates, sized for a pointer (the previous 0.9em icon-only
- * version was too small to hit) and reset back to plain shell.
- */
 .note-copy-link {
   position: absolute;
   top: 0.1rem;
@@ -95,8 +45,6 @@
   left: 0.1rem;
 }
 
-/* The icon used to sit on top of whatever prose started there. Applied per
-   state, since the popover and the float have different base padding. */
 .sidenote .note-toggle:checked ~ .note-text {
   padding-inline-end: var(--note-icon-gutter);
 }
@@ -119,16 +67,12 @@
   color: var(--accent);
 }
 
-/* Anywhere on the note reveals it, so a reader does not have to find a small
-   target to discover it is there. */
 .note:hover .note-copy-link,
 .note:focus-within .note-copy-link,
 .note-copy-link:focus-visible {
   opacity: 1;
 }
 
-/* Visually hidden but focusable: the real control behind the click. Stays this
-   way at every width; only its relevance changes. */
 .note-toggle {
   position: absolute;
   width: 1px;
@@ -155,8 +99,8 @@
   user-select: none;
 }
 
-/* The counter lives on <main> rather than <body> so it needs no JS, resets per
-   page, and cannot be replaced by a later body-level counter-reset. */
+/* On <main> rather than <body>: resets per page and cannot be overridden by a
+   later body-level counter-reset. */
 main {
   counter-reset: sidenote;
 }
@@ -174,17 +118,14 @@ main {
   color: var(--accent);
 }
 
-/* A margin note has no number, just a tap target so the popover is
-   discoverable where there is no margin to put the text in. */
 .marginnote .note-marker::after {
   content: '•';
   color: var(--muted);
   font-size: 0.9em;
 }
 
-/* Deliberately not `display: none`: that would drop the note from the
-   accessibility tree, leaving an unlabelled checkbox and no way to know what it
-   reveals. The clip technique keeps it readable in place. */
+/* Clipped rather than `display: none`, which would drop the note from the
+   accessibility tree and leave the checkbox unlabelled. */
 .note-text {
   position: absolute;
   width: 1px;
@@ -195,23 +136,10 @@ main {
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
   white-space: nowrap;
-  /* On the base rule so it applies in every state, not only the ones that use
-     it today. */
   transition: transform var(--note-grow-duration) var(--note-grow-ease);
 }
 
-/*
- * The mirror of the highlight: hovering the bound text grows the note, so the
- * pairing is obvious in both directions. FootnoteSidenotes.astro hit-tests the
- * pointer and toggles this class, since that text has no element to select.
- *
- * A transform rather than font-size or padding, which would reflow the floated
- * column. The trade-off is that a transform does not reflow either, so two
- * notes stacked tightly can have the growing one paint over the space before
- * its neighbour. transform-origin points growth away from the note above, and
- * the scale stays at 1.02 to keep that headroom (1.04 read as a jump once the
- * timing slowed).
- */
+/* A transform, because font-size or padding would reflow the floated column. */
 .note.note-grow .note-text {
   transform: scale(1.02);
   transform-origin: top left;
@@ -242,8 +170,6 @@ main {
   text-wrap: pretty;
 }
 
-/* The house frame, shared with quotes and callouts: thick solid left edge, thin
-   double rule on the other three. */
 .sidenote .note-toggle:checked ~ .note-text,
 .marginnote .note-toggle:checked ~ .note-text {
   border-block-start: var(--note-border-thin) double var(--fg);
@@ -251,10 +177,6 @@ main {
   border-block-end: var(--note-border-thin) double var(--fg);
 }
 
-/* Where CSS anchor positioning exists, anchor the popover to its marker rather
-   than the parent-relative guess above, so it cannot drift on a wrapped line.
-   The names are set per instance by the components, from a build-time id. A
-   no-op in Firefox, which has not shipped it. */
 @supports (position-anchor: --a) {
   .note-toggle:checked ~ .note-text {
     position: fixed;
@@ -264,8 +186,6 @@ main {
   }
 }
 
-/* Block children are a misuse of these components, but degrade rather than
-   breaking the popover layout if they slip in. */
 .note-text :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li, blockquote, pre, figure, table, hr) {
   display: inline;
   margin: 0;
@@ -273,7 +193,6 @@ main {
   border: 0;
 }
 
-/* Margin room exists, so skip the popover and float the note into it. */
 @media (min-width: 90rem) {
   .note-toggle {
     display: none;
@@ -308,8 +227,7 @@ main {
     color: var(--muted);
   }
 
-  /* The same frame as the popover, kept in step. The extra padding on three
-     sides keeps the floated text off its own rule. */
+  /* Must stay in step with the popover's frame above. */
   .sidenote .note-text,
   .marginnote .note-text {
     padding: 0.35rem 0.5rem 0.4rem 0.6rem;

@@ -18,8 +18,6 @@ suggestFixUrl.searchParams.set('title', `Translation: ${Astro.url.pathname}`)
 suggestFixUrl.searchParams.set('body', 'Suggest a translation fix for this page')
 ---
 
-{/* `note` rather than DPUB's `doc-notice`: same meaning to a screen reader here,
-    and it is in the ARIA role set every browser and checker knows. */}
 <div class="lang-banner" role="note">
   <p>
     {t(lang, 'machineTranslated')}
@@ -31,20 +29,7 @@ suggestFixUrl.searchParams.set('body', 'Suggest a translation fix for this page'
 </div>
 
 <style>
-  /*
-   * The quote card's frame, in the post's own colour: double rule on three
-   * edges, one thick solid bar on the left, no fill (variants/quotes.css, whose
-   * --qc-* tokens are declared at :root and so are readable from here). It used
-   * to be a solid --rule slab, the one grey block on a page whose every other
-   * aside is a frame.
-   *
-   * The colour is --post-accent, the tone this post's own cover drew
-   * (coverTone, lib/cover.ts), which the banner inherits from the <article> it
-   * renders inside. The quote's own recipe is followed rather than a plain
-   * `var(--post-accent)`: on the light ground the brand tone is used straight,
-   * and on the dark one it is lifted 25% toward white, since the same hue that
-   * reads as a firm rule on paper goes muddy against black.
-   */
+  /* Lifted toward white on dark: the brand tone goes muddy straight against black. */
   .lang-banner {
     margin-block-end: 2rem;
     padding: 0.9rem 1.2rem;

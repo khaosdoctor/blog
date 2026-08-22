@@ -1,11 +1,4 @@
 ---
-/**
- * A Speaker Deck deck, from `![](https://speakerdeck.com/player/<id>)`.
- * Written by remark-embeds, so posts stay plain markdown.
- *
- * No facade here, unlike the video embeds: a deck is the content of the section
- * it belongs to, and there is no thumbnail endpoint to build a preview from.
- */
 interface Props {
   id: string
 }
@@ -25,9 +18,7 @@ const { id } = Astro.props
 </figure>
 
 <style>
-  /* The block margin comes from core.css's own `figure` rule. */
   .deck iframe {
-    /* Speaker Deck renders 16:10, not 16:9. */
     aspect-ratio: 16 / 10;
     width: 100%;
     border: 1px solid var(--rule);

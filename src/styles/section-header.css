@@ -1,29 +1,8 @@
-/*
- * The page title, everywhere one appears: a shell prompt before it and the
- * site's dashed rule under it.
- *
- * `main h1` rather than a class each page opts into, because this is the
- * default now: an index, a section listing and a post all carry the same mark.
- * A post's h1 lives inside `<article>` and still matches, which is why
- * prose/headings.css hands h1 over to this file and keeps only h2 and h3.
- *
- * Its own stylesheet rather than a corner of core.css: core.css is the page
- * frame (reset, grounds, landmarks) and this is a piece of typography that will
- * keep being adjusted on its own.
- */
-
 main h1::before {
   content: '> ';
   color: var(--accent-day, var(--accent));
 }
 
-/*
- * The dashed mark, 10px on and 6px off, with the mask fading the run out rather
- * than ending it on a hard edge. Two layers because one gradient cannot do
- * both: the dashes need a repeating pattern and the fade a continuous one. The
- * same pair the quote rule, the pagination rule and the listing row separators
- * draw with.
- */
 main h1::after {
   content: '';
   display: block;
@@ -33,11 +12,6 @@ main h1::after {
   mask-image: linear-gradient(to right, #000 0 55%, transparent 100%);
 }
 
-/*
- * How many things the page lists, beside its title. Dimmed and small: it is a
- * measurement of the page, not part of its name, and the title has to keep
- * reading as one word from across the room.
- */
 .page-count {
   color: var(--muted);
   font-size: 0.5em;

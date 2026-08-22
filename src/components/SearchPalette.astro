@@ -1,22 +1,4 @@
 ---
-// A command-style opener beside LangSwitcher: a magnifier plus the reader's
-// own shortcut key, opening a native <dialog> (top-layer placement and a focus
-// trap for free, no popover/hidden fallback to write) that live-searches
-// through Pagefind. Search.astro's form-based page is left alone and keeps
-// working with JS off.
-//
-// Progressive enhancement, not a JS-only control: the element below is a real
-// `<a href="/search/">` (or `/en/search/`, via localePath), so a reader with
-// JS off, or before search-palette.ts runs, reaches the JS-free search page.
-// Once the script runs it preventDefaults the click and opens the dialog, and
-// adds aria-haspopup/aria-controls, which are only true from that point.
-//
-// So nothing about the anchor's appearance depends on JS, unlike
-// ThemeToggle/SettingsPanel which do nothing without it and start hidden. The
-// one JS-only part is the shortcut hint, since <Cmd+K> promises a keyboard
-// shortcut that only exists once the global keydown listener is live: it stays
-// reserved in space (visibility: hidden, not display: none) so the box never
-// resizes, and the script reveals it once the promise holds.
 import Magnifier from './icons/Magnifier.astro'
 import { localePath, t, type Locale } from '../i18n/ui'
 
@@ -28,32 +10,17 @@ const { locale } = Astro.props
 const searchHref = localePath(locale, '/search/')
 ---
 
-{/*
-  aria-haspopup/aria-controls are not declared here (the script adds them once
-  it has taken the click over), so this never claims a behaviour it cannot yet
-  deliver. aria-label has to be honest in both states at once: t(locale,
-  'search') names the destination rather than the mechanism, so it reads
-  correctly whether the click navigates or opens a dialog.
-
-  Shares its hit target (--icon-btn-hit) and its visible-chip technique (a
-  ::before at --icon-btn-chip) with ThemeToggle/SettingsPanel, but it is not
-  square: the hint's reserved space widens it before any script runs.
-*/}
 <div class="search-trigger">
   <a href={searchHref} class="sx-open" aria-label={t(locale, 'search')} data-base-label={t(locale, 'search')}>
     <span class="sx-label">{t(locale, 'search')}</span>
     <Magnifier class="sx-open-icon" />
-    {/* Reserved space, invisible content, see the component comment. The
-       bracket vocabulary matches every other button on this site, and the
-       letter comes from the settings panel's choice rather than a hardcoded
-       K. */}
     <span class="sx-hint" aria-hidden="true"
       >&lt;<span class="sx-hint-mod"></span>+<span class="sx-hint-key">K</span>&gt;</span
     >
   </a>
 
-  {/* tabindex so the dialog itself can hold the initial focus on touch,
-      where focusing the input would open the keyboard over the results. */}
+  {/* tabindex so the dialog itself can hold the initial focus on touch, where
+      focusing the input would open the keyboard over the results. */}
   <dialog id="sx-dialog" class="sx-dialog" tabindex="-1" aria-label={t(locale, 'searchLabel')}>
     <div class="sx-row">
       <span class="sx-prompt" aria-hidden="true">&gt;</span>
@@ -70,13 +37,8 @@ const searchHref = localePath(locale, '/search/')
         data-results-found={t(locale, 'searchResultsFound')}
         data-no-index-message={t(locale, 'searchNoIndex')}
       />
-      {/* The block cursor: the real caret is hidden (caret-color: transparent
-         below) and this one is positioned over the text by the script,
-         coloured from the day's hash rather than the theme accent. */}
       <span class="sx-cursor" aria-hidden="true"></span>
     </div>
-    {/* One update per settled query, not per keystroke: debouncedSearch
-       already coalesces rapid typing. */}
     <p class="sx-status" aria-live="polite" aria-atomic="true"></p>
     <ul class="sx-results"></ul>
     <p class="sx-more"></p>
@@ -88,22 +50,12 @@ const searchHref = localePath(locale, '/search/')
 </script>
 
 <style>
-  /*
-   * Always visible, unlike ThemeToggle/SettingsPanel's wrappers: this one is a
-   * real link with a real destination from first paint.
-   */
   .search-trigger {
     position: relative;
     display: inline-flex;
     align-items: center;
   }
 
-  /*
-   * Same --icon-btn-hit as .tt-open and .sp-open, but not square: the icon and
-   * the hint's reserved space both live inside it, so it grows sideways while
-   * min-block-size holds the height. text-decoration: none because an <a>
-   * carries a default underline a <button> never had to override.
-   */
   .sx-open {
     position: relative;
     display: inline-flex;
@@ -120,13 +72,6 @@ const searchHref = localePath(locale, '/search/')
     cursor: pointer;
   }
 
-  /*
-   * The visible chip, --icon-btn-chip tall like every other control's drawn
-   * box, but spanning the full width rather than a fixed square, since this
-   * button's content is wider than it is tall. The block insets centre it in
-   * the hit target. Border reads --accent-day, not --rule: see
-   * ThemeToggle's .tt-open::before for the measured numbers.
-   */
   .sx-open::before {
     content: '';
     position: absolute;
@@ -138,9 +83,6 @@ const searchHref = localePath(locale, '/search/')
     pointer-events: none;
   }
 
-  /* The ::before chip is absolutely positioned and opaque, so it paints over
-     anything unpositioned inside the button and leaves an empty outlined
-     square. Both the icon and the hint need this. */
   .sx-open-icon,
   .sx-hint {
     position: relative;
@@ -162,11 +104,8 @@ const searchHref = localePath(locale, '/search/')
     letter-spacing: 0.03em;
     color: var(--muted);
     white-space: nowrap;
-    /*
-     * Reserved space, hidden content: keeps the anchor at its final width from
-     * first paint. The script sets this visible once it has taken over the
-     * click, see the component comment.
-     */
+    /* Not display: none, so the anchor holds its final width from first
+       paint. */
     visibility: hidden;
   }
 
@@ -180,17 +119,11 @@ const searchHref = localePath(locale, '/search/')
     border-color: var(--accent);
   }
 
-  /* Drawn on the real hit box, not the chip, same as .tt-open. */
   .sx-open:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
-  /*
-   * Hard corners (--radius is 0 site-wide) and a double rule in the ink
-   * colour, the same treatment as the other two menus. showModal() puts this
-   * in the top layer, so nothing here needs a z-index.
-   */
   .sx-dialog {
     inline-size: min(92vw, 36rem);
     max-block-size: 70dvh;
@@ -201,8 +134,6 @@ const searchHref = localePath(locale, '/search/')
     padding: 1rem;
   }
 
-  /* No author `display` outside [open]: the UA sheet already hides a closed
-     <dialog> and an author rule would beat it. */
   .sx-dialog[open] {
     display: flex;
     flex-direction: column;
@@ -212,20 +143,8 @@ const searchHref = localePath(locale, '/search/')
     margin-block-start: 0.6rem;
   }
 
-  /*
-   * The pixelated backdrop. A real per-pixel mosaic of the live page is not
-   * something CSS can do: backdrop-filter only accepts the functions `filter`
-   * does, none of which resample, and no SVG filter primitive downsamples
-   * either. Every working "CSS pixelate" starts from a snapshot rasterised
-   * onto a small canvas and scaled back up, which needs a dependency or a
-   * hand-rolled DOM-to-canvas renderer, both past what a decorative backdrop
-   * justifies.
-   *
-   * blur() is the closest built-in, and the hard-edged stripes over it are
-   * what keep it reading as chunky rather than as a plain dim. Both resolve
-   * once in the compositor when the dialog opens; typing only touches the
-   * results list.
-   */
+  /* A real pixelate is out of reach in CSS: backdrop-filter takes only the
+     functions `filter` does and none of them resample. */
   .sx-dialog::backdrop {
     backdrop-filter: blur(5px);
     background-image: repeating-linear-gradient(
@@ -275,8 +194,6 @@ const searchHref = localePath(locale, '/search/')
     pointer-events: none;
   }
 
-  /* Reduced motion: solid and visible while typing, no blink. The media query
-     below layers the blink on for everyone else. */
   .sx-input:focus ~ .sx-cursor {
     opacity: 1;
   }
@@ -311,8 +228,6 @@ const searchHref = localePath(locale, '/search/')
     overflow-y: auto;
   }
 
-  /* :global() from here down: these rows are built with createElement, so they
-     carry no data-astro-cid and a scoped selector matches nothing. */
   .sx-results :global(li + li) {
     border-block-start: var(--border) solid var(--rule);
   }

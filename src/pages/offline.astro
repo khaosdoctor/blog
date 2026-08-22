@@ -3,8 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import { t } from '../i18n/ui'
 ---
 
-{/* The service worker serves this single page for any uncached URL in either
-    language, so like the 404 it carries both. */}
+{/* The service worker serves this one page for any uncached URL, in either
+    language, so both have to be here. */}
 <BaseLayout title={`LS: ${t('pt', 'offlineTitle')}`} description={t('pt', 'offlineDescription')}>
   <h1 class="listing-heading">{t('pt', 'offlineTitle')}</h1>
   <div class="listing-heading">

@@ -1,18 +1,6 @@
 ---
 import { t, type Locale } from '../i18n/ui'
 
-/**
- * One level of the outline, which renders itself for every level below it.
- *
- * Split out of PostToc only because a heading tree has no fixed depth: h2 > h3
- * > h4 is the common shape, but nothing stops a post from going deeper, and
- * `Astro.self` is the only way to render an unbounded nesting without writing
- * one loop per level.
- *
- * The fold state is an attribute on the `<li>` (`data-folded`), not a class, so
- * the script that opens the branch the reader is currently inside has exactly
- * one thing to set and the CSS has exactly one thing to read.
- */
 export interface TocItem {
   slug: string
   text: string
@@ -63,8 +51,6 @@ const { items, locale } = Astro.props
     list-style: none;
   }
 
-  /* Every nested level steps in by one character of the outline's own font, so
-     the indentation matches the tree the headings actually form. */
   .sub > div > ul {
     padding-inline-start: 1.1ch;
   }
@@ -75,12 +61,6 @@ const { items, locale } = Astro.props
     gap: 0.15rem;
   }
 
-  /*
-   * The active row is painted from the box's inside edge to its inside edge,
-   * which is why the anchor is a block filling the row rather than a text run:
-   * a background on an inline anchor stops at the end of the words and reads as
-   * a highlighter mark instead of a selected line.
-   */
   a {
     display: block;
     flex: 1;
@@ -89,8 +69,6 @@ const { items, locale } = Astro.props
     font-size: 0.72rem;
     line-height: 1.5;
     text-decoration: none;
-    /* Long headings truncate rather than wrap to four lines and push the rest of
-       the outline out of the box. The full text stays in the accessible name. */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -99,22 +77,6 @@ const { items, locale } = Astro.props
       color var(--duration) var(--ease);
   }
 
-  /*
-   * Hover and focus invert the line exactly the way the current heading does,
-   * rather than washing it with a tint.
-   *
-   * This used to paint `color-mix(in oklab, var(--toc-ink) 14%, transparent)`
-   * behind unchanged full-strength ink. On the dark page that reads as white
-   * type on a dark grey band, and beside a fully inverted current line it looks
-   * muddy rather than lighter, which is what the owner reported. A 14% wash is
-   * also the weakest possible signal: it is the one state a reader produces
-   * deliberately, so it should be the clearest.
-   *
-   * The cost is that a hovered line and the current line now look identical.
-   * That is the intent: this is a four-item outline where the pointer is its
-   * own answer to "which one is this", and the current line is never in doubt
-   * once the pointer leaves.
-   */
   a:hover,
   a:focus-visible,
   a[aria-current='location'] {
@@ -122,49 +84,8 @@ const { items, locale } = Astro.props
     color: var(--toc-paper);
   }
 
-  /*
-   * The whole heading, printed over the row on hover or focus when the ellipsis
-   * above cut it short, and deliberately allowed to hang past the frame and over
-   * the article: the panel is 15rem wide and the headings are not. Two sections
-   * that both start "O que aconteceu com a" are otherwise the same line.
-   *
-   * One element, created on <body> by PostToc's own script and placed from the
-   * row's rectangle. It cannot live in the panel: `.toc` is a scroll container
-   * (`max-block-size` plus `overflow-y: auto`) and a scroll container clips its
-   * children on both axes, so a child growing sideways is cut off or turns into
-   * a horizontal scrollbar. `position: fixed` does not get it out from in there
-   * either, because the panel carries `transform: translateY(-50%)` and a
-   * transform makes its element the containing block for fixed descendants,
-   * clipping included. `:global` because an element the script creates never
-   * carries this component's scoping attribute (ReadingTime.astro's own
-   * `:global(.rt-popup)` reaches into a client-built subtree the same way).
-   *
-   * Everything under the placement repeats the `a` rule above, so the reveal
-   * reads as that same row continuing rather than as a tooltip: identical face,
-   * size, line height and padding, painted in the inversion `a:hover` uses. The
-   * two colours are literals rather than `var(--toc-ink)`/`var(--toc-paper)`,
-   * which are declared on `.toc` and cannot reach an element that is not inside
-   * it. Same copy, same reason, as ReadingTime.astro's popup.
-   *
-   * `overflow-wrap: anywhere` rather than `break-word`: a shrink-to-fit box can
-   * still be pushed wider than the room left by a single long word, and only
-   * `anywhere` lowers the minimum enough that it cannot. Together with the
-   * `max-inline-size` the script writes, that is what keeps the reveal on screen
-   * in handle mode, where the panel is a drawer at the bottom of a phone.
-   *
-   * `pointer-events: none` so a click still reaches the row's own link
-   * underneath, and so the row keeps its `:hover` while the pointer is over the
-   * part of the reveal that covers it. PostToc's script follows the pointer
-   * itself to decide when the reveal goes away.
-   *
-   * z-index 30 clears the sidenotes that float in the margins (20) and stays
-   * under the settings and theme menus (60), which a reader opens deliberately
-   * and which nothing hovered should ever cover.
-   *
-   * No transition, on purpose: `--duration` is 0ms under prefers-reduced-motion
-   * anyway, and a reveal whose whole job is to be legible the instant it appears
-   * has nothing to gain from fading in.
-   */
+  /* Literal colours: `--toc-ink`/`--toc-paper` cannot reach outside `.toc`.
+     `anywhere`, not `break-word`, caps one long word to the script's `max-inline-size`. */
   :global(.toc-full) {
     position: fixed;
     z-index: 30;
@@ -185,8 +106,7 @@ const { items, locale } = Astro.props
   }
 
   .fold {
-    /* Invisible padding pulled back by the margin: a 44px thumb target
-       (WCAG 2.5.8) around a 0.6rem glyph, with the row metrics untouched. */
+    /* Cancelled by the margin below: a bigger target, same row metrics. */
     padding: 1.1rem;
     margin: -1.1rem;
     border: 0;
@@ -196,8 +116,6 @@ const { items, locale } = Astro.props
     font-size: 0.6rem;
     line-height: 1.5;
     cursor: pointer;
-    /* The triangle turns; it is not swapped for a different glyph, so there is
-       nothing to reflow and the rotation is the whole animation. */
     transition: transform var(--duration) var(--ease);
   }
 
@@ -205,12 +123,6 @@ const { items, locale } = Astro.props
     transform: rotate(-90deg);
   }
 
-  /*
-   * Folding animates from `1fr` to `0fr`, which is the only way to transition
-   * to an intrinsic height without measuring anything in JavaScript. A browser
-   * that cannot interpolate it snaps instead, which is the same behaviour the
-   * old `hidden` attribute would have given.
-   */
   .sub {
     display: grid;
     grid-template-rows: 1fr;

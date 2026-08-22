@@ -1,17 +1,3 @@
-/* Centers every embed component in the reading column and stops it
-   overflowing that column. Each embed component still owns its own width,
-   aspect ratio and border styling; this file only touches horizontal
-   placement, so the rule lives in one place instead of seven times.
-
-   .twitter-tweet, .deck, .spotify, .raw-embed, .video-figure and
-   .video-standalone already render at 100% of their container, so centering
-   them is a no-op there and only matters for the two embeds that render
-   narrower than the column: the SpeakerDeck iframe is full-width by design,
-   left in the list for completeness if that ever changes.
-
-   lite-youtube and lite-vimeo are custom elements from astro-embed (see
-   node_modules/@astro-community/astro-embed-{youtube,vimeo}), rendered by the
-   YouTube/Vimeo components wired up in src/pages/[...slug].astro. */
 .twitter-tweet,
 .deck,
 .spotify,
@@ -24,21 +10,12 @@ lite-vimeo {
   max-width: 100%;
 }
 
-/* lite-youtube ships its own 720px cap (lite-yt-embed.css); keep that cap,
-   just do not let it also exceed the column when the column is narrower. */
 lite-youtube {
   max-width: min(720px, 100%);
 }
 
-/*
- * Twitter's widgets.js replaces <blockquote class="twitter-tweet"> in place
- * once it loads client-side: Firefox and Edge get a plain <iframe>, WebKit
- * browsers get a <twitterwidget> custom element backed by Shadow DOM. Either
- * way the class above is gone by the time the live tweet renders, but the
- * replacement keeps the blockquote's exact spot in the DOM, so catching it by
- * tag name and by its generated id prefix centers the real thing too.
- * !important overrides the inline width/margin the widget sets on itself.
- */
+/* widgets.js replaces the blockquote with an <iframe> or <twitterwidget>, so the
+   class above no longer matches; !important overrides the widget's own inline styles. */
 twitterwidget,
 iframe[id^='twitter-widget-'] {
   display: block !important;

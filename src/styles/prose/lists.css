@@ -1,10 +1,3 @@
-/* Bullets, numbers and task boxes. */
-
-/*
- * Arrows, then hollow arrows, then bullets, then hollow bullets. ::marker takes
- * content and font properties, so this needs no extra element and keeps the
- * list semantics intact.
- */
 .prose ul > li::marker {
   content: '▸  ';
   color: var(--fg);
@@ -22,7 +15,6 @@
   content: '◦  ';
 }
 
-/* A number is a label, not prose: bigger and bold so it reads as one. */
 .prose ol > li::marker {
   font-family: var(--font-mono);
   font-size: 1.15em;
@@ -30,12 +22,6 @@
   color: var(--fg);
 }
 
-/*
- * Task lists. The checkbox markdown produces is disabled and cannot be styled
- * reliably across engines, so it stays for semantics and the box is drawn on the
- * list item: a hollow square, square corners, and a green tick when checked.
- * The bullet goes away, as it would otherwise sit next to the box.
- */
 .prose ul.contains-task-list {
   padding-inline-start: 0.2em;
 }

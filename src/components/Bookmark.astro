@@ -1,17 +1,4 @@
 ---
-/**
- * The old Ghost "bookmark card": a link with its title, description and host.
- *
- * It deliberately fetches NOTHING. astro-embed's LinkPreview refetches OG data
- * for every bookmark at build time, which means hundreds of third-party
- * requests, a build that fails when one has no OG tags, and output that changes
- * with the network. Ghost captured this metadata when the card was created and
- * the migration carries it over, so the build stays offline and deterministic.
- *
- * `image` follows the same rule. It only appears once something upstream
- * vendors a local copy and threads it through as a prop; until then every card
- * falls back to a drawn placeholder rather than an empty hole in the layout.
- */
 interface Props {
   url: string
   title?: string
@@ -52,8 +39,7 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     display: flex;
     container-type: inline-size;
     margin-block: 1.5rem;
-    /* House style: double rule on three edges, thick solid bar on the left.
-       `border-style: double` collapses to one line under 3px, hence the 4px. */
+    /* `border-style: double` collapses to a single line under 3px, hence 4px. */
     border: 4px double var(--rule);
     border-inline-start: var(--border-card-edge) solid var(--rule);
     border-radius: var(--radius);
@@ -62,17 +48,6 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     overflow: hidden;
   }
 
-  /*
-   * Today's colour, the same one every other link on the page answers to
-   * (--accent-day, src/lib/day-color.ts), rather than the generic --accent
-   * this used to read: that token is the site's fallback blue and never
-   * changed with the day, so the card was the one link on the page hovering
-   * in a colour nothing else used. The fallback keeps it working anywhere
-   * --accent-day is not written, matching how prose/links.css reads it.
-   *
-   * The border and the title carry it, and nothing fills: prose/links.css
-   * hands the card back to this file for exactly that reason, above.
-   */
   .bookmark:hover,
   .bookmark:focus-visible {
     border-color: var(--accent-day, var(--accent));
@@ -123,7 +98,6 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     margin-block-start: 0.35rem;
     color: var(--muted);
     font-size: var(--text-small);
-    /* Ghost descriptions can be a whole paragraph; two lines is enough. */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -138,8 +112,6 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     font-size: var(--text-tiny);
   }
 
-  /* Reacts to the card's own width, not the viewport, so it degrades the
-     same way regardless of what else shares the reading column. */
   @container (max-width: 420px) {
     .bookmark {
       flex-direction: column;

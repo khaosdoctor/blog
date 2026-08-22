@@ -1,77 +1,20 @@
-/*
- * The site's roles. Components reference these (`--fg`, `--accent`, `--rule`),
- * never a raw value and never a `--brand-*` directly.
- *
- * The raw values live in tweaks.css, which loads first. This file is where the
- * reasoning lives: contrast measurements, and which values are deliberately
- * below the floor.
- */
-
 :root {
   color-scheme: light dark;
 
-  /*
-   * Each brand colour carries a tone per ground: one hex measured against black
-   * came out under 4.5:1 on the sepia page, so the arithmetic is redone per
-   * ground rather than shared.
-   *
-   * Measured as TEXT, WCAG 2.1, dark / light: red 4.67 / 4.72, blue 4.90 /
-   * 4.56, green 8.03 / 3.29, yellow 11.25 / 3.23. Green and yellow fail on
-   * sepia; Lucas accepted that with the numbers in front of him.
-   */
   --brand-red: light-dark(var(--dial-red-on-light), var(--dial-red-on-dark));
   --brand-blue: light-dark(var(--dial-blue-on-light), var(--dial-blue-on-dark));
   --brand-yellow: light-dark(var(--dial-yellow-on-light), var(--dial-yellow-on-dark));
   --brand-green: light-dark(var(--dial-green-on-light), var(--dial-green-on-dark));
-  /*
-   * Purple comes from the old Ghost theme, not the favicon. 9.27:1 on sepia,
-   * 4.22:1 on black, also an accepted failure: nothing uses the dark tone raw
-   * as text, and `--qc-border` (variants/quotes.css) mixes it toward white
-   * first, reaching 6.72:1 against the 3:1 a border needs.
-   */
   --brand-purple: light-dark(var(--dial-purple-on-light), var(--dial-purple-on-dark));
 
-  /*
-   * Dark is true black so OLED pixels switch off, which is why the hint of
-   * purple lives in `--rule` and the quote frame instead of in the page.
-   *
-   * Measured: fg 16.26:1 light / 18.61:1 dark, muted 5.17 / 8.30, rule 4.41 /
-   * 3.66. A border only needs 3:1, so both rules pass on their own terms.
-   */
   --bg: light-dark(var(--dial-page-light), var(--dial-page-dark));
   --fg: light-dark(var(--dial-text-light), var(--dial-text-dark));
   --muted: light-dark(var(--dial-text-quiet-light), var(--dial-text-quiet-dark));
-  /*
-   * An alias for the day colour, not a colour of its own. It was a fixed blue
-   * from before there was a day colour, which left ~50 rules (search hover, the
-   * language switch's focus ring, pagination, footnotes) blue while the site
-   * around them went yellow. All of them mean "the accent".
-   *
-   * The fallback is that old blue, and is what a reader with no JavaScript
-   * gets, since `--accent-day` is only ever overwritten inline by
-   * `applyAccent()` (lib/accent.ts).
-   */
   --accent: var(--accent-day, light-dark(var(--dial-accent-fallback-light), var(--dial-accent-fallback-dark)));
   --rule: light-dark(var(--dial-line-light), var(--dial-line-dark));
 
-  /*
-   * Today's colour, or the one the reader pinned. `applyAccent()` overwrites
-   * this on every page load; the value here is only the pre-JS fallback.
-   *
-   * Purple is excluded from the automatic rotation at the hash's own pool
-   * (chip-color.ts), so this token can safely be any of the other four.
-   *
-   * The risk it carries: green and yellow clear 4.5:1 on the black page and
-   * fail it on the sepia one (3.29, 3.23), so a day that hashes to either is
-   * under-contrast as header text in light mode.
-   */
   --accent-day: var(--brand-yellow);
 
-  /*
-   * A pixel face suits shell and punishes a 3000-word article, so body copy
-   * keeps a readable one. Two body faces because the reader picks between them;
-   * every rule reads `--font-body`, whichever is active.
-   */
   --font-body-serif: var(--dial-face-reading-serif);
   --font-body-sans: var(--dial-face-reading-sans);
   --font-body: var(--font-body-serif);
@@ -79,18 +22,6 @@
   --font-display: var(--dial-face-interface);
   --font-subtitle: var(--dial-face-subtitle);
 
-  /*
-   * `--font-scale` is the settings panel's text-size control (50-160%), a
-   * unitless multiplier rather than a second absolute size: multiplying a rem
-   * keeps the result relative to the reader's own browser default instead of
-   * replacing it. settings-panel.ts writes it inline on the root element, and
-   * BaseLayout's pre-paint script does the same before first render.
-   *
-   * At `:root` only `--text-base` reads it, so shell keeps a fixed size
-   * whatever the reader picks. `.prose` (prose.css) redefines the two smaller
-   * steps in terms of the same scale, so a post's code, tables and quotes grow
-   * with its paragraphs.
-   */
   --font-scale: 1;
   --text-base: calc(var(--dial-text-size) * var(--font-scale));
   --text-small: var(--dial-text-size-small);
@@ -99,69 +30,30 @@
   --tracking-body: var(--dial-letter-spacing);
   --word-spacing-body: var(--dial-word-spacing);
 
-  /*
-   * Antialiasing was off, on the argument that smoothed type beside a bitmap
-   * heading reads as two eras. It lost: with no smoothing every stem rounds up
-   * to a whole device pixel, so on a 1x screen the body comes out blocky, and a
-   * reader's monitor is not something the design gets to choose.
-   *
-   * The lab also forced this in more engines with `filter: contrast(100.00001%)`.
-   * That must never come here: a filter makes its element the containing block
-   * for every fixed descendant, which would unpin the outline panel and the
-   * sidenotes at once.
-   */
   --font-smoothing: antialiased;
 
-  /*
-   * The reading column in characters, so it follows whichever body face is
-   * active: `ch` is 0.578em in Literata and 0.648em in Atkinson, so 78ch is
-   * ~812px in one and ~1010px in the other. The outline panel measures the room
-   * it has left rather than trusting a breakpoint.
-   */
   --measure: var(--dial-reading-width);
   --gutter: var(--dial-page-margin);
   --cover-frame-inset: var(--dial-cover-frame-inset);
 
-  /* Minimum space between two prose blocks of the same kind (two figures, two
-     code frames), where margin collapsing gives no minimum on its own. */
   --block-spacing: var(--dial-block-spacing);
 
   --radius: var(--dial-corner-radius);
   --border: var(--dial-border-width);
-  /* Anything card-shaped carries a thick left edge in its own border colour. */
   --border-card-edge: var(--dial-card-edge-width);
 
-  /* The double ANSI rule every shell button draws. One token, or four of the
-     five components drift onto a plain 1px solid, which is what happened. */
   --btn-border: 3px double var(--accent-day);
 
-  /* The header and footer read this. `main` keeps `--measure`: a post's running
-     text wants the narrow column. */
   --shell-width: var(--dial-shell-width);
-  /* The same two, below the breakpoint where they stop framing the column. */
   --shell-narrow-width: var(--dial-shell-narrow-width);
-  /* Every wide block between them reads this instead, which is the same width
-     less an inset on each side. */
   --content-width: calc(var(--dial-shell-width) - var(--dial-content-inset) * 2);
-  /* How far inside that width the shell's own contents finish. */
   --shell-inset: var(--dial-shell-inset);
 
-  /*
-   * Bold is a highlighter chip, solid rather than a wash (a tint read as a
-   * smudge). Fixed at the bright yellow in BOTH themes rather than following
-   * `--brand-yellow`: that token is tuned for yellow as TEXT, and following its
-   * light tone measured 3.69:1 for the ink on this chip. Fixed, the pairing
-   * holds 7.30:1 on both grounds.
-   */
   --em-bold-bg: #f5b200;
   --em-bold-fg: #332d23;
-  /* Italic is the same yellow as text. The brand tone is unreadable as text on
-     the sepia page, so light mode drops to a darker amber: 4.68:1. */
   --em-italic-fg: light-dark(#8a6400, var(--brand-yellow));
   --em-italic-weight: 500;
 
-  /* Wikipedia's red link: a post linked before it was written. 6.39:1 light,
-     9.37:1 dark. */
   --link-unwritten: light-dark(#a4232e, #ff8b93);
 
   --heading-rule: var(--rule);
@@ -171,13 +63,10 @@
   );
   --heading-glow-blur: 0.5em;
 
-  /* Task list boxes. The light fill is just lighter than the page, so the box
-     reads as a box without punching a white chip into a warm ground. */
   --check-box: light-dark(#fbf7ec, transparent);
   --check-edge: var(--fg);
   --check-tick: var(--brand-green);
 
-  /* The section break: a short dotted bar, no glow. */
   --rule-length: var(--dial-section-rule-length);
   --rule-weight: var(--dial-section-rule-weight);
   --rule-core: var(--fg);
@@ -185,42 +74,18 @@
   --rule-gap: var(--dial-section-rule-dot-spacing);
 
   --table-edge: var(--fg);
-  /* A glimpse of a tint: at 12% the header read as a filled band and pulled the
-     eye off the rows, which are the content. */
   --table-head-bg: light-dark(
     color-mix(in oklab, var(--brand-blue) 5%, transparent),
     color-mix(in oklab, var(--brand-blue) 8%, transparent)
   );
   --table-cell-pad: 0.45rem 0.7rem;
 
-  /* A hard offset block, no blur, the way a DOS window drops one. Same 4px as
-     the code frame's own border width, so both read on one pixel grid. */
   --code-shadow-offset: var(--dial-shadow-offset);
   --code-shadow-color: light-dark(var(--dial-shadow-light), var(--dial-shadow-dark));
 
-  /*
-   * The wordmark needs its own, smaller offset: 4px against 13.6px text is a
-   * third of its height with no blur, which read as a second copy of the
-   * letters rather than a shadow.
-   */
   --brand-shadow-offset: var(--dial-wordmark-shadow-offset);
-  /*
-   * Transparent on the dark ground on purpose. This shadow exists only to hold
-   * the mark together on sepia, where two of the four day accents fall under
-   * the text floor; on black it only drew a second copy of the letters.
-   * Transparent rather than dropping the filter, so the brand keeps one rule
-   * with one value that changes.
-   */
   --brand-shadow-color: light-dark(rgb(0 0 0 / 0.55), transparent);
 
-  /*
-   * Buttons: brackets, Departure Mono, brand yellow.
-   *
-   * Outline text is `--brand-yellow` itself, so it carries that token's own
-   * 11.25:1 dark / 3.23:1 light, the light case a real failure applied as
-   * decided. The smallest fix that keeps the look is the move `--em-italic-fg`
-   * already made: a darker amber (#8a6400, 4.68:1).
-   */
   --btn-face: var(--font-display);
   --btn-tracking: 0em;
   --btn-pad-block: var(--dial-button-padding-block);
@@ -228,12 +93,6 @@
   --btn-touch-min: var(--dial-button-hit-area);
   --btn-fg: var(--brand-yellow);
 
-  /*
-   * One footprint shared by every icon-only control, so a new one lines up for
-   * free. `--icon-btn-hit` is the real 44px box (WCAG 2.5.5); `--icon-btn-chip`
-   * is the smaller bordered square actually drawn, on a `::before`. Shrinking
-   * what is seen without shrinking what is clickable is the whole point.
-   */
   --icon-btn-hit: var(--btn-touch-min);
   --icon-btn-chip: var(--dial-button-chip-size);
   --icon-btn-glyph: var(--dial-button-glyph-size);
@@ -241,10 +100,6 @@
   --duration: var(--dial-transition-duration);
   --ease: var(--dial-transition-easing);
 
-  /* Sidenote/footnote grow timing and the tint on the text a note is bound
-     to. Declared here rather than in sidenotes.css/footnotes.css because
-     sidenotes.css only loads on a page that renders a note, and both files
-     used to carry identical copies. */
   --note-grow-duration: var(--dial-note-grow-duration);
   --note-grow-ease: var(--dial-note-grow-easing);
   --note-highlight: light-dark(
@@ -253,12 +108,6 @@
   );
 }
 
-/*
- * Narrowing `color-scheme` to one keyword IS the theme switch: a `light-dark()`
- * call resolves against the nearest one in effect, so every token above follows
- * without being rewritten. Written by BaseLayout's pre-paint script, then by
- * ThemeToggle. No attribute means system.
- */
 :root[data-theme='light'] {
   color-scheme: light;
 }
@@ -267,11 +116,6 @@
   color-scheme: dark;
 }
 
-/*
- * Atkinson needs a larger body and tighter leading than Literata to read at the
- * same apparent size, and wants no letter spacing, so each face carries the
- * measurements it was chosen with rather than borrowing the other's.
- */
 :root[data-body-face='sans'] {
   --font-body: var(--font-body-sans);
   --text-base: calc(1.25rem * var(--font-scale));
@@ -279,7 +123,6 @@
   --tracking-body: 0em;
 }
 
-/* Motion is decoration everywhere on this site, so it can all go. */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration: 0ms;
@@ -287,11 +130,6 @@
   }
 }
 
-/*
- * An animated full-page scroll is the most nauseating thing this site could do
- * to someone with vestibular trouble, so the instant jump is the correct
- * behaviour for them and this is declared only for everyone else.
- */
 @media (prefers-reduced-motion: no-preference) {
   :root {
     scroll-behavior: smooth;

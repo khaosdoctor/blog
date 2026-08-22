@@ -1,10 +1,4 @@
 ---
-// Real <form> first: a plain GET to /search/?q=... works with JS off, with
-// Pagefind not installed yet, and in dev where /pagefind/pagefind.js 404s.
-// The script below only enhances that baseline in place, it never replaces it.
-// The input starts empty; the client script below fills it from
-// window.location.search on load, the only place a real query string exists
-// on a static build.
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -16,8 +10,6 @@ const { action = '/search/', locale = 'pt' } = Astro.props
 ---
 
 <form action={action} method="get" role="search" aria-label={t(locale, 'searchLabel')} data-search-form>
-  {/* The visible label is gone; the name moves to aria-label so the field is
-      still announced. */}
   <div class="row">
     <input
       id="search-q"
@@ -40,16 +32,12 @@ const { action = '/search/', locale = 'pt' } = Astro.props
 </noscript>
 
 <script>
-  // Pagefind ships its own ranked index + snippet extraction; this only glues
-  // its JS API to our own markup so results keep the site's styling instead
-  // of Pagefind's default UI CSS.
   import { loadPagefind, searchLabel as label, type PagefindModule } from '../scripts/pagefind'
-  // Capped because an unqualified term (e.g. "de") can match a large share of
-  // the site, and Pagefind returns every match with no limit of its own.
+  // Pagefind itself returns every match, however many that is.
   import { searchPageResultLimit as MAX_RESULTS } from '../lib/tweaks'
 
-  // Bumped on every search; a stale async response checks it before writing
-  // to the DOM so a slow earlier query can't overwrite a faster later one.
+  // Every await below has to re-check this before touching the DOM, or a slow
+  // earlier query overwrites the results of a faster later one.
   let searchGeneration = 0
 
   function showMessage(target: HTMLElement, message: string): void {
@@ -78,7 +66,7 @@ const { action = '/search/', locale = 'pt' } = Astro.props
 
     showMessage(target, label(input, 'searching'))
     const { results } = await pagefind.search(query)
-    if (generation !== searchGeneration) return // a newer search has already started
+    if (generation !== searchGeneration) return
 
     if (results.length === 0) {
       showMessage(target, label(input, 'noResults', query))
@@ -90,16 +78,16 @@ const { action = '/search/', locale = 'pt' } = Astro.props
     for (const result of results.slice(0, MAX_RESULTS)) {
       const data = await result.data()
       if (generation !== searchGeneration) return
-      // data.url only comes from this site's own Pagefind index today, but
-      // guard against a future indexing misconfig emitting an external URL.
+      // Refuse anything that is not a same-site path, so a misconfigured index
+      // cannot put a foreign URL behind a result link.
       if (!data.url.startsWith('/')) continue
       const item = document.createElement('li')
       const link = document.createElement('a')
       link.href = data.url
       link.textContent = data.meta.title ?? data.url
       const excerpt = document.createElement('p')
-      // Pagefind's excerpt is its own generated HTML (wraps matches in <mark>),
-      // not user input, so innerHTML here is the documented, intended usage.
+      // innerHTML is safe only because the excerpt is Pagefind's own generated
+      // markup (<mark> around matches) from build-time content, never input.
       excerpt.innerHTML = data.excerpt
       item.append(link, excerpt)
       list.append(item)
@@ -123,28 +111,19 @@ const { action = '/search/', locale = 'pt' } = Astro.props
     const resultsEl = document.getElementById('search-results')
     if (!input || !resultsEl) return
 
-    // Astro prerenders this page once at build time, so any `value` baked
-    // into the input's HTML is stale for a static build. The live query
-    // only exists in the browser's address bar, so that's the source of
-    // truth for "read the initial query on load".
+    // Prerendered page: the address bar is the only live source of the query.
     const queryFromUrl = new URLSearchParams(window.location.search).get('q')
     if (queryFromUrl !== null) input.value = queryFromUrl
     if (input.value.trim()) showMessage(resultsEl, label(input, 'searching'))
 
     const pagefind = await loadPagefind()
     if (!pagefind) {
-      // Localised server-side and read back here, so this script stays free of
-      // translation strings.
       if (input.value.trim()) showMessage(resultsEl, input.dataset.noIndexMessage ?? '')
       return
     }
 
-    // Called bare, init() picks between the per-language indexes from the
-    // page's own lang, which is right on the happy path. Its miss path is
-    // `findIndex`, so an unknown or variant tag falls back to whichever index
-    // has the most pages (pt): a reader on an English page would silently get
-    // Portuguese results and nothing would report it. Passing the tag turns
-    // that quiet fallback into a thrown error, handled below.
+    // Called bare, init() falls back to the largest index on an unknown tag and
+    // an English page quietly serves Portuguese results; passing it throws.
     if (pagefind.init) {
       try {
         await pagefind.init(document.documentElement.lang)
@@ -195,13 +174,6 @@ const { action = '/search/', locale = 'pt' } = Astro.props
     outline-offset: 1px;
   }
 
-  /*
-   * The site's chosen button treatment (ChromeButton.vue, decided): brackets
-   * as pseudo-elements, never text, so the label stays the only thing a
-   * screen reader announces. Outline variant, the one the search form's
-   * single action calls for; see theme.css for the touch-target and contrast
-   * numbers behind these tokens.
-   */
   button {
     display: inline-flex;
     align-items: center;

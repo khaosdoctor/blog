@@ -1,18 +1,3 @@
-/*
- * A section break, not a full-width line: a short dotted bar centred in the
- * column, fading out at both ends. No glow.
- *
- * The dots are a repeating gradient rather than `border-style: dotted`, which
- * gives no control over dot size or spacing, and the fade is a mask so it works
- * the same over any background.
- *
- * The footnotes section reuses these tokens for its own separator, so the two
- * never drift apart. See src/styles/footnotes.css.
- *
- * `.pg-rule` is the same mark above a pagination row, matched here rather than
- * redrawn there: that row used to carry a dashed rule of its own, which made
- * two different marks do one job on the same page.
- */
 .prose hr,
 .pg-rule {
   inline-size: var(--rule-length);

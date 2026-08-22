@@ -1,17 +1,4 @@
 ---
-// Reader-facing code-block theme picker. Used to render on every code block
-// and inject its own opener button next to Expressive Code's copy button;
-// moved into SettingsPanel.astro instead (docs/design.md, Settled), one
-// picker for the whole site rather than one per block. This component now
-// renders only the labelled <select> itself: SettingsPanel.astro supplies the
-// popover, the opener button and the reveal-on-ready wrapper around it.
-//
-// Preventing a flash of the wrong theme still needs the blocking script in
-// BaseLayout's <head>, which runs before any stylesheet; this only renders
-// the picker and code-theme.ts only wires it up.
-//
-// Theme names are not translated: they are the themes' own names, the way a
-// font name is not translated either.
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {

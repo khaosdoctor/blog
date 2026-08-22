@@ -7,13 +7,6 @@ interface Props {
 
 const { html, title, caption } = Astro.props
 
-// `html` is trusted, developer-reviewed migration content pulled from the
-// author's own Ghost export (build-time only, never live user input). We still refuse
-// the two simplest attack surfaces rather than fully sanitizing: some legitimate
-// widgets from the migration (Twitter/Instagram) genuinely need their own <script>,
-// which is exactly what this component exists to pass through, so a full sanitizer
-// would break the use case it's built for. Fail the build loudly instead of shipping
-// either one silently.
 if (/<script\b/i.test(html)) {
   throw new Error(`RawEmbed: refusing <script> tag in embed HTML (title: "${title}")`)
 }
@@ -25,9 +18,8 @@ if (/\bsrc\s*=\s*["']?http:\/\//i.test(html)) {
 const hasFrame = /<(iframe|embed)[\s>]/i.test(html)
 const embedHtml = hasFrame ? patchFrameAttrs(html, title) : html
 
-// Backfills accessibility/perf/privacy attributes onto <iframe>/<embed> tags without
-// overwriting ones the source markup already set, scoped per-tag (not per-document) so
-// multiple frames in one embed all get patched and none get double-patched.
+// Each lookahead is per-tag, not per-document, so every frame in a multi-frame
+// embed is patched and none is patched twice or has its own attribute replaced.
 function patchFrameAttrs(source: string, frameTitle: string): string {
   const escapedTitle = frameTitle.replaceAll('"', '&quot;')
   return source
@@ -37,9 +29,6 @@ function patchFrameAttrs(source: string, frameTitle: string): string {
       /<(iframe|embed)(?![^>]*\breferrerpolicy=)([^>]*)>/gi,
       '<$1$2 referrerpolicy="strict-origin-when-cross-origin">',
     )
-    // Without a sandbox the framed third party can navigate the reader's tab
-    // away from the article. allow-same-origin is deliberately absent, and
-    // top-navigation is denied by default once sandbox is present.
     .replace(
       /<(iframe)(?![^>]*\bsandbox=)([^>]*)>/gi,
       '<$1$2 sandbox="allow-scripts allow-popups allow-presentation">',
@@ -62,7 +51,6 @@ function patchFrameAttrs(source: string, frameTitle: string): string {
 
   .container.framed {
     position: relative;
-    /* 16:9 aspect ratio */
     padding-block-end: 56.25%;
     height: 0;
     overflow: hidden;
@@ -78,7 +66,6 @@ function patchFrameAttrs(source: string, frameTitle: string): string {
     border: none;
   }
 
-  /* Everything else a caption needs comes from core.css's figcaption rule. */
   figcaption {
     font-style: italic;
   }

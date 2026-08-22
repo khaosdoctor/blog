@@ -5,21 +5,6 @@ import { t, type Locale } from '../i18n/ui'
 import PostList from './PostList.astro'
 import ReadingTime from './ReadingTime.astro'
 
-/**
- * The series index, in the same listing table PostList uses
- * (src/styles/listing.css). A series row answers the same three questions a
- * post row does, one level up: when it was last touched, how much of it there
- * is, and how long it takes.
- *
- * Each row opens in place instead of navigating, through a native <details>:
- * the open state, the keyboard handling and the screen reader announcement all
- * belong to the element, so this ships no script and works with JS off. A part
- * is chosen from here directly, so nothing on this page links to the
- * per-series page; SeriesToc inside a post still does.
- *
- * The part count takes the label column and its day colour, without the hover
- * fill the section link carries: a count is nothing to click.
- */
 interface Props {
   entries: { slug: string; title: string; posts: Post[] }[]
   locale: Locale
@@ -29,9 +14,6 @@ const { entries, locale } = Astro.props
 
 const LEADER = '·'.repeat(200)
 
-// The most recent part's date, so the column means the same thing it does in a
-// post row: when this last had something new in it. Sorted by that too, since
-// a date column ordered alphabetically reads as broken.
 const rows = entries
   .map((entry) => ({
     ...entry,
@@ -67,8 +49,7 @@ const rows = entries
             </span>
           </summary>
           <div class="listing-panel">
-            {/* Ordered by seriesOrder rather than by date: this is the reading
-                order the parts were written in. */}
+            {/* seriesOrder, not date: parts are listed in reading order. */}
             <PostList posts={row.parts} showCategory={false} />
           </div>
         </details>

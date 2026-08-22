@@ -2,16 +2,6 @@
 import { parseAuthors } from '../lib/authors'
 import { t, type Locale } from '../i18n/ui'
 
-/**
- * Who wrote the post, above the text.
- *
- * `authors` is optional in the schema and almost always absent, because almost
- * every post is the owner's. Absent means exactly that, so nothing here needs
- * writing for a normal post.
- *
- * The links carry `no-preview`: a hover card would show the author's own site
- * shell, which says nothing the byline has not already said.
- */
 interface Props {
   authors: string[] | undefined
   locale: Locale
@@ -45,11 +35,7 @@ const parsed = parseAuthors(authors)
   .authors {
     display: flex;
     flex-wrap: wrap;
-    /* Baseline, not the default stretch: the author name is a link, and the
-       site-wide link treatment gives every link block padding plus a dashed
-       underline offset from its own baseline. Stretched to this row height,
-       that underline drew well below the name and out of line with the "por"
-       beside it. Baseline puts both on one line. */
+    /* Baseline, not stretch: stretch would pull the dashed underline out of line with the label. */
     align-items: baseline;
     gap: 0.35rem;
     margin-block: -1.5rem 2rem;

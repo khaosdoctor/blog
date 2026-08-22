@@ -1,8 +1,3 @@
-// Draggable hover previews, progressive enhancement only: links work with JS
-// off, this adds a floating card on top. No build-time pipeline, the target
-// page's built HTML is fetched and parsed at hover time. A footnote reference
-// is the exception: its note is already in this DOM, so its card is read from
-// there (see getMeta).
 import { readStorage } from '../lib/storage'
 import {
   hoverPreviewCacheEntryLimit as CACHE_MAX,
@@ -19,41 +14,24 @@ import { onReady } from './ready'
 interface Meta {
   title: string
   description: string
-  /** Shown for links to other sites, so it is obvious you are leaving. */
   host?: string
 }
 
-/** What a pinned card needs to come back on the next page. */
 interface StoredCard {
   href: string
   left: number
   top: number
-  /** Docked at the foot of the window rather than floating where it was left. */
   docked?: boolean
-  /**
-   * The words the card is showing. Nothing else can recover them for a link to
-   * another site: that title comes from the link's own text (see
-   * getExternalMeta), which belongs to the page the card was pinned from, and
-   * on any later page that text is gone. Without it every restored external
-   * card fell back to its bare hostname.
-   */
   title?: string
 }
 
-/**
- * The popover methods are typed as required but absent in a browser without
- * the API, which is why every call site uses `?.()`.
- */
 interface PopoverHTMLElement extends HTMLElement {
   hpLink?: HTMLAnchorElement
 }
 
 const STORAGE_KEY = 'hp-pinned'
-/** Reader opted into keeping the pinned set past the end of the session. */
 const PERSIST_KEY = 'hp-persist'
 
-// Labels for the runtime-built cards, from data attributes on .hp-settings
-// (HoverPreviews.astro). The fallbacks only matter if that element is missing.
 const strings = {
   ...{
     loading: 'Carregando…',
@@ -72,7 +50,6 @@ const cache = new Map<string, Meta | null>()
 const inflight = new Map<string, AbortController>()
 const pinned: PopoverHTMLElement[] = []
 
-/** Bookmark metadata for external links, loaded once and shared by every card. */
 let externalMeta: Promise<Record<string, { title?: string; description?: string; publisher?: string }>> | null = null
 
 function loadExternalMeta(): NonNullable<typeof externalMeta> {
@@ -84,15 +61,8 @@ function loadExternalMeta(): NonNullable<typeof externalMeta> {
 
 const canPopover = 'popover' in HTMLElement.prototype
 
-/**
- * Minimised cards live in one fixed strip at the foot of the window, in DOM
- * order, so several of them stack along it instead of each keeping its own
- * coordinates.
- *
- * A card is taken OUT of the top layer to get there (hidePopover): an open
- * popover is laid out against the viewport whatever its parent is, so it would
- * ignore the strip's own flex layout entirely.
- */
+// An open popover lays out against the viewport whatever its parent is, so a
+// card must be hidePopover()'d before the dock's flex layout applies to it.
 let dock: HTMLElement | null = null
 
 function ensureDock(): HTMLElement {
@@ -103,11 +73,7 @@ function ensureDock(): HTMLElement {
   return dock
 }
 
-// The breakpoint above which footnotes.css floats a margin aside and hides
-// section[data-footnotes]. Read from the stylesheet rather than hardcoded a
-// second time; an unset custom property reads back as '', so a load failure
-// degrades to the aside's own default. Kept as a MediaQueryList because
-// `.matches` is live, so previewable() sees a resize.
+// Kept live so previewable() answers correctly after a resize.
 const footnoteWideMedia = matchMedia(
   `(min-width: ${getComputedStyle(document.documentElement).getPropertyValue('--footnote-wide-breakpoint').trim() || '70rem'})`,
 )
@@ -122,18 +88,8 @@ function samePath(a: URL, b: URL): boolean {
 }
 
 function previewable(link: HTMLAnchorElement): boolean {
-  // A bookmark card already is the preview. `no-preview` is the general
-  // opt-out (Authors.astro's byline links carry it). closest(), so a link
-  // nested inside a no-preview wrapper is caught too.
   if (!link.href || link.closest('.hp-card') || link.closest('.bookmark') || link.closest('.no-preview')) return false
-  // A draft link (remark-wikilinks.mjs) gets its own card regardless of the
-  // origin/same-page checks below, see buildCard's unwritten branch.
   if (link.classList.contains('link-unwritten')) return true
-  // A footnote reference points down the same page, so it fails the
-  // different-page check below on purpose. Card built from the note's own
-  // text instead, but only above the wide breakpoint: below it, the notes are
-  // on the page already and a card would duplicate them. Read live, so this
-  // answers correctly after a resize.
   if (link.hasAttribute('data-footnote-ref')) return footnoteWideMedia.matches
   let url: URL
   try {
@@ -141,10 +97,7 @@ function previewable(link: HTMLAnchorElement): boolean {
   } catch {
     return false
   }
-  // mailto:, tel: and friends have nothing to preview.
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
-  // Every other site gets a card too, built from cached metadata or, failing
-  // that, the link's own text and hostname.
   if (url.origin !== location.origin) return true
   return !samePath(url, new URL(location.href))
 }
@@ -158,12 +111,6 @@ function remember(href: string, meta: Meta | null): Meta | null {
   return meta
 }
 
-/**
- * A card for a link to another site. CORS stops the page itself being read,
- * and no proxy is worth putting a third party between the reader and every
- * link, so this uses the metadata Ghost cached for its bookmark cards and
- * falls back to the link's own text plus the hostname.
- */
 async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
   const url = new URL(href)
   const host = url.hostname.replace(/^www\./, '')
@@ -176,12 +123,6 @@ async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
   }
 }
 
-/**
- * The note's text, read from the foot of the page rather than fetched: it is
- * already in this document. The bracketed number echoes the "[1]" the
- * reference renders. The back-reference arrow is dropped, it points into the
- * body text and means nothing inside a popover.
- */
 function getFootnoteMeta(hash: string, linkText: string): Meta | null {
   const target = document.getElementById(hash.slice(1))
   if (!target) return null
@@ -201,10 +142,6 @@ function getFootnoteMeta(hash: string, linkText: string): Meta | null {
 }
 
 async function getMeta(href: string, linkText: string): Promise<Meta | null> {
-  // A cross-site card falls back to the link's own text, so two links to the
-  // same URL with different words are two different cards. Keyed on the href
-  // alone, the second link showed the first one's text. Same-origin cards
-  // come from the fetched page and are shared.
   const external = new URL(href).origin !== location.origin
   const key = external ? `${href}\n${linkText}` : href
   const cached = cache.get(key)
@@ -224,10 +161,8 @@ async function getMeta(href: string, linkText: string): Promise<Meta | null> {
   inflight.set(href, controller)
 
   try {
-    // redirect: 'manual' keeps a same-origin-checked href from silently
-    // following a redirect to a cross-origin page (hosting rewrite,
-    // open-redirect endpoint). An opaque redirect has ok: false, so it falls
-    // into the failure branch below rather than having its body parsed.
+    // redirect: 'manual' keeps a same-origin-checked href from following a
+    // redirect to a cross-origin page; an opaque redirect has ok: false.
     const res = await fetch(href, { signal: controller.signal, redirect: 'manual' })
     if (!res.ok) return remember(href, null)
     const html = await res.text()
@@ -238,9 +173,7 @@ async function getMeta(href: string, linkText: string): Promise<Meta | null> {
     }
     return remember(href, meta)
   } catch (err) {
-    // Aborted means a newer call for the same href superseded this one and is
-    // still running, so don't cache a false failure over it. Anything else is
-    // real and gets cached, so a broken link isn't refetched on every hover.
+    // An abort means a newer call is still running: do not cache over it.
     if (err instanceof DOMException && err.name === 'AbortError') return null
     return remember(href, null)
   } finally {
@@ -266,12 +199,8 @@ function place(card: HTMLElement, anchor: HTMLElement): void {
   card.style.left = `${left}px`
 }
 
-/**
- * Stored positions come from whatever viewport the card was pinned on, so a
- * card pinned on a desktop restores off-screen on a phone: fixed-position, so
- * it scrolls nothing, but it is unreachable and cannot be closed. Any write
- * of left/top that does not come through place() goes through this.
- */
+// Every write of left/top that does not go through place() goes through this:
+// a position stored on a wider viewport is unreachable on a narrower one.
 function clampToViewport(card: HTMLElement): void {
   const inset = VIEWPORT_MARGIN
   const cw = card.offsetWidth
@@ -282,21 +211,6 @@ function clampToViewport(card: HTMLElement): void {
   card.style.top = `${Math.min(Math.max(top, inset), Math.max(inset, innerHeight - ch - inset))}px`
 }
 
-/**
- * Pinned cards are the reader's working set, so the set is mirrored into
- * storage and restored on the next page.
- *
- * sessionStorage by default: one reading session's scratch space, which should
- * not still be there next week. The checkbox moves the same data to
- * localStorage. The preference itself always lives in localStorage, since a
- * session-scoped one could never be read back on the visit it affects.
- */
-/*
- * On unless the reader turned it off, so the stored value is the OFF marker
- * ('0'): this site's convention is that nothing stored means the default. A
- * '1' written by the earlier opt-in shape still reads as on, which is what
- * that reader chose. Storage throwing (private mode) also reads as on.
- */
 function persistent(): boolean {
   return readStorage(PERSIST_KEY) !== '0'
 }
@@ -305,7 +219,6 @@ function store(): Storage | null {
   try {
     return persistent() ? localStorage : sessionStorage
   } catch {
-    // Private mode: previews still work, they just do not survive navigation.
     return null
   }
 }
@@ -314,17 +227,13 @@ function savePinned(): void {
   try {
     const state: StoredCard[] = pinned.map((card) => ({
       href: (card.querySelector('.hp-title') as HTMLAnchorElement).href,
-      // A docked card has no inline position of its own, so the one it will be
-      // restored to is read back from where dockCard parked it.
       left: parseFloat(isDocked(card) ? (card.dataset.hpLeft ?? '') : card.style.left) || 0,
       top: parseFloat(isDocked(card) ? (card.dataset.hpTop ?? '') : card.style.top) || 0,
       docked: isDocked(card),
       title: (card.querySelector('.hp-title') as HTMLAnchorElement).textContent ?? '',
     }))
     store()?.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // Storage full or refused: same as above, nothing breaks.
-  }
+  } catch {}
 }
 
 function closeCard(card: PopoverHTMLElement): void {
@@ -356,10 +265,6 @@ function pinCard(card: PopoverHTMLElement): void {
   savePinned()
 }
 
-/**
- * Unpinning leaves the card open: the reader asked for it to stop being
- * sticky, not to go away. It closes the next time the pointer leaves.
- */
 function unpinCard(card: PopoverHTMLElement): void {
   const idx = pinned.indexOf(card)
   if (idx < 0) return
@@ -378,14 +283,9 @@ function markDocked(card: PopoverHTMLElement, on: boolean): void {
   button?.setAttribute('aria-label', on ? strings.restore : strings.minimize)
 }
 
-/**
- * Minimising pins as well: a loose card closes the next time the pointer
- * leaves, which would throw away the thing the reader just asked to keep.
- */
 function dockCard(card: PopoverHTMLElement): void {
   if (isDocked(card)) return
   pinCard(card)
-  // Where to put it back, since the strip takes over its position.
   card.dataset.hpLeft = card.style.left
   card.dataset.hpTop = card.style.top
   card.hidePopover?.()
@@ -421,9 +321,6 @@ function startDrag(event: PointerEvent, card: PopoverHTMLElement): void {
   const target = event.target as HTMLElement
   if (target.closest('.hp-close, .hp-pin, .hp-min, .hp-title')) return
   if (isDocked(card)) return
-  // Touch stays a native scroll gesture inside the card (touch-action: pan-y
-  // in the stylesheet): the two gestures overlap on the same axis, and
-  // dragging is not essential on touch.
   if (event.pointerType === 'touch') return
 
   const startX = event.clientX
@@ -448,7 +345,6 @@ function startDrag(event: PointerEvent, card: PopoverHTMLElement): void {
     removeEventListener('pointermove', move)
     removeEventListener('pointerup', up)
     removeEventListener('pointercancel', up)
-    // Remember where the reader put it, not just that it was open.
     if (dragging) savePinned()
   }
 
@@ -462,8 +358,6 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   card.id = `hp-card-${++cardSeq}`
   card.className = unwritten ? 'hp-card hp-unwritten' : 'hp-card'
   card.setAttribute('role', 'note')
-  // Loading -> loaded is a content swap with no focus move, so screen reader
-  // users get it announced rather than only a sighted user seeing it.
   card.setAttribute('aria-live', 'polite')
   if (canPopover) card.setAttribute('popover', 'manual')
 
@@ -474,8 +368,6 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   close.textContent = '×'
   close.addEventListener('click', () => closeCard(card))
 
-  // Dragging pins too, so this is the discoverable way to the same result,
-  // and its pressed state is what tells the reader a card is being kept.
   const pin = document.createElement('button')
   pin.type = 'button'
   pin.className = 'hp-pin'
@@ -488,8 +380,6 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
     else pinCard(card)
   })
 
-  // A chevron rather than a word: the row is three small square buttons and a
-  // label would not fit any of them.
   const minimize = document.createElement('button')
   minimize.type = 'button'
   minimize.className = 'hp-min'
@@ -513,15 +403,12 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   const host = document.createElement('span')
   host.className = 'hp-host'
 
-  // Dragging is the only gesture here with no other affordance. Hidden on
-  // touch, where drag is off.
   const hint = document.createElement('span')
   hint.className = 'hp-hint'
   hint.textContent = strings.drag
 
   if (unwritten) {
-    // A draft has no built page to fetch. title/desc/host stay in the DOM,
-    // hidden, so savePinned()/restorePinned() keep reading .hp-title's href.
+    // Hidden, not removed: savePinned()/restorePinned() read .hp-title's href.
     title.hidden = true
     desc.hidden = true
     host.hidden = true
@@ -544,8 +431,6 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
 }
 
 async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
-  // The live re-check attach() defers here: for most links this repeats a
-  // decision already made, but for a footnote reference it catches a resize.
   if (!previewable(link)) return
   if (current?.link === link) {
     if (pin) pinCard(current.card)
@@ -584,11 +469,6 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
   place(card, link)
 }
 
-/**
- * Rebuilds the cards pinned on the previous page, at the coordinates they were
- * left at. The link they came from usually does not exist here, so place() is
- * skipped and the stored position is used as-is.
- */
 async function restorePinned(): Promise<void> {
   let stored: StoredCard[]
   try {
@@ -624,14 +504,10 @@ async function restorePinned(): Promise<void> {
 }
 
 function attach(link: HTMLAnchorElement): void {
-  // A footnote reference's previewable() answer can change after this runs at
-  // page load, so its listeners are bound regardless of the current width and
-  // show() makes the live call. Every other kind of link's answer never
-  // changes, so they are filtered here.
+  // A footnote reference's previewable() answer changes with the viewport
+  // width, so it binds regardless and show() re-checks live.
   if (!link.hasAttribute('data-footnote-ref') && !previewable(link)) return
 
-  // Advertise the disclosure relationship up front; show()/closeCard() set
-  // 'true' and aria-controls once a card exists.
   link.setAttribute('aria-expanded', 'false')
 
   let pressTimer = 0
@@ -662,8 +538,6 @@ function attach(link: HTMLAnchorElement): void {
     clearTimeout(openTimer)
     scheduleClose()
   })
-  // Keyboard equivalent of hover. Space never scrolls while a link has focus,
-  // and Enter is left alone so it still follows the link.
   link.addEventListener('keydown', (event) => {
     if (event.key !== ' ') return
     event.preventDefault()
@@ -678,12 +552,9 @@ function bindPersistToggle(): void {
   box.checked = persistent()
 
   box.addEventListener('change', () => {
-    // Whichever store the set was in has to be emptied, or the old copy comes
-    // back the next time the preference is switched again.
     try {
       sessionStorage.removeItem(STORAGE_KEY)
       localStorage.removeItem(STORAGE_KEY)
-      // The key marks OFF, so keeping them (the default) removes it.
       if (box.checked) localStorage.removeItem(PERSIST_KEY)
       else localStorage.setItem(PERSIST_KEY, '0')
     } catch {
@@ -700,17 +571,8 @@ function init(): void {
     for (const card of [...pinned]) closeCard(card)
   })
 
-  /*
-   * Coming back through history restores the page from the back/forward cache,
-   * which means no reload and no second run of this script. The DOM comes back
-   * intact, but the top layer does not: a manual popover is no longer open, and
-   * the UA sheet gives a closed `[popover]` `display: none`, so every floating
-   * card was still there and invisible. Docked cards were unaffected, their own
-   * `display: flex` outranks that rule.
-   *
-   * showPopover() throws on an already-open popover, hence the check rather
-   * than a bare call.
-   */
+  // A bfcache restore brings the DOM back but not the top layer, so a floating
+  // card returns closed and invisible with no second run of this script.
   addEventListener('pageshow', (event) => {
     if (!event.persisted) return
     for (const card of pinned) {
@@ -720,8 +582,6 @@ function init(): void {
     }
   })
 
-  // Rotating a phone (or shrinking the window) can leave a floating card
-  // outside the new viewport, and nothing else re-places an open card.
   addEventListener('resize', () => {
     for (const card of pinned) {
       if (!isDocked(card)) clampToViewport(card)

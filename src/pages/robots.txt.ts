@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro'
 import { noindexPaths } from '../lib/post-dates.mjs'
 
-// Shell, not content: these never carry a `noindex` frontmatter field, so
-// they can't come from noindexPaths and have to stay listed by hand.
+// These have no frontmatter, so noindexPaths cannot reach them.
 const CHROME_PATHS = ['/search/', '/en/search/', '/offline/']
 
 export const GET: APIRoute = ({ site }) => {

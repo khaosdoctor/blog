@@ -1,47 +1,22 @@
 ---
-// Self-hosted rather than a CDN link, per the plan: no third-party requests.
-// Without this the one post with LaTeX renders its formulas as raw $...$ text.
+// Import order is load-bearing here: each stylesheet depends on values or
+// rules defined by the ones before it.
 import 'katex/dist/katex.min.css'
-// rehype-callouts emits the markup and the icons but ships its themes as opt-in
-// stylesheets, so without this line every > [!note] rendered as plain text with
-// a stray title. Obsidian's theme, matching the plugin option in astro.config.mjs
-// and the vocabulary the posts are actually written in.
 import 'rehype-callouts/theme/obsidian'
-// The two faces that are decided, self-hosted. First, so a @font-face exists
-// before any rule below asks for the family.
 import '../styles/fonts.css'
-// The dials: every value worth changing, named in plain language and grouped
-// into blocks. First, because theme.css reads its raw numbers from here.
 import '../styles/tweaks.css'
-// Every colour, font stack, size and duration the site uses, as roles rather
-// than raw values, with the reasoning behind each. Nothing below should
-// hardcode one.
 import '../styles/theme.css'
-// How the body of a post reads: headings, emphasis, lists, tables, links, code.
 import '../styles/prose.css'
-// The prompt and dashed rule under every page title, after prose.css so it
-// owns h1 where headings.css owns h2 and h3.
 import '../styles/section-header.css'
-// Both override a plugin's own stylesheet, so both come after prose.css.
 import '../styles/callouts.css'
 import '../styles/code-blocks.css'
-// Footnotes rendered beside the text instead of only at the foot of the page.
 import '../styles/footnotes.css'
-// Every embed centred in the reading column instead of hugging its left edge.
 import '../styles/embeds.css'
-// Display equations and their copy control.
 import '../styles/math.css'
-// Quote and epigraph treatments the lab page shows side by side. This file is a
-// menu, not a decision: the chosen variant moves into prose.css and the rest go.
 import '../styles/variants/quotes.css'
-// Tag and category chips, which live outside the prose wrapper.
 import '../styles/chips.css'
-// The dense listing table, shared by PostList and the series index.
 import '../styles/listing.css'
-// The lab demo card frame, shared by LabDemo and HtmlLab.
 import '../styles/lab-demo.css'
-// The page itself: reset, grounds, landmarks. Last, so a component's own
-// stylesheet above can be overridden by nothing but a component's scoped style.
 import '../styles/core.css'
 import BrandHeader from '../components/BrandHeader.astro'
 import ConwayField from '../components/ConwayField.astro'
@@ -57,8 +32,6 @@ import ReadingProgress from '../components/ReadingProgress.astro'
 import SEO from '../components/SEO.astro'
 import { t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
-// Baked in at build time (src/lib/version.ts). REPO is the same string the
-// footer's GitHub icon link points at, so both read one constant.
 import { commitShort, commitUrl, REPO, siteVersion as version } from '../lib/version'
 
 interface Props {
@@ -71,21 +44,12 @@ interface Props {
   image?: string
   tags?: string[]
   series?: string
-  /** Raw `authors` frontmatter, passed through to the article schema. */
   authors?: string[]
   alternates?: { lang: string; href: string }[]
   markdown?: string
   noindex?: boolean
-  /** Passed through to the breadcrumb so it reads Home > section > post. */
   section?: { name: string; url: string }
-  /** Only a post gets the reading progress bar; an index has nothing to read through. */
   progress?: boolean
-  /**
-   * The post's own colour, one of the tokens coverTone() hands out, written
-   * onto <body> as `--post-accent`: the header's reading progress reads it as
-   * well as the article's prose, and <body> is the nearest element containing
-   * both. Always pass `coverTone(slug).token`, never a re-derivation.
-   */
   postAccent?: string
 }
 
@@ -112,58 +76,28 @@ const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
 const canonical = new URL(Astro.url.pathname, Astro.site).href
 const home = locale === 'en' ? '/en/' : '/'
 
-// Cloudflare Web Analytics: cookieless, no consent banner needed. Emitted only
-// when the token is set, so local builds and previews send nothing.
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 
-// The footer copyright's closing year. 2019 (the first post's year) is fixed
-// in the translated string itself; this is only the end of the range, taken
-// at build time so it never needs a manual bump.
 const copyrightYear = new Date().getFullYear()
 
-// The footer's other three icon buttons, alongside REPO: Lucas's own
-// subdomains rather than the platforms' own hosts, so a renamed or replaced
-// service is one DNS record away from staying correct without a code change.
 const LINKEDIN_URL = 'https://linkedin.lsantos.dev'
 const TWITTER_URL = 'https://twitter.lsantos.dev'
 const YOUTUBE_URL = 'https://youtube.lsantos.dev'
 ---
 
 <!doctype html>
-{/* data-copied-label feeds scripts/copy-toast.ts, the copy-confirmation every
-    copy control on the site shares: a translated string a module script has
-    no t() to ask for. */}
 <html lang={lang} data-copied-label={t(locale, 'linkCopied')}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    {/* Ahead of every stylesheet on purpose: an explicit light/dark choice has
-        to be on <html> before the first paint, or every page flashes the
-        system-default ground first. Nothing stored means no attribute, and
-        the color-scheme: light dark on :root (theme.css) decides, which is
-        exactly today's behaviour with no toggle at all. */}
+    {/* These four snippets must stay ahead of every stylesheet: each puts a
+        stored choice on <html> before the first paint. */}
     <script is:inline>
       try {
         const stored = localStorage.getItem('color-scheme')
         if (stored === 'light' || stored === 'dark') document.documentElement.setAttribute('data-theme', stored)
-      } catch {
-        // Private mode, or storage disabled. color-scheme: light dark still applies.
-      }
+      } catch {}
     </script>
-    {/* Same shape, one key over: the reader's chosen code theme has to be on
-        <html> before the first paint too, or every page flashes the
-        system-default theme first.
-
-        Nothing stored means the default pair, ayu-light/ayu-dark
-        (astro.config.mjs lists them first, which is what makes them the
-        default). With no site-wide light/dark choice either, that needs no
-        attribute at all: expressive-code's own prefers-color-scheme media
-        query already resolves ayu-light on a light OS and ayu-dark on a dark
-        one. With a site-wide choice, that media query is answering about the
-        OS while the page above is showing whatever the reader picked, so the
-        matching ayu is named outright here instead. This runs after the
-        color-scheme snippet above on purpose: same key, already read once,
-        and code-theme.ts repeats exactly this resolution once it can run. */}
     <script is:inline>
       try {
         const stored = localStorage.getItem('code-theme')
@@ -175,41 +109,18 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
             document.documentElement.setAttribute('data-code-theme', scheme === 'dark' ? 'ayu-dark' : 'ayu-light')
           }
         }
-      } catch {
-        // Private mode, or storage disabled. The media query still applies.
-      }
+      } catch {}
     </script>
-    {/* Same shape again: the reader's motion override and the Conway
-        background on/off choice both decide whether anything moves or draws
-        at all, so both need to be on <html> before conway.ts's own deferred
-        module ever runs. Absent, nothing here changes: the OS query still
-        decides reduced motion, and the field still starts on. */}
+    {/* Before conway.ts's deferred module runs. */}
     <script is:inline>
       try {
         const motion = localStorage.getItem('motion')
         if (motion === 'reduce' || motion === 'allow') document.documentElement.setAttribute('data-motion', motion)
         if (localStorage.getItem('background-life') === '0') document.documentElement.setAttribute('data-bg-life', 'off')
-      } catch {
-        // Private mode, or storage disabled. The field starts on, motion follows the OS.
-      }
+      } catch {}
     </script>
-    {/* Same shape again: the reader's text-size choice and body face
-        (theme.css, settings-panel.ts) both have to be on <html> before first
-        paint too, or every page flashes at the default size and face first.
-        Text size is a raw 50-160 percent, not one of a few named steps, so it
-        sets --font-scale directly instead of an attribute a stylesheet rule
-        would key off. Nothing stored, or a value that is not a finite number,
-        means no override, which is the default 100%. Nothing stored for the
-        face means Literata.
-
-        The clamp-and-snap here is settings-panel.ts's own clampFontSize,
-        repeated inline because this snippet cannot import anything and has to
-        run before the module bundle does. It has to stay identical to it: a
-        reader who set 400% while the range was still 10-500 has that in
-        storage now, and if this applied it raw the page would paint at 400%
-        and then jump to the clamped 160% the moment the panel's module ran.
-        `raw === null` is checked before Number(), since Number(null) is 0 and
-        would otherwise clamp up to the minimum instead of meaning "unset". */}
+    {/* Mirrors settings-panel.ts's clampFontSize since this inline snippet can't
+        import it; keep both in sync or the page flashes on load. */}
     <script is:inline>
       try {
         const raw = localStorage.getItem('font-size')
@@ -220,35 +131,19 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
           if (snapped !== 100) document.documentElement.style.setProperty('--font-scale', String(snapped / 100))
         }
         if (localStorage.getItem('body-face') === 'sans') document.documentElement.setAttribute('data-body-face', 'sans')
-      } catch {
-        // Private mode, or storage disabled. The default size and face apply.
-      }
+      } catch {}
     </script>
-    {/* Departure Mono draws the body, the header and every heading, so with
-        font-display: swap its late arrival reflowed the whole page: Lighthouse
-        measured CLS 1.5 on a phone. Preloading starts the fetch with the HTML
-        instead of after the CSS, which is what removes that swap shift. */}
     <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
-    {/* The wordmark's bitmap face: its swap resized .word, which re-wrapped
-        the header rows on a phone and shifted everything below by a full row. */}
     <link rel="preload" href="/fonts/PxPlusIBMVGA8-9x16.woff" as="font" type="font/woff" crossorigin />
-    {/* progress doubles as "this is a post": only a post renders body copy in
-        Literata, and its swap was the last measurable layout shift left. */}
     {progress && <link rel="preload" href="/fonts/Literata-400-700.woff2" as="font" type="font/woff2" crossorigin />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <!-- iOS ignores the manifest and looks for this one specifically. -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    {/* One manifest per locale, so an install prompt describes the site in the
-        language the reader is actually on. */}
     <link rel="manifest" href={locale === 'en' ? '/en/manifest.webmanifest' : '/manifest.webmanifest'} />
-    <!-- Both are --bg from theme.css. They cannot read the token, so they are the
-         one place a palette change has to be made twice. -->
+    <!-- Both are --bg from theme.css: a meta tag cannot read a token, so a
+         palette change has to be made here too. -->
     <meta name="theme-color" content="#f4efe0" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
-    {/* GitHub Pages cannot set headers, so this is the only way to cap what an
-        injected script could reach. The old Ghost site had nothing like it, and
-        one injected tag was enough to run whatever the attacker wanted. Built
-        from src/lib/embed-hosts.ts, which the output guard reads too. */}
+    {/* GitHub Pages cannot set headers, so the policy has to be a meta tag. */}
     <meta http-equiv="Content-Security-Policy" content={contentSecurityPolicy()} />
     <link
       rel="alternate"
@@ -274,90 +169,29 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       noindex={noindex}
     />
   </head>
-  <!-- The post's cover colour, on the one element that contains both the
-       header (whose dashes draw the reading progress) and the article (whose
-       bold and italic read the same token). A page with no post carries no
-       attribute at all, and every rule that reads --post-accent names its own
-       fallback. See the prop's own comment for the full reasoning. -->
+  <!-- <body> is the nearest element containing both the header (whose dashes
+       draw the reading progress) and the article, so --post-accent goes here. -->
   <body style={postAccent === undefined ? undefined : `--post-accent: ${postAccent}`}>
-    {/* Decorative, aria-hidden, and behind everything (z-index: -1 in its own
-        scoped style): placed first so it never affects tab order, which
-        starts at the skip link below regardless of where in the DOM this
-        renders. */}
     <ConwayField />
-    {/* Renders no markup: it drives the header's own dashes. Still rendered
-        here, and still only when `progress` is set, so the script ships on a
-        page that has something to read through and nowhere else. */}
     {progress && <ReadingProgress />}
     <a href="#main-content" class="skip-link">{t(locale, 'skipToContent')}</a>
-    {/* The plain-link "Buscar" nav that used to live here is gone: the
-        command palette BrandHeader renders replaced it as the actual way
-        readers search with JS on. The old link's own /search/ page still
-        exists and still works with JS off (which the palette never will).
-        It no longer lives in this footer, but it is not orphaned: the 404
-        page links to it directly, and robots.txt/the sitemap filter still
-        know it by name. */}
     <BrandHeader locale={locale} home={home} alternates={alternates} />
     <main id="main-content">
       <slot />
     </main>
     <footer>
-      {/* Drawn the same way BrandHeader.astro's .shell draws its own top
-          edge: box-drawing corners plus a run of dashes filling whatever
-          room is left, same --muted, same font-display, same 0.4em
-          letter-spacing on the dashes. Corners point down (└─ / ─┘) rather
-          than repeating the header's up-pointing ┌─/─┐: the header opens
-          the frame at the top of the page, this closes it at the bottom,
-          so the two read as one box rather than two unrelated bars. */}
       <div class="rule" aria-hidden="true">
         <span class="rule-edge">└─</span><span class="rule-fill">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span><span class="rule-edge">─┘</span>
       </div>
       <div class="row">
         <p class="copyright">{t(locale, 'copyright', copyrightYear)}</p>
         <p class="links">
-          {/*
-            Required, not decorative: PxPlus IBM VGA is CC BY-SA 4.0, which asks for
-            attribution reachable from the site. This link is that attribution now;
-            /oss/ names the font, its author and the licence, with a link to the
-            licence text. See docs/theming.md.
-          */}
-          {/*
-            Four icon-only links, each needing a name in words: aria-label
-            carries that, and every icon component's own aria-hidden keeps
-            the glyph out of the accessibility tree, so the label is the only
-            thing a screen reader announces on any of them.
-
-            The header's own icon-button shell now, not the quieter
-            treatment this GitHub link had last pass: the owner asked for it
-            explicitly, reversing that earlier call. `.icon-link` (below)
-            matches ThemeToggle.astro's `.tt-open`/`.tt-open::before` pair
-            (--icon-btn-hit hit target, --icon-btn-chip drawn chip,
-            --icon-btn-glyph size, --accent-day border) on an <a> rather than
-            a <button>, since these link straight to a destination instead of
-            opening anything.
-
-            All four are excluded by name from the site-wide link treatment
-            (src/styles/prose/links.css's own `footer .icon-link` entry,
-            generalised from the single `footer .gh-link` case it used to be
-            a single-purpose exception for): a dashed underline has no
-            baseline to sit under on an icon, and the external-link arrow
-            that rule appends is redundant beside a glyph that already reads
-            as its own service.
-          */}
           <a href={REPO} rel="noopener" class="icon-link" aria-label={t(locale, 'githubRepo')}>
             <Github />
           </a>
           <a href={LINKEDIN_URL} rel="noopener" class="icon-link" aria-label={t(locale, 'linkedinProfile')}>
             <LinkedIn />
           </a>
-          {/*
-            "Twitter", not "X": lsantos.dev's own short link keeps the old
-            name (twitter.lsantos.dev), and the accessible label matches it.
-            Pixelarticons has no separate twitter glyph any more (see
-            Twitter.astro's own comment); the icon is the pack's current X
-            logo either way, so the mismatch is only in the label, not a
-            drawn stand-in for a mark the pack does not ship.
-          */}
           <a href={TWITTER_URL} rel="noopener" class="icon-link" aria-label={t(locale, 'twitterProfile')}>
             <Twitter />
           </a>
@@ -366,32 +200,11 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
           </a>
         </p>
       </div>
-      {/*
-        Still a real link to the commit it was built from, deliberately not
-        styled as one: the owner asked for both, so this is a link a reader can
-        follow while reading as plain dim text in the line.
-
-        `.version a` therefore has to opt out of the site-wide link treatment
-        (the dashed rest underline and the inverted hover block). It keeps a
-        visible focus ring and a hover cue of its own rather than dropping
-        every affordance: an unstyled link that also gives no feedback on
-        hover or focus is undiscoverable and unreachable by keyboard, which is
-        a different problem from the one being solved here.
-      */}
       <p class="version">
         {t(locale, 'version')}: <a href={commitUrl}>{version}</a>
       </p>
-      {/*
-        The OSS credits, moved out of the right-hand link row and given their
-        own centred line under the version, smaller than it.
-
-        Required, not decorative: PxPlus IBM VGA8 is CC BY-SA 4.0, which asks
-        for attribution reachable from the site, and /oss/ is where the font,
-        its author and its licence are named. So this line is a licence
-        obligation wearing the quietest treatment that still satisfies it,
-        which is why it can be the smallest thing in the footer but cannot be
-        dropped.
-      */}
+      {/* A licence obligation: PxPlus IBM VGA8 is CC BY-SA 4.0 and asks for
+        attribution reachable from the site. Do not drop it. */}
       <p class="credits">
         <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
       </p>
@@ -399,10 +212,6 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     <MathCopy />
     <FootnoteSidenotes />
     <QuoteCopy />
-    {/* Every page, not just a post: the reader's pinned set is restored by this
-        script, so a page without it dropped the cards they were keeping. Pages
-        with no <article> attach no new previews, which is the same behaviour
-        they had before. */}
     <HoverPreviews locale={locale} />
     {
       analyticsToken && (
@@ -416,10 +225,6 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     <script>
       import { copyWithToast } from '../scripts/copy-toast'
 
-      // Clicking a heading's # both jumps to the section and puts the full URL on
-      // the clipboard. One delegated listener rather than one per heading, and
-      // the jump is left to the browser: preventDefault would break opening the
-      // anchor in a new tab and lose the history entry.
       document.addEventListener('click', (event) => {
         const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[data-copy-link]')
         if (anchor === null) return
@@ -427,19 +232,6 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       })
     </script>
     <script is:inline define:vars={{ commitShort }}>
-      // Registers the offline cache. Everything above works without it; this
-      // only makes already-read posts available with no connection.
-      //
-      // The commit in the URL is what triggers an update: browsers install a
-      // new worker only when the script URL or its bytes change, and sw.js
-      // reads it back to name its caches. Keyed on the commit rather than the
-      // release, so every deploy retires the previous deploy's caches instead
-      // of only those from before the last version bump.
-      // Never on localhost. A worker that answers from cache makes an edit look
-      // like it did nothing, and the offline behaviour it exists for is not
-      // what anyone is testing on a dev server. Any worker a previous visit
-      // installed is unregistered, since it would otherwise keep serving this
-      // origin long after this guard arrived.
       var isLocal = ['localhost', '127.0.0.1', '[::1]', '::1'].indexOf(location.hostname) !== -1
       if ('serviceWorker' in navigator && isLocal) {
         navigator.serviceWorker
@@ -451,9 +243,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       }
       if ('serviceWorker' in navigator && !isLocal) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=' + commitShort).catch(() => {
-            // A failed registration must never break the page.
-          })
+          navigator.serviceWorker.register('/sw.js?v=' + commitShort).catch(() => {})
         })
       }
     </script>

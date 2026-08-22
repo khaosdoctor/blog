@@ -8,10 +8,6 @@ import { categoryDescription } from '../../../lib/categories'
 import { categoryLocales, getCategories } from '../../../lib/taxonomy'
 import { HREFLANG, localePath, LOCALES, t } from '../../../i18n/ui'
 
-// The English half of the section pages. Built from the English posts alone,
-// so a section with no translated post yet simply has no English page rather
-// than an empty one, and a post's category chip never drops the reader into
-// the other language.
 export const getStaticPaths = (async ({ paginate }) => {
   const [byCategory, sectionsByLocale] = await Promise.all([getCategories('en'), categoryLocales()])
   return [...byCategory.entries()].flatMap(([category, categoryPosts]) =>

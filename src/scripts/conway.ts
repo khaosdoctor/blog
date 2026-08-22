@@ -1,10 +1,3 @@
-// The Conway "game of life" background.
-//
-// Ported from the theme lab's bench with four differences: the canvas covers
-// the viewport rather than a bench div, the excluded region is the real article
-// rather than a simulated one, the values Lucas decided are fixed rather than
-// knobs, and this module exports a control surface settings-panel.ts calls.
-//
 import { readStorage, writeStorage } from '../lib/storage'
 import {
   conwayCellSizePixels as CELL_SIZE,
@@ -40,20 +33,11 @@ function isMotion(value: string): value is Motion {
   return value === 'reduce' || value === 'allow'
 }
 
-/*
- * Cell size and click-adds-a-glider are fixed; density, generations per
- * second, auto-feed and opacity are lib/tweaks.ts dials the settings panel
- * can move. Opacity is one value for both grounds on purpose: a knob whose
- * meaning changes with the theme is worse than one that holds still, and the
- * lit cells deliberately fail the 3:1 non-text criterion (texture, not
- * content).
- */
-/* Slack around a glider so it does not spawn touching the viewport edge and die
-   within a few generations. */
+// Cells short of the edge a glider may be placed: one spawned flush against
+// the boundary hits the wall and dies within a few generations.
 const EDGE_MARGIN = 3
 const GLIDER_BOX = 3
 
-/** The classic glider, as offsets from the seeded cell in a 3x3 box. */
 const GLIDER_BASE: Array<[number, number]> = [
   [1, 0],
   [2, 1],
@@ -62,7 +46,6 @@ const GLIDER_BASE: Array<[number, number]> = [
   [2, 2],
 ]
 
-/** Rotates a shape 90 degrees, so every glider does not travel one diagonal. */
 function rotate90(cells: Array<[number, number]>, size: number): Array<[number, number]> {
   return cells.map(([c, r]) => [size - 1 - r, c])
 }
@@ -76,8 +59,6 @@ function clampNumber(raw: string | null, fallback: number, min: number, max: num
   return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback
 }
 
-// Plain module-level variables rather than anything reactive: a cell is read
-// and written thousands of times per generation, and this is a canvas loop.
 let motionOverride: Motion | null = null
 let backgroundEnabled = true
 let manualPaused = false
@@ -99,8 +80,6 @@ function osReduced(): boolean {
   return matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/* The override wins in BOTH directions: an explicit "allow" beats an OS that
-   asks for less motion, as well as the other way round. */
 function effectiveReduced(): boolean {
   if (motionOverride === 'reduce') return true
   if (motionOverride === 'allow') return false
@@ -119,38 +98,16 @@ function currentFade(): number {
   return opacity
 }
 
-/*
- * Read off the canvas's own resolved `color`, NOT the `--fg` custom property.
- * This is the fix for the field being invisible for weeks.
- *
- * `getPropertyValue('--fg')` returns the SPECIFIED value of a custom property,
- * which for an untyped one is the literal text `light-dark(#14120e, #f3f1ee)`:
- * custom properties carry a raw token stream and only resolve when consumed by
- * a real typed property. Handing that to `fillStyle` asks the canvas to resolve
- * `light-dark()` outside any element's used `color-scheme`, and a fillStyle it
- * cannot parse is silently left at its default, black. Black cells on the black
- * page read as nothing.
- *
- * `body` sets `color: var(--fg)` and this canvas inherits it, so reading
- * `.color` gets the COMPUTED value, which is always a resolved colour.
- */
+// Reads the canvas's resolved `color`, not `--fg` directly: an untyped custom
+// property returns unresolved text that `fillStyle` cannot parse, silently turning black.
 function currentFg(): string {
   if (canvas === null) return 'currentColor'
   return getComputedStyle(canvas).color || 'currentColor'
 }
 
-/*
- * The mask that keeps the field off the text, measured with a cell of slack.
- * Any live cell the mask starts covering is cleared, so a reflow never leaves
- * one stuck behind the words.
- */
+// Measured against `main article`, not `main`: on a listing page `main` is the
+// whole post list, which would blank the middle of the screen.
 function computeExclusion(): void {
-  /*
-   * The article, not `main`. Only a post has one: `main` on a listing page is
-   * the post list and the pagination, so measuring against it blanked the
-   * middle of the page and confined the field to the margins. With no article
-   * there is nothing to keep clear, so the field takes the whole viewport.
-   */
   const article = document.querySelector('main article')
   if (canvas === null || cols === 0 || rows === 0) return
   if (article === null) {
@@ -204,6 +161,10 @@ function resizeGrid(): void {
   seed()
 }
 
+// Conway's B3/S23: a dead cell with exactly 3 live neighbours is born, a live
+// cell with 2 or 3 survives, everything else dies. Edges do not wrap, so
+// out-of-bounds neighbours count as dead and the field decays inward. Excluded
+// cells (behind the article) are skipped, which also makes them dead neighbours.
 function step(): void {
   const c = cols
   const r = rows
@@ -268,8 +229,7 @@ function boxOverlapsExclusion(col: number, row: number): boolean {
   return false
 }
 
-/** `Math.random()` here is live decoration, not the deterministic seed a
- * build-time image would need. */
+// Gives up after 20 tries instead of searching exhaustively, so a full viewport skips a feed instead of stalling.
 function feedGlider(): void {
   const c = cols
   const r = rows
@@ -319,13 +279,7 @@ function stopLoop(): void {
   rafId = null
 }
 
-/*
- * Reduced motion never starts the loop rather than pausing it partway: crossing
- * into "reduced" stops and reseeds, so what stays on screen is a fresh static
- * frame rather than whatever instant the loop was cut at. Every other reason to
- * stop (manual pause, the reader's toggle, a hidden tab) leaves the frame as it
- * was.
- */
+// Reseeds so the frozen frame isn't a mid-cycle snapshot.
 function syncRunning(): void {
   const reducedNow = effectiveReduced()
   if (reducedNow && !wasReduced) {
@@ -350,9 +304,6 @@ function applyBgLifeAttr(): void {
   if (backgroundEnabled) document.documentElement.removeAttribute(BG_LIFE_ATTR)
   else document.documentElement.setAttribute(BG_LIFE_ATTR, 'off')
 }
-
-// --- The control surface settings-panel.ts calls. Plain exports rather than an
-// event bus: both are ES modules bundled together. ---
 
 export function setMotion(value: Motion | null): void {
   motionOverride = value
@@ -390,8 +341,6 @@ export function setAutoFeed(seconds: number): void {
   writeStorage(AUTOFEED_KEY, String(autoFeedSeconds))
 }
 
-/** Redraws immediately rather than waiting for the next generation: the reader
-    is dragging a slider and needs to see the result while dragging it. */
 export function setOpacity(value: number): void {
   opacity = Math.min(MAX_OPACITY, Math.max(MIN_OPACITY, value))
   writeStorage(OPACITY_KEY, String(opacity))
@@ -402,16 +351,8 @@ export function reseed(): void {
   seed()
 }
 
-/*
- * Every key this module owns, back to default, for reset-all.
- *
- * One call rather than seven setters, because the setters are the wrong shape:
- * `setDensity(10)` writes the literal "10", a stored value that happens to
- * equal the default, where this site stores a default as nothing stored.
- *
- * It re-applies as well as clearing, so the screen matches what is now stored.
- * `seed()` and `syncRunning()` are both safe on a page with no canvas.
- */
+// Clears the keys rather than calling the setters: a setter would write the
+// literal default value, and this site represents a default as nothing stored.
 export function resetSettings(): void {
   motionOverride = null
   backgroundEnabled = true
@@ -439,20 +380,8 @@ export function getSettings(): {
   return { motion: motionOverride, backgroundEnabled, paused: manualPaused, density, gps, autoFeedSeconds, opacity }
 }
 
-/*
- * On the document, not the canvas, and that is why clicking used to do nothing.
- *
- * The canvas is `z-index: -1`, and a negative-z-index element is behind for HIT
- * TESTING as well as painting. `body` covers the viewport, so it is the topmost
- * element under the pointer everywhere the content is not, including the
- * gutters: the canvas never received a click anywhere.
- *
- * Listening on the document means deciding what a click means. Anything
- * interactive or selectable belongs to the page, so `closest()` bails out and a
- * link still navigates. A drag that selected text is not a click either, which
- * is what the collapsed-selection check is for. A click inside the reading
- * column needs no rule: the mask already covers it.
- */
+// The click listener has to be on the document, not the canvas: the canvas's
+// `z-index: -1` puts it behind for hit testing too, so it never gets a click.
 const CLICK_THROUGH = 'a, button, input, select, textarea, label, summary, details, [role="button"], [tabindex]'
 
 function onDocumentClick(event: MouseEvent): void {
@@ -475,20 +404,16 @@ function onDocumentClick(event: MouseEvent): void {
   draw()
 }
 
-/*
- * State is hydrated before the canvas check, not after: settings-panel.ts
- * imports this module and calls getSettings() whether or not the field is on
- * the current page, and it needs the stored values rather than these defaults.
- */
+// State must be hydrated before the canvas check: other code reads stored
+// settings even on pages with no field.
 function init(): void {
   const storedMotion = readStorage(MOTION_KEY)
   motionOverride = storedMotion !== null && isMotion(storedMotion) ? storedMotion : null
   backgroundEnabled = readStorage(BG_LIFE_KEY) !== '0'
   manualPaused = readStorage(PAUSED_KEY) === '1'
   density = clampNumber(readStorage(DENSITY_KEY), DEFAULT_DENSITY, MIN_DENSITY, MAX_DENSITY)
-  // The same bounds setGps clamps to. They drifted apart once, when the range
-  // moved from 0.5-8 to 1-25 and only the setter was updated: a stored 20 was
-  // then pulled back to 8 on every load.
+  // Must clamp to the same bounds setGps does, or a stored value gets pulled
+  // back to a different range on every load.
   gps = clampNumber(readStorage(GPS_KEY), DEFAULT_GPS, MIN_GPS, MAX_GPS)
   autoFeedSeconds = clampNumber(readStorage(AUTOFEED_KEY), DEFAULT_AUTOFEED, MIN_AUTOFEED, MAX_AUTOFEED)
   opacity = clampNumber(readStorage(OPACITY_KEY), DEFAULT_OPACITY, MIN_OPACITY, MAX_OPACITY)
@@ -507,9 +432,6 @@ function init(): void {
 
   matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', syncRunning)
 
-  // theme-toggle.ts owns data-theme and dispatches nothing when it changes it,
-  // so an observer is the plain way to notice a change made by a script this
-  // one has no other reason to import.
   new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: [THEME_ATTR] })
 
   document.addEventListener('visibilitychange', () => {

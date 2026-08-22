@@ -23,25 +23,20 @@ export interface Alternate {
 interface Props {
   title: string
   description: string
-  /** This page's own absolute URL. Everything relative resolves against it. */
+  /** Must be absolute: every relative value here resolves against it. */
   canonical: string
   type: 'website' | 'article'
   publishedAt?: Date
   updatedAt?: Date
   lang: string
-  /** Absolute or root-relative path; resolved against `canonical` for og:image/twitter:image (both require absolute URLs). */
   image?: string
-  /** Describes `image`. Defaults to the page title. */
   imageAlt?: string
   tags?: string[]
   series?: string
-  /** Raw `authors` frontmatter, so the schema names who actually wrote it. */
   authors?: string[]
   noindex?: boolean
   alternates?: Alternate[]
-  /** Markdown twin of this page, for readers that are not browsers. */
   markdown?: string
-  /** The section this page belongs to, so the breadcrumb has a middle step. */
   section?: { name: string; url: string }
 }
 
@@ -64,13 +59,10 @@ const {
   markdown,
 } = Astro.props
 
-// Every page carries its own ranking. Three posts were on Medium first and a
-// canonical pointing there would hand Google the other domain, so they do not
-// get one: the traffic belongs here.
+// Deliberately never points off-site, even for posts published elsewhere first:
+// a foreign canonical hands the ranking to that domain.
 const indexUrl = canonical
 
-// A page with no image of its own shares as a bare link on most networks, so
-// it gets the card of its section instead.
 const card = image ?? sectionOgImage(section?.url)
 const absoluteImage = new URL(card, canonical).href
 
@@ -87,19 +79,10 @@ const jsonLd = buildPrimaryJsonLd(type, {
   authors,
 })
 
-// Derived from Astro.site (astro.config.mjs) instead of a duplicate constant,
-// so the domain has exactly one source of truth.
 const homeUrl = Astro.site ? new URL('/', Astro.site).href : '/'
 
-// Home -> section -> post. The middle step is what produces the breadcrumb line
-// under a result in Google instead of a bare URL, and it only appears on pages
-// that are actually in a section. Built on `canonical`, never `indexUrl`: this
-// is the trail through THIS site, so a post that credits Medium still shows its
-// own path here.
-//
-// The section index passes its own section, which would repeat the trail's last
-// step, and a BreadcrumbList whose last two items are the same URL is rejected
-// as malformed.
+// The URL comparison is what keeps a section index from repeating itself: a
+// BreadcrumbList whose last two items share a URL is rejected as malformed.
 const sectionUrl = section === undefined ? null : new URL(section.url, canonical).href
 const breadcrumbItems: BreadcrumbItem[] = [
   { name: SITE_NAME, url: homeUrl },
@@ -111,10 +94,8 @@ const breadcrumbItems: BreadcrumbItem[] = [
 const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems)
 const personJsonLd = buildPersonJsonLd(homeUrl)
 
-// Compared on the language subtag: callers emit region-qualified hreflang
-// values (`pt-BR`), so an exact match against DEFAULT_LOCALE (`pt`) never hit,
-// and x-default pointed at the right page only because pt happens to be listed
-// first everywhere.
+// Callers emit region-qualified hreflang values (`pt-BR`) while DEFAULT_LOCALE
+// is a bare subtag (`pt`), so this has to compare the subtag, not the whole tag.
 const xDefault =
   alternates.find((alt) => alt.lang.split('-')[0] === DEFAULT_LOCALE) ?? alternates[0]
 const robots = noindex ? 'noindex,nofollow' : 'index,follow'
@@ -139,9 +120,8 @@ const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 <meta property="og:image" content={absoluteImage} />
 <meta property="og:image:alt" content={imageAlt ?? title} />
 {
-  /* Dimensions are only declared for our own cards, which are drawn at this
-     size. A hero image can be anything, and a wrong hint renders worse than
-     no hint. */
+  /* Only the generated cards have known dimensions; a wrong hint on a hero
+     image renders worse than no hint. */
   !image && (
     <>
       <meta property="og:image:width" content={String(OG_CARD_WIDTH)} />

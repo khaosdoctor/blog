@@ -1,17 +1,4 @@
 ---
-// Explicit light/dark/system control, next to LangSwitcher in the header. Same
-// shape as CodeTheme.astro: a button and a menu do nothing without a script to
-// wire them up, so both stay hidden until theme-toggle.ts confirms it can run.
-// Option labels travel through data attributes for the same reason CodeTheme's
-// do: that script has no access to t().
-//
-// Applying a stored choice before first paint is the blocking script in
-// BaseLayout's <head>; this component only renders the control itself.
-//
-// A native <select> was considered for the menu, the same element
-// CodeTheme.astro's picker uses, since it would delete the open/place/
-// outside-click/Escape machinery below for free. Rejected: the owner asked
-// for an icon beside each choice, and an <option> cannot hold one.
 import { t, type Locale } from '../i18n/ui'
 import Sun from './icons/Sun.astro'
 import Moon from './icons/Moon.astro'
@@ -33,8 +20,6 @@ const { locale } = Astro.props
   data-system={t(locale, 'themeSystem')}
 >
   <button type="button" class="tt-open" aria-haspopup="true" aria-expanded="false" aria-controls="tt-menu">
-    {/* One icon per scheme, all hidden until theme-toggle.ts un-hides the
-       current one: the button shows what is on, without opening anything. */}
     <Sun class="tt-icon" data-value="light" hidden />
     <Moon class="tt-icon" data-value="dark" hidden />
     <Monitor class="tt-icon" data-value="system" hidden />
@@ -64,23 +49,10 @@ const { locale } = Astro.props
     position: relative;
   }
 
-  /*
-   * Author CSS beats the UA sheet's `[hidden] { display: none }` regardless of
-   * specificity, so `display` only ever applies here, on the `:not([hidden])`
-   * state: a reader with JS off, who never gets past the wrapper's own
-   * `hidden`, would otherwise see a dead control anyway.
-   */
   .theme-toggle:not([hidden]) {
     display: inline-flex;
   }
 
-  /*
-   * Space reserved while still hidden: the un-hide happens when the module
-   * runs, and adding a 44px button to the header at that point re-wrapped the
-   * phone header and shifted the whole page (measured CLS 0.10). A reader
-   * with JS off gets a blank slot instead of a dead control, which is the
-   * cost of the page not jumping for everyone else.
-   */
   .theme-toggle[hidden] {
     display: inline-flex;
     visibility: hidden;
@@ -88,14 +60,8 @@ const { locale } = Astro.props
     min-block-size: var(--icon-btn-hit);
   }
 
-  /*
-   * Icon-only, so the touch target comes from the button's own box rather
-   * than from a bigger glyph: min-inline/block-size holds --icon-btn-hit (the
-   * WCAG 44px floor, theme.css) regardless of how small the drawn chip below
-   * gets. The button itself carries no border or background any more; both
-   * moved to ::before, sized at --icon-btn-chip, so the *visible* square can
-   * shrink independently of the box a pointer actually has to reach.
-   */
+  /* Border and background live on ::before so the drawn chip can shrink
+     independently of the hit box. */
   .tt-open {
     position: relative;
     display: inline-flex;
@@ -111,16 +77,8 @@ const { locale } = Astro.props
     cursor: pointer;
   }
 
-  /*
-   * The chip a reader actually sees, sized at `--icon-btn-chip` rather than the
-   * full hit box. `pointer-events: none` so a click anywhere in the real button
-   * still reaches it rather than being swallowed by this decoration.
-   *
-   * The border reads `--accent-day`, not `--rule`, so every icon button shares
-   * the row's one accent. `--rule` was chosen for the 3:1 a non-text border
-   * needs; the day colours clear 3:1 too on both grounds (the weakest being
-   * yellow at 3.23 light), so nothing drops under the floor.
-   */
+  /* `pointer-events: none`, or this decoration swallows clicks meant for the
+     button. */
   .tt-open::before {
     content: '';
     position: absolute;
@@ -132,26 +90,8 @@ const { locale } = Astro.props
     pointer-events: none;
   }
 
-  /*
-   * Sized from .tt-open's own font-size above; only the current one is
-   * unhidden, which the script does by moving the `hidden` attribute.
-   *
-   * The second rule is the one that does the hiding, and it has to exist: the
-   * UA stylesheet declares `@namespace url(http://www.w3.org/1999/xhtml)`, so
-   * its `[hidden] { display: none }` never matches an `<svg>`, which is in the
-   * SVG namespace. Without this the attribute is inert and all three glyphs
-   * draw at once.
-   */
-  /*
-   * position: relative only so the glyph paints above the ::before chip below.
-   * That chip is absolutely positioned and fills itself with --bg, and an
-   * absolutely positioned pseudo-element paints over a non-positioned sibling
-   * whatever the source order says, so the opaque square covered the icon and
-   * the button rendered as an empty outlined box. Giving the glyph a position
-   * puts it in the same painting group and later in it. No z-index: the two
-   * are siblings in one stacking context, so tree order decides once both are
-   * positioned, and a z-index here would only invite a fight with the menu.
-   */
+  /* `position: relative` keeps the glyph's painting group above the ::before
+     chip. No z-index: source order alone decides, and one here would fight the menu. */
   .tt-icon:not([hidden]) {
     display: block;
     position: relative;
@@ -173,20 +113,12 @@ const { locale } = Astro.props
     border-color: var(--accent);
   }
 
-  /* Drawn on the real (larger) hit box, not the chip, so focus shows the
-     whole area a keyboard or switch-access user can actually activate. */
   .tt-open:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
-  /*
-   * Positioned by theme-toggle.ts, which sets top/left in pixels once it knows
-   * where the opener button is. Deliberately no `display` here: the browser
-   * already hides a closed popover (`[popover]:not(:popover-open)`) and the
-   * no-popover fallback (`[hidden]`), and an author `display` would beat both,
-   * which is the bug CodeTheme's picker hit first (see code-blocks.css).
-   */
+  /* theme-toggle.ts sets top/left here in pixels. */
   .tt-menu {
     position: fixed;
     z-index: 60;
@@ -221,10 +153,6 @@ const { locale } = Astro.props
     cursor: pointer;
   }
 
-  /* An icon alone in a menu leaves the reader guessing, so the label stays;
-     the icon only speeds up the visual match and inherits the option's own
-     0.75rem. Spaced from the label with margin, not a row property, to avoid
-     a three-letter CSS keyword the author has banned from this codebase. */
   .tt-option-icon {
     flex-shrink: 0;
     margin-inline-end: 0.5rem;
@@ -244,14 +172,6 @@ const { locale } = Astro.props
     outline-offset: -2px;
   }
 
-  /*
-   * The current choice, the same way LangSwitcher marks the current language:
-   * `aria-current="true"` on the matching option. A real `role="radio"` group
-   * would announce it too, but the ARIA radiogroup pattern also asks for a
-   * roving tabindex and arrow-key navigation between options, which is more
-   * machinery than three buttons in a menu need; Tab and Enter already reach
-   * every option here.
-   */
   .tt-option[aria-current='true'] {
     color: var(--accent);
   }

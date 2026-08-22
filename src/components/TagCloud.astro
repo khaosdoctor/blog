@@ -1,7 +1,4 @@
 ---
-// The tag cloud both tag indexes render (src/pages/tags/index.astro and its
-// /en/ twin). One component so the sizing and scatter rules exist once; each
-// page still builds its own tag list from its own language's posts.
 import { chipColor, slugify, tagCloudLift, tagCloudScale } from '../lib/taxonomy'
 import { localePath, t, type Locale } from '../i18n/ui'
 
@@ -12,7 +9,6 @@ interface Props {
 
 const { locale, tags } = Astro.props
 
-// The range the cloud is scaled across, from the counts actually present.
 const counts = tags.map(({ count }) => count)
 const fewest = Math.min(...counts)
 const most = Math.max(...counts)
@@ -40,19 +36,13 @@ const most = Math.max(...counts)
 <style>
   .chips {
     margin-block-start: 1.5rem;
-    /* Pulls the run in from both edges so the cloud reads a little more
-       centred without any chip changing shape. */
     padding-inline: 5px;
-    /* Centred rows read as a band of mixed sizes; on a baseline the cloud read
-       as ruled text, and a left-aligned short last row looked unfinished. */
     align-items: center;
     justify-content: center;
   }
 
-  /* The cloud and its title break out of the reading column: 85 chips at up
-     to three times the base size need the room. Same arithmetic as .listing
-     (listing.css): 50% puts the start edge at main's centre, the translate
-     pulls back by half this box's own width. */
+  /* 50% puts the start edge at main's centre and the translate pulls back by
+     half this box's own width, so the cloud centres outside the reading column. */
   @media (min-width: 70rem) {
     .cloud-heading,
     .chips {
@@ -62,15 +52,12 @@ const most = Math.max(...counts)
     }
   }
 
-  /* Size carries the count. Padding and rule in `em` so a big chip keeps a
-     chip's proportions; the number stays in the label because size alone is a
-     visual-only signal and this page is where tags get compared exactly. */
+  /* Padding, rule and lift are all in `em` so a chip scaled up by its count
+     keeps a chip's proportions and drifts proportionally off the row. */
   .chips .chip {
     font-size: calc(var(--text-tiny) * var(--chip-scale, 1));
     padding: 0.15em 0.55em;
     border-width: 0.2em;
-    /* tagCloudLift scatters chips off the row's centre; in `em` so a large
-       chip drifts further and the offsets stay in proportion. */
     transform: translateY(var(--chip-lift, 0em));
   }
 </style>

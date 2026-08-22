@@ -1,33 +1,10 @@
 ---
 import { localeFromPath, t } from '../i18n/ui'
 
-/**
- * A self-contained HTML page embedded in a post, with its source one click away.
- *
- * For a demo that is a whole page with its own script and style, which is what
- * most of the old ones are. A post never fills `html` or the `source` slot by
- * hand: `remark-lab-demos.mjs` turns
- *
- *   <HtmlLab src="./components/counter.html" title="a counter in plain HTML" />
- *
- * into this component's actual shape, reading the file once for the iframe and
- * once for the highlighted `source` slot (a real markdown code block, so
- * expressive-code highlights it the same as any fenced block in the post).
- *
- * `srcdoc` rather than a URL: the page stays in the post's own folder instead of
- * having to be copied into public/, and there is still an iframe boundary, so the
- * demo's CSS cannot inherit from the post and its script cannot see the post's
- * globals. `sandbox` without `allow-same-origin` puts it in an opaque origin, so
- * it cannot reach this site's storage or cookies either.
- */
 interface Props {
-  /** The page source, read from disk by the remark plugin. */
   html: string
-  /** Filename, shown on the source toggle. */
   name: string
-  /** What the demo is, for the iframe's accessible name. Required, not decorative. */
   title: string
-  /** CSS height. A demo that needs to grow should say so. */
   height?: string
 }
 
@@ -44,8 +21,6 @@ const locale = localeFromPath(Astro.url.pathname)
 </figure>
 
 <style>
-  /* The card frame and the source disclosure live in styles/lab-demo.css,
-     shared with LabDemo.astro. */
   iframe {
     display: block;
     inline-size: 100%;

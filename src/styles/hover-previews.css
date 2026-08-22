@@ -1,23 +1,6 @@
-/* Hover preview cards. Injected by HoverPreviews.astro and targeting nodes
-   hover-previews.ts creates at runtime, so this is a plain global stylesheet
-   rather than an Astro scoped <style>. */
-
 :root {
-  /*
-   * Every card on the site carries a double rule; this is the one that gets it
-   * on all four edges rather than three plus a thick spine, since it floats
-   * over the page instead of embedding in the article flow. 4px matches the
-   * other double-rule cards (--cc-frame-width, --qc-border-width):
-   * border-style: double collapses to one line under 3px, and 4px is the first
-   * width that splits into line-gap-line.
-   */
   --hp-border-width: 4px;
 
-  /*
-   * The unwritten-link card's watermark, same technique as the quote card's
-   * `"` in variants/quotes.css. --fg rather than a literal white so it
-   * inverts with the theme.
-   */
   --hp-glyph-size: 3.5rem;
   --hp-glyph: light-dark(
     color-mix(in oklab, var(--fg) 12%, transparent),
@@ -47,8 +30,6 @@
   margin: 0;
   padding: 0.85rem 1rem;
   overflow: auto;
-  /* Square corners, matching the site's --radius: 0. A double-rule border
-   * renders poorly on a rounded one. */
   border-style: double;
   border-color: var(--fg);
   border-width: var(--hp-border-width);
@@ -60,8 +41,6 @@
   font-size: 0.85rem;
   line-height: 1.45;
   cursor: grab;
-  /* Drag is mouse/pen only (see startDrag's pointerType check); touch keeps
-     native vertical scrolling of the description. */
   touch-action: pan-y;
   opacity: 0;
   transition: opacity var(--duration) var(--ease);
@@ -86,8 +65,6 @@
   width: 1.4rem;
   height: 1.4rem;
   padding: 0;
-  /* Solid, not double: at this size a double rule has no room to split into
-   * two visible lines. */
   border: var(--border) solid var(--fg);
   border-radius: 0;
   background: transparent;
@@ -111,7 +88,6 @@
   width: 0.9rem;
   height: 0.9rem;
   fill: currentColor;
-  /* Upright when loose, driven into the card when pinned. */
   rotate: -35deg;
   transition: rotate var(--duration) var(--ease);
 }
@@ -145,7 +121,6 @@
   font-style: italic;
 }
 
-/* Drag is mouse/pen only, so on touch the hint would be a lie. */
 @media (hover: none), (pointer: coarse) {
   .hp-hint {
     display: none;
@@ -170,8 +145,6 @@
   color: var(--muted);
 }
 
-/* Only set for links to other sites, so its presence is the signal that
-   following this one leaves the blog. */
 .hp-host {
   display: block;
   margin-block-start: 0.5rem;
@@ -184,20 +157,15 @@
   display: none;
 }
 
-/* A link to a post not written yet (remark-wikilinks.mjs). The <a> still
-   resolves, it just looks unavailable while hovered. */
 a.link-unwritten {
   cursor: not-allowed;
 }
 
-/* The unwritten-link card: a watermark and a short note instead of
-   title/description/host, which stay in the DOM hidden so savePinned() and
-   restorePinned() keep reading .hp-title's href. */
+/* title/description/host stay in the DOM, hidden, for JS to keep reading
+   .hp-title's href. */
 .hp-card.hp-unwritten {
-  /* NOT `position: relative`. The base card is `fixed` and place() writes
-     top/left onto it, so relaxing it here dropped the card back into the
-     document flow and it never appeared where the link was. `fixed` is
-     already a containing block for the watermark below. */
+  /* Must not become `position: relative`: the card is `fixed`, JS writes top/left
+     onto it, and `fixed` already contains the watermark below. */
   isolation: isolate;
   display: grid;
   place-items: center;
@@ -228,21 +196,11 @@ a.link-unwritten {
   font-style: italic;
 }
 
-/* Only the stacking changes: the hint keeps its spacing and colour from above,
-   it just has to paint over the watermark like the message does. */
 .hp-card.hp-unwritten .hp-hint {
   position: relative;
   z-index: 1;
 }
 
-/* --- Minimised cards --- */
-
-/*
- * One strip along the foot of the window holding every minimised card, in the
- * order they were minimised. `pointer-events: none` on the strip and `auto` on
- * its children, so the empty room beside them never eats a click meant for the
- * page. Wraps, so a long row becomes two rather than running off the side.
- */
 .hp-dock {
   position: fixed;
   z-index: 2147483000;
@@ -260,15 +218,6 @@ a.link-unwritten {
   pointer-events: auto;
 }
 
-/*
- * A docked card is one line: its title, and the three buttons. `position:
- * static` hands its placement to the strip, which is the whole point of taking
- * it out of the top layer to get here.
- *
- * The buttons come out of their absolute corners and sit in the row. The title
- * takes `order: -1` so it reads first, even though the buttons come before it
- * in the DOM, where they are in tab order after the title.
- */
 .hp-card.hp-docked {
   position: static;
   display: flex;
@@ -295,14 +244,10 @@ a.link-unwritten {
   flex: none;
 }
 
-/* Nothing but the title survives the collapse: a description and a host need
-   the room the strip does not have, and the drag hint is a lie in here. */
 .hp-card.hp-docked :is(.hp-desc, .hp-host, .hp-hint, .hp-unwritten-msg) {
   display: none;
 }
 
-/* The watermark is drawn on the card itself, so the unwritten variant has to
-   drop it too rather than paint it behind one line of text. */
 .hp-card.hp-docked.hp-unwritten {
   display: flex;
   min-block-size: 0;
@@ -343,16 +288,12 @@ a.link-unwritten {
   color: var(--fg);
 }
 
-/* Room for the third button, so a long title never runs under the row. */
 .hp-card:not(.hp-docked) .hp-title {
   padding-inline-end: 4.6rem;
 }
 
-/* A long-press opens a card on touch, so these three are the only way to
-   close it: at 1.4rem a thumb misses them. Respaced to keep their order
-   (dock, pin, close from the left) without overlap at the bigger size.
-   Last in the file on purpose: the base .hp-min rule above would otherwise
-   win the same-specificity tie by source order. */
+/* Must stay last in the file: the base .hp-min rule above would otherwise win
+   the same-specificity tie by source order. */
 @media (hover: none), (pointer: coarse) {
   .hp-close,
   .hp-pin,
