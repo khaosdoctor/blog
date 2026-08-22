@@ -254,8 +254,7 @@ function init(): void {
     }
   }
 
-  // Inside the phone drawer the palette is not a modal: it opens as a dropdown
-  // anchored over the drawer's own search row, so the menu behind it stays
+  // In the drawer the palette opens as a dropdown, so the menu behind it stays
   // readable and nothing in it moves.
   const inDrawer = (): boolean => document.querySelector('header.shell')?.matches('[data-menu-open]') === true
 
@@ -269,8 +268,7 @@ function init(): void {
 
     if (inDrawer()) {
       dialog.show()
-      // The dropdown is pinned to the top of the drawer, so the keyboard rising
-      // over the lower half covers nothing the reader still needs.
+      // Pinned to the top of the drawer, so the keyboard covers nothing needed.
       input.focus()
       updateCaret()
       return

@@ -311,11 +311,8 @@ const searchHref = localePath(locale, '/search/')
     overflow-y: auto;
   }
 
-  /*
-   * :global() from here down: every row is built with createElement in
-   * search-palette.ts, so none of these elements carries this file's
-   * data-astro-cid and a scoped selector matches nothing.
-   */
+  /* :global() from here down: these rows are built with createElement, so they
+     carry no data-astro-cid and a scoped selector matches nothing. */
   .sx-results :global(li + li) {
     border-block-start: var(--border) solid var(--rule);
   }
