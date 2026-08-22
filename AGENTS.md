@@ -10,7 +10,31 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 
 **One folder is one article, in every language.** `content/blog/<folder>/index.mdx` is the source; any other `.mdx` in that folder is a translation, identified by its `lang` and given its own URL by `slug`. The folder is the pairing, which is where `hreflang` comes from, so there is no field to keep in sync. Images are `./image.png` from either file.
 
-**Post URLs are frozen.** Every slug came from six years of Ghost and is linked from elsewhere. Route paths are English (`/search/`, `/tags/`, `/series/`), Portuguese post slugs are whatever was written. Never rename a post folder. English lives under `/en/` with an English slug.
+**Post URLs are frozen.** Every slug came from six years of Ghost and is linked from elsewhere. Route paths are English (`/search/`, `/tags/`, `/series/`), Portuguese post slugs are whatever was written. Never rename a post directory. English lives under `/en/` with an English slug, Portuguese stays unprefixed at the root because those root URLs are the frozen ones. Moving a post between sections changes its `category` and nothing else. `/rss.xml` is the frozen Portuguese feed so existing subscribers keep working; the English feed is `/en/rss.xml`. Paginated listings take a rest param (`[...page]`, never `[page]`) so page 1 stays at the bare path instead of `/1/`.
+
+**An Astro scoped style only reaches elements that exist in the template.** Anything a client script builds with `createElement` carries no `data-astro-cid`, so a scoped selector matches it never, silently. Those rules need `:global()`. Three more edges of the same trap: `:global()` is needed on a combinator's child side when that child is another component's root element; a `:global()` nested inside `:has()` is left uncompiled, so the whole selector has to be global; and a slot the CSS must match has to be written in the template rather than invented by the script. Styles for markdown-rendered output (`remark-figures` figures), rows shared by more than one component, and runtime-injected nodes belong in a global stylesheet for the same reason.
+
+**Never size or position one element from another element's `ch` token.** `ch` resolves against the font of the element reading it, so the same `78ch` is a different pixel width on every element and in each body face the reader can pick. Measure the real rect at runtime and write the answer to a custom property or a `data-` attribute, the way `PostToc.astro` does with `--toc-left` and `data-toc-mode`. A hard-coded breakpoint standing in for one is correct in one face and wrong in the other.
+
+**Some logic is deliberately duplicated and must be mirrored by hand.** `BaseLayout`'s blocking pre-paint script shares no source with the client modules it pre-empts, so a storage key name, a clamp bound or an applied-value rule edited on one side has to be edited on the other or the page flashes. The same applies to: `SOURCE_LOCALE` (`src/i18n/ui.ts`) and `SOURCE_LANG` (`src/lib/posts.ts`), which `scripts/check-i18n.ts` asserts agree; the settings panel's Conway slider bounds against `src/lib/tweaks.ts`; the `hp-persist` key, where `'0'` means off and anything else including absence means on; the pt/en page pairs, whose filters must match; and any code deciding whether to link to a series index, which must use the same "more than one published part in this language" condition the route builds on, or the link 404s.
+
+**A module a node script imports must import nothing itself.** `reading-time.ts`, `slugify.ts` and `mdx-component-names.ts` stay leaf modules because anything reaching `astro:content` cannot be imported outside Astro; `posts.ts` and `taxonomy.ts` are the two that reach it. For the same reason a browser script must not import `taxonomy.ts`: take the underlying helper from its own module instead (`chipColor` from `./chip-color`, `slugify` from `./slugify`).
+
+**Nothing fetches at build time.** Embed metadata and images arrive as props, so the build stays offline and reproducible. `Astro.site` in `astro.config.mjs` is the only source for the domain; no component declares its own.
+
+**An embed iframe is sandboxed and never gets `allow-same-origin`.** A framed third party could otherwise navigate the reader's tab. Raw embed HTML is build-time migration content, never live input: it reaches `set:html` unsanitised and is defended only by the build-failing checks for inline `<script>` and plain-http `src`.
+
+**Generated files are not edited by hand.** `src/data/redirects.ts` comes from `scripts/build-redirects.ts`. In `src/lib/credits.ts` the `fonts` and `icons` entries are hand-maintained and the dependency generator must never emit them, while `scripts/check-credits.ts` fails `npm run check` whenever the dependency half and `package.json` disagree in either direction.
+
+**Every taxonomy listing builds from its own locale.** `getSeries('en')`, `getTags('en')`, `getCategories('en')`: no index may link a reader into the other language's tree, and a term with no post in that language gets no page rather than an empty one.
+
+**Cover drawing has exactly one source.** `buildCoverSvg` in `src/lib/cover.ts` feeds both the build-time og:image raster and the in-browser hero, along with `coverOverlay`, `coverChipInk` and `CHIP_SIZE`. Never re-derive any of it on either side. `--post-accent` comes from the same file's `coverTone()`, since a second hash over a different pool agrees only by luck.
+
+**Attribute changes on `<html>` fire no events.** `theme-toggle.ts` writes `data-theme` and the settings panel writes `data-motion` without dispatching anything, so a module that needs to react watches them with a `MutationObserver`. Never an event listener.
+
+**A stored preference at its default is stored as nothing at all.** Reset removes the key rather than writing the default value, so clear-to-default behaves the same everywhere. `ayu-light`/`ayu-dark` must stay first in the expressive-code `themes` array for the matching pair to be emitted for a reader with no JavaScript.
+
+**Popover methods are typed as always present and are not.** `showPopover` and `hidePopover` are absent in browsers without the Popover API, so every call site goes through optional chaining.
 
 **Never ask the clock twice.** `PUBLISH_CUTOFF` in `src/lib/posts.ts` is the one instant a build calls now. Astro settles the route table before rendering, so a second `new Date()` can list a post whose page was never generated.
 

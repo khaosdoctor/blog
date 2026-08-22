@@ -204,6 +204,38 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   than retiring, since the bench never pitted them against `decifra` as a closed dispute. `prefers-reduced-motion`
   freezes on the final frame and the loop never starts; a manual pause control covers WCAG 2.2.2.
 
+## Conventions
+
+House rules the styling follows. These used to live as comments in the source and were moved here when the codebase
+went on a comment diet; the invariants that break the build instead live in `AGENTS.md`.
+
+**Which accent a thing follows.** Transient effects, links and hovers take `--accent-day`, the day-hashed colour.
+Text treatments belonging to the article itself, `strong` and `em`, take `--post-accent`, the post's cover tone. Do
+not repoint either at the other: they answer different questions, "what colour is the site today" and "what colour is
+this article".
+
+**Stacking order.** Header content claims the low single digits, menus and popovers claim 60. Nothing in between is
+in use, so a new overlay picks a side rather than a number.
+
+**Where a rule belongs.** `.prose` wraps rendered markdown only. Shell inside the same `<article>`, the tag row and
+the series navigation, belongs outside that wrapper. `prose/links.css` is the deliberate exception: its colour,
+underline and hover rules are site-wide (`html :is(main, footer) a`) and only the external-link arrow stays scoped to
+`.prose a`. Two links opt out there by name, `footer .credits a` and `footer .version a`, and must stay excluded.
+
+**Groups of a few options use `aria-current`**, never `role="radio"`, which would also oblige a roving tabindex and
+arrow-key handling for no gain at this size. Colour is never the only signal for a state: a word, a fill-versus-hollow
+difference or a shape carries it too. A control's accessible name begins with its visible text, so speech input can
+address it by what is on screen.
+
+**Metric-matched fallback faces.** The `ascent-override`, `descent-override` and `size-adjust` values are the real
+face's own metrics per em divided by `size-adjust`. Re-derive them whenever either the real face or its local stand-in
+changes, or the fallback stops matching and the swap shifts the page again.
+
+**Two CSS mechanics worth knowing.** An author `display` beats the UA sheet's `[hidden]` at any specificity, so it
+has to stay behind `:not([hidden])`; a popover or a closed `<dialog>` gets no author `display` in its base rule at
+all, since that beats the UA rule that hides it. And a character-level effect needs one span per character, because a
+text node has no per-character handle.
+
 ## Next up
 
 The order the work goes in from here, Lucas's own list.
