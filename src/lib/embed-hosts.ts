@@ -1,25 +1,10 @@
-/**
- * The single source for the CSP meta tag (BaseLayout.astro) and the
- * check-output.ts frame/script allowlists. Never derive this from build
- * output: an allowlist that grows to fit the page grants permission to
- * whatever wrote the page.
- */
 interface EmbedProvider {
-  /** Component or feature that produces this traffic. */
   component: string
-  /** Becomes `frame-src`. */
   frame?: string[]
-  /** Becomes `script-src`, the narrowest list and the one to think hardest about. */
   script?: string[]
-  /** Becomes `connect-src`. */
   connect?: string[]
-  /**
-   * Hosts that appear in the output without executing anything: thumbnails,
-   * preconnect hints, facade-assembled URLs. The guard accepts these; the CSP
-   * grants them nothing.
-   */
+  /** Appears in the output but executes nothing: the guard accepts these, the CSP grants them nothing. */
   referenced?: string[]
-  /** Why these hosts are here, when it is not obvious. */
   note?: string
 }
 
@@ -72,34 +57,25 @@ export const FRAME_HOSTS = hostsFor('frame')
 export const SCRIPT_HOSTS = hostsFor('script')
 const CONNECT_HOSTS = hostsFor('connect')
 
-/**
- * What a URL inside the output may point at without failing the guard: anything
- * granted above, plus the hosts that only ever get mentioned. Wider than any CSP
- * directive on purpose, and still an allowlist.
- */
+/** Wider than any CSP directive on purpose, and still an allowlist. */
 export const MENTIONABLE_HOSTS = hostsFor('frame', 'script', 'connect', 'referenced')
 
 const https = (hosts: string[]): string => hosts.map((host) => `https://${host}`).join(' ')
 
-/**
- * GitHub Pages cannot set headers, so this goes in a meta tag. `unsafe-inline`
- * for script covers the service worker registration and the JSON-LD blocks;
- * dropping it needs either hashes or a real header, so it stays for now.
- */
+// GitHub Pages cannot set headers, so this goes in a meta tag. `unsafe-inline` covers the service
+// worker registration and the JSON-LD blocks; dropping it needs hashes or a real header.
 export function contentSecurityPolicy(): string {
   return [
     "default-src 'self'",
-    // 'wasm-unsafe-eval' is for Pagefind, which is a WebAssembly module: without
-    // it the browser blocks the search index from ever compiling, and the page
-    // reports no index rather than an error. It permits WASM only, not eval().
+    // 'wasm-unsafe-eval' is required by Pagefind's WASM module. It permits WASM
+    // only, not eval().
     `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${https(SCRIPT_HOSTS)}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self'",
     `connect-src 'self' ${https(CONNECT_HOSTS)}`,
-    // 'self' is here for the lab pages in public/labs/: a self-contained HTML
-    // demo runs in an iframe of this same origin, which is what keeps its scripts
-    // and styles from touching the post around it.
+    // 'self' is for public/labs/: a same-origin iframe keeps a demo's scripts
+    // and styles away from the post around it.
     `frame-src 'self' ${https(FRAME_HOSTS)}`,
     "object-src 'none'",
     "base-uri 'self'",

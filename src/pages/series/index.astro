@@ -1,14 +1,6 @@
 ---
-// The series index: every series on the site, linking to its own
-// /series/<name>/ page (src/pages/series/[name].astro). That page only
-// generates a route for a series with more than one post (a "series" of one
-// is not one yet), so this index applies the same filter, or it would link to
-// a page that does not exist.
-//
-// getSeries() with no argument is the Portuguese map, which is the right one
-// for this tree: src/pages/en/series/index.astro is the English half and builds
-// its own list out of getSeries('en'), so neither index lists a series the
-// reader's own language cannot show.
+// The length filter must match src/pages/series/[name].astro, which builds no
+// route for a series of one.
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import SeriesList from '../../components/SeriesList.astro'
 import { getSeries, seriesTitle } from '../../lib/taxonomy'

@@ -1,8 +1,4 @@
 ---
-// The Portuguese per-series page; src/pages/en/series/[name].astro is the
-// English twin. `series:` in the frontmatter is the same word in every
-// language, so switching language is a prefix change: /series/grpc/ and
-// /en/series/grpc/. Only the display title and the parts themselves differ.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
@@ -10,9 +6,6 @@ import { getSeries, seriesTitle } from '../../lib/taxonomy'
 import { HREFLANG, t } from '../../i18n/ui'
 
 export const getStaticPaths = (async () => {
-  // The English map only says whether the English page for this series is
-  // built at all: the switcher must not offer a URL that route never emits,
-  // which is any series with fewer than two translated parts.
   const [series, english] = await Promise.all([getSeries(), getSeries('en')])
   return [...series.entries()]
     .filter(([, posts]) => posts.length > 1)

@@ -4,11 +4,7 @@ import { join } from 'node:path'
 export const field = (frontmatter, name) =>
   new RegExp(`^${name}:\\s*(.+)$`, 'm').exec(frontmatter)?.[1].trim().replace(/^["']|["']$/g, '')
 
-/**
- * The post's own URL, by the same rule as `slugOf`/`urlOf` in src/lib/posts.ts:
- * an explicit `slug` wins, then the filename, and `index` means the folder.
- * Portuguese keeps the bare path, every other language gets a prefix.
- */
+/** Must stay in sync with `slugOf`/`urlOf` in src/lib/posts.ts. */
 export function urlFor(folder, filename, frontmatter) {
   const name = filename.replace(/\.mdx?$/, '')
   const slug = field(frontmatter, 'slug') ?? (name === 'index' ? folder : name)
@@ -16,8 +12,7 @@ export function urlFor(folder, filename, frontmatter) {
   return lang === 'pt' ? `/${slug}/` : `/${lang}/${slug}/`
 }
 
-// Read from frontmatter, not the content collection: astro.config.mjs is evaluated
-// before astro:content exists.
+// Frontmatter, not the collection: astro.config.mjs runs before astro:content.
 function collect() {
   const dates = new Map()
   const noindex = new Set()
@@ -34,9 +29,7 @@ function collect() {
       if (frontmatter === undefined) continue
       if (/^draft:\s*true/m.test(frontmatter)) continue
 
-      // A page that tells crawlers not to index it must not also be advertised in
-      // the sitemap: the two would contradict each other, which is worse for the
-      // rest of the site than either one alone.
+      // A noindex page must not also appear in the sitemap; the two contradict.
       if (/^noindex:\s*true/m.test(frontmatter)) noindex.add(urlFor(entry.name, file, frontmatter))
 
       const raw = field(frontmatter, 'updatedDate') ?? field(frontmatter, 'pubDate')

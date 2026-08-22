@@ -1,5 +1,4 @@
 ---
-/** Progressive enhancement: widgets.js upgrades the cached quote, which stays if it cannot. */
 interface Props {
   url: string
 }
@@ -13,7 +12,6 @@ const { url } = Astro.props
 </blockquote>
 
 <script is:inline>
-  // One copy of the widget script per page, however many tweets are on it.
   if (!document.querySelector('script[src^="https://platform.twitter.com/widgets.js"]')) {
     const script = document.createElement('script')
     script.async = true
@@ -24,8 +22,8 @@ const { url } = Astro.props
 </script>
 
 <style>
-  /* Styles the fallback only: once widgets.js runs it replaces this element
-     completely with an iframe of its own. */
+  /* Only ever seen as a fallback: widgets.js replaces this element with its
+     own iframe when it loads. */
   .twitter-tweet {
     margin-block: 2rem;
     margin-inline: 0;

@@ -1,9 +1,3 @@
-// BrandHeader's wordmark and mark: the accent, the once-per-session scramble,
-// the terminal-rate cursor, and the glitch burst on both.
-//
-// A plain script rather than an island: this runs on every page and every value
-// below is fixed rather than reader-adjustable, so there is no state for a
-// component tree to hold.
 import { applyAccent } from '../lib/accent'
 import { runDecode, SCRAMBLE_TICK_MS, SCRAMBLE_LOCK_TICKS, type DecodeRun } from '../lib/decode-scramble'
 import { GLITCH_GLYPHS } from '../lib/logo-mark'
@@ -22,15 +16,10 @@ import { prefersReducedMotion as reduced } from './motion'
 
 const SCRAMBLE_GLYPHS = '!<>-_\\/[]{}=+*^?#'.split('')
 
-// The scramble's per-letter stagger shares the cursor's own ramp clock, so
-// the two read as one tempo. The tick and lock timings live in
-// lib/decode-scramble, shared with the reading progress.
 const STAGGER_MS = CURSOR_RAMP_MS
 
-// sessionStorage, not localStorage: the scramble should play again in a new
-// browser session but never while clicking around the site in one sitting.
-// Astro ships static HTML, so "once per page load" would mean once per
-// navigation.
+// sessionStorage, not localStorage: the scramble replays in a new browser
+// session but not on every navigation.
 const SCRAMBLE_SESSION_KEY = 'header-scramble-played'
 
 function randomBetween(min: number, max: number): number {
@@ -41,12 +30,8 @@ function randomGlyph(glyphs: string[]): string {
   return glyphs[Math.floor(Math.random() * glyphs.length)] ?? ''
 }
 
-/**
- * One full cycle of the cursor's opacity, lit then unlit: each phase holds,
- * then ramps to the next over its last frames. The ramp lives inside the phase
- * rather than adding to it, so the cycle stays 2x CURSOR_RATE_MS however many
- * ramp frames it carries.
- */
+// The ramp is drawn inside its phase rather than added to it, so one cycle
+// stays 2x CURSOR_RATE_MS whatever the ramp frame count is.
 function buildCursorFrames(): number[] {
   const perPhase = Math.max(CURSOR_RAMP_FRAMES + 1, Math.round(CURSOR_RATE_MS / CURSOR_RAMP_MS))
   const hold = perPhase - CURSOR_RAMP_FRAMES
@@ -70,17 +55,12 @@ function init(): void {
   const markCharsEl = header.querySelector<HTMLElement>('.mark-chars')
   const cellEls = Array.from(header.querySelectorAll<HTMLElement>('.mark-cell'))
   if (wordEl === null || cursorEl === null || markCharsEl === null) return
-  // TS narrows the originals after the guard, but not inside the closures
-  // below, so the rest of this scope reads these aliases instead.
   const word = wordEl
   const cursor = cursorEl
   const markChars = markCharsEl
 
-  // Today's colour unless the reader pinned one. lib/accent.ts owns that, and
-  // its own try/catch means this never blocks the rest of the header.
   applyAccent()
 
-  // --- the cursor ---
   const cursorFrames = buildCursorFrames()
   let cursorFrame = 0
   let cursorTimer: ReturnType<typeof setInterval> | null = null
@@ -101,10 +81,9 @@ function init(): void {
     if (cursorTimer !== null) clearInterval(cursorTimer)
     cursorTimer = null
     cursorFrame = 0
-    setCursorOpacity(1) // rest frame: solid, never a mid-ramp value
+    setCursorOpacity(1)
   }
 
-  // --- the scramble, once per session ---
   let scrambleRun: DecodeRun | null = null
 
   function resolveLetters(): void {
@@ -112,10 +91,8 @@ function init(): void {
   }
 
   function runScramble(onDone: () => void): void {
-    // Locked to the resolved text's width before the letters empty out:
-    // without this the wordmark narrows to its min for the whole animation,
-    // the wrapped phone header re-flows around it and the page shifts
-    // (measured CLS 0.10 on every post).
+    // Lock the width before emptying the letters, or the wordmark collapses
+    // for the length of the animation and the phone header reflows around it.
     word.style.minInlineSize = `${word.getBoundingClientRect().width}px`
     for (const el of letterEls) el.textContent = ''
     const items = letterEls.map((el, i) => {
@@ -137,7 +114,6 @@ function init(): void {
     })
   }
 
-  // --- the glitch ---
   let glitchScheduleTimer: ReturnType<typeof setTimeout> | null = null
   let glitchPulseTimer: ReturnType<typeof setTimeout> | null = null
   let glitchGapTimer: ReturnType<typeof setTimeout> | null = null
@@ -194,14 +170,8 @@ function init(): void {
     }, randomBetween(PULSE_MIN_MS, PULSE_MAX_MS))
   }
 
-  /*
-   * Every path back to "waiting for the next burst" goes through here, and it
-   * clears all three timers plus the pulse itself.
-   *
-   * It used to clear only its own schedule timer, so re-entering boot() during
-   * a burst left the old pulse chain running: nothing stayed visible forever,
-   * but two schedules ticked at once and the 4-20s cadence stopped holding.
-   */
+  // Every path back to waiting for the next burst goes through here and must
+  // clear all three timers, or re-entering boot() mid-burst doubles the chain.
   function scheduleGlitch(): void {
     clearGlitchTimers()
     endPulse()
@@ -211,14 +181,13 @@ function init(): void {
     )
   }
 
-  // --- boot and freeze ---
   function freeze(): void {
     stopCursor()
     scrambleRun?.cancel()
     scrambleRun = null
     clearGlitchTimers()
     endPulse()
-    resolveLetters() // rest frame: the whole name, no mid-scramble glyph left behind
+    resolveLetters()
   }
 
   function boot(): void {
@@ -236,8 +205,7 @@ function init(): void {
       try {
         sessionStorage.setItem(SCRAMBLE_SESSION_KEY, '1')
       } catch {
-        // Private mode: the scramble replays next load, a small cost next to
-        // the animation still running this one.
+        // Private mode: the scramble just replays on the next load.
       }
       scheduleGlitch()
     })
@@ -250,21 +218,13 @@ function init(): void {
     else boot()
   })
 
-  // The settings panel writes `data-motion` on <html>, the same attribute
-  // conway.ts writes. An observer notices it without the two importing each
-  // other.
   new MutationObserver(() => {
     if (reduced()) freeze()
     else boot()
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] })
 
-  /*
-   * A pulse in flight when the tab is backgrounded is the one case the two
-   * above cannot cover: background timers are throttled well past this pulse's
-   * own 80-150ms window, so the coloured ghosts stay painted for as long as the
-   * tab is hidden and a reader switching back can catch that stale frame.
-   * Clearing on hide guarantees the resting state at that instant.
-   */
+  // Background timers are throttled far past a pulse's own window, so a pulse
+  // in flight when the tab hides would stay painted until it returns.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       clearGlitchTimers()

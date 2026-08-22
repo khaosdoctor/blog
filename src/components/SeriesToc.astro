@@ -12,35 +12,18 @@ interface Props {
 
 const { series, current, locale } = Astro.props
 
-// Drafts are included on purpose: an unwritten part still belongs in the map of
-// the series, it just is not a link.
-//
-// Filtered by language, because a translation carries its source's `series` and
-// would otherwise appear in the other language's contents, linking at a URL that
-// route never builds.
+// Drafts stay in the series map without a link. Filtered by language: a
+// translation shares its source's `series` and would link to a route that never builds.
 const parts = (
   await getCollection('blog', ({ data }) => data.series === series && data.lang === locale)
 ).sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0))
 const title = seriesTitle(series, parts)
 
-// Same predicate as getPublishedPosts, against the same cutoff: a draft has no
-// page, and a future pubDate is a scheduled post, which also has no page until
-// the rebuild at that minute. Asking the clock again here would let a component
-// disagree with the route table about a post published mid-build.
 const isPublished = (part: Post) => !part.data.draft && part.data.pubDate <= PUBLISH_CUTOFF
 
-// The series page is only built when the series has more than one PUBLISHED
-// part in this language (src/pages/series/[name].astro and its /en/ twin), so
-// the heading links on exactly those terms. One published post and two drafts
-// used to render a link to a 404.
-//
-// `parts` is already filtered to this page's own language, so this count is the
-// English one on an English page, which is the one that route consulted.
 const publishedCount = parts.filter(isPublished).length
 const linkHeading = publishedCount > 1
 
-// Both languages have the route now, each under its own prefix, so the heading
-// takes the reader to the listing written in the language they are reading.
 const seriesHref = localePath(locale, `/series/${series}/`)
 ---
 
@@ -56,9 +39,6 @@ const seriesHref = localePath(locale, `/series/${series}/`)
                 <strong>{part.data.title}</strong> <span class="marker">({t(locale, 'youAreHere')})</span>
               </>
             ) : !isPublished(part) ? (
-              // No marker text: the colour says it, the same way an unwritten
-              // wikilink does, and the title attribute carries the words for
-              // anyone who cannot see the colour.
               <span title={t(locale, 'notWrittenYet')}>{part.data.title}</span>
             ) : (
               <a href={urlOf(part)}>{part.data.title}</a>
@@ -71,44 +51,24 @@ const seriesHref = localePath(locale, `/series/${series}/`)
 }
 
 <style>
-  /*
-   * The house card: a double rule on all four edges, square corners. 4px
-   * because border-style: double collapses to one line under 3px, the same
-   * width the bookmark card and the code frame settled on.
-   *
-   * Drawn in the post cover colour rather than --rule, so the block belongs to
-   * the article it is inside. --post-accent is written onto <body> by
-   * BaseLayout, and the fallback keeps this readable anywhere it is not.
-   */
   .series-toc {
-    /* The card's own padding, and how far the list is indented inside it. Both
-       named, because the rows undo and redo them to span the full width. */
     --toc-pad: 1.2rem;
     --toc-indent: 5rem;
-    /* The cover carries 2.5rem below it and adjacent margins collapse to the
-       larger, so a smaller positive value here changes nothing. A negative one
-       is added to it instead: 2.5 - 2 leaves 0.5rem between the two frames. */
     margin-block: -2rem 2rem;
-    /* Lines up with the frame the cover draws inside its own box; the token
-       carries the reasoning (tweaks.css). Inherited from the article rule in
-       core.css, restated because this element also sets margin-block. */
     margin-inline: var(--cover-frame-inset);
     padding: 0.9rem var(--toc-pad);
+    /* 4px because border-style: double collapses to one line under 3px. */
     border: 4px double var(--post-accent, var(--rule));
     border-radius: var(--radius);
     font-size: var(--text-small);
   }
 
-  /* At 360px the 5rem indent left titles a ~187px column; readability, since
-     the overflow itself is handled by overflow-wrap on the rows. */
   @media (max-width: 30rem) {
     .series-toc {
       --toc-indent: 2rem;
     }
   }
 
-  /* The series name owns its own line, in ink rather than muted: it is the
-     title of the block, not a label above it. */
   .heading {
     margin: 0 0 0.7rem;
     color: var(--fg);
@@ -116,9 +76,6 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     font-size: 1.15rem;
   }
 
-  /* A shell prompt, the same mark the search palette puts before its input, so
-     the line reads as something typed. In the cover colour, matching the frame
-     around it. */
   .heading::before {
     content: '> ';
     color: var(--post-accent, var(--accent));
@@ -128,31 +85,17 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     color: inherit;
   }
 
-  /*
-   * The number is drawn inside the item rather than in the list's own indent,
-   * so the row is one box that covers everything on the line. That is what
-   * lets the current part be filled by a background on the row itself: an
-   * absolutely positioned band had to guess the card's padding in fixed units
-   * and overflowed the frame as soon as the card narrowed.
-   */
   ol {
     margin: 0;
     padding-inline-start: 0;
     list-style-position: inside;
   }
 
-  /*
-   * Every row spans the card's full inner width: the negative margin pulls it
-   * out over the card's own padding and the padding puts the text back where
-   * it was, so the box a fill would paint reaches the frame on both sides at
-   * any width. The start padding carries the list indent too.
-   */
+  /* Out over the card's padding and back, so a fill reaches the frame. */
   li {
     margin-inline: calc(var(--toc-pad) * -1);
     padding-inline: calc(var(--toc-indent) + var(--toc-pad)) var(--toc-pad);
     padding-block: 0.15rem;
-    /* A part title with one unbroken 20+ character token was the one thing
-       that could still scroll a phone sideways. */
     overflow-wrap: break-word;
   }
 
@@ -160,29 +103,19 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     margin-block-start: 0.25rem;
   }
 
-  /*
-   * The part being read, filled with the day colour and its text inverted to
-   * the page ground: the same treatment a hovered title takes in the listing
-   * table and the footer, so "this one" reads the same way everywhere.
-   */
   .current {
     background: var(--accent-day, var(--accent));
     color: var(--bg);
   }
 
-  /* The marker is its own box even when drawn inside, so it needs the
-     inverted ink named rather than inherited. */
   .current::marker {
     color: var(--bg);
   }
 
-  /* Inherits the inverted ink rather than staying muted, which would fall to
-     near-invisible against the fill. */
   .current .marker {
     color: inherit;
   }
 
-  /* Wikipedia's red link, the same token an unwritten wikilink uses. */
   .unwritten {
     color: var(--link-unwritten);
   }

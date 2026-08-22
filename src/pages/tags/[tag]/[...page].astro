@@ -1,7 +1,4 @@
 ---
-// The Portuguese per-tag listing; src/pages/en/tags/[tag]/[...page].astro is
-// the English twin. The slug is shared because a translation repeats its
-// original's `tags:` line, so switching language is a prefix change.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import PostList from '../../../components/PostList.astro'
@@ -12,8 +9,7 @@ import { HREFLANG, localePath, LOCALES, t } from '../../../i18n/ui'
 export const getStaticPaths = (async ({ paginate }) => tagListingRoutes(paginate)) satisfies GetStaticPaths
 
 const { tag, languages, page } = Astro.props
-// Page 1 of the counterpart, whatever page this is: the two languages hold
-// different post counts under one tag, so page 3 here need not exist there.
+// Always page 1: the counterpart tag may have fewer pages than this one.
 const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
   lang: HREFLANG[locale],
   href: new URL(localePath(locale, `/tags/${slugify(tag)}/`), Astro.site).href,

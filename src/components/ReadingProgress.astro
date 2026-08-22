@@ -1,136 +1,44 @@
 ---
-/**
- * How far down the post you are, drawn on the header's own dashed rule.
- *
- * This renders no markup of its own. The track is the two runs of dashes
- * BrandHeader already draws, read as ONE meter left to right: the left run's
- * dashes, then the right run's, so progress starts at the `┌─` corner and
- * finishes at the `─┐` one. A dash the reader has passed takes the post's cover
- * colour; the rest stay muted.
- *
- * The wordmark's block cursor is the head of that run rather than a fixture
- * beside the brand: at the top of a post it is where it always was, and as the
- * reader scrolls it travels along the dashes, which are its trail.
- *
- * The reveal is not a straight readout of scroll position. Two things stay
- * between them, and both are motion, so both are off under reduced motion (the
- * count then tracks the scroll exactly and every dash lights evenly):
- *
- * - Lag: the lit count eases toward where the reader is, so on a fast scroll
- *   the dashes visibly catch up rather than arriving with the page.
- * - Jitter: each dash carries a small random offset in WHEN it lights within
- *   its own slot, so the run types itself out unevenly.
- *
- * It stays out of the accessibility tree, since the dash spans are inside
- * BrandHeader's `aria-hidden` runs: announcing a percentage on every scroll
- * tick is noise, and the reader knows where they are.
- */
 ---
 
 <script>
   import { prefersReducedMotion as reducedMotion } from '../scripts/motion'
 
-  /*
-   * The track, in visual order: the left run's dashes, then the right run's.
-   * DOM order is left-to-right order here, so no sorting is needed.
-   *
-   * Only the dashes that are actually VISIBLE count. `.fill` crops its fixed
-   * 38-character run with `overflow: hidden`, and how many of those 38 survive
-   * depends on the viewport, so treating all 76 as the meter would stall the
-   * fill against a cropped stretch nobody can see and then jump. Measured on
-   * load, on resize and once the display face has loaded (a font swap changes
-   * every advance, and with it how many dashes fit), never on a scroll tick.
-   */
   const fills = Array.from(document.querySelectorAll<HTMLElement>('.shell .fill'))
-  /*
-   * The write head is the wordmark's own cursor, borrowed rather than
-   * duplicated: a second block drawn elsewhere would have to hide the first.
-   *
-   * It is NOT moved in the DOM. Reparenting it into `.fill` breaks four things
-   * at once: `overflow: hidden` would clip it exactly where each run ends, the
-   * 0.4em letter-spacing would add a slot of air and shove every remaining dash
-   * along, its em-based metrics would re-resolve against a different font-size
-   * so the block would change size, and it would step outside `.brand`'s drop
-   * shadow. A transform from where it already lives keeps all four.
-   */
+  // Never reparent this into `.fill`: clipping, letter-spacing, font metrics,
+  // and `.brand`'s drop shadow would all break.
   const cursor = document.querySelector<HTMLElement>('.shell .cursor')
 
   if (fills.length > 0) {
-    // How much of a dash's own slot its appearance can be pushed back by. Under
-    // 1 so the order can never invert: dash i lights somewhere inside [i, i+1),
-    // which is still strictly after dash i-1.
+    // Must stay under 1, or the order inverts: dash i lights inside [i, i+1),
+    // still strictly after dash i-1.
     const JITTER = 0.85
-    // How much of the remaining distance the fill closes per frame. The lag the
-    // owner asked for, and the reason it reads as catching up rather than
-    // tracking.
     const EASE = 0.18
-    // Ceiling on that, in dashes per frame: without it a jump to the bottom of
-    // a long post closes most of the distance in the first frame or two, which
-    // reads as the whole run appearing at once rather than being typed. At 60Hz
-    // this is roughly 54 dashes a second, so even a full-length jump types
-    // itself out in well under two seconds.
+    // Ceiling in dashes per frame, so a jump to the bottom of a long post still
+    // types itself out.
     const MAX_STEP = 0.9
 
     let track: HTMLElement[] = []
     let jitter: number[] = []
-    /*
-     * Where the head is, in px to the right of its home position, once exactly
-     * `i` dashes are lit. `stops[0]` is 0, which is home: nothing written past
-     * the brand yet, and the header at the top of a post therefore draws the
-     * cursor in the position it has always drawn it. `stops[i]` past that is
-     * the TRAILING edge of dash `i - 1`, which is also the leading edge of dash
-     * `i`, since two consecutive characters of one run share that edge (letter-
-     * spacing goes into each character's own advance). So the head always
-     * occupies the slot of the dash it is about to write, one step ahead of its
-     * own trail, which is what a cursor does.
-     */
+    // Head position in px right of home, indexed by how many dashes are lit.
+    // Index i is the left edge of dash i, the one about to be written.
     let stops: number[] = []
-    /*
-     * The distance from the cursor's home edge to the first run, measured once:
-     * it is the cursor's own width, `.word`'s padding and `.shell`'s column
-     * spacing, none of which move when the display face loads.
-     *
-     * Measured ONLY on the first pass, which is the only one guaranteed to
-     * catch the wordmark whole: this runs at module time, before header-brand
-     * starts its scramble on DOMContentLoaded. Any later measurement (a font
-     * swap, a resize) can arrive mid-scramble, where the letters are blanked
-     * and `.word` collapses onto its `min-inline-size`; reading the cursor
-     * there would put home ~30px off for the rest of the session. Anchoring to
-     * `.fill` keeps the font swap's real effect, which is that every dash edge
-     * moves, without importing that transient width.
-     */
+    // Measured on the FIRST pass only: a later run can arrive mid-scramble in
+    // header-brand, when the letters are blank and `.word` collapses to its min.
     let lead: number | null = null
-    // How many leading dashes are lit. The thresholds below only ever increase
-    // with the index, so the lit set is always a prefix and this one number is
-    // enough to know exactly which spans need touching on any given frame.
+    // Thresholds increase with the index, so the lit set is always a prefix.
     let lit = 0
     let shown = 0
     let target = 0
     let animating = false
     let queued = false
 
-    /** Where in the run dash `index` lights up, in dashes. */
     function threshold(index: number): number {
       return reducedMotion() ? index : index + jitter[index]
     }
 
-    /**
-     * Where the head is drawn, in px from home.
-     *
-     * It rides `lit`, the count of dashes actually written, not `shown` and not
-     * `scrollY`. `threshold()` pushes each dash's lighting back by up to JITTER
-     * of its slot, so `shown` can be well past a dash the trail has not drawn:
-     * placing from it ran the block ahead of its own trail, further ahead the
-     * more jitter that dash drew.
-     *
-     * One stop per dash, no interpolation. Sliding between two stops is what
-     * let the head drift from its trail, which only ever moves a whole
-     * character at a time. Stepping makes the two the same thing by
-     * construction, and it is what typing looks like: a cursor jumps a
-     * character, it does not glide across one.
-     *
-     * Writes one custom property and reads nothing, so it is safe every frame.
-     */
+    // Rides `lit`, not `shown`: `threshold()` pushes each dash back by up to
+    // JITTER of its slot, so `shown` can be past a dash the trail has not drawn.
     function moveHead(): void {
       if (cursor === null || stops.length === 0) return
       const last = stops.length - 1
@@ -138,26 +46,14 @@
       cursor.style.setProperty('--cursor-x', `${stops[index].toFixed(2)}px`)
     }
 
-    /** Adds or removes only the spans the fill has actually crossed. */
     function paint(): void {
       while (lit < track.length && threshold(lit) < shown) track[lit++].classList.add('lit')
       while (lit > 0 && threshold(lit - 1) >= shown) track[--lit].classList.remove('lit')
       moveHead()
     }
 
-    /*
-     * The head's stops, from the LEFT edge of each dash the crop left visible.
-     *
-     * Not the trailing edges this used to read: a dash carries 0.4em of
-     * letter-spacing as part of its own advance, so its right edge is most of
-     * half an em past the glyph, and stacking that on the final dash put the
-     * head inside the search button. The left edge also says what the block
-     * means, since the pen is on the character it is writing.
-     *
-     * The last stop is that final dash's left edge too, so a fully read post
-     * parks the block on it rather than in the shell beyond. Nothing is lost:
-     * that dash is lit either way.
-     */
+    // Left edges, never right: a dash carries 0.4em of letter-spacing inside
+    // its own advance, so its right edge is half an em past the glyph.
     function measureHead(lefts: number[]): void {
       if (cursor === null) return
       const start = fills[0].getBoundingClientRect().left
@@ -165,11 +61,8 @@
       if (lead === null) lead = start - box.left
       const home = start - lead
       const last = lefts.length - 1
-      /*
-       * A stop positions the block's LEFT edge, so on the final dashes its own
-       * width still carried it past the run and into the search button. This is
-       * the furthest left edge that keeps the whole block inside the dashes.
-       */
+      // A stop positions the block's LEFT edge, so subtracting its width keeps
+      // the whole block inside the run on the final dashes.
       const limit = fills[fills.length - 1].getBoundingClientRect().right - box.width - home
       stops = [0]
       for (let index = 0; index <= last; index += 1) {
@@ -177,11 +70,8 @@
       }
     }
 
-    /*
-     * Which dashes the crop leaves visible, a fresh jitter offset for each, and
-     * where the head has to be for each. Reads geometry, so it runs on load and
-     * resize only, never per scroll.
-     */
+    // Only the dashes `.fill`'s crop leaves visible are part of the meter.
+    // Reads geometry, so it runs on load and resize only, never on a scroll.
     function measure(): void {
       for (const dash of track) dash.classList.remove('lit')
       lit = 0
@@ -191,8 +81,7 @@
         const edge = fill.getBoundingClientRect().right
         for (const dash of fill.querySelectorAll<HTMLElement>('.dash')) {
           const box = dash.getBoundingClientRect()
-          // Half a pixel of slack: a fractional layout width should not lose
-          // the last dash that does in fact draw.
+          // Half a pixel of slack for fractional layout widths.
           if (box.right <= edge + 0.5) {
             track.push(dash)
             lefts.push(box.left)
@@ -206,19 +95,6 @@
       paint()
     }
 
-    /*
-     * Blinking or solid. A terminal cursor blinks while it waits for you and
-     * holds steady while characters are going down, and that is the distinction
-     * worth keeping here: a block that blinks while it slides along the rule
-     * reads as flicker, not as a cursor. So it is solid for exactly as long as
-     * the eased count is still moving, and back to blinking the moment it parks,
-     * whether that is at the brand or halfway down the post.
-     *
-     * The blink itself belongs to header-brand.ts, which writes an inline
-     * opacity per frame and knows nothing about any of this. One attribute and
-     * one `!important` rule in BrandHeader.astro is the whole of the contract
-     * between them; neither script has to import the other or share a clock.
-     */
     function setWriting(writing: boolean): void {
       if (cursor === null) return
       if (writing) cursor.setAttribute('data-writing', 'true')
@@ -242,10 +118,6 @@
 
     function advance(): void {
       if (reducedMotion()) {
-        // No lag and no jitter: the fill is wherever the reader is, and so is
-        // the head. Nothing is travelling, so there is no writing state to mark
-        // either; the same convention the lag and the jitter already follow,
-        // and header-brand.ts has frozen the cursor solid regardless.
         shown = target
         setWriting(false)
         paint()
@@ -257,14 +129,10 @@
       requestAnimationFrame(step)
     }
 
-    // Scroll position as a fraction of the scrollable height. rAF-throttled,
-    // the same as the fixed bar this replaces: a scroll listener that reads
-    // layout on every event is the classic way to make a long post feel heavy.
     const update = (): void => {
       queued = false
       const max = document.documentElement.scrollHeight - innerHeight
-      // A post shorter than the window has nothing to scroll, so it is either
-      // fully read already or the question is meaningless. Either way: full.
+      // A post shorter than the window has nothing to scroll: count it full.
       const ratio = max <= 0 ? 1 : Math.min(Math.max(scrollY / max, 0), 1)
       target = ratio * track.length
       advance()
@@ -283,21 +151,13 @@
 
     addEventListener('scroll', schedule, { passive: true })
     addEventListener('resize', remeasure, { passive: true })
-    // The dashes are laid out in the display face, which loads after first
-    // paint: until it has, the run measures at the fallback's advance and the
-    // crop falls in a different place.
+    // Before the display face loads the run measures at the fallback's advance.
     document.fonts?.ready.then(remeasure)
     measure()
     update()
 
-    // A reader turning reduced motion on mid-scroll should finish at the exact
-    // position rather than complete an eased run; both paths below do that
-    // through the same `advance`.
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', advance)
 
-    // The settings panel writes `data-motion` straight onto <html>; a
-    // MutationObserver is the plain platform way to notice that without this
-    // script importing the settings panel's own module.
     new MutationObserver(advance).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] })
   }
 </script>

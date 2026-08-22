@@ -1,27 +1,4 @@
 ---
-// The four header nav links Lucas asked for: POSTS, SERIES, TAGS, ABOUT, in
-// that order. BrandHeader.astro imports this component and renders it between
-// its own two runs of dashes, ahead of the `.controls` row (the search
-// trigger, the language switch, the theme toggle, settings): a separate
-// cluster from that row, not a child inside it.
-//
-// POSTS, SERIES and TAGS all have a real destination now: the locale's own
-// home page, /series/ and /tags/ (this last pair built by this same pass,
-// src/pages/{series,tags}/index.astro). ABOUT still has nowhere to go:
-// /about/ does not exist, and this component does not invent Lucas's own
-// biography to fill it. It stays a plain link to the un-generated /about/
-// path (Astro never emits a page for a path nothing renders, so it never
-// reaches the sitemap either); a reader who clicks it gets the site's own
-// friendly 404 rather than a dead button, and pointing a real page there
-// later is a rename away.
-//
-// `localePath` (src/i18n/ui.ts) gives every link the same source-bare,
-// prefixed-elsewhere shape every other locale-aware link on this site
-// already uses (BaseLayout's footer links, LangSwitcher's own home
-// fallback). /series/ and /tags/ get real /en/ twins now
-// (src/pages/en/{series,tags}/index.astro), so the prefix is no longer a
-// placeholder for those two; /about/ keeps it anyway, ready for whichever
-// language gets a real page first.
 import { getCategories } from '../lib/taxonomy'
 import { LOCALES, localePath, SOURCE_LOCALE, t, type Locale } from '../i18n/ui'
 
@@ -40,54 +17,29 @@ const LINKS: { key: LinkKey; path: string }[] = [
   { key: 'navAbout', path: '/about/' },
 ]
 
-// Which of the four is "current". The header renders on every page, so this
-// reads Astro.url.pathname rather than taking a prop nobody would remember to
-// pass consistently.
-//
-// The English tree is prefixed (/en/...), so the prefix comes off first: the
-// four rules below are written once, against the bare path, and apply to
-// both trees alike rather than needing an English-only copy of each one.
 const OTHER_LOCALES = LOCALES.filter((entry) => entry !== SOURCE_LOCALE)
 const localePrefix = OTHER_LOCALES.find(
   (entry) => Astro.url.pathname === `/${entry}` || Astro.url.pathname.startsWith(`/${entry}/`),
 )
 const path = localePrefix === undefined ? Astro.url.pathname : Astro.url.pathname.slice(localePrefix.length + 1) || '/'
 
-// A post's own page (src/pages/[...slug].astro) and a category listing
-// (src/pages/[category]/[...page].astro) share exactly one URL shape,
-// `/<segment>/`: Astro tells them apart at build time by which one a given
-// segment's getStaticPaths actually produced, and it fails the build on a
-// collision (see that file's own comment). This component has no such build
-// step, so it asks the same question getCategories() itself answers: only a
-// segment that is a real category name counts, which is what keeps POSTS
-// current on a section listing (a slice of "browsing posts", reachable only
-// by clicking a category chip, with no nav item of its own) while leaving an
-// individual post, which is any other single segment, unmarked.
+// A post page and a category listing share the URL shape `/<segment>/`; only
+// the category set can tell them apart at render time.
 const categorySlugs = new Set((await getCategories()).keys())
 
 function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): boolean {
   switch (key) {
     case 'navPosts': {
-      // The home page itself, and its own pagination (/2/, /3/, ...): both
-      // src/pages/[...page].astro, one segment, always a bare number.
       if (path === '/' || /^\/\d+\/$/.test(path)) return true
-      // A category listing and its pagination, e.g. /javascript/ or
-      // /javascript/2/: one segment, optionally a page number, and that
-      // first segment has to be a real category, or this would also catch
-      // /tags/javascript/ (TAGS' own path, below) and every individual post.
+      // The category test has to be there, or this also catches /tags/<name>/
+      // and every individual post.
       const section = /^\/([^/]+)\/(?:\d+\/)?$/.exec(path)
       return section !== null && categorySlugs.has(section[1])
     }
     case 'navTags':
-      // /tags/ itself, or a specific tag and its pagination
-      // (/tags/javascript/, /tags/javascript/2/). Both languages now build all
-      // three (src/pages/en/tags/), and the /en/ prefix already came off above,
-      // so /en/tags/javascript/2/ reaches this test as /tags/javascript/2/ and
-      // needs no case of its own.
       return path === '/tags/' || /^\/tags\/[^/]+\/(?:\d+\/)?$/.test(path)
     case 'navSeries':
-      // /series/ itself, or a specific series (/series/<name>/, no
-      // pagination: src/pages/series/[name].astro never paginates).
+      // No pagination arm: series listings never paginate.
       return path === '/series/' || /^\/series\/[^/]+\/$/.test(path)
     case 'navAbout':
       return path === '/about/'
@@ -128,18 +80,9 @@ function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): bool
     margin-inline-end: 0;
   }
 
-  /*
-   * An ordinary text underline, not the site's own dashed prose-link rest
-   * state (--link-underline-style etc., prose/links.css): these four sit in
-   * the header, outside the `:is(main, footer) a` scope that treatment reads,
-   * on purpose (see that file's own SCOPE comment), and Lucas's ask was to
-   * underline them "naturally", which reads as the plain browser default
-   * rather than borrowing prose's own decorated one.
-   */
   .nav-links a {
-    /* The block padding pulled back by the same margin buys the 44px tap
-       floor (WCAG 2.5.8) without fattening the header row; background-clip
-       keeps the hover fill on the visible line, off the invisible padding. */
+    /* background-clip keeps the hover fill on the visible line, off the
+       invisible tap padding. */
     display: inline-block;
     padding-inline: 1px;
     padding-block: 0.7rem;
@@ -151,20 +94,6 @@ function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): bool
     text-underline-offset: 3px;
   }
 
-  /*
-   * The current page's marker hangs off `aria-current="page"` rather than a
-   * separate class, the same way TocBranch.astro hangs its own current-heading
-   * paint off `aria-current='location'`: one attribute is both what a screen
-   * reader announces and what CSS reads, so the two can never drift apart.
-   *
-   * It reuses the hover/focus fill instead of a paint written just for this:
-   * a solid inverted block reads as a shape difference, which is what WCAG
-   * 1.4.1 asks for beyond colour alone, and a bolder font-weight would have
-   * missed that bar. The underline drops here for the same reason the
-   * site's own hover rule drops it (prose/links.css): the fill alone already
-   * marks "this one is different", and an underline drawn in the same
-   * inverted colour as the text above it would mostly disappear anyway.
-   */
   .nav-links a:hover,
   .nav-links a:focus-visible,
   .nav-links a[aria-current='page'] {

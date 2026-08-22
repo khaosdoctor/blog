@@ -1,31 +1,15 @@
-/**
- * Every language the shell speaks, source language first. Adding one is this
- * array plus its table below, and `scripts/check-i18n.ts` reads this same
- * constant, so the checker never needs a list of its own.
- */
 export const LOCALES = ['pt', 'en'] as const
 
 export type Locale = (typeof LOCALES)[number]
 
-/**
- * The language the site is written in. It keeps the bare path (`/slug/`) while
- * every other language is prefixed (`/en/slug/`). `SOURCE_LANG` in
- * src/lib/posts.ts is the same value, declared separately because that module
- * imports `astro:content` and this one has to stay importable from a plain
- * node script. The checker asserts the two agree.
- */
 export const SOURCE_LOCALE: Locale = 'pt'
 
-/**
- * What a locale is called in an `hreflang`. The region is what search engines
- * match against, so Portuguese is announced as pt-BR rather than pt.
- */
+// Search engines match on the region, so Portuguese is announced as pt-BR.
 export const HREFLANG: Record<Locale, string> = {
   pt: 'pt-BR',
   en: 'en',
 }
 
-/** Where a route shared by every language lives in one of them. */
 export function localePath(locale: Locale, path: string): string {
   return locale === SOURCE_LOCALE ? path : `/${locale}${path}`
 }
@@ -264,11 +248,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Idioma',
     switchLanguage: 'Mudar para %s',
     version: 'Versão',
-    // 2019 is the first published post's year, fixed. The closing year comes
-    // from the build, so it never goes stale on its own.
     copyright: '© 2019–%d Lucas Santos. Todos os direitos reservados.',
-    // PxPlus IBM VGA's CC BY-SA licence needs attribution reachable from the
-    // site. /oss/ is that attribution; see docs/theming.md.
     credits: 'Créditos',
     githubRepo: 'Repositório no GitHub',
     linkedinProfile: 'Perfil no LinkedIn',
@@ -409,12 +389,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Language',
     switchLanguage: 'Switch to %s',
     version: 'Version',
-    // 2019 is the year the first post went up (content/blog), fixed. The end
-    // year comes from new Date().getFullYear() at build time, so it never goes
-    // stale on its own: every new build already carries the right year.
     copyright: '© 2019–%d Lucas Santos. All rights reserved.',
-    // PxPlus IBM VGA is CC BY-SA, which requires attribution reachable from the
-    // site. /en/oss/ is that attribution today; see docs/theming.md.
     credits: 'Credits',
     githubRepo: 'GitHub repository',
     linkedinProfile: 'LinkedIn profile',
@@ -468,12 +443,6 @@ export function t(lang: Locale, key: UIKey, ...args: Array<string | number>): st
   return args.reduce((result: string, arg) => result.replace(/%[ds]/, String(arg)), template)
 }
 
-/**
- * For components that render inside both page trees without a locale prop, such
- * as the ones injected into MDX. Every language but the source one lives under
- * its own prefix, so the first path segment is the only signal available and it
- * is a reliable one.
- */
 export function localeFromPath(pathname: string): Locale {
   const segment = pathname.split('/')[1]
   return LOCALES.find((locale) => locale === segment) ?? SOURCE_LOCALE

@@ -4,8 +4,6 @@ import { getPublishedPosts, LIST_PAGE_SIZE, type Post } from './posts'
 import { slugify } from './slugify'
 import { LOCALES, type Locale } from '../i18n/ui'
 
-/** A section is the `category` field: exactly one per post. One language at
-    a time, defaulting to the source one, the same shape getTags() takes. */
 export async function getCategories(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
   const posts = await getPublishedPosts(lang)
   const byCategory = new Map<string, Post[]>()
@@ -17,11 +15,8 @@ export async function getCategories(lang?: Post['data']['lang']): Promise<Map<st
   return byCategory
 }
 
-/**
- * Which categories each locale has a section page for. A section page only
- * exists in a language that has a post in it, so the alternates (and the
- * language switcher) are built from this rather than assumed.
- */
+// A section page only exists in a language that has a post in it, so the
+// language switcher must be built from this rather than assuming both locales.
 export async function categoryLocales(): Promise<(readonly [Locale, Set<string>])[]> {
   const languages = await Promise.all(
     LOCALES.map(async (locale) => [locale, await getPublishedPosts(locale)] as const),
@@ -31,12 +26,6 @@ export async function categoryLocales(): Promise<(readonly [Locale, Set<string>]
   )
 }
 
-/**
- * Every tag in one language, mapped to the posts carrying it, newest first.
- * The tag string (and its slug) is shared across languages because a
- * translation repeats its original's `tags:` line verbatim; the membership is
- * not, so a tag with no translated post has no entry in that language at all.
- */
 export async function getTags(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
   const posts = await getPublishedPosts(lang)
   const byTag = new Map<string, Post[]>()
@@ -50,12 +39,8 @@ export async function getTags(lang?: Post['data']['lang']): Promise<Map<string, 
   return byTag
 }
 
-/**
- * The paginated routes for one language's per-tag pages, shared by
- * src/pages/tags/[tag]/[...page].astro and its /en/ twin so the two cannot
- * drift. `languages` names only the locales that actually build a page for
- * this tag: the switcher must never offer a URL no route emits.
- */
+// `languages` names only the locales that actually build a page for this tag:
+// the switcher must never offer a URL no route emits.
 export async function tagListingRoutes(paginate: PaginateFunction, lang?: Locale) {
   const [tags, byLocale] = await Promise.all([
     getTags(lang),
@@ -75,20 +60,13 @@ export async function tagListingRoutes(paginate: PaginateFunction, lang?: Locale
 
 export type Series = { name: string; posts: Post[] }
 
-/* The smallest and largest a tag chip is allowed to read in the cloud. The
-   floor is 1, the chip's own size, so the cloud only ever grows a tag: with a
-   floor below 1 the many one-post tags all shrank by a hair, which reads as
-   nothing having happened. */
+// Multipliers on the chip's own size. The floor must stay at 1 so the cloud
+// only ever grows a tag.
 const TAG_SCALE_MIN = 1
 const TAG_SCALE_MAX = 3
 
-/**
- * How large a tag reads in the cloud, as a multiplier on the chip's own size.
- * Logarithmic because the counts are heavily skewed: a linear scale flattens
- * everything under the biggest tags, and a log spreads the crowded low end.
- * log1p so a count of 1 is not log(1) = 0 fighting a zero-width span; the
- * floor when max <= min avoids dividing by a zero range.
- */
+// Logarithmic because tag counts are heavily skewed and a linear scale would flatten everything below
+// the biggest tags; log1p keeps a count of 1 from mapping to log(1) = 0.
 export function tagCloudScale(count: number, min: number, max: number): number {
   if (max <= min) return TAG_SCALE_MIN
   const span = Math.log1p(max) - Math.log1p(min)
@@ -96,24 +74,18 @@ export function tagCloudScale(count: number, min: number, max: number): number {
   return Math.round((TAG_SCALE_MIN + position * (TAG_SCALE_MAX - TAG_SCALE_MIN)) * 1000) / 1000
 }
 
-/* How far off the row's centre line a chip may be nudged, in em of its own
-   size. Small: past about a third of a line the rows start colliding. */
+// Offsets in em of the chip's own size. Past about a third of a line the rows
+// start colliding.
 const TAG_LIFT_STEPS = [-0.3, 0.15, -0.15, 0.3, 0, 0.22, -0.22]
 
-/**
- * A small vertical offset per tag, so the cloud stops reading as text on
- * ruled lines. Hashed from the tag's own name so a rebuild never reshuffles
- * the page and the two language trees agree for one tag.
- */
+// Hashed from the tag name so a rebuild never reshuffles the cloud and both
+// language trees place the same tag identically.
 export function tagCloudLift(tag: string): number {
   return TAG_LIFT_STEPS[hashString(tag) % TAG_LIFT_STEPS.length]
 }
 
-/**
- * The display title of a series: the first `seriesName` among its parts, the
- * slug as fallback. The members are all one language on purpose: borrowing
- * the Portuguese name would put Portuguese in an English heading.
- */
+// `members` must be one language: borrowing the Portuguese name would put
+// Portuguese in an English heading.
 export function seriesTitle(slug: string, members: Post[]): string {
   for (const member of members) {
     const name = member.data.seriesName?.trim()
@@ -122,7 +94,6 @@ export function seriesTitle(slug: string, members: Post[]): string {
   return slug
 }
 
-/** Groups already-fetched posts by series, ordered by seriesOrder (not date). */
 export function buildSeriesMap(posts: Post[]): Map<string, Post[]> {
   const bySeries = new Map<string, Post[]>()
   for (const post of posts) {
@@ -140,28 +111,18 @@ export function buildSeriesMap(posts: Post[]): Map<string, Post[]> {
   return bySeries
 }
 
-/**
- * Series posts ordered by seriesOrder, one language at a time: each language
- * builds a complete map of its own, so a series page never mixes languages
- * and a half-translated series just comes out shorter on the missing side.
- */
+// One language at a time, so a series page never mixes languages and a
+// half-translated series comes out shorter rather than mixed.
 export async function getSeries(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
   const posts = await getPublishedPosts(lang)
   return buildSeriesMap(posts)
 }
 
-/**
- * Previous/next within a series. Takes an already-built map so per-post
- * callers build it once instead of re-fetching per page, and the map decides
- * the language of every neighbour it returns.
- */
 export function getSeriesNavigation(
   post: Post,
   seriesMap: Map<string, Post[]>,
 ): {
-  /** The slug, shared by every language: /series/<name>/ and /en/series/<name>/. */
   name: string
-  /** Derived from the first part's title. */
   title: string
   index: number
   total: number
@@ -183,13 +144,5 @@ export function getSeriesNavigation(
   }
 }
 
-/** Tags and series names become URL segments, so they need slugifying. */
-// Re-exported so existing callers keep importing it from here, while the
-// implementation stays reachable from a plain node script.
 export { slugify } from './slugify'
-
-// A chip's colour, derived from its own label. Re-exported so the pages that
-// already import it from here keep working, while the implementation stays
-// reachable from a client script: this file imports ./posts, which imports
-// `astro:content`, and that module is server-only.
 export { chipColor } from './chip-color'

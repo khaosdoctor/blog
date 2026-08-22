@@ -1,11 +1,3 @@
-/*
- * Every block says which language it is. Bottom right by default: the copy
- * button owns the top right corner, and a filename tab owns the top left when
- * there is one. The lab page shows the other placements.
- *
- * The frame itself, the filename tab and the marked lines live in
- * src/styles/code-blocks.css.
- */
 .expressive-code figure {
   position: relative;
 }

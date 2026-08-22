@@ -1,18 +1,15 @@
 ---
 import { localeFromPath, t } from '../i18n/ui'
 
-/** Keeps the caption and the original URL when a remote host stops serving an image. */
 interface Props {
   src: string
   alt?: string
   caption?: string
 }
 
-// The dead URL is kept in data-original on the frame. It used to be an HTML
-// comment, and Astro does not evaluate expressions inside comments, so every page
-// shipped the literal text `{src}` instead.
+// The dead URL has to ride in data-original rather than an HTML comment: Astro
+// does not evaluate expressions inside comments and would ship `{src}` verbatim.
 const { src, alt, caption } = Astro.props
-// MDX calls this without props, so the URL is what tells us the language.
 const locale = localeFromPath(Astro.url.pathname)
 const host = (() => {
   try {
@@ -33,7 +30,6 @@ const host = (() => {
 </figure>
 
 <style>
-  /* The block margin comes from core.css's own `figure` rule. */
   .frame {
     position: relative;
     display: flex;
@@ -50,10 +46,6 @@ const host = (() => {
     text-align: center;
   }
 
-  /* A typed-out sad face rather than an emoji: an emoji is a font-dependent
-     colour image, and this whole site is going pixel and monochrome. Painted behind
-     the labels as a watermark, hidden from screen readers because it is
-     decoration and the frame already carries a real label. */
   .sad {
     position: absolute;
     z-index: -1;
@@ -64,8 +56,8 @@ const host = (() => {
     line-height: 1;
     letter-spacing: -0.05em;
     user-select: none;
-    /* Typed sideways, read upright: rotating it puts the eyes above the mouth
-       instead of leaving the reader to tilt their head. */
+    /* The face is typed sideways, so the rotation is what puts the eyes above
+       the mouth. */
     transform: rotate(90deg);
   }
 

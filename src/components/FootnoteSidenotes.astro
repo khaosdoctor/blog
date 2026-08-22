@@ -1,38 +1,6 @@
 ---
-/**
- * The parts of the notes feature CSS cannot do alone: four independent,
- * feature-detected behaviours, none depending on the others.
- *
- * 1. Highlight the text a Sidenote or MarginNote is attached to, on hover or
- *    focus. That text is not wrapped in anything, it is whatever prose
- *    precedes the tag, so no `:hover` rule can reach it. The CSS Custom
- *    Highlight API paints an arbitrary Range without touching the DOM; this
- *    builds the Range and sidenotes.css paints it.
- *
- *    One delegated pair of listeners on the document, since this runs on every
- *    page whether it has zero notes or a dozen.
- *
- * 2. `.note-copy-link` copies a note's own anchor URL without navigating.
- *    BaseLayout has a delegated handler for the same shape, but it exists to
- *    let the browser FOLLOW the link after copying, which is exactly what a
- *    note must not do (round 1 shipped that as an <a> and it jumped the page).
- *    It reuses the same `.toast` and 2-second removal, so the site keeps one
- *    copy-confirmation pattern rather than growing a second.
- *
- * 3. The mirror of (1): hovering the bound text grows its note. That text has
- *    no element at all, so `mouseover` has nothing to bubble from either. This
- *    hit-tests the pointer instead, via `caretPositionFromPoint` or
- *    `caretRangeFromPoint`, and checks whether the text node's `nextSibling`
- *    is a `.note`.
- *
- * 4. The same pairing for a footnote, where both ends ARE real elements, so a
- *    class toggle does the whole job. The plugin stamps the aside with
- *    `data-footnote-ref-id`, so this is `getElementById` one way and an
- *    attribute selector the other, never text parsing.
- *
- * Every one is wrapped and feature-detected: a missing API or an unexpected DOM
- * shape is a cosmetic loss, never a broken page.
- */
+// No element wraps a note's bound text, so this uses a Range, not a selector.
+// The copy handler is separate here: a note's copy must not follow the link.
 ---
 
 <script>
@@ -55,9 +23,6 @@
 
       var NAME = 'note-bound'
 
-      // The bound text is the plain text node immediately before the note's
-      // own <span>, in the same parent: whatever prose the author placed the
-      // <Sidenote>/<MarginNote> tag right after.
       function boundRange(note) {
         var node = note.previousSibling
         if (!node || node.nodeType !== Node.TEXT_NODE || !node.textContent.trim()) return null
@@ -89,19 +54,13 @@
         show(event.target)
       })
       document.addEventListener('focusout', hide)
-    } catch (_error) {
-      // A highlight that never shows is a cosmetic loss, not a broken page.
-    }
+    } catch (_error) {}
   })()
 </script>
 
 <script is:inline>
   ;(function () {
     try {
-      // Whichever of the two the browser has: Firefox ships
-      // caretPositionFromPoint, Chromium (as of this writing) only
-      // caretRangeFromPoint. Neither existing is a plain no-op, not an
-      // error, same as the highlight block above.
       var textNodeAt
       if (typeof document.caretPositionFromPoint === 'function') {
         textNodeAt = function (x, y) {
@@ -120,9 +79,6 @@
       var GROWN = 'note-grow'
       var grown = null
 
-      // The inverse of boundRange above: given the text node under the
-      // pointer, its own note (if it has one) is whatever immediately
-      // follows it in the same parent.
       function noteAfter(node) {
         if (!node || node.nodeType !== Node.TEXT_NODE) return null
         var next = node.nextSibling
@@ -140,15 +96,10 @@
       document.addEventListener('mousemove', function (event) {
         setGrown(noteAfter(textNodeAt(event.clientX, event.clientY)))
       })
-      // relatedTarget is null when the pointer leaves the window outright,
-      // the one case mousemove stops firing without another element to
-      // report hitting.
       document.addEventListener('mouseout', function (event) {
         if (!event.relatedTarget) setGrown(null)
       })
-    } catch (_error) {
-      // A note that never grows is a cosmetic loss, not a broken page.
-    }
+    } catch (_error) {}
   })()
 </script>
 
@@ -174,16 +125,12 @@
         if (grown) grown.classList.add(GROW)
       }
 
-      // aside -> reference: the plugin stamps the aside with the
-      // reference's own id (data-footnote-ref-id), so this is a plain
-      // lookup, no runtime text parsing.
       function referenceSup(aside) {
         var id = aside.dataset.footnoteRefId
         var ref = id ? document.getElementById(id) : null
         return ref ? ref.closest('sup') : null
       }
 
-      // reference -> aside: the mirror lookup, by the same attribute.
       function asideFor(anchor) {
         return anchor.id ? document.querySelector('[data-footnote-ref-id="' + anchor.id + '"]') : null
       }
@@ -222,9 +169,6 @@
         show(event.target)
       })
       document.addEventListener('focusout', clear)
-    } catch (_error) {
-      // A footnote pairing that never highlights or grows is a cosmetic
-      // loss, not a broken page.
-    }
+    } catch (_error) {}
   })()
 </script>

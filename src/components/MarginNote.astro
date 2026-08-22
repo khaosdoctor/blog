@@ -1,26 +1,11 @@
 ---
-/**
- * <MarginNote>inline text</MarginNote>
- *
- * The same mechanics as <Sidenote> but unnumbered: no counter mark in the text
- * flow, the note just rests in the margin. Injected globally into MDX.
- *
- * - Wide: floats into the right margin, unmarked, always visible. Narrow:
- *   there is no margin to show it in, so a small dot becomes the tap target
- *   for the same checkbox popover.
- * - Its copy button behaves exactly as a Sidenote's, in the top-LEFT corner
- *   rather than the right.
- * - Hovering highlights the text it is attached to, painted on a Range by
- *   FootnoteSidenotes.astro since that text is not wrapped in anything.
- * - Slot content MUST be inline only.
- */
+// Slot content must be inline only: this renders inside a <span> in the running
+// text, so a block element would break the paragraph around it.
 import { localeFromPath, t } from '../i18n/ui'
 import '../styles/sidenotes.css'
 
-// Same reasoning as Sidenote.astro's own counter (module-scoped, resets when
-// the pathname changes), kept as its own separate counter rather than a
-// shared one: the two id spaces never need to interleave, only stay unique
-// within their own prefix.
+// Module scope survives between pages in one build, so the counter has to reset
+// on a pathname change or ids would keep climbing across posts.
 let lastPath = ''
 let count = 0
 

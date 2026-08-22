@@ -4,18 +4,6 @@ import { estimateReadingTime, formatDate, urlOf } from '../lib/posts'
 import { localePath } from '../i18n/ui'
 import ReadingTime from './ReadingTime.astro'
 
-/**
- * Posts in the shared listing table (src/styles/listing.css): date, title,
- * dotted leader, section and reading time in one row.
- *
- * Dense on purpose. A reader scanning the archive sees many posts per screen,
- * the eye runs down the title column, and the leader only carries it sideways
- * when they go looking for a date or a section. That is what makes this
- * survive a hundred posts.
- *
- * No thumbnails and no excerpt, both deliberate: the description still exists,
- * HoverPreviews reads it from each post's own built page.
- */
 interface Props {
   posts: Post[]
   showCategory?: boolean
@@ -23,15 +11,13 @@ interface Props {
 
 const { posts, showCategory = true } = Astro.props
 
-// The section index of the post's own language. This list renders inside both
-// page trees, and a bare /<category>/ sent an English reader from an English
-// listing to a Portuguese one.
+// This list renders inside both page trees, so the link has to carry the post's
+// own language or an English reader leaves for the Portuguese section index.
 function categoryUrl(post: Post): string {
   return localePath(post.data.lang, `/${post.data.category}/`)
 }
 
-// 200 of them overflows any width the leader is ever given, clipped by its own
-// overflow: hidden.
+// Enough dots to overflow any width the leader is given, then clipped by CSS.
 const LEADER = '·'.repeat(200)
 ---
 
@@ -53,10 +39,6 @@ const LEADER = '·'.repeat(200)
             {post.data.category}
           </a>
         )}
-        {/* post.body is the raw markdown/MDX Astro already loaded for this
-            entry; see estimateReadingTime's own comment for why this reads
-            that instead of calling render() again per post. ReadingTime.astro
-            owns the "min" abbreviation. */}
         <span class="listing-figure">
           <ReadingTime minutes={estimateReadingTime(post.body ?? '')} locale={post.data.lang} />
         </span>

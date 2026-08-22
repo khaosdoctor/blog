@@ -1,7 +1,3 @@
-// The preferences panel from SettingsPanel.astro. The open/close, keyboard and
-// focus handling is the shared popover-menu shell; the Conway controls call
-// conway.ts's own exported setters rather than duplicating its storage logic.
-
 import {
   getSettings,
   reseed,
@@ -27,35 +23,17 @@ import {
 import { promoteToPopover, wireMenu } from './popover-menu'
 import { onReady } from './ready'
 
-// hover-previews.ts binds its own listener to the same checkbox on post pages
-// and additionally moves the pinned set between storages. This binding is what
-// makes the checkbox mean something on every OTHER page, where that module
-// never loads and there is nothing to reconcile.
 const HP_PERSIST_KEY = 'hp-persist'
 
-// Written the first time the nudge under the cog is shown, so it only ever
-// appears once per browser.
 const NUDGE_KEY = 'settings-nudge-seen'
 
-// The same key BaseLayout's pre-paint script reads, so there is no flash at
-// the default size. A raw percentage rather than named steps: the range is
-// more stops than attribute blocks want to carry, so this writes --font-scale
-// inline. Nothing stored means the stylesheet's own 100%.
 const FONT_SIZE_KEY = 'font-size'
 
-// Clamped, then snapped to the same grid the control steps on, so a value read
-// back from storage always resolves to a stop the control can rest on. This is
-// also what pulls a reader who set 400% under the old 10-500 range back to 160
-// rather than discarding their choice. BaseLayout's pre-paint script repeats
-// this arithmetic inline and has to keep matching it.
 function clampFontSize(value: number): number {
   const clamped = Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, value))
   return FONT_SIZE_MIN + Math.round((clamped - FONT_SIZE_MIN) / FONT_SIZE_STEP) * FONT_SIZE_STEP
 }
 
-// Missing or unparseable falls back to the default outright; out of range is
-// pulled inside rather than discarded, so a past choice still means the closest
-// thing to itself if the range moves again.
 function storedFontSize(): number {
   const raw = readStorage(FONT_SIZE_KEY)
   if (raw === null) return FONT_SIZE_DEFAULT
@@ -68,9 +46,6 @@ function applyFontSize(value: number): void {
   else document.documentElement.style.setProperty('--font-scale', String(value / 100))
 }
 
-// 'sans' is the only stored value that means anything; anything else, absent
-// included, is Literata. This only ever writes --font-body, the running text
-// inside .prose, never the header or code.
 const BODY_FACE_KEY = 'body-face'
 
 function storedBodyFace(): 'sans' | null {
@@ -94,27 +69,16 @@ function init(): void {
   const label = wrapper.dataset.label ?? 'Preferences'
   opener.setAttribute('aria-label', label)
 
-  /*
-   * What reset-all has to put back ON SCREEN, collected next to each control as
-   * it is wired rather than written out again at the bottom. Clearing a key is
-   * only half a reset: the control still shows the old choice until something
-   * re-reads it, and this panel has three shapes of that (aria-current on a
-   * button group, a slider's value, a checkbox).
-   */
   const resetHandlers: Array<() => void> = []
 
   wireMenu(wrapper, opener, menu)
 
 
-  // --- Motion: the same three-way shape as theme-toggle.ts, "system" written
-  // back as null so the OS query keeps deciding. ---
   const motionOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-motion-option')]
   const markMotion = (value: string): void => {
     for (const option of motionOptions) option.setAttribute('aria-current', String(option.dataset.value === value))
   }
   markMotion(getSettings().motion ?? 'system')
-  // resetConway() has already cleared the key by the time this runs, so it only
-  // has to re-read what was left.
   resetHandlers.push(() => markMotion(getSettings().motion ?? 'system'))
 
   for (const option of motionOptions) {
@@ -125,7 +89,6 @@ function init(): void {
     })
   }
 
-  // --- Text size: a minus/plus stepper around an editable number box. ---
   const fontSizeInput = menu.querySelector<HTMLInputElement>('#sp-font-size')
   const fontSizeValue = menu.querySelector<HTMLElement>('#sp-font-size-value')
   const fontSizeDown = menu.querySelector<HTMLButtonElement>('#sp-font-size-down')
@@ -140,15 +103,10 @@ function init(): void {
       const percent = `${value}%`
       fontSizeValue.textContent = percent
       fontSizeValue.setAttribute('aria-label', template.replace('%s', percent))
-      // Disabled at each end rather than live and silently doing nothing.
       if (fontSizeDown !== null) fontSizeDown.disabled = value <= FONT_SIZE_MIN
       if (fontSizeUp !== null) fontSizeUp.disabled = value >= FONT_SIZE_MAX
     }
 
-    // The one write path for every way the size can change. The default is
-    // stored as NOTHING stored, this site's convention for every preference, so
-    // 100 removes the key rather than writing a literal that would then have to
-    // be recognised as a default everywhere it is read.
     const setFontSize = (next: number): void => {
       value = clampFontSize(next)
       if (value === FONT_SIZE_DEFAULT) removeStorage(FONT_SIZE_KEY)
@@ -163,10 +121,8 @@ function init(): void {
     fontSizeUp?.addEventListener('click', () => setFontSize(value + FONT_SIZE_STEP))
     fontSizeReset?.addEventListener('click', () => setFontSize(FONT_SIZE_DEFAULT))
 
-    // `change`, not `input`: on a number field `input` fires per keystroke, so
-    // "5" on the way to "50" would clamp up and overwrite what is being typed.
-    // `change` fires on blur, Enter and each arrow step. An empty box falls back
-    // to the default rather than to NaN, which would clamp to the minimum.
+    // `input` fires per keystroke, so "5" on the way to "50" would clamp up and
+    // overwrite what is being typed; `change` fires on blur, Enter and arrow steps.
     fontSizeInput.addEventListener('change', () => {
       const typed = Number(fontSizeInput.value)
       setFontSize(Number.isFinite(typed) && fontSizeInput.value.trim() !== '' ? typed : FONT_SIZE_DEFAULT)
@@ -175,12 +131,8 @@ function init(): void {
     resetHandlers.push(() => setFontSize(FONT_SIZE_DEFAULT))
   }
 
-  // --- Reading font: the two vendored body faces. Its own class so this query
-  // never picks up the motion buttons. ---
   const fontFamilyOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-font-family-option')]
 
-  // One write path, same shape as setFontSize: null is the default and is
-  // stored as nothing stored, so a reset is this called with null.
   const setBodyFace = (face: 'sans' | null): void => {
     if (face === null) removeStorage(BODY_FACE_KEY)
     else writeStorage(BODY_FACE_KEY, face)
@@ -198,9 +150,6 @@ function init(): void {
 
   resetHandlers.push(() => setBodyFace(null))
 
-  // --- Accent: today's colour, or one the reader pins. The write path and the
-  // resolution live in lib/accent.ts, since header-brand.ts applies the same
-  // choice on every page load. ---
   const accentOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-accent-auto, .sp-accent-option')]
   if (accentOptions.length > 0) {
     const syncAccent = (): void => {
@@ -221,9 +170,6 @@ function init(): void {
     })
   }
 
-  // --- Conway. Every control from here to the pause button reads its value
-  // back out of conway.ts rather than storage, so its reset handler is the same
-  // one-liner that set it up: resetConway() has already run by then. ---
   const bgLife = menu.querySelector<HTMLInputElement>('#sp-bg-life')
   if (bgLife !== null) {
     const syncBgLife = (): void => {
@@ -234,17 +180,6 @@ function init(): void {
     resetHandlers.push(syncBgLife)
   }
 
-  // All four knobs are the same three lines with different names, so they share
-  // one wiring function.
-  //
-  // The readout prints from the value the SETTER took, not the slider's raw
-  // string: conway.ts clamps every one of these, so a value that arrives out of
-  // range (from storage written by an older build) would otherwise be shown as
-  // a number nothing is using.
-  //
-  // The unit is a symbol appended here rather than a translated string: `%`,
-  // `/s` and `s` read the same in both languages, and the readout is
-  // aria-hidden anyway, so this text is seen and never spoken.
   const wireKnob = (
     id: string,
     read: () => number,
@@ -270,7 +205,6 @@ function init(): void {
   wireKnob('sp-density', () => getSettings().density, setDensity, (value) => `${value}%`)
   wireKnob('sp-gps', () => getSettings().gps, setGps, (value) => `${value}/s`)
   wireKnob('sp-autofeed', () => getSettings().autoFeedSeconds, setAutoFeed, (value) => `${value}s`)
-  // Stored as an alpha and shown as a percentage: 0.09 reads as 9%.
   wireKnob('sp-opacity', () => getSettings().opacity, setOpacity, (value) => `${Math.round(value * 100)}%`)
 
   const pause = menu.querySelector<HTMLButtonElement>('#sp-pause')
@@ -291,18 +225,10 @@ function init(): void {
   const reseedButton = menu.querySelector<HTMLButtonElement>('#sp-reseed')
   reseedButton?.addEventListener('click', () => reseed())
 
-  // --- The search palette's shortcut letter. ---
   const searchKey = menu.querySelector<HTMLSelectElement>('#sp-search-key')
   if (searchKey !== null) {
-    /*
-     * Seven letters are shortcuts the browser owns, and the browser intercepts
-     * them before any listener here runs, so picking one used to save and then
-     * do nothing at all.
-     *
-     * Disabled rather than removed, so the alphabet stays whole and a reader
-     * looking for D finds it and can see it is unavailable. The reason rides in
-     * `title`, since a disabled option cannot be focused to announce more.
-     */
+    // The browser intercepts its own shortcut letters before any listener here
+    // runs. `title` is all a disabled option can carry.
     for (const option of searchKey.options) {
       if (!RESERVED_LETTERS.has(option.value)) continue
       option.disabled = true
@@ -316,25 +242,13 @@ function init(): void {
     resetHandlers.push(syncSearchKey)
   }
 
-  // --- Pinned preview persistence. ---
   const hpPersist = menu.querySelector<HTMLInputElement>('#hp-persist')
   if (hpPersist !== null) {
-    // On by default, so the stored value marks OFF and an absent key reads as
-    // checked. hover-previews.ts's own persistent() reads the same direction;
-    // both files write this key and have to agree on which value means what.
     hpPersist.checked = readStorage(HP_PERSIST_KEY) !== '0'
     hpPersist.addEventListener('change', () => {
       if (hpPersist.checked) removeStorage(HP_PERSIST_KEY)
       else writeStorage(HP_PERSIST_KEY, '0')
     })
-    /*
-     * The one reset that dispatches an event rather than doing the work itself.
-     * On a post page hover-previews.ts binds to this same checkbox and does more
-     * than write the flag: it moves the pinned set between storages. Setting
-     * `.checked` from a script fires nothing, so doing it silently would strand
-     * a pinned set in localStorage that this preference says should not be
-     * there.
-     */
     resetHandlers.push(() => {
       if (hpPersist.checked) return
       hpPersist.checked = true
@@ -342,13 +256,8 @@ function init(): void {
     })
   }
 
-  /*
-   * Reset all: the modules that own their own keys go first, then every
-   * control's handler re-reads what they left. Deliberately does NOT touch
-   * the light/dark choice (Lucas asked for that to stay out of this panel;
-   * ThemeToggle has its own reset, "system") nor 'hp-pinned' (the pinned
-   * cards are the reader's content, not a preference).
-   */
+  // Order matters: the modules that own their own keys clear them first, then
+  // every control's handler re-reads what they left.
   const resetAll = menu.querySelector<HTMLButtonElement>('#sp-reset-all')
   resetAll?.addEventListener('click', () => {
     resetConway()
@@ -361,21 +270,13 @@ function init(): void {
 
   wrapper.removeAttribute('hidden')
 
-  /*
-   * The first-visit nudge. The flag is written the moment it appears rather
-   * than when the panel is opened, so a visitor who ignores it does not meet it
-   * again on the next page. Storage throwing means "shown already", which errs
-   * toward not pestering someone whose browser cannot remember the answer.
-   */
   const nudge = wrapper.querySelector<HTMLElement>('[data-nudge]')
   if (nudge !== null) {
     let seen = true
     try {
       seen = localStorage.getItem(NUDGE_KEY) === '1'
       if (!seen) localStorage.setItem(NUDGE_KEY, '1')
-    } catch {
-      // Left as seen.
-    }
+    } catch {}
     if (!seen) {
       nudge.hidden = false
       opener.addEventListener('click', () => nudge.remove(), { once: true })

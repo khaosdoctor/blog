@@ -1,10 +1,3 @@
-/*
- * The lab demo cards (LabDemo.astro and HtmlLab.astro): the framed figure and
- * its "show source" disclosure. Shared here because the two components
- * carried identical scoped copies. The figure's block margin comes from
- * core.css's own `figure` rule.
- */
-
 .lab-demo {
   border: var(--border) double var(--rule);
   border-inline-start: var(--border-card-edge) solid var(--rule);

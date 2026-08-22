@@ -1,8 +1,4 @@
 ---
-// Drop this once anywhere in the page (BaseLayout is the natural spot). It
-// takes no props beyond the locale: at runtime it scans <article a href> and
-// attaches hover / long-press preview cards. With JS disabled every link stays
-// a plain, fully working <a href>, this only ever adds behaviour on top.
 import { t, type Locale } from '../i18n/ui'
 import '../styles/hover-previews.css'
 
@@ -13,11 +9,6 @@ interface Props {
 const { locale } = Astro.props
 ---
 
-{/* Cards are built in the browser, so their labels cannot come from t()
-    directly. They ride along on this element instead, which the script reads
-    once. The persist checkbox that used to live in here moved to
-    SettingsPanel.astro (docs/design.md, Settled); this element now only ever
-    carries data, so it stays permanently hidden rather than being toggled. */}
 <p
   class="hp-settings"
   hidden

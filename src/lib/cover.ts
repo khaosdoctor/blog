@@ -1,29 +1,5 @@
-/**
- * The post cover: an SVG at 1200x630, not canvas and not WebGL.
- *
- * Two callers, one implementation: `scripts/cover.ts` feeds the exact string
- * this builds to `sharp` at build time, and `src/scripts/cover-hero.ts` drops
- * the same string into the DOM on load. The built PNG and the drawn hero can
- * never differ for the same post.
- *
- * Colour, seed and solid all come from the slug plus a fixed salt, never
- * `Math.random()`, so a cover is stable across rebuilds and the social-card
- * cache does not break on every build.
- *
- * The one part the two callers do NOT share is the last line, the chip plus the
- * reading time, and `drawMeta` is why: the chip is a real link and the reading
- * time a real hover control, so drawing them as SVG text on the page and hiding
- * the originals would throw both away. The browser passes `drawMeta: false` and
- * lays the real elements over the card at the coordinates `coverOverlay`
- * reports; the raster, with no DOM to lay over anything, draws them itself.
- * Both read `layoutCard`, so the two cannot end up in different places.
- *
- * The knobs below are the lab's sliders baked to the decided values.
- */
-
-// The extension is not decoration: scripts/cover.ts runs this file through
-// plain node, whose ESM resolver does not guess one, while every import
-// reached only through Astro (day-color.ts, taxonomy.ts) can stay bare.
+// The .ts extension is required: scripts/cover.ts runs this file through plain
+// node, whose ESM resolver does not add one.
 import { chipColor, hashString } from './chip-color.ts'
 
 const CARD_W = 1200
@@ -32,15 +8,8 @@ const CARD_H = 630
 const TITLE_FONT = "'Departure Mono', ui-monospace, monospace"
 const LABEL_FONT = "'PxPlus IBM VGA8', ui-monospace, monospace"
 
-// --- hash + PRNG -----------------------------------------------------------
-// Small, deterministic, no dependency: the only job is to spread slugs across
-// the brand pool and the solid's shape stably. Same slug, same number, always.
-// The arithmetic lives in chip-color.ts as `hashString`; the seed it feeds
-// decides every cover's colour AND its solid's shape, so changing it changes
-// every drawing.
-
-// mulberry32, public domain: a seed in, a function that draws numbers in
-// [0, 1) out, always the same sequence for the same seed.
+// Deterministic: hashString(slug) + salt seeds this PRNG, so the same slug always
+// redraws the same solid; changing the salt, hash or arithmetic redraws every cover.
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0
   return () => {
@@ -51,9 +20,8 @@ function mulberry32(seed: number): () => number {
   }
 }
 
-// --- colour: sRGB <-> OKLab, just enough to mix a brand colour toward white
-// the way `color-mix(in oklab, …)` would, for the literal hex an SVG needs
-// baked in at build time (there is no live custom property to recompute here).
+// sRGB -> linear -> LMS -> cube root -> OKLab -> back.
+// Mix after the cube root; mixing raw sRGB darkens the midpoint.
 type Rgb = [number, number, number]
 
 function parseHex(hex: string): Rgb {
@@ -121,7 +89,6 @@ function escapeXml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-// --- brand + the decided knobs ---------------------------------------------
 interface Brand {
   id: string
   hex: string
@@ -142,34 +109,12 @@ const TITLE_INK = '#e6e4e0'
 const DIM_OPACITY = 0.75
 const DIMMED_WHITE = toHex(composite(parseHex(TITLE_INK), parseHex(DARK_BG), DIM_OPACITY))
 
-// White and dimmed white are two more entries the hash can draw for "brand
-// colour", same as the lab: no saturation, no % knob (nothing to mix).
 const BRANDS: Brand[] = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id: 'branco-apagado', hex: DIMMED_WHITE }]
 
-// Every brand's own knob starts at the lab's default (100%, full colour); only
-// purple's was pulled down, per the derivation in this file's header comment.
-// Do not add a floor here and do not let this resolve itself: that is the one
-// thing the lab's notes ask future edits not to do.
 const INK_MIX: Record<string, number> = { vermelho: 100, verde: 100, amarelo: 100, azul: 100, roxo: 90 }
 
-/**
- * The same brands as CSS custom properties.
- *
- * The SVG needs a literal hex, since it always paints on its own black card.
- * The page needs a TOKEN, because a highlight has to work on `--bg` in both
- * themes and theme.css has already measured each brand for exactly that.
- * Handing the page the card's hex would drop those measurements: the card's
- * yellow is chosen against black, and 85% of it on the sepia ground reads far
- * lighter than `--brand-yellow`'s own light tone. The hue matches either way,
- * which is the complaint being fixed; only the lightness follows the ground.
- *
- * The two neutrals have no brand token and cannot borrow one: a white cover is
- * the hash picking NO colour, and the page's neutral per ground is its ink
- * rather than a hue. `--fg` and `--muted` are the same pairing the card makes
- * (white title, white at 75% for the dim line), resolved against `--bg` instead
- * of black, so a neutral post reads black-on-sepia and white-on-black rather
- * than white-on-white. Measured 16.99:1 / 18.74:1 and 7.15 / 8.75.
- */
+// The SVG needs a literal hex since it paints on its own black ground; the page needs a CSS token since
+// the same accent must work over `--bg` in both themes. The two neutrals map to `--fg`/`--muted` instead.
 const BRAND_TOKENS: Record<string, string> = {
   vermelho: 'var(--brand-red)',
   verde: 'var(--brand-green)',
@@ -185,34 +130,16 @@ const WIRE_DENSITY = 6
 const WIRE_OPACITY_SCALE = 145
 const CURSOR = true
 
-/** The one number a slug turns into. Colour and solid both read this. */
 function coverSeed(slug: string): number {
   return (hashString(slug) + SEED_SALT) >>> 0
 }
 
 interface CoverTone {
-  /** The brand the hash drew, by the lab's own name: `roxo`, `branco`, ... */
   id: string
-  /** The literal colour the card paints, already through that brand's `INK_MIX`. */
   hex: string
-  /** The same brand as a theme.css custom property, see `BRAND_TOKENS`. */
   token: string
 }
 
-/**
- * A post's colour, and the only derivation of it.
- *
- * There used to be two: the card resolved its brand from a salted `hash * 31`
- * over seven entries, while `--post-accent` came from `chipColor(slug)`, a sum
- * of code points over five. Two hashes over two pools agree only by luck, and
- * for `criptografia-assimetrica-com-rsa` they did not: a purple card with red
- * bold text. The card's pick wins, since that is the colour a reader has
- * already seen by the time any bold arrives.
- *
- * This follows the cover's side of the split: bold, italic and the other text
- * treatments read it; links and anything transient stay on the day colour. Do
- * not move a link onto this.
- */
 export function coverTone(slug: string): CoverTone {
   const brand = BRANDS[coverSeed(slug) % BRANDS.length]
   const isNeutral = brand.id === 'branco' || brand.id === 'branco-apagado'
@@ -222,10 +149,10 @@ export function coverTone(slug: string): CoverTone {
   return { id: brand.id, hex, token: BRAND_TOKENS[brand.id] }
 }
 
-// --- the generated solid ----------------------------------------------------
-// A ring of N sides stacked M times, tips optionally closed: the same shape
-// that produces a cube, a hex prism, an octahedron or a tetrahedron, just by
-// varying the numbers the hash draws, rather than picking from a fixed list.
+// Ring of `sides` vertices stacks `ringCount` times along Y, tapered, optionally
+// apex-capped, with a diagonal brace per quad when `brace` is on.
+// Model space: origin-centred, Y up; order is yaw, pitch, roll, then perspective
+// divide by camDist/(camDist+z), then scale/translate into 1200x630 card coords.
 type Vec3 = [number, number, number]
 
 interface SolidParams {
@@ -341,13 +268,9 @@ interface WireCell {
   closeness: number
 }
 
-// Each edge is sampled into points snapped to a `WIRE_DENSITY`px grid, one "+"
-// glyph per cell: a mesh of characters, not a smooth vector stroke. Depth
-// (the rotated Z, before perspective) drives size and opacity, so the near
-// side of the solid reads solid and the far side reads faint, same idea as
-// hidden edges still drawn, just weak. When two edges round to the same
-// cell, whichever is closer to the camera wins, since that is the one that
-// would actually be in front.
+// Each edge is walked in WIRE_DENSITY-px steps, sample snapped to that pixel grid,
+// one "+" glyph per cell. closeness = rotated Z normalised across the solid's Z range
+// (1 = nearest camera), driving glyph size/opacity. Nearer edge wins on cell collision.
 function buildWireCells(solid: GeneratedSolid): WireCell[] {
   const step = WIRE_DENSITY
   const rotated = solid.vertices.map((v) => rotate3(v, solid.params.yaw, solid.params.pitch, solid.params.roll))
@@ -377,16 +300,10 @@ function buildWireCells(solid: GeneratedSolid): WireCell[] {
   return [...best.values()]
 }
 
-// --- the card: byline, title, meta ------------------------------------------
-// Top to bottom: the byline over a dashed rule, the title, then the meta line
-// (category chip + reading time). The top line used to read
-// `BLOG.LSANTOS.DEV / CATEGORY`, which said nothing to a reader already on the
-// site; the byline took over its slot, and its own styling with it (same size,
-// same 4px of letter-spacing, same brand tone, same rule underneath).
 const BYLINE_SIZE = 22
 const META_SIZE = 20
 const LINE_HEIGHT_RATIO = 1.22
-const MONO_ADVANCE = 0.62 // a monospace face's rough advance, in em
+const MONO_ADVANCE = 0.62
 const WRAP_SAFETY = 0.92 // margin against that estimate being wrong
 
 const BORDER_OUTER_INSET = 36
@@ -396,21 +313,8 @@ const BORDER_INNER_INSET = BORDER_OUTER_INSET + BORDER_STROKE + BORDER_SPACING
 const CARD_PAD_X = 160
 const CARD_PAD_Y = 140
 
-/*
- * The meta line, in the card's own coordinates. The chip keeps chips.css's
- * shape rather than a new one: a double rule (a stroke, a space, a stroke),
- * the label inside it with a touch of letter-spacing, and the reading time
- * beside it as plain dim text with the same `·` the page's own meta row uses.
- * The numbers are chips.css's own, scaled from its ~11px text to this card's
- * 20px: padding .15rem/.55rem becomes 5/14, `border: 3px double` becomes
- * 2+2+2, and the `.meta` row's own .5rem spacing becomes 14.
- */
-/*
- * The chip runs smaller than the reading time next to it: at one shared size
- * the boxed label was the loudest thing under the title. Its own constant, so
- * the rasteriser and the real chip the page lays over the card cannot disagree,
- * which is the whole reason this layout lives in one module.
- */
+// The chip reproduces chips.css's shape, scaled to this card's larger text. Keep these in step with
+// chips.css, or the drawn chip and the real DOM chip the browser layers over the card stop matching.
 const CHIP_SIZE = 17
 const CHIP_PAD_X = 14
 const CHIP_PAD_Y = 5
@@ -421,21 +325,10 @@ const META_LETTER_SPACING = 2
 const META_SPACING = 14
 const META_BOX_H = CHIP_SIZE + CHIP_PAD_Y * 2
 
-/**
- * The advance of one character, in em, measured off a rasterised card: the
- * 25-character kicker at 22px with 4px of letter-spacing drew 430px wide, so
- * 22a + 4 = 17.2 and a = 0.6. `MONO_ADVANCE` above is the title's own,
- * deliberately loose because `WRAP_SAFETY` gives the wrap its margin and a
- * wrong guess there only costs a line break. The chip's box is drawn around
- * its label rather than measured after it, so it needs the real number: 0.62
- * padded a ten-character tag out by five pixels on one side only.
- */
+// No text measurement at build time, so this glyph-advance guess sizes the chip box;
+// unlike the looser MONO_ADVANCE, a wrong value here misfits the box outright.
 const CHIP_ADVANCE = 0.6
-/**
- * The chip box's top, above the meta baseline. A monospace face carries about
- * 0.8em over its baseline, so the box clears the label's own ascenders by the
- * padding and no more.
- */
+// The chip box's top: a monospace face carries ~0.8em over its baseline.
 const META_BOX_RISE = CHIP_SIZE * 0.8 + CHIP_PAD_Y
 
 function titleFontSize(length: number): number {
@@ -461,15 +354,14 @@ function wrapTitle(text: string, maxWidth: number, fontSize: number): string[] {
   return lines
 }
 
+// Every Y here is a text BASELINE in viewBox units, not a box top.
 interface Card {
   padX: number
   fontSize: number
   lines: string[]
-  /** Baseline of the byline that opens the card, over the dashed rule. */
   bylineY: number
   ruleY: number
   titleYs: number[]
-  /** Baseline of the meta line (chip label + reading time) that closes it. */
   metaY: number
 }
 
@@ -482,9 +374,8 @@ function layoutCard(title: string): Card {
   const lineHeight = fontSize * LINE_HEIGHT_RATIO
   const spaceAfterByline = fontSize * 0.55
   const spaceBeforeMeta = fontSize * 0.85
-  // The meta line is a box, not a text line: its own height is what the block
-  // has to reserve, or the chip's rule would hang below the padding the card
-  // centres itself inside.
+  // The meta line reserves a box height, not a line height: the chip's rule
+  // would otherwise hang below the padding.
   const blockHeight =
     BYLINE_SIZE * LINE_HEIGHT_RATIO + spaceAfterByline + lines.length * lineHeight + spaceBeforeMeta + META_BOX_H
   const contentHeight = CARD_H - padY * 2
@@ -496,37 +387,19 @@ function layoutCard(title: string): Card {
   return { padX, fontSize, lines, bylineY, ruleY: bylineY + spaceAfterByline * 0.5, titleYs, metaY }
 }
 
-// --- byline date formatting --------------------------------------------------
 const MONTHS: Record<'pt' | 'en', string[]> = {
   pt: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'],
   en: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
 }
 
-/**
- * "Lucas Santos / 18 AGO 2026": the same shape as the lab's own byline, with
- * a real date and a real author instead of a fixture. Read with the UTC
- * getters, not the local ones, so the day printed on the cover does not
- * depend on which timezone happens to be running the build.
- *
- * The separator is the slash the site kicker used to carry, not the `·` the
- * page's own byline uses: this line took that kicker's slot and its styling,
- * so it reads with the kicker's own punctuation too.
- */
+// UTC getters, so the printed day does not depend on the build machine's zone.
 export function formatCoverByline(date: Date, lang: 'pt' | 'en', authorName: string): string {
   const month = MONTHS[lang][date.getUTCMonth()]
   return `${authorName} / ${date.getUTCDate()} ${month} ${date.getUTCFullYear()}`
 }
 
-// --- the chip's own colour ---------------------------------------------------
-/**
- * theme.css's `--brand-*` tokens, dark branch, as literal hexes.
- *
- * Two things force the copy. An SVG has no custom properties to read at build,
- * and the card is a black ground in both page themes, so the dark branch is
- * the only branch that can ever apply to a chip drawn on it. Keep this table
- * in step with theme.css if a brand tone is ever retuned; nothing here can
- * follow it automatically.
- */
+// theme.css's `--brand-*` tokens (dark branch) as literal hexes, since an SVG has no custom properties
+// at build time and the card is always black. Must be kept in sync with theme.css by hand.
 const CHIP_BRAND_DARK: Record<string, string> = {
   'var(--brand-red)': '#e6242f',
   'var(--brand-blue)': '#1480c2',
@@ -535,64 +408,33 @@ const CHIP_BRAND_DARK: Record<string, string> = {
   'var(--brand-purple)': '#815bc2',
 }
 
-/** chips.css's own dark-ground ink mix, the same percentage that file measured. */
+// Must match chips.css's own dark-ground ink mix.
 const CHIP_INK_MIX = 52
 
-/**
- * The chip's ink, hashed from the label's own name through `chipColor`, the
- * one derivation every chip on the site already uses.
- *
- * This is deliberately NOT `coverTone(slug)`. The post's accent is the cover's
- * own brand and drives bold, italic and the rest of prose/emphasis.css; the
- * chip is the taxonomy's colour and belongs to the category, not to the post,
- * so `career` reads the same colour on every card that carries it.
- */
+// Hashed from the category label, not from the slug: the chip belongs to the
+// taxonomy, so one category reads the same colour on every card carrying it.
 function coverChipInk(label: string): string {
   const brand = CHIP_BRAND_DARK[chipColor(label)] ?? TITLE_INK
   return toHex(mixOklab(parseHex(brand), parseHex('#ffffff'), CHIP_INK_MIX))
 }
 
-// --- assembly ----------------------------------------------------------------
 interface CoverInput {
-  /** Hashed for colour, seed and solid. The post's own URL slug. */
   slug: string
   title: string
-  /** The chip's label, and the string its colour is hashed from. */
   category: string
-  /** Already formatted, e.g. via `formatCoverByline`. */
   byline: string
-  /** Omitted when the post has none; the meta line then carries the chip alone. */
   readingMinutes?: number
-  /**
-   * Draw the meta line, or leave its slot empty for a caller that puts real
-   * DOM over it (see this file's header). Defaults to drawing it, so the
-   * rasteriser and anything else with no DOM gets the whole card by default.
-   */
   drawMeta?: boolean
 }
 
-/**
- * Where the browser has to put the real chip and the real reading time so the
- * page's card reads exactly like the rasterised one, in the card's own
- * 1200x630 coordinates. The container is `aspect-ratio: 1200 / 630`, so a
- * caller turns any of these into CSS by scaling against the rendered width.
- *
- * Everything here comes off `layoutCard` and `coverChipInk`, the same two the
- * drawing itself reads, which is what keeps the drawn line and the overlaid
- * line the same line.
- */
+// Positions in the 1200x630 viewBox. The container is `aspect-ratio: 1200/630`,
+// so a caller converts to CSS by scaling against the rendered width.
 interface CoverOverlay {
-  /** Left edge of the meta line. */
   x: number
-  /** Vertical centre of the chip's box, the row's own centre. */
   centerY: number
-  /** The meta line's font size. */
   size: number
-  /** The chip label, smaller than `size`, see CHIP_SIZE. */
   chipSize: number
-  /** The chip's ink on the card's black ground. */
   chipInk: string
-  /** The reading time's dim white, white at 75% over black. */
   textInk: string
 }
 
@@ -612,13 +454,6 @@ function n(value: number): number {
   return Math.round(value * 100) / 100
 }
 
-/**
- * Builds the cover as a literal SVG string, 1200x630. `scripts/cover.ts`
- * rasterises this with `sharp` at build; `src/scripts/cover-hero.ts` sets it
- * as a decorative container's `innerHTML` on load. Both read the exact same
- * function, so there is only ever one cover per post, not two that can drift
- * apart from each other.
- */
 export function buildCoverSvg({ slug, title, category, byline, readingMinutes, drawMeta = true }: CoverInput): string {
   const seed = coverSeed(slug)
   const { hex: brandTone } = coverTone(slug)
@@ -638,12 +473,8 @@ export function buildCoverSvg({ slug, title, category, byline, readingMinutes, d
   const outer = { x: BORDER_OUTER_INSET, y: BORDER_OUTER_INSET, w: CARD_W - BORDER_OUTER_INSET * 2, h: CARD_H - BORDER_OUTER_INSET * 2 }
   const inner = { x: BORDER_INNER_INSET, y: BORDER_INNER_INSET, w: CARD_W - BORDER_INNER_INSET * 2, h: CARD_H - BORDER_INNER_INSET * 2 }
 
-  // The meta line, drawn twice like every other line on the card: once in the
-  // near-black shadow tone, offset, which is what knocks the wireframe's `+`
-  // glyphs out from behind the text, then once for real.
-  //
-  // Letter-spacing is added after every glyph, the last one included, so the
-  // label's own width is one of those short of the sum.
+  // Every line is drawn twice: shadow tone first to knock the wireframe glyphs out from behind the text, then real ink.
+  // SVG letter-spacing applies after every glyph including the last, so the real width is one spacing short of the naive sum.
   const chipTextWidth = category.length * (CHIP_SIZE * CHIP_ADVANCE + CHIP_LETTER_SPACING) - CHIP_LETTER_SPACING
   const chipWidth = chipTextWidth + CHIP_PAD_X * 2
   const chipTop = card.metaY - META_BOX_RISE
@@ -657,9 +488,8 @@ export function buildCoverSvg({ slug, title, category, byline, readingMinutes, d
     const x = card.padX + dx
     const y = chipTop + dy
     const parts = [
-      // `border: 3px double` is a stroke, a space, then a stroke: two rects
-      // inset by half a stroke and by a stroke and a half plus the space,
-      // since an SVG stroke straddles its own path.
+      // `border: 3px double` is a stroke, a space, then a stroke: two rects inset by half a stroke and
+      // by a stroke and a half plus the space, since an SVG stroke straddles its own path.
       chipRule(x, y, CHIP_BORDER / 2, chipInk),
       chipRule(x, y, CHIP_BORDER * 1.5 + CHIP_BORDER_SPACING, chipInk),
       `<text x="${n(x + CHIP_PAD_X)}" y="${n(card.metaY + dy)}" font-family="${TITLE_FONT}" font-size="${CHIP_SIZE}" letter-spacing="${CHIP_LETTER_SPACING}" fill="${chipInk}">${escapeXml(category)}</text>`,

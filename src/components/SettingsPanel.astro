@@ -1,22 +1,4 @@
 ---
-// The reader preferences panel: one cog beside ThemeToggle, opening a menu
-// that gathers what would otherwise be controls scattered across the page.
-// Same shape as ThemeToggle.astro on purpose: a button and a menu do nothing
-// without a script, so both stay hidden until settings-panel.ts confirms it
-// can run.
-//
-// In order: the motion override (mirrors ThemeToggle's light/dark/system
-// three-way), the text-size stepper and the reading-font picker (both scoped
-// to --text-base/--font-body, so neither touches the header, the mark or
-// code, which keep their own decided faces), the accent override, the Conway
-// background switch and its knobs, the code theme picker (moved in from
-// CodeTheme.astro) and the pinned-preview checkbox (moved in from
-// HoverPreviews.astro).
-//
-// Static labels go through t() directly: this is an Astro component with
-// access to it at render time, unlike the plain script modules that wire the
-// controls up. Dataset attributes carry only the strings that change at
-// runtime, or that a script needs and cannot call t() for.
 import Cog from './icons/Cog.astro'
 import CodeTheme from './CodeTheme.astro'
 import { t, type Locale } from '../i18n/ui'
@@ -34,10 +16,6 @@ const { locale } = Astro.props
     <Cog class="sp-icon" />
   </button>
 
-  {/* Shown once, on a reader's first visit, then never again (settings-panel.ts
-     stores a flag). aria-hidden and out of the tab order: the button beside it
-     already announces itself, and a screen reader reaching a second copy of
-     "preferences" would be reading the same control twice. */}
   <span class="sp-nudge" data-nudge hidden aria-hidden="true">{t(locale, 'settingsNudge')}</span>
 
   <div id="sp-menu" class="sp-menu" hidden>
@@ -55,20 +33,6 @@ const { locale } = Astro.props
         <label for="sp-font-size">{t(locale, 'fontSizeLabel')}</label>
       </legend>
       <div class="sp-font-size-row">
-        {/* A stepper across 50-160%, in steps of 10: twelve stops, each a
-           perceptible jump, with both ends on the grid.
-
-           `type="number"` rather than a text box gives Up/Down stepping on
-           that same grid for free and makes a screen reader announce a
-           spinbutton with a range rather than an open-ended field. What it
-           does *not* do is enforce min/max on a typed value, only report the
-           field invalid, so settings-panel.ts clamps and snaps on `change`
-           rather than per keystroke: "5" on the way to "50" would otherwise
-           apply as 50 and fight the reader's typing.
-
-           The percent sign is a static aria-hidden marker so the input can
-           hold a bare number the browser can step and validate; the
-           accessible name comes from the legend plus the live region below. */}
         <button type="button" class="sp-step" id="sp-font-size-down" aria-label={t(locale, 'fontSizeDecrease')}>&minus;</button>
         <input
           type="number"
@@ -80,17 +44,11 @@ const { locale } = Astro.props
         />
         <span class="sp-font-size-unit" aria-hidden="true">%</span>
         <button type="button" class="sp-step" id="sp-font-size-up" aria-label={t(locale, 'fontSizeIncrease')}>+</button>
-        {/* Back to 100%, which this panel stores as *nothing stored*: reset
-           removes the key and the inline --font-scale rather than writing a
-           literal 100. Visible label is the number, untranslated like the
-           code theme names, with the sentence in aria-label. */}
         <button type="button" class="sp-step" id="sp-font-size-reset" aria-label={t(locale, 'fontSizeReset')}>
           {t(locale, 'fontSizeResetShort')}
         </button>
       </div>
-      {/* Pressing a stepper button moves no focus, so without a live region
-         nothing tells a screen reader the size changed. Visually hidden
-         because the box beside it already shows the same number. */}
+      {/* A stepper button moves no focus, so nothing else announces the change. */}
       <span
         id="sp-font-size-value"
         class="sr-only"
@@ -98,15 +56,6 @@ const { locale } = Astro.props
         data-template={t(locale, 'fontSizeCurrent')}></span>
     </fieldset>
 
-    {/* The accent override. "Auto" is the default, today's colour from the day
-       hash (lib/day-color.ts); the swatches pin it to one brand colour.
-
-       Buttons rather than radios because this panel has one button-group
-       shape and one aria-current convention. Each carries a real name in
-       aria-label, so the choice is never colour alone (WCAG 1.4.1).
-
-       Purple is offered even though the automatic rotation never draws it:
-       that exclusion is about chance, not about the colour. */}
     <fieldset class="sp-accent">
       <legend>{t(locale, 'accentLabel')}</legend>
       <div class="sp-accent-row">
@@ -134,13 +83,6 @@ const { locale } = Astro.props
     <details class="sp-conway-details">
       <summary>{t(locale, 'conwayKnobs')}</summary>
       <div class="sp-conway-knobs">
-        {/* Every knob prints its own value: a bare range input shows where the
-           handle is and never what that position means.
-
-           Each readout is aria-hidden and carries no unit in its markup: the
-           range input announces its own value already, and the unit each
-           appends (%, /s, s) is a symbol rather than a word, which is why it
-           lives in settings-panel.ts's formatter and not in a translation. */}
         <label class="sp-knob">
           <span class="sp-knob-head">
             <span>{t(locale, 'conwaySeedDensity')}</span>
@@ -153,9 +95,6 @@ const { locale } = Astro.props
             <span>{t(locale, 'conwayGenerationsPerSecond')}</span>
             <span class="sp-knob-value" id="sp-gps-value" aria-hidden="true"></span>
           </span>
-          {/* Matches conway.ts's MIN_GPS/MAX_GPS. It was 0.5 to 8 in half
-             steps; a fractional generation rate is a number nobody sets on
-             purpose, and the old ceiling was slower than the field can run. */}
           <input type="range" id="sp-gps" min="1" max="25" step="1" />
         </label>
         <label class="sp-knob">
@@ -170,9 +109,6 @@ const { locale } = Astro.props
             <span>{t(locale, 'conwayOpacity')}</span>
             <span class="sp-knob-value" id="sp-opacity-value" aria-hidden="true"></span>
           </span>
-          {/* Matches conway.ts's MIN_OPACITY/MAX_OPACITY, repeated here like
-             the other three ranges because those constants are not exported.
-             Step 0.01 so the slider can rest on the 0.04 default. */}
           <input type="range" id="sp-opacity" min="0" max="0.5" step="0.01" />
         </label>
         <div class="sp-conway-actions">
@@ -186,9 +122,6 @@ const { locale } = Astro.props
 
     <fieldset class="sp-search-shortcut">
       <legend>{t(locale, 'searchShortcutLabel')}</legend>
-      {/* Every letter is offered; settings-panel.ts disables the seven the
-         browser owns and puts this sentence on each as its title. Passed in
-         because that file is a plain script with no access to t(). */}
       <select id="sp-search-key" data-reserved={t(locale, 'searchShortcutReserved')}>
         {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
           <option value={letter}>{letter}</option>
@@ -207,13 +140,6 @@ const { locale } = Astro.props
 
     <hr class="sp-rule" />
 
-    {/* Returns every preference above to its default. No confirmation step:
-       nothing else on this site confirms before a destructive action, and
-       none of what this clears is the reader's own content, only choices any
-       of which is one click from being made again.
-
-       The light/dark choice is out of scope by the same rule: it belongs to
-       ThemeToggle, one button over, and stays there. */}
     <button type="button" class="sp-reset-all" id="sp-reset-all" title={t(locale, 'resetAllHint')}>
       {t(locale, 'resetAll')}
     </button>
@@ -229,17 +155,12 @@ const { locale } = Astro.props
     position: relative;
   }
 
-  /* The UA `[hidden] { display: none }` sheet is namespaced to XHTML and never
-     matches an <svg>, so a hidden icon inside this button would still draw
-     unless CSS says so. Nothing here hides an SVG conditionally today, but
-     this row is the likeliest place for that trap to reappear. ThemeToggle
-     carries the same guard. */
   .settings-panel:not([hidden]) {
     display: inline-flex;
   }
 
-  /* Same reserved-while-hidden treatment as ThemeToggle, same reason: the
-     late un-hide re-wrapped the phone header and shifted the page. */
+  /* Still occupying its space while hidden, or the late un-hide re-wraps the
+     phone header. */
   .settings-panel[hidden] {
     display: inline-flex;
     visibility: hidden;
@@ -251,19 +172,11 @@ const { locale } = Astro.props
     display: none;
   }
 
-  /* Same reason as ThemeToggle's .tt-icon: the ::before chip is absolutely
-     positioned and opaque, so it paints over an unpositioned glyph and leaves
-     an empty outlined square. */
+  /* The ::before chip is opaque, so it paints over an unpositioned glyph. */
   .sp-icon {
     position: relative;
   }
 
-  /*
-   * Identical footprint to ThemeToggle's .tt-open: --icon-btn-hit is the real
-   * hit target, the border and background move to ::before at --icon-btn-chip
-   * so the visible square can be smaller than the box a pointer has to reach,
-   * and --icon-btn-glyph sizes the icon.
-   */
   .sp-open {
     position: relative;
     display: inline-flex;
@@ -279,10 +192,6 @@ const { locale } = Astro.props
     cursor: pointer;
   }
 
-  /*
-   * Border reads --accent-day, not --rule: see ThemeToggle's .tt-open::before
-   * for the measured contrast numbers behind that.
-   */
   .sp-open::before {
     content: '';
     position: absolute;
@@ -306,8 +215,6 @@ const { locale } = Astro.props
     border-color: var(--accent);
   }
 
-  /* No `display` here: the browser already hides a closed popover and the
-     no-popover `hidden` fallback, and an author `display` would beat both. */
   .sp-menu {
     position: fixed;
     z-index: 60;
@@ -347,9 +254,6 @@ const { locale } = Astro.props
     padding: 0;
   }
 
-  /* The plain groups drop the browser's default fieldset look, a notched box
-     none of their neighbours have; .sp-motion and .sp-font-family carry the
-     same reset inside their own flex rules. */
   .sp-font-size,
   .sp-accent,
   .sp-search-shortcut {
@@ -358,7 +262,6 @@ const { locale } = Astro.props
     padding: 0;
   }
 
-  /* The one legend treatment, shared by every group. */
   .sp-motion legend,
   .sp-font-size legend,
   .sp-font-family legend,
@@ -372,14 +275,12 @@ const { locale } = Astro.props
     font-size: 0.68rem;
   }
 
-  /* Flex-row groups need the legend on its own full-width line. */
   .sp-motion legend,
   .sp-font-family legend,
   .sp-accent legend {
     inline-size: 100%;
   }
 
-  /* The panel's one button treatment; padding and layout stay per control. */
   .sp-motion-option,
   .sp-step,
   .sp-font-family-option,
@@ -423,7 +324,6 @@ const { locale } = Astro.props
     color: var(--accent);
   }
 
-  /* One focus ring for every control that takes one. */
   .sp-open:focus-visible,
   .sp-motion-option:focus-visible,
   .sp-step:focus-visible,
@@ -444,15 +344,10 @@ const { locale } = Astro.props
     margin-inline-start: 0.3rem;
   }
 
-  /* Padding tighter than the shared button treatment: it carries one glyph. */
   .sp-step {
     padding: 0.35rem 0.5rem;
   }
 
-  /* At either end the matching button is disabled rather than left looking
-     live and doing nothing. Dimmed *and* not-allowed, since colour alone is
-     the signal a reader with low vision is least likely to catch; the
-     `disabled` attribute is what tells a screen reader. */
   .sp-step:disabled {
     color: var(--muted);
     border-color: var(--rule);
@@ -460,14 +355,6 @@ const { locale } = Astro.props
     cursor: not-allowed;
   }
 
-  /*
-   * Sized to three digits, so the row does not shift between 50 and 160.
-   *
-   * The native spinner is dropped: the minus and plus buttons already are
-   * that control at a hit target a pointer can reach, and the browser's
-   * arrows are two tiny halves stacked inside the field. Up/Down still steps
-   * it, since that belongs to `type="number"` rather than to the spinner.
-   */
   .sp-font-size-row input[type='number'] {
     inline-size: 4.5ch;
     flex: 0 0 auto;
@@ -494,9 +381,6 @@ const { locale } = Astro.props
     font-size: var(--text-tiny);
   }
 
-  /* Same shape as .sp-motion-option, its own classes because settings-panel.ts
-     scopes its motion query to .sp-motion-option and these must not answer to
-     it too. */
   .sp-font-family {
     display: flex;
     flex-wrap: wrap;
@@ -518,15 +402,6 @@ const { locale } = Astro.props
     color: var(--fg);
   }
 
-  /*
-   * The field's properties only exist while the field does: with the
-   * background off, every knob adjusts something that is not being drawn.
-   *
-   * Done off the checkbox's own state rather than from the script, so the
-   * panel cannot get into a state where the box says one thing and the
-   * disclosure shows another. `display: none` rather than the `hidden`
-   * attribute, so nothing has to remember to remove it.
-   */
   .sp-row:has(#sp-bg-life:not(:checked)) + .sp-conway-details {
     display: none;
   }
@@ -592,13 +467,8 @@ const { locale } = Astro.props
     }
   }
 
-  /*
-   * The first-visit nudge: a small label under the cog, pointing at it with a
-   * caret. Absolutely positioned and `pointer-events: none`, so it cannot move
-   * the header row or intercept a click meant for the button under it. It
-   * disappears the first time the panel opens, so it never becomes something
-   * a reader has to dismiss.
-   */
+  /* `pointer-events: none`, or it intercepts the click meant for the button
+     under it. */
   .sp-nudge {
     position: absolute;
     inset-block-start: 100%;
@@ -646,15 +516,8 @@ const { locale } = Astro.props
     align-items: center;
   }
 
-  /*
-   * A square of the colour it sets, with the panel's border around it so it
-   * reads as a control. No label on screen: six named colours would fill the
-   * menu, and the name is in aria-label.
-   *
-   * The spacing has to clear the selected ring, an outline 2px outside the
-   * border, or two swatches overlap the moment one is chosen. The block
-   * margin is what keeps a wrapped second row clear of the one above.
-   */
+  /* The margins have to clear the selected ring, an outline 2px outside the
+     border, or two swatches overlap the moment one is chosen. */
   .sp-accent-option {
     inline-size: 1.5rem;
     block-size: 1.5rem;
@@ -681,11 +544,6 @@ const { locale } = Astro.props
     cursor: pointer;
   }
 
-  /*
-   * A ring outside the swatch rather than a change to the swatch itself,
-   * whose whole job is to show one exact colour. aria-current drives it, the
-   * same as every other group in this panel.
-   */
   .sp-accent-option[aria-current='true'],
   .sp-accent-auto[aria-current='true'] {
     border-color: var(--fg);
@@ -699,8 +557,6 @@ const { locale } = Astro.props
     outline-offset: 2px;
   }
 
-  /* Number pushed to the far end so all four line up in a column whatever
-     their labels measure. */
   .sp-knob-head {
     display: flex;
     align-items: baseline;
@@ -711,8 +567,6 @@ const { locale } = Astro.props
     margin-inline-start: 0.5rem;
     color: var(--fg);
     white-space: nowrap;
-    /* Tabular figures so the number does not shift its neighbours as it counts
-       through different-width digits while a slider is dragged. */
     font-variant-numeric: tabular-nums;
   }
 
@@ -732,8 +586,6 @@ const { locale } = Astro.props
     margin: 0;
   }
 
-  /* A plain <select> rather than 26 buttons: a native picker already gives
-     keyboard and screen reader support for a long option list. */
   .sp-search-shortcut select {
     font-family: var(--font-mono);
     font-size: var(--text-tiny);
@@ -744,17 +596,11 @@ const { locale } = Astro.props
     padding: 0.3rem;
   }
 
-  /* Full width because it is alone on its line and its label is a sentence.
-     Not coloured as a danger control: nothing here is unrecoverable, and a red
-     button in a preferences menu reads as a warning this does not deserve. */
   .sp-reset-all {
     inline-size: 100%;
     padding: 0.4rem 0.5rem;
   }
 
-  /* The code theme row, moved in from CodeTheme.astro, drops its own `hidden`
-     once code-theme.ts confirms it can run; it needs no popover machinery of
-     its own now that it renders inline inside this menu. */
   .settings-panel :global(.ct-settings) {
     display: flex;
     flex-direction: column;

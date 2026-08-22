@@ -1,23 +1,4 @@
 ---
-/**
- * Appends a copy-as-citation button to every rendered quote card and wires its
- * click. Neither markup shape a quote can take ever contains one, so this adds
- * it at runtime rather than asking an author to write it.
- *
- * The same shape as the notes' own copy control: a real <button>, an SVG mask
- * icon so it takes currentColor, hidden until hover or focus, reusing the
- * site's one `.toast` confirmation rather than growing a second pattern.
- *
- * The payload is built at click time from whatever text is on the page:
- * `"body" » Author` for the callout shape, just `"body"` for the plain
- * blockquote. The » is the same glyph the author line already shows, so a
- * pasted citation matches the house style. Paragraphs join with one space and
- * whitespace collapses, so a two-paragraph quote copies as one unit.
- *
- * The author's leading » and the watermark are both CSS `content`, never text,
- * so neither needs stripping; they are only defended against in case that
- * changes.
- */
 import { localeFromPath, t } from '../i18n/ui'
 
 const locale = localeFromPath(Astro.url.pathname)
@@ -47,10 +28,6 @@ const locale = localeFromPath(Astro.url.pathname)
     const card = button.closest('.callout[data-callout="quote"], blockquote:not(.callout):not(.twitter-tweet)')
     if (card === null) return
 
-    // A container's own text, from its direct <p> children when it has any
-    // (both markup shapes normally do), falling back to the container's
-    // whole text otherwise, so a quote with no paragraph wrapper still
-    // copies something rather than an empty string.
     function textOf(container: Element): string {
       const paragraphs = container.querySelectorAll(':scope > p')
       const nodes = paragraphs.length ? [...paragraphs] : [container]

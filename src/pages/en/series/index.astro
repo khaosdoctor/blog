@@ -1,13 +1,6 @@
 ---
-// The English half of the series index (see src/pages/series/index.astro for
-// the Portuguese one).
-//
-// This page builds its own list rather than borrowing the Portuguese one:
-// getSeries('en') groups the English posts by the `series` each translation
-// carries in its own frontmatter, so the count beside a title is how many parts
-// exist in English and every link goes to /en/series/<name>/, which
-// src/pages/en/series/[name].astro builds. Nothing here sends an English reader
-// into the Portuguese tree.
+// The length filter must match src/pages/en/series/[name].astro, which builds
+// no route for a series of one.
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import SeriesList from '../../../components/SeriesList.astro'
 import { getSeries, seriesTitle } from '../../../lib/taxonomy'

@@ -1,38 +1,8 @@
 ---
-// A hollow rectangle with a solid square inside it (Lucas's own spec,
-// replacing the earlier full-slab and knob-slider attempts): the rectangle
-// is a double-ruled outline in the day colour (`--accent-day`, the same
-// token the header accent and the icon buttons' own outline read), no fill
-// of its own. Twice the square's width, so the square occupies exactly one
-// half and the other half stays hollow, page ground showing through.
-//
-// The square carries the CURRENT language, not the destination, on every
-// axis: solid green with `PT` on the Portuguese site (left half), solid red
-// with `EN` on the English one (right half). Word, fill and position all
-// name the same thing now, which is what the reader is asked to confirm
-// before leaving; the destination is implied by which half is hollow (the
-// side the square would move to) and stated in words by the link's own
-// accessible name, not painted anywhere on the square itself.
-//
-// Still a single real link, not a faked in-place control: choosing a
-// language is a navigation, to the page's own alternate when one exists and
-// to that language's home otherwise. "The square moves" on click is real
-// only in the sense that the next page renders it on the other side; there
-// is no in-place slide today, since a plain link swaps the whole document.
-// The transform+steps transition on `.lang-square` below is a no-cost
-// placeholder for the one case that could show it: a future same-document
-// view transition carrying this element across the navigation, the same
-// reasoning the old knob's own transition carried before it was replaced.
-//
-// Colour is never the only signal (WCAG 1.4.1, and red/green is the one
-// pair a colour-blind reader is least likely to tell apart): the word is
-// one non-colour signal, which half is solid vs. hollow is a second, and
-// the link's own accessible name states in words which language it goes to.
 import { t, type Locale } from '../i18n/ui'
 
 interface Props {
   locale: Locale
-  /** The hreflang pairs the page already builds, when it has any. */
   alternates?: { lang: string; href: string }[]
 }
 
@@ -43,8 +13,6 @@ const LOCALES: { code: Locale; label: string; name: string; home: string }[] = [
   { code: 'en', label: 'EN', name: 'English', home: '/en/' },
 ]
 
-// A translated page links to its counterpart. Everything else links to the
-// other locale's home, which beats linking at a page that does not exist.
 function hrefFor(code: Locale): string {
   const match = alternates.find((alt) => alt.lang.toLowerCase().startsWith(code))
   if (match !== undefined) return new URL(match.href, Astro.site).pathname
@@ -56,14 +24,6 @@ const otherHref = other === undefined ? '/' : hrefFor(other.code)
 const otherName = other?.name ?? ''
 ---
 
-{/* `data-goes-to` is what the click handler at the bottom stores: using this
-   switch is the reader stating a language, and a stated choice outranks the
-   browser's own header from then on (see core-lang.ts).
-
-   The accessible name starts with the visible "PT EN" (WCAG 2.5.3: a
-   speech-input user addresses the control by the text they can see), then
-   says what the click does. LOCALES order matches the rendered order in both
-   states, since the square and the dim half swap places, never order. */}
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
   <a
     class="lang-track"
@@ -73,22 +33,8 @@ const otherName = other?.name ?? ''
     aria-label={`${LOCALES.map((entry) => entry.label).join(' ')}: ${t(locale, 'switchLanguage', otherName)}`}
     title={t(locale, 'switchLanguage', otherName)}
   >
-    {/* The 44px hit target is .lang-track (the link itself, above); .lang-rect
-       is the 32px hollow frame a reader actually sees, the same drawn-vs-hit
-       split every other header control uses. .lang-square is the one solid
-       half, carrying the current language's colour and its word together. */}
-    {/*
-      `.lang-other` fills the whole rectangle and centres its own text in the
-      half the square is not on, rather than being positioned per state: one
-      rule, and the `[data-current]` selector below moves it with the square
-      instead of a second set of insets to keep in step.
-    */}
     <span class="lang-rect" aria-hidden="true">
-      {/* Rendered in LOCALES order with a literal space, so the flattened
-          text reads "PT EN" in both locales and matches the accessible name
-          (WCAG 2.5.3); which span is the solid square follows the locale.
-          The square's own z-index keeps it painting over the dim half, so
-          source order no longer decides that. */}
+      {/* The literal space keeps the flattened text reading "PT EN", matching the accessible name above. */}
       {LOCALES.map((entry, index) => (
         <Fragment>
           {index > 0 && ' '}
@@ -105,15 +51,7 @@ const otherName = other?.name ?? ''
     align-items: center;
   }
 
-  /*
-   * The 44px hit target: `--icon-btn-hit`, the same token every other header
-   * control's own hit target uses (ThemeToggle, SettingsPanel, the search
-   * trigger), so this control lines up with them in one row. Width matches
-   * `.lang-rect` below (twice `--icon-btn-chip`) rather than a separate
-   * fixed measurement, so the hit target never reaches wider than the frame
-   * a reader actually sees. Draws nothing itself: a flex container that
-   * centres the real drawn box.
-   */
+  /* Width is derived from `.lang-rect` so the hit box never reaches wider than the frame a reader sees. */
   .lang-track {
     position: relative;
     display: inline-flex;
@@ -129,17 +67,7 @@ const otherName = other?.name ?? ''
     outline-offset: 2px;
   }
 
-  /*
-   * The hollow frame: 32px tall (--icon-btn-chip, the same drawn height
-   * every other control's own visible chip uses) and twice that wide, so a
-   * single square (below) fills exactly half of it. No background of its
-   * own, on purpose: "hollow" means the page ground shows through the half
-   * the square is not on. The double border reads `--accent-day`, the day-
-   * hash accent BrandHeader.astro sets on every page load (the pre-JS
-   * fallback in theme.css is a static yellow), the same token the icon
-   * buttons' own outline now reads too. 3px double is chips.css's own
-   * weight for a double rule at this scale, reused rather than picked fresh.
-   */
+  /* `--icon-btn-chip` tall and twice that wide, so `.lang-square` fills exactly half; transparent so the hollow half shows page ground. */
   .lang-rect {
     position: relative;
     display: block;
@@ -151,27 +79,10 @@ const otherName = other?.name ?? ''
     background: transparent;
   }
 
-  /*
-   * The one solid half: exactly one square, half the rectangle's width, which
-   * is itself twice the square size. Left by default (Portuguese, the source
-   * locale); `[data-current='en']` moves it right via `transform` rather than
-   * by changing which inset is set, so the property stays animatable.
-   *
-   * Fill and ink are fixed literals rather than `light-dark()`: the brand
-   * tokens already carry their own per-ground tone, so the ink only has to
-   * clear both resolved shades, not the page ground.
-   *
-   * Measured (WCAG 2.1, 4.5:1 the floor): black on green, the PT state, 8.04:1
-   * dark and 5.56:1 light, which is why black rather than `--em-bold-fg`'s
-   * warmer near-black (that reaches only 5.22 / 3.61, failing light). White on
-   * red, the EN state, 4.51:1 dark, a hair over the floor with almost no
-   * margin, reported rather than silently swapped since white was specified;
-   * 5.43:1 light.
-   */
+  /* Ink is a fixed literal since the brand tokens already carry their own per-ground tone. */
   .lang-square {
     position: absolute;
-    /* Paints over the dim half during the transition, whatever the source
-       order: the markup orders the spans for the text reading now. */
+    /* z-index paints over the dim half regardless of source order, which is set for the flattened text, not for painting. */
     z-index: 1;
     inset-block: 0;
     inset-inline-start: 0;
@@ -184,11 +95,6 @@ const otherName = other?.name ?? ''
     background: var(--brand-green);
     color: #000000;
     font-family: var(--font-subtitle);
-    /* --icon-btn-glyph, not a bespoke size: the same 16px-in-32px ratio the
-       icon buttons themselves draw their glyph at, and two letters at 16px
-       comfortably clear this 32px-wide half (PxPlus IBM VGA8's own advance
-       width is roughly half its em), where the old design's 32px word needed
-       a wider slot than this square has to give. */
     font-size: var(--icon-btn-glyph);
   }
 
@@ -198,18 +104,6 @@ const otherName = other?.name ?? ''
     color: #ffffff;
   }
 
-  /*
-   * The destination's code, in the hollow half. Same 50% box as the square and
-   * the same font, so the two codes read as one pair at one size rather than
-   * as a label and an afterthought; it just starts on the opposite side and
-   * carries no fill.
-   *
-   * `--muted` rather than a bespoke dim: it is the site's own token for text
-   * that is present but not the point, and it is already measured against both
-   * grounds at 8.30:1 dark and 5.17:1 light, so "dim" here still clears the
-   * 4.5:1 floor rather than being dim enough to fail. The hollow half shows the
-   * page ground through it, which is exactly what those two numbers measure.
-   */
   .lang-other {
     position: absolute;
     inset-block: 0;
@@ -225,24 +119,18 @@ const otherName = other?.name ?? ''
     font-size: var(--icon-btn-glyph);
   }
 
-  /* Moves with the square, in the opposite direction, so the two never share a
-     half: on the English page the square takes the right and this takes the
-     left. */
   .lang-switch[data-current='en'] .lang-other {
     transform: translateX(-100%);
   }
 </style>
 
 <script>
-  // Clicking the switch is the reader stating a language. Stored here rather
-  // than in the redirect script, which only ever reads it.
   document.querySelector<HTMLAnchorElement>(".lang-switch .lang-track")?.addEventListener("click", (event) => {
     const code = (event.currentTarget as HTMLElement).dataset.goesTo
     if (code === undefined) return
     try {
       localStorage.setItem("lang", code)
     } catch {
-      // Private mode: the click still navigates, the preference just does not stick.
     }
   })
 </script>

@@ -8,13 +8,8 @@ import { categoryDescription } from '../../lib/categories'
 import { categoryLocales, getCategories } from '../../lib/taxonomy'
 import { HREFLANG, localePath, LOCALES, t } from '../../i18n/ui'
 
-// Section index pages live at /{category}/, the same shape as a post URL.
-// Astro gives this route priority over the [...slug] rest route, so the only
-// real hazard is a category named exactly like a post: fail the build instead
-// of silently shadowing an article.
-//
-// [...page] rather than [page]: page 1 stays bare, page 2+ gets /{category}/2/,
-// the same rest-param convention as the paginated home page.
+// Astro gives this route priority over [...slug], so a category named like a
+// post slug would shadow that article.
 export const getStaticPaths = (async ({ paginate }) => {
   const [categories, posts] = await Promise.all([getCategories(), getPublishedPosts()])
   const slugs = new Set(posts.map((post) => post.id))
@@ -43,7 +38,6 @@ const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
   lang: HREFLANG[locale],
   href: new URL(localePath(locale, `/${category}/`), Astro.site).href,
 }))
-// A written description when there is one, otherwise the generated sentence.
 const described = categoryDescription(category)
 const description = described ?? t('pt', 'sectionDescription', category)
 const title = page.currentPage > 1 ? `LS: ${category} | página ${page.currentPage}` : `LS: ${category}`

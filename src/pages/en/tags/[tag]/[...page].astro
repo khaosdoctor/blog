@@ -1,8 +1,4 @@
 ---
-// The English per-tag listing (src/pages/tags/[tag]/[...page].astro is the
-// Portuguese one), built from getTags('en') so every link stays inside /en/.
-// A tag with no English post gets no page here at all rather than an empty
-// one, the same rule the English section and series pages follow.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../../../layouts/BaseLayout.astro'
 import PostList from '../../../../components/PostList.astro'
@@ -13,8 +9,7 @@ import { HREFLANG, localePath, LOCALES, t } from '../../../../i18n/ui'
 export const getStaticPaths = (async ({ paginate }) => tagListingRoutes(paginate, 'en')) satisfies GetStaticPaths
 
 const { tag, languages, page } = Astro.props
-// Page 1 of the counterpart, whatever page this is: the two languages hold
-// different post counts under one tag, so page 3 here need not exist there.
+// Always page 1: the counterpart tag may have fewer pages than this one.
 const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
   lang: HREFLANG[locale],
   href: new URL(localePath(locale, `/tags/${slugify(tag)}/`), Astro.site).href,

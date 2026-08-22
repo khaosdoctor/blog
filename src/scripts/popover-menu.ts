@@ -1,16 +1,5 @@
-// The shared open/close/position shell for the header's anchored menus
-// (theme-toggle.ts and settings-panel.ts), which carried identical copies.
-
-// Where the native popover API exists the menu is promoted to the top layer,
-// with no stacking context or outside-click bookkeeping of its own. Where it
-// does not, the same element is toggled with `hidden` and positioned manually.
 export const canPopover = 'popover' in HTMLElement.prototype
 
-/**
- * Places the menu next to its opener, clamped to the viewport.
- * getBoundingClientRect is viewport-relative, which lines up with the `fixed`
- * positioning the fallback sets and the popover API imposes.
- */
 function placeMenu(el: HTMLElement, anchor: HTMLElement): void {
   const rect = anchor.getBoundingClientRect()
   const space = 8
@@ -35,12 +24,7 @@ interface MenuController {
   close(returnFocus: boolean): void
 }
 
-/**
- * Wires opener click, outside click and Escape for one menu. Open state is
- * tracked here rather than read off the element: `:popover-open` and the
- * `hidden` attribute are two different sources of truth, and the close paths
- * have to work the same way whichever is in play.
- */
+/** Local `open` because `:popover-open` and `hidden` are two different sources of truth. */
 export function wireMenu(wrapper: HTMLElement, opener: HTMLButtonElement, menu: HTMLElement): MenuController {
   let open = false
 
@@ -68,7 +52,7 @@ export function wireMenu(wrapper: HTMLElement, opener: HTMLButtonElement, menu: 
     try {
       menu.hidePopover?.()
     } catch {
-      // Not currently showing as a popover.
+      /* not showing as a popover */
     }
     if (!canPopover) menu.hidden = true
     if (returnFocus) opener.focus()
@@ -91,11 +75,7 @@ export function wireMenu(wrapper: HTMLElement, opener: HTMLButtonElement, menu: 
   return { isOpen: () => open, open: openMenu, close: closeMenu }
 }
 
-/**
- * Promotes a wired menu to a native popover where supported. `hidden` is
- * cleared before `popover` is set: a popover-attributed element that is still
- * hidden refuses to show.
- */
+/** Order matters: a popover element that is still `hidden` refuses to show. */
 export function promoteToPopover(menu: HTMLElement): void {
   if (!canPopover) return
   menu.removeAttribute('hidden')

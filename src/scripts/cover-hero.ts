@@ -1,8 +1,4 @@
-// Draws a post's cover into CoverHero.astro's empty container from the same
-// buildCoverSvg the og:image rasterises with, so the two can never differ.
-// `drawMeta: false` because the chip and the reading time are real, working
-// controls on the page: the SVG leaves that slot empty and this script moves
-// the page's own `.meta` row into the overlay, placed by coverOverlay.
+// `drawMeta: false` leaves that slot for the page's real `.meta` row below.
 import { buildCoverSvg, coverOverlay } from '../lib/cover'
 import { onReady } from './ready'
 
@@ -17,11 +13,6 @@ function init(): void {
 
   canvas.innerHTML = buildCoverSvg({ slug, title, category, byline, drawMeta: false })
 
-  // The card's own coordinates, handed to CSS as plain numbers. The container
-  // is `aspect-ratio: 1200 / 630` and a container query, so the stylesheet
-  // turns each of these into a length by scaling against the card's rendered
-  // width, and the row tracks the card at every viewport with nothing to
-  // recompute on resize.
   const overlay = coverOverlay(title, category)
   hero.style.setProperty('--cover-meta-x', String(overlay.x))
   hero.style.setProperty('--cover-meta-y', String(overlay.centerY))
@@ -34,10 +25,7 @@ function init(): void {
   hero.removeAttribute('hidden')
   article?.setAttribute('data-cover-active', '')
 
-  // Moved (not copied) last, once the card is visibly on the page: a `.meta`
-  // put into a still-hidden container would be a chip and a reading time
-  // nobody can see. Its <time> is hidden sr-only by the stylesheet, since the
-  // byline over the rule now draws that date.
+  // Must run after the card is unhidden above, or the moved controls stay invisible.
   const meta = article?.querySelector<HTMLElement>('.meta') ?? null
   const slot = hero.querySelector<HTMLElement>('.cover-hero-meta')
   if (meta === null || slot === null) return

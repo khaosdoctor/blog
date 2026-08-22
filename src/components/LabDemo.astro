@@ -1,25 +1,7 @@
 ---
 import { localeFromPath, t } from '../i18n/ui'
 
-/**
- * An interactive demo with its own source one click away.
- *
- * Wraps whatever island a post drops in the default slot. The `source` slot
- * carries the component's own code as a real markdown code block, so
- * expressive-code highlights it the same as any fenced block in the post. A
- * post never fills either slot by hand: `remark-lab-demos.mjs` turns
- *
- *   <LabDemo src="./components/Counter.vue" client:visible />
- *
- * into this component's actual shape, importing the component for the client
- * directive and reading the file for the `source` slot.
- *
- * `<details>` rather than a button and a script: it is a disclosure widget, which
- * is exactly what the element is for, so this costs no JavaScript and works with
- * a keyboard for free.
- */
 interface Props {
-  /** Filename, shown on the toggle so it is obvious whose source this is. */
   name: string
 }
 
@@ -38,8 +20,6 @@ const locale = localeFromPath(Astro.url.pathname)
 </figure>
 
 <style>
-  /* The card frame and the source disclosure live in styles/lab-demo.css,
-     shared with HtmlLab.astro. */
   .stage {
     padding: 1.25rem;
   }

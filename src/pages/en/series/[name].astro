@@ -1,8 +1,4 @@
 ---
-// The English per-series page (src/pages/series/[name].astro is the
-// Portuguese one), built from getSeries('en'): English parts, English URLs.
-// A series with fewer than two English parts gets no page here, the same
-// rule the Portuguese route has always applied to itself.
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import PostList from '../../../components/PostList.astro'
@@ -10,9 +6,6 @@ import { getSeries, seriesTitle } from '../../../lib/taxonomy'
 import { HREFLANG, t } from '../../../i18n/ui'
 
 export const getStaticPaths = (async () => {
-  // The Portuguese map only says whether the Portuguese counterpart exists,
-  // which decides whether the switcher has one to offer. A series written in
-  // English first would have none.
   const [series, portuguese] = await Promise.all([getSeries('en'), getSeries()])
   return [...series.entries()]
     .filter(([, posts]) => posts.length > 1)

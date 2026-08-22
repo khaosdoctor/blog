@@ -1,24 +1,8 @@
 ---
 import { t, type Locale } from '../i18n/ui'
 
-/**
- * The "11 min" the list and a post's header already render, made hoverable:
- * hovering or focusing reveals the clock time the reader finishes at. Time
- * only, no date.
- *
- * That finish time cannot be computed here, since it depends on the moment the
- * reader looks rather than on when the page was built. This renders exactly the
- * plain text it always did, plus two data attributes the script needs: the
- * minutes, and the locale's own "finish at %s" template, so the popup's words
- * are never hardcoded into a client script.
- *
- * With JavaScript off it stays that plain text: no button, no popup.
- * reading-time-hover.ts upgrades the span in place into a real <button> plus an
- * empty popup.
- *
- * Astro dedupes an identical component <script> across every instance, so the
- * list rendering this once per row still ships it once.
- */
+// The finish time depends on when the reader looks, not on build time, so it can
+// only be computed client-side.
 interface Props {
   minutes: number
   locale: Locale
@@ -32,35 +16,17 @@ const { minutes, locale } = Astro.props
 >
 
 <style>
-  /*
-   * The upgraded button and popup are both created by reading-time-hover.ts,
-   * never written in this template, so Astro's own scoping attribute (added
-   * only to elements that exist in the markup above) is never applied to
-   * them. :global() is this site's own escape hatch for exactly that case
-   * (BrandHeader.astro's `.controls :global(.search-trigger)` and neighbours
-   * reach the same way into a client-rendered subtree).
-   */
   .reading-time {
     position: relative;
     display: inline-block;
   }
 
-  /* The arrow, not the text I-beam the span would otherwise show and not the
-     hand its inner button defaults to: hovering only reveals a finish time, so
-     nothing here goes anywhere. The whole selector is global rather than just
-     the inner class, because Astro leaves a :global() nested inside :has()
-     uncompiled and the rule then never matches. */
   :global(.reading-time:has(.rt-trigger)),
   :global(.reading-time .rt-trigger) {
     cursor: default;
   }
 
-  /*
-   * A plain reset, not `all: unset`: that would also drop `display` and this
-   * button still needs to sit inline like the text it replaces. Every other
-   * declaration (font, color) is inherited so the button reads exactly like
-   * the plain text it upgrades, until it is hovered or focused.
-   */
+  /* Not `all: unset`: that drops `display` too, and this has to stay inline. */
   .reading-time :global(.rt-trigger) {
     margin: 0;
     padding: 0;
@@ -70,10 +36,6 @@ const { minutes, locale } = Astro.props
     color: inherit;
   }
 
-  /*
-   * The site's one hover convention for a plain-text control (listing.css's
-   * own `.listing-title:hover`): fill with the day colour, invert the text.
-   */
   .reading-time :global(.rt-trigger:hover),
   .reading-time :global(.rt-trigger:focus-visible) {
     background: var(--accent-day, var(--accent));
@@ -81,21 +43,8 @@ const { minutes, locale } = Astro.props
     outline: none;
   }
 
-  /*
-   * The popup borrows PostToc.astro's own ink-on-paper style (full ink on the
-   * page's own ground, a 3px double border), the strong existing precedent
-   * for exactly this "small inverted box of text over the page" treatment.
-   * Copied as literal values rather than importing PostToc's own scoped
-   * `--toc-ink`/`--toc-paper`, which are private to that component; nothing
-   * here edits PostToc itself.
-   *
-   * Absolutely positioned, so it is removed from flow completely: it can
-   * never push the row below it, in PostList's flex rows or anywhere else.
-   * Opacity plus pointer-events, not `hidden`/`display: none`: either of
-   * those pulls the element out of the accessibility tree, and
-   * aria-describedby (set by the script below) needs its text reachable by a
-   * screen reader on focus even while it is visually hidden.
-   */
+  /* Never `display: none`: an `aria-describedby` points at this, so its text has
+     to stay in the accessibility tree while it is invisible. */
   .reading-time :global(.rt-popup) {
     position: absolute;
     inset-inline-start: 50%;

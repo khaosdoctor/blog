@@ -3,10 +3,6 @@ import type { APIRoute } from 'astro'
 import { getPublishedPosts, urlOf } from '../lib/posts'
 import { t } from '../i18n/ui'
 
-/**
- * The Portuguese feed at the same path Ghost used, so existing subscribers keep
- * working after the cutover. The English feed lives at /en/rss.xml.
- */
 export const GET: APIRoute = async (context) => {
   const posts = await getPublishedPosts()
   return rss({

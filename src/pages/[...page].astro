@@ -6,9 +6,8 @@ import Pagination from '../components/Pagination.astro'
 import { getPublishedPosts, LIST_PAGE_SIZE } from '../lib/posts'
 import { t } from '../i18n/ui'
 
-// [...page] rather than [page]: paginate() only maps the first page to an
-// undefined param for a rest param, so page 1 stays the bare "/" and a plain
-// [page] segment would have put it at /1/ instead.
+// A rest param is required here: paginate() only maps page 1 to an undefined
+// param for [...page], so a plain [page] would put the home page at /1/.
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPublishedPosts()
   return paginate(posts, { pageSize: LIST_PAGE_SIZE })

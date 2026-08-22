@@ -1,17 +1,3 @@
-/*
- * Display equations and their copy control.
- *
- * Scoped to .katex-display, which rehype-katex only emits for a $$ block,
- * never for inline $...$ math (see node_modules/katex "displayMode"): the
- * button below rides on that class distinction instead of guessing.
- *
- * The button is real, not decorative, so it earns visible shell rather than
- * fading into the page: square corners (the design is heading ASCII/8-bit,
- * see docs/design.md), muted until the formula is hovered, and always
- * visible on keyboard focus, the same rule .heading-anchor uses in
- * prose.css.
- */
-
 .katex-display {
   position: relative;
 }

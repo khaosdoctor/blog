@@ -1,9 +1,3 @@
-// The command-style search opener from SearchPalette.astro: a magnifier plus a
-// configurable Ctrl/Cmd+letter, opening a native <dialog> that live-searches
-// through Pagefind.
-//
-// The Pagefind loader and label reader are shared with Search.astro's own
-// <script> through ./pagefind.
 import { dayColor } from '../lib/day-color'
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
 import {
@@ -14,20 +8,10 @@ import {
 import { loadPagefind, searchLabel as label, type PagefindModule } from './pagefind'
 import { onReady } from './ready'
 
-// --- The shortcut letter. Stored like every other reader preference here: a
-// plain localStorage key, written on change, read once at startup, wrapped for
-// private mode. Exported so settings-panel.ts calls into this module instead
-// of duplicating the key. ---
-
 const SHORTCUT_KEY = 'search-shortcut'
 
-/*
- * Seven letters are a shortcut the browser itself owns (bookmark, address bar,
- * new window, quit, reload, new tab, close tab) and a page-level keydown
- * handler cannot preventDefault, so picking one would leave the setting
- * looking broken. settings-panel.ts disables these in the picker. K, the
- * default, is unclaimed and is what every other command palette uses.
- */
+// The browser owns these seven for its own shortcuts, so preventDefault
+// cannot claim them back.
 export const RESERVED_LETTERS = new Set(['D', 'L', 'N', 'Q', 'R', 'T', 'W'])
 
 function readStoredLetter(): string {
@@ -49,21 +33,12 @@ export function setShortcutLetter(letter: string): void {
   applyHint()
 }
 
-/*
- * For the settings panel's reset-all. Removes the key rather than storing
- * 'K': choosing K on purpose is a choice worth storing, a reset is the
- * absence of one, and this site's convention is that nothing stored means the
- * default.
- */
 export function resetShortcutLetter(): void {
   shortcutLetter = DEFAULT_LETTER
   removeStorage(SHORTCUT_KEY)
   applyHint()
 }
 
-// Cmd on Apple platforms, Ctrl everywhere else, not reader configurable.
-// navigator.platform is deprecated but still universally implemented; the user
-// agent string is the fallback for the one engine that might drop it.
 const isApple = /Mac|iPhone|iPad|iPod/.test(`${navigator.platform ?? ''} ${navigator.userAgent}`)
 
 let hintModEl: HTMLElement | null = null
@@ -73,9 +48,6 @@ function applyHint(): void {
   const mod = isApple ? 'Cmd' : 'Ctrl'
   if (hintModEl !== null) hintModEl.textContent = mod
   if (hintKeyEl !== null) hintKeyEl.textContent = shortcutLetter
-  // WCAG 2.5.3: once the hint is visible, "<Cmd+K>" is the control's visible
-  // text and the accessible name has to contain it, or a speech-input user
-  // reading the screen aloud cannot address the button.
   const opener = hintModEl?.closest('a')
   const base = opener?.getAttribute('data-base-label')
   if (opener && base !== null && base !== undefined) {
@@ -83,28 +55,19 @@ function applyHint(): void {
   }
 }
 
-// --- Pagefind, loaded once and cached: the dialog opens many times per page
-// view, and init() is not something Pagefind expects twice. ---
-
 type PagefindState = PagefindModule | null | 'unready'
 
 let pagefindState: PagefindState = 'unready'
 let pagefindLoad: Promise<PagefindModule | null> | null = null
 
-/**
- * Resolves to null both when the index does not exist (dev, or before a build)
- * and when init() throws, so callers handle one "not available" case.
- */
 async function ensurePagefind(): Promise<PagefindModule | null> {
   if (pagefindState !== 'unready') return pagefindState
   pagefindLoad ??= (async () => {
     const pagefind = await loadPagefind()
     if (pagefind === null) return null
 
-    // Called bare, init() picks between the per-language indexes from the
-    // page's lang and silently serves whichever has the most pages to an
-    // unrecognised or variant tag. Passing the tag turns that quiet fallback
-    // into a thrown error. Search.astro carries the same guard.
+    // Called bare, init() silently serves whichever per-language index has the
+    // most pages for an unrecognised tag. Passing the tag makes it throw.
     if (pagefind.init) {
       try {
         await pagefind.init(document.documentElement.lang)
@@ -119,8 +82,6 @@ async function ensurePagefind(): Promise<PagefindModule | null> {
   return pagefindState
 }
 
-// MAX_RESULTS rows each get a numbered shortcut (NUMBER_SHORTCUT below);
-// past it the palette links to /search/ instead of a further row.
 const NUMBER_SHORTCUT = new RegExp(`^[1-${MAX_RESULTS}]$`)
 
 function searchPageHref(query: string): string {
@@ -130,7 +91,6 @@ function searchPageHref(query: string): string {
 
 function init(): void {
   const triggerEl = document.querySelector<HTMLElement>('.search-trigger')
-  // <a>, not <button>: see SearchPalette.astro for why this is a real link.
   const openerEl = document.querySelector<HTMLAnchorElement>('.sx-open')
   const hintEl = document.querySelector<HTMLElement>('.sx-hint')
   const dialogEl = document.querySelector<HTMLDialogElement>('.sx-dialog')
@@ -162,15 +122,9 @@ function init(): void {
   const list = listEl
   const more = moreEl
 
-  // These only become true now that the click below opens a dialog instead of
-  // navigating; in the static markup they would describe behaviour a no-JS
-  // reader never gets. aria-label is left alone, SearchPalette.astro sets one
-  // that reads correctly in both states.
   opener.setAttribute('aria-haspopup', 'dialog')
   opener.setAttribute('aria-controls', 'sx-dialog')
 
-  // The hint's space is already reserved at rest (visibility: hidden), so
-  // revealing it resizes nothing. Only from here is the promise it makes true.
   hint.style.visibility = 'visible'
   hintModEl = trigger.querySelector('.sx-hint-mod')
   hintKeyEl = trigger.querySelector('.sx-hint-key')
@@ -204,9 +158,8 @@ function init(): void {
       return
     }
 
-    // Pagefind's own coalescing rather than a hand-rolled setTimeout: a call
-    // superseded by a newer keystroke resolves to null instead of running,
-    // which keeps the live region from announcing once per key.
+    // A call superseded by a newer keystroke resolves to null instead of
+    // running, so the live region does not announce once per key.
     const outcome = await pagefind.debouncedSearch(query, {}, DEBOUNCE_MS)
     if (outcome === null || generation !== searchGeneration) return
 
@@ -220,7 +173,7 @@ function init(): void {
     for (const result of results.slice(0, MAX_RESULTS)) {
       const data = await result.data()
       if (generation !== searchGeneration) return
-      if (!data.url.startsWith('/')) continue // Same external-URL guard as Search.astro.
+      if (!data.url.startsWith('/')) continue
       entries.push({ url: data.url, title: data.meta.title ?? data.url })
     }
     if (generation !== searchGeneration) return
@@ -241,9 +194,6 @@ function init(): void {
       return link
     })
 
-    // One announcement per settled search, the count rather than the titles:
-    // the results are already visible, and reading each one aloud on every
-    // keystroke is what a polite live region has to avoid.
     status.textContent = label(input, 'resultsFound', String(results.length))
 
     if (results.length > MAX_RESULTS) {
@@ -254,8 +204,6 @@ function init(): void {
     }
   }
 
-  // In the drawer the palette opens as a dropdown, so the menu behind it stays
-  // readable and nothing in it moves.
   const inDrawer = (): boolean => document.querySelector('header.shell')?.matches('[data-menu-open]') === true
 
   function openDialog(): void {
@@ -268,23 +216,19 @@ function init(): void {
 
     if (inDrawer()) {
       dialog.show()
-      // Pinned to the top of the drawer, so the keyboard covers nothing needed.
       input.focus()
       updateCaret()
       return
     }
 
     dialog.showModal()
-    // Focusing the input on touch opens the keyboard over half the dialog
-    // before the reader has seen it; on a phone the tap on the field is what
-    // asks for the keyboard, so the dialog itself takes the initial focus.
+    // Focusing the input on touch opens the on-screen keyboard before the
+    // reader has seen the dialog, so there the dialog itself takes initial focus.
     if (matchMedia('(pointer: fine)').matches) input.focus()
     else dialog.focus()
     updateCaret()
   }
 
-  // preventDefault is the upgrade: without it a real <a href> navigates, which
-  // is the correct no-JS behaviour and wrong once this handler exists.
   opener.addEventListener('click', (event) => {
     event.preventDefault()
     openDialog()
@@ -294,14 +238,12 @@ function init(): void {
     opener.focus()
   })
 
-  // A click whose target is the dialog element itself, rather than any of its
-  // content, only happens on the ::backdrop area: every real child has a box.
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close()
   })
 
-  // The dropdown has no backdrop to catch that click, so light dismiss is a
-  // document listener instead.
+  // A non-modal dialog has no backdrop to catch that click, so light dismiss
+  // needs a document listener instead.
   document.addEventListener('click', (event) => {
     if (!dialog.open || dialog.matches(':modal')) return
     const target = event.target as HTMLElement
@@ -319,9 +261,8 @@ function init(): void {
   dialog.addEventListener('keydown', (event) => {
     const metaHeld = isApple ? event.metaKey : event.ctrlKey
 
-    // Cmd/Ctrl+1-5 jumps to that result. Most browsers also use Ctrl/Cmd+1-9
-    // to switch tabs, so this preventDefault may lose that race depending on
-    // the browser, the same way GitHub's and Linear's number shortcuts do.
+    // Most browsers also use Ctrl/Cmd+1-9 for tabs, so this preventDefault may
+    // lose that race.
     if (metaHeld && NUMBER_SHORTCUT.test(event.key)) {
       event.preventDefault()
       resultLinks[Number(event.key) - 1]?.click()
@@ -331,8 +272,6 @@ function init(): void {
     const target = event.target as HTMLElement
 
     if (target === input) {
-      // Arrow keys never insert a character, so they can move focus into the
-      // results while the reader is still typing.
       if (event.key === 'ArrowDown' && resultLinks.length > 0) {
         event.preventDefault()
         resultLinks[0].focus()
@@ -340,15 +279,11 @@ function init(): void {
         event.preventDefault()
         resultLinks[resultLinks.length - 1].focus()
       }
-      // Escape is native: showModal() fires 'cancel' and closes with no
-      // listener. Every other key, h/j/k/l included, types as pressed.
+      // Escape is native here: showModal() fires 'cancel' and closes with no
+      // listener. A dialog opened with show() gets neither.
       return
     }
 
-    // Focus is on a result link, the one place h/j/k/l are bound. That
-    // placement is what resolves the conflict: they are ordinary letters a
-    // reader types into the field above, so they only mean navigation once
-    // focus has left it via arrows, a click or Tab, never via a letter.
     const currentIndex = resultLinks.indexOf(target as HTMLAnchorElement)
     if (currentIndex === -1) return
 
@@ -360,16 +295,12 @@ function init(): void {
         break
       case 'k':
       case 'ArrowUp':
-        // From the first item this returns to the input rather than wrapping
-        // to the last result: the field is the only other useful target.
         event.preventDefault()
         if (currentIndex === 0) input.focus()
         else resultLinks[currentIndex - 1].focus()
         break
       case 'h':
       case 'ArrowLeft':
-        // ranger/vifm's "up a level". There is no parent list, only the query
-        // that produced this one, so back means returning to the input.
         event.preventDefault()
         input.focus()
         break
@@ -384,8 +315,6 @@ function init(): void {
     }
   })
 
-  // Modifier+letter never types a character into whatever is focused, so the
-  // global open shortcut stays active everywhere on the page.
   document.addEventListener('keydown', (event) => {
     if (dialog.open) return
     const metaHeld = isApple ? event.metaKey : event.ctrlKey

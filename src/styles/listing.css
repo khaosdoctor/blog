@@ -1,35 +1,15 @@
-/*
- * The dense listing table: date, title, dotted leader, a label and a trailing
- * figure, in one row. PostList.astro renders posts through it and the series
- * index renders series, so the two read as the same object at different
- * zoom levels rather than as two unrelated lists.
- *
- * Global rather than scoped to PostList, which is where it started: an Astro
- * scoped style pairs its selector with that component's own cid, so a second
- * component could never reuse it.
- */
-
 .listing {
   padding: 0;
   list-style: none;
   letter-spacing: -0.01em;
 }
 
-/*
- * Past 70rem the list and its heading widen to --content-width while `main`
- * keeps --measure, so they break out of it: main is this box's containing
- * block, a margin percentage resolves against that block's width, so
- * `margin-inline-start: 50%` puts the start edge at main's centre (which is
- * the viewport's, both are centred) and the translate pulls the box back by
- * half its own width. The heading shares the geometry so the title and the
- * first row share a left edge.
- */
+/* Breaks out of `main`'s --measure: a margin percentage resolves against main's
+   width, so 50% centers the start edge and the translate offsets by half the width. */
 @media (min-width: 70rem) {
   .listing,
   .listing-heading {
     inline-size: var(--content-width);
-    /* The header's own inset, so rows begin and end exactly where the header's
-       drawn edges do rather than a few pixels wider on both sides. */
     padding-inline: var(--shell-inset);
     margin-inline-start: 50%;
     transform: translateX(calc(var(--content-width) / -2));
@@ -38,13 +18,6 @@
 
 .listing-row {
   display: flex;
-  /*
-   * Centred, not baseline: the row mixes a small date and figure with a
-   * visibly larger title, and baseline alignment sizes the line from the
-   * tallest item's ascent, which pushes every smaller item off-centre. This
-   * still holds when the title wraps, the row grows and the small cluster
-   * stays in the middle of the taller box.
-   */
   align-items: center;
   color: var(--muted);
   font-family: var(--font-mono);
@@ -54,20 +27,8 @@
   position: relative;
 }
 
-/*
- * The separator, on its own pseudo-element because it is masked and a mask
- * applies to everything an element renders: on the li it would fade the row's
- * own text along with the rule.
- *
- * Three quarters of the row, fading out toward the end. Two layers doing two
- * jobs: the repeating gradient draws the dashes (10px on, 6px off, the same
- * mark quotes.css and the pagination rule use), and the mask ramps its alpha
- * away. One gradient cannot do both, since the dashes need a repeating
- * pattern and the fade needs a continuous one.
- *
- * Drawn in --muted rather than --rule, whose dark tone carries a hint of
- * purple that read as coloured against the dim white of the row's own text.
- */
+/* On a pseudo-element because a mask applies to everything its element renders;
+   on the li it would fade the row's text too. */
 .listing-row::after {
   content: '';
   position: absolute;
@@ -83,10 +44,6 @@
   mask-image: linear-gradient(to right, #000 0 55%, transparent 100%);
 }
 
-/* The last row drops its separator: Pagination.astro draws its own
-   border-block-start immediately below, and the two stacked read as a doubled
-   line with an empty band between them. Two selectors because the row is the
-   <li> itself in a post list and a <summary> inside it in the series list. */
 .listing > li.listing-row:last-child::after,
 .listing > li:last-child > details > .listing-row::after {
   content: none;
@@ -94,28 +51,11 @@
 
 .listing-date {
   flex: none;
-  /* Departure Mono, not the inherited system mono stack: the same face the
-     page numbers use. */
   font-family: var(--font-display);
 }
 
-/*
- * A title, so it takes the display face. A bare <a> rather than a heading,
- * which is why the global heading rule does not reach it.
- *
- * Colour is explicit rather than the global `a { color: accent }`: the title
- * reads in ink (16.26:1 light, 18.61:1 dark), keeping the accent for the label
- * alone. Weight 400, not 600: Departure Mono ships one weight and a browser
- * asked for 600 synthesises it by smearing the glyphs sideways.
- *
- * Shrinks but does not grow, so a title takes the room its own text needs and
- * the leader claims what is left. If both grew they would split the leftover
- * space and the leader would never reach the columns it guides the eye toward.
- * `min-inline-size: 0` is what lets a flex item wrap below its content's
- * natural one-line width at all, and wrapping beats an ellipsis here: reading
- * every title in full is the one thing a list built for scanning cannot
- * compromise on.
- */
+/* Shrinks but does not grow, so the leader takes what the title leaves;
+   `min-inline-size: 0` is what lets the title wrap below its one-line width. */
 .listing-title {
   flex: 0 1 auto;
   min-inline-size: 0;
@@ -128,28 +68,14 @@
   overflow-wrap: break-word;
 }
 
-/* The site's one hover convention for a plain-text link (core.css's own
-   `footer a:hover`): fill with the day colour, invert the text to the ground. */
 .listing-title:hover,
 .listing-title:focus-visible {
   background: var(--accent-day, var(--accent));
   color: var(--bg);
 }
 
-/*
- * The dots carry the eye from the title across to the trailing columns.
- *
- * Basis 0, not `auto`. The dot run is 200 characters, and with an `auto` basis
- * that whole string counts as this item's ideal width, so the row overflowed
- * and flexbox shrank every shrinkable item to compensate, the title included:
- * titles wrapped after three or four words with empty room to their right. A
- * zero basis asks for nothing and takes only what the title leaves, which is
- * what a leader is: decoration cut to fit, never a width the row owes it.
- *
- * Dimmed with opacity, the same mechanism Pagination uses for "present but not
- * the point". It carries no required information, so WCAG 1.4.11's decorative
- * exemption applies and there is no 3:1 floor to hold it to.
- */
+/* Basis 0, not `auto`: the dot-leader run would otherwise be this item's
+   ideal width, overflowing the row and shrinking the title with it. */
 .listing-leader {
   flex: 1 1 0;
   min-inline-size: 0;
@@ -159,15 +85,6 @@
   opacity: 0.5;
 }
 
-/*
- * The label column. Its colour is the day colour rather than a post's own
- * per-slug hash, since a list of many rows belongs to no single cover. Text,
- * so its floor is 4.5:1 rather than the 3:1 non-text one: red 4.67:1 dark /
- * 4.72:1 light and blue 4.90:1 dark / 4.56:1 light clear it, green 8.03:1 dark
- * / 3.29:1 light and yellow 11.25:1 dark / 3.23:1 light do not on the light
- * page (measured in theme.css against --bg, WCAG 2.1). That shortfall exists
- * everywhere --accent-day is text and is not this list's to fix.
- */
 .listing-label {
   flex: none;
   color: var(--accent-day, var(--accent));
@@ -180,8 +97,6 @@
   color: var(--bg);
 }
 
-/* The day colour, like .listing-label above, but with no hover fill: this one
-   is a count, so it says nothing about being clickable. */
 .listing-label-plain {
   flex: none;
   color: var(--accent-day, var(--accent));
@@ -191,7 +106,6 @@
   flex: none;
   margin-inline-start: 0.7rem;
   font-variant-numeric: tabular-nums;
-  /* Departure Mono, matching .listing-date. */
   font-family: var(--font-display);
 }
 
@@ -211,29 +125,18 @@
     display: none;
   }
 
-  /* The leader was the space between date and label; without it they touched
-     ("6 March 2025opinion"). */
   .listing-label,
   .listing-label-plain {
     margin-inline-start: 0.6rem;
   }
 }
 
-/* --- The accordion variant, used by the series index --- */
-
-/*
- * A <details> per row, so the parts open in place with no script: the disclosure
- * state, the keyboard behaviour and the screen reader announcement are all the
- * element's own.
- */
 .listing-accordion > li {
   display: block;
 }
 
 .listing-accordion summary {
   cursor: pointer;
-  /* The UA triangle is replaced by the bracket marker below, and Safari needs
-     the WebKit pseudo-element as well as `list-style` to drop it. */
   list-style: none;
 }
 
@@ -246,12 +149,6 @@
   outline-offset: 2px;
 }
 
-/*
- * The site's bracket vocabulary rather than a triangle. No fixed width: both
- * states are three characters of the same monospace face, so they already
- * measure the same, and a box narrower than the glyph let it overflow into the
- * date beside it.
- */
 .listing-marker {
   flex: none;
   margin-inline-end: 0.6rem;
@@ -271,11 +168,8 @@
   color: var(--accent-day, var(--accent));
 }
 
-/*
- * The parts, indented under their series. The nested list has to undo the
- * break-out above: that rule centres a list against `main`, which is the wrong
- * containing block once the list is inside a row that has already been widened.
- */
+/* The nested list must undo the break-out above: it centres against `main`,
+   the wrong containing block once the list is inside an already widened row. */
 .listing-panel {
   padding-inline-start: 2.4rem;
   padding-block-end: 0.5rem;
@@ -290,17 +184,10 @@
   }
 }
 
-/* The panel's own last row keeps its separator, since the series row below it
-   is a sibling rather than the page's own next block. */
 .listing-panel .listing > li.listing-row:last-child::after {
   content: '';
 }
 
-/*
- * The small uppercase label above a listing title ("tag", "series"). Global
- * here because the per-tag and per-series pages of both languages carried
- * identical scoped copies.
- */
 .kicker {
   margin-block-end: 0;
   color: var(--muted);
@@ -310,13 +197,10 @@
   letter-spacing: 0.08em;
 }
 
-/* The title closes up under its label. */
 .kicker + h1 {
   margin-block-start: 0.2rem;
 }
 
-/* A section page's one-line description, under its title. The subtitle face
-   is a bitmap traced to outlines, only crisp at a whole 16px. */
 .about {
   margin-block: 0.5rem 1rem;
   color: var(--muted);

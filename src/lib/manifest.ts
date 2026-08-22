@@ -1,14 +1,7 @@
 import { t, type Locale } from '../i18n/ui'
 
-/**
- * The manifest used to be a static file in public/, which meant an English
- * reader installing the app got a Portuguese description. It is generated per
- * locale now: BaseLayout links the one matching the page.
- *
- * `scope` stays at the site root for both, so navigating from an installed
- * English app into a Portuguese post stays inside the app instead of opening a
- * browser tab. Only `start_url` and the copy differ.
- */
+// `scope` must stay at the site root for every locale, so crossing languages
+// inside an installed app does not open a browser tab.
 export function buildManifest(locale: Locale): string {
   return JSON.stringify(
     {
@@ -19,8 +12,8 @@ export function buildManifest(locale: Locale): string {
       start_url: locale === 'en' ? '/en/' : '/',
       scope: '/',
       display: 'standalone',
-      // The light --bg from theme.css. A manifest cannot hold two colours for the
-      // two schemes, and the splash screen it paints should not be the black one.
+      // The light --bg from theme.css: a manifest holds one colour for both
+      // schemes, and the splash screen should not be the black one.
       background_color: '#f4efe0',
       theme_color: '#f4efe0',
       icons: [

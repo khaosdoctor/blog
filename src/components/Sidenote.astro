@@ -1,41 +1,14 @@
 ---
-/**
- * <Sidenote>inline text</Sidenote>
- *
- * A numbered note anchored to the word it follows. Injected globally into MDX,
- * so its public shape (tag name, slot content) must not change.
- *
- * - Numbering is a CSS counter, no client JS.
- * - Each instance gets a build-time id for its own permalink. The copy button
- *   lives inside `.note-text`, not the running text, and copies without
- *   navigating: FootnoteSidenotes.astro handles it rather than BaseLayout's
- *   delegated handler, which deliberately lets the browser follow the link.
- * - Hovering anywhere on the note highlights the prose it is attached to. That
- *   text is not wrapped in anything, so the highlight is painted on a Range by
- *   FootnoteSidenotes.astro rather than by this markup.
- * - Wide: the text floats into the right margin, always visible. Narrow: a
- *   tap-to-reveal popover toggled by a checkbox. No JS either way. Following a
- *   link to this note's anchor rings the marker and never forces the popover
- *   open, since nothing should reach a state the reader cannot dismiss.
- * - Slot content MUST be inline only. This renders inside a <span>, and a
- *   popover card is not a place for a blockquote.
- */
+// Slot content must be inline only: this renders inside a <span> in the running
+// text, so a block element would break the paragraph around it.
 import { localeFromPath, t } from '../i18n/ui'
 import '../styles/sidenotes.css'
 
-// Module-scoped on purpose: Astro renders a page's components top to bottom
-// before moving to the next page, so watching the pathname for a change is
-// enough to zero the count at the first Sidenote of a new page, the same
-// "resets per page" the CSS counter above already gets for free from the
-// browser. If a future build ever renders pages concurrently in one process
-// this can go stale; ids stay unique, they just may stop matching the
-// visible 1, 2, 3 the CSS counter shows. A separate counter from
-// MarginNote's own (not shared): the two id spaces never need to interleave,
-// only stay unique within their own prefix.
+// Assumes Astro finishes one page before starting the next; rendering pages
+// concurrently would keep ids unique but unmatched to the CSS counter.
 let lastPath = ''
 let count = 0
 
-// MDX calls this without props, so the URL is what tells us the language.
 const locale = localeFromPath(Astro.url.pathname)
 
 if (Astro.url.pathname !== lastPath) {

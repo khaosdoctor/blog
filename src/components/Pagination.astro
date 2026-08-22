@@ -2,18 +2,6 @@
 import type { Page } from 'astro'
 import { t, type Locale } from '../i18n/ui'
 
-/**
- * The page nav at the bottom of every list long enough to page.
- *
- * Takes Astro's own `page` object from `paginate()`, so prev/next come from its
- * route generator rather than being rebuilt here. The individual numbers are
- * not something `paginate()` hands back, so those are built from `basePath`
- * plus the same `N/` convention the page files already generate.
- *
- * Every control is a link styled as one of the header's icon buttons: they
- * navigate, so they stay <a> even where they look like buttons. The current
- * page and a disabled prev/next are plain <span>, since neither goes anywhere.
- */
 interface Props {
   page: Page<unknown>
   basePath: string
@@ -28,24 +16,12 @@ function hrefFor(pageNumber: number): string {
 
 type Slot = number | 'ellipsis'
 
-/**
- * Which page numbers render, out of `count`. MUI's own `usePagination` rule
- * (boundaryCount 1, siblingCount 1) rather than an invented one: first and last
- * always render, the current page keeps one sibling each side, and an ellipsis
- * only ever replaces two or more hidden pages, since one hidden between two
- * visible numbers would read the same length as printing it.
- *
- * What that buys over a plainer first-N/last-N split: every render at 8 pages or
- * more produces exactly 7 slots, a constant width whichever page is current, so
- * the row never shifts under the reader's pointer. And the current page can
- * never fall inside the hidden middle with nothing marking where it is.
- */
+// Yields exactly 7 slots at 8+ pages, so the row holds a constant width as
+// the page changes.
 function paginationSlots(count: number, current: number): Slot[] {
   const BOUNDARY = 1
   const SIBLING = 1
-  // The smallest count the boundary pairs and the current page's own
-  // siblings cannot already cover between them without a hidden run of two
-  // or more; at or under it, list every page instead of collapsing anything.
+  // Below this the boundaries and siblings already cover every page.
   const COLLAPSE_FLOOR = 2 * BOUNDARY + 2 * SIBLING + 3
   if (count < COLLAPSE_FLOOR + 1) {
     return Array.from({ length: count }, (_, index) => index + 1)
@@ -93,13 +69,7 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
 {
   page.lastPage > 1 && (
     <nav class="pagination" aria-label={t(locale, 'pagination')}>
-      {/* The section break a post draws for `---`, styled by prose/rules.css so
-          there is one such mark on the site rather than two. A flex item of its
-          own row, since the controls below it are the other row. */}
       <hr class="pg-rule" />
-      {/* The disabled arrows are aria-hidden with no label: aria-label is
-          prohibited on a bare span (WAI-ARIA generic role), and a dead arrow
-          says nothing a screen reader needs. */}
       {page.url.prev ? (
         <a class="pg-btn" href={page.url.prev} rel="prev" aria-label={t(locale, 'paginationPrev')}>
           <span class="pg-glyph" aria-hidden="true">
@@ -163,13 +133,8 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     font-size: 0.85rem;
   }
 
-  /*
-   * The box spans the row so the controls fall below it, and only the paint is
-   * cut to --rule-length. `inline-size` cannot do that here: as a flex item its
-   * main size is `flex-basis`, which wins. The mask is re-declared at the same
-   * size for the same reason, or it would fade the row's edges instead of the
-   * mark's.
-   */
+  /* `inline-size` cannot shorten a flex item, so the box spans the row and only
+     the paint is cut. The mask needs that same size or it fades the wrong edges. */
   .pg-rule {
     flex-basis: 100%;
     margin-block: 0 1.2rem;
@@ -180,16 +145,9 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
       no-repeat;
   }
 
-  /*
-   * Same 70rem/80vw treatment as PostList.astro's own `.posts` (see that
-   * file's comment for the full mechanism): this row widens exactly as much
-   * as the list above it, so the two read as one deliberate width rather
-   * than the list widening on its own.
-   */
   @media (min-width: 70rem) {
     .pagination {
       inline-size: var(--content-width);
-      /* Same inset as the list above and the header's own row. */
       padding-inline: var(--shell-inset);
       margin-inline-start: 50%;
       transform: translateX(calc(var(--content-width) / -2));
@@ -208,18 +166,6 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     margin-inline-start: 0.15rem;
   }
 
-  /*
-   * Every control here, previous, next, each page number, shares the
-   * header's own icon-button footprint (ThemeToggle.astro/
-   * SettingsPanel.astro, both read in full before writing this):
-   * --icon-btn-hit is the real 44px hit target, --icon-btn-chip the smaller
-   * bordered square actually drawn (on ::before, so the visible chip can be
-   * smaller than the box a pointer has to reach), --accent-day the border
-   * every icon button already reads. These stay <a> (or, disabled/current, a
-   * plain <span>) rather than becoming <button>: they navigate, which is
-   * what a link is for, and there is nothing here to submit the way
-   * ThemeToggle's own menu options do.
-   */
   .pg-btn {
     position: relative;
     display: inline-flex;
@@ -246,14 +192,7 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     pointer-events: none;
   }
 
-  /*
-   * position: relative for the same reason ThemeToggle's own .tt-icon needs
-   * it: the ::before chip above is absolutely positioned and opaque, and an
-   * absolutely positioned box paints over a non-positioned sibling whatever
-   * the source order says. Giving the label a position moves it into the
-   * same later paint step the chip is already in, so tree order (the label
-   * comes after ::before) decides, and the label draws on top.
-   */
+  /* Without a position the opaque ::before chip paints over this label. */
   .pg-glyph {
     position: relative;
     font-size: var(--icon-btn-glyph);
@@ -281,20 +220,7 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     cursor: default;
   }
 
-  /*
-   * The current page: this list's own destaque colour, the day colour, same
-   * rule PostList.astro's own section label reads, kept from the plain-text
-   * version this replaces.
-   */
-  /*
-   * The current page fills solid in the day's own colour, with the page ground
-   * as the ink on top. It reads `--post-accent-fill` (prose/links.css) rather
-   * than the raw accent: that token is the same day colour already mixed the
-   * few percent it needs to clear 4.5:1 against `--bg` on either ground, so
-   * the number stays readable on a green or yellow day where the raw colour
-   * would not. Painted on ::before, the same element the chip's own border is
-   * on, so the fill and the frame are one box.
-   */
+  /* Not the raw accent: this token is mixed to stay readable on either ground. */
   .pg-current {
     color: var(--bg);
   }
@@ -307,13 +233,7 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     font-weight: bold;
   }
 
-  /*
-   * min-inline-size matches .pg-btn's own hit target, not because the
-   * ellipsis is a control (it is aria-hidden and un-clickable, plain text),
-   * but so it takes up the same width as every real slot: the whole point of
-   * the 7-slot rule above is a row that holds a constant width as the
-   * current page changes, and an undersized ellipsis would undo that.
-   */
+  /* Sized like .pg-btn though it is not a control: every slot has to match. */
   .pg-ellipsis {
     display: inline-flex;
     align-items: center;

@@ -1,8 +1,3 @@
-/*
- * The one confirmation on the site. Written by the delegated click handler in
- * BaseLayout and removed two seconds later. Anything else that copies something
- * reuses this class rather than growing a second pattern.
- */
 .toast {
   position: fixed;
   inset-block-end: 1.5rem;

@@ -1,31 +1,3 @@
-/*
- * How the body of a post reads. One file per thing being styled, because this is
- * the part of the site that gets fiddled with most and a single long stylesheet
- * makes every change a search.
- *
- * Every value comes from a token in theme.css, so the coming ASCII redesign
- * changes values, not selectors.
- *
- * Scoped to .prose, which wraps the rendered markdown. Shell that happens to
- * live inside the same <article> (the tag row, the series navigation) is
- * deliberately outside that wrapper so none of this reaches it.
- *
- * One exception: ./prose/links.css. A link's colour, dashed rest underline
- * and inverted hover block are not only a prose thing any more (the owner's
- * ask: /oss/, the footer and every other link on the site read the same
- * accent and hover as a link in a post), so those rules in that file read
- * `html :is(main, footer) a` rather than `.prose a`. The out/in arrow icon
- * stayed behind at `.prose a`, a follow-up correction: it is a mid-sentence
- * "does this leave the site" cue, which only means something in running
- * text, not on a footer row or an OSS credit list. That file stays imported
- * from here regardless of which of its own rules are which width, since it
- * still belongs beside the rest of what a post's own text looks like; see
- * that file's own top comment for the exact split and why.
- *
- * The lab page at /lab/ renders variants of most of this side by side; see the
- * Lab feedback section of docs/design.md for what is still undecided.
- */
-
 @import './prose/headings.css';
 @import './prose/toast.css';
 @import './prose/emphasis.css';
@@ -35,56 +7,15 @@
 @import './prose/links.css';
 @import './prose/code.css';
 
-/*
- * The one deliberate font-family declaration this file makes for running
- * text itself (headings, code, tables and links below all already had their
- * own). It used to come for free: <body> in BaseLayout.astro read
- * --font-body directly, and .prose is a descendant, so nothing here had to
- * say so. <body>'s own default changed (site-wide, so anything that never
- * picked a face defaults to Departure Mono instead), which would have taken
- * a post's own body copy along with it purely because nothing here
- * contradicted the new default. This line is that contradiction, on
- * purpose: --font-body is still an open decision (docs/design.md), and a
- * reader should see today's answer to it change only when that decision
- * does, never as a side effect of the site's shell defaulting to
- * something else.
- */
 .prose {
   font-family: var(--font-body);
-  /* break-word, never anywhere: it leaves intrinsic sizes alone and only
-     breaks a token that would otherwise scroll the page sideways on a phone
-     (a bare hash, a long URL). Code blocks keep their own scroll container. */
   overflow-wrap: break-word;
-  /*
-   * The reader's text-size control (--font-scale, theme.css) reaches
-   * --text-base only, so the running paragraph grows and everything sized off
-   * the two smaller steps does not: a post's code blocks, tables, quotes,
-   * footnotes, maths and chips all read --text-small/--text-tiny. At the top
-   * of the 50-160% range that leaves a reader with 1.6x paragraphs beside
-   * unchanged code, which is not a text-size control so much as a
-   * paragraph-size one.
-   *
-   * The two steps are redefined here rather than in theme.css because the
-   * same two tokens also size the site's own shell (the settings panel, the
-   * search palette, the credits list), and shell should not follow a reading
-   * preference: a gear menu grown to the top of the range would put its own
-   * controls out of reach, and did so far more violently while that top was
-   * still the 500% this control opened with.
-   * Scoping the scaled values to .prose moves exactly the reading content and
-   * leaves every shell consumer on the fixed values it already reads.
-   */
+  /* Scaled here rather than in theme.css: the same tokens size the shell, which
+     must not follow a reading preference. */
   --text-small: calc(0.9rem * var(--font-scale));
   --text-tiny: calc(0.75rem * var(--font-scale));
 }
 
-/*
- * Two block-level children of the same visual weight, a figure or a code
- * frame, touch when one follows the other directly: neither carries a
- * bottom margin the next one's top margin can collapse against, so nothing
- * separates them. This only applies to that adjacency, so a code block or
- * figure next to a paragraph, heading or callout keeps the spacing it
- * already has.
- */
 .prose :is(figure, .expressive-code) + :is(figure, .expressive-code) {
   margin-block-start: var(--block-spacing);
 }
