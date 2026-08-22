@@ -157,6 +157,7 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
   .numbers {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     margin: 0 0.5rem;
     padding: 0;
     list-style: none;
@@ -164,6 +165,36 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
 
   .numbers li + li {
     margin-inline-start: 0.15rem;
+  }
+
+  /*
+   * Phone: the numbers take a row of their own and both arrows share the one
+   * under it. Left inline, the seven slots plus two arrows overflow the row and
+   * each arrow wrapped onto a line by itself. The slots also narrow to 2.5rem,
+   * since seven at the full hit width do not fit 360px either; the row keeps
+   * its full height, so the thumb target only loses width.
+   */
+  @media (max-width: 47.99rem) {
+    .numbers {
+      order: 1;
+      flex-basis: 100%;
+      margin-inline: 0;
+      margin-block-end: 0.5rem;
+    }
+
+    .pagination > .pg-btn {
+      order: 2;
+      margin-inline: 0.3rem;
+    }
+
+    .numbers .pg-btn,
+    .pg-ellipsis {
+      min-inline-size: 2.5rem;
+    }
+
+    .numbers li + li {
+      margin-inline-start: 0;
+    }
   }
 
   .pg-btn {
