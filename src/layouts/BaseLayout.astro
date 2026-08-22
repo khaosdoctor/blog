@@ -184,7 +184,9 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
         <span class="rule-edge">└─</span><span class="rule-fill">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</span><span class="rule-edge">─┘</span>
       </div>
       <div class="row">
-        <p class="copyright">{t(locale, 'copyright', copyrightYear)}</p>
+        <p class="copyright">
+          {t(locale, 'copyright', copyrightYear)} <span class="rights">{t(locale, 'rightsReserved')}</span>
+        </p>
         <p class="links">
           <a href={REPO} rel="noopener" class="icon-link" aria-label={t(locale, 'githubRepo')}>
             <Github />

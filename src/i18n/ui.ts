@@ -140,6 +140,7 @@ type UIKey =
   | 'appShortName'
   | 'appDescription'
   | 'copyright'
+  | 'rightsReserved'
   | 'credits'
   | 'githubRepo'
   | 'linkedinProfile'
@@ -248,7 +249,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Idioma',
     switchLanguage: 'Mudar para %s',
     version: 'Versão',
-    copyright: '© 2019–%d Lucas Santos. Todos os direitos reservados.',
+    copyright: '© 2019–%d Lucas Santos.',
+    rightsReserved: 'Todos os direitos reservados.',
     credits: 'Créditos',
     githubRepo: 'Repositório no GitHub',
     linkedinProfile: 'Perfil no LinkedIn',
@@ -389,7 +391,8 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     language: 'Language',
     switchLanguage: 'Switch to %s',
     version: 'Version',
-    copyright: '© 2019–%d Lucas Santos. All rights reserved.',
+    copyright: '© 2019–%d Lucas Santos.',
+    rightsReserved: 'All rights reserved.',
     credits: 'Credits',
     githubRepo: 'GitHub repository',
     linkedinProfile: 'LinkedIn profile',

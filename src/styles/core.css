@@ -183,6 +183,29 @@ footer .links {
   color: var(--muted);
 }
 
+/* Phone: the whole footer centres, matching the version and credits lines that
+   already do. `.rights` takes its own line so the sentence never splits
+   mid-phrase, which left "rights reserved." orphaned. */
+@media (max-width: 47.99rem) {
+  footer .row {
+    justify-content: center;
+  }
+
+  footer .copyright {
+    margin-inline-end: 0;
+    text-align: center;
+  }
+
+  footer .copyright .rights {
+    display: block;
+  }
+
+  footer .links {
+    justify-content: center;
+    inline-size: 100%;
+  }
+}
+
 footer a {
   padding-inline: 1px;
   padding-block: 2px;
