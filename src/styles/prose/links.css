@@ -103,6 +103,8 @@ html :is(main, footer) figure a:focus-visible {
 
 .prose a.link-unwritten {
   color: var(--link-unwritten);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
 }
 
 .prose a.link-unwritten:hover,

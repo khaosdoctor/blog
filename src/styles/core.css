@@ -9,6 +9,37 @@
 html {
   background: var(--bg);
   scroll-padding-block-start: calc(var(--icon-btn-hit) + 0.8rem);
+  scrollbar-width: thin;
+  scrollbar-color: var(--fg) var(--bg);
+}
+
+/*
+ * The two mechanisms are mutually exclusive: Chrome ignores ::-webkit-scrollbar
+ * outright once scrollbar-width or scrollbar-color is anything but auto, so the
+ * pair above has to be handed back before these can square the thumb. Firefox
+ * fails this @supports test and keeps the pair, rounded thumb included, since it
+ * exposes no shape control at all.
+ */
+@supports selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: var(--bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--fg);
+    border-radius: 0;
+  }
 }
 
 body {
@@ -183,9 +214,6 @@ footer .links {
   color: var(--muted);
 }
 
-/* Phone: the whole footer centres, matching the version and credits lines that
-   already do. `.rights` takes its own line so the sentence never splits
-   mid-phrase, which left "rights reserved." orphaned. */
 @media (max-width: 47.99rem) {
   footer .row {
     justify-content: center;

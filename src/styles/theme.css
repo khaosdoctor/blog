@@ -54,7 +54,9 @@
   --em-italic-fg: light-dark(#8a6400, var(--brand-yellow));
   --em-italic-weight: 500;
 
-  --link-unwritten: light-dark(#a4232e, #ff8b93);
+  /* Grey, never a brand tone: a red day accent or cover made an unwritten link
+     identical to a working one. */
+  --link-unwritten: var(--muted);
 
   --heading-rule: var(--rule);
   --heading-glow: light-dark(
@@ -121,6 +123,14 @@
   --text-base: calc(1.25rem * var(--font-scale));
   --leading: 1.53;
   --tracking-body: 0em;
+}
+
+/* Phone: the cover's side frame lines are cropped off-screen, so the text has
+   nothing to line up with there and takes the page gutter instead. */
+@media (max-width: 47.99rem) {
+  :root {
+    --cover-frame-inset: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

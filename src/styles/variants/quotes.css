@@ -63,6 +63,15 @@
   color: var(--qc-fg);
 }
 
+/* Phone: the indent has to come out of the card's own width, or the obsidian
+   theme's `width: 100%` carries its far edge past the screen. */
+@media (max-width: 47.99rem) {
+  .prose blockquote.callout[data-callout='quote'],
+  .prose .callout[data-callout='quote'] {
+    inline-size: auto;
+  }
+}
+
 .prose .callout[data-callout='quote'] > *,
 .prose blockquote:not(.callout):not(.twitter-tweet) > * {
   position: relative;

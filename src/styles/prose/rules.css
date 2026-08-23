@@ -1,5 +1,7 @@
 .prose hr,
-.pg-rule {
+.pg-rule,
+.prose section[data-footnotes]::before {
+  display: block;
   inline-size: var(--rule-length);
   block-size: var(--rule-weight);
   margin-block: 3rem;

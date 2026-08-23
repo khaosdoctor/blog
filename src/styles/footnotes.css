@@ -67,6 +67,25 @@
   font-weight: inherit;
 }
 
+/* Too narrow for the margin copy, so this list is the only notes on screen: it
+   takes back the label GFM ships hidden, and the post's own section break. */
+@media (max-width: 47.99rem) {
+  .prose section[data-footnotes]::before {
+    content: '';
+  }
+
+  .prose section[data-footnotes] h2 {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0 0 1rem;
+    overflow: visible;
+    clip-path: none;
+    color: var(--fg);
+    white-space: normal;
+  }
+}
+
 @media (min-width: 70rem) {
   .prose section[data-footnotes] {
     display: none;

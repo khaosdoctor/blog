@@ -28,7 +28,7 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 
 **Every taxonomy listing builds from its own locale.** `getSeries('en')`, `getTags('en')`, `getCategories('en')`: no index may link a reader into the other language's tree, and a term with no post in that language gets no page rather than an empty one.
 
-**Cover drawing has exactly one source.** `buildCoverSvg` in `src/lib/cover.ts` feeds both the build-time og:image raster and the in-browser hero, along with `coverOverlay`, `coverChipInk` and `CHIP_SIZE`. Never re-derive any of it on either side. `--post-accent` comes from the same file's `coverTone()`, since a second hash over a different pool agrees only by luck.
+**Cover drawing has exactly one source.** `buildCoverSvg` in `src/lib/cover.ts` feeds both the build-time og:image raster and the in-browser hero, along with `coverOverlay`, `coverChipInk` and `CHIP_SIZE`. Never re-derive any of it on either side. The two callers differ by one argument: the raster keeps the default black ground, since a social image cannot follow a reader's theme, while the browser passes the page's `scheme` and redraws when it changes. Every colour either ground uses lives in that file's `GROUNDS` and `BRAND_ON_GROUND`, mirrored from theme.css by hand. `--post-accent` comes from the same file's `coverTone()`, since a second hash over a different pool agrees only by luck.
 
 **Attribute changes on `<html>` fire no events.** `theme-toggle.ts` writes `data-theme` and the settings panel writes `data-motion` without dispatching anything, so a module that needs to react watches them with a `MutationObserver`. Never an event listener.
 

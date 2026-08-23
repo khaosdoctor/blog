@@ -37,28 +37,48 @@ const byline = formatCoverByline(pubDate, lang, authorName)
 
 <style>
   .cover-hero {
+    /* The box shows the middle `--cover-span` units of the drawing's 1200, so each side loses half the difference. */
+    --cover-span: 1200;
+    --cover-crop: calc((1200 - var(--cover-span)) / 2);
+
     position: relative;
-    aspect-ratio: 1200 / 630;
+    aspect-ratio: var(--cover-span) / 630;
     width: 100%;
     margin-block-end: 2.5rem;
-    /* `n * (100cqw / 1200)` is SVG unit n at every viewport, so the overlay below is written in the card's own 1200x630 coordinates. */
+    overflow: hidden;
+    /* `n * (100cqw / var(--cover-span))` is SVG unit n at every viewport, so the overlay below is written in the card's own coordinates. */
     container-type: inline-size;
+  }
+
+  /* Phone: the card bleeds over both page gutters, cropping its side frame lines off-screen (the inner rect's outer edge is unit 69.5).
+     Cancelling the known gutter, rather than sizing from 100vw, keeps a scrollbar out of the sum. */
+  @media (max-width: 47.99rem) {
+    .cover-hero {
+      --cover-span: 990;
+
+      width: calc(100% + 2 * var(--gutter));
+      margin-inline: calc(-1 * var(--gutter));
+    }
+
+    /* The row below reads at its 11px floor, taller than the slot the drawing left it, so it clears the title downwards. */
+    .cover-hero-meta {
+      margin-block-start: 0.75rem;
+    }
   }
 
   .cover-hero-canvas :global(svg) {
     display: block;
-    width: 100%;
+    width: calc(1200 / var(--cover-span) * 100%);
     height: 100%;
+    margin-inline-start: calc(var(--cover-crop) / var(--cover-span) * -100%);
   }
 
   .cover-hero-meta {
     position: absolute;
-    inset-inline-start: calc(var(--cover-meta-x, 160) * (100cqw / 1200));
-    inset-block-start: calc(var(--cover-meta-y, 470) * (100cqw / 1200));
+    inset-inline-start: calc((var(--cover-meta-x, 160) - var(--cover-crop)) * (100cqw / var(--cover-span)));
+    inset-block-start: calc(var(--cover-meta-y, 470) * (100cqw / var(--cover-span)));
     transform: translateY(-50%);
-    font-size: max(11px, calc(var(--cover-meta-size, 20) * (100cqw / 1200)));
-    /* The card is black on both page themes, so every `light-dark()` reached from in here has to take its dark branch. */
-    color-scheme: dark;
+    font-size: max(11px, calc(var(--cover-meta-size, 20) * (100cqw / var(--cover-span))));
   }
 
   .cover-hero .cover-hero-meta :global(.meta) {

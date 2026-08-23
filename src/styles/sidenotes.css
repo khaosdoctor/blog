@@ -99,6 +99,23 @@
   user-select: none;
 }
 
+/* A border, not text-decoration: a decoration on this box would also paint
+   through any link in the sentence, doubling the link's own dashed underline. */
+@media (max-width: 89.99rem) {
+  .note-sentence {
+    border-block-end: 1px dotted color-mix(in oklab, var(--muted) 55%, transparent);
+  }
+}
+
+.note-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  background: rgb(0 0 0 / 0.32);
+  cursor: default;
+}
+
 /* On <main> rather than <body>: resets per page and cannot be overridden by a
    later body-level counter-reset. */
 main {
@@ -186,6 +203,34 @@ main {
   }
 }
 
+/* A phone has no room beside the marker, so the note comes up from the bottom
+   edge. Must stay after the @supports block: same properties, same specificity. */
+@media (max-width: 47.99rem) {
+  .note-text {
+    transform: translateY(100%);
+    transition: transform var(--duration) var(--ease);
+  }
+
+  .note-toggle:checked ~ .note-text {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    width: auto;
+    max-width: none;
+    max-height: 60dvh;
+    padding-block: 0.9rem 1.1rem;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -2px 12px rgb(0 0 0 / 0.22);
+    transform: translateY(0);
+  }
+
+  .note-toggle:checked ~ .note-scrim {
+    display: block;
+  }
+}
+
 .note-text :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li, blockquote, pre, figure, table, hr) {
   display: inline;
   margin: 0;
@@ -254,8 +299,13 @@ main {
 @media print {
   .note-toggle,
   .marginnote .note-marker,
-  .note-copy-link {
+  .note-copy-link,
+  .note-scrim {
     display: none;
+  }
+
+  .note-sentence {
+    border-block-end: 0;
   }
 
   .note-text {

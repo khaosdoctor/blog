@@ -148,10 +148,14 @@ const RULE = '──────────────────────
       display: inline;
     }
 
-    .menu-toggle[aria-expanded='true'],
     .menu-toggle:hover,
     .menu-toggle:focus-visible {
       color: var(--accent);
+    }
+
+    /* Ink, not the day's accent, which reads as a live control on a red day. */
+    .menu-toggle[aria-expanded='true'] {
+      color: var(--fg);
     }
 
     .menu-toggle:focus-visible {
@@ -165,13 +169,45 @@ const RULE = '──────────────────────
       display: none;
     }
 
+    /* Reading progress with no run to write along: a wash over what has been
+       read, the cover's own tone at the head, painted under the brand. */
+    .shell[data-menu-ready]::after {
+      --read-tone: light-dark(
+        color-mix(in oklab, var(--post-accent, var(--accent-day)) 18%, var(--bg)),
+        color-mix(in oklab, var(--post-accent, var(--accent-day)) 34%, var(--bg))
+      );
+      --read-head: var(--read-progress, 0%);
+      --read-tip: 0.75rem;
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline: calc(-1 * var(--gutter));
+      z-index: 0;
+      background: linear-gradient(
+        to right,
+        var(--read-tone) 0 calc(var(--read-head) - var(--read-tip)),
+        var(--post-accent, var(--accent-day)) calc(var(--read-head) - var(--read-tip)) var(--read-head),
+        transparent var(--read-head)
+      );
+      pointer-events: none;
+    }
+
+    /* Four offsets, no blur: an opaque 1px ring in the ground colour, so the
+       wordmark and the mark hold their edges over the fill in any tone. */
+    .shell[data-menu-ready] .brand {
+      filter: drop-shadow(1px 0 0 var(--bg)) drop-shadow(-1px 0 0 var(--bg)) drop-shadow(0 1px 0 var(--bg))
+        drop-shadow(0 -1px 0 var(--bg)) drop-shadow(var(--brand-shadow-offset) var(--brand-shadow-offset) 0 var(--brand-shadow-color));
+    }
+
     .shell[data-menu-ready] {
       justify-content: center;
     }
 
+    /* Negative by the hit box's overhang, so the DRAWN chip lines up with the
+       gutter every heading and link starts at. */
     .shell[data-menu-ready] .menu-toggle {
       position: absolute;
-      inset-inline-start: var(--shell-inset);
+      inset-inline-start: calc((var(--icon-btn-chip) - var(--icon-btn-hit)) / 2);
       z-index: 2;
     }
 
@@ -259,7 +295,25 @@ const RULE = '──────────────────────
       inline-size: auto;
       max-block-size: 60dvh;
       margin: 0;
-      padding: 0.6rem;
+      padding: 0.45rem;
+    }
+
+    /* Status, results and the more link are empty until a search runs, and
+       their spacing alone would hold the box open. */
+    .shell[data-menu-open] .controls :global(.sx-dialog[open] > :empty) {
+      margin-block-start: 0;
+    }
+
+    .shell[data-menu-open] .controls :global(.sx-row) {
+      font-size: 0.8rem;
+      padding-block-end: 0.3rem;
+      border-color: var(--fg);
+    }
+
+    /* The example queries are longer than the drawer can show without cutting
+       them at the frame, so the row is the prompt and the caret here. */
+    .shell[data-menu-open] .controls :global(.sx-input::placeholder) {
+      color: transparent;
     }
 
     .shell[data-menu-open] .controls :global(.sx-label) {

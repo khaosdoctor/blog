@@ -163,7 +163,8 @@
   --dial-content-inset: 2.5rem;
 
   /* Post title, byline and prose, aligned to the frame the cover DRAWS (stroked
-     at unit 34 of 1200 by cover.ts), not the card's outer box. */
+     at unit 34 of 1200 by cover.ts) rather than the card's outer box. Phones
+     drop to 0: the cover bleeds full width there and crops those lines away. */
   --dial-cover-frame-inset: calc(34 / 1200 * 100%);
 
   /* ==========================================================================

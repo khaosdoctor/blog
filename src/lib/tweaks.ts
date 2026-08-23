@@ -6,7 +6,6 @@ export const hoverPreviewCacheEntryLimit = 40
 export const hoverPreviewPinnedCardLimit = 6
 export const hoverPreviewOpenDelayMilliseconds = 200
 export const hoverPreviewCloseDelayMilliseconds = 150
-export const hoverPreviewLongPressMilliseconds = 500
 export const hoverPreviewDragThresholdPixels = 6
 export const hoverPreviewFootnoteCharacterLimit = 480
 export const hoverPreviewViewportMarginPixels = 8
