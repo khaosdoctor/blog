@@ -1,11 +1,13 @@
 ---
-import { localeFromPath, t } from '../i18n/ui'
+import LabSource from './LabSource.astro'
+import { localeFromPath } from '../i18n/ui'
 
 interface Props {
   name: string
+  source: string
 }
 
-const { name } = Astro.props
+const { name, source } = Astro.props
 const locale = localeFromPath(Astro.url.pathname)
 ---
 
@@ -13,10 +15,7 @@ const locale = localeFromPath(Astro.url.pathname)
   <div class="stage">
     <slot />
   </div>
-  <details>
-    <summary>{t(locale, 'showSource')} <code>{name}</code></summary>
-    <slot name="source" />
-  </details>
+  <LabSource locale={locale} name={name} source={source} />
 </figure>
 
 <style>

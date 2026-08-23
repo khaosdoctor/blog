@@ -59,7 +59,7 @@ Why each plugin exists, in the order they run:
 | `remark-embeds` | a bare URL or `![](url)` alone in a paragraph | `<YouTube>`, `<Vimeo>`, `<Tweet>`, `<SpeakerDeck>`, `<Spotify>`, `<Bookmark>` |
 | `remark-figures` | a lone image whose title is set | `<figure>` plus `<figcaption>` |
 | `remark-wikilinks` | `[[folder]]` | a link to that article in the reader's language |
-| `remark-lab-demos` | `<LabDemo src="./components/X.vue" />` | the island, its import, and its source as a highlighted block |
+| `remark-lab-demos` | `<LabDemo src="./components/X.vue" />` | the island, its import, and a link to the page its source is highlighted on |
 | `rehype-callouts` | `> [!note]`, `> [!quote] Author` | a callout box, in Obsidian's own vocabulary |
 | `rehype-math-copy` | a rendered formula | the same formula, copyable as LaTeX |
 | `rehype-heading-anchors` | a heading | a `#` link to itself |
@@ -69,12 +69,28 @@ Why each plugin exists, in the order they run:
 paragraph", and once a figure is wrapped the link check would have to look one level deeper for nothing.
 `remark-lab-demos` runs last because it is the only one that reads a file off disk and injects synthesized content.
 
+A demo's source is a page of its own. The plugin emits a link, never the file: the `labSource` collection
+(`src/lib/lab-sources.ts`) renders every file under a post's `components/` through this same processor, one page each
+at `/lab-source/<post>/<path>.html`, and `src/scripts/lab-source.ts` fetches that page when the reader asks for it.
+A content-layer loader is the one place outside a post where the configured markdown processor can be reached, through
+`renderMarkdown` in the loader context, which is what keeps the highlighting the same rather than a second Shiki setup.
+
 Code blocks go through expressive-code, which replaces Astro's default Shiki setup and so has to be listed before
 `mdx()` in `astro.config.mjs`. It carries the line numbers, the filename tab read from a first-line comment, and the
 fourteen themes the reader picks between.
 
 Both accept `![](url)` on purpose: Obsidian renders image syntax for YouTube and tweets as a live embed while you
 write, so a post previews correctly in the editor.
+
+Those fourteen themes are why `src/plugins/expressive-code-token-styles.mjs` exists. The engine writes one colour per
+theme inline on every syntax token, which cost about 1.7KB of HTML per code line: the archive post reached 15MB and the
+dev server ran out of heap rendering it. The plugin replaces the colours on a token with a marker, `style="--t:<id>"`,
+and emits one stylesheet rule per distinct token type per page, so the colours are paid for once per type instead of
+once per occurrence. What makes the marker an inline custom property rather than a class is the engine's own
+theme-dependent rule, which selects `span[style^='--']:not([class])` and reads `var(--<variant>)` from it: keeping that
+selector matching means every theme, the dark-mode media query and the picker all keep working through the CSS
+expressive-code already generates. A code line now costs about 400 bytes, and each theme added to the array costs
+roughly 1.5KB of theme CSS per page plus one declaration per token type, instead of one declaration on every token.
 
 ## The build
 

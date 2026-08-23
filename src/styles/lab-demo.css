@@ -4,24 +4,37 @@
   border-radius: var(--radius);
 }
 
-.lab-demo details {
+.lab-demo .lab-source {
+  margin: 0;
   border-block-start: var(--border) solid var(--rule);
 }
 
-.lab-demo summary {
+.lab-demo .lab-source a {
+  display: block;
   padding: 0.4rem 0.75rem;
   color: var(--muted);
-  cursor: pointer;
+  background: none;
   font-family: var(--font-mono);
   font-size: var(--text-tiny);
   letter-spacing: 0.04em;
+  text-decoration: none;
   text-transform: uppercase;
 }
 
-.lab-demo summary:hover {
+.lab-demo .lab-source a:hover,
+.lab-demo .lab-source a:focus-visible {
   color: var(--accent);
+  background: none;
 }
 
-.lab-demo summary code {
+.lab-demo .lab-source code {
   text-transform: none;
+}
+
+.lab-demo .lab-source-code {
+  border-block-start: var(--border) solid var(--rule);
+}
+
+.lab-demo .lab-source-code .expressive-code {
+  margin: 0;
 }

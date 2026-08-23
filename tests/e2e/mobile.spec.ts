@@ -142,6 +142,36 @@ test.describe('hover previews on touch', () => {
   })
 })
 
+/** An unnumbered note has no number to press, so the underlined sentence is the target. */
+test.describe('unnumbered notes on touch', () => {
+  test.use({ viewport: { width: 360, height: 780 }, hasTouch: true, isMobile: true })
+
+  test('the underlined sentence opens the note as a panel at the bottom edge', async ({ page }) => {
+    await page.goto('/lab/', { waitUntil: 'networkidle' })
+    const toggle = page.locator('#marginnote-1 .note-toggle')
+    const panel = page.locator('#marginnote-1 .note-text')
+
+    await page.locator('.note-sentence').first().tap()
+    await expect(toggle).toBeChecked()
+
+    // Polled: the panel is mid-slide right after the tap.
+    await expect
+      .poll(async () => {
+        const box = await panel.boundingBox()
+        return box ? Math.round(box.y + box.height) : -1
+      })
+      .toBe(780)
+
+    const box = await panel.boundingBox()
+    expect(box!.x).toBe(0)
+    expect(box!.width).toBe(360)
+    expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0)
+
+    await page.touchscreen.tap(8, 200)
+    await expect(toggle).not.toBeChecked()
+  })
+})
+
 test('search returns results on the built site', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 850 })
   await page.goto('/en/search/?q=typescript', { waitUntil: 'networkidle' })

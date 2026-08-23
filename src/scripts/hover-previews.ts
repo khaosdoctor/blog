@@ -30,6 +30,7 @@ interface PopoverHTMLElement extends HTMLElement {
 
 const STORAGE_KEY = 'hp-pinned'
 const PERSIST_KEY = 'hp-persist'
+const FOOTNOTES_KEY = 'hp-footnotes'
 
 const strings = {
   ...{
@@ -90,10 +91,15 @@ function samePath(a: URL, b: URL): boolean {
   return a.pathname.replace(/\/?$/, '/') === b.pathname.replace(/\/?$/, '/')
 }
 
+// Read on every hover, so the settings panel's checkbox takes effect at once.
+function footnotePreviews(): boolean {
+  return readStorage(FOOTNOTES_KEY) === '1'
+}
+
 function previewable(link: HTMLAnchorElement): boolean {
   if (!link.href || link.closest('.hp-card') || link.closest('.bookmark') || link.closest('.no-preview')) return false
   if (link.classList.contains('link-unwritten')) return true
-  if (link.hasAttribute('data-footnote-ref')) return footnoteWideMedia.matches
+  if (link.hasAttribute('data-footnote-ref')) return footnotePreviews() && footnoteWideMedia.matches
   let url: URL
   try {
     url = new URL(link.href)

@@ -39,6 +39,7 @@ type UIKey =
   | 'linkCopied'
   | 'footnotes'
   | 'showSource'
+  | 'hideSource'
   | 'codeTheme'
   | 'codeThemeAuto'
   | 'themeToggle'
@@ -107,6 +108,7 @@ type UIKey =
   | 'language'
   | 'switchLanguage'
   | 'version'
+  | 'footnotePreviews'
   | 'keepPreviews'
   | 'resetAll'
   | 'resetAllHint'
@@ -181,6 +183,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     linkCopied: 'link copiado',
     footnotes: 'Notas de rodapé',
     showSource: 'ver o código',
+    hideSource: 'esconder o código',
     codeTheme: 'Tema do código',
     codeThemeAuto: 'Automático (segue o tema da página)',
     themeToggle: 'Tema',
@@ -262,6 +265,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     ossFontsHeading: 'Tipografia',
     ossIconsHeading: 'Ícones',
     ossDependenciesHeading: 'Framework e dependências',
+    footnotePreviews: 'Mostrar prévia ao passar o mouse numa nota de rodapé',
     keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
     resetAll: 'Restaurar tudo',
     resetAllHint: 'Volta todas as preferências acima para o padrão',
@@ -323,6 +327,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     linkCopied: 'link copied',
     footnotes: 'Footnotes',
     showSource: 'show the source',
+    hideSource: 'hide the source',
     codeTheme: 'Code theme',
     codeThemeAuto: 'Automatic (follows the page theme)',
     themeToggle: 'Theme',
@@ -404,6 +409,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     ossFontsHeading: 'Typefaces',
     ossIconsHeading: 'Icons',
     ossDependenciesHeading: 'Framework and dependencies',
+    footnotePreviews: 'Show a preview when hovering a footnote reference',
     keepPreviews: 'Keep pinned previews after closing the tab',
     resetAll: 'Reset everything',
     resetAllHint: 'Puts every preference above back to its default',

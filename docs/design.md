@@ -111,7 +111,8 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   `border-style: double` collapses to one line under 3px, so the thin edges are 3–4px.
 - **Islands.** A post's own components live in a `components/` folder beside it, imported relatively. The content
   collection globs `*/*.{md,mdx}`, so that folder is invisible to it. `LabDemo` wraps an island and reveals its source
-  through a `<details>`; `HtmlLab` embeds a whole HTML page from the same folder via `srcdoc`.
+  by fetching the page that file is highlighted on; `HtmlLab` embeds a whole HTML page from beside the post via
+  `srcdoc`.
 - **Version.** Commits since the last tag, as semver build metadata (`0.0.1+42`). No tag per change.
 - **Code themes.** 14 Shiki themes, picked from an icon on every code block, stored in `localStorage`, applied by a
   blocking head script so a repeat visit never flashes the wrong one. `github-light` and `github-dark` stay first in

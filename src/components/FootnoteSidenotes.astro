@@ -23,6 +23,8 @@
       var TERMINATOR = /[.!?…]/
       var UP_TO_LAST_TERMINATOR = /^[\s\S]*[.!?…]/
       var OWN_ENDING = /[\s)\]"'”’»]*[.!?…]+[\s)\]"'”’»]*$/
+      var breakpoint = getComputedStyle(document.documentElement).getPropertyValue('--note-margin-breakpoint')
+      var wideMargin = matchMedia('(min-width: ' + breakpoint.trim() + ')')
 
       function startAfterSpace(range, node, from) {
         var start = from
@@ -65,17 +67,34 @@
         return range
       }
 
+      // An unnumbered note has no number to press, so the underlined sentence is
+      // its tap target, but never where the note already reads in the margin.
+      function bindSentences() {
+        for (var label of document.querySelectorAll('.note-sentence')) {
+          if (wideMargin.matches) {
+            label.removeAttribute('for')
+            continue
+          }
+          label.setAttribute('for', label.dataset.toggle)
+        }
+      }
+
       for (var note of document.querySelectorAll('.marginnote')) {
-        var sentence = sentenceRange(note)
+        var toggle = note.querySelector('.note-toggle')
+        var sentence = toggle ? sentenceRange(note) : null
         if (!sentence || !sentence.toString().trim()) continue
-        var wrapper = document.createElement('span')
+        var wrapper = document.createElement('label')
         wrapper.className = 'note-sentence'
+        wrapper.dataset.toggle = toggle.id
         wrapper.appendChild(sentence.extractContents())
         sentence.insertNode(wrapper)
         // Inserting into a text node splits it, and the empty half left behind
         // would hide the wrapper from every sibling walk that follows.
         wrapper.parentNode.normalize()
       }
+
+      bindSentences()
+      wideMargin.addEventListener('change', bindSentences)
     } catch (_error) {}
   })()
 </script>

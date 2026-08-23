@@ -7,6 +7,7 @@ import { defineConfig } from 'astro/config'
 import { unified } from '@astrojs/markdown-remark'
 import expressiveCode from 'astro-expressive-code'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
+import { pluginTokenStyles } from './src/plugins/expressive-code-token-styles.mjs'
 import mermaid from 'astro-mermaid'
 import rehypeCallouts from 'rehype-callouts'
 import rehypeKatex from 'rehype-katex'
@@ -44,7 +45,9 @@ export default defineConfig({
       // that source is emitted as an ordinary code node, so it goes through this
       // same pass. A block that reads better without them can turn them off with
       // `showLineNumbers=false` on the fence.
-      plugins: [pluginLineNumbers()],
+      // Without pluginTokenStyles a code-heavy post reaches megabytes: it moves the
+      // fourteen colours written on every syntax token into the stylesheet.
+      plugins: [pluginLineNumbers(), pluginTokenStyles()],
       // ayu-light/ayu-dark are the default pair (the owner's own words:
       // "default code theme is ayu dark if the theme is dark, ayu light if
       // the theme is light"), so they lead the list; the rest are the

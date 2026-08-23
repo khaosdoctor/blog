@@ -406,9 +406,10 @@ at runtime, so the CSS and the JS cannot diverge.
 
 `<LabDemo src="./components/Counter.vue" client:visible />` and `<HtmlLab src="./components/x.html" title="…" />`.
 The component lives in a `components/` folder next to the post. A remark plugin resolves the path, reads the file,
-injects the import the client directive needs, and emits the source code as an ordinary code block, so it gets
-highlighted by the same step as every other block on the site and follows whichever theme the reader picked. A
-wrong `src` breaks the build.
+injects the import the client directive needs, and links to the page that file is highlighted on, so the source gets
+highlighted by the same step as every other block on the site and follows whichever theme the reader picked. The
+reveal fetches that page on click, so a reader who opens no demo downloads none of it, and a reader with no
+JavaScript follows the link to it. A wrong `src` breaks the build.
 
 ## Deprecation of `markdown.remarkPlugins`: migrated, and an earlier version of this entry named the wrong target
 

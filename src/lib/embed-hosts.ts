@@ -46,6 +46,11 @@ const EMBED_PROVIDERS: EmbedProvider[] = [
     connect: ['static.cloudflareinsights.com'],
     note: 'Cookieless, and only emitted when PUBLIC_CF_ANALYTICS_TOKEN is set.',
   },
+  {
+    component: 'LinkLab',
+    referenced: ['developer.mozilla.org'],
+    note: 'A sample external href inside the lab component, never loaded. Referenced only, so it widens no CSP directive.',
+  },
 ]
 
 function hostsFor(...keys: Array<'frame' | 'script' | 'connect' | 'referenced'>): string[] {
