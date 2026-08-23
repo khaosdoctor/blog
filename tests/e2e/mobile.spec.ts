@@ -101,6 +101,47 @@ test('long unbroken tokens wrap instead of scrolling the page', async ({ page })
   expect(grew).toBeLessThanOrEqual(0)
 })
 
+/** A preview card is a hovering-pointer affordance and never reaches a phone. */
+test.describe('hover previews on touch', () => {
+  test.use({ viewport: { width: 360, height: 780 }, hasTouch: true, isMobile: true })
+
+  const POST = '/en/cryptography-0-essential-concepts/'
+
+  test('a long press on a post link opens no card', async ({ page }) => {
+    await page.goto(POST, { waitUntil: 'networkidle' })
+    await expect(page.locator('article a[aria-expanded]')).toHaveCount(0)
+
+    const link = page.locator('article a[href^="/en/"]').first()
+    await link.scrollIntoViewIfNeeded()
+    await link.evaluate((el) => {
+      const rect = el.getBoundingClientRect()
+      el.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+          pointerType: 'touch',
+          clientX: rect.x + rect.width / 2,
+          clientY: rect.y + rect.height / 2,
+        }),
+      )
+    })
+    await page.waitForTimeout(900)
+    await expect(page.locator('.hp-card')).toHaveCount(0)
+  })
+
+  test('a card pinned on a wider window does not come back', async ({ page }) => {
+    await page.addInitScript(() => {
+      const card = { href: `${location.origin}/en/security/`, left: 900, top: 40, docked: false }
+      localStorage.setItem('hp-pinned', JSON.stringify([card]))
+    })
+    await page.goto(POST, { waitUntil: 'networkidle' })
+    await expect(page.locator('.hp-card')).toHaveCount(0)
+    await expect(page.locator('.hp-dock')).toHaveCount(0)
+    expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0)
+  })
+})
+
 test('search returns results on the built site', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 850 })
   await page.goto('/en/search/?q=typescript', { waitUntil: 'networkidle' })

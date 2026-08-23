@@ -170,8 +170,11 @@ const searchHref = localePath(locale, '/search/')
     color: var(--accent);
   }
 
+  /* Without the zero minimum the flex item keeps an input's default twenty
+     characters of intrinsic width and runs past a narrow row. */
   .sx-input {
     flex: 1;
+    min-inline-size: 0;
     border: 0;
     background: transparent;
     color: var(--fg);

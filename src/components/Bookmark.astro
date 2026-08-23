@@ -112,17 +112,9 @@ const host = publisher ?? new URL(url).host.replace(/^www\./, '')
     font-size: var(--text-tiny);
   }
 
-  @container (max-width: 420px) {
-    .bookmark {
-      flex-direction: column;
-    }
-
+  @media (max-width: 47.99rem) {
     .thumb {
-      flex-basis: auto;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-inline-end: 0;
-      border-block-end: var(--border) solid var(--rule);
+      display: none;
     }
   }
 </style>

@@ -104,17 +104,43 @@ const BRAND_COLORS: Brand[] = [
 
 const DARK_BG = '#000000'
 const DARK_SHADOW = '#050505'
+const LIGHT_BG = '#f4efe0'
+const LIGHT_SHADOW = '#efeadb'
+const LIGHT_INK = '#14120e'
 const SHADOW_OFFSET = 3
 const TITLE_INK = '#e6e4e0'
 const DIM_OPACITY = 0.75
-const DIMMED_WHITE = toHex(composite(parseHex(TITLE_INK), parseHex(DARK_BG), DIM_OPACITY))
+
+function dimmedInk(ink: string, bg: string): string {
+  return toHex(composite(parseHex(ink), parseHex(bg), DIM_OPACITY))
+}
+
+const DIMMED_WHITE = dimmedInk(TITLE_INK, DARK_BG)
 
 const BRANDS: Brand[] = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id: 'branco-apagado', hex: DIMMED_WHITE }]
 
 const INK_MIX: Record<string, number> = { vermelho: 100, verde: 100, amarelo: 100, azul: 100, roxo: 90 }
 
-// The SVG needs a literal hex since it paints on its own black ground; the page needs a CSS token since
-// the same accent must work over `--bg` in both themes. The two neutrals map to `--fg`/`--muted` instead.
+export type CoverScheme = 'dark' | 'light'
+
+interface Ground {
+  bg: string
+  shadow: string
+  ink: string
+  dim: string
+  chipTint: string
+  chipMix: number
+}
+
+// One per page theme: the og:image keeps the black ground, the in-browser card takes the page's.
+// `chipTint` and `chipMix` mirror chips.css, where each branch carries the chip ink away from its own ground.
+const GROUNDS: Record<CoverScheme, Ground> = {
+  dark: { bg: DARK_BG, shadow: DARK_SHADOW, ink: TITLE_INK, dim: DIMMED_WHITE, chipTint: '#ffffff', chipMix: 52 },
+  light: { bg: LIGHT_BG, shadow: LIGHT_SHADOW, ink: LIGHT_INK, dim: dimmedInk(LIGHT_INK, LIGHT_BG), chipTint: '#000000', chipMix: 50 },
+}
+
+// The SVG needs literal hexes since it carries no custom properties and the raster has no page at all; the
+// page needs a CSS token so the same accent works over `--bg`. The two neutrals map to `--fg`/`--muted`.
 const BRAND_TOKENS: Record<string, string> = {
   vermelho: 'var(--brand-red)',
   verde: 'var(--brand-green)',
@@ -123,6 +149,24 @@ const BRAND_TOKENS: Record<string, string> = {
   roxo: 'var(--brand-purple)',
   branco: 'var(--fg)',
   'branco-apagado': 'var(--muted)',
+}
+
+// theme.css's `--brand-*` tokens as literal hexes, one column per ground. Must be kept in sync by hand.
+const BRAND_ON_GROUND: Record<CoverScheme, Record<string, string>> = {
+  dark: {
+    'var(--brand-red)': '#e6242f',
+    'var(--brand-blue)': '#1480c2',
+    'var(--brand-yellow)': '#f5b200',
+    'var(--brand-green)': '#45b384',
+    'var(--brand-purple)': '#815bc2',
+  },
+  light: {
+    'var(--brand-red)': '#d50612',
+    'var(--brand-blue)': '#0571b3',
+    'var(--brand-yellow)': '#ac7d00',
+    'var(--brand-green)': '#39936c',
+    'var(--brand-purple)': '#4b15a8',
+  },
 }
 
 const SEED_SALT = 65
@@ -140,13 +184,17 @@ interface CoverTone {
   token: string
 }
 
-export function coverTone(slug: string): CoverTone {
+// The two neutrals are the ground's own ink, the way BRAND_TOKENS points them at `--fg` and `--muted`.
+function toneHex(brand: Brand, ground: Ground, scheme: CoverScheme): string {
+  if (brand.id === 'branco') return ground.ink
+  if (brand.id === 'branco-apagado') return ground.dim
+  if (scheme === 'light') return BRAND_ON_GROUND.light[BRAND_TOKENS[brand.id]] ?? ground.ink
+  return toHex(mixOklab(parseHex(brand.hex), parseHex('#ffffff'), INK_MIX[brand.id] ?? 100))
+}
+
+export function coverTone(slug: string, scheme: CoverScheme = 'dark'): CoverTone {
   const brand = BRANDS[coverSeed(slug) % BRANDS.length]
-  const isNeutral = brand.id === 'branco' || brand.id === 'branco-apagado'
-  const hex = isNeutral
-    ? brand.hex
-    : toHex(mixOklab(parseHex(brand.hex), parseHex('#ffffff'), INK_MIX[brand.id] ?? 100))
-  return { id: brand.id, hex, token: BRAND_TOKENS[brand.id] }
+  return { id: brand.id, hex: toneHex(brand, GROUNDS[scheme], scheme), token: BRAND_TOKENS[brand.id] }
 }
 
 // Ring of `sides` vertices stacks `ringCount` times along Y, tapered, optionally
@@ -398,24 +446,12 @@ export function formatCoverByline(date: Date, lang: 'pt' | 'en', authorName: str
   return `${authorName} / ${date.getUTCDate()} ${month} ${date.getUTCFullYear()}`
 }
 
-// theme.css's `--brand-*` tokens (dark branch) as literal hexes, since an SVG has no custom properties
-// at build time and the card is always black. Must be kept in sync with theme.css by hand.
-const CHIP_BRAND_DARK: Record<string, string> = {
-  'var(--brand-red)': '#e6242f',
-  'var(--brand-blue)': '#1480c2',
-  'var(--brand-yellow)': '#f5b200',
-  'var(--brand-green)': '#45b384',
-  'var(--brand-purple)': '#815bc2',
-}
-
-// Must match chips.css's own dark-ground ink mix.
-const CHIP_INK_MIX = 52
-
 // Hashed from the category label, not from the slug: the chip belongs to the
 // taxonomy, so one category reads the same colour on every card carrying it.
-function coverChipInk(label: string): string {
-  const brand = CHIP_BRAND_DARK[chipColor(label)] ?? TITLE_INK
-  return toHex(mixOklab(parseHex(brand), parseHex('#ffffff'), CHIP_INK_MIX))
+function coverChipInk(label: string, scheme: CoverScheme): string {
+  const ground = GROUNDS[scheme]
+  const brand = BRAND_ON_GROUND[scheme][chipColor(label)] ?? ground.ink
+  return toHex(mixOklab(parseHex(brand), parseHex(ground.chipTint), ground.chipMix))
 }
 
 interface CoverInput {
@@ -425,10 +461,11 @@ interface CoverInput {
   byline: string
   readingMinutes?: number
   drawMeta?: boolean
+  scheme?: CoverScheme
 }
 
-// Positions in the 1200x630 viewBox. The container is `aspect-ratio: 1200/630`,
-// so a caller converts to CSS by scaling against the rendered width.
+// Positions in the 1200x630 viewBox. A caller converts to CSS by scaling
+// against however much of that width its container renders.
 interface CoverOverlay {
   x: number
   centerY: number
@@ -438,15 +475,15 @@ interface CoverOverlay {
   textInk: string
 }
 
-export function coverOverlay(title: string, category: string): CoverOverlay {
+export function coverOverlay(title: string, category: string, scheme: CoverScheme = 'dark'): CoverOverlay {
   const card = layoutCard(title)
   return {
     x: card.padX,
     centerY: card.metaY - META_BOX_RISE + META_BOX_H / 2,
     size: META_SIZE,
     chipSize: CHIP_SIZE,
-    chipInk: coverChipInk(category),
-    textInk: DIMMED_WHITE,
+    chipInk: coverChipInk(category, scheme),
+    textInk: GROUNDS[scheme].dim,
   }
 }
 
@@ -454,9 +491,10 @@ function n(value: number): number {
   return Math.round(value * 100) / 100
 }
 
-export function buildCoverSvg({ slug, title, category, byline, readingMinutes, drawMeta = true }: CoverInput): string {
+export function buildCoverSvg({ slug, title, category, byline, readingMinutes, drawMeta = true, scheme = 'dark' }: CoverInput): string {
   const seed = coverSeed(slug)
-  const { hex: brandTone } = coverTone(slug)
+  const ground = GROUNDS[scheme]
+  const { hex: brandTone } = coverTone(slug, scheme)
 
   const solid = generateSolid(mulberry32(seed))
   const wireCells = buildWireCells(solid)
@@ -501,22 +539,22 @@ export function buildCoverSvg({ slug, title, category, byline, readingMinutes, d
     return parts.join('')
   }
 
-  const shadowByline = `<text x="${card.padX + SHADOW_OFFSET}" y="${n(card.bylineY + SHADOW_OFFSET)}" font-family="${LABEL_FONT}" font-size="${BYLINE_SIZE}" letter-spacing="4" fill="${DARK_SHADOW}">${escapeXml(byline)}</text>`
+  const shadowByline = `<text x="${card.padX + SHADOW_OFFSET}" y="${n(card.bylineY + SHADOW_OFFSET)}" font-family="${LABEL_FONT}" font-size="${BYLINE_SIZE}" letter-spacing="4" fill="${ground.shadow}">${escapeXml(byline)}</text>`
   const shadowTitle = card.titleYs
-    .map((y, i) => `<text x="${card.padX + SHADOW_OFFSET}" y="${n(y + SHADOW_OFFSET)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${DARK_SHADOW}">${escapeXml(card.lines[i])}</text>`)
+    .map((y, i) => `<text x="${card.padX + SHADOW_OFFSET}" y="${n(y + SHADOW_OFFSET)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${ground.shadow}">${escapeXml(card.lines[i])}</text>`)
     .join('')
-  const shadowMeta = drawMeta ? metaLine(SHADOW_OFFSET, SHADOW_OFFSET, DARK_SHADOW, DARK_SHADOW, 1) : ''
+  const shadowMeta = drawMeta ? metaLine(SHADOW_OFFSET, SHADOW_OFFSET, ground.shadow, ground.shadow, 1) : ''
 
   const bylineLine = `<text x="${card.padX}" y="${n(card.bylineY)}" font-family="${LABEL_FONT}" font-size="${BYLINE_SIZE}" letter-spacing="4" fill="${brandTone}">${escapeXml(byline)}</text>`
   const rule = `<line x1="${card.padX}" y1="${n(card.ruleY)}" x2="${CARD_W - card.padX}" y2="${n(card.ruleY)}" stroke="${brandTone}" stroke-width="2" stroke-dasharray="10 6" opacity="0.7"/>`
   const titleLines = card.titleYs
-    .map((y, i) => `<text x="${card.padX}" y="${n(y)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${TITLE_INK}">${escapeXml(card.lines[i])}</text>`)
+    .map((y, i) => `<text x="${card.padX}" y="${n(y)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${ground.ink}">${escapeXml(card.lines[i])}</text>`)
     .join('')
-  const metaInk = drawMeta ? metaLine(0, 0, coverChipInk(category), TITLE_INK, DIM_OPACITY) : ''
+  const metaInk = drawMeta ? metaLine(0, 0, coverChipInk(category, scheme), ground.ink, DIM_OPACITY) : ''
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CARD_W} ${CARD_H}">` +
-    `<rect width="${CARD_W}" height="${CARD_H}" fill="${DARK_BG}"/>` +
+    `<rect width="${CARD_W}" height="${CARD_H}" fill="${ground.bg}"/>` +
     `<g font-family="${LABEL_FONT}" fill="${brandTone}" text-anchor="middle" dominant-baseline="central">${wireGlyphs}</g>` +
     `<rect x="${outer.x}" y="${outer.y}" width="${outer.w}" height="${outer.h}" fill="none" stroke="${brandTone}" stroke-width="${BORDER_STROKE}"/>` +
     `<rect x="${inner.x}" y="${inner.y}" width="${inner.w}" height="${inner.h}" fill="none" stroke="${brandTone}" stroke-width="3"/>` +

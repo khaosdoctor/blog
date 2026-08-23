@@ -44,6 +44,21 @@
   padding-inline-end: calc(var(--ec-uiPadInl) + 1.4em);
 }
 
+.prose .expressive-code .frame.has-title:not(.is-terminal) .title {
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+}
+
+@media (max-width: 47.99rem) {
+  .prose .expressive-code .copy button {
+    inline-size: 2rem;
+    block-size: 2rem;
+  }
+
+  .prose .expressive-code .copy button::after {
+    margin: 0.38rem;
+  }
+}
+
 .prose .expressive-code .frame.has-title:not(.is-terminal) .title::after {
   content: '';
   position: absolute;

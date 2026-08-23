@@ -4,6 +4,7 @@
 <script>
   import { prefersReducedMotion as reducedMotion } from '../scripts/motion'
 
+  const shell = document.querySelector<HTMLElement>('.shell')
   const fills = Array.from(document.querySelectorAll<HTMLElement>('.shell .fill'))
   // Never reparent this into `.fill`: clipping, letter-spacing, font metrics,
   // and `.brand`'s drop shadow would all break.
@@ -46,17 +47,33 @@
       cursor.style.setProperty('--cursor-x', `${stops[index].toFixed(2)}px`)
     }
 
+    // The phone header hides the dash run, so the same eased position drives the
+    // background fill there instead.
+    function fillHeader(): void {
+      if (shell === null || track.length === 0) return
+      shell.style.setProperty('--read-progress', `${((shown / track.length) * 100).toFixed(2)}%`)
+    }
+
     function paint(): void {
       while (lit < track.length && threshold(lit) < shown) track[lit++].classList.add('lit')
       while (lit > 0 && threshold(lit - 1) >= shown) track[--lit].classList.remove('lit')
       moveHead()
+      fillHeader()
     }
 
     // Left edges, never right: a dash carries 0.4em of letter-spacing inside
     // its own advance, so its right edge is half an em past the glyph.
     function measureHead(lefts: number[]): void {
       if (cursor === null) return
-      const start = fills[0].getBoundingClientRect().left
+      const run = fills[0].getBoundingClientRect()
+      // Nothing to write along once the run is hidden: the head stays home and
+      // the background fill carries the progress.
+      if (run.width === 0) {
+        stops = []
+        cursor.style.removeProperty('--cursor-x')
+        return
+      }
+      const start = run.left
       const box = cursor.getBoundingClientRect()
       if (lead === null) lead = start - box.left
       const home = start - lead
@@ -159,5 +176,9 @@
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', advance)
 
     new MutationObserver(advance).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] })
+
+    // The phone layout hides the run only once its own script has upgraded the
+    // header, which is after this module first measured it.
+    if (shell !== null) new MutationObserver(remeasure).observe(shell, { attributes: true, attributeFilter: ['data-menu-ready'] })
   }
 </script>

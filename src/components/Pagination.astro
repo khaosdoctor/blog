@@ -167,13 +167,8 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
     margin-inline-start: 0.15rem;
   }
 
-  /*
-   * Phone: the numbers take a row of their own and both arrows share the one
-   * under it. Left inline, the seven slots plus two arrows overflow the row and
-   * each arrow wrapped onto a line by itself. The slots also narrow to 2.5rem,
-   * since seven at the full hit width do not fit 360px either; the row keeps
-   * its full height, so the thumb target only loses width.
-   */
+  /* Seven slots plus two arrows overflow a phone row, and each arrow wrapped to
+     a line of its own. Numbers take one row, both arrows share the next. */
   @media (max-width: 47.99rem) {
     .numbers {
       order: 1;
@@ -187,6 +182,8 @@ const slots = paginationSlots(page.lastPage, page.currentPage)
       margin-inline: 0.3rem;
     }
 
+    /* Seven at the full hit width do not fit 360px. The row keeps its height,
+       so the thumb target only loses width. */
     .numbers .pg-btn,
     .pg-ellipsis {
       min-inline-size: 2.5rem;

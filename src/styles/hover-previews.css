@@ -121,12 +121,6 @@
   font-style: italic;
 }
 
-@media (hover: none), (pointer: coarse) {
-  .hp-hint {
-    display: none;
-  }
-}
-
 .hp-title {
   display: block;
   padding-inline-end: 3rem;
@@ -290,27 +284,4 @@ a.link-unwritten {
 
 .hp-card:not(.hp-docked) .hp-title {
   padding-inline-end: 4.6rem;
-}
-
-/* Must stay last in the file: the base .hp-min rule above would otherwise win
-   the same-specificity tie by source order. */
-@media (hover: none), (pointer: coarse) {
-  .hp-close,
-  .hp-pin,
-  .hp-min {
-    width: 2.75rem;
-    height: 2.75rem;
-  }
-
-  .hp-pin {
-    right: 3.4rem;
-  }
-
-  .hp-min {
-    right: 6.4rem;
-  }
-
-  .hp-card:not(.hp-docked) .hp-title {
-    padding-inline-end: 9.4rem;
-  }
 }

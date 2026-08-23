@@ -17,6 +17,12 @@
   font-weight: 700;
 }
 
-.prose .table-scroll {
-  overflow-x: auto;
+/* Narrow screens only: a table whose columns cannot fit scrolls itself rather
+   than widening the page. Wider than this it stays a real table so it stretches
+   to the column instead of shrinking to its content. */
+@media (max-width: 30rem) {
+  .prose table {
+    display: block;
+    overflow-x: auto;
+  }
 }

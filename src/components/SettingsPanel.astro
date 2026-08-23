@@ -406,6 +406,13 @@ const { locale } = Astro.props
     display: none;
   }
 
+  /* Preview cards only open on a hovering pointer, so there is nothing to keep. */
+  @media (hover: none), (pointer: coarse) {
+    .sp-row:has(#hp-persist) {
+      display: none;
+    }
+  }
+
   .sp-conway-details summary {
     color: var(--fg);
     cursor: pointer;
@@ -588,7 +595,7 @@ const { locale } = Astro.props
 
   .sp-search-shortcut select {
     font-family: var(--font-mono);
-    font-size: var(--text-tiny);
+    font-size: 1rem;
     background: var(--bg);
     color: var(--fg);
     border: var(--border) solid var(--rule);
@@ -611,11 +618,17 @@ const { locale } = Astro.props
 
   .settings-panel :global(.ct-settings select) {
     font-family: var(--font-mono);
-    font-size: var(--text-tiny);
+    font-size: 1rem;
     background: var(--bg);
     color: var(--fg);
     border: var(--border) solid var(--rule);
     border-radius: var(--radius);
     padding: 0.3rem;
+  }
+
+  .sp-search-shortcut option,
+  .settings-panel :global(.ct-settings option),
+  .settings-panel :global(.ct-settings optgroup) {
+    font-size: 1rem;
   }
 </style>

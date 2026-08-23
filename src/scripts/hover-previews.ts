@@ -4,7 +4,6 @@ import {
   hoverPreviewCloseDelayMilliseconds as CLOSE_DELAY,
   hoverPreviewDragThresholdPixels as DRAG_THRESHOLD,
   hoverPreviewFootnoteCharacterLimit as FOOTNOTE_TEXT_MAX,
-  hoverPreviewLongPressMilliseconds as LONG_PRESS_DELAY,
   hoverPreviewOpenDelayMilliseconds as HOVER_DELAY,
   hoverPreviewPinnedCardLimit as CARD_MAX,
   hoverPreviewViewportMarginPixels as VIEWPORT_MARGIN,
@@ -72,6 +71,10 @@ function ensureDock(): HTMLElement {
   document.body.append(dock)
   return dock
 }
+
+// The feature never starts on touch: the opening gesture would collide with the
+// browser's own link menu, and a pinned card cannot be moved out of the way.
+const hoverPointerMedia = matchMedia('(hover: hover) and (pointer: fine)')
 
 // Kept live so previewable() answers correctly after a resize.
 const footnoteWideMedia = matchMedia(
@@ -510,9 +513,6 @@ function attach(link: HTMLAnchorElement): void {
 
   link.setAttribute('aria-expanded', 'false')
 
-  let pressTimer = 0
-  const cancelPress = () => clearTimeout(pressTimer)
-
   link.addEventListener('pointerenter', (event) => {
     if (event.pointerType === 'touch') return
     clearTimeout(openTimer)
@@ -522,13 +522,6 @@ function attach(link: HTMLAnchorElement): void {
     clearTimeout(openTimer)
     scheduleClose()
   })
-  link.addEventListener('pointerdown', (event) => {
-    if (event.pointerType !== 'touch') return
-    pressTimer = window.setTimeout(() => show(link, true), LONG_PRESS_DELAY)
-  })
-  link.addEventListener('pointerup', cancelPress)
-  link.addEventListener('pointercancel', cancelPress)
-  link.addEventListener('pointermove', cancelPress)
 
   link.addEventListener('focus', () => {
     clearTimeout(openTimer)
@@ -565,6 +558,8 @@ function bindPersistToggle(): void {
 }
 
 function init(): void {
+  if (!hoverPointerMedia.matches) return
+
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return
     if (current) closeCard(current.card)
