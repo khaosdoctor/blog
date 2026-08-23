@@ -11,7 +11,7 @@ noindex: true
 
 Esta página existe para ser aberta no navegador. Cada seção abaixo nomeia um recurso, explica em uma ou duas frases para que ele serve, mostra o código exato que você digitaria e, logo em seguida, o resultado renderizado. Se algo aqui aparecer quebrado, o recurso está quebrado.
 
-As duas ilhas interativas do final são a única seção sem um bloco de código igual ao que se digita: `<LabDemo>` e `<HtmlLab>` nomeiam o arquivo com `src`, e um plugin remark lê esse arquivo na hora do build, monta a importação que a diretiva de cliente precisa e injeta o próprio código-fonte destacado. Os dois arquivos moram em `components/`, dentro da pasta deste post. Nenhum post sem ilha importa nada, porque todos os outros componentes já são injetados em todos os posts.
+As duas ilhas interativas do final são a única seção sem um bloco de código igual ao que se digita: `<LabDemo>` e `<HtmlLab>` nomeiam o arquivo com `src`, e um plugin remark lê esse arquivo na hora do build, monta a importação que a diretiva de cliente precisa e aponta o `ver o código` para a página onde esse arquivo aparece destacado. Os dois arquivos moram em `components/`, dentro da pasta deste post. Nenhum post sem ilha importa nada, porque todos os outros componentes já são injetados em todos os posts.
 
 ## Frontmatter
 
@@ -516,7 +516,7 @@ O último aponta para um rascunho: o link continua funcionando, mas vem seguido 
 
 ## Uma ilha interativa em Vue
 
-O componente mora na pasta do próprio post, em `components/`, junto com as imagens. `src` aponta para o arquivo, e é a única coisa que se escreve à mão: o plugin resolve o caminho, importa o componente de verdade (é disso que a diretiva de cliente precisa) e mostra o arquivo em `ver o código`, destacado como qualquer outro bloco da página. `client:visible` significa que o JavaScript do contador só é baixado quando ele entra na tela; o resto da página continua sendo HTML estático.
+O componente mora na pasta do próprio post, em `components/`, junto com as imagens. `src` aponta para o arquivo, e é a única coisa que se escreve à mão: o plugin resolve o caminho, importa o componente de verdade (é disso que a diretiva de cliente precisa) e liga o `ver o código` à página onde esse arquivo aparece destacado como qualquer outro bloco do site, baixada só quando alguém clica. `client:visible` significa que o JavaScript do contador só é baixado quando ele entra na tela; o resto da página continua sendo HTML estático.
 
 ```mdx
 <LabDemo src="./components/Counter.vue" client:visible />

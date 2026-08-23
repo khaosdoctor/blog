@@ -77,6 +77,7 @@ const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
   '[...slug].astro': 'per-locale',
   '[...slug]/index.md.ts': 'per-locale',
   '[...page].astro': 'per-locale',
+  'lab-source/[...id].html.ts': 'shared',
   'link-metadata.json.ts': 'shared',
   'llms.txt.ts': 'source-only',
   'manifest.webmanifest.ts': 'per-locale',

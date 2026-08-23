@@ -8,6 +8,9 @@
   --note-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'/%3E%3Cpath d='M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'/%3E%3C/svg%3E");
 
   --note-icon-gutter: 1.9rem;
+
+  /* Read by JS; the media queries below repeat the literal since they can't take a var(). */
+  --note-margin-breakpoint: 90rem;
 }
 
 .note {
@@ -104,6 +107,7 @@
 @media (max-width: 89.99rem) {
   .note-sentence {
     border-block-end: 1px dotted color-mix(in oklab, var(--muted) 55%, transparent);
+    cursor: pointer;
   }
 }
 

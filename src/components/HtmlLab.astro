@@ -1,23 +1,22 @@
 ---
-import { localeFromPath, t } from '../i18n/ui'
+import LabSource from './LabSource.astro'
+import { localeFromPath } from '../i18n/ui'
 
 interface Props {
   html: string
   name: string
+  source: string
   title: string
   height?: string
 }
 
-const { html, name, title, height = '18rem' } = Astro.props
+const { html, name, source, title, height = '18rem' } = Astro.props
 const locale = localeFromPath(Astro.url.pathname)
 ---
 
 <figure class="lab-demo" style={`--lab-height: ${height}`}>
   <iframe srcdoc={html} title={title} loading="lazy" sandbox="allow-scripts"></iframe>
-  <details>
-    <summary>{t(locale, 'showSource')} <code>{name}</code></summary>
-    <slot name="source" />
-  </details>
+  <LabSource locale={locale} name={name} source={source} />
 </figure>
 
 <style>

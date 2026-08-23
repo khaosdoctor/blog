@@ -1,5 +1,6 @@
 import { glob } from 'astro/loaders'
 import { defineCollection, z } from 'astro:content'
+import { labSources } from './lib/lab-sources'
 
 // Exactly one level deep, so a stray note anywhere else cannot fail the build.
 const blog = defineCollection({
@@ -38,4 +39,11 @@ const blog = defineCollection({
     }),
 })
 
-export const collections = { blog }
+// A lab demo's source, one entry per file under a post's components/, so the
+// demo can link to it instead of carrying it.
+const labSource = defineCollection({
+  loader: labSources(),
+  schema: z.object({ name: z.string(), postUrl: z.string() }),
+})
+
+export const collections = { blog, labSource }

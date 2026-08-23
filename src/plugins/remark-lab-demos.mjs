@@ -5,11 +5,10 @@
 // components actually need:
 //
 // - `name` (the filename) is derived from `src`, so it is never typed twice.
-// - The revealed source becomes a real mdast `code` node, slotted into the
-//   component as `slot="source"`, so expressive-code highlights it on its
-//   normal pass exactly like any other fenced block in the post. Remark
-//   plugins all run before any rehype plugin regardless of where they sit in
-//   the `remarkPlugins` array, so this is unaffected by plugin order.
+// - `source` is the URL of the page that file is highlighted on, built by the
+//   `labSource` collection. The source is never inlined here: twenty-one demos
+//   highlighted into one post came to 15MB of HTML that a reader who opens no
+//   demo pays for in full.
 // - `<LabDemo>` needs a real component reference for its client directive, not
 //   a string, so this also synthesises the `import Counter from
 //   './components/Counter.vue'` line as an `mdxjsEsm` node at the top of the
@@ -24,6 +23,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { basename, extname, resolve } from 'node:path'
 import { Parser } from 'acorn'
+import { labSourceId, labSourceUrl } from '../lib/lab-source.mjs'
 import { attribute, jsxElement } from './mdx-util.mjs'
 
 function plainAttributes(node) {
@@ -37,13 +37,6 @@ function attributeValue(node, name) {
 /** Every attribute except the named plain ones. A `{...spread}` is left alone. */
 function withoutAttributes(node, names) {
   return node.attributes.filter((attr) => attr.type !== 'mdxJsxAttribute' || !names.includes(attr.name))
-}
-
-/** The lang comes from the file's own extension, so a future third component
- * (a `.ts` playground, say) needs no change here. */
-function codeNode(path, value) {
-  const lang = extname(path).slice(1)
-  return { type: 'code', lang: lang === '' ? 'text' : lang, meta: null, value }
 }
 
 function readSource(file, src) {
@@ -79,10 +72,6 @@ function identifierFor(src, seen) {
   return candidate
 }
 
-function sourceSlot(path, contents) {
-  return jsxElement('div', [attribute('slot', 'source')], [codeNode(path, contents)])
-}
-
 export function remarkLabDemos() {
   return (tree, file) => {
     const imports = []
@@ -99,6 +88,7 @@ export function remarkLabDemos() {
         const src = requireSrc(node, file)
         const { path, contents } = readSource(file, src)
         const name = basename(src)
+        const source = attribute('source', labSourceUrl(labSourceId(file.dirname, path)))
 
         if (node.name === 'LabDemo') {
           const clientAttrs = plainAttributes(node).filter((attr) => attr.name.startsWith('client:'))
@@ -108,16 +98,22 @@ export function remarkLabDemos() {
           node.attributes = [
             ...withoutAttributes(node, ['src', ...clientAttrs.map((attr) => attr.name)]),
             attribute('name', name),
+            source,
           ]
-          // Anything the post wrote inside the tag is kept, between the island
-          // and the source toggle. That is what lets a demo carry sample content
-          // in the same panel as its controls: the type specimen drives a real
-          // post rendered by this same markdown pipeline, and the post has to be
-          // inside the panel for the two to read as one thing.
-          node.children = [jsxElement(identifier, clientAttrs), ...node.children, sourceSlot(path, contents)]
+          // Anything the post wrote inside the tag is kept, after the island.
+          // That is what lets a demo carry sample content in the same panel as
+          // its controls: the type specimen drives a real post rendered by this
+          // same markdown pipeline, and the post has to be inside the panel for
+          // the two to read as one thing.
+          node.children = [jsxElement(identifier, clientAttrs), ...node.children]
         } else {
-          node.attributes = [...withoutAttributes(node, ['src']), attribute('name', name), attribute('html', contents)]
-          node.children = [sourceSlot(path, contents)]
+          node.attributes = [
+            ...withoutAttributes(node, ['src']),
+            attribute('name', name),
+            attribute('html', contents),
+            source,
+          ]
+          node.children = []
         }
       }
     }

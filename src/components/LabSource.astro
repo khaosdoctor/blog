@@ -1,0 +1,21 @@
+---
+import { t, type Locale } from '../i18n/ui'
+
+interface Props {
+  locale: Locale
+  name: string
+  source: string
+}
+
+const { locale, name, source } = Astro.props
+---
+
+<p class="lab-source no-preview">
+  <a href={source} data-show={t(locale, 'showSource')} data-hide={t(locale, 'hideSource')}>
+    <span>{t(locale, 'showSource')}</span> <code>{name}</code>
+  </a>
+</p>
+
+<script>
+  import '../scripts/lab-source'
+</script>
