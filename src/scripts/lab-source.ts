@@ -1,3 +1,4 @@
+import { copyWithToast } from './copy-toast'
 import { onReady } from './ready'
 
 const pending = new Set<HTMLAnchorElement>()
@@ -18,6 +19,28 @@ async function fetchSource(url: string): Promise<string | null> {
   } catch {
     return null
   }
+}
+
+/*
+ * Expressive-code only ships its copy handler on a page that already has a
+ * fenced block, so a lab post with none would reveal a dead button. Replacing
+ * the control removes that dependency instead of relying on it.
+ */
+function bindCopy(panel: HTMLElement): void {
+  const original = panel.querySelector('.copy')
+  const lines = panel.querySelectorAll('.ec-line .code')
+  if (original === null || lines.length === 0) return
+
+  // Per line, and only the code half: `pre > code` also holds the line-number
+  // gutter, so its text would paste the numbers along with the source.
+  const source = [...lines].map((line) => line.textContent ?? '').join('\n')
+
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = 'lab-source-copy'
+  button.textContent = original.querySelector('button')?.getAttribute('title') ?? ''
+  button.addEventListener('click', () => void copyWithToast(source))
+  original.replaceWith(button)
 }
 
 async function reveal(link: HTMLAnchorElement): Promise<void> {
@@ -47,6 +70,7 @@ async function reveal(link: HTMLAnchorElement): Promise<void> {
   panel.id = `lab-source-${document.querySelectorAll('.lab-source-code').length + 1}`
   // The markup comes from a page of this same build, so it is output, not input.
   panel.innerHTML = html
+  bindCopy(panel)
   row.after(panel)
   link.setAttribute('aria-controls', panel.id)
   setExpanded(link, true)

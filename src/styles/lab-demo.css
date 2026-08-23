@@ -38,3 +38,25 @@
 .lab-demo .lab-source-code .expressive-code {
   margin: 0;
 }
+
+.lab-demo .lab-source-copy {
+  position: absolute;
+  inset-block-start: 0.4rem;
+  inset-inline-end: 0.4rem;
+  z-index: 1;
+  padding: 0.3rem 0.5rem;
+  border: var(--border) solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.lab-demo .lab-source-copy:hover,
+.lab-demo .lab-source-copy:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
