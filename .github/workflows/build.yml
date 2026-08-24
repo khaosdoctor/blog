@@ -1,17 +1,11 @@
 name: Build
 
-# Off by hand until the DNS cutover, alongside the deploy job further down.
-# Nothing here deploys yet, so a run costs minutes and storage and tells us what
-# `npm run check` and `node scripts/check-output.ts` already say locally. Restore
-# the two triggers below at the cutover, when a red build starts meaning
-# something:
-#
-#   push:
-#     branches: [main]
-#     paths-ignore: ["docs/**"]   # docs never reach dist
-#   pull_request:
-#     paths-ignore: ["docs/**"]
 on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**"] # docs never reach dist
+  pull_request:
+    paths-ignore: ["docs/**"]
   # The Cloudflare Worker fires this at a scheduled post's exact pubDate.
   repository_dispatch:
     types: [scheduled-publish]
@@ -164,15 +158,19 @@ jobs:
             --jq '.[] | select(.key != "${{ steps.astro-cache.outputs.cache-primary-key }}") | .id' \
             | while read -r id; do gh cache delete "$id"; done
 
-  # No deploy job yet, the repo is private and Pages isn't enabled,
-  # so actions/deploy-pages@v4 would only ever fail. Add it back at DNS cutover:
-  #
-  #   deploy:
-  #     needs: build
-  #     runs-on: ubuntu-latest
-  #     environment:
-  #       name: github-pages
-  #       url: ${{ steps.deploy.outputs.page_url }}
-  #     steps:
-  #       - id: deploy
-  #         uses: actions/deploy-pages@v4
+  # Only the events that produce an artifact above can deploy, which is the same
+  # condition upload-pages-artifact carries: a pull request builds and checks and
+  # stops there.
+  deploy:
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
