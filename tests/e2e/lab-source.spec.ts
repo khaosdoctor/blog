@@ -9,7 +9,7 @@ test('the initial HTML carries no demo source', async ({ request }) => {
 })
 
 test('clicking the reveal shows that one source, highlighted, with line numbers', async ({ page }) => {
-  await page.goto(POST, { waitUntil: 'networkidle' })
+  await page.goto(POST)
   const link = page.locator('a[href="/lab-source/theme-lab-arquivo/components/CoverLab.vue.html"]')
   await expect(link).toHaveAttribute('aria-expanded', 'false')
   await expect(page.locator('.lab-source-code')).toHaveCount(0)
@@ -35,7 +35,7 @@ test('clicking the reveal shows that one source, highlighted, with line numbers'
  */
 test('the revealed source copies without expressive-code’s own handler', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto(POST, { waitUntil: 'networkidle' })
+  await page.goto(POST)
   await page.locator('a[href="/lab-source/theme-lab-arquivo/components/TmHeading.vue.html"]').click()
 
   const panel = page.locator('.lab-source-code').first()

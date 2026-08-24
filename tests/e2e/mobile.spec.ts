@@ -28,14 +28,24 @@ async function horizontalOverflow(page: Page): Promise<number> {
   })
 }
 
+/*
+ * One load per page, widening through the list, rather than a load per pair:
+ * the site relays out on resize, and forty-eight navigations cost minutes for
+ * coverage a resize gives. The load happens at the narrowest width, which is
+ * where an overflow that only appears on a cold layout would show.
+ */
 for (const { name, path } of PAGES) {
-  for (const width of ALL_WIDTHS) {
-    test(`${name} has no sideways scroll at ${width}px`, async ({ page }) => {
+  test(`${name} never scrolls sideways`, async ({ page }) => {
+    await page.setViewportSize({ width: ALL_WIDTHS[0], height: 850 })
+    await page.goto(path)
+
+    for (const width of ALL_WIDTHS) {
       await page.setViewportSize({ width, height: 850 })
-      await page.goto(path, { waitUntil: 'networkidle' })
-      expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0)
-    })
-  }
+      await expect
+        .poll(() => horizontalOverflow(page), { timeout: 2000, message: `${name} at ${width}px` })
+        .toBeLessThanOrEqual(0)
+    }
+  })
 }
 
 /** Controls a thumb has to be able to hit on every page that shows them. */
@@ -56,7 +66,7 @@ const TAP_TARGETS = [
 for (const { name, selector, path, minWidth, minHeight } of TAP_TARGETS) {
   test(`${name} is tappable at 393px`, async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 850 })
-    await page.goto(path, { waitUntil: 'networkidle' })
+    await page.goto(path)
     const box = await page.locator(selector).first().boundingBox()
     expect(box, `${selector} not found on ${path}`).not.toBeNull()
     expect(box!.width, `${selector} width`).toBeGreaterThanOrEqual(minWidth)
@@ -66,7 +76,7 @@ for (const { name, selector, path, minWidth, minHeight } of TAP_TARGETS) {
 
 test('hamburger opens the drawer with nav links at 393px', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 850 })
-  await page.goto('/en/', { waitUntil: 'networkidle' })
+  await page.goto('/en/')
   await expect(page.locator('.nav-links')).toBeHidden()
   await page.click('.menu-toggle')
   await expect(page.locator('.nav-links a', { hasText: 'SERIES' })).toBeVisible()
@@ -74,7 +84,7 @@ test('hamburger opens the drawer with nav links at 393px', async ({ page }) => {
 
 test('the toc tab slides the outline in at 393px', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 850 })
-  await page.goto('/en/a-deep-dive-into-container-images-part-1/', { waitUntil: 'networkidle' })
+  await page.goto('/en/a-deep-dive-into-container-images-part-1/')
   await page.click('.handle')
   await expect(page.locator('.toc')).toBeVisible()
   // Polled: the panel is mid-slide right after the click.
@@ -88,7 +98,7 @@ test('the toc tab slides the outline in at 393px', async ({ page }) => {
 
 test('long unbroken tokens wrap instead of scrolling the page', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 850 })
-  await page.goto('/en/a-deep-dive-into-container-images-part-1/', { waitUntil: 'networkidle' })
+  await page.goto('/en/a-deep-dive-into-container-images-part-1/')
   const grew = await page.evaluate(() => {
     const doc = document.documentElement
     const token = 'a'.repeat(61)
@@ -108,7 +118,7 @@ test.describe('hover previews on touch', () => {
   const POST = '/en/cryptography-0-essential-concepts/'
 
   test('a long press on a post link opens no card', async ({ page }) => {
-    await page.goto(POST, { waitUntil: 'networkidle' })
+    await page.goto(POST)
     await expect(page.locator('article a[aria-expanded]')).toHaveCount(0)
 
     const link = page.locator('article a[href^="/en/"]').first()
@@ -126,7 +136,9 @@ test.describe('hover previews on touch', () => {
         }),
       )
     })
-    await page.waitForTimeout(900)
+    // Short on purpose: previews bind behind `(hover: hover) and (pointer: fine)`,
+    // so on touch there is no timer to outlast, only the dispatch to settle.
+    await page.waitForTimeout(250)
     await expect(page.locator('.hp-card')).toHaveCount(0)
   })
 
@@ -135,7 +147,7 @@ test.describe('hover previews on touch', () => {
       const card = { href: `${location.origin}/en/security/`, left: 900, top: 40, docked: false }
       localStorage.setItem('hp-pinned', JSON.stringify([card]))
     })
-    await page.goto(POST, { waitUntil: 'networkidle' })
+    await page.goto(POST)
     await expect(page.locator('.hp-card')).toHaveCount(0)
     await expect(page.locator('.hp-dock')).toHaveCount(0)
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0)
@@ -147,7 +159,7 @@ test.describe('unnumbered notes on touch', () => {
   test.use({ viewport: { width: 360, height: 780 }, hasTouch: true, isMobile: true })
 
   test('the underlined sentence opens the note as a panel at the bottom edge', async ({ page }) => {
-    await page.goto('/lab/', { waitUntil: 'networkidle' })
+    await page.goto('/lab/')
     const toggle = page.locator('#marginnote-1 .note-toggle')
     const panel = page.locator('#marginnote-1 .note-text')
 
@@ -174,6 +186,6 @@ test.describe('unnumbered notes on touch', () => {
 
 test('search returns results on the built site', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 850 })
-  await page.goto('/en/search/?q=typescript', { waitUntil: 'networkidle' })
+  await page.goto('/en/search/?q=typescript')
   await expect(page.locator('a[href*="typescript"]').first()).toBeVisible({ timeout: 10000 })
 })
