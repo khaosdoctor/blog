@@ -38,9 +38,10 @@ Não são perguntas, são coisas em construção ou dívida conhecida. Ficam aqu
 
 - **Índice fixo na margem esquerda.** No ar em todo post, nos dois idiomas, com revelação do título completo no hover.
   Falta uma decisão sua: se ele começa dobrado nos níveis h3 em post longo.
-- **Nada foi visto em navegador.** Os agentes não têm um. Tudo que envolve posição, sobreposição e animação (a capa
-  desenhada sobre o cabeçalho, o cursor escrevendo os traços, o painel de preferências em telas estreitas) foi
-  raciocinado a partir do CSS e do HTML servido, nunca olhado. É a maior fonte de erro pendente hoje.
+- **Navegador agora existe.** O que antes era raciocinado a partir do CSS passou a ser medido: `tests/e2e/` roda
+  Chrome contra o site construído e cobre a régua mobile (todo tipo de página em seis larguras, mais o piso de área
+  de toque), as cores dos blocos de código, a etiqueta de linguagem, a fonte dos labs e a barra de leitura. O que
+  ainda ninguém olhou de fato é o conteúdo: se os posts publicados leem bem com a tipografia e os quadros decididos.
 - **Migração do pipeline de markdown.** Dívida desbloqueada: o motivo de não migrar dos arrays depreciados para o
   processador novo caiu quando o `astro-mermaid` passou a suportar os dois. Detalhes e a receita de verificação em
   `docs/decisions-log.md`.

@@ -116,6 +116,7 @@ first part. Leave `seriesName` off a translated first part and that language fal
 | `npm run build` | build plus the Pagefind index |
 | `npm run preview` | serve `dist/` |
 | `node scripts/check-output.ts` | post-build checks, the same ones CI runs |
+| `npm run test:e2e` | Playwright over the built `dist/`, the same suite CI runs. Build first |
 | `node scripts/build-redirects.ts` | regenerate `src/data/redirects.ts` after content moves |
 | `node scripts/build-icons.ts` | regenerate the PWA icons from `public/favicon.svg` |
 | `node scripts/translate.ts` | translate changed posts in place, needs `ANTHROPIC_API_KEY`. CI uses the workflow instead |
@@ -132,6 +133,7 @@ first part. Leave `seriesName` off a translated first part and that language fal
 | `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, and the same set again under `/en/` |
 | `src/components/` | the component set posts can use |
 | `src/plugins/` | the remark and rehype plugins that turn markdown into figures, embeds and margin notes |
+| `tests/e2e/` | the browser suite: widths, code colours, the lab source, the reading meter |
 | `worker/` | Cloudflare Worker that rebuilds the site the minute a scheduled post is due |
 | `.migration/` | migration reports and review lists (untracked) |
 

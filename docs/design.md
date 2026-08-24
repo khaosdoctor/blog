@@ -205,6 +205,30 @@ Decided and implemented. Kept short on purpose; the code is the detail.
   than retiring, since the bench never pitted them against `decifra` as a closed dispute. `prefers-reduced-motion`
   freezes on the final frame and the loop never starts; a manual pause control covers WCAG 2.2.2.
 
+- **Mobile.** The pass below 70rem, settled as a group. The cover goes full-bleed and lets its side frames run off
+  the screen rather than shrinking, so wider windows keep the framed look; it is taller, the author/date line is
+  larger, and it inverts to follow a light page while the OG raster keeps the black ground a share card needs. The
+  header drawer carries a thinner search row, a white divider and a white FECHAR, with the hamburger on the leftmost
+  content gutter reading `X Close` when open. The dash meter is hidden and the header background fills with the post
+  colour instead, grey behind a tip in the cover tone. Pagination reorders and takes a minimum tap width, the footer
+  centres and the copyright stops wrapping. Sidenotes open as a panel from the bottom edge and close on an outside
+  tap; an unnumbered note has no number to press, so its sentence carries a faint dotted underline and is the target.
+  The footnote section takes a `footnotes` heading and the same `---` rule a post uses. Hover previews never bind on
+  a touch pointer. Tables scroll inside themselves rather than widening the document.
+- **Scrollbars.** Squared off, no radius, track in the page ground and thumb in the foreground, so each is the other's
+  opposite. Split by capability rather than layered: Chrome ignores `::-webkit-scrollbar` once `scrollbar-width` or
+  `scrollbar-color` is anything but `auto`, so the WebKit rules live behind `@supports selector(::-webkit-scrollbar)`
+  and Firefox keeps the standard properties. The two mechanisms cannot both be set on the same element.
+- **Dead links.** A cover colour can be red, which made an unwritten link indistinguishable from a working one. They
+  are faint grey and struck through now, never red.
+- **The code language chip.** Transparent, in a double border, both border and text taken from the block's own painted
+  background so they invert with the code theme rather than the page theme. The cover colour was tried for the border
+  first and dropped: a post whose cover is black drew a black border on a black block. The value comes from the L
+  channel of `--code-background` in oklch, read per block, because a variable resolved per theme to black or white
+  collapses all five light themes onto one value and expressive-code omits a value matching its base variant. The
+  code reserves room below the last line and the block takes a floor, since the chip and the copy button hold
+  opposite corners of one box.
+
 ## Conventions
 
 House rules the styling follows. These used to live as comments in the source and were moved here when the codebase
@@ -241,16 +265,10 @@ text node has no per-character handle.
 
 The order the work goes in from here, Lucas's own list.
 
-1. **Mobile design.** Nothing below 70rem has had a pass of its own. Every width decision so far was made at desktop
-   and given a fallback rather than a design: the header row wraps, the outline becomes a drawer, the post list drops
-   to the plain measure, and the cover overlay's own coordinates were reasoned about rather than seen. This is the one
-   item that touches every surface already built.
-
-   Three things were found at a narrow window and deliberately left for this pass rather than patched: the series card
-   on a post overflows the frame, because its rows carry a fixed indent and the longest title then sets a minimum row
-   width, and content wider than the viewport extends the document so the whole page scrolls sideways; the cover needs
-   to resize rather than be cropped; and a pinned hover preview restored from a wider window can land off-screen. An
-   attempt at collapsing the series card into a disclosure was built and reverted, it was not the behaviour wanted.
+1. ~~**Mobile design.**~~ Done, and recorded under Settled below. The three things left open for it were all resolved:
+   the series card no longer overflows, the cover resizes rather than being cropped, and a pinned preview restored
+   from a wider window never comes back on a phone. `tests/e2e/mobile.spec.ts` is the ruler that keeps it: every page
+   type at six widths, plus the tap-target floor.
 2. **Reading the existing posts.** A pass through what is already published to judge what reads well and what does
    not, now that the type, the rules, the code frames and the callouts are all decided. Content review feeding
    design rather than a code task: expect it to reopen a few settled values.

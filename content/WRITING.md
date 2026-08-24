@@ -165,8 +165,11 @@ export const x = 1
 
 Every block carries line numbers. Turn them off for one block with `showLineNumbers=false` on the fence.
 
-The reader can change the syntax theme from an icon on any block, and the choice is remembered. Fourteen themes:
-GitHub, Monokai, Dracula, the four Catppuccins, three Kanagawas, Ayu light and dark, and Snazzy.
+The reader can change the syntax theme from the settings panel, the cog in the header, and the choice is remembered.
+Fourteen themes: GitHub, Monokai, Dracula, the four Catppuccins, three Kanagawas, Ayu light and dark, and Snazzy.
+
+The language name shows in the bottom corner of every block, in a border that takes its colour from the block's own
+background, so it reads whichever theme the reader picked and whatever the page theme is.
 
 ## Diagrams and maths
 
@@ -199,7 +202,9 @@ Another sentence.<MarginNote>Same, but with no number.</MarginNote>
 
 Inline content only: text, `**bold**`, `_italic_`, links, `code`. No headings, no lists, no blockquotes, they render inside a `<span>`.
 
-On a narrow screen both collapse to a tap-to-reveal popover. No JavaScript either way.
+On a narrow screen both open as a panel from the bottom edge, closing on a tap outside. A `<Sidenote>` has its number
+to press; a `<MarginNote>` has none, so the sentence before it carries a faint dotted underline and is the target. No
+JavaScript either way.
 
 ## A quote with an author
 

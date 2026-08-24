@@ -20,7 +20,10 @@ No em-dashes anywhere. Banned words, comments included: land/lands/landed, sweep
 npm run check
 npm run build
 node scripts/check-output.ts
+npm run test:e2e
 ```
+
+The e2e suite reads `dist/`, so build before running it.
 
 ## Commits
 

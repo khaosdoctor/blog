@@ -213,6 +213,14 @@ the build.
 7. An image a page references that never reached the output.
 8. A remote-script loader pattern: `new Function(`, `eval(await`, a raw gist URL.
 
+Every check above reads the output as text. `tests/e2e/` is the other half: Playwright over the built `dist/`, which
+is where anything only a browser can answer is settled. `mobile.spec.ts` is the width ruler (each page type at six
+widths, plus the tap-target floor), `code-tokens.spec.ts` guards the marker scheme against an expressive-code
+upgrade, `code-language-chip.spec.ts` the chip's ink and its clearance, `lab-source.spec.ts` the fetch-on-demand
+source and its no-JavaScript fallback, `reading-progress.spec.ts` the meter. Two rules keep the suite quick: a page
+is loaded once and resized through the width list rather than reloaded per width, and nothing waits on `networkidle`,
+which here waits out the service worker and Pagefind for no benefit.
+
 ## Layout
 
 ```
@@ -228,6 +236,7 @@ src/scripts/                 the client modules: conway, header, search, setting
 src/styles/                  one file per thing being styled, see below
 src/i18n/ui.ts               every string the shell shows, both languages
 scripts/                     build steps and guards
+tests/e2e/                   Playwright over the built dist/
 worker/                      the Cloudflare scheduler
 ```
 

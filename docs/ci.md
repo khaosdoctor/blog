@@ -21,20 +21,28 @@ flowchart TD
   I --> CH["npm run check<br/>astro check + tsc -p worker + check-i18n + check-component-css"]
   CH --> B["npm run build<br/>prebuild vendors media, then astro, then pagefind"]
   B --> G["node scripts/check-output.ts"]
-  G --> A["upload-pages-artifact"]
+  G --> E["npx playwright install chrome<br/>npm run test:e2e"]
+  E --> S["Lighthouse + lychee<br/>continue-on-error, advisory"]
+  S --> A["upload-pages-artifact"]
   A -.->|"commented out until cutover"| D["deploy-pages"]
-  A --> S["job: seo-audit<br/>continue-on-error: true"]
 ```
 
 `fetch-depth: 0` is required: the footer version is the semver plus the number of commits since that version's tag
 (`0.0.1+42`), and a shallow clone can see neither the tag nor the history behind it. See `src/lib/version.ts`.
 
-**seo-audit** runs after `build`, against the artifact `build` already produced (extracted from `artifact.tar`, not
-rebuilt). It audits `dist/` with Lighthouse ([treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action),
-config in `lighthouserc.json`) and checks links with [lychee](https://github.com/lycheeverse/lychee-action), internal
-and external, `--root-dir dist` mapping the site's root-relative hrefs back to local files so no server has to run.
-`continue-on-error: true` on the job means neither tool can ever fail the workflow or block a deploy: both reports are
-advisory, one as a job summary (lychee) and one as an artifact plus a temporary public link (Lighthouse).
+**The end-to-end suite** runs after the artefact guard, against the same `dist/`. Everything before it reads the
+output as text, so it is the only step that sees layout, the per-theme code colours a browser has to resolve, and the
+markup a reader gets with scripting off. `playwright.config.ts` pins the `chrome` channel, hence the install step, and
+starts its own `astro preview` when there is not one already on 4322. A failing run uploads its report as an artifact.
+This one does fail the workflow.
+
+**Lighthouse and lychee** run last, in the same job and against the same `dist/`. Lighthouse
+([treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action), config in `lighthouserc.json`) audits
+the output; [lychee](https://github.com/lycheeverse/lychee-action) checks links, internal and external, `--root-dir
+dist` mapping the site's root-relative hrefs back to local files so no server has to run. `continue-on-error: true`
+on each step means neither can fail the workflow or block a deploy: both are advisory, one as a job summary (lychee)
+and one as an artifact plus a temporary public link (Lighthouse). They used to be a separate job downloading the
+pages artifact, which made every run produce that artifact only to hand it over.
 
 **Concurrency.** The group depends on the event, so a pull request can only ever cancel its own earlier runs:
 
@@ -124,6 +132,7 @@ Manual, from the Actions tab. release-please opens the PR, merging it cuts the t
 npm run check                      # astro check + tsc -p worker + check-i18n.ts + check-component-css.ts
 npm run build                      # prebuild vendors media, astro, pagefind
 node scripts/check-output.ts       # the artefact guard CI runs
+npm run test:e2e                   # the browser suite CI runs, reads dist/
 node scripts/check-translations.ts # the translation guard CI runs
 node scripts/clean-translations.ts # strips agent artefacts from translated files
 ```
