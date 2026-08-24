@@ -25,10 +25,19 @@ export function urlOf(post: Post): string {
   return `/${post.data.lang}/${slug}/`
 }
 
+export function isScheduled(post: Post): boolean {
+  return post.data.pubDate > PUBLISH_CUTOFF
+}
+
 async function getPublished(): Promise<Post[]> {
+  // A scheduled post is held back from the build and listed in scheduled.json
+  // instead. The dev server keeps it so it can be read before it is due, which
+  // is the only difference between the two and must stay behind this flag:
+  // check-output.ts asserts a post is either on the built site or in that
+  // manifest, never both.
   const posts = await getCollection(
     'blog',
-    ({ data }) => !data.draft && data.pubDate <= PUBLISH_CUTOFF,
+    ({ data }) => !data.draft && (import.meta.env.DEV || data.pubDate <= PUBLISH_CUTOFF),
   )
   return posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
 }

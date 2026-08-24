@@ -313,4 +313,7 @@ either way.
 - **A post is a folder.** `blog/<slug>/index.mdx` plus its images. The folder name is the URL, so never rename it after publishing.
 - **`draft: true` builds nothing.** Set it to `false` and push to publish.
 - **A future `pubDate` schedules the post.** It appears on its own at that minute, once the scheduler is deployed.
+- **The dev server shows what the site will not.** A scheduled post is listed there, at its future date, tagged
+  `[scheduled]` in yellow with a clock; a `noindex` post is tagged `[private]` in red. Both tags exist only on the dev
+  server, so nothing about them reaches a reader. A scheduled post is still held out of the built site entirely.
 - **The build never fetches anything.** A bookmark card only renders if its metadata was captured. New links stay plain links until someone adds them.
