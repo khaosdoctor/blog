@@ -4,7 +4,7 @@
  * wireframe 3D"), rasterised locally with sharp. No network call, no Replicate token,
  * no external Deno service: the three shortlisted candidates all drew their
  * own SVG locally, and choosing one retired the AI-background pipeline this
- * script used to run (docs/decisions.md, docs/decisions-log.md).
+ * script used to run (docs/decisions-log.md).
  *
  *   node scripts/cover.ts <slug>
  *
