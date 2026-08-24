@@ -2,24 +2,40 @@
   position: relative;
 }
 
+/* The chip is out of flow, so a last line long enough to reach the right edge
+   would run underneath it. */
+.expressive-code figure pre > code {
+  padding-block-end: calc(var(--ec-codePadBlk) + 1.75rem);
+}
+
+/* The chip and the copy button hold opposite corners of this box, so a block of
+   one or two lines is short enough to put them in the same place. The floor is
+   what separates them; tests/e2e/code-language-chip.spec.ts fails if either
+   control outgrows it. */
+.expressive-code figure pre {
+  min-block-size: 6rem;
+}
+
 .expressive-code figure pre::after {
+  /* Both the ink and the border have to read against the code theme, which the
+     reader picks separately from the page theme, so a dark block can appear on
+     a light page. `--code-background` is what the frame paints, terminal frames
+     included, and the L channel of its oklch form decides black or white.
+     Reading the theme's own background is what makes this work: a variable
+     resolved per theme to black or white would collapse all five light themes
+     onto one value, and the engine omits a value that matches its base variant,
+     leaving those themes with the dark default. */
+  --lang-chip-ink: oklch(from var(--code-background, var(--ec-codeBg)) clamp(0, calc((0.6 - l) * 100), 1) 0 0);
+
   content: attr(data-language);
   position: absolute;
   inset-block-end: 0.5rem;
   inset-inline-end: 0.5rem;
   padding: 0.1em 0.5em;
-  border: 3px double var(--post-accent, var(--accent));
+  border: 3px double var(--lang-chip-ink);
   border-radius: var(--radius);
   background: transparent;
-  /* The chip has to read against the code theme, which the reader picks
-     separately from the page theme, so a dark block can appear on a light page.
-     `--code-background` is what the frame paints, terminal frames included, and
-     the L channel of its oklch form decides black or white. Reading the theme's
-     own background is what makes this work: a variable resolved per theme to
-     black or white would collapse all five light themes onto one value, and the
-     engine omits a value that matches its base variant, leaving those themes
-     with the dark default. */
-  color: oklch(from var(--code-background, var(--ec-codeBg)) clamp(0, calc((0.6 - l) * 100), 1) 0 0);
+  color: var(--lang-chip-ink);
   font-family: var(--font-mono);
   font-size: var(--text-tiny);
   letter-spacing: 0.06em;

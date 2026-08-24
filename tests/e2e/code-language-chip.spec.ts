@@ -49,7 +49,7 @@ test.describe('the code language chip', () => {
     })
   }
 
-  test('the chip is transparent and bordered in the post colour', async ({ page }) => {
+  test('the chip is transparent and its border matches its ink', async ({ page }) => {
     await page.goto(POST, { waitUntil: 'networkidle' })
 
     const chip = await page.evaluate(() => {
@@ -61,21 +61,57 @@ test.describe('the code language chip', () => {
         background: style.backgroundColor,
         borderStyle: style.borderTopStyle,
         borderColor: style.borderTopColor,
-        accent: getComputedStyle(document.body).getPropertyValue('--post-accent').trim(),
+        ink: style.color,
       }
     })
 
     expect(chip.content).toContain('bash')
     expect(chip.background).toBe('rgba(0, 0, 0, 0)')
     expect(chip.borderStyle).toBe('double')
-    expect(chip.accent, 'the post sets no cover colour').not.toBe('')
-    expect(chip.borderColor).toBe(await page.evaluate((value) => {
-      const probe = document.createElement('span')
-      probe.style.color = value
-      document.body.append(probe)
-      const resolved = getComputedStyle(probe).color
-      probe.remove()
-      return resolved
-    }, chip.accent))
+    expect(chip.borderColor, 'the border does not follow the block').toBe(chip.ink)
+  })
+
+  test('the code leaves room for the chip', async ({ page }) => {
+    await page.goto(POST, { waitUntil: 'networkidle' })
+
+    const clearance = await page.evaluate(() => {
+      const pre = document.querySelector('.expressive-code figure pre')
+      if (pre === null) throw new Error('no code block on the page')
+      const code = pre.querySelector('code')
+      if (code === null) throw new Error('the block has no code element')
+      const chip = getComputedStyle(pre, '::after')
+      return {
+        padding: parseFloat(getComputedStyle(code).paddingBlockEnd),
+        needed: parseFloat(chip.height) + parseFloat(chip.bottom),
+      }
+    })
+
+    expect(clearance.padding, 'the last line runs under the chip').toBeGreaterThan(clearance.needed)
+  })
+
+  /*
+   * The chip and the copy button hold opposite corners of the same box, so the
+   * shortest block on the page is where they meet.
+   */
+  test('the chip never reaches the copy button', async ({ page }) => {
+    await page.goto(POST, { waitUntil: 'networkidle' })
+
+    const worst = await page.evaluate(() => {
+      let smallest: number | null = null
+      for (const figure of document.querySelectorAll('.expressive-code figure')) {
+        const pre = figure.querySelector('pre')
+        const button = figure.querySelector('.copy button')
+        if (pre === null || button === null) continue
+        const chip = getComputedStyle(pre, '::after')
+        const chipTop =
+          pre.getBoundingClientRect().height - parseFloat(chip.bottom) - parseFloat(chip.height)
+        const room = chipTop - (button.getBoundingClientRect().bottom - pre.getBoundingClientRect().top)
+        if (smallest === null || room < smallest) smallest = room
+      }
+      return smallest
+    })
+
+    expect(worst, 'no block with both a chip and a copy button').not.toBeNull()
+    expect(worst, 'the chip runs into the copy button').toBeGreaterThan(0)
   })
 })
