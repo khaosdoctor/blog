@@ -84,6 +84,24 @@ jobs:
       - name: Check migrated output
         run: node scripts/check-output.ts
 
+      # Everything above reads the output as text. These drive a real browser
+      # over the dist/ this job just built, which is the only way the layout
+      # rules, the per-theme code colours and the progressive-enhancement
+      # fallbacks are checked at all. Chrome only: the suite pins that channel.
+      - name: Install Chrome for the end-to-end suite
+        run: npx playwright install --with-deps chrome
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Keep the report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
       # Advisory only, never a release blocker: a broken link in one of the
       # migrated posts or a Lighthouse regression is worth knowing about, not
       # worth stopping a deploy over. continue-on-error on each step keeps

@@ -62,11 +62,14 @@ Run these, in order:
 npm run check
 npm run build
 node scripts/check-output.ts
+npm run test:e2e
 ```
 
 `npm run check` is `astro check`, `tsc -p worker`, `scripts/check-i18n.ts` and `scripts/check-component-css.ts`, in that order. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
 
 `check-output.ts` fails on a published post with no page, leftover Ghost markup, an unrendered component tag, a missing feed or manifest icon, an image that never reached the output, and any remote-script loader pattern. That last check exists because the old Ghost site served an injected script for a month before anyone noticed. Do not weaken it.
+
+`npm run test:e2e` drives a real browser over `dist/`, so it needs the build above to be current. Everything before it reads the output as text; this is the only step that sees layout, the resolved per-theme code colours, and what happens with scripting off. It runs in CI too. Two things keep it quick and must stay that way: a page is loaded once and resized through the width list rather than reloaded per width, and no test waits on `networkidle`, which on this site waits out the service worker and Pagefind for nothing. Wait on the thing being asserted instead.
 
 ## Writing
 
