@@ -57,8 +57,11 @@ test('the revealed source copies without expressive-code’s own handler', async
 test.describe('with no javascript', () => {
   test.use({ javaScriptEnabled: false })
 
+  // The one place `networkidle` earns its cost: images above this link keep
+  // shifting it while they load, and with scripting off there is no way to ask
+  // the page whether it has settled.
   test('the reveal is a link to the source page', async ({ page }) => {
-    await page.goto(POST)
+    await page.goto(POST, { waitUntil: 'networkidle' })
     await page.locator('a[href="/lab-source/theme-lab-arquivo/components/CoverLab.vue.html"]').click()
     await expect(page).toHaveURL('/lab-source/theme-lab-arquivo/components/CoverLab.vue.html')
     await expect(page.locator('.expressive-code')).toBeVisible()
