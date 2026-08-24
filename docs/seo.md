@@ -46,5 +46,5 @@ prop is already there for exactly this on every other page (`BaseLayout` → `SE
 
 ## CI audit
 
-A non-blocking `seo-audit` job runs after `build` on every push, PR, and scheduled publish. See `docs/ci.md` for the
+Lighthouse and lychee run at the end of the `build` job, both `continue-on-error`, on every push, PR, and scheduled publish. See `docs/ci.md` for the
 job and why it can never fail the workflow. Config lives in `lighthouserc.json` at the repo root.

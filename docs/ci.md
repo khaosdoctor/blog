@@ -133,7 +133,6 @@ Manual, from the Actions tab. release-please opens the PR, merging it cuts the t
 | `CLAUDE_CODE_OAUTH_TOKEN` | Translate | the job exits clean and nothing is translated |
 | `PUBLIC_CF_ANALYTICS_TOKEN` | `BaseLayout.astro`, read at build time | no analytics beacon is rendered. `build.yml` does not pass it into the build yet, so setting the secret alone changes nothing |
 | Cloudflare account + a GitHub PAT with `contents:write` | the Worker | scheduled posts appear on the next push instead of on time |
-| `REPLICATE_API_TOKEN` | `scripts/cover.ts`, run by hand | no generated covers |
 
 ## Running the same checks locally
 
