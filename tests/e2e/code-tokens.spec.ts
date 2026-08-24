@@ -19,8 +19,8 @@ async function tokenColours(page: Page): Promise<string[]> {
   )
 }
 
-test('syntax tokens resolve to more than one colour', async ({ page }) => {
-  await page.goto(POST, { waitUntil: 'networkidle' })
+test('every syntax token resolves to a declared colour', async ({ page }) => {
+  await page.goto(POST)
   await expect(page.locator('.expressive-code').first()).toBeVisible()
 
   const colours = await tokenColours(page)
@@ -28,10 +28,6 @@ test('syntax tokens resolve to more than one colour', async ({ page }) => {
 
   // The failure this guards against is every token collapsing to one colour.
   expect(new Set(colours).size, 'tokens are all one colour').toBeGreaterThan(2)
-})
-
-test('every token marker resolves to a declared colour', async ({ page }) => {
-  await page.goto(POST, { waitUntil: 'networkidle' })
 
   // Asks the marker what it resolves to rather than reading the stylesheet
   // text, which the CSS minifier is free to rewrite.
@@ -64,7 +60,7 @@ test('every token marker resolves to a declared colour', async ({ page }) => {
 })
 
 test('the code theme picker repaints the tokens', async ({ page }) => {
-  await page.goto(POST, { waitUntil: 'networkidle' })
+  await page.goto(POST)
   const before = await tokenColours(page)
 
   await page.evaluate(() => {
