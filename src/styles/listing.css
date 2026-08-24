@@ -209,3 +209,33 @@
   font-size: 16px;
   line-height: 1.5;
 }
+
+/* Dev only, both of them. `PostList.astro` renders these behind
+   `import.meta.env.DEV`: a noindex post is listed with nothing on the row saying
+   so, and a scheduled one is not built outside the dev server at all. They live
+   here rather than in a scoped block so the rules are one cached copy instead of
+   half a kilobyte inlined into every listing page. */
+.listing-private,
+.listing-scheduled {
+  margin-inline-end: 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.listing-private {
+  color: var(--brand-red);
+}
+
+.listing-scheduled {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  color: var(--brand-yellow);
+}
+
+.listing-scheduled svg {
+  inline-size: 1em;
+  block-size: 1em;
+}

@@ -60,35 +60,3 @@ const showPrivate = import.meta.env.DEV
     ))
   }
 </ol>
-
-{
-  /*
-   * Inline and dev-only, alongside the markup it styles: a global rule would be
-   * bundled into every production page for markup that never ships there.
-   */
-  showPrivate && (
-    <style is:inline>
-      {`
-        .listing-private,
-        .listing-scheduled {
-          margin-inline-end: 0.4em;
-          font-family: var(--font-mono);
-          font-size: 0.85em;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-        }
-
-        .listing-private { color: var(--brand-red); }
-
-        .listing-scheduled {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.3em;
-          color: var(--brand-yellow);
-        }
-
-        .listing-scheduled svg { inline-size: 1em; block-size: 1em; }
-      `}
-    </style>
-  )
-}
