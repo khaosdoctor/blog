@@ -1,6 +1,6 @@
 ---
 import type { Post } from '../lib/posts'
-import { estimateReadingTime, formatDate, urlOf } from '../lib/posts'
+import { estimateReadingTime, formatDate, isScheduled, urlOf } from '../lib/posts'
 import { localePath } from '../i18n/ui'
 import ReadingTime from './ReadingTime.astro'
 
@@ -19,6 +19,10 @@ function categoryUrl(post: Post): string {
 
 // Enough dots to overflow any width the leader is given, then clipped by CSS.
 const LEADER = '·'.repeat(200)
+
+// A noindex post is still listed, so nothing on the row says it is unlisted
+// everywhere else. The marker is for the author while writing and never ships.
+const showPrivate = import.meta.env.DEV
 ---
 
 <ol class="listing">
@@ -29,6 +33,16 @@ const LEADER = '·'.repeat(200)
           <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, post.data.lang)}</time>
         </span>
         <a href={urlOf(post)} class="listing-title">
+          {showPrivate && post.data.noindex && <span class="listing-private">[private]</span>}
+          {showPrivate && isScheduled(post) && (
+            <span class="listing-scheduled">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+                <path d="M8 4.5V8l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+              [scheduled]
+            </span>
+          )}
           {post.data.title}
         </a>
         <span class="listing-leader" aria-hidden="true">
@@ -46,3 +60,35 @@ const LEADER = '·'.repeat(200)
     ))
   }
 </ol>
+
+{
+  /*
+   * Inline and dev-only, alongside the markup it styles: a global rule would be
+   * bundled into every production page for markup that never ships there.
+   */
+  showPrivate && (
+    <style is:inline>
+      {`
+        .listing-private,
+        .listing-scheduled {
+          margin-inline-end: 0.4em;
+          font-family: var(--font-mono);
+          font-size: 0.85em;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .listing-private { color: var(--brand-red); }
+
+        .listing-scheduled {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3em;
+          color: var(--brand-yellow);
+        }
+
+        .listing-scheduled svg { inline-size: 1em; block-size: 1em; }
+      `}
+    </style>
+  )
+}
