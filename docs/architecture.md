@@ -109,7 +109,7 @@ flowchart LR
 What each step can fail on:
 
 - **`vendor-media.ts`** never fails the build. A download that does not answer leaves the remote URL in the post and
-  is listed in an untracked report the run writes. Everything it does succeed at is committed, so the step is a no-op
+  is listed in `.migration/unreachable-media.md`, untracked and rewritten on every run. Everything it does succeed at is committed, so the step is a no-op
   on the next run and the site stops depending on anyone else's server.
 - **`astro build`** fails on a schema violation, a broken image path (the `image()` helper resolves it), an MDX parse
   error, or a wikilink pointing at a folder that does not exist.
