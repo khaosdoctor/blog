@@ -117,7 +117,7 @@ first part. Leave `seriesName` off a translated first part and that language fal
 | `npm run test:e2e` | Playwright over the built `dist/`, the same suite CI runs. Build first |
 | `node scripts/build-redirects.ts` | regenerate `src/data/redirects.ts` after content moves |
 | `node scripts/build-icons.ts` | regenerate the PWA icons from `public/favicon.svg` |
-| `node scripts/translate.ts` | translate changed posts in place, needs `ANTHROPIC_API_KEY`. CI uses the workflow instead |
+| `node scripts/translate.ts` | translate changed posts in place, needs `TRANSLATE_API_KEY`, or `ANTHROPIC_API_KEY` as a fallback. CI uses the workflow instead |
 | `node scripts/clean-translations.ts` | strip agent artefacts from translated files |
 
 ## Layout
