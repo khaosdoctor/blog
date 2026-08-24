@@ -9,7 +9,7 @@ const POST = '/en/a-deep-dive-into-container-images-part-1/'
 
 async function cursorX(page: Page): Promise<string> {
   return page.evaluate(
-    () => document.querySelector('.shell .cursor')?.style.getPropertyValue('--cursor-x') ?? '',
+    () => document.querySelector<HTMLElement>('.shell .cursor')?.style.getPropertyValue('--cursor-x') ?? '',
   )
 }
 
