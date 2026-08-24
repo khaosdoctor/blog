@@ -1,7 +1,12 @@
 # CI
 
-Three workflows and one Cloudflare Worker. Nothing is deployed yet: the deploy job in `build.yml` is commented out
-and Pages is off until the DNS cutover.
+Three workflows and one Cloudflare Worker. `build.yml` deploys to GitHub Pages on a push to `main` and on the
+Worker's scheduled-publish dispatch; a pull request builds and checks and stops before the artefact.
+
+The Pages custom domain is `blog.lsantos.dev`, carried by `public/CNAME` so it survives every deploy rather than
+living only in the repo settings. `site` in `astro.config.mjs` is the same domain, and every internal link is
+root-relative with no `base`, so the output is only correct at that domain: served from `khaosdoctor.github.io/blog/`
+it would 404 on every path.
 
 Every `uses:` is pinned to a full commit SHA. A tag like `@v1` is a moving ref, so the action's owner decides what
 runs on the runner, which is the same trust that cost the Ghost site a month of serving an injected script.
@@ -24,7 +29,7 @@ flowchart TD
   G --> E["npx playwright install chrome<br/>npm run test:e2e"]
   E --> S["Lighthouse + lychee<br/>continue-on-error, advisory"]
   S --> A["upload-pages-artifact"]
-  A -.->|"commented out until cutover"| D["deploy-pages"]
+  A --> D["job: deploy<br/>deploy-pages, push and dispatch only"]
 ```
 
 `fetch-depth: 0` is required: the footer version is the semver plus the number of commits since that version's tag
@@ -43,6 +48,10 @@ dist` mapping the site's root-relative hrefs back to local files so no server ha
 on each step means neither can fail the workflow or block a deploy: both are advisory, one as a job summary (lychee)
 and one as an artifact plus a temporary public link (Lighthouse). They used to be a separate job downloading the
 pages artifact, which made every run produce that artifact only to hand it over.
+
+**The deploy job** runs after `build` and only on the events that produce an artefact, the same condition
+`upload-pages-artifact` carries. It needs `pages: write` and `id-token: write`, and the `github-pages` environment
+is what publishes the URL back onto the run.
 
 **Concurrency.** The group depends on the event, so a pull request can only ever cancel its own earlier runs:
 
