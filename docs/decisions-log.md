@@ -1,10 +1,11 @@
 # Decisions log
 
 The history of the choices already made and the reasoning behind each one, so nothing gets rediscussed by accident.
-Newest first. Nothing here depends on you: whatever still does lives in `docs/decisions.md`, which stays short on
+Newest first. `docs/design.md` and `docs/decisions.md` have been removed; where entries below name either one, that
+is a record of what was true when the entry was written, not a live link. Whatever still depends on you lives on
 purpose.
 
-In English, because these are settled decisions and the writing is better in English. `docs/decisions.md` stays in
+In English, because these are settled decisions and the writing is better in English. The owner's own notes stayed in
 Portuguese, since it holds only the open questions you still have to answer, and you read those faster in Portuguese.
 
 ---

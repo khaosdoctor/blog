@@ -71,6 +71,26 @@ npm run test:e2e
 
 `npm run test:e2e` drives a real browser over `dist/`, so it needs the build above to be current. Everything before it reads the output as text; this is the only step that sees layout, the resolved per-theme code colours, and what happens with scripting off. It runs in CI too. Two things keep it quick and must stay that way: a page is loaded once and resized through the width list rather than reloaded per width, and no test waits on `networkidle`, which on this site waits out the service worker and Pagefind for nothing. Wait on the thing being asserted instead.
 
+## Styling conventions
+
+House rules the CSS follows. They are not build-breaking like the section above, but breaking one produces something that looks deliberate and is not. The long reasoning behind the palette and the type is in `docs/theming.md`.
+
+**Which accent a thing follows.** Transient effects, links and hovers take `--accent-day`, the day-hashed colour. Text treatments belonging to the article itself, `strong` and `em`, take `--post-accent`, the post's cover tone. Do not repoint either at the other: they answer different questions, "what colour is the site today" and "what colour is this article".
+
+**Stacking order.** Header content claims the low single digits, menus and popovers claim 60. Nothing in between is in use, so a new overlay picks a side rather than a number.
+
+**Where a rule belongs.** `.prose` wraps rendered markdown only. Shell inside the same `<article>`, the tag row and the series navigation, belongs outside that wrapper. `prose/links.css` is the deliberate exception: its colour, underline and hover rules are site-wide (`html :is(main, footer) a`) and only the external-link arrow stays scoped to `.prose a`. Two links opt out there by name, `footer .credits a` and `footer .version a`, and must stay excluded.
+
+**Groups of a few options use `aria-current`**, never `role="radio"`, which would also oblige a roving tabindex and arrow-key handling for no gain at this size. Colour is never the only signal for a state: a word, a fill-versus-hollow difference or a shape carries it too. A control's accessible name begins with its visible text, so speech input can address it by what is on screen.
+
+**Metric-matched fallback faces.** The `ascent-override`, `descent-override` and `size-adjust` values are the real face's own metrics per em divided by `size-adjust`. Re-derive them whenever either the real face or its local stand-in changes, or the fallback stops matching and the swap shifts the page again.
+
+**Two CSS mechanics worth knowing.** An author `display` beats the UA sheet's `[hidden]` at any specificity, so it has to stay behind `:not([hidden])`; a popover or a closed `<dialog>` gets no author `display` in its base rule at all, since that beats the UA rule that hides it. And a character-level effect needs one span per character, because a text node has no per-character handle.
+
+**The code block chip reads the block, not the page.** The language chip's ink and border come from the L channel of `--code-background` in oklch, per block. A value resolved per theme to black or white does not work: all five light themes collapse onto one value, and expressive-code omits a value that matches its base variant, which leaves those themes with the dark default.
+
+**Scrollbars are one mechanism or the other.** Chrome ignores `::-webkit-scrollbar` once `scrollbar-width` or `scrollbar-color` is anything but `auto`, so the WebKit rules stay behind `@supports selector(::-webkit-scrollbar)` and never sit alongside the standard properties on the same element.
+
 ## Writing
 
 The author is strict about prose, in code comments as much as anywhere else.

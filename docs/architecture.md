@@ -1,8 +1,7 @@
 # Architecture
 
 How the site is built and why. `content/WRITING.md` is the authoring reference, `docs/decisions-log.md` records what
-was decided and why (in English), `docs/decisions.md` holds only what is still open (in Portuguese, being the owner's
-own notes), `docs/design.md` holds the visual direction. This file is the machinery.
+was decided and why, `docs/theming.md` holds the visual direction. This file is the machinery.
 
 Astro 7, static output, no server, no database. Deployed to GitHub Pages. One author, writing in Obsidian.
 
@@ -110,7 +109,7 @@ flowchart LR
 What each step can fail on:
 
 - **`vendor-media.ts`** never fails the build. A download that does not answer leaves the remote URL in the post and
-  is listed in `.migration/unreachable-media.md`. Everything it does succeed at is committed, so the step is a no-op
+  is listed in an untracked report the run writes. Everything it does succeed at is committed, so the step is a no-op
   on the next run and the site stops depending on anyone else's server.
 - **`astro build`** fails on a schema violation, a broken image path (the `image()` helper resolves it), an MDX parse
   error, or a wikilink pointing at a folder that does not exist.
