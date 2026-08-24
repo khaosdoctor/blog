@@ -3,6 +3,14 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "description": "blog.lsantos.dev, an Astro static site written in Obsidian",
+  "license": "MIT",
+  "author": "Lucas Santos <https://lsantos.dev>",
+  "homepage": "https://blog.lsantos.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khaosdoctor/blog.git"
+  },
   "engines": {
     "node": ">=22.12.0"
   },

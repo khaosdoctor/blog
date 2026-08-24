@@ -133,7 +133,6 @@ first part. Leave `seriesName` off a translated first part and that language fal
 | `src/plugins/` | the remark and rehype plugins that turn markdown into figures, embeds and margin notes |
 | `tests/e2e/` | the browser suite: widths, code colours, the lab source, the reading meter |
 | `worker/` | Cloudflare Worker that rebuilds the site the minute a scheduled post is due |
-| `.migration/` | migration reports and review lists (untracked) |
 
 ## Two things that are load-bearing
 
@@ -143,3 +142,13 @@ working. Route paths are English; slugs and titles are whatever was written.
 **The build fetches only its own media.** Bookmark cards, tweets and embeds render from data in the repo. The one
 exception is the vendoring step, which pulls a remote image into the repo so it stops being remote. A post that has
 been built once depends on nobody else's server.
+
+## Licence
+
+Two, because this repo holds two different things.
+
+The **code** is MIT (`LICENSE`): the Astro site, the components, the plugins, the build scripts, the Worker. Take any
+of it.
+
+The **writing** is CC BY-NC-SA 4.0 (`LICENSE-CONTENT`): everything under `content/`, meaning the articles in both
+languages and their images. Quote it, credit it, link back. Do not republish it whole on a site that sells ads.
