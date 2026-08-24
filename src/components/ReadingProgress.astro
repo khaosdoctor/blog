@@ -38,13 +38,17 @@
       return reducedMotion() ? index : index + jitter[index]
     }
 
-    // Rides `lit`, not `shown`: `threshold()` pushes each dash back by up to
-    // JITTER of its slot, so `shown` can be past a dash the trail has not drawn.
+    // Rides `shown` rather than the lit count, and interpolates between the two
+    // surrounding stops, so the head glides instead of hopping a dash at a time.
     function moveHead(): void {
       if (cursor === null || stops.length === 0) return
       const last = stops.length - 1
-      const index = Math.min(Math.max(lit, 0), last)
-      cursor.style.setProperty('--cursor-x', `${stops[index].toFixed(2)}px`)
+      const position = Math.min(Math.max(shown, 0), last)
+      const index = Math.floor(position)
+      const from = stops[index]
+      const to = stops[Math.min(index + 1, last)]
+      const x = from + (to - from) * (position - index)
+      cursor.style.setProperty('--cursor-x', `${x.toFixed(2)}px`)
     }
 
     // The phone header hides the dash run, so the same eased position drives the

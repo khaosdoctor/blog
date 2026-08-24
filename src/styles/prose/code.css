@@ -42,3 +42,23 @@
   text-transform: uppercase;
   pointer-events: none;
 }
+
+/* The phone gets a smaller copy button (see code-blocks.css), so the chip needs
+   less room to clear it, and on a narrow block the space the desktop can spare
+   reads as a dead band under the code. */
+@media (max-width: 47.99rem) {
+  .expressive-code figure pre {
+    min-block-size: 2rem;
+  }
+
+  .expressive-code figure pre > code {
+    padding-block-end: calc(var(--ec-codePadBlk) + 1rem);
+  }
+
+  .expressive-code figure pre::after {
+    inset-block-end: 0.4rem;
+    inset-inline-end: 0.4rem;
+    /* Otherwise the chip carries the code's 1.65 and is half again as tall. */
+    line-height: 1;
+  }
+}
