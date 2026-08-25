@@ -6,10 +6,10 @@
  *
  * Exits non-zero on anything that would ship broken content.
  */
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
-import { annotate, bold, count, dim, fail, heading, ok, warn, walkFiles } from './lib/cli.ts'
+import { count, frontmatterOf, heading, postIndex, reportFailures, warn, walkFiles, type Failure } from './lib/cli.ts'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
 import { urlFor } from '../src/lib/post-dates.mjs'
 
@@ -19,15 +19,17 @@ const CONTENT = 'content/blog'
 // The file each failure is annotated against. A dist page or a manifest file is
 // exact; a content slug falls back to its source post so the annotation still
 // points somewhere a human can act on it.
-type Failure = { check: string; detail: string; file: string }
-
 const failures: Failure[] = []
 const warnings: string[] = []
 
 heading('check-output: verifying the build output')
 
+function indexFileOf(slug: string): string | undefined {
+  return postIndex(join(CONTENT, slug))
+}
+
 function contentFileFor(slug: string): string {
-  return ['index.mdx', 'index.md'].map((name) => join(CONTENT, slug, name)).find(existsSync) ?? join(CONTENT, slug)
+  return indexFileOf(slug) ?? join(CONTENT, slug)
 }
 
 const files = walkFiles(DIST)
@@ -61,14 +63,16 @@ if (files.includes(manifestPath)) {
 // One post is one folder holding index.md(x) and its images, so the slug is the
 // folder name. Anything else in content/blog (a stray note, a loose file) is not
 // a post and is deliberately not checked.
-const postFolders = readdirSync(CONTENT, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name)
-  .filter((slug) => {
-    const file = ['index.mdx', 'index.md'].map((name) => join(CONTENT, slug, name)).find(existsSync)
-    if (file === undefined) return false
-    return !/^draft:\s*true/m.test(readFileSync(file, 'utf8'))
-  })
+const postSources = new Map<string, { file: string; source: string }>()
+for (const entry of readdirSync(CONTENT, { withFileTypes: true })) {
+  if (!entry.isDirectory()) continue
+  const file = indexFileOf(entry.name)
+  if (file === undefined) continue
+  const source = readFileSync(file, 'utf8')
+  if (/^draft:\s*true/m.test(source)) continue
+  postSources.set(entry.name, { file, source })
+}
+const postFolders = [...postSources.keys()]
 const expected = postFolders.filter((slug) => !scheduled.has(slug))
 
 /**
@@ -78,16 +82,13 @@ const expected = postFolders.filter((slug) => !scheduled.has(slug))
  * that had built perfectly well. Same rule as everywhere else, imported rather
  * than restated.
  */
-function pageFor(slug: string): string {
-  const file = ['index.mdx', 'index.md'].map((name) => join(CONTENT, slug, name)).find(existsSync)
-  if (file === undefined) return join(DIST, slug, 'index.html')
-  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(file, 'utf8'))?.[1] ?? ''
-  const url = urlFor(slug, file.endsWith('.md') ? 'index.md' : 'index.mdx', frontmatter)
+function pageFor(slug: string, post: { file: string; source: string }): string {
+  const url = urlFor(slug, post.file.endsWith('.md') ? 'index.md' : 'index.mdx', frontmatterOf(post.source))
   return join(DIST, url.replace(/^\/|\/$/g, ''), 'index.html')
 }
 
-for (const slug of postFolders) {
-  const hasPage = files.includes(pageFor(slug))
+for (const [slug, post] of postSources) {
+  const hasPage = files.includes(pageFor(slug, post))
   if (scheduled.has(slug) && hasPage) {
     failures.push({ check: 'post both published and still scheduled', detail: slug, file: contentFileFor(slug) })
     continue
@@ -225,23 +226,4 @@ console.log(
 )
 for (const warning of warnings) warn(warning)
 
-if (failures.length === 0) {
-  ok('output looks clean')
-  process.exit(0)
-}
-
-fail(`${count(failures.length, 'failure', 'failures')} found`)
-
-const grouped = new Map<string, Failure[]>()
-for (const failure of failures) {
-  const current = grouped.get(failure.check) ?? []
-  current.push(failure)
-  grouped.set(failure.check, current)
-}
-for (const [check, group] of grouped) {
-  console.error(`\n${bold(check)} ${dim(`(${group.length})`)}:`)
-  for (const failure of group.slice(0, 10)) console.error(`  ${failure.detail}`)
-  if (group.length > 10) console.error(`  ${dim(`...and ${group.length - 10} more`)}`)
-}
-for (const failure of failures) annotate('error', { file: failure.file, message: `${failure.check}: ${failure.detail}` })
-process.exit(1)
+reportFailures(failures, 'output looks clean')

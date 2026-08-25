@@ -1,16 +1,11 @@
 import type { APIRoute } from 'astro'
-import { getPublishedPosts, urlOf } from '../lib/posts'
+import { urlOf } from '../lib/posts'
+import { getCategories } from '../lib/taxonomy'
 
 export const GET: APIRoute = async ({ site }) => {
-  const posts = await getPublishedPosts()
   const absolute = (path: string) => (site === undefined ? path : new URL(path, site).href)
 
-  const bySection = new Map<string, typeof posts>()
-  for (const post of posts) {
-    const current = bySection.get(post.data.category) ?? []
-    current.push(post)
-    bySection.set(post.data.category, current)
-  }
+  const bySection = await getCategories()
 
   const lines: string[] = [
     '# lsantos.dev',

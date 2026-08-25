@@ -358,10 +358,8 @@ const RULE = '──────────────────────
     margin-inline-start: 0;
   }
 
-  /* Negative: the container's 0.5rem column spacing also separates the nav links, so pulling controls back tightens just this cluster. */
-  .controls :global(.lang-switch),
-  .controls :global(.theme-toggle),
-  .controls :global(.settings-panel) {
+  /* Negative: the container's 0.5rem column spacing also separates the nav links, so pulling the switch back tightens just the controls. */
+  .controls :global(.lang-switch) {
     margin-inline-start: -0.25rem;
   }
 

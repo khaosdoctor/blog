@@ -1,29 +1,14 @@
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
+import { pageScheme, THEME_ATTR } from './scheme'
 import { onReady } from './ready'
 
 const STORAGE_KEY = 'code-theme'
 const ATTR = 'data-code-theme'
-const PAGE_THEME_ATTR = 'data-theme'
 
 const AUTO_LIGHT = 'ayu-light'
 const AUTO_DARK = 'ayu-dark'
-type ThemeName =
-  | 'github-light'
-  | 'github-dark'
-  | 'monokai'
-  | 'dracula'
-  | 'catppuccin-latte'
-  | 'catppuccin-frappe'
-  | 'catppuccin-macchiato'
-  | 'catppuccin-mocha'
-  | 'kanagawa-wave'
-  | 'kanagawa-dragon'
-  | 'kanagawa-lotus'
-  | 'ayu-light'
-  | 'ayu-dark'
-  | 'snazzy-light'
 
-const THEMES: ThemeName[] = [
+const THEMES = [
   'github-light',
   'github-dark',
   'monokai',
@@ -38,9 +23,12 @@ const THEMES: ThemeName[] = [
   'ayu-light',
   'ayu-dark',
   'snazzy-light',
-]
+] as const
+
+type ThemeName = (typeof THEMES)[number]
+
 function isThemeName(value: string): value is ThemeName {
-  return (THEMES as string[]).includes(value)
+  return (THEMES as readonly string[]).includes(value)
 }
 
 function rawStored(): string | null {
@@ -50,11 +38,6 @@ function rawStored(): string | null {
 function storedTheme(): ThemeName | null {
   const value = rawStored()
   return value !== null && isThemeName(value) ? value : null
-}
-
-function pageScheme(): 'light' | 'dark' | null {
-  const value = document.documentElement.getAttribute(PAGE_THEME_ATTR)
-  return value === 'light' || value === 'dark' ? value : null
 }
 
 // "Auto" sets no attribute until a site-wide scheme exists; ayu-light is named
@@ -132,7 +115,7 @@ function init(): void {
 
   new MutationObserver(() => applyTheme(storedTheme())).observe(document.documentElement, {
     attributes: true,
-    attributeFilter: [PAGE_THEME_ATTR],
+    attributeFilter: [THEME_ATTR],
   })
 
   wrapper.removeAttribute('hidden')

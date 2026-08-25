@@ -28,7 +28,7 @@
 // item, a table cell). The aside goes right after whichever of these is the
 // nearest ancestor, so nested cases (a footnote inside a blockquote's <p>)
 // are handled by recursing into children before checking the node itself.
-import { localeFromFile } from './mdx-util.mjs'
+import { localeFromFile, walkElements } from './mdx-util.mjs'
 
 const BLOCK_TAGS = new Set(['p', 'li', 'td', 'th', 'dd'])
 
@@ -74,18 +74,17 @@ function relabelHeading(section, locale) {
  * Rewrites every back-arrow's aria-label in the page's own language, keeping
  * whatever reference number GFM already put in it.
  */
-function relabelBackrefs(node, locale) {
-  if (Array.isArray(node.children)) {
-    for (const child of node.children) relabelBackrefs(child, locale)
-  }
-  if (node.type !== 'element' || node.properties?.dataFootnoteBackref === undefined) return
+function relabelBackrefs(section, locale) {
+  walkElements(section, (node) => {
+    if (node.type !== 'element' || node.properties?.dataFootnoteBackref === undefined) return
 
-  const current = node.properties['ariaLabel']
-  if (typeof current !== 'string') return
-  // The number is the only part worth keeping: everything else is English GFM
-  // hardcodes and cannot be configured.
-  const reference = /(\d+(?:[-:]\d+)*)\s*$/.exec(current)?.[1] ?? ''
-  node.properties['ariaLabel'] = BACKREF_LABEL[locale].replace('%s', reference)
+    const current = node.properties['ariaLabel']
+    if (typeof current !== 'string') return
+    // The number is the only part worth keeping: everything else is English GFM
+    // hardcodes and cannot be configured.
+    const reference = /(\d+(?:[-:]\d+)*)\s*$/.exec(current)?.[1] ?? ''
+    node.properties['ariaLabel'] = BACKREF_LABEL[locale].replace('%s', reference)
+  })
 }
 
 function findFootnoteSection(node) {

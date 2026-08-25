@@ -8,7 +8,7 @@
 // migrated posts carry.
 
 import { readFileSync } from 'node:fs'
-import { attribute, jsxElement } from './mdx-util.mjs'
+import { attribute, jsxElement, soleChild } from './mdx-util.mjs'
 
 /**
  * Remote images whose host stopped serving them. They stay in the markdown so
@@ -29,12 +29,8 @@ function isDead(url) {
 
 /** An image is "lone" when it is the only meaningful thing in its paragraph. */
 function loneImage(node) {
-  if (node.type !== 'paragraph') return null
-  const meaningful = node.children.filter(
-    (child) => !(child.type === 'text' && child.value.trim() === ''),
-  )
-  if (meaningful.length !== 1) return null
-  return meaningful[0].type === 'image' ? meaningful[0] : null
+  const only = soleChild(node)
+  return only?.type === 'image' ? only : null
 }
 
 function figureFor(image) {

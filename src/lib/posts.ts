@@ -47,14 +47,7 @@ export async function getPublishedPosts(lang: Post['data']['lang'] = SOURCE_LANG
 }
 
 export async function getPublishedByFolder(): Promise<Map<string, Post[]>> {
-  const byFolder = new Map<string, Post[]>()
-  for (const post of await getPublished()) {
-    const folder = folderOf(post)
-    const current = byFolder.get(folder) ?? []
-    current.push(post)
-    byFolder.set(folder, current)
-  }
-  return byFolder
+  return Map.groupBy(await getPublished(), folderOf)
 }
 
 export function formatDate(date: Date, lang: string): string {

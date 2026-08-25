@@ -4,7 +4,6 @@ export const SITE_NAME = 'lsantos.dev'
 export const AUTHOR_NAME = 'Lucas Santos'
 const AUTHOR_GITHUB = 'https://github.com/khaosdoctor'
 export const AUTHOR_TWITTER_HANDLE = '@khaosdoctor'
-export const DEFAULT_LOCALE = 'pt'
 
 const AUTHOR_PROFILES = [
   AUTHOR_GITHUB,

@@ -12,13 +12,13 @@
  * (src/lib/cover.ts), never `Math.random()`, so the same post always draws
  * the same cover and the social-card cache does not break on every build.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import { parseAuthors } from '../src/lib/authors.ts'
 import { buildCoverSvg, formatCoverByline } from '../src/lib/cover.ts'
 import { estimateReadingTime } from '../src/lib/reading-time.ts'
-import { fail as failLine, heading, ok } from './lib/cli.ts'
+import { fail as failLine, field, frontmatterOf, heading, ok, postIndex } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 
@@ -27,22 +27,12 @@ function fail(message: string): never {
   process.exit(1)
 }
 
-function frontmatterOf(raw: string): string {
-  return /^---\n([\s\S]*?)\n---/.exec(raw)?.[1] ?? ''
-}
-
-function field(frontmatter: string, key: string): string | null {
-  const match = new RegExp(`^${key}:\\s*(.*)$`, 'm').exec(frontmatter)
-  if (match === null) return null
-  return match[1].trim().replace(/^["'](.*)["']$/, '$1')
-}
-
 const slug = process.argv[2] ?? fail('Usage: node scripts/cover.ts <slug>')
 
 heading(`cover: making the cover for ${slug}`)
 
 const dir = join(SOURCE_DIR, slug)
-const postFile = ['index.mdx', 'index.md'].map((name) => join(dir, name)).find(existsSync) ?? fail(`No post at ${dir}.`)
+const postFile = postIndex(dir) ?? fail(`No post at ${dir}.`)
 
 const raw = readFileSync(postFile, 'utf8')
 const frontmatter = frontmatterOf(raw)
@@ -53,7 +43,7 @@ const pubDateRaw = field(frontmatter, 'pubDate') ?? fail(`${postFile} has no pub
 const pubDate = new Date(pubDateRaw)
 
 // No post sets `authors` today (a plain frontmatter line reader like `field`
-// above cannot follow a YAML list safely), so this reads the site's own
+// cannot follow a YAML list safely), so this reads the site's own
 // default the same way Authors.astro does when a post is silent about it.
 const [author] = parseAuthors(undefined)
 const byline = formatCoverByline(pubDate, lang, author.name)

@@ -8,6 +8,7 @@ import {
   hoverPreviewPinnedCardLimit as CARD_MAX,
   hoverPreviewViewportMarginPixels as VIEWPORT_MARGIN,
 } from '../lib/tweaks'
+import { ALIGN, canPopover, clampAxis, placeNear } from './popover-menu'
 import { onReady } from './ready'
 
 interface Meta {
@@ -32,19 +33,7 @@ const STORAGE_KEY = 'hp-pinned'
 const PERSIST_KEY = 'hp-persist'
 const FOOTNOTES_KEY = 'hp-footnotes'
 
-const strings = {
-  ...{
-    loading: 'Carregando…',
-    close: 'Fechar prévia',
-    pin: 'Fixar',
-    unpin: 'Soltar',
-    drag: 'arraste para mover',
-    minimize: 'Minimizar prévia',
-    restore: 'Restaurar prévia',
-    unwritten: 'not yet written, but soon!',
-  },
-  ...(document.querySelector<HTMLElement>('.hp-settings')?.dataset ?? {}),
-}
+const strings: DOMStringMap = document.querySelector<HTMLElement>('.hp-settings')?.dataset ?? {}
 
 const cache = new Map<string, Meta | null>()
 const inflight = new Map<string, AbortController>()
@@ -58,8 +47,6 @@ function loadExternalMeta(): NonNullable<typeof externalMeta> {
     .catch(() => ({}))
   return externalMeta
 }
-
-const canPopover = 'popover' in HTMLElement.prototype
 
 // An open popover lays out against the viewport whatever its parent is, so a
 // card must be hidePopover()'d before the dock's flex layout applies to it.
@@ -191,21 +178,7 @@ async function getMeta(href: string, linkText: string): Promise<Meta | null> {
 }
 
 function place(card: HTMLElement, anchor: HTMLElement): void {
-  const rect = anchor.getBoundingClientRect()
-  const gap = VIEWPORT_MARGIN
-  const cw = card.offsetWidth
-  const ch = card.offsetHeight
-  const vw = innerWidth
-  const vh = innerHeight
-
-  let top = rect.bottom + gap
-  if (top + ch > vh && rect.top - ch - gap > 0) top = rect.top - ch - gap
-  top = Math.min(Math.max(top, gap), Math.max(gap, vh - ch - gap))
-
-  const left = Math.min(Math.max(rect.left, gap), Math.max(gap, vw - cw - gap))
-
-  card.style.top = `${top}px`
-  card.style.left = `${left}px`
+  placeNear(card, anchor, { margin: VIEWPORT_MARGIN, align: ALIGN.start })
 }
 
 // Every write of left/top that does not go through place() goes through this:
@@ -216,8 +189,8 @@ function clampToViewport(card: HTMLElement): void {
   const ch = card.offsetHeight
   const left = parseFloat(card.style.left) || 0
   const top = parseFloat(card.style.top) || 0
-  card.style.left = `${Math.min(Math.max(left, inset), Math.max(inset, innerWidth - cw - inset))}px`
-  card.style.top = `${Math.min(Math.max(top, inset), Math.max(inset, innerHeight - ch - inset))}px`
+  card.style.left = `${clampAxis(left, cw, innerWidth, inset)}px`
+  card.style.top = `${clampAxis(top, ch, innerHeight, inset)}px`
 }
 
 function persistent(): boolean {
@@ -262,7 +235,7 @@ function markPinned(card: PopoverHTMLElement, on: boolean): void {
   card.classList.toggle('hp-pinned', on)
   const button = card.querySelector('.hp-pin')
   button?.setAttribute('aria-pressed', String(on))
-  button?.setAttribute('aria-label', on ? strings.unpin : strings.pin)
+  button?.setAttribute('aria-label', (on ? strings.unpin : strings.pin) ?? '')
 }
 
 function pinCard(card: PopoverHTMLElement): void {
@@ -289,7 +262,7 @@ function isDocked(card: PopoverHTMLElement): boolean {
 function markDocked(card: PopoverHTMLElement, on: boolean): void {
   const button = card.querySelector('.hp-min')
   button?.setAttribute('aria-pressed', String(on))
-  button?.setAttribute('aria-label', on ? strings.restore : strings.minimize)
+  button?.setAttribute('aria-label', (on ? strings.restore : strings.minimize) ?? '')
 }
 
 function dockCard(card: PopoverHTMLElement): void {
@@ -373,7 +346,7 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   const close = document.createElement('button')
   close.type = 'button'
   close.className = 'hp-close'
-  close.setAttribute('aria-label', strings.close)
+  close.setAttribute('aria-label', strings.close ?? '')
   close.textContent = '×'
   close.addEventListener('click', () => closeCard(card))
 
@@ -381,7 +354,7 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   pin.type = 'button'
   pin.className = 'hp-pin'
   pin.setAttribute('aria-pressed', 'false')
-  pin.setAttribute('aria-label', strings.pin)
+  pin.setAttribute('aria-label', strings.pin ?? '')
   pin.innerHTML =
     '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9.5 1.2 14.8 6.5l-1.1 1.1-1.3-.4-2.6 2.6.5 2.4a1 1 0 0 1-.3.9l-.6.6-3-3-3.2 3.2-.7-.7L5.5 10l-3-3 .6-.6a1 1 0 0 1 .9-.3l2.4.5 2.6-2.6-.4-1.3z"/></svg>'
   pin.addEventListener('click', () => {
@@ -393,7 +366,7 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   minimize.type = 'button'
   minimize.className = 'hp-min'
   minimize.setAttribute('aria-pressed', 'false')
-  minimize.setAttribute('aria-label', strings.minimize)
+  minimize.setAttribute('aria-label', strings.minimize ?? '')
   minimize.innerHTML =
     '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 9h10v2H3z"/></svg>'
   minimize.addEventListener('click', () => {
@@ -414,7 +387,7 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
 
   const hint = document.createElement('span')
   hint.className = 'hp-hint'
-  hint.textContent = strings.drag
+  hint.textContent = strings.drag ?? ''
 
   if (unwritten) {
     // Hidden, not removed: savePinned()/restorePinned() read .hp-title's href.
@@ -424,7 +397,7 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
     const msg = document.createElement('p')
     msg.id = `${card.id}-msg`
     msg.className = 'hp-unwritten-msg'
-    msg.textContent = strings.unwritten
+    msg.textContent = strings.unwritten ?? ''
     card.setAttribute('aria-labelledby', msg.id)
     card.append(pin, minimize, close, title, desc, host, msg, hint)
   } else {
@@ -458,7 +431,7 @@ async function show(link: HTMLAnchorElement, pin: boolean): Promise<void> {
 
   const title = card.querySelector('.hp-title') as HTMLAnchorElement
   const desc = card.querySelector('.hp-desc') as HTMLParagraphElement
-  if (!unwritten) title.textContent = strings.loading
+  if (!unwritten) title.textContent = strings.loading ?? ''
 
   card.style.visibility = 'hidden'
   card.showPopover?.()
@@ -519,24 +492,22 @@ function attach(link: HTMLAnchorElement): void {
 
   link.setAttribute('aria-expanded', 'false')
 
+  const openSoon = (): void => {
+    clearTimeout(openTimer)
+    openTimer = window.setTimeout(() => show(link, false), HOVER_DELAY)
+  }
+  const closeSoon = (): void => {
+    clearTimeout(openTimer)
+    scheduleClose()
+  }
+
   link.addEventListener('pointerenter', (event) => {
     if (event.pointerType === 'touch') return
-    clearTimeout(openTimer)
-    openTimer = window.setTimeout(() => show(link, false), HOVER_DELAY)
+    openSoon()
   })
-  link.addEventListener('pointerleave', () => {
-    clearTimeout(openTimer)
-    scheduleClose()
-  })
-
-  link.addEventListener('focus', () => {
-    clearTimeout(openTimer)
-    openTimer = window.setTimeout(() => show(link, false), HOVER_DELAY)
-  })
-  link.addEventListener('blur', () => {
-    clearTimeout(openTimer)
-    scheduleClose()
-  })
+  link.addEventListener('pointerleave', closeSoon)
+  link.addEventListener('focus', openSoon)
+  link.addEventListener('blur', closeSoon)
   link.addEventListener('keydown', (event) => {
     if (event.key !== ' ') return
     event.preventDefault()

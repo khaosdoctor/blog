@@ -20,13 +20,11 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { HREFLANG, LOCALES, SOURCE_LOCALE, ui, type Locale } from '../src/i18n/ui.ts'
-import { annotate, bold, count, dim, fail, heading, ok, warn, walkFiles } from './lib/cli.ts'
+import { count, field, frontmatterOf, heading, reportFailures, warn, walkFiles, type Failure } from './lib/cli.ts'
 
 const PAGES = 'src/pages'
 const CONTENT = 'content/blog'
 const UI_FILE = 'src/i18n/ui.ts'
-
-type Failure = { check: string; detail: string; file: string }
 
 const failures: Failure[] = []
 const warnings: string[] = []
@@ -340,9 +338,6 @@ for (const file of LOCALE_AWARE_FILES) {
 
 // 10. The content pairing. One folder is one article in every language, so the
 // folder is what makes two files translations of each other.
-const field = (frontmatter: string, name: string) =>
-  new RegExp(`^${name}:\\s*(.+)$`, 'm').exec(frontmatter)?.[1].trim().replace(/^["']|["']$/g, '')
-
 type Entry = { file: string; folder: string; isIndex: boolean; lang: string; url: string; draft: boolean }
 const posts: Entry[] = []
 
@@ -351,8 +346,8 @@ for (const folder of readdirSync(CONTENT, { withFileTypes: true })) {
   for (const name of readdirSync(join(CONTENT, folder.name))) {
     if (!/\.mdx?$/.test(name)) continue
     const file = join(CONTENT, folder.name, name)
-    const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(file, 'utf8'))?.[1]
-    if (frontmatter === undefined) continue
+    const frontmatter = frontmatterOf(readFileSync(file, 'utf8'))
+    if (frontmatter === '') continue
     const base = name.replace(/\.mdx?$/, '')
     const isIndex = base === 'index'
     const lang = field(frontmatter, 'lang') ?? SOURCE_LOCALE
@@ -429,23 +424,4 @@ console.log(
 )
 for (const warning of warnings) warn(warning)
 
-if (failures.length === 0) {
-  ok('the language trees agree')
-  process.exit(0)
-}
-
-fail(`${count(failures.length, 'failure', 'failures')} found`)
-
-const grouped = new Map<string, Failure[]>()
-for (const failure of failures) {
-  const current = grouped.get(failure.check) ?? []
-  current.push(failure)
-  grouped.set(failure.check, current)
-}
-for (const [check, group] of grouped) {
-  console.error(`\n${bold(check)} ${dim(`(${group.length})`)}:`)
-  for (const failure of group.slice(0, 10)) console.error(`  ${failure.detail}`)
-  if (group.length > 10) console.error(`  ${dim(`...and ${group.length - 10} more`)}`)
-}
-for (const failure of failures) annotate('error', { file: failure.file, message: `${failure.check}: ${failure.detail}` })
-process.exit(1)
+reportFailures(failures, 'the language trees agree')

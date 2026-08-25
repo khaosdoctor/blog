@@ -35,6 +35,7 @@
   --measure: var(--dial-reading-width);
   --gutter: var(--dial-page-margin);
   --cover-frame-inset: var(--dial-cover-frame-inset);
+  --figure-width: 80%;
 
   --block-spacing: var(--dial-block-spacing);
 
@@ -130,6 +131,12 @@
 @media (max-width: 47.99rem) {
   :root {
     --cover-frame-inset: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  :root {
+    --figure-width: 100%;
   }
 }
 

@@ -1,7 +1,7 @@
 // A bare URL or `![](url)` on its own line becomes an embed, decided by host.
 // See docs/architecture.md.
 import { readFileSync } from 'node:fs'
-import { attribute, jsxElement } from './mdx-util.mjs'
+import { attribute, jsxElement, soleChild } from './mdx-util.mjs'
 
 /** Read once per process, not per file. */
 let bookmarks = null
@@ -43,15 +43,6 @@ function spotifyEmbed(url) {
   if (url.hostname !== 'open.spotify.com') return null
   const match = url.pathname.match(/^\/(?:embed\/)?(episode|track|album|playlist|show)\/(\w+)/)
   return match === null ? null : { kind: match[1], id: match[2] }
-}
-
-/** The one meaningful child of a paragraph, or null if there is more than one. */
-function soleChild(node) {
-  if (node.type !== 'paragraph') return null
-  const meaningful = node.children.filter(
-    (child) => !(child.type === 'text' && child.value.trim() === ''),
-  )
-  return meaningful.length === 1 ? meaningful[0] : null
 }
 
 /**
@@ -157,12 +148,7 @@ export function remarkEmbeds() {
       for (let index = 0; index < parent.children.length; index += 1) {
         const quoted = tweetQuote(parent.children[index])
         if (quoted !== null) {
-          parent.children[index] = {
-            type: 'mdxJsxFlowElement',
-            name: 'Tweet',
-            attributes: [attribute('url', quoted.href)],
-            children: quoted.children,
-          }
+          parent.children[index] = jsxElement('Tweet', [attribute('url', quoted.href)], quoted.children)
           continue
         }
 

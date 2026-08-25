@@ -19,9 +19,8 @@
  * Translations are .mdx like everything else now, so the real protection is
  * this guard, not the extension.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import { annotate, bold, count, dim, fail, heading, ok } from './lib/cli.ts'
+import { readFileSync, statSync } from 'node:fs'
+import { annotate, bold, count, dim, fail, frontmatterOf, heading, ok, postFiles } from './lib/cli.ts'
 import { MDX_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
 
 const DIR = 'content/blog'
@@ -62,22 +61,6 @@ const BANNED: [RegExp, string][] = [
   [UNKNOWN_ELEMENT, 'unknown element or component'],
 ]
 
-/** Every non-index .md/.mdx file one level under content/blog is a translation. */
-function walk(dir: string): string[] {
-  const found: string[] = []
-  for (const postDir of readdirSync(dir, { withFileTypes: true })) {
-    if (!postDir.isDirectory()) continue
-    const full = join(dir, postDir.name)
-    for (const entry of readdirSync(full, { withFileTypes: true })) {
-      if (entry.isDirectory()) continue
-      if (!/\.mdx?$/.test(entry.name)) continue
-      if (/^index\.mdx?$/.test(entry.name)) continue
-      found.push(join(full, entry.name))
-    }
-  }
-  return found
-}
-
 /**
  * What is left after removing everything that cannot execute: fenced and inline
  * code, an escaped `\<` (which markdown renders as text, so `\<T>` and
@@ -99,11 +82,6 @@ function withoutCode(source: string): string {
     .replace(/<(?:RawEmbed|Video|MissingImage|Tweet|Bookmark)\b[\s\S]*?\/>/g, '')
 }
 
-function frontmatterOf(source: string): string {
-  const match = /^---\n([\s\S]*?)\n---/.exec(source)
-  return match === null ? '' : match[1]
-}
-
 heading('check-translations: scanning machine-written translations for unsafe markup')
 
 try {
@@ -115,7 +93,7 @@ try {
 
 const problems: { file: string; message: string }[] = []
 
-for (const file of walk(DIR)) {
+for (const file of postFiles(DIR, { index: false })) {
   const raw = readFileSync(file, 'utf8')
   const frontmatter = frontmatterOf(raw)
 

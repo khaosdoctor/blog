@@ -106,9 +106,7 @@
           if (box.right <= edge + 0.5) {
             track.push(dash)
             lefts.push(box.left)
-            continue
           }
-          dash.classList.remove('lit')
         }
       }
       jitter = track.map(() => Math.random() * JITTER)

@@ -9,7 +9,7 @@
  * The click handler that copies the URL and shows the toast lives in
  * src/layouts/BaseLayout.astro, because it is one listener for the whole page.
  */
-import { localeFromFile } from './mdx-util.mjs'
+import { localeFromFile, walkElements } from './mdx-util.mjs'
 
 const HEADINGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 
@@ -22,31 +22,26 @@ const ANCHOR_LABEL = { pt: 'link para esta seção', en: 'link to this section' 
 
 export function rehypeHeadingAnchors() {
   return (tree, file) => {
-    visit(tree, ANCHOR_LABEL[localeFromFile(file)])
+    const label = ANCHOR_LABEL[localeFromFile(file)]
+    walkElements(tree, (node) => {
+      if (node.type !== 'element' || !HEADINGS.has(node.tagName)) return
+
+      const id = node.properties?.id
+      if (typeof id !== 'string' || id === '') return
+
+      node.children.push({
+        type: 'element',
+        tagName: 'a',
+        properties: {
+          className: ['heading-anchor'],
+          href: `#${id}`,
+          // The label has to be readable on its own: a screen reader announcing
+          // "hash, link" six times a page is noise.
+          'aria-label': label,
+          'data-copy-link': '',
+        },
+        children: [{ type: 'text', value: '#' }],
+      })
+    })
   }
-}
-
-function visit(node, label) {
-  if (Array.isArray(node.children)) {
-    for (const child of node.children) visit(child, label)
-  }
-
-  if (node.type !== 'element' || !HEADINGS.has(node.tagName)) return
-
-  const id = node.properties?.id
-  if (typeof id !== 'string' || id === '') return
-
-  node.children.push({
-    type: 'element',
-    tagName: 'a',
-    properties: {
-      className: ['heading-anchor'],
-      href: `#${id}`,
-      // The label has to be readable on its own: a screen reader announcing
-      // "hash, link" six times a page is noise.
-      'aria-label': label,
-      'data-copy-link': '',
-    },
-    children: [{ type: 'text', value: '#' }],
-  })
 }

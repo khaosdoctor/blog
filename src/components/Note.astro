@@ -17,20 +17,14 @@ interface Props {
 
 const { kind } = Astro.props
 
-// Assumes Astro finishes one page before starting the next; rendering pages
-// concurrently would keep ids unique but unmatched to the CSS counter. The
-// counters are per kind so each numbering runs on its own.
-let lastPath = ''
-const counts: Record<NoteKind, number> = { sidenote: 0, marginnote: 0 }
-
 const locale = localeFromPath(Astro.url.pathname)
 
-if (Astro.url.pathname !== lastPath) {
-  lastPath = Astro.url.pathname
-  for (const name of Object.keys(counts) as NoteKind[]) counts[name] = 0
-}
-counts[kind] += 1
-const anchorId = `${kind}-${counts[kind]}`
+// Frontmatter runs again for every note, so the count has to live on the page
+// render; a counter declared here restarts at each one.
+const pageNoteCounts = Astro.locals as Partial<Record<NoteKind, number>>
+const position = (pageNoteCounts[kind] ?? 0) + 1
+pageNoteCounts[kind] = position
+const anchorId = `${kind}-${position}`
 const toggleId = `${anchorId}-toggle`
 ---
 

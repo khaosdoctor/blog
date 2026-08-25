@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { POST, pickCodeTheme } from './helpers.ts'
 
 /**
  * The token-styles plugin rewrites every syntax token's inline colours to a
@@ -8,8 +9,6 @@ import { test, expect, type Page } from '@playwright/test'
  * markers stop resolving and every token silently falls back to the plain
  * foreground, which looks like a theme choice rather than a break.
  */
-
-const POST = '/en/everything-about-node-running-typescript-natively/'
 
 async function tokenColours(page: Page): Promise<string[]> {
   return page.evaluate(() =>
@@ -63,13 +62,7 @@ test('the code theme picker repaints the tokens', async ({ page }) => {
   await page.goto(POST)
   const before = await tokenColours(page)
 
-  await page.evaluate(() => {
-    const select = document.querySelector<HTMLSelectElement>('#ct-theme')
-    if (select === null) throw new Error('the code theme picker is not on the page')
-    select.value = 'dracula'
-    select.dispatchEvent(new Event('change', { bubbles: true }))
-  })
-  await expect(page.locator('html')).toHaveAttribute('data-code-theme', 'dracula')
+  await pickCodeTheme(page, 'dracula')
 
   expect(await tokenColours(page), 'picking a theme changed nothing').not.toEqual(before)
 })

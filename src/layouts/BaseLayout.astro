@@ -30,7 +30,7 @@ import MathCopy from '../components/MathCopy.astro'
 import QuoteCopy from '../components/QuoteCopy.astro'
 import ReadingProgress from '../components/ReadingProgress.astro'
 import SEO from '../components/SEO.astro'
-import { t, type Locale } from '../i18n/ui'
+import { localePath, t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
 import { commitShort, commitUrl, REPO, siteVersion as version } from '../lib/version'
 
@@ -74,7 +74,7 @@ const {
 
 const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
 const canonical = new URL(Astro.url.pathname, Astro.site).href
-const home = locale === 'en' ? '/en/' : '/'
+const home = localePath(locale, '/')
 
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN
 
@@ -138,7 +138,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     {progress && <link rel="preload" href="/fonts/Literata-400-700.woff2" as="font" type="font/woff2" crossorigin />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <link rel="manifest" href={locale === 'en' ? '/en/manifest.webmanifest' : '/manifest.webmanifest'} />
+    <link rel="manifest" href={localePath(locale, '/manifest.webmanifest')} />
     <!-- Both are --bg from theme.css: a meta tag cannot read a token, so a
          palette change has to be made here too. -->
     <meta name="theme-color" content="#f4efe0" media="(prefers-color-scheme: light)" />
@@ -149,7 +149,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       rel="alternate"
       type="application/rss+xml"
       title="Lucas Santos"
-      href={locale === 'en' ? '/en/rss.xml' : '/rss.xml'}
+      href={localePath(locale, '/rss.xml')}
     />
     <SEO
       title={title}
@@ -208,7 +208,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       {/* A licence obligation: PxPlus IBM VGA8 is CC BY-SA 4.0 and asks for
         attribution reachable from the site. Do not drop it. */}
       <p class="credits">
-        <a href={locale === 'en' ? '/en/oss/' : '/oss/'}>{t(locale, 'credits')}</a>
+        <a href={localePath(locale, '/oss/')}>{t(locale, 'credits')}</a>
       </p>
     </footer>
     <MathCopy />

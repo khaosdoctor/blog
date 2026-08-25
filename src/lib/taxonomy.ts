@@ -5,24 +5,14 @@ import { slugify } from './slugify'
 import { LOCALES, type Locale } from '../i18n/ui'
 
 export async function getCategories(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
-  const posts = await getPublishedPosts(lang)
-  const byCategory = new Map<string, Post[]>()
-  for (const post of posts) {
-    const current = byCategory.get(post.data.category) ?? []
-    current.push(post)
-    byCategory.set(post.data.category, current)
-  }
-  return byCategory
+  return Map.groupBy(await getPublishedPosts(lang), (post) => post.data.category)
 }
 
 // A section page only exists in a language that has a post in it, so the
 // language switcher must be built from this rather than assuming both locales.
 export async function categoryLocales(): Promise<(readonly [Locale, Set<string>])[]> {
-  const languages = await Promise.all(
-    LOCALES.map(async (locale) => [locale, await getPublishedPosts(locale)] as const),
-  )
-  return languages.map(
-    ([locale, localePosts]) => [locale, new Set(localePosts.map((post) => post.data.category))] as const,
+  return Promise.all(
+    LOCALES.map(async (locale) => [locale, new Set((await getCategories(locale)).keys())] as const),
   )
 }
 
@@ -95,18 +85,12 @@ export function seriesTitle(slug: string, members: Post[]): string {
 }
 
 export function buildSeriesMap(posts: Post[]): Map<string, Post[]> {
-  const bySeries = new Map<string, Post[]>()
-  for (const post of posts) {
-    if (post.data.series === undefined) continue
-    const current = bySeries.get(post.data.series) ?? []
-    current.push(post)
-    bySeries.set(post.data.series, current)
-  }
-  for (const [name, members] of bySeries) {
-    bySeries.set(
-      name,
-      members.sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0)),
-    )
+  const bySeries = Map.groupBy(
+    posts.filter((post) => post.data.series !== undefined),
+    (post) => post.data.series as string,
+  )
+  for (const members of bySeries.values()) {
+    members.sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0))
   }
   return bySeries
 }
