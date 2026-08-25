@@ -7,7 +7,7 @@ import { bold, count, dim, heading, ok } from './lib/cli.ts'
 const OUT_DIR = 'public/og'
 const WIDTH = 1200
 const HEIGHT = 630
-const PAPER = '#fffdf9'
+const PAPER = '#f4efe0'
 const INK = '#1a1c20'
 
 // One accent per section, taken from the brand mark's four colours.

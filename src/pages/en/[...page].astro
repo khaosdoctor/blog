@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
 import Pagination from '../../components/Pagination.astro'
 import { getPublishedPosts, LIST_PAGE_SIZE } from '../../lib/posts'
-import { t } from '../../i18n/ui'
+import { HREFLANG, t } from '../../i18n/ui'
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPublishedPosts('en')
@@ -22,8 +22,8 @@ const title = page.currentPage > 1 ? `Lucas Santos: Blog | page ${page.currentPa
   description={t('en', 'homeDescription')}
   lang="en"
   alternates={[
-    { lang: 'pt-BR', href: new URL('/', Astro.site).href },
-    { lang: 'en', href: new URL('/en/', Astro.site).href },
+    { lang: HREFLANG.pt, href: new URL('/', Astro.site).href },
+    { lang: HREFLANG.en, href: new URL('/en/', Astro.site).href },
   ]}
 >
   <h1 class="listing-heading">

@@ -110,7 +110,7 @@ first part. Leave `seriesName` off a translated first part and that language fal
 | Command | What it does |
 |---|---|
 | `npm run dev` | local server |
-| `npm run check` | `astro check`, `tsc -p worker`, the i18n guard and the component-css guard. Run it before you finish |
+| `npm run check` | `astro check`, `tsc -p worker`, and the i18n, component-css, content and credits guards. Run it before you finish |
 | `npm run build` | build plus the Pagefind index |
 | `npm run preview` | serve `dist/` |
 | `node scripts/check-output.ts` | post-build checks, the same ones CI runs |

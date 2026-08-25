@@ -12,7 +12,7 @@
  * CSS modules only rename what stays inside their rules, so this guard fails
  * the build on the three ways a component can still leak or break:
  *
- *   1. A style block that is not `<style module>` — `scoped` keeps the literal
+ *   1. A style block that is not `<style module>`, since `scoped` keeps the literal
  *      class name and relies on the very scoping that leaked, and a bare
  *      `<style>` is global by definition.
  *   2. A selector with no class in it (`button { ... }`): CSS modules leave

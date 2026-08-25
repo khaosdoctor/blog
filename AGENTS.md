@@ -65,7 +65,7 @@ node scripts/check-output.ts
 npm run test:e2e
 ```
 
-`npm run check` is `astro check`, `tsc -p worker`, `scripts/check-i18n.ts` and `scripts/check-component-css.ts`, in that order. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
+`npm run check` is `astro check`, `tsc -p worker`, `scripts/check-i18n.ts`, `scripts/check-component-css.ts`, `scripts/check-content.ts` and `scripts/check-credits.ts`, in that order. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
 
 `check-output.ts` fails on a published post with no page, leftover Ghost markup, an unrendered component tag, a missing feed or manifest icon, an image that never reached the output, and any remote-script loader pattern. That last check exists because the old Ghost site served an injected script for a month before anyone noticed. Do not weaken it.
 
@@ -79,7 +79,7 @@ House rules the CSS follows. They are not build-breaking like the section above,
 
 **Stacking order.** Header content claims the low single digits, menus and popovers claim 60. Nothing in between is in use, so a new overlay picks a side rather than a number.
 
-**Where a rule belongs.** `.prose` wraps rendered markdown only. Shell inside the same `<article>`, the tag row and the series navigation, belongs outside that wrapper. `prose/links.css` is the deliberate exception: its colour, underline and hover rules are site-wide (`html :is(main, footer) a`) and only the external-link arrow stays scoped to `.prose a`. Two links opt out there by name, `footer .credits a` and `footer .version a`, and must stay excluded.
+**Where a rule belongs.** `.prose` wraps rendered markdown only. Shell inside the same `<article>`, the tag row and the series navigation, belongs outside that wrapper. `prose/links.css` is the deliberate exception: its colour, underline and hover rules are site-wide (`html :is(main, footer) a`) and only the external-link arrow stays scoped to `.prose a`. Three footer selectors opt out there by name, `footer .credits a`, `footer .version a` and `footer .icon-link`, and must stay excluded.
 
 **Groups of a few options use `aria-current`**, never `role="radio"`, which would also oblige a roving tabindex and arrow-key handling for no gain at this size. Colour is never the only signal for a state: a word, a fill-versus-hollow difference or a shape carries it too. A control's accessible name begins with its visible text, so speech input can address it by what is on screen.
 

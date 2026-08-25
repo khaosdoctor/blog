@@ -10,7 +10,6 @@ export const GET: APIRoute = async (context) => {
     description: t('pt', 'homeDescription'),
     site: context.site ?? 'https://blog.lsantos.dev',
     trailingSlash: true,
-    stylesheet: false,
     items: posts.map((post) => ({
       title: post.data.title,
       description: post.data.description,

@@ -50,7 +50,11 @@ function index() {
   posts = new Map()
 
   // Sorted, so the fallback a page gets never depends on directory order.
-  for (const folder of readdirSync(BASE).sort()) {
+  const dirs = readdirSync(BASE, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()
+  for (const folder of dirs) {
     const dir = `${BASE}/${folder}`
     for (const name of readdirSync(dir).sort()) {
       if (!/\.mdx?$/.test(name)) continue

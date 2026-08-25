@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import PostList from '../components/PostList.astro'
 import Pagination from '../components/Pagination.astro'
 import { getPublishedPosts, LIST_PAGE_SIZE } from '../lib/posts'
-import { t } from '../i18n/ui'
+import { HREFLANG, t } from '../i18n/ui'
 
 // A rest param is required here: paginate() only maps page 1 to an undefined
 // param for [...page], so a plain [page] would put the home page at /1/.
@@ -21,8 +21,8 @@ const title = page.currentPage > 1 ? `Lucas Santos: Blog | página ${page.curren
   title={title}
   description={t('pt', 'homeDescription')}
   alternates={[
-    { lang: 'pt-BR', href: new URL('/', Astro.site).href },
-    { lang: 'en', href: new URL('/en/', Astro.site).href },
+    { lang: HREFLANG.pt, href: new URL('/', Astro.site).href },
+    { lang: HREFLANG.en, href: new URL('/en/', Astro.site).href },
   ]}
 >
   <h1 class="listing-heading">

@@ -7,12 +7,17 @@ let cache: Record<string, Described> | null = null
 
 function load(): Record<string, Described> {
   if (cache !== null) return cache
+  let raw: string
   try {
-    const parsed: unknown = JSON.parse(readFileSync('content/categories.json', 'utf8'))
-    cache = typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, Described>) : {}
+    raw = readFileSync('content/categories.json', 'utf8')
   } catch {
+    // No sidecar yet: every section falls back to its generated line. A file
+    // that exists but does not parse is a typo in prose, so it throws instead.
     cache = {}
+    return cache
   }
+  const parsed: unknown = JSON.parse(raw)
+  cache = typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, Described>) : {}
   return cache
 }
 

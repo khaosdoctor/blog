@@ -18,11 +18,15 @@ let deadImages = null
 
 function isDead(url) {
   if (deadImages === null) {
+    let raw
     try {
-      deadImages = new Set(JSON.parse(readFileSync('content/dead-images.json', 'utf8')).urls ?? [])
+      raw = readFileSync('content/dead-images.json', 'utf8')
     } catch {
-      deadImages = new Set()
+      // No sidecar yet: nothing is known dead. A file that exists but does not
+      // parse throws, rather than quietly marking every image alive.
+      raw = null
     }
+    deadImages = new Set(raw === null ? [] : (JSON.parse(raw).urls ?? []))
   }
   return deadImages.has(url)
 }
