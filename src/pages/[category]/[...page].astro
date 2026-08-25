@@ -3,7 +3,7 @@ import type { GetStaticPaths } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostList from '../../components/PostList.astro'
 import Pagination from '../../components/Pagination.astro'
-import { getPublishedPosts, LIST_PAGE_SIZE } from '../../lib/posts'
+import { getPublishedPosts, LIST_PAGE_SIZE, slugOf } from '../../lib/posts'
 import { categoryDescription } from '../../lib/categories'
 import { categoryLocales, getCategories } from '../../lib/taxonomy'
 import { HREFLANG, localePath, LOCALES, t } from '../../i18n/ui'
@@ -12,7 +12,7 @@ import { HREFLANG, localePath, LOCALES, t } from '../../i18n/ui'
 // post slug would shadow that article.
 export const getStaticPaths = (async ({ paginate }) => {
   const [categories, posts] = await Promise.all([getCategories(), getPublishedPosts()])
-  const slugs = new Set(posts.map((post) => post.id))
+  const slugs = new Set(posts.map((post) => slugOf(post)))
   for (const category of categories.keys()) {
     if (slugs.has(category)) {
       throw new Error(

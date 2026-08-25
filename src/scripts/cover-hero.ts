@@ -1,14 +1,12 @@
 // `drawMeta: false` leaves that slot for the page's real `.meta` row below.
 import { buildCoverSvg, coverOverlay, type CoverScheme } from '../lib/cover'
+import { pageScheme, THEME_ATTR } from './scheme'
 import { onReady } from './ready'
 
-const THEME_ATTR = 'data-theme'
 const darkMedia = matchMedia('(prefers-color-scheme: dark)')
 
-function pageScheme(): CoverScheme {
-  const value = document.documentElement.getAttribute(THEME_ATTR)
-  if (value === 'light' || value === 'dark') return value
-  return darkMedia.matches ? 'dark' : 'light'
+function heroScheme(): CoverScheme {
+  return pageScheme() ?? (darkMedia.matches ? 'dark' : 'light')
 }
 
 function init(): void {
@@ -24,7 +22,7 @@ function init(): void {
   const card = { slug, title, category, byline }
 
   function paint(): void {
-    const scheme = pageScheme()
+    const scheme = heroScheme()
     canvas.innerHTML = buildCoverSvg({ ...card, drawMeta: false, scheme })
 
     const overlay = coverOverlay(card.title, card.category, scheme)

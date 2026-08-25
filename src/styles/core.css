@@ -339,14 +339,8 @@ figure {
 }
 
 figure:has(img):not(.video-figure, .raw-embed, .lab-demo, .missing, .deck, .spotify, .twitter-tweet) {
-  inline-size: var(--figure-width, 80%);
+  inline-size: var(--figure-width);
   margin-inline: auto;
-}
-
-@media (max-width: 40rem) {
-  figure:has(img):not(.video-figure, .raw-embed, .lab-demo, .missing, .deck, .spotify, .twitter-tweet) {
-    inline-size: 100%;
-  }
 }
 
 figure > p {

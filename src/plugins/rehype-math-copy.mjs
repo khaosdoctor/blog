@@ -12,7 +12,7 @@
  * author typed and what any other renderer will accept.
  */
 
-import { localeFromFile } from './mdx-util.mjs'
+import { localeFromFile, walkElements } from './mdx-util.mjs'
 
 function findAnnotationText(node) {
   if (node.type === 'element' && node.tagName === 'annotation') {
@@ -64,19 +64,14 @@ function makeCopyButton(ascii, locale) {
 
 export function rehypeMathCopy() {
   return (tree, file) => {
-    walk(tree, localeFromFile(file))
+    const locale = localeFromFile(file)
+    walkElements(tree, (node) => {
+      if (!isKatexDisplay(node)) return
+
+      const tex = findAnnotationText(node)
+      if (tex === null || tex.trim() === '') return
+
+      node.children.push(makeCopyButton(tex.trim(), locale))
+    })
   }
-}
-
-function walk(node, locale) {
-  if (Array.isArray(node.children)) {
-    for (const child of node.children) walk(child, locale)
-  }
-
-  if (!isKatexDisplay(node)) return
-
-  const tex = findAnnotationText(node)
-  if (tex === null || tex.trim() === '') return
-
-  node.children.push(makeCopyButton(tex.trim(), locale))
 }

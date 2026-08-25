@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { POST, pickCodeTheme } from './helpers.ts'
 
 /**
  * The language chip reads its ink off the block's own painted background, so a
@@ -7,18 +8,6 @@ import { test, expect, type Page } from '@playwright/test'
  * expressive-code omits a value that matches its base variant, which left them
  * with the dark default.
  */
-
-const POST = '/en/everything-about-node-running-typescript-natively/'
-
-async function pickCodeTheme(page: Page, theme: string): Promise<void> {
-  await page.evaluate((name) => {
-    const select = document.querySelector<HTMLSelectElement>('#ct-theme')
-    if (select === null) throw new Error('the code theme picker is not on the page')
-    select.value = name
-    select.dispatchEvent(new Event('change', { bubbles: true }))
-  }, theme)
-  await expect(page.locator('html')).toHaveAttribute('data-code-theme', theme)
-}
 
 async function chipInk(page: Page): Promise<string[]> {
   return page.evaluate(() =>

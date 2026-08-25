@@ -41,7 +41,8 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
-import { bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
+import { slugify } from '../src/lib/slugify.ts'
+import { bold, count, dim, fail, field, frontmatterOf, heading, ok, postIndex, warn } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 // Lives directly in content/blog, not one level down inside a post folder like
@@ -111,21 +112,14 @@ function readCache(): Cache {
 
 /** One post is one folder, so the file to read is the index inside it. */
 function sourceFile(slug: string): string | null {
-  const candidates = [join(SOURCE_DIR, slug, 'index.mdx'), join(SOURCE_DIR, slug, 'index.md')]
-  return candidates.find((file) => existsSync(file)) ?? null
+  return postIndex(join(SOURCE_DIR, slug)) ?? null
 }
 
 /** Frontmatter stays machine-readable, so split it off and translate only prose. */
 function splitFrontmatter(raw: string): { frontmatter: string; body: string } {
-  const match = /^---\n([\s\S]*?)\n---\n?/.exec(raw)
-  if (match === null) return { frontmatter: '', body: raw }
-  return { frontmatter: match[1], body: raw.slice(match[0].length) }
-}
-
-function frontmatterValue(frontmatter: string, key: string): string | null {
-  const match = new RegExp(`^${key}:\\s*(.*)$`, 'm').exec(frontmatter)
-  if (match === null) return null
-  return match[1].trim().replace(/^"(.*)"$/, '$1')
+  const frontmatter = frontmatterOf(raw)
+  if (frontmatter === '') return { frontmatter: '', body: raw }
+  return { frontmatter, body: raw.slice(`---\n${frontmatter}\n---`.length).replace(/^\n/, '') }
 }
 
 /** Copies a frontmatter key through byte for byte, whatever shape its value has. */
@@ -141,16 +135,6 @@ function frontmatterLine(frontmatter: string, key: string): string | null {
  */
 const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription'] as const
 
-/** ASCII kebab-case, stable across runs so a rerun on an unchanged title reuses the same file. */
-function slugify(title: string): string {
-  return title
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
 type ExistingTranslation = { file: string; slug: string }
 
 /** Finds the translation already sitting in a post's folder for this locale, if any. */
@@ -161,8 +145,8 @@ function findExistingTranslation(postDir: string, locale: Locale): ExistingTrans
     if (/^index\.mdx?$/.test(entry.name)) continue
     const full = join(postDir, entry.name)
     const { frontmatter } = splitFrontmatter(readFileSync(full, 'utf8'))
-    if (frontmatterValue(frontmatter, 'lang') !== locale) continue
-    const slug = frontmatterValue(frontmatter, 'slug') ?? entry.name.replace(/\.mdx?$/, '')
+    if (field(frontmatter, 'lang') !== locale) continue
+    const slug = field(frontmatter, 'slug') ?? entry.name.replace(/\.mdx?$/, '')
     return { file: full, slug }
   }
   return null
@@ -362,11 +346,11 @@ const overrides: string[] = []
 for (const post of sources) {
   const raw = readFileSync(post.file, 'utf8')
   const { frontmatter } = splitFrontmatter(raw)
-  const sourceLang = (frontmatterValue(frontmatter, 'lang') ?? 'pt') as Locale
+  const sourceLang = (field(frontmatter, 'lang') ?? 'pt') as Locale
 
   // A post already written in the target language needs no translation.
   if (sourceLang === args.locale) continue
-  if (frontmatterValue(frontmatter, 'draft') === 'true') continue
+  if (field(frontmatter, 'draft') === 'true') continue
 
   const sourceHash = hash(raw)
   const entry = cache[post.slug]
@@ -402,11 +386,11 @@ let skipped = 0
 
 for (const post of changed) {
   const { frontmatter, body } = splitFrontmatter(post.raw)
-  const sourceLang = (frontmatterValue(frontmatter, 'lang') ?? 'pt') as Locale
+  const sourceLang = (field(frontmatter, 'lang') ?? 'pt') as Locale
 
   const fields = new Map<string, string>()
   for (const key of TRANSLATABLE_FIELDS) {
-    const value = frontmatterValue(frontmatter, key)
+    const value = field(frontmatter, key)
     if (value === null) continue
     fields.set(key, value)
   }

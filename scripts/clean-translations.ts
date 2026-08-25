@@ -12,8 +12,8 @@
  * Only non-index files one level under content/blog are touched, so a source
  * post is never modified.
  */
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { postFiles } from './lib/cli.ts'
 
 const ROOT = 'content/blog'
 const CHECK_ONLY = process.argv.includes('--check')
@@ -21,22 +21,9 @@ const CHECK_ONLY = process.argv.includes('--check')
 /** A line that is nothing but a tool-call tag. Never legitimate prose. */
 const ARTEFACT_LINE = /^\s*<\/?(?:content|invoke|function_calls|function_results|antml:[a-z_]+)\b[^>]*>\s*$/
 
-function translations(): string[] {
-  const found: string[] = []
-  for (const folder of readdirSync(ROOT)) {
-    const dir = join(ROOT, folder)
-    if (!statSync(dir).isDirectory()) continue
-    for (const name of readdirSync(dir)) {
-      if (!/\.mdx?$/.test(name) || /^index\.mdx?$/.test(name)) continue
-      found.push(join(dir, name))
-    }
-  }
-  return found
-}
-
 const dirty: { file: string; removed: string[] }[] = []
 
-for (const file of translations()) {
+for (const file of postFiles(ROOT, { index: false })) {
   const lines = readFileSync(file, 'utf8').split('\n')
   const removed = lines.filter((line) => ARTEFACT_LINE.test(line)).map((line) => line.trim())
   if (removed.length === 0) continue

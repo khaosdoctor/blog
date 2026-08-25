@@ -1,21 +1,27 @@
 export const canPopover = 'popover' in HTMLElement.prototype
 
-function placeMenu(el: HTMLElement, anchor: HTMLElement): void {
+const MENU_MARGIN = 8
+
+export const ALIGN = { start: 'start', end: 'end' } as const
+
+export type Align = (typeof ALIGN)[keyof typeof ALIGN]
+
+export function clampAxis(value: number, size: number, extent: number, inset: number): number {
+  return Math.min(Math.max(value, inset), Math.max(inset, extent - size - inset))
+}
+
+export function placeNear(el: HTMLElement, anchor: HTMLElement, { margin, align }: { margin: number; align: Align }): void {
   const rect = anchor.getBoundingClientRect()
-  const space = 8
   const w = el.offsetWidth
   const h = el.offsetHeight
   const vw = innerWidth
   const vh = innerHeight
 
-  let top = rect.bottom + space
-  if (top + h > vh && rect.top - h - space > 0) top = rect.top - h - space
-  top = Math.min(Math.max(top, space), Math.max(space, vh - h - space))
+  let top = rect.bottom + margin
+  if (top + h > vh && rect.top - h - margin > 0) top = rect.top - h - margin
 
-  const left = Math.min(Math.max(rect.right - w, space), Math.max(space, vw - w - space))
-
-  el.style.top = `${top}px`
-  el.style.left = `${left}px`
+  el.style.top = `${clampAxis(top, h, vh, margin)}px`
+  el.style.left = `${clampAxis(align === ALIGN.end ? rect.right - w : rect.left, w, vw, margin)}px`
 }
 
 /** Local `open` because `:popover-open` and `hidden` are two different sources of truth. */
@@ -40,7 +46,7 @@ export function wireMenu(
     }
     open = true
     opener.setAttribute('aria-expanded', 'true')
-    placeMenu(menu, opener)
+    placeNear(menu, opener, { margin: MENU_MARGIN, align: ALIGN.end })
     menu.style.visibility = ''
   }
 
@@ -71,6 +77,10 @@ export function wireMenu(
   })
 
   return closeMenu
+}
+
+export function markCurrent(options: HTMLElement[], value: string): void {
+  for (const option of options) option.setAttribute('aria-current', String(option.dataset.value === value))
 }
 
 /** Order matters: a popover element that is still `hidden` refuses to show. */

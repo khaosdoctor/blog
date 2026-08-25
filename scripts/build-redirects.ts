@@ -1,10 +1,10 @@
 // Regenerates src/data/redirects.ts. Run when content moves.
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 // The same function the tag route uses, so a generated redirect can never point
 // at a slug the site spells differently.
 import { slugify } from '../src/lib/slugify.ts'
-import { count, heading, ok } from './lib/cli.ts'
+import { count, frontmatterOf, heading, ok, postIndex } from './lib/cli.ts'
 
 heading('build-redirects: regenerating src/data/redirects.ts')
 
@@ -93,10 +93,9 @@ const liveSlugs = new Set<string>()
 
 for (const entry of readdirSync(SOURCE_DIR, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue
-  const file = ['index.mdx', 'index.md'].map((name) => join(SOURCE_DIR, entry.name, name)).find(existsSync)
+  const file = postIndex(join(SOURCE_DIR, entry.name))
   if (file === undefined) continue
-  const raw = readFileSync(file, 'utf8')
-  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(raw)?.[1] ?? ''
+  const frontmatter = frontmatterOf(readFileSync(file, 'utf8'))
   const published = /^draft:\s*false/m.test(frontmatter)
   if (published) liveSlugs.add(entry.name)
   const category = /^category:\s*"?([^"\n]+)"?/m.exec(frontmatter)?.[1]

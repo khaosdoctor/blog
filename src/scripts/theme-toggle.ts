@@ -1,15 +1,9 @@
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
-import { promoteToPopover, wireMenu } from './popover-menu'
+import { markCurrent, promoteToPopover, wireMenu } from './popover-menu'
+import { isScheme, type Scheme, THEME_ATTR } from './scheme'
 import { onReady } from './ready'
 
 const STORAGE_KEY = 'color-scheme'
-const ATTR = 'data-theme'
-
-type Scheme = 'light' | 'dark'
-
-function isScheme(value: string): value is Scheme {
-  return value === 'light' || value === 'dark'
-}
 
 function storedScheme(): Scheme | null {
   const value = readStorage(STORAGE_KEY)
@@ -17,8 +11,8 @@ function storedScheme(): Scheme | null {
 }
 
 function applyScheme(scheme: Scheme | null): void {
-  if (scheme === null) document.documentElement.removeAttribute(ATTR)
-  else document.documentElement.setAttribute(ATTR, scheme)
+  if (scheme === null) document.documentElement.removeAttribute(THEME_ATTR)
+  else document.documentElement.setAttribute(THEME_ATTR, scheme)
 }
 
 // Each tag's authored content IS that scheme's colour, so it has to be cached
@@ -69,9 +63,9 @@ function init(): void {
 
   const openerIcons = [...opener.querySelectorAll<SVGElement>('.tt-icon')]
 
-  function markCurrent(scheme: Scheme | null): void {
+  function markScheme(scheme: Scheme | null): void {
     const value = scheme ?? 'system'
-    for (const option of options) option.setAttribute('aria-current', String(option.dataset.value === value))
+    markCurrent(options, value)
     for (const icon of openerIcons) {
       if (icon.dataset.value === value) icon.removeAttribute('hidden')
       else icon.setAttribute('hidden', '')
@@ -81,7 +75,7 @@ function init(): void {
   const initial = storedScheme()
   applyScheme(initial)
   syncThemeColor(initial)
-  markCurrent(initial)
+  markScheme(initial)
 
   for (const option of options) {
     option.addEventListener('click', () => {
@@ -91,7 +85,7 @@ function init(): void {
       else writeStorage(STORAGE_KEY, scheme)
       applyScheme(scheme)
       syncThemeColor(scheme)
-      markCurrent(scheme)
+      markScheme(scheme)
       closeMenu(true)
     })
   }

@@ -1,4 +1,4 @@
-export function motionOverride(): 'reduce' | 'allow' | null {
+function motionOverride(): 'reduce' | 'allow' | null {
   const attr = document.documentElement.getAttribute('data-motion')
   return attr === 'reduce' || attr === 'allow' ? attr : null
 }

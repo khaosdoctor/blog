@@ -5,7 +5,6 @@ import {
   buildBreadcrumbJsonLd,
   buildPersonJsonLd,
   buildPrimaryJsonLd,
-  DEFAULT_LOCALE,
   OG_CARD_HEIGHT,
   OG_CARD_WIDTH,
   sectionOgImage,
@@ -14,6 +13,7 @@ import {
   toOgLocale,
   type BreadcrumbItem,
 } from '../lib/seo'
+import { HREFLANG, SOURCE_LOCALE } from '../i18n/ui'
 
 export interface Alternate {
   lang: string
@@ -94,10 +94,8 @@ const breadcrumbItems: BreadcrumbItem[] = [
 const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems)
 const personJsonLd = buildPersonJsonLd(homeUrl)
 
-// Callers emit region-qualified hreflang values (`pt-BR`) while DEFAULT_LOCALE
-// is a bare subtag (`pt`), so this has to compare the subtag, not the whole tag.
 const xDefault =
-  alternates.find((alt) => alt.lang.split('-')[0] === DEFAULT_LOCALE) ?? alternates[0]
+  alternates.find((alt) => alt.lang === HREFLANG[SOURCE_LOCALE]) ?? alternates[0]
 const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 ---
 

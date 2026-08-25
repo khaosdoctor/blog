@@ -29,8 +29,9 @@ self.addEventListener('activate', (event) => {
 async function trim(cacheName, max) {
   const cache = await caches.open(cacheName)
   const keys = await cache.keys()
-  if (keys.length <= max) return
-  await Promise.all(keys.slice(0, keys.length - max).map((key) => cache.delete(key)))
+  const evictable = keys.filter((key) => new URL(key.url).pathname !== OFFLINE_URL)
+  if (evictable.length <= max) return
+  await Promise.all(evictable.slice(0, evictable.length - max).map((key) => cache.delete(key)))
 }
 
 self.addEventListener('fetch', (event) => {

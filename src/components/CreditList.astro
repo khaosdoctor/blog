@@ -7,63 +7,44 @@ interface Props {
 }
 
 const { locale } = Astro.props
+
+const ATTRIBUTED = [
+  { heading: 'ossFontsHeading', credits: fonts },
+  { heading: 'ossIconsHeading', credits: icons },
+] as const
 ---
 
-<section class="credit-group">
-  <h2>{t(locale, 'ossFontsHeading')}</h2>
-  <ul>
-    {fonts.map((credit: AttributedCredit) => (
-      <li>
-        <a href={credit.url} rel="noopener">
-          {credit.name}
-        </a>
-        <span class="meta">
-          {credit.licenseUrl ? (
-            <a href={credit.licenseUrl} rel="noopener license">
-              {credit.license}
+{
+  ATTRIBUTED.map((group) => (
+    <section class="credit-group">
+      <h2>{t(locale, group.heading)}</h2>
+      <ul>
+        {group.credits.map((credit: AttributedCredit) => (
+          <li>
+            <a href={credit.url} rel="noopener">
+              {credit.name}
             </a>
-          ) : (
-            credit.license
-          )}
-          {credit.author && (
-            <>
-              {' · '}
-              {t(locale, 'writtenBy')} {credit.author}
-            </>
-          )}
-        </span>
-      </li>
-    ))}
-  </ul>
-</section>
-
-<section class="credit-group">
-  <h2>{t(locale, 'ossIconsHeading')}</h2>
-  <ul>
-    {icons.map((credit: AttributedCredit) => (
-      <li>
-        <a href={credit.url} rel="noopener">
-          {credit.name}
-        </a>
-        <span class="meta">
-          {credit.licenseUrl ? (
-            <a href={credit.licenseUrl} rel="noopener license">
-              {credit.license}
-            </a>
-          ) : (
-            credit.license
-          )}
-          {credit.author && (
-            <>
-              {' · '}
-              {t(locale, 'writtenBy')} {credit.author}
-            </>
-          )}
-        </span>
-      </li>
-    ))}
-  </ul>
-</section>
+            <span class="meta">
+              {credit.licenseUrl ? (
+                <a href={credit.licenseUrl} rel="noopener license">
+                  {credit.license}
+                </a>
+              ) : (
+                credit.license
+              )}
+              {credit.author && (
+                <>
+                  {' · '}
+                  {t(locale, 'writtenBy')} {credit.author}
+                </>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))
+}
 
 <section class="credit-group">
   <h2>{t(locale, 'ossDependenciesHeading')}</h2>

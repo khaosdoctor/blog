@@ -122,17 +122,6 @@ const { action = '/search/', locale = 'pt' } = Astro.props
       return
     }
 
-    // Called bare, init() falls back to the largest index on an unknown tag and
-    // an English page quietly serves Portuguese results; passing it throws.
-    if (pagefind.init) {
-      try {
-        await pagefind.init(document.documentElement.lang)
-      } catch {
-        if (input.value.trim()) showMessage(resultsEl, input.dataset.noIndexMessage ?? '')
-        return
-      }
-    }
-
     form.addEventListener('submit', (event) => {
       event.preventDefault()
       const query = input.value.trim()

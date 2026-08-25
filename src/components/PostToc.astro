@@ -324,7 +324,6 @@ const tree = treeOf(flat)
       const rect = link.getBoundingClientRect()
       full.style.maxInlineSize = `${Math.max(120, innerWidth - rect.left - EDGE)}px`
       full.style.left = `${rect.left}px`
-      full.style.top = `${rect.top}px`
       const top = Math.min(rect.top, Math.max(EDGE, innerHeight - full.offsetHeight - EDGE))
       full.style.top = `${top}px`
       rowBox = rect

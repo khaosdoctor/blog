@@ -4,6 +4,7 @@ import { estimateReadingTime, formatDate } from '../lib/posts'
 import { t, type Locale } from '../i18n/ui'
 import PostList from './PostList.astro'
 import ReadingTime from './ReadingTime.astro'
+import { LISTING_LEADER } from '../lib/listing'
 
 interface Props {
   entries: { slug: string; title: string; posts: Post[] }[]
@@ -12,7 +13,6 @@ interface Props {
 
 const { entries, locale } = Astro.props
 
-const LEADER = '·'.repeat(200)
 
 const rows = entries
   .map((entry) => ({
@@ -39,7 +39,7 @@ const rows = entries
             </span>
             <span class="listing-title">{row.title}</span>
             <span class="listing-leader" aria-hidden="true">
-              {LEADER}
+              {LISTING_LEADER}
             </span>
             <span class="listing-label-plain">
               {row.posts.length} {t(locale, 'articles')}

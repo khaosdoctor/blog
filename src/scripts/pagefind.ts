@@ -17,7 +17,11 @@ export async function loadPagefind(): Promise<PagefindModule | null> {
     // Pagefind writes this into dist/ after the build, so the specifier has to
     // go through a variable or Vite tries to resolve it at build time.
     const module = '/pagefind/pagefind.js'
-    return (await import(/* @vite-ignore */ module)) as PagefindModule
+    const pagefind = (await import(/* @vite-ignore */ module)) as PagefindModule
+    // Called bare, init() falls back to the largest index on an unknown tag and
+    // an English page quietly serves Portuguese results; passing it throws.
+    await pagefind.init?.(document.documentElement.lang)
+    return pagefind
   } catch {
     return null
   }

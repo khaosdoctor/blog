@@ -14,6 +14,8 @@ import {
   conwayMinimumGenerationsPerSecond as MIN_GPS,
   conwayMinimumOpacity as MIN_OPACITY,
 } from '../lib/tweaks'
+import { prefersReducedMotion } from './motion'
+import { THEME_ATTR } from './scheme'
 import { onReady } from './ready'
 
 const MOTION_KEY = 'motion'
@@ -23,7 +25,6 @@ const GPS_KEY = 'conway-gps'
 const AUTOFEED_KEY = 'conway-autofeed'
 const PAUSED_KEY = 'conway-paused'
 const OPACITY_KEY = 'conway-opacity'
-const THEME_ATTR = 'data-theme'
 const MOTION_ATTR = 'data-motion'
 const BG_LIFE_ATTR = 'data-bg-life'
 
@@ -76,18 +77,8 @@ let rows = 0
 let grid = new Uint8Array(0)
 let excluded = new Uint8Array(0)
 
-function osReduced(): boolean {
-  return matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
-function effectiveReduced(): boolean {
-  if (motionOverride === 'reduce') return true
-  if (motionOverride === 'allow') return false
-  return osReduced()
-}
-
 function shouldRun(): boolean {
-  return backgroundEnabled && !effectiveReduced() && !manualPaused && !tabHidden
+  return backgroundEnabled && !prefersReducedMotion() && !manualPaused && !tabHidden
 }
 
 function indexOf(col: number, row: number): number {
@@ -277,7 +268,7 @@ function stopLoop(): void {
 
 // Reseeds so the frozen frame isn't a mid-cycle snapshot.
 function syncRunning(): void {
-  const reducedNow = effectiveReduced()
+  const reducedNow = prefersReducedMotion()
   if (reducedNow && !wasReduced) {
     stopLoop()
     seed()
@@ -413,8 +404,8 @@ function init(): void {
   gps = clampNumber(readStorage(GPS_KEY), DEFAULT_GPS, MIN_GPS, MAX_GPS)
   autoFeedSeconds = clampNumber(readStorage(AUTOFEED_KEY), DEFAULT_AUTOFEED, MIN_AUTOFEED, MAX_AUTOFEED)
   opacity = clampNumber(readStorage(OPACITY_KEY), DEFAULT_OPACITY, MIN_OPACITY, MAX_OPACITY)
-  wasReduced = effectiveReduced()
   applyMotionAttr()
+  wasReduced = prefersReducedMotion()
   applyBgLifeAttr()
 
   canvas = document.querySelector<HTMLCanvasElement>('.conway-field')

@@ -20,7 +20,7 @@ import {
   fontSizeMinimumPercent as FONT_SIZE_MIN,
   fontSizeStepPercent as FONT_SIZE_STEP,
 } from '../lib/tweaks'
-import { promoteToPopover, wireMenu } from './popover-menu'
+import { markCurrent, promoteToPopover, wireMenu } from './popover-menu'
 import { onReady } from './ready'
 
 const HP_PERSIST_KEY = 'hp-persist'
@@ -78,7 +78,7 @@ function init(): void {
 
   const motionOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-motion-option')]
   const markMotion = (value: string): void => {
-    for (const option of motionOptions) option.setAttribute('aria-current', String(option.dataset.value === value))
+    markCurrent(motionOptions, value)
   }
   markMotion(getSettings().motion ?? 'system')
   resetHandlers.push(() => markMotion(getSettings().motion ?? 'system'))
@@ -139,12 +139,10 @@ function init(): void {
     if (face === null) removeStorage(BODY_FACE_KEY)
     else writeStorage(BODY_FACE_KEY, face)
     applyBodyFace(face)
-    const current = face ?? 'serif'
-    for (const option of fontFamilyOptions) option.setAttribute('aria-current', String(option.dataset.value === current))
+    markCurrent(fontFamilyOptions, face ?? 'serif')
   }
 
-  const initialBodyFace = storedBodyFace() ?? 'serif'
-  for (const option of fontFamilyOptions) option.setAttribute('aria-current', String(option.dataset.value === initialBodyFace))
+  markCurrent(fontFamilyOptions, storedBodyFace() ?? 'serif')
 
   for (const option of fontFamilyOptions) {
     option.addEventListener('click', () => setBodyFace(option.dataset.value === 'sans' ? 'sans' : null))
@@ -155,8 +153,7 @@ function init(): void {
   const accentOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-accent-auto, .sp-accent-option')]
   if (accentOptions.length > 0) {
     const syncAccent = (): void => {
-      const current = storedAccent() ?? 'auto'
-      for (const option of accentOptions) option.setAttribute('aria-current', String(option.dataset.value === current))
+      markCurrent(accentOptions, storedAccent() ?? 'auto')
     }
     syncAccent()
     for (const option of accentOptions) {

@@ -55,31 +55,11 @@ function applyHint(): void {
   }
 }
 
-type PagefindState = PagefindModule | null | 'unready'
-
-let pagefindState: PagefindState = 'unready'
 let pagefindLoad: Promise<PagefindModule | null> | null = null
 
-async function ensurePagefind(): Promise<PagefindModule | null> {
-  if (pagefindState !== 'unready') return pagefindState
-  pagefindLoad ??= (async () => {
-    const pagefind = await loadPagefind()
-    if (pagefind === null) return null
-
-    // Called bare, init() silently serves whichever per-language index has the
-    // most pages for an unrecognised tag. Passing the tag makes it throw.
-    if (pagefind.init) {
-      try {
-        await pagefind.init(document.documentElement.lang)
-      } catch {
-        return null
-      }
-    }
-    return pagefind
-  })()
-
-  pagefindState = await pagefindLoad
-  return pagefindState
+function ensurePagefind(): Promise<PagefindModule | null> {
+  pagefindLoad ??= loadPagefind()
+  return pagefindLoad
 }
 
 function searchPageHref(query: string): string {
