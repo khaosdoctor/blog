@@ -48,7 +48,7 @@ function init(): void {
   const opener = openerEl
   const menu = menuEl
 
-  const menuControl = wireMenu(wrapper, opener, menu)
+  const closeMenu = wireMenu(wrapper, opener, menu)
 
   const strings = wrapper.dataset
   const label = strings.label ?? 'Theme'
@@ -92,7 +92,7 @@ function init(): void {
       applyScheme(scheme)
       syncThemeColor(scheme)
       markCurrent(scheme)
-      menuControl.close(true)
+      closeMenu(true)
     })
   }
 

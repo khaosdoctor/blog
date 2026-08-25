@@ -599,16 +599,6 @@ const { locale } = Astro.props
     margin: 0;
   }
 
-  .sp-search-shortcut select {
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    background: var(--bg);
-    color: var(--fg);
-    border: var(--border) solid var(--rule);
-    border-radius: var(--radius);
-    padding: 0.3rem;
-  }
-
   .sp-reset-all {
     inline-size: 100%;
     padding: 0.4rem 0.5rem;
@@ -622,6 +612,7 @@ const { locale } = Astro.props
     color: var(--fg);
   }
 
+  .sp-search-shortcut select,
   .settings-panel :global(.ct-settings select) {
     font-family: var(--font-mono);
     font-size: 1rem;

@@ -82,8 +82,6 @@ async function ensurePagefind(): Promise<PagefindModule | null> {
   return pagefindState
 }
 
-const NUMBER_SHORTCUT = new RegExp(`^[1-${MAX_RESULTS}]$`)
-
 function searchPageHref(query: string): string {
   const base = document.documentElement.lang === 'en' ? '/en/search/' : '/search/'
   return `${base}?q=${encodeURIComponent(query)}`
@@ -263,9 +261,10 @@ function init(): void {
 
     // Most browsers also use Ctrl/Cmd+1-9 for tabs, so this preventDefault may
     // lose that race.
-    if (metaHeld && NUMBER_SHORTCUT.test(event.key)) {
+    const shortcut = Number(event.key)
+    if (metaHeld && Number.isInteger(shortcut) && shortcut >= 1 && shortcut <= MAX_RESULTS) {
       event.preventDefault()
-      resultLinks[Number(event.key) - 1]?.click()
+      resultLinks[shortcut - 1]?.click()
       return
     }
 

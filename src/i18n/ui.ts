@@ -14,292 +14,155 @@ export function localePath(locale: Locale, path: string): string {
   return locale === SOURCE_LOCALE ? path : `/${locale}${path}`
 }
 
-type UIKey =
-  | 'finishReadingAt'
-  | 'machineTranslated'
-  | 'readOriginal'
-  | 'suggestFix'
-  | 'search'
-  | 'noResults'
-  | 'noResultsFor'
-  | 'searching'
-  | 'moreResults'
-  | 'searchResultsFound'
-  | 'searchLabel'
-  | 'searchPlaceholder'
-  | 'searchNoJs'
-  | 'searchNoIndex'
-  | 'searchTitle'
-  | 'searchDescription'
-  | 'series'
-  | 'partOfSeriesNamed'
-  | 'seriesNav'
-  | 'seriesDescription'
-  | 'youAreHere'
-  | 'linkCopied'
-  | 'footnotes'
-  | 'showSource'
-  | 'hideSource'
-  | 'codeTheme'
-  | 'codeThemeAuto'
-  | 'themeToggle'
-  | 'themeLight'
-  | 'themeDark'
-  | 'themeSystem'
-  | 'settingsPanel'
-  | 'settingsNudge'
-  | 'motionLabel'
-  | 'motionReduce'
-  | 'motionAllow'
-  | 'motionSystem'
-  | 'fontSizeLabel'
-  | 'fontSizeCurrent'
-  | 'fontSizeDecrease'
-  | 'fontSizeIncrease'
-  | 'fontSizeReset'
-  | 'fontSizeResetShort'
-  | 'fontFamilyLabel'
-  | 'fontFamilySerif'
-  | 'fontFamilySans'
-  | 'accentLabel'
-  | 'accentAuto'
-  | 'accentRed'
-  | 'accentGreen'
-  | 'accentYellow'
-  | 'accentBlue'
-  | 'accentPurple'
-  | 'accentWhite'
-  | 'backgroundLife'
-  | 'conwayKnobs'
-  | 'conwaySeedDensity'
-  | 'conwayGenerationsPerSecond'
-  | 'conwayAutoFeed'
-  | 'conwayOpacity'
-  | 'conwayPause'
-  | 'conwayResume'
-  | 'conwayReseed'
-  | 'searchShortcutLabel'
-  | 'searchShortcutReserved'
-  | 'writtenBy'
-  | 'contents'
-  | 'openMenu'
-  | 'closeMenu'
-  | 'closeMenuShort'
-  | 'openContents'
-  | 'foldSection'
-  | 'notWrittenYet'
-  | 'tags'
-  | 'tag'
-  | 'tagDescription'
-  | 'tagsIntro'
-  | 'allSeries'
-  | 'seriesIntro'
-  | 'sectionDescription'
-  | 'primaryNav'
-  | 'navPosts'
-  | 'navSeries'
-  | 'navTags'
-  | 'navAbout'
-  | 'article'
-  | 'articles'
-  | 'homeDescription'
-  | 'noTranslatedPosts'
-  | 'skipToContent'
-  | 'language'
-  | 'switchLanguage'
-  | 'version'
-  | 'footnotePreviews'
-  | 'keepPreviews'
-  | 'resetAll'
-  | 'resetAllHint'
-  | 'previewLoading'
-  | 'previewClose'
-  | 'previewPin'
-  | 'previewUnpin'
-  | 'previewDrag'
-  | 'previewUnwritten'
-  | 'previewMinimize'
-  | 'previewRestore'
-  | 'showNote'
-  | 'showMarginNote'
-  | 'linkToNote'
-  | 'copyQuote'
-  | 'pagination'
-  | 'paginationPrev'
-  | 'paginationNext'
-  | 'paginationGoTo'
-  | 'imageGone'
-  | 'imageGoneAlt'
-  | 'imageGoneUnknownHost'
-  | 'notFoundTitle'
-  | 'notFoundBody'
-  | 'notFoundRecent'
-  | 'offlineTitle'
-  | 'offlineDescription'
-  | 'offlineBody'
-  | 'backHome'
-  | 'appName'
-  | 'appShortName'
-  | 'appDescription'
-  | 'copyright'
-  | 'rightsReserved'
-  | 'credits'
-  | 'githubRepo'
-  | 'linkedinProfile'
-  | 'twitterProfile'
-  | 'youtubeChannel'
-  | 'ossTitle'
-  | 'ossDescription'
-  | 'ossIntro'
-  | 'ossFontsHeading'
-  | 'ossIconsHeading'
-  | 'ossDependenciesHeading'
+const pt = {
+  finishReadingAt: 'termina às %s',
+  machineTranslated: 'Esta página foi traduzida automaticamente.',
+  readOriginal: 'Ler original',
+  suggestFix: 'Sugerir correção',
+  search: 'Buscar',
+  noResults: 'Nenhum resultado encontrado',
+  noResultsFor: 'Nenhum resultado para "%s".',
+  searching: 'Buscando...',
+  moreResults: 'E mais %d resultado(s).',
+  searchResultsFound: '%d resultado(s).',
+  searchLabel: 'Buscar no blog',
+  searchPlaceholder: 'ex: deno, astro, observabilidade',
+  searchNoJs:
+    'A busca completa depende de JavaScript. Sem ele, o formulário acima ainda funciona: ele recarrega esta página com sua consulta salva na URL.',
+  searchNoIndex:
+    'O índice de busca ainda não foi gerado neste ambiente (rode o build). Envie o formulário para navegar normalmente.',
+  searchTitle: 'Busca',
+  searchDescription: 'Buscar artigos no blog de Lucas Santos.',
+  series: 'Série',
+  partOfSeriesNamed: 'Parte %d de %d da série',
+  seriesNav: 'Navegação da série',
+  seriesDescription: 'Todos os artigos da série %s.',
+  youAreHere: 'você está aqui',
+  linkCopied: 'link copiado',
+  footnotes: 'Notas de rodapé',
+  showSource: 'ver o código',
+  hideSource: 'esconder o código',
+  codeTheme: 'Tema do código',
+  codeThemeAuto: 'Automático (segue o tema da página)',
+  themeToggle: 'Tema',
+  themeLight: 'Claro',
+  themeDark: 'Escuro',
+  themeSystem: 'Sistema',
+  settingsPanel: 'Preferências',
+  settingsNudge: 'Ajuste a leitura do jeito que você gosta',
+  motionLabel: 'Movimento',
+  motionReduce: 'Reduzido',
+  motionAllow: 'Sempre ativo',
+  motionSystem: 'Sistema',
+  fontSizeLabel: 'Tamanho do texto',
+  fontSizeCurrent: 'Tamanho do texto: %s',
+  fontSizeDecrease: 'Diminuir o tamanho do texto',
+  fontSizeIncrease: 'Aumentar o tamanho do texto',
+  fontSizeReset: 'Voltar o tamanho do texto para 100%',
+  fontSizeResetShort: 'Redefinir',
+  fontFamilyLabel: 'Fonte de leitura',
+  fontFamilySerif: 'Serifada',
+  fontFamilySans: 'Sem serifa',
+  accentLabel: 'Cor de destaque',
+  accentAuto: 'Auto',
+  accentRed: 'Vermelho',
+  accentGreen: 'Verde',
+  accentYellow: 'Amarelo',
+  accentBlue: 'Azul',
+  accentPurple: 'Roxo',
+  accentWhite: 'Branco',
+  backgroundLife: 'Plano de fundo',
+  conwayKnobs: 'Propriedades',
+  conwaySeedDensity: 'Densidade do seed',
+  conwayGenerationsPerSecond: 'Gerações por segundo',
+  conwayAutoFeed: 'Alimentação automática (s, 0 desliga)',
+  conwayOpacity: 'Opacidade do fundo',
+  conwayPause: 'Pausar',
+  conwayResume: 'Retomar',
+  conwayReseed: 'Reiniciar',
+  searchShortcutLabel: 'Tecla de atalho da busca',
+  searchShortcutReserved: 'O navegador já usa esta tecla',
+  writtenBy: 'por',
+  contents: 'Neste post',
+  openMenu: 'abrir o menu',
+  closeMenu: 'fechar o menu',
+  closeMenuShort: 'Fechar',
+  openContents: 'abrir o índice',
+  foldSection: 'recolher ou expandir esta seção',
+  notWrittenYet: 'ainda não escrito',
+  tags: 'Tags',
+  tag: 'Tag',
+  tagDescription: 'Artigos marcados com %s.',
+  tagsIntro: 'Todas as tags usadas nos artigos, com quantos artigos cada uma tem.',
+  allSeries: 'Séries',
+  seriesIntro: 'Todas as séries de artigos publicadas.',
+  sectionDescription: 'Todos os artigos da seção %s.',
+  primaryNav: 'Navegação principal',
+  navPosts: 'Posts',
+  navSeries: 'Séries',
+  navTags: 'Tags',
+  navAbout: 'Sobre',
+  article: 'artigo',
+  articles: 'artigos',
+  homeDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
+  noTranslatedPosts: 'Nenhum artigo traduzido ainda.',
+  skipToContent: 'Pular para o conteúdo',
+  language: 'Idioma',
+  switchLanguage: 'Mudar para %s',
+  version: 'Versão',
+  copyright: '© 2019–%d Lucas Santos.',
+  rightsReserved: 'Todos os direitos reservados.',
+  credits: 'Créditos',
+  githubRepo: 'Repositório no GitHub',
+  linkedinProfile: 'Perfil no LinkedIn',
+  twitterProfile: 'Perfil no Twitter',
+  youtubeChannel: 'Canal no YouTube',
+  ossTitle: 'Código aberto',
+  ossDescription: 'Cada projeto de código aberto, fonte e ferramenta usados para construir este site, com um link para cada um.',
+  ossIntro: 'Este site é construído sobre o trabalho de muita gente.',
+  ossFontsHeading: 'Tipografia',
+  ossIconsHeading: 'Ícones',
+  ossDependenciesHeading: 'Framework e dependências',
+  footnotePreviews: 'Mostrar prévia ao passar o mouse numa nota de rodapé',
+  keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
+  resetAll: 'Restaurar tudo',
+  resetAllHint: 'Volta todas as preferências acima para o padrão',
+  previewLoading: 'Carregando…',
+  previewClose: 'Fechar prévia',
+  previewPin: 'Fixar esta prévia',
+  previewUnpin: 'Soltar esta prévia',
+  previewDrag: 'arraste para mover',
+  previewUnwritten: 'ainda não escrito, mas em breve!',
+  previewMinimize: 'Minimizar prévia',
+  previewRestore: 'Restaurar prévia',
+  showNote: 'mostrar nota',
+  showMarginNote: 'mostrar nota lateral',
+  linkToNote: 'link para esta nota',
+  copyQuote: 'copiar esta citação',
+  pagination: 'Paginação',
+  paginationPrev: 'Página anterior',
+  paginationNext: 'Próxima página',
+  paginationGoTo: 'ir para a página %d',
+  imageGone: 'Esta imagem não existe mais',
+  imageGoneAlt: 'Imagem indisponível, hospedada em %s',
+  imageGoneUnknownHost: 'um host que não a serve mais',
+  notFoundTitle: 'Página não encontrada',
+  notFoundBody: 'Esta página não existe. Talvez o link esteja errado, ou o post tenha mudado de nome.',
+  notFoundRecent: 'Ou leia algo recente:',
+  offlineTitle: 'Sem conexão',
+  offlineDescription: 'Você está sem conexão.',
+  offlineBody:
+    'Esta página não está no cache do seu navegador e você está offline no momento. Os posts que você já abriu continuam disponíveis.',
+  backHome: 'Voltar para a home',
+  appName: 'Lucas Santos',
+  appShortName: 'Blog Lucas Santos',
+  appDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
+}
+
+type UIKey = keyof typeof pt
 
 export const ui: Record<Locale, Record<UIKey, string>> = {
-  pt: {
-    finishReadingAt: 'termina às %s',
-    machineTranslated: 'Esta página foi traduzida automaticamente.',
-    readOriginal: 'Ler original',
-    suggestFix: 'Sugerir correção',
-    search: 'Buscar',
-    noResults: 'Nenhum resultado encontrado',
-    noResultsFor: 'Nenhum resultado para "%s".',
-    searching: 'Buscando...',
-    moreResults: 'E mais %d resultado(s).',
-    searchResultsFound: '%d resultado(s).',
-    searchLabel: 'Buscar no blog',
-    searchPlaceholder: 'ex: deno, astro, observabilidade',
-    searchNoJs:
-      'A busca completa depende de JavaScript. Sem ele, o formulário acima ainda funciona: ele recarrega esta página com sua consulta salva na URL.',
-    searchNoIndex:
-      'O índice de busca ainda não foi gerado neste ambiente (rode o build). Envie o formulário para navegar normalmente.',
-    searchTitle: 'Busca',
-    searchDescription: 'Buscar artigos no blog de Lucas Santos.',
-    series: 'Série',
-    partOfSeriesNamed: 'Parte %d de %d da série',
-    seriesNav: 'Navegação da série',
-    seriesDescription: 'Todos os artigos da série %s.',
-    youAreHere: 'você está aqui',
-    linkCopied: 'link copiado',
-    footnotes: 'Notas de rodapé',
-    showSource: 'ver o código',
-    hideSource: 'esconder o código',
-    codeTheme: 'Tema do código',
-    codeThemeAuto: 'Automático (segue o tema da página)',
-    themeToggle: 'Tema',
-    themeLight: 'Claro',
-    themeDark: 'Escuro',
-    themeSystem: 'Sistema',
-    settingsPanel: 'Preferências',
-    settingsNudge: 'Ajuste a leitura do jeito que você gosta',
-    motionLabel: 'Movimento',
-    motionReduce: 'Reduzido',
-    motionAllow: 'Sempre ativo',
-    motionSystem: 'Sistema',
-    fontSizeLabel: 'Tamanho do texto',
-    fontSizeCurrent: 'Tamanho do texto: %s',
-    fontSizeDecrease: 'Diminuir o tamanho do texto',
-    fontSizeIncrease: 'Aumentar o tamanho do texto',
-    fontSizeReset: 'Voltar o tamanho do texto para 100%',
-    fontSizeResetShort: 'Redefinir',
-    fontFamilyLabel: 'Fonte de leitura',
-    fontFamilySerif: 'Serifada',
-    fontFamilySans: 'Sem serifa',
-    accentLabel: 'Cor de destaque',
-    accentAuto: 'Auto',
-    accentRed: 'Vermelho',
-    accentGreen: 'Verde',
-    accentYellow: 'Amarelo',
-    accentBlue: 'Azul',
-    accentPurple: 'Roxo',
-    accentWhite: 'Branco',
-    backgroundLife: 'Plano de fundo',
-    conwayKnobs: 'Propriedades',
-    conwaySeedDensity: 'Densidade do seed',
-    conwayGenerationsPerSecond: 'Gerações por segundo',
-    conwayAutoFeed: 'Alimentação automática (s, 0 desliga)',
-    conwayOpacity: 'Opacidade do fundo',
-    conwayPause: 'Pausar',
-    conwayResume: 'Retomar',
-    conwayReseed: 'Reiniciar',
-    searchShortcutLabel: 'Tecla de atalho da busca',
-    searchShortcutReserved: 'O navegador já usa esta tecla',
-    writtenBy: 'por',
-    contents: 'Neste post',
-    openMenu: 'abrir o menu',
-    closeMenu: 'fechar o menu',
-    closeMenuShort: 'Fechar',
-    openContents: 'abrir o índice',
-    foldSection: 'recolher ou expandir esta seção',
-    notWrittenYet: 'ainda não escrito',
-    tags: 'Tags',
-    tag: 'Tag',
-    tagDescription: 'Artigos marcados com %s.',
-    tagsIntro: 'Todas as tags usadas nos artigos, com quantos artigos cada uma tem.',
-    allSeries: 'Séries',
-    seriesIntro: 'Todas as séries de artigos publicadas.',
-    sectionDescription: 'Todos os artigos da seção %s.',
-    primaryNav: 'Navegação principal',
-    navPosts: 'Posts',
-    navSeries: 'Séries',
-    navTags: 'Tags',
-    navAbout: 'Sobre',
-    article: 'artigo',
-    articles: 'artigos',
-    homeDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
-    noTranslatedPosts: 'Nenhum artigo traduzido ainda.',
-    skipToContent: 'Pular para o conteúdo',
-    language: 'Idioma',
-    switchLanguage: 'Mudar para %s',
-    version: 'Versão',
-    copyright: '© 2019–%d Lucas Santos.',
-    rightsReserved: 'Todos os direitos reservados.',
-    credits: 'Créditos',
-    githubRepo: 'Repositório no GitHub',
-    linkedinProfile: 'Perfil no LinkedIn',
-    twitterProfile: 'Perfil no Twitter',
-    youtubeChannel: 'Canal no YouTube',
-    ossTitle: 'Código aberto',
-    ossDescription: 'Cada projeto de código aberto, fonte e ferramenta usados para construir este site, com um link para cada um.',
-    ossIntro: 'Este site é construído sobre o trabalho de muita gente.',
-    ossFontsHeading: 'Tipografia',
-    ossIconsHeading: 'Ícones',
-    ossDependenciesHeading: 'Framework e dependências',
-    footnotePreviews: 'Mostrar prévia ao passar o mouse numa nota de rodapé',
-    keepPreviews: 'Manter as prévias fixadas depois de fechar a aba',
-    resetAll: 'Restaurar tudo',
-    resetAllHint: 'Volta todas as preferências acima para o padrão',
-    previewLoading: 'Carregando…',
-    previewClose: 'Fechar prévia',
-    previewPin: 'Fixar esta prévia',
-    previewUnpin: 'Soltar esta prévia',
-    previewDrag: 'arraste para mover',
-    previewUnwritten: 'ainda não escrito, mas em breve!',
-    previewMinimize: 'Minimizar prévia',
-    previewRestore: 'Restaurar prévia',
-    showNote: 'mostrar nota',
-    showMarginNote: 'mostrar nota lateral',
-    linkToNote: 'link para esta nota',
-    copyQuote: 'copiar esta citação',
-    pagination: 'Paginação',
-    paginationPrev: 'Página anterior',
-    paginationNext: 'Próxima página',
-    paginationGoTo: 'ir para a página %d',
-    imageGone: 'Esta imagem não existe mais',
-    imageGoneAlt: 'Imagem indisponível, hospedada em %s',
-    imageGoneUnknownHost: 'um host que não a serve mais',
-    notFoundTitle: 'Página não encontrada',
-    notFoundBody: 'Esta página não existe. Talvez o link esteja errado, ou o post tenha mudado de nome.',
-    notFoundRecent: 'Ou leia algo recente:',
-    offlineTitle: 'Sem conexão',
-    offlineDescription: 'Você está sem conexão.',
-    offlineBody:
-      'Esta página não está no cache do seu navegador e você está offline no momento. Os posts que você já abriu continuam disponíveis.',
-    backHome: 'Voltar para a home',
-    appName: 'Lucas Santos',
-    appShortName: 'Blog Lucas Santos',
-    appDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
-  },
+  pt,
   en: {
     finishReadingAt: 'finish at %s',
     machineTranslated: 'This page was machine translated.',

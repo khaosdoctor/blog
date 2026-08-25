@@ -172,7 +172,6 @@ const BRAND_ON_GROUND: Record<CoverScheme, Record<string, string>> = {
 const SEED_SALT = 65
 const WIRE_DENSITY = 6
 const WIRE_OPACITY_SCALE = 145
-const CURSOR = true
 
 function coverSeed(slug: string): number {
   return (hashString(slug) + SEED_SALT) >>> 0
@@ -417,7 +416,7 @@ function layoutCard(title: string): Card {
   const padX = CARD_PAD_X
   const padY = CARD_PAD_Y
   const fontSize = titleFontSize(title.length)
-  const displayTitle = CURSOR ? `${title}.█` : title
+  const displayTitle = `${title}.█`
   const lines = wrapTitle(displayTitle, CARD_W - padX * 2, fontSize)
   const lineHeight = fontSize * LINE_HEIGHT_RATIO
   const spaceAfterByline = fontSize * 0.55

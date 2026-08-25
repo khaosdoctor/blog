@@ -18,14 +18,12 @@ function placeMenu(el: HTMLElement, anchor: HTMLElement): void {
   el.style.left = `${left}px`
 }
 
-interface MenuController {
-  isOpen(): boolean
-  open(): void
-  close(returnFocus: boolean): void
-}
-
 /** Local `open` because `:popover-open` and `hidden` are two different sources of truth. */
-export function wireMenu(wrapper: HTMLElement, opener: HTMLButtonElement, menu: HTMLElement): MenuController {
+export function wireMenu(
+  wrapper: HTMLElement,
+  opener: HTMLButtonElement,
+  menu: HTMLElement,
+): (returnFocus: boolean) => void {
   let open = false
 
   function openMenu(): void {
@@ -72,7 +70,7 @@ export function wireMenu(wrapper: HTMLElement, opener: HTMLButtonElement, menu: 
     if (event.key === 'Escape' && open) closeMenu(true)
   })
 
-  return { isOpen: () => open, open: openMenu, close: closeMenu }
+  return closeMenu
 }
 
 /** Order matters: a popover element that is still `hidden` refuses to show. */
