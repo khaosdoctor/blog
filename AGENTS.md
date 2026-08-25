@@ -65,7 +65,7 @@ node scripts/check-output.ts
 npm run test:e2e
 ```
 
-`npm run check` is `astro check`, `tsc -p worker`, `scripts/check-i18n.ts` and `scripts/check-component-css.ts`, in that order. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
+`npm run check` is `astro check`, `tsc -p worker`, `scripts/check-i18n.ts`, `scripts/check-component-css.ts`, `scripts/check-content.ts` and `scripts/check-credits.ts`, in that order. The build strips types without checking them, so a wrong i18n key or prop ships as the literal string `undefined` in the page.
 
 `check-output.ts` fails on a published post with no page, leftover Ghost markup, an unrendered component tag, a missing feed or manifest icon, an image that never reached the output, and any remote-script loader pattern. That last check exists because the old Ghost site served an injected script for a month before anyone noticed. Do not weaken it.
 
