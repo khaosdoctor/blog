@@ -1,4 +1,7 @@
 {
-  "note": "Remote images whose host stopped serving them. Listed here instead of edited out of the posts, so the caption and the sentence around it survive and the loss stays visible. remark-figures renders <MissingImage /> for anything in `urls`. Empty right now: the four pbs.twimg.com images that used to be listed here were never dead, the migration's download failed on the HTML-escaped URL and the record was wrong. They are local files in content/blog/slopware/ now. Verify with curl before adding a URL here.",
-  "urls": []
+  "note": "Remote images whose host stopped serving them. Listed here instead of edited out of the posts, so the caption and the sentence around it survive and the loss stays visible. remark-figures renders <MissingImage /> for anything in `urls`, and vendor-media.ts skips them rather than retrying a dead host on every build. Verify with curl before adding a URL here.",
+  "urls": [
+    "https://memegenerator.net/img/instances/85332300.jpg",
+    "https://lh3.googleusercontent.com/rjJ9LcUAJk1ROfpgVx9V4wvKBP_TUbZn9sH_rURvC02cP6ApdsGDM09OHWMZV5Xre7CrEVGLw6C9fpr_REOQK6jQnnsahXwmlw-7KgehB0oGaAmNqezkrNw2QTnQs_-aB8OB7E5alMj2RzfJ0X-RJOOpEV1cxpoTsZ6UYmSeJU28BxHZVObnxS2j4xmiMjcJqjN-Ww"
+  ]
 }
