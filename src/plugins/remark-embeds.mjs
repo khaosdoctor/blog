@@ -8,12 +8,16 @@ let bookmarks = null
 
 function bookmarkMetadata() {
   if (bookmarks !== null) return bookmarks
+  let raw
   try {
-    bookmarks = JSON.parse(readFileSync('content/bookmarks.json', 'utf8'))
+    raw = readFileSync('content/bookmarks.json', 'utf8')
   } catch {
-    // No sidecar yet: every URL simply stays a plain link.
+    // No sidecar yet: every URL simply stays a plain link. A file that exists
+    // but does not parse throws, rather than dropping every card in silence.
     bookmarks = {}
+    return bookmarks
   }
+  bookmarks = JSON.parse(raw)
   return bookmarks
 }
 
