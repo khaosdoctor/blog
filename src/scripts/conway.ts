@@ -94,10 +94,6 @@ function indexOf(col: number, row: number): number {
   return row * cols + col
 }
 
-function currentFade(): number {
-  return opacity
-}
-
 // Reads the canvas's resolved `color`, not `--fg` directly: an untyped custom
 // property returns unresolved text that `fillStyle` cannot parse, silently turning black.
 function currentFg(): string {
@@ -199,7 +195,7 @@ function draw(): void {
   const height = window.innerHeight
   ctx.clearRect(0, 0, width, height)
 
-  ctx.globalAlpha = currentFade()
+  ctx.globalAlpha = opacity
   ctx.fillStyle = currentFg()
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {

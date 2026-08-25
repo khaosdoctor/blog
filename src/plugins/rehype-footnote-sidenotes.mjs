@@ -5,19 +5,8 @@
  * the only copy a reader with CSS off or an RSS reader ever sees), it copies
  * each footnote body into an `<aside class="footnote-aside">` right after the
  * paragraph that references it, so src/styles/footnotes.css can float it into
- * the margin on a wide viewport. Below that breakpoint the reference's own
- * hover-preview card (src/scripts/hover-previews.ts) covers the same note,
- * so the aside stays hidden there too, reading straight out of the (now
- * visually hidden, see footnotes.css) section at the foot of the page.
- *
- * The section at the foot of the page is `display: none` in
- * src/styles/footnotes.css now: the margin copy is the only one a sighted
- * reader ever sees, so it is also the one this plugin leaves reachable to
- * assistive tech. `display: none` drops the foot-of-page section out of the
- * accessibility tree the same way it drops out of layout, so there is no
- * double announcement to guard against there; this copy carries no
- * `aria-hidden` of its own, which is what makes it the one a screen reader
- * does meet.
+ * the margin on a wide viewport. Which copy a reader meets is a viewport
+ * question src/styles/footnotes.css answers on its own.
  *
  * The copy is build-time only, no client fetch, and works with JS disabled.
  *
