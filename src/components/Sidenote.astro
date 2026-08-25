@@ -1,33 +1,5 @@
 ---
-// Slot content must be inline only: this renders inside a <span> in the running
-// text, so a block element would break the paragraph around it.
-import { localeFromPath, t } from '../i18n/ui'
-import '../styles/sidenotes.css'
-
-// Assumes Astro finishes one page before starting the next; rendering pages
-// concurrently would keep ids unique but unmatched to the CSS counter.
-let lastPath = ''
-let count = 0
-
-const locale = localeFromPath(Astro.url.pathname)
-
-if (Astro.url.pathname !== lastPath) {
-  lastPath = Astro.url.pathname
-  count = 0
-}
-count += 1
-const anchorId = `sidenote-${count}`
-const toggleId = `${anchorId}-toggle`
+import Note from './Note.astro'
 ---
 
-<span class="note sidenote" id={anchorId}>
-  <input type="checkbox" id={toggleId} class="note-toggle" aria-label={t(locale, 'showNote')} />
-  <label for={toggleId} class="note-marker" style={`anchor-name: --${toggleId}`}></label>
-  <span class="note-text" style={`position-anchor: --${toggleId}`}
-    ><slot /><button
-      type="button"
-      class="note-copy-link"
-      data-copy-anchor={`#${anchorId}`}
-      aria-label={t(locale, 'linkToNote')}></button></span
-  ><label for={toggleId} class="note-scrim"></label>
-</span>
+<Note kind="sidenote"><slot /></Note>

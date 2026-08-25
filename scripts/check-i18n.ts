@@ -20,7 +20,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { HREFLANG, LOCALES, SOURCE_LOCALE, ui, type Locale } from '../src/i18n/ui.ts'
-import { annotate, bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
+import { annotate, bold, count, dim, fail, heading, ok, warn, walkFiles } from './lib/cli.ts'
 
 const PAGES = 'src/pages'
 const CONTENT = 'content/blog'
@@ -128,19 +128,6 @@ const LOCALE_AWARE_FILES = [
 
 heading('check-i18n: verifying the two language trees agree')
 
-function walk(dir: string): string[] {
-  const found: string[] = []
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name)
-    if (entry.isDirectory()) {
-      found.push(...walk(full))
-      continue
-    }
-    found.push(full)
-  }
-  return found
-}
-
 const OTHER_LOCALES = LOCALES.filter((locale) => locale !== SOURCE_LOCALE)
 
 // 1. Every table holds every key, filled in, in its own language.
@@ -237,7 +224,7 @@ for (const { file, constant, key } of MIRRORED_TABLES) {
 
 // 6. Route parity. A reader who clicks something must not fall out of their own
 // language because the page they wanted only exists in the other one.
-const routeFiles = walk(PAGES).map((file) => file.slice(PAGES.length + 1))
+const routeFiles = walkFiles(PAGES).map((file) => file.slice(PAGES.length + 1))
 const sourceRoutes = new Set<string>()
 for (const route of routeFiles) {
   const locale = OTHER_LOCALES.find((entry) => route.startsWith(`${entry}/`))
@@ -299,7 +286,7 @@ for (const route of routeFiles) {
 
 // A component renders inside every tree, so it can never name a language: it
 // takes one, from a prop or from the path.
-for (const file of walk('src/components').concat(walk('src/layouts'))) {
+for (const file of walkFiles('src/components').concat(walkFiles('src/layouts'))) {
   if (!file.endsWith('.astro')) continue
   const source = readFileSync(file, 'utf8')
   for (const match of source.matchAll(/\bt\(\s*['"]([a-z-]+)['"]/g)) {
@@ -316,7 +303,7 @@ for (const file of walk('src/components').concat(walk('src/layouts'))) {
 // of a component (the frontmatter is comments and code), and only literals: an
 // expression is already going through t() or a prop.
 const TEXT_ATTRIBUTES = /\s(aria-label|alt|placeholder|title)="([^"{}]+)"/g
-for (const file of [...walk('src/components'), ...walk('src/layouts'), ...walk(PAGES)]) {
+for (const file of [...walkFiles('src/components'), ...walkFiles('src/layouts'), ...walkFiles(PAGES)]) {
   if (!file.endsWith('.astro')) continue
   const source = readFileSync(file, 'utf8')
   // Everything after the component script fence. A doc comment above the markup

@@ -1,0 +1,47 @@
+---
+// Slot content must be inline only: this renders inside a <span> in the running
+// text, so a block element would break the paragraph around it.
+import { localeFromPath, t } from '../i18n/ui'
+import '../styles/sidenotes.css'
+
+const NOTE_KINDS = {
+  sidenote: 'showNote',
+  marginnote: 'showMarginNote',
+} as const
+
+type NoteKind = keyof typeof NOTE_KINDS
+
+interface Props {
+  kind: NoteKind
+}
+
+const { kind } = Astro.props
+
+// Assumes Astro finishes one page before starting the next; rendering pages
+// concurrently would keep ids unique but unmatched to the CSS counter. The
+// counters are per kind so each numbering runs on its own.
+let lastPath = ''
+const counts: Record<NoteKind, number> = { sidenote: 0, marginnote: 0 }
+
+const locale = localeFromPath(Astro.url.pathname)
+
+if (Astro.url.pathname !== lastPath) {
+  lastPath = Astro.url.pathname
+  for (const name of Object.keys(counts) as NoteKind[]) counts[name] = 0
+}
+counts[kind] += 1
+const anchorId = `${kind}-${counts[kind]}`
+const toggleId = `${anchorId}-toggle`
+---
+
+<span class={`note ${kind}`} id={anchorId}>
+  <input type="checkbox" id={toggleId} class="note-toggle" aria-label={t(locale, NOTE_KINDS[kind])} />
+  <label for={toggleId} class="note-marker" style={`anchor-name: --${toggleId}`}></label>
+  <span class="note-text" style={`position-anchor: --${toggleId}`}
+    ><slot /><button
+      type="button"
+      class="note-copy-link"
+      data-copy-anchor={`#${anchorId}`}
+      aria-label={t(locale, 'linkToNote')}></button></span
+  ><label for={toggleId} class="note-scrim"></label>
+</span>

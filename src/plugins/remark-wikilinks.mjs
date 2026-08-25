@@ -103,8 +103,8 @@ export function remarkWikilinks() {
       if (parent === undefined || position === undefined) return
       // Code spans and fenced blocks are separate node types, so nested JS
       // arrays like [['a']] inside a snippet are never touched here.
-      if (!PATTERN.test(node.value)) return
-      PATTERN.lastIndex = 0
+      const matches = [...node.value.matchAll(PATTERN)]
+      if (matches.length === 0) return
 
       const children = []
       let cursor = 0
@@ -112,7 +112,7 @@ export function remarkWikilinks() {
       // below uses.
       const locale = file.data?.astro?.frontmatter?.lang ?? 'pt'
 
-      for (const match of node.value.matchAll(PATTERN)) {
+      for (const match of matches) {
         const [raw, target, fragment, label] = match
         const slug = target.trim()
         const post = resolve(slug, locale)

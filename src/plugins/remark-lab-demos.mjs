@@ -55,26 +55,18 @@ function requireSrc(node, file) {
   return src
 }
 
-/** A valid, unique-per-file identifier for the synthesised import, derived from
- * the file's own name: Counter.vue -> Counter. Two demos that happen to import
- * files with the same basename get suffixed so neither import shadows the other. */
-function identifierFor(src, seen) {
+/** A valid identifier for the synthesised import, derived from the file's own
+ * name: Counter.vue -> Counter. Every src in a post is a flat sibling file, so
+ * two different files can never share one. */
+function identifierFor(src, identifiers) {
   const stem = basename(src, extname(src)).replace(/[^a-zA-Z0-9_$]/g, '_') || 'Component'
-  const base = /^[0-9]/.test(stem) ? `_${stem}` : stem.charAt(0).toUpperCase() + stem.slice(1)
-
-  let candidate = base
-  let suffix = 2
-  while (seen.has(candidate) && seen.get(candidate) !== src) {
-    candidate = `${base}${suffix}`
-    suffix += 1
-  }
-  seen.set(candidate, src)
-  return candidate
+  const identifier = /^[0-9]/.test(stem) ? `_${stem}` : stem.charAt(0).toUpperCase() + stem.slice(1)
+  identifiers.set(identifier, src)
+  return identifier
 }
 
 export function remarkLabDemos() {
   return (tree, file) => {
-    const imports = []
     const identifiers = new Map()
 
     const walk = (parent) => {
@@ -93,7 +85,6 @@ export function remarkLabDemos() {
         if (node.name === 'LabDemo') {
           const clientAttrs = plainAttributes(node).filter((attr) => attr.name.startsWith('client:'))
           const identifier = identifierFor(src, identifiers)
-          imports.push({ identifier, src })
 
           node.attributes = [
             ...withoutAttributes(node, ['src', ...clientAttrs.map((attr) => attr.name)]),
@@ -119,8 +110,8 @@ export function remarkLabDemos() {
     }
     walk(tree)
 
-    if (imports.length === 0) return
-    const esmNodes = imports.map(({ identifier, src }) => {
+    if (identifiers.size === 0) return
+    const esmNodes = [...identifiers].map(([identifier, src]) => {
       const code = `import ${identifier} from ${JSON.stringify(src)}`
       return { type: 'mdxjsEsm', value: code, data: { estree: Parser.parse(code, { sourceType: 'module', ecmaVersion: 'latest' }) } }
     })
