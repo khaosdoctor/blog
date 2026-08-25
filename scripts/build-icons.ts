@@ -7,7 +7,7 @@ import { bold, count, dim, heading, ok } from './lib/cli.ts'
 const SOURCE = 'public/favicon.svg'
 const OUT_DIR = 'public/icons'
 
-const PAPER = '#fffdf9'
+const PAPER = '#f4efe0'
 
 interface Icon {
   name: string

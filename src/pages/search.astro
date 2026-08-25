@@ -1,15 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Search from '../components/Search.astro'
-import { t } from '../i18n/ui'
+import { HREFLANG, t } from '../i18n/ui'
 ---
 
 <BaseLayout
   title={`LS: ${t('pt', 'searchTitle')}`}
   description={t('pt', 'searchDescription')}
   alternates={[
-    { lang: 'pt-BR', href: new URL('/search/', Astro.site).href },
-    { lang: 'en', href: new URL('/en/search/', Astro.site).href },
+    { lang: HREFLANG.pt, href: new URL('/search/', Astro.site).href },
+    { lang: HREFLANG.en, href: new URL('/en/search/', Astro.site).href },
   ]}
 >
   <h1 class="listing-heading">{t('pt', 'searchTitle')}</h1>

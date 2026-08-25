@@ -1,4 +1,3 @@
-import { dayColor } from '../lib/day-color'
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
 import {
   searchPaletteDebounceMilliseconds as DEBOUNCE_MS,
@@ -190,7 +189,6 @@ function init(): void {
     more.replaceChildren()
     status.textContent = ''
     resultLinks = []
-    cursor.style.background = dayColor()
 
     if (inDrawer()) {
       dialog.show()

@@ -18,6 +18,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { dirname, extname, join } from 'node:path'
 import { bold, count, dim, heading, list, ok, postFiles, warn } from './lib/cli.ts'
+import { slugify } from '../src/lib/slugify.ts'
 
 const CONTENT_DIR = 'content/blog'
 const DEAD_IMAGES = 'content/dead-images.json'
@@ -128,14 +129,7 @@ function remoteUrls(body: string): string[] {
 function filenameFor(url: string, extension: string): string {
   const parsed = new URL(url)
   const base = decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() ?? 'image')
-  const stem = base
-    .replace(/\.[a-z0-9]+$/i, '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40)
+  const stem = slugify(base.replace(/\.[a-z0-9]+$/i, '')).slice(0, 40)
 
   const short = createHash('sha256').update(url).digest('hex').slice(0, 6)
   return `${stem || 'media'}-${short}${extension}`
@@ -321,7 +315,7 @@ if (failures.length > 0) {
     '',
     ...failures.flatMap((failure) => [
       `- [ ] ${failure.url}`,
-      `      ${failure.reason} — in [${failure.slug}](${SITE}/${failure.slug}/)`,
+      `      ${failure.reason}, in [${failure.slug}](${SITE}/${failure.slug}/)`,
     ]),
     '',
   ]

@@ -17,7 +17,7 @@
 
 /* Specificity is exact here: `html` outranks core.css's `footer a` while `footer
    .version a` still wins; `:where()` keeps the exclusions at zero specificity. */
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, footer .icon-link)) {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .credits a, footer .version a, footer .icon-link)) {
   padding-inline: 1px;
   padding-block: 2px;
   background: transparent;
@@ -48,8 +48,8 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .version a, f
   content: none;
 }
 
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .version a, footer .icon-link)):hover,
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .version a, footer .icon-link)):focus-visible {
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .credits a, footer .version a, footer .icon-link)):hover,
+html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .credits a, footer .version a, footer .icon-link)):focus-visible {
   background: var(--post-accent-fill);
   color: var(--bg);
   text-decoration-line: none;

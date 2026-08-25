@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test'
 /**
  * The mobile ruler: every page type, both languages, at the common phone and
  * tablet widths. Two invariants: the page never scrolls sideways, and every
- * always-visible control is tappable (44x44 CSS px, WCAG 2.5.8).
+ * always-visible control is tappable at 44x44 CSS px.
  */
 
 const PHONE_WIDTHS = [360, 393, 430]

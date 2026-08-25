@@ -190,13 +190,21 @@ function init(): void {
     resolveLetters()
   }
 
+  function playedThisSession(): boolean {
+    try {
+      return sessionStorage.getItem(SCRAMBLE_SESSION_KEY) !== null
+    } catch {
+      return false
+    }
+  }
+
   function boot(): void {
     if (reduced()) {
       freeze()
       return
     }
     startCursor()
-    if (sessionStorage.getItem(SCRAMBLE_SESSION_KEY) !== null) {
+    if (playedThisSession()) {
       resolveLetters()
       scheduleGlitch()
       return

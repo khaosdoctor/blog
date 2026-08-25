@@ -7,12 +7,12 @@
  * with a plain-English name and a one-line note on each. Change a number here
  * and the whole site follows.
  *
- * How this relates to theme.css: that file holds the site's *roles* (`--fg`,
- * `--accent`, `--rule`) and the long reasoning behind each decision, including
- * the measured contrast ratios. It reads its raw values from here. So this
+ * How this relates to theme.css: that file is a bare map of the site's *roles*
+ * (`--fg`, `--accent`, `--rule`) onto the raw values declared here. So this
  * file is the only place these numbers are written down; nothing is duplicated
  * between the two, and editing one of these changes the site rather than
- * fighting a second declaration somewhere else.
+ * fighting a second declaration somewhere else. The long reasoning behind the
+ * palette lives in docs/theming.md.
  *
  * Two rules if you edit this:
  *
@@ -20,9 +20,9 @@
  *    site runs both grounds and picks per reader, so changing only one half
  *    leaves the other theme on the old value.
  * 2. If you change a colour, its contrast against the page changes with it.
- *    theme.css records what each one measures today and which ones already
- *    sit below the 4.5:1 readability floor on purpose. Worth a look before
- *    picking something much lighter or much darker.
+ *    docs/theming.md records what each one measures today and which few are
+ *    deliberately under the readability floor. Worth a read before picking
+ *    something much lighter or much darker.
  *
  * Loaded before theme.css (BaseLayout.astro), so these are declared by the
  * time anything reads them.
@@ -196,8 +196,8 @@
    * the footer's social links, and the phone drawer's hamburger.
    * ======================================================================== */
 
-  /* The real clickable area of an icon button. 44px is the size WCAG asks for
-     a touch target; do not go below it. */
+  /* The real clickable area of an icon button. Do not go below 44px: a thumb
+     misses anything smaller. */
   --dial-button-hit-area: 2.75rem;
   /* The visible square drawn inside that area, which can be smaller. */
   --dial-button-chip-size: 2rem;

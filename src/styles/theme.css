@@ -50,9 +50,6 @@
   --content-width: calc(var(--dial-shell-width) - var(--dial-content-inset) * 2);
   --shell-inset: var(--dial-shell-inset);
 
-  --em-bold-bg: #f5b200;
-  --em-bold-fg: #332d23;
-  --em-italic-fg: light-dark(#8a6400, var(--brand-yellow));
   --em-italic-weight: 500;
 
   /* Grey, never a brand tone: a red day accent or cover made an unwritten link
