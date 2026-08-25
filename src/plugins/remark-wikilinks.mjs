@@ -18,6 +18,7 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import GithubSlugger from 'github-slugger'
 import { visit } from 'unist-util-visit'
+import { postUrl, slugFrom } from '../lib/post-url.mjs'
 
 const BASE = 'content/blog'
 const PATTERN = /\[\[([^\]|#]+)(#[^\]|]+)?(?:\|([^\]]+))?\]\]/g
@@ -54,19 +55,15 @@ function index() {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort()
-  for (const folder of dirs) {
-    const dir = `${BASE}/${folder}`
+  for (const dirEntry of dirs) {
+    const dir = `${BASE}/${dirEntry}`
     for (const name of readdirSync(dir).sort()) {
       if (!/\.mdx?$/.test(name)) continue
       const front = read(`${dir}/${name}`)
       if (front === null) continue
 
-      const isIndex = name === 'index.mdx' || name === 'index.md'
-      // The file's own slug frontmatter wins, else index.* answers on the
-      // folder name, else the filename itself is the slug.
-      const urlSlug = front.slug ?? (isIndex ? folder : name.replace(/\.mdx?$/, ''))
-      const url = front.lang === 'pt' ? `/${urlSlug}/` : `/${front.lang}/${urlSlug}/`
-      record(folder, front.lang, { draft: front.draft, title: front.title ?? folder, url })
+      const url = postUrl(front.slug ?? slugFrom(dirEntry, name), front.lang)
+      record(dirEntry, front.lang, { draft: front.draft, title: front.title ?? dirEntry, url })
     }
   }
   return posts

@@ -283,6 +283,8 @@ function init(): void {
 
   const nudge = wrapper.querySelector<HTMLElement>('[data-nudge]')
   if (nudge !== null) {
+    // Not readStorage: a reader whose storage throws must not be nudged on
+    // every visit, and the helper cannot tell an absent key from a refusal.
     let seen = true
     try {
       seen = localStorage.getItem(NUDGE_KEY) === '1'

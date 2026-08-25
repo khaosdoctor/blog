@@ -13,6 +13,7 @@ import {
   glitchPulseMinimumMilliseconds as PULSE_MIN_MS,
 } from '../lib/tweaks'
 import { prefersReducedMotion as reduced } from './motion'
+import { onReady } from './ready'
 
 const SCRAMBLE_GLYPHS = '!<>-_\\/[]{}=+*^?#'.split('')
 
@@ -243,4 +244,4 @@ function init(): void {
   })
 }
 
-document.addEventListener('DOMContentLoaded', init)
+onReady(init)

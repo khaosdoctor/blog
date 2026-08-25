@@ -3,11 +3,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import { bold, count, dim, heading, ok } from './lib/cli.ts'
+import { LIGHT_GROUND } from '../src/lib/grounds.mjs'
 
 const OUT_DIR = 'public/og'
 const WIDTH = 1200
 const HEIGHT = 630
-const PAPER = '#f4efe0'
+const PAPER = LIGHT_GROUND
 const INK = '#1a1c20'
 
 // One accent per section, taken from the brand mark's four colours.

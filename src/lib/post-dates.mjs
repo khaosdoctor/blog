@@ -1,15 +1,13 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { frontmatterOf, postUrl, slugFrom, SOURCE_LANG } from './post-url.mjs'
 
 export const field = (frontmatter, name) =>
   new RegExp(`^${name}:\\s*(.+)$`, 'm').exec(frontmatter)?.[1].trim().replace(/^["']|["']$/g, '')
 
-/** Must stay in sync with `slugOf`/`urlOf` in src/lib/posts.ts. */
-export function urlFor(folder, filename, frontmatter) {
-  const name = filename.replace(/\.mdx?$/, '')
-  const slug = field(frontmatter, 'slug') ?? (name === 'index' ? folder : name)
-  const lang = field(frontmatter, 'lang') ?? 'pt'
-  return lang === 'pt' ? `/${slug}/` : `/${lang}/${slug}/`
+export function urlFor(directory, filename, frontmatter) {
+  const slug = field(frontmatter, 'slug') ?? slugFrom(directory, filename)
+  return postUrl(slug, field(frontmatter, 'lang') ?? SOURCE_LANG)
 }
 
 // Frontmatter, not the collection: astro.config.mjs runs before astro:content.
@@ -25,8 +23,8 @@ function collect() {
     for (const file of readdirSync(join(dir, entry.name))) {
       if (!/\.mdx?$/.test(file)) continue
 
-      const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(join(dir, entry.name, file), 'utf8'))?.[1]
-      if (frontmatter === undefined) continue
+      const frontmatter = frontmatterOf(readFileSync(join(dir, entry.name, file), 'utf8'))
+      if (frontmatter === '') continue
       if (/^draft:\s*true/m.test(frontmatter)) continue
 
       // A noindex page must not also appear in the sitemap; the two contradict.

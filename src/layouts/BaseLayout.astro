@@ -32,6 +32,7 @@ import ReadingProgress from '../components/ReadingProgress.astro'
 import SEO from '../components/SEO.astro'
 import { localePath, t, type Locale } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
+import { DARK_GROUND, LIGHT_GROUND } from '../lib/grounds.mjs'
 import { commitShort, commitUrl, REPO, siteVersion as version } from '../lib/version'
 
 interface Props {
@@ -139,10 +140,9 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href={localePath(locale, '/manifest.webmanifest')} />
-    <!-- Both are --bg from theme.css: a meta tag cannot read a token, so a
-         palette change has to be made here too. -->
-    <meta name="theme-color" content="#f4efe0" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    {/* A meta tag cannot read a custom property, so these read the constant. */}
+    <meta name="theme-color" content={LIGHT_GROUND} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={DARK_GROUND} media="(prefers-color-scheme: dark)" />
     {/* GitHub Pages cannot set headers, so the policy has to be a meta tag. */}
     <meta http-equiv="Content-Security-Policy" content={contentSecurityPolicy()} />
     <link

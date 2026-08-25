@@ -191,7 +191,7 @@ for (const locale of LOCALES) {
 
 // 4. The source language is stated twice, in two modules only one of which can
 // import the other. They have to say the same thing.
-const POSTS = 'src/lib/posts.ts'
+const POSTS = 'src/lib/post-url.mjs'
 const declared = /export const SOURCE_LANG = '([a-z-]+)'/.exec(readFileSync(POSTS, 'utf8'))?.[1]
 if (declared === undefined) {
   report('SOURCE_LANG not found', `expected an export in ${POSTS} to compare against SOURCE_LOCALE`, POSTS)

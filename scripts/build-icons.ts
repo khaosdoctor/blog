@@ -3,11 +3,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import { bold, count, dim, heading, ok } from './lib/cli.ts'
+import { LIGHT_GROUND } from '../src/lib/grounds.mjs'
 
 const SOURCE = 'public/favicon.svg'
 const OUT_DIR = 'public/icons'
 
-const PAPER = '#f4efe0'
+const PAPER = LIGHT_GROUND
 
 interface Icon {
   name: string

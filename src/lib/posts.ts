@@ -1,8 +1,9 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
+import { postUrl, SOURCE_LANG } from './post-url.mjs'
 
 export type Post = CollectionEntry<'blog'>
 
-export const SOURCE_LANG = 'pt'
+export { SOURCE_LANG }
 
 export const PUBLISH_CUTOFF = new Date()
 
@@ -20,9 +21,7 @@ export function slugOf(post: Post): string {
 }
 
 export function urlOf(post: Post): string {
-  const slug = slugOf(post)
-  if (post.data.lang === SOURCE_LANG) return `/${slug}/`
-  return `/${post.data.lang}/${slug}/`
+  return postUrl(slugOf(post), post.data.lang)
 }
 
 export function isScheduled(post: Post): boolean {

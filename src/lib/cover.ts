@@ -1,6 +1,7 @@
 // The .ts extension is required: scripts/cover.ts runs this file through plain
 // node, whose ESM resolver does not add one.
 import { chipColor, hashString } from './chip-color.ts'
+import { DARK_GROUND, LIGHT_GROUND } from './grounds.mjs'
 
 const CARD_W = 1200
 const CARD_H = 630
@@ -105,9 +106,9 @@ type BrandId = (typeof Brand)[keyof typeof Brand]
 
 const BRAND_COLORS: BrandId[] = [Brand.Red, Brand.Green, Brand.Yellow, Brand.Blue, Brand.Purple]
 
-const DARK_BG = '#000000'
+const DARK_BG = DARK_GROUND
 const DARK_SHADOW = '#050505'
-const LIGHT_BG = '#f4efe0'
+const LIGHT_BG = LIGHT_GROUND
 const LIGHT_SHADOW = '#efeadb'
 const LIGHT_INK = '#14120e'
 const SHADOW_OFFSET = 3
