@@ -25,9 +25,8 @@
  * It reads source, never build output, so it runs in `npm run check` before a
  * build exists.
  */
-import { readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { annotate, count, fail, heading, ok } from './lib/cli.ts'
+import { readFileSync } from 'node:fs'
+import { annotate, count, fail, heading, ok, walkFiles } from './lib/cli.ts'
 
 const CONTENT = 'content/blog'
 
@@ -36,14 +35,6 @@ const failures: Failure[] = []
 
 function report(file: string, detail: string): void {
   failures.push({ file, detail })
-}
-
-function* vueFiles(dir: string): Generator<string> {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const path = join(dir, entry.name)
-    if (entry.isDirectory()) yield* vueFiles(path)
-    if (entry.isFile() && entry.name.endsWith('.vue')) yield path
-  }
 }
 
 /**
@@ -70,7 +61,7 @@ function classesOf(css: string): Set<string> {
   return classes
 }
 
-for (const file of vueFiles(CONTENT)) {
+for (const file of walkFiles(CONTENT).filter((path) => path.endsWith('.vue'))) {
   const source = readFileSync(file, 'utf8')
   const blocks = [...source.matchAll(/<style([^>]*)>([\s\S]*?)<\/style>/g)]
   if (blocks.length === 0) continue

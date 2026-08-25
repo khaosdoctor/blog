@@ -1,3 +1,6 @@
+import { readdirSync } from 'node:fs'
+import { join } from 'node:path'
+
 /**
  * Shared terminal output for the build scripts. Plain ANSI, no dependency: this
  * is a formatting helper, not a logging framework.
@@ -63,4 +66,11 @@ export function annotate(level: 'error' | 'warning', target: { file: string; lin
   if (!process.env.GITHUB_ACTIONS) return
   const location = target.line === undefined ? `file=${target.file}` : `file=${target.file},line=${target.line}`
   console.log(`::${level} ${location}::${target.message}`)
+}
+
+/** Every file under `dir`, recursively. Node has done this natively since 20.1. */
+export function walkFiles(dir: string): string[] {
+  return readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name))
 }

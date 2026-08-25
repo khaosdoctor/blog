@@ -89,18 +89,21 @@ function escapeXml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-interface Brand {
-  id: string
-  hex: string
-}
+// A const object rather than a TS enum: scripts/cover.ts runs this file through
+// node's type stripping, which rejects an enum because it emits runtime code.
+const Brand = {
+  Red: 'red',
+  Green: 'green',
+  Yellow: 'yellow',
+  Blue: 'blue',
+  Purple: 'purple',
+  White: 'white',
+  WhiteDim: 'white-dim',
+} as const
 
-const BRAND_COLORS: Brand[] = [
-  { id: 'vermelho', hex: '#e30613' },
-  { id: 'verde', hex: '#45b384' },
-  { id: 'amarelo', hex: '#f5b200' },
-  { id: 'azul', hex: '#0578be' },
-  { id: 'roxo', hex: '#4b15a8' },
-]
+type BrandId = (typeof Brand)[keyof typeof Brand]
+
+const BRAND_COLORS: BrandId[] = [Brand.Red, Brand.Green, Brand.Yellow, Brand.Blue, Brand.Purple]
 
 const DARK_BG = '#000000'
 const DARK_SHADOW = '#050505'
@@ -117,9 +120,8 @@ function dimmedInk(ink: string, bg: string): string {
 
 const DIMMED_WHITE = dimmedInk(TITLE_INK, DARK_BG)
 
-const BRANDS: Brand[] = [...BRAND_COLORS, { id: 'branco', hex: TITLE_INK }, { id: 'branco-apagado', hex: DIMMED_WHITE }]
+const BRANDS: BrandId[] = [...BRAND_COLORS, Brand.White, Brand.WhiteDim]
 
-const INK_MIX: Record<string, number> = { vermelho: 100, verde: 100, amarelo: 100, azul: 100, roxo: 90 }
 
 export type CoverScheme = 'dark' | 'light'
 
@@ -141,14 +143,14 @@ const GROUNDS: Record<CoverScheme, Ground> = {
 
 // The SVG needs literal hexes since it carries no custom properties and the raster has no page at all; the
 // page needs a CSS token so the same accent works over `--bg`. The two neutrals map to `--fg`/`--muted`.
-const BRAND_TOKENS: Record<string, string> = {
-  vermelho: 'var(--brand-red)',
-  verde: 'var(--brand-green)',
-  amarelo: 'var(--brand-yellow)',
-  azul: 'var(--brand-blue)',
-  roxo: 'var(--brand-purple)',
-  branco: 'var(--fg)',
-  'branco-apagado': 'var(--muted)',
+const BRAND_TOKENS: Record<BrandId, string> = {
+  [Brand.Red]: 'var(--brand-red)',
+  [Brand.Green]: 'var(--brand-green)',
+  [Brand.Yellow]: 'var(--brand-yellow)',
+  [Brand.Blue]: 'var(--brand-blue)',
+  [Brand.Purple]: 'var(--brand-purple)',
+  [Brand.White]: 'var(--fg)',
+  [Brand.WhiteDim]: 'var(--muted)',
 }
 
 // theme.css's `--brand-*` tokens as literal hexes, one column per ground. Must be kept in sync by hand.
@@ -184,16 +186,15 @@ interface CoverTone {
 }
 
 // The two neutrals are the ground's own ink, the way BRAND_TOKENS points them at `--fg` and `--muted`.
-function toneHex(brand: Brand, ground: Ground, scheme: CoverScheme): string {
-  if (brand.id === 'branco') return ground.ink
-  if (brand.id === 'branco-apagado') return ground.dim
-  if (scheme === 'light') return BRAND_ON_GROUND.light[BRAND_TOKENS[brand.id]] ?? ground.ink
-  return toHex(mixOklab(parseHex(brand.hex), parseHex('#ffffff'), INK_MIX[brand.id] ?? 100))
+function toneHex(id: BrandId, ground: Ground, scheme: CoverScheme): string {
+  if (id === Brand.White) return ground.ink
+  if (id === Brand.WhiteDim) return ground.dim
+  return BRAND_ON_GROUND[scheme][BRAND_TOKENS[id]] ?? ground.ink
 }
 
 export function coverTone(slug: string, scheme: CoverScheme = 'dark'): CoverTone {
-  const brand = BRANDS[coverSeed(slug) % BRANDS.length]
-  return { id: brand.id, hex: toneHex(brand, GROUNDS[scheme], scheme), token: BRAND_TOKENS[brand.id] }
+  const id = BRANDS[coverSeed(slug) % BRANDS.length]
+  return { id, hex: toneHex(id, GROUNDS[scheme], scheme), token: BRAND_TOKENS[id] }
 }
 
 // Ring of `sides` vertices stacks `ringCount` times along Y, tapered, optionally

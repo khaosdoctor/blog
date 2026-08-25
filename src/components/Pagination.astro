@@ -17,50 +17,16 @@ function hrefFor(pageNumber: number): string {
 type Slot = number | 'ellipsis'
 
 // Yields exactly 7 slots at 8+ pages, so the row holds a constant width as
-// the page changes.
+// the page changes. One boundary page and one sibling either side of the
+// current one; below 8 pages every page fits without collapsing.
 function paginationSlots(count: number, current: number): Slot[] {
-  const BOUNDARY = 1
-  const SIBLING = 1
-  // Below this the boundaries and siblings already cover every page.
-  const COLLAPSE_FLOOR = 2 * BOUNDARY + 2 * SIBLING + 3
-  if (count < COLLAPSE_FLOOR + 1) {
-    return Array.from({ length: count }, (_, index) => index + 1)
-  }
+  if (count < 8) return Array.from({ length: count }, (_, index) => index + 1)
 
-  const range = (start: number, end: number): number[] =>
-    Array.from({ length: end - start + 1 }, (_, index) => start + index)
+  const start = Math.max(Math.min(current - 1, count - 4), 3)
+  const end = Math.min(Math.max(current + 1, 5), count - 2)
+  const middle = Array.from({ length: end - start + 1 }, (_, index) => start + index)
 
-  const startPages = range(1, BOUNDARY)
-  const endPages = range(count - BOUNDARY + 1, count)
-
-  const siblingsStart = Math.max(
-    Math.min(current - SIBLING, count - BOUNDARY - SIBLING * 2 - 1),
-    BOUNDARY + 2
-  )
-  const siblingsEnd = Math.min(
-    Math.max(current + SIBLING, BOUNDARY + SIBLING * 2 + 2),
-    endPages[0] - 2
-  )
-
-  const slots: Slot[] = [...startPages]
-
-  if (siblingsStart > BOUNDARY + 2) {
-    slots.push('ellipsis')
-  } else if (BOUNDARY + 1 < count - BOUNDARY) {
-    slots.push(BOUNDARY + 1)
-  }
-
-  slots.push(...range(siblingsStart, siblingsEnd))
-
-  if (siblingsEnd < count - BOUNDARY - 1) {
-    slots.push('ellipsis')
-  } else if (count - BOUNDARY > BOUNDARY) {
-    slots.push(count - BOUNDARY)
-  }
-
-  slots.push(...endPages)
-
-  return slots
+  return [1, start > 3 ? 'ellipsis' : 2, ...middle, end < count - 2 ? 'ellipsis' : count - 1, count]
 }
 
 const slots = paginationSlots(page.lastPage, page.currentPage)

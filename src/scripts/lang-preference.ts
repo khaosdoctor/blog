@@ -1,4 +1,4 @@
-import { readStorage } from '../lib/storage'
+import { readStorage, writeStorage } from '../lib/storage'
 
 const CHOICE_KEY = 'lang'
 // sessionStorage: without a per-tab mark, a reader pressing back after an
@@ -27,6 +27,14 @@ function markRedirected(): void {
 
 function subtag(tag: string): string {
   return tag.toLowerCase().split('-')[0] ?? ''
+}
+
+function rememberChoiceOnClick(): void {
+  const track = document.querySelector<HTMLAnchorElement>('.lang-switch .lang-track')
+  track?.addEventListener('click', (event) => {
+    const code = (event.currentTarget as HTMLElement).dataset.goesTo
+    if (code !== undefined) writeStorage(CHOICE_KEY, code)
+  })
 }
 
 function run(): void {
@@ -66,4 +74,5 @@ function run(): void {
   location.replace(samePath(target))
 }
 
+rememberChoiceOnClick()
 run()

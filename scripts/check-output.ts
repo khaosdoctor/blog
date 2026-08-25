@@ -9,7 +9,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
-import { annotate, bold, count, dim, fail, heading, ok, warn } from './lib/cli.ts'
+import { annotate, bold, count, dim, fail, heading, ok, warn, walkFiles } from './lib/cli.ts'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
 import { urlFor } from '../src/lib/post-dates.mjs'
 
@@ -30,20 +30,7 @@ function contentFileFor(slug: string): string {
   return ['index.mdx', 'index.md'].map((name) => join(CONTENT, slug, name)).find(existsSync) ?? join(CONTENT, slug)
 }
 
-function walk(dir: string): string[] {
-  const found: string[] = []
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name)
-    if (entry.isDirectory()) {
-      found.push(...walk(full))
-      continue
-    }
-    found.push(full)
-  }
-  return found
-}
-
-const files = walk(DIST)
+const files = walkFiles(DIST)
 const pages = files.filter((file) => file.endsWith('.html'))
 
 // Read the scheduler manifest first: it is the build's own record of which posts

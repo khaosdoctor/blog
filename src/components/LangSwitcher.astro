@@ -125,16 +125,5 @@ const otherName = other?.name ?? ''
 </style>
 
 <script>
-  document.querySelector<HTMLAnchorElement>(".lang-switch .lang-track")?.addEventListener("click", (event) => {
-    const code = (event.currentTarget as HTMLElement).dataset.goesTo
-    if (code === undefined) return
-    try {
-      localStorage.setItem("lang", code)
-    } catch {
-    }
-  })
-</script>
-
-<script>
   import '../scripts/lang-preference'
 </script>

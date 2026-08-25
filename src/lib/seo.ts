@@ -47,9 +47,13 @@ const OG_SECTION_CARDS = [
 export const OG_CARD_WIDTH = 1200
 export const OG_CARD_HEIGHT = 630
 
-/** Takes the section URL (`/infra/`), not its display name: the file is named after the URL. */
+/**
+ * Takes the section URL, not its display name: the file is named after the URL.
+ * The last segment is what names the card, because the English routes pass a
+ * locale-prefixed path (`/en/infra/`) that the breadcrumb needs.
+ */
 export function sectionOgImage(sectionUrl?: string): string {
-  const section = sectionUrl?.replace(/^\/+|\/+$/g, '')
+  const section = sectionUrl?.replace(/^\/+|\/+$/g, '').split('/').at(-1)
   if (section && OG_SECTION_CARDS.includes(section)) return `/og/${section}.png`
   return '/og/default.png'
 }
