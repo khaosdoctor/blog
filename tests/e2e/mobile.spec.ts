@@ -4,22 +4,44 @@ import { test, expect, type Page } from '@playwright/test'
  * The mobile ruler: every page type, both languages, at the common phone and
  * tablet widths. Two invariants: the page never scrolls sideways, and every
  * always-visible control is tappable at 44x44 CSS px.
+ *
+ * The tap-target and note tests below run in one language on purpose. They
+ * measure layout the two trees share to the pixel, and a second copy would
+ * only cost a page load.
  */
 
 const PHONE_WIDTHS = [360, 393, 430]
 const TABLET_WIDTHS = [768, 834, 1024]
 const ALL_WIDTHS = [...PHONE_WIDTHS, ...TABLET_WIDTHS]
 
-const PAGES = [
-  { name: 'home pt', path: '/' },
-  { name: 'home en', path: '/en/' },
-  { name: 'post with series en', path: '/en/a-deep-dive-into-container-images-part-1/' },
-  { name: 'series pt', path: '/series/' },
-  { name: 'series en', path: '/en/series/' },
-  { name: 'tags en', path: '/en/tags/' },
-  { name: 'search en', path: '/en/search/' },
-  { name: '404', path: '/definitely-not-a-page/' },
-]
+/*
+ * Grouped by language because lang-preference.ts sends a reader to the tree
+ * their browser asks for: an en-US context loading `/` is redirected to `/en/`
+ * before anything renders, so a Portuguese page can only be reached from a
+ * Portuguese browser. The `lang` assertion below is what makes that visible;
+ * without it these tests measure the redirect target and pass.
+ */
+const PAGES = {
+  pt: [
+    { name: 'home pt', path: '/' },
+    { name: 'post with series pt', path: '/um-mergulho-em-imagens-de-containers-parte-1/' },
+    { name: 'series pt', path: '/series/' },
+    { name: 'tags pt', path: '/tags/' },
+    { name: 'search pt', path: '/search/' },
+    // One 404 answers for the whole host, so it renders in the source language.
+    { name: '404', path: '/definitely-not-a-page/' },
+  ],
+  en: [
+    { name: 'home en', path: '/en/' },
+    { name: 'post with series en', path: '/en/a-deep-dive-into-container-images-part-1/' },
+    { name: 'series en', path: '/en/series/' },
+    { name: 'tags en', path: '/en/tags/' },
+    { name: 'search en', path: '/en/search/' },
+  ],
+}
+
+/** The browser locale that reaches each tree without being redirected away. */
+const BROWSER_LOCALE = { pt: 'pt-BR', en: 'en-GB' }
 
 async function horizontalOverflow(page: Page): Promise<number> {
   return page.evaluate(() => {
@@ -34,17 +56,30 @@ async function horizontalOverflow(page: Page): Promise<number> {
  * coverage a resize gives. The load happens at the narrowest width, which is
  * where an overflow that only appears on a cold layout would show.
  */
-for (const { name, path } of PAGES) {
-  test(`${name} never scrolls sideways`, async ({ page }) => {
-    await page.setViewportSize({ width: ALL_WIDTHS[0], height: 850 })
-    await page.goto(path)
+for (const [lang, pages] of Object.entries(PAGES)) {
+  test.describe(`${lang} tree`, () => {
+    test.use({ locale: BROWSER_LOCALE[lang as keyof typeof BROWSER_LOCALE] })
 
-    for (const width of ALL_WIDTHS) {
-      await page.setViewportSize({ width, height: 850 })
-      await expect
-        .poll(() => horizontalOverflow(page), { timeout: 2000, message: `${name} at ${width}px` })
-        .toBeLessThanOrEqual(0)
+    for (const { name, path } of pages) {
+      test(`${name} never scrolls sideways`, async ({ page }) => {
+        await page.setViewportSize({ width: ALL_WIDTHS[0], height: 850 })
+        await page.goto(path)
+        await expect(page.locator('html')).toHaveAttribute('lang', lang)
+
+        for (const width of ALL_WIDTHS) {
+          await page.setViewportSize({ width, height: 850 })
+          await expect
+            .poll(() => horizontalOverflow(page), { timeout: 2000, message: `${name} at ${width}px` })
+            .toBeLessThanOrEqual(0)
+        }
+      })
     }
+
+    test(`search returns results on the built site (${lang})`, async ({ page }) => {
+      await page.setViewportSize({ width: 393, height: 850 })
+      await page.goto(`${lang === 'pt' ? '/search/' : '/en/search/'}?q=typescript`)
+      await expect(page.locator('a[href*="typescript"]').first()).toBeVisible({ timeout: 10000 })
+    })
   })
 }
 
@@ -184,8 +219,3 @@ test.describe('unnumbered notes on touch', () => {
   })
 })
 
-test('search returns results on the built site', async ({ page }) => {
-  await page.setViewportSize({ width: 393, height: 850 })
-  await page.goto('/en/search/?q=typescript')
-  await expect(page.locator('a[href*="typescript"]').first()).toBeVisible({ timeout: 10000 })
-})
