@@ -1,63 +1,11 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import { render } from 'astro:content'
-import BaseLayout from '../layouts/BaseLayout.astro'
-import PostArticle from '../components/PostArticle.astro'
-import PostToc from '../components/PostToc.astro'
-import { coverTone } from '../lib/cover'
-import { mdxComponents } from '../lib/mdx-components'
-import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, urlOf } from '../lib/posts'
-import { buildSeriesMap, getSeriesNavigation } from '../lib/taxonomy'
-import { HREFLANG } from '../i18n/ui'
+import type { ComponentProps } from 'astro/types'
+import PostPage from '../components/pages/PostPage.astro'
+import { postPaths } from '../lib/routes'
 
-export const getStaticPaths = (async () => {
-  const [posts, byFolder] = await Promise.all([getPublishedPosts(), getPublishedByFolder()])
-  const seriesMap = buildSeriesMap(posts)
-  return posts.map((post) => ({
-    params: { slug: slugOf(post) },
-    props: {
-      post,
-      series: getSeriesNavigation(post, seriesMap),
-      alternates: (byFolder.get(folderOf(post)) ?? [post]).map((entry) => ({
-        lang: HREFLANG[entry.data.lang],
-        path: urlOf(entry),
-      })),
-    },
-  }))
-}) satisfies GetStaticPaths
+type Props = ComponentProps<typeof PostPage>
 
-const { post, series, alternates: folderAlternates } = Astro.props
-const { Content, headings, remarkPluginFrontmatter } = await render(post)
-const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
-
-const alternates = folderAlternates.map(({ lang, path }) => ({
-  lang,
-  href: new URL(path, Astro.site).href,
-}))
-
-const postAccent = coverTone(slugOf(post)).token
+export const getStaticPaths = postPaths('pt')
 ---
 
-<BaseLayout
-  title={`${post.data.seoTitle ?? post.data.title} - Lucas Santos`}
-  description={post.data.seoDescription ?? post.data.description}
-  lang={post.data.lang}
-  type="article"
-  publishedAt={post.data.pubDate}
-  updatedAt={post.data.updatedDate}
-  tags={post.data.tags}
-  series={post.data.series}
-  authors={post.data.authors}
-  image={post.data.heroImage?.src}
-  alternates={alternates}
-  section={{ name: post.data.category, url: `/${post.data.category}/` }}
-  markdown={new URL(`${Astro.url.pathname}index.md`, Astro.site).href}
-  noindex={post.data.noindex}
-  progress
-  postAccent={postAccent}
->
-  <PostToc headings={headings} locale={post.data.lang} />
-  <PostArticle post={post} series={series} readingTime={readingTime} locale={post.data.lang}>
-    <Content components={mdxComponents} />
-  </PostArticle>
-</BaseLayout>
+<PostPage {...Astro.props} />

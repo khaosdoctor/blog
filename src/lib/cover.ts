@@ -1,5 +1,6 @@
 // The .ts extension is required: scripts/cover.ts runs this file through plain
 // node, whose ESM resolver does not add one.
+import type { Locale } from '../i18n/locales.ts'
 import { chipColor, hashString } from './chip-color.ts'
 import { DARK_GROUND, LIGHT_GROUND } from './grounds.mjs'
 
@@ -436,13 +437,13 @@ function layoutCard(title: string): Card {
   return { padX, fontSize, lines, bylineY, ruleY: bylineY + spaceAfterByline * 0.5, titleYs, metaY }
 }
 
-const MONTHS: Record<'pt' | 'en', string[]> = {
+const MONTHS: Record<Locale, string[]> = {
   pt: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'],
   en: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
 }
 
 // UTC getters, so the printed day does not depend on the build machine's zone.
-export function formatCoverByline(date: Date, lang: 'pt' | 'en', authorName: string): string {
+export function formatCoverByline(date: Date, lang: Locale, authorName: string): string {
   const month = MONTHS[lang][date.getUTCMonth()]
   return `${authorName} / ${date.getUTCDate()} ${month} ${date.getUTCFullYear()}`
 }

@@ -1,10 +1,11 @@
+import { asLocale, DATE_LOCALE, type Locale } from '../i18n/ui'
 import { onReady } from './ready'
 
 const OPEN_ATTR = 'data-open'
 
-function finishTimeText(minutes: number, lang: string): string {
+function finishTimeText(minutes: number, lang: Locale): string {
   const finish = new Date(Date.now() + minutes * 60_000)
-  return new Intl.DateTimeFormat(lang, { hour: 'numeric', minute: '2-digit' }).format(finish)
+  return new Intl.DateTimeFormat(DATE_LOCALE[lang], { hour: 'numeric', minute: '2-digit' }).format(finish)
 }
 
 let popupSeq = 0
@@ -32,7 +33,7 @@ function upgrade(span: HTMLElement): void {
   const show = (): void => {
     // Written synchronously in the handler that received the focus event, or a
     // screen reader announces the empty string the popup started with.
-    popup.textContent = template.replace(/%s/, finishTimeText(minutes, document.documentElement.lang || 'en'))
+    popup.textContent = template.replace(/%s/, finishTimeText(minutes, asLocale(document.documentElement.lang)))
     span.setAttribute(OPEN_ATTR, 'true')
     button.setAttribute('aria-expanded', 'true')
   }

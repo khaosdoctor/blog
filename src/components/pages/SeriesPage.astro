@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { alternatesFor, t, type Locale } from '../../i18n/ui'
+import type { Post } from '../../lib/posts'
+import PostList from '../PostList.astro'
+
+interface Props {
+  locale: Locale
+  slug: string
+  name: string
+  posts: Post[]
+  languages: Locale[]
+}
+
+const { locale, slug, name, posts, languages } = Astro.props
+---
+
+<BaseLayout
+  title={`LS: ${name}`}
+  description={t(locale, 'seriesDescription', name)}
+  lang={locale}
+  alternates={alternatesFor(`/series/${slug}/`, Astro.site, languages)}
+>
+  <p class="kicker listing-heading">{t(locale, 'series')}</p>
+  <h1 class="listing-heading">
+    {name} <span class="page-count">[{posts.length}]</span>
+  </h1>
+  <PostList posts={posts} />
+</BaseLayout>

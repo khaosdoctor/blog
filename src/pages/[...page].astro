@@ -1,34 +1,11 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import BaseLayout from '../layouts/BaseLayout.astro'
-import PostList from '../components/PostList.astro'
-import Pagination from '../components/Pagination.astro'
-import { getPublishedPosts, LIST_PAGE_SIZE } from '../lib/posts'
-import { HREFLANG, t } from '../i18n/ui'
+import type { ComponentProps } from 'astro/types'
+import PostListing from '../components/pages/PostListing.astro'
+import { postListPaths } from '../lib/routes'
 
-// A rest param is required here: paginate() only maps page 1 to an undefined
-// param for [...page], so a plain [page] would put the home page at /1/.
-export const getStaticPaths = (async ({ paginate }) => {
-  const posts = await getPublishedPosts()
-  return paginate(posts, { pageSize: LIST_PAGE_SIZE })
-}) satisfies GetStaticPaths
+type Props = ComponentProps<typeof PostListing>
 
-const { page } = Astro.props
-const title = page.currentPage > 1 ? `Lucas Santos: Blog | página ${page.currentPage}` : 'Lucas Santos: Blog'
+export const getStaticPaths = postListPaths('pt')
 ---
 
-<BaseLayout
-  title={title}
-  description={t('pt', 'homeDescription')}
-  alternates={[
-    { lang: HREFLANG.pt, href: new URL('/', Astro.site).href },
-    { lang: HREFLANG.en, href: new URL('/en/', Astro.site).href },
-  ]}
->
-  <h1 class="listing-heading">
-    {t('pt', 'navPosts')} <span class="page-count">[{page.total}]</span>
-  </h1>
-  <PostList posts={page.data} />
-  <Pagination page={page} basePath="/" locale="pt" />
-</BaseLayout>
-
+<PostListing {...Astro.props} />

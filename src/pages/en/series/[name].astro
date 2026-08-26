@@ -1,42 +1,11 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import BaseLayout from '../../../layouts/BaseLayout.astro'
-import PostList from '../../../components/PostList.astro'
-import { getSeries, seriesTitle } from '../../../lib/taxonomy'
-import { HREFLANG, t } from '../../../i18n/ui'
+import type { ComponentProps } from 'astro/types'
+import SeriesPage from '../../../components/pages/SeriesPage.astro'
+import { seriesPaths } from '../../../lib/routes'
 
-export const getStaticPaths = (async () => {
-  const [series, portuguese] = await Promise.all([getSeries('en'), getSeries()])
-  return [...series.entries()]
-    .filter(([, posts]) => posts.length > 1)
-    .map(([slug, posts]) => ({
-      params: { name: slug },
-      props: {
-        slug,
-        name: seriesTitle(slug, posts),
-        posts,
-        hasPortuguese: (portuguese.get(slug)?.length ?? 0) > 1,
-      },
-    }))
-}) satisfies GetStaticPaths
+type Props = ComponentProps<typeof SeriesPage>
 
-const { slug, name, posts, hasPortuguese } = Astro.props
-
-const alternates = [
-  ...(hasPortuguese ? [{ lang: HREFLANG.pt, href: new URL(`/series/${slug}/`, Astro.site).href }] : []),
-  { lang: HREFLANG.en, href: new URL(`/en/series/${slug}/`, Astro.site).href },
-]
+export const getStaticPaths = seriesPaths('en')
 ---
 
-<BaseLayout
-  title={`LS: ${name}`}
-  description={t('en', 'seriesDescription', name)}
-  lang="en"
-  alternates={alternates}
->
-  <p class="kicker listing-heading">{t('en', 'series')}</p>
-  <h1 class="listing-heading">
-    {name} <span class="page-count">[{posts.length}]</span>
-  </h1>
-  <PostList posts={posts} />
-</BaseLayout>
+<SeriesPage {...Astro.props} />

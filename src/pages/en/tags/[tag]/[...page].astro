@@ -1,27 +1,11 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import BaseLayout from '../../../../layouts/BaseLayout.astro'
-import PostList from '../../../../components/PostList.astro'
-import Pagination from '../../../../components/Pagination.astro'
-import { slugify, tagListingRoutes } from '../../../../lib/taxonomy'
-import { HREFLANG, localePath, LOCALES, t } from '../../../../i18n/ui'
+import type { ComponentProps } from 'astro/types'
+import TagListing from '../../../../components/pages/TagListing.astro'
+import { tagListPaths } from '../../../../lib/routes'
 
-export const getStaticPaths = (async ({ paginate }) => tagListingRoutes(paginate, 'en')) satisfies GetStaticPaths
+type Props = ComponentProps<typeof TagListing>
 
-const { tag, languages, page } = Astro.props
-// Always page 1: the counterpart tag may have fewer pages than this one.
-const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
-  lang: HREFLANG[locale],
-  href: new URL(localePath(locale, `/tags/${slugify(tag)}/`), Astro.site).href,
-}))
-const title = page.currentPage > 1 ? `LS: ${tag} | page ${page.currentPage}` : `LS: ${tag}`
+export const getStaticPaths = tagListPaths('en')
 ---
 
-<BaseLayout title={title} description={t('en', 'tagDescription', tag)} lang="en" alternates={alternates}>
-  <p class="kicker listing-heading">{t('en', 'tag')}</p>
-  <h1 class="listing-heading">
-    {tag} <span class="page-count">[{page.total}]</span>
-  </h1>
-  <PostList posts={page.data} />
-  <Pagination page={page} basePath={`/en/tags/${slugify(tag)}/`} locale="en" />
-</BaseLayout>
+<TagListing {...Astro.props} />

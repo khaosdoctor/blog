@@ -15,6 +15,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
+import { asLocale } from '../src/i18n/locales.ts'
 import { parseAuthors } from '../src/lib/authors.ts'
 import { buildCoverSvg, formatCoverByline } from '../src/lib/cover.ts'
 import { estimateReadingTime } from '../src/lib/reading-time.ts'
@@ -38,7 +39,7 @@ const raw = readFileSync(postFile, 'utf8')
 const frontmatter = frontmatterOf(raw)
 const title = field(frontmatter, 'title') ?? fail(`${postFile} has no title in its frontmatter.`)
 const category = field(frontmatter, 'category') ?? ''
-const lang = field(frontmatter, 'lang') === 'en' ? 'en' : 'pt'
+const lang = asLocale(field(frontmatter, 'lang'))
 const pubDateRaw = field(frontmatter, 'pubDate') ?? fail(`${postFile} has no pubDate in its frontmatter.`)
 const pubDate = new Date(pubDateRaw)
 

@@ -1,30 +1,5 @@
 ---
-// The length filter must match src/pages/en/series/[name].astro, which builds
-// no route for a series of one.
-import BaseLayout from '../../../layouts/BaseLayout.astro'
-import SeriesList from '../../../components/SeriesList.astro'
-import { getSeries, seriesTitle } from '../../../lib/taxonomy'
-import { HREFLANG, t } from '../../../i18n/ui'
-
-const series = [...(await getSeries('en')).entries()]
-  .filter(([, posts]) => posts.length > 1)
-  .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), posts }))
-
-const alternates = [
-  { lang: HREFLANG.pt, href: new URL('/series/', Astro.site).href },
-  { lang: HREFLANG.en, href: new URL('/en/series/', Astro.site).href },
-]
+import SeriesIndex from '../../../components/pages/SeriesIndex.astro'
 ---
 
-<BaseLayout
-  title={`LS: ${t('en', 'allSeries')}`}
-  description={t('en', 'seriesIntro')}
-  lang="en"
-  alternates={alternates}
->
-  <h1 class="listing-heading">
-    {t('en', 'allSeries')} <span class="page-count">[{series.length}]</span>
-  </h1>
-  <SeriesList entries={series} locale="en" />
-</BaseLayout>
-
+<SeriesIndex locale="en" />

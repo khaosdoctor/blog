@@ -1,8 +1,6 @@
-export const LOCALES = ['pt', 'en'] as const
+import { asLocale, LOCALES, localePath, postUrl, SOURCE_LOCALE, type Locale } from './locales.ts'
 
-export type Locale = (typeof LOCALES)[number]
-
-export const SOURCE_LOCALE: Locale = 'pt'
+export { asLocale, LOCALES, localePath, postUrl, SOURCE_LOCALE, type Locale }
 
 // Search engines match on the region, so Portuguese is announced as pt-BR.
 export const HREFLANG: Record<Locale, string> = {
@@ -10,8 +8,26 @@ export const HREFLANG: Record<Locale, string> = {
   en: 'en',
 }
 
-export function localePath(locale: Locale, path: string): string {
-  return locale === SOURCE_LOCALE ? path : `/${locale}${path}`
+// Not HREFLANG: a date wants a region even where a hreflang does not.
+export const DATE_LOCALE: Record<Locale, string> = {
+  pt: 'pt-BR',
+  en: 'en-GB',
+}
+
+/**
+ * The hreflang block a page carries. Every page that exists in more than one
+ * language builds the same array, so it lives here rather than in each route.
+ * `locales` narrows it where a page only exists in some of them.
+ */
+export function alternatesFor(
+  path: string,
+  site: URL | undefined,
+  locales: readonly Locale[] = LOCALES,
+): { lang: string; href: string }[] {
+  return locales.map((locale) => ({
+    lang: HREFLANG[locale],
+    href: new URL(localePath(locale, path), site).href,
+  }))
 }
 
 const pt = {
@@ -104,6 +120,8 @@ const pt = {
   navAbout: 'Sobre',
   article: 'artigo',
   articles: 'artigos',
+  // The word in a listing title, as in "LS: Deno | página 2".
+  page: 'página',
   homeDescription: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
   noTranslatedPosts: 'Nenhum artigo traduzido ainda.',
   skipToContent: 'Pular para o conteúdo',
@@ -253,6 +271,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     navAbout: 'About',
     article: 'article',
     articles: 'articles',
+    page: 'page',
     homeDescription: 'Articles about software development, technology and opinion.',
     noTranslatedPosts: 'No translated articles yet.',
     skipToContent: 'Skip to content',
@@ -316,6 +335,5 @@ export function t(lang: Locale, key: UIKey, ...args: Array<string | number>): st
 }
 
 export function localeFromPath(pathname: string): Locale {
-  const segment = pathname.split('/')[1]
-  return LOCALES.find((locale) => locale === segment) ?? SOURCE_LOCALE
+  return asLocale(pathname.split('/')[1])
 }

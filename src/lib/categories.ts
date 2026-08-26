@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import type { Locale } from '../i18n/ui'
+import { SOURCE_LOCALE, type Locale } from '../i18n/ui'
 
 type Described = string | Partial<Record<Locale, string>>
 
@@ -25,9 +25,9 @@ function clean(value: unknown): string | null {
   return typeof value === 'string' && value.trim() !== '' ? value.trim() : null
 }
 
-export function categoryDescription(category: string, locale: Locale = 'pt'): string | null {
+export function categoryDescription(category: string, locale: Locale): string | null {
   const entry = load()[category]
   if (entry === undefined) return null
   if (typeof entry === 'string') return clean(entry)
-  return clean(entry[locale]) ?? clean(entry.pt)
+  return clean(entry[locale]) ?? clean(entry[SOURCE_LOCALE])
 }

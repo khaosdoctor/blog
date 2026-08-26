@@ -1,4 +1,5 @@
 ---
+import type { Locale } from '../i18n/ui'
 import { formatCoverByline } from '../lib/cover'
 
 interface Props {
@@ -6,7 +7,7 @@ interface Props {
   title: string
   category: string
   pubDate: Date
-  lang: 'pt' | 'en'
+  lang: Locale
   authorName: string
 }
 

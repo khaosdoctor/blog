@@ -1,24 +1,5 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro'
-import TagCloud from '../../../components/TagCloud.astro'
-import { getTags } from '../../../lib/taxonomy'
-import { HREFLANG, t } from '../../../i18n/ui'
-
-const tags = [...(await getTags('en')).entries()]
-  .sort(([a], [b]) => a.localeCompare(b, 'en'))
-  .map(([name, posts]) => ({ name, count: posts.length }))
-
-const alternates = [
-  { lang: HREFLANG.pt, href: new URL('/tags/', Astro.site).href },
-  { lang: HREFLANG.en, href: new URL('/en/tags/', Astro.site).href },
-]
+import TagIndex from '../../../components/pages/TagIndex.astro'
 ---
 
-<BaseLayout
-  title={`LS: ${t('en', 'tags')}`}
-  description={t('en', 'tagsIntro')}
-  lang="en"
-  alternates={alternates}
->
-  <TagCloud locale="en" tags={tags} />
-</BaseLayout>
+<TagIndex locale="en" />

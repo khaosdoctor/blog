@@ -13,9 +13,10 @@ import {
   toOgLocale,
   type BreadcrumbItem,
 } from '../lib/seo'
-import { HREFLANG, SOURCE_LOCALE } from '../i18n/ui'
+import { HREFLANG, SOURCE_LOCALE, type Locale } from '../i18n/ui'
 
 export interface Alternate {
+  /** A hreflang tag, not a locale code: `pt` is announced as `pt-BR`. */
   lang: string
   href: string
 }
@@ -28,7 +29,7 @@ interface Props {
   type: 'website' | 'article'
   publishedAt?: Date
   updatedAt?: Date
-  lang: string
+  lang: Locale
   image?: string
   imageAlt?: string
   tags?: string[]

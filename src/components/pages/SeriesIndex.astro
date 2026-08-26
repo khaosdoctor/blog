@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { alternatesFor, t, type Locale } from '../../i18n/ui'
+import { getSeries, seriesTitle } from '../../lib/taxonomy'
+import SeriesList from '../SeriesList.astro'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+
+// The length filter must match seriesPaths in src/lib/routes.ts, which builds
+// no route for a series of one.
+const series = [...(await getSeries(locale)).entries()]
+  .filter(([, posts]) => posts.length > 1)
+  .map(([slug, posts]) => ({ slug, title: seriesTitle(slug, posts), posts }))
+---
+
+<BaseLayout
+  title={`LS: ${t(locale, 'allSeries')}`}
+  description={t(locale, 'seriesIntro')}
+  lang={locale}
+  alternates={alternatesFor('/series/', Astro.site)}
+>
+  <h1 class="listing-heading">
+    {t(locale, 'allSeries')} <span class="page-count">[{series.length}]</span>
+  </h1>
+  <SeriesList entries={series} locale={locale} />
+</BaseLayout>

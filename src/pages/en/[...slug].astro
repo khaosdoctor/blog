@@ -1,74 +1,11 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import { render } from 'astro:content'
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import LangBanner from '../../components/LangBanner.astro'
-import PostArticle from '../../components/PostArticle.astro'
-import PostToc from '../../components/PostToc.astro'
-import { coverTone } from '../../lib/cover'
-import { mdxComponents } from '../../lib/mdx-components'
-import { buildSeriesMap, getSeriesNavigation } from '../../lib/taxonomy'
-import { HREFLANG } from '../../i18n/ui'
-import { folderOf, getPublishedByFolder, getPublishedPosts, slugOf, SOURCE_LANG, urlOf } from '../../lib/posts'
+import type { ComponentProps } from 'astro/types'
+import PostPage from '../../components/pages/PostPage.astro'
+import { postPaths } from '../../lib/routes'
 
-export const getStaticPaths = (async () => {
-  const [posts, byFolder] = await Promise.all([getPublishedPosts('en'), getPublishedByFolder()])
-  const seriesMap = buildSeriesMap(posts)
-  return posts.map((post) => {
-    const siblings = byFolder.get(folderOf(post)) ?? [post]
-    const source = siblings.find((entry) => entry.data.lang === SOURCE_LANG)
-    return {
-      params: { slug: slugOf(post) },
-      props: {
-        post,
-        series: getSeriesNavigation(post, seriesMap),
-        sourcePath: source === undefined ? null : urlOf(source),
-        alternates: siblings.map((entry) => ({
-          lang: HREFLANG[entry.data.lang],
-          path: urlOf(entry),
-        })),
-      },
-    }
-  })
-}) satisfies GetStaticPaths
+type Props = ComponentProps<typeof PostPage>
 
-const { post, series, sourcePath, alternates: folderAlternates } = Astro.props
-const { Content, headings, remarkPluginFrontmatter } = await render(post)
-const readingTime = remarkPluginFrontmatter.readingTime as number | undefined
-const alternates = folderAlternates.map(({ lang, path }) => ({
-  lang,
-  href: new URL(path, Astro.site).href,
-}))
-
-const postAccent = coverTone(slugOf(post)).token
+export const getStaticPaths = postPaths('en')
 ---
 
-<BaseLayout
-  title={`${post.data.seoTitle ?? post.data.title} - Lucas Santos`}
-  description={post.data.seoDescription ?? post.data.description}
-  lang="en"
-  type="article"
-  publishedAt={post.data.pubDate}
-  updatedAt={post.data.updatedDate}
-  tags={post.data.tags}
-  series={post.data.series}
-  authors={post.data.authors}
-  section={{ name: post.data.category, url: `/en/${post.data.category}/` }}
-  alternates={alternates}
-  markdown={new URL(`${Astro.url.pathname}index.md`, Astro.site).href}
-  noindex={post.data.noindex}
-  progress
-  postAccent={postAccent}
->
-  <PostToc headings={headings} locale="en" />
-  <PostArticle post={post} series={series} readingTime={readingTime} locale="en">
-    <Fragment slot="banner">
-      {
-        post.data.machineTranslated && sourcePath !== null && (
-          <LangBanner lang="en" originalHref={sourcePath} />
-        )
-      }
-    </Fragment>
-    <Content components={mdxComponents} />
-  </PostArticle>
-</BaseLayout>
+<PostPage {...Astro.props} />

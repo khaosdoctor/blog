@@ -1,13 +1,14 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { frontmatterOf, postUrl, slugFrom, SOURCE_LANG } from './post-url.mjs'
+import { asLocale, postUrl } from '../i18n/locales.ts'
+import { frontmatterOf, slugFrom } from './post-file.mjs'
 
 export const field = (frontmatter, name) =>
   new RegExp(`^${name}:\\s*(.+)$`, 'm').exec(frontmatter)?.[1].trim().replace(/^["']|["']$/g, '')
 
 export function urlFor(directory, filename, frontmatter) {
   const slug = field(frontmatter, 'slug') ?? slugFrom(directory, filename)
-  return postUrl(slug, field(frontmatter, 'lang') ?? SOURCE_LANG)
+  return postUrl(slug, asLocale(field(frontmatter, 'lang')))
 }
 
 // Frontmatter, not the collection: astro.config.mjs runs before astro:content.

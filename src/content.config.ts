@@ -1,5 +1,6 @@
 import { glob } from 'astro/loaders'
 import { defineCollection, z } from 'astro:content'
+import { LOCALES, SOURCE_LOCALE } from './i18n/locales.ts'
 import { labSources } from './lib/lab-sources'
 
 // Exactly one level deep, so a stray note anywhere else cannot fail the build.
@@ -17,7 +18,7 @@ const blog = defineCollection({
       // A future pubDate means scheduled: the build hides it until its time.
       pubDate: z.coerce.date(),
       updatedDate: z.coerce.date().optional(),
-      lang: z.enum(['pt', 'en']).default('pt'),
+      lang: z.enum(LOCALES).default(SOURCE_LOCALE),
       slug: z.string().optional(),
       category: z.string(),
       tags: z.array(z.string()).default([]),

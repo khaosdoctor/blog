@@ -103,23 +103,24 @@ const BILINGUAL_PAGES = new Set(['404.astro', 'offline.astro'])
 const MIRRORED_TABLES = [
   { file: 'src/plugins/remark-wikilinks.mjs', constant: 'NOT_WRITTEN_YET', key: 'notWrittenYet' },
   { file: 'src/plugins/rehype-footnote-sidenotes.mjs', constant: 'FOOTNOTES_LABEL', key: 'footnotes' },
+  // No `key`: these two say something the ui tables never needed a word for,
+  // so only their language coverage can be checked.
+  { file: 'src/plugins/rehype-footnote-sidenotes.mjs', constant: 'BACKREF_LABEL', key: undefined },
+  { file: 'src/plugins/rehype-heading-anchors.mjs', constant: 'ANCHOR_LABEL', key: undefined },
 ] as const
 
 /**
  * Files holding a case per language, which therefore have to name every one of
- * them: a date format, an og:locale, a manifest field, the locale a plugin
- * decides a page is in, a switcher entry. A language missing from any of these
- * falls back to the source language without saying so.
+ * them. A language missing from any of these falls back to the source language
+ * without saying so.
  *
- * Files that handle languages generically are deliberately absent, because
- * naming them here would fail on code that is already right:
- * src/lib/post-dates.mjs and src/plugins/remark-wikilinks.mjs both build a URL
- * as "source language bare, anything else prefixed", which needs no new case.
+ * The list is short on purpose. Anything that reads a locale-keyed table by
+ * index rather than branching on the locale belongs nowhere near it: naming
+ * such a file here fails code that is already right.
  */
 const LOCALE_AWARE_FILES = [
-  'src/lib/posts.ts',
+  'src/i18n/ui.ts',
   'src/lib/seo.ts',
-  'src/lib/manifest.ts',
   'src/plugins/rehype-footnote-sidenotes.mjs',
   'src/components/LangSwitcher.astro',
 ]
@@ -189,14 +190,18 @@ for (const locale of LOCALES) {
   announced.add(value)
 }
 
-// 4. The source language is stated twice, in two modules only one of which can
-// import the other. They have to say the same thing.
-const POSTS = 'src/lib/post-url.mjs'
-const declared = /export const SOURCE_LANG = '([a-z-]+)'/.exec(readFileSync(POSTS, 'utf8'))?.[1]
-if (declared === undefined) {
-  report('SOURCE_LANG not found', `expected an export in ${POSTS} to compare against SOURCE_LOCALE`, POSTS)
-} else if (declared !== SOURCE_LOCALE) {
-  report('source language disagreement', `${POSTS} says "${declared}", ${UI_FILE} says "${SOURCE_LOCALE}"`, POSTS)
+// 4. The locale set and the source language are declared once, in a leaf module
+// every builder can reach. Nothing else may state them.
+const LEAF = 'src/i18n/locales.ts'
+// A pair of bare locale codes side by side is the shape of a table or a union
+// written out by hand. The i18n modules are where those belong.
+const RESTATED = new RegExp(`(['"])(?:${LOCALES.join('|')})\\1\\s*[,|]\\s*(['"])(?:${LOCALES.join('|')})\\2`)
+for (const dir of ['src/lib', 'src/scripts', 'src/plugins', 'src/components', 'src/layouts', 'scripts']) {
+  for (const file of walkFiles(dir)) {
+    if (!/\.(ts|mjs|astro)$/.test(file)) continue
+    if (!RESTATED.test(readFileSync(file, 'utf8'))) continue
+    warnings.push(`${file} lists the locales itself. Import LOCALES from ${LEAF}`)
+  }
 }
 
 // 5. The copy duplicated into the build-time plugins still matches its key.
@@ -213,6 +218,7 @@ for (const { file, constant, key } of MIRRORED_TABLES) {
       report('mirrored table is missing a language', `${constant} has no ${locale} entry`, file)
       continue
     }
+    if (key === undefined) continue
     const expected = ui[locale]?.[key as keyof typeof sourceTable]
     if (value !== expected) {
       report('mirrored copy drifted', `${constant}.${locale} is "${value}", ${UI_FILE} says "${expected}"`, file)

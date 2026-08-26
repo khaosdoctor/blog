@@ -1,41 +1,39 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PostList from '../components/PostList.astro'
-import { t } from '../i18n/ui'
+import { localePath, LOCALES, SOURCE_LOCALE, t } from '../i18n/ui'
 import { getPublishedPosts } from '../lib/posts'
 
 const recent = (await getPublishedPosts()).slice(0, 5)
 ---
 
-{/* One 404 answers for the whole host, /en/ paths included, so both languages
-    have to be rendered here. */}
-<BaseLayout title={`LS: ${t('pt', 'notFoundTitle')}`} description={t('pt', 'notFoundBody')}>
+{/* One 404 answers for the whole host, every language prefix included, so all
+    of them have to be rendered here and the script below keeps one. */}
+<BaseLayout
+  title={`LS: ${t(SOURCE_LOCALE, 'notFoundTitle')}`}
+  description={t(SOURCE_LOCALE, 'notFoundBody')}
+  lang={SOURCE_LOCALE}
+>
   <h1 class="listing-heading">404</h1>
   <div class="listing-heading">
-    <div data-lang="pt">
-      <p>{t('pt', 'notFoundBody')}</p>
-      <p><a href="/search/">{t('pt', 'searchLabel')}</a></p>
-      <p class="recent">{t('pt', 'notFoundRecent')}</p>
-    </div>
-    <div data-lang="en" lang="en">
-      <p>{t('en', 'notFoundBody')}</p>
-      <p><a href="/en/search/">{t('en', 'searchLabel')}</a></p>
-      <p class="recent">{t('en', 'notFoundRecent')}</p>
-    </div>
+    {LOCALES.map((locale) => (
+      <div data-lang={locale} lang={locale}>
+        <p>{t(locale, 'notFoundBody')}</p>
+        <p><a href={localePath(locale, '/search/')}>{t(locale, 'searchLabel')}</a></p>
+        <p class="recent">{t(locale, 'notFoundRecent')}</p>
+      </div>
+    ))}
   </div>
   <PostList posts={recent} />
 </BaseLayout>
 
 <script>
-  const stored = (() => {
-    try {
-      return localStorage.getItem('lang')
-    } catch {
-      return null
-    }
-  })()
+  import { asLocale } from '../i18n/ui'
+  import { readStorage } from '../lib/storage'
+
+  const stored = readStorage('lang')
   const top = (stored ?? navigator.languages?.[0] ?? navigator.language ?? '').toLowerCase().split('-')[0]
-  const wanted = top === 'pt' ? 'pt' : 'en'
+  const wanted = asLocale(top)
   for (const block of document.querySelectorAll<HTMLElement>('[data-lang]')) {
     if (block.dataset.lang !== wanted) block.remove()
   }

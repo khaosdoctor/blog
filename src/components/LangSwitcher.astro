@@ -1,5 +1,5 @@
 ---
-import { t, type Locale } from '../i18n/ui'
+import { localePath, LOCALES, t, type Locale } from '../i18n/ui'
 
 interface Props {
   locale: Locale
@@ -8,37 +8,40 @@ interface Props {
 
 const { locale, alternates = [] } = Astro.props
 
-const LOCALES: { code: Locale; label: string; name: string; home: string }[] = [
-  { code: 'pt', label: 'PT', name: 'Português', home: '/' },
-  { code: 'en', label: 'EN', name: 'English', home: '/en/' },
-]
+// A language names itself in its own words, so these are not in the ui tables.
+const ENDONYM: Record<Locale, { label: string; name: string }> = {
+  pt: { label: 'PT', name: 'Português' },
+  en: { label: 'EN', name: 'English' },
+}
 
 function hrefFor(code: Locale): string {
   const match = alternates.find((alt) => alt.lang.toLowerCase().startsWith(code))
   if (match !== undefined) return new URL(match.href, Astro.site).pathname
-  return LOCALES.find((entry) => entry.code === code)?.home ?? '/'
+  return localePath(code, '/')
 }
 
-const other = LOCALES.find((entry) => entry.code !== locale)
-const otherHref = other === undefined ? '/' : hrefFor(other.code)
-const otherName = other?.name ?? ''
+// The switcher is a two-way toggle: it offers the next language round, which
+// with two of them is always the other one.
+const other = LOCALES[(LOCALES.indexOf(locale) + 1) % LOCALES.length]
+const otherHref = hrefFor(other)
+const otherName = ENDONYM[other].name
 ---
 
 <nav class="lang-switch" aria-label={t(locale, 'language')} data-current={locale}>
   <a
     class="lang-track"
     href={otherHref}
-    hreflang={other?.code}
-    data-goes-to={other?.code}
-    aria-label={`${LOCALES.map((entry) => entry.label).join(' ')}: ${t(locale, 'switchLanguage', otherName)}`}
+    hreflang={other}
+    data-goes-to={other}
+    aria-label={`${LOCALES.map((code) => ENDONYM[code].label).join(' ')}: ${t(locale, 'switchLanguage', otherName)}`}
     title={t(locale, 'switchLanguage', otherName)}
   >
     <span class="lang-rect" aria-hidden="true">
       {/* The literal space keeps the flattened text reading "PT EN", matching the accessible name above. */}
-      {LOCALES.map((entry, index) => (
+      {LOCALES.map((code, index) => (
         <Fragment>
           {index > 0 && ' '}
-          <span class={entry.code === locale ? 'lang-square' : 'lang-other'}>{entry.label}</span>
+          <span class={code === locale ? 'lang-square' : 'lang-other'}>{ENDONYM[code].label}</span>
         </Fragment>
       ))}
     </span>

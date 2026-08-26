@@ -1,4 +1,4 @@
-import { t, type Locale } from '../i18n/ui'
+import { HREFLANG, localePath, t, type Locale } from '../i18n/ui'
 import { LIGHT_GROUND } from './grounds.mjs'
 
 // `scope` must stay at the site root for every locale, so crossing languages
@@ -9,8 +9,8 @@ export function buildManifest(locale: Locale): string {
       name: t(locale, 'appName'),
       short_name: t(locale, 'appShortName'),
       description: t(locale, 'appDescription'),
-      lang: locale === 'en' ? 'en' : 'pt-BR',
-      start_url: locale === 'en' ? '/en/' : '/',
+      lang: HREFLANG[locale],
+      start_url: localePath(locale, '/'),
       scope: '/',
       display: 'standalone',
       // A manifest holds one colour for both schemes, and the splash screen

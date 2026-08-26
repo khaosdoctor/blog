@@ -40,6 +40,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { asLocale, type Locale } from '../src/i18n/locales.ts'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 import { slugify } from '../src/lib/slugify.ts'
 import { bold, count, dim, fail, field, frontmatterOf, heading, ok, postIndex, warn } from './lib/cli.ts'
@@ -61,7 +62,6 @@ const MAX_TOKENS = Number(process.env.TRANSLATE_MAX_TOKENS ?? 64000)
 // not be sent to Groq or OpenRouter.
 const API_KEY = process.env.TRANSLATE_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? ''
 
-type Locale = 'pt' | 'en'
 
 const LANGUAGE_NAMES: Record<Locale, string> = {
   pt: 'Brazilian Portuguese',
@@ -346,7 +346,7 @@ const overrides: string[] = []
 for (const post of sources) {
   const raw = readFileSync(post.file, 'utf8')
   const { frontmatter } = splitFrontmatter(raw)
-  const sourceLang = (field(frontmatter, 'lang') ?? 'pt') as Locale
+  const sourceLang = asLocale(field(frontmatter, 'lang'))
 
   // A post already written in the target language needs no translation.
   if (sourceLang === args.locale) continue
@@ -386,7 +386,7 @@ let skipped = 0
 
 for (const post of changed) {
   const { frontmatter, body } = splitFrontmatter(post.raw)
-  const sourceLang = (field(frontmatter, 'lang') ?? 'pt') as Locale
+  const sourceLang = asLocale(field(frontmatter, 'lang'))
 
   const fields = new Map<string, string>()
   for (const key of TRANSLATABLE_FIELDS) {

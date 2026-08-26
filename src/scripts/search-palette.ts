@@ -1,3 +1,4 @@
+import { asLocale, localePath } from '../i18n/ui'
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
 import {
   searchPaletteDebounceMilliseconds as DEBOUNCE_MS,
@@ -62,7 +63,7 @@ function ensurePagefind(): Promise<PagefindModule | null> {
 }
 
 function searchPageHref(query: string): string {
-  const base = document.documentElement.lang === 'en' ? '/en/search/' : '/search/'
+  const base = localePath(asLocale(document.documentElement.lang), '/search/')
   return `${base}?q=${encodeURIComponent(query)}`
 }
 

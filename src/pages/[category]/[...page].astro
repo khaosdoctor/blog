@@ -1,58 +1,11 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import PostList from '../../components/PostList.astro'
-import Pagination from '../../components/Pagination.astro'
-import { getPublishedPosts, LIST_PAGE_SIZE, slugOf } from '../../lib/posts'
-import { categoryDescription } from '../../lib/categories'
-import { categoryLocales, getCategories } from '../../lib/taxonomy'
-import { HREFLANG, localePath, LOCALES, t } from '../../i18n/ui'
+import type { ComponentProps } from 'astro/types'
+import CategoryListing from '../../components/pages/CategoryListing.astro'
+import { categoryListPaths } from '../../lib/routes'
 
-// Astro gives this route priority over [...slug], so a category named like a
-// post slug would shadow that article.
-export const getStaticPaths = (async ({ paginate }) => {
-  const [categories, posts] = await Promise.all([getCategories(), getPublishedPosts()])
-  const slugs = new Set(posts.map((post) => slugOf(post)))
-  for (const category of categories.keys()) {
-    if (slugs.has(category)) {
-      throw new Error(
-        `Category "${category}" collides with a post of the same slug. Rename the category or the post.`,
-      )
-    }
-  }
-  const sectionsByLocale = await categoryLocales()
-  return [...categories.entries()].flatMap(([category, categoryPosts]) =>
-    paginate(categoryPosts, {
-      pageSize: LIST_PAGE_SIZE,
-      params: { category },
-      props: {
-        category,
-        languages: sectionsByLocale.filter(([, sections]) => sections.has(category)).map(([locale]) => locale),
-      },
-    }),
-  )
-}) satisfies GetStaticPaths
+type Props = ComponentProps<typeof CategoryListing>
 
-const { category, languages, page } = Astro.props
-const alternates = languages.map((locale: (typeof LOCALES)[number]) => ({
-  lang: HREFLANG[locale],
-  href: new URL(localePath(locale, `/${category}/`), Astro.site).href,
-}))
-const described = categoryDescription(category)
-const description = described ?? t('pt', 'sectionDescription', category)
-const title = page.currentPage > 1 ? `LS: ${category} | página ${page.currentPage}` : `LS: ${category}`
+export const getStaticPaths = categoryListPaths('pt')
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  alternates={alternates}
-  section={{ name: category, url: `/${category}/` }}
->
-  <h1 class="listing-heading">
-    {category} <span class="page-count">[{page.total}]</span>
-  </h1>
-  {described !== null && <p class="about listing-heading">{described}</p>}
-  <PostList posts={page.data} />
-  <Pagination page={page} basePath={`/${category}/`} locale="pt" />
-</BaseLayout>
+<CategoryListing {...Astro.props} />

@@ -1,3 +1,4 @@
+import { asLocale } from '../i18n/ui'
 import { readStorage, writeStorage } from '../lib/storage'
 
 const CHOICE_KEY = 'lang'
@@ -66,7 +67,7 @@ function run(): void {
   if (alreadyRedirected()) return
   const top = subtag(navigator.languages?.[0] ?? navigator.language ?? '')
   if (top === '') return
-  const wanted = top === 'pt' ? 'pt' : 'en'
+  const wanted = asLocale(top)
   if (wanted === current) return
   const target = alternates.get(wanted)
   if (target === undefined) return

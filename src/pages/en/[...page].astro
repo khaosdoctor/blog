@@ -1,35 +1,11 @@
 ---
-import type { GetStaticPaths } from 'astro'
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import PostList from '../../components/PostList.astro'
-import Pagination from '../../components/Pagination.astro'
-import { getPublishedPosts, LIST_PAGE_SIZE } from '../../lib/posts'
-import { HREFLANG, t } from '../../i18n/ui'
+import type { ComponentProps } from 'astro/types'
+import PostListing from '../../components/pages/PostListing.astro'
+import { postListPaths } from '../../lib/routes'
 
-export const getStaticPaths = (async ({ paginate }) => {
-  const posts = await getPublishedPosts('en')
-  // paginate() returns one page even for an empty array, which is what lets the
-  // "no translated posts yet" notice render on /en/.
-  return paginate(posts, { pageSize: LIST_PAGE_SIZE })
-}) satisfies GetStaticPaths
+type Props = ComponentProps<typeof PostListing>
 
-const { page } = Astro.props
-const title = page.currentPage > 1 ? `Lucas Santos: Blog | page ${page.currentPage}` : 'Lucas Santos: Blog'
+export const getStaticPaths = postListPaths('en')
 ---
 
-<BaseLayout
-  title={title}
-  description={t('en', 'homeDescription')}
-  lang="en"
-  alternates={[
-    { lang: HREFLANG.pt, href: new URL('/', Astro.site).href },
-    { lang: HREFLANG.en, href: new URL('/en/', Astro.site).href },
-  ]}
->
-  <h1 class="listing-heading">
-    {t('en', 'navPosts')} <span class="page-count">[{page.total}]</span>
-  </h1>
-  {page.total === 0 ? <p>{t('en', 'noTranslatedPosts')}</p> : <PostList posts={page.data} />}
-  <Pagination page={page} basePath="/en/" locale="en" />
-</BaseLayout>
-
+<PostListing {...Astro.props} />

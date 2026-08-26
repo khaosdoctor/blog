@@ -1,9 +1,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
-import { postUrl, SOURCE_LANG } from './post-url.mjs'
+import { DATE_LOCALE, postUrl, SOURCE_LOCALE, type Locale } from '../i18n/ui'
 
 export type Post = CollectionEntry<'blog'>
-
-export { SOURCE_LANG }
 
 export const PUBLISH_CUTOFF = new Date()
 
@@ -41,7 +39,7 @@ async function getPublished(): Promise<Post[]> {
   return posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
 }
 
-export async function getPublishedPosts(lang: Post['data']['lang'] = SOURCE_LANG): Promise<Post[]> {
+export async function getPublishedPosts(lang: Locale = SOURCE_LOCALE): Promise<Post[]> {
   return (await getPublished()).filter((post) => post.data.lang === lang)
 }
 
@@ -49,8 +47,8 @@ export async function getPublishedByFolder(): Promise<Map<string, Post[]>> {
   return Map.groupBy(await getPublished(), folderOf)
 }
 
-export function formatDate(date: Date, lang: string): string {
-  return date.toLocaleDateString(lang === 'en' ? 'en-GB' : 'pt-BR', {
+export function formatDate(date: Date, lang: Locale): string {
+  return date.toLocaleDateString(DATE_LOCALE[lang], {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

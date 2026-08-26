@@ -1,19 +1,25 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { t } from '../i18n/ui'
+import { localePath, LOCALES, SOURCE_LOCALE, t } from '../i18n/ui'
 ---
 
-{/* The service worker serves this one page for any uncached URL, in either
-    language, so both have to be here. */}
-<BaseLayout title={`LS: ${t('pt', 'offlineTitle')}`} description={t('pt', 'offlineDescription')}>
-  <h1 class="listing-heading">{t('pt', 'offlineTitle')}</h1>
+{/* The service worker serves this one page for any uncached URL, in every
+    language, so all of them have to be here. */}
+<BaseLayout
+  title={`LS: ${t(SOURCE_LOCALE, 'offlineTitle')}`}
+  description={t(SOURCE_LOCALE, 'offlineDescription')}
+  lang={SOURCE_LOCALE}
+>
+  <h1 class="listing-heading">{t(SOURCE_LOCALE, 'offlineTitle')}</h1>
   <div class="listing-heading">
-    <p>{t('pt', 'offlineBody')}</p>
-    <p lang="en">{t('en', 'offlineBody')}</p>
+    {LOCALES.map((locale) => <p lang={locale}>{t(locale, 'offlineBody')}</p>)}
     <p>
-      <a href="/">{t('pt', 'backHome')}</a>
-      {' / '}
-      <a href="/en/" hreflang="en">{t('en', 'backHome')}</a>
+      {LOCALES.map((locale, index) => (
+        <Fragment>
+          {index > 0 && ' / '}
+          <a href={localePath(locale, '/')} hreflang={locale}>{t(locale, 'backHome')}</a>
+        </Fragment>
+      ))}
     </p>
   </div>
 </BaseLayout>

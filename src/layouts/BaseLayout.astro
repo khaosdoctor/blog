@@ -38,7 +38,7 @@ import { commitShort, commitUrl, REPO, siteVersion as version } from '../lib/ver
 interface Props {
   title: string
   description: string
-  lang?: string
+  lang: Locale
   type?: 'website' | 'article'
   publishedAt?: Date
   updatedAt?: Date
@@ -57,7 +57,7 @@ interface Props {
 const {
   title,
   description,
-  lang = 'pt',
+  lang: locale,
   type = 'website',
   publishedAt,
   updatedAt,
@@ -73,7 +73,6 @@ const {
   postAccent,
 } = Astro.props
 
-const locale = (lang === 'en' ? 'en' : 'pt') satisfies Locale
 const canonical = new URL(Astro.url.pathname, Astro.site).href
 const home = localePath(locale, '/')
 
@@ -87,7 +86,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
 ---
 
 <!doctype html>
-<html lang={lang} data-copied-label={t(locale, 'linkCopied')}>
+<html lang={locale} data-copied-label={t(locale, 'linkCopied')}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -158,7 +157,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       type={type}
       publishedAt={publishedAt}
       updatedAt={updatedAt}
-      lang={lang}
+      lang={locale}
       image={image}
       tags={tags}
       series={series}

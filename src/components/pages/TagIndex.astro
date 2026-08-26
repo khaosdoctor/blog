@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { alternatesFor, HREFLANG, t, type Locale } from '../../i18n/ui'
+import { getTags } from '../../lib/taxonomy'
+import TagCloud from '../TagCloud.astro'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+
+const tags = [...(await getTags(locale)).entries()]
+  .sort(([a], [b]) => a.localeCompare(b, HREFLANG[locale]))
+  .map(([name, posts]) => ({ name, count: posts.length }))
+---
+
+<BaseLayout
+  title={`LS: ${t(locale, 'tags')}`}
+  description={t(locale, 'tagsIntro')}
+  lang={locale}
+  alternates={alternatesFor('/tags/', Astro.site)}
+>
+  <TagCloud locale={locale} tags={tags} />
+</BaseLayout>

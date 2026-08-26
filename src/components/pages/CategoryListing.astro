@@ -1,0 +1,37 @@
+---
+import type { Page } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { alternatesFor, localePath, t, type Locale } from '../../i18n/ui'
+import type { Post } from '../../lib/posts'
+import Pagination from '../Pagination.astro'
+import PostList from '../PostList.astro'
+
+interface Props {
+  locale: Locale
+  category: string
+  description: string | null
+  languages: Locale[]
+  page: Page<Post>
+}
+
+const { locale, category, description, languages, page } = Astro.props
+
+const path = `/${category}/`
+const title =
+  page.currentPage > 1 ? `LS: ${category} | ${t(locale, 'page')} ${page.currentPage}` : `LS: ${category}`
+---
+
+<BaseLayout
+  title={title}
+  description={description ?? t(locale, 'sectionDescription', category)}
+  lang={locale}
+  alternates={alternatesFor(path, Astro.site, languages)}
+  section={{ name: category, url: localePath(locale, path) }}
+>
+  <h1 class="listing-heading">
+    {category} <span class="page-count">[{page.total}]</span>
+  </h1>
+  {description !== null && <p class="about listing-heading">{description}</p>}
+  <PostList posts={page.data} />
+  <Pagination page={page} basePath={localePath(locale, path)} locale={locale} />
+</BaseLayout>

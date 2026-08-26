@@ -1,0 +1,33 @@
+---
+import type { Page } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { alternatesFor, localePath, t, type Locale } from '../../i18n/ui'
+import type { Post } from '../../lib/posts'
+import Pagination from '../Pagination.astro'
+import PostList from '../PostList.astro'
+
+interface Props {
+  locale: Locale
+  page: Page<Post>
+}
+
+const { locale, page } = Astro.props
+
+const title =
+  page.currentPage > 1
+    ? `Lucas Santos: Blog | ${t(locale, 'page')} ${page.currentPage}`
+    : 'Lucas Santos: Blog'
+---
+
+<BaseLayout
+  title={title}
+  description={t(locale, 'homeDescription')}
+  lang={locale}
+  alternates={alternatesFor('/', Astro.site)}
+>
+  <h1 class="listing-heading">
+    {t(locale, 'navPosts')} <span class="page-count">[{page.total}]</span>
+  </h1>
+  {page.total === 0 ? <p>{t(locale, 'noTranslatedPosts')}</p> : <PostList posts={page.data} />}
+  <Pagination page={page} basePath={localePath(locale, '/')} locale={locale} />
+</BaseLayout>

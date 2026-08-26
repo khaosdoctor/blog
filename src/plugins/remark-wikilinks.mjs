@@ -18,7 +18,9 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import GithubSlugger from 'github-slugger'
 import { visit } from 'unist-util-visit'
-import { postUrl, slugFrom } from '../lib/post-url.mjs'
+import { asLocale, postUrl } from '../i18n/locales.ts'
+import { slugFrom } from '../lib/post-file.mjs'
+import { localeFromFile } from './mdx-util.mjs'
 
 const BASE = 'content/blog'
 const PATTERN = /\[\[([^\]|#]+)(#[^\]|]+)?(?:\|([^\]]+))?\]\]/g
@@ -34,7 +36,7 @@ function read(path) {
   return {
     draft: /^draft:\s*true/m.test(front),
     title: front.match(/^title:\s*"?(.*?)"?\s*$/m)?.[1],
-    lang: front.match(/^lang:\s*"?([a-z]{2})"?/m)?.[1] ?? 'pt',
+    lang: asLocale(front.match(/^lang:\s*"?([a-z]{2})"?/m)?.[1]),
     slug: front.match(/^slug:\s*"?([^"\s]+)"?\s*$/m)?.[1],
   }
 }
@@ -111,7 +113,7 @@ export function remarkWikilinks() {
       let cursor = 0
       // The locale of the page doing the linking, the same signal the draft marker
       // below uses.
-      const locale = file.data?.astro?.frontmatter?.lang ?? 'pt'
+      const locale = localeFromFile(file)
 
       for (const match of matches) {
         const [raw, target, fragment, label] = match
@@ -139,11 +141,10 @@ export function remarkWikilinks() {
         // moves to the title attribute, so a reader who cannot see the colour still
         // gets told, on hover and through a screen reader, without the sentence
         // being interrupted by a parenthesis.
-        const lang = locale in NOT_WRITTEN_YET ? locale : 'pt'
         children.push({
           type: 'link',
           url: `${post.url}${anchor(fragment)}`,
-          title: post.draft ? NOT_WRITTEN_YET[lang] : null,
+          title: post.draft ? NOT_WRITTEN_YET[locale] : null,
           data: post.draft ? { hProperties: { className: ['link-unwritten'] } } : undefined,
           children: [{ type: 'text', value: text }],
         })

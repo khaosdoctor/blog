@@ -1,12 +1,13 @@
 ---
-import { t, type Locale } from '../i18n/ui'
+import { localePath, t, type Locale } from '../i18n/ui'
 
 interface Props {
-  action?: string
-  locale?: Locale
+  locale: Locale
 }
 
-const { action = '/search/', locale = 'pt' } = Astro.props
+const { locale } = Astro.props
+
+const action = localePath(locale, '/search/')
 ---
 
 <form action={action} method="get" role="search" aria-label={t(locale, 'searchLabel')} data-search-form>

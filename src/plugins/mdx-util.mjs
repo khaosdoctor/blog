@@ -1,5 +1,6 @@
 // Small helpers shared by the remark/rehype plugins here, which each carried
 // their own identical copy.
+import { asLocale } from '../i18n/locales.ts'
 
 /**
  * The page's locale, for a build-time plugin: Astro attaches the frontmatter
@@ -7,7 +8,7 @@
  * URL never has to be reverse-engineered.
  */
 export function localeFromFile(file) {
-  return file?.data?.astro?.frontmatter?.lang === 'en' ? 'en' : 'pt'
+  return asLocale(file?.data?.astro?.frontmatter?.lang)
 }
 
 /** The one meaningful child of a paragraph, or null if there is more than one. */

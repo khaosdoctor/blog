@@ -1,0 +1,36 @@
+---
+import type { Page } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { alternatesFor, localePath, t, type Locale } from '../../i18n/ui'
+import type { Post } from '../../lib/posts'
+import { slugify } from '../../lib/taxonomy'
+import Pagination from '../Pagination.astro'
+import PostList from '../PostList.astro'
+
+interface Props {
+  locale: Locale
+  tag: string
+  languages: Locale[]
+  page: Page<Post>
+}
+
+const { locale, tag, languages, page } = Astro.props
+
+// Always page 1: the counterpart tag may have fewer pages than this one.
+const path = `/tags/${slugify(tag)}/`
+const title = page.currentPage > 1 ? `LS: ${tag} | ${t(locale, 'page')} ${page.currentPage}` : `LS: ${tag}`
+---
+
+<BaseLayout
+  title={title}
+  description={t(locale, 'tagDescription', tag)}
+  lang={locale}
+  alternates={alternatesFor(path, Astro.site, languages)}
+>
+  <p class="kicker listing-heading">{t(locale, 'tag')}</p>
+  <h1 class="listing-heading">
+    {tag} <span class="page-count">[{page.total}]</span>
+  </h1>
+  <PostList posts={page.data} />
+  <Pagination page={page} basePath={localePath(locale, path)} locale={locale} />
+</BaseLayout>

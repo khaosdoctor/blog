@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import CreditList from './CreditList.astro'
-import { t, type Locale } from '../i18n/ui'
+import { alternatesFor, t, type Locale } from '../i18n/ui'
 
 interface Props {
   locale: Locale
@@ -14,10 +14,7 @@ const { locale } = Astro.props
   title={`LS: ${t(locale, 'ossTitle')}`}
   description={t(locale, 'ossDescription')}
   lang={locale}
-  alternates={[
-    { lang: 'pt-BR', href: new URL('/oss/', Astro.site).href },
-    { lang: 'en', href: new URL('/en/oss/', Astro.site).href },
-  ]}
+  alternates={alternatesFor('/oss/', Astro.site)}
 >
   <h1 class="listing-heading">{t(locale, 'ossTitle')}</h1>
   <p class="intro listing-heading">{t(locale, 'ossIntro')}</p>
