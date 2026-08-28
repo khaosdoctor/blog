@@ -72,9 +72,7 @@ A chave privada (comumente chamada de **Sk** para _Secret Key_) é uma chave ger
 > [!CAUTION] 👀
 > Nessa sessão vamos falar da chave privada como algo geral, mais abaixo vamos falar dela no contexto do algoritmo RSA
 
-Lembre-se: criptografia assimétrica é um **sistema criptográfico** (_cryptosystem)_ que é implementado por vários algoritmos. **Um deles** é o RSA, mas ele não é o único, portanto existem várias implementações de chaves privadas diferentes, mas todas vão ter as mesmas propriedades.
-
-As chaves privadas são utilizadas para **decriptar** dados criptografados pela chave pública, ou então **assinar** dados que possam ser validados pela chave pública. **Não é aconselhável encriptar dados usando a chave privada** porque qualquer chave pública pode decriptar esses dados, por isso que essas chaves são chamadas de **assinantes** (vamos entender o conceito de assinatura nos demais artigos).
+As chaves privadas são utilizadas para **decriptar** dados criptografados pela chave pública, ou então **assinar** dados que possam ser validados pela chave pública.<MarginNote>Criptografia assimétrica é um **sistema criptográfico** (_cryptosystem_) que é implementado por vários algoritmos. **Um deles** é o RSA, mas ele não é o único, portanto existem várias implementações de chaves privadas diferentes, mas todas vão ter as mesmas propriedades.</MarginNote> **Não é aconselhável encriptar dados usando a chave privada** porque qualquer chave pública pode decriptar esses dados, por isso que essas chaves são chamadas de **assinantes** (vamos entender o conceito de assinatura nos demais artigos).
 
 ![](./image-8.png)
 
@@ -136,9 +134,7 @@ Depois juntamos os dois e mandamos para o nosso recipiente, dessa forma mesmo se
 
 ![](./image-2.png "Decriptando um DEM Block")
 
-Pegamos o DEM block, separamos em chave e arquivo, decriptamos a chave simétrica usando a chave privada, obtendo a chave simétrica original, que podemos usar para decriptar o arquivo encriptado.
-
-> O protocolo HTTPS funciona "mais ou menos" assim.
+Pegamos o DEM block, separamos em chave e arquivo, decriptamos a chave simétrica usando a chave privada, obtendo a chave simétrica original, que podemos usar para decriptar o arquivo encriptado.<Sidenote>O protocolo HTTPS funciona "mais ou menos" assim.</Sidenote>
 
 ## RSA
 
@@ -153,9 +149,9 @@ Pontos chave:
 -   Uma chave boa geralmente está entre 1024 e 4096 bits
 -   Quando maior a chave (mais bits) mais tempo de computação vai ser necessário
 -   Chaves muito grandes (como 65536 bits) são **muito seguras**, porém muito lentas para uso prático, já que elas podem levar horas para serem geradas
--   Qualquer chave acima de 3072 bits é considerada segura
+-   Qualquer chave acima de 3072 bits é considerada segura<MarginNote>Quando falamos de chaves aqui, estamos falando de números, nada mais. É como se fosse uma senha, só que ela tivesse 1234 dígitos (`2^4096`).</MarginNote>
 
-Lembre-se que, quando falamos de chaves aqui, estamos falando de números, nada mais. É como se fosse uma senha, só que ela tivesse 1234 dígitos (`2^4096`). Quando estamos "criptografando" algo, estamos aplicando uma operação de exponenciação entre a chave e o valor que queremos criptografar.
+Quando estamos "criptografando" algo, estamos aplicando uma operação de exponenciação entre a chave e o valor que queremos criptografar.
 
 ![](./image-13.png "Um número de 4096 bytes")
 
@@ -243,9 +239,7 @@ Isso significa que podemos criptografar mensagens de até 12 bits, ou seja, núm
 
 O próximo passo é definir o módulo, que é a múltiplicação de `q` e `p`, logo:
 
--   `n` é `p*q` que é `41*97=3977`, agora temos o primeiro valor que você viu no passo 3 lá em cima (tente fatorar 3977 para chegar nos primos dele, quantos passos levou?)
-
-Lembrando que `p` e `q` são privados, não podem ser divulgados, enquanto `n` é público.
+-   `n` é `p*q` que é `41*97=3977`, agora temos o primeiro valor que você viu no passo 3 lá em cima (tente fatorar 3977 para chegar nos primos dele, quantos passos levou?)<MarginNote>Lembrando que `p` e `q` são privados, não podem ser divulgados, enquanto `n` é público.</MarginNote>
 
 Até agora temos isso:
 
