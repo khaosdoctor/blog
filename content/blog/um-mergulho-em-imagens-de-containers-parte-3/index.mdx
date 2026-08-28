@@ -47,7 +47,7 @@ COPY "./src" "/usr/src/app/src/"
 RUN npm run build
 ```
 
-A imagem do Node:12 pode variar de espaço utilizado, mas a imagem crua possui cerca de 340Mb.  Como você pode observar, as imagens base de linguagens dinâmicas são bem maiores do que imagens de linguagens compiladas porque temos a necessidade do runtime estar junto.
+A imagem do Node:12 pode variar de espaço utilizado, mas a imagem crua possui cerca de 340Mb.  Como você pode observar, as imagens base de linguagens dinâmicas são bem maiores do que imagens de linguagens compiladas porque temos a necessidade do runtime estar junto.
 
 Porém, vamos fazer uma alteração já que as imagens full podem ter muitas vulnerabilidades, vamos mudar para a imagem **slim** que tem aproximadamente **40mb**
 

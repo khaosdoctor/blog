@@ -392,7 +392,7 @@ spec:
 
 O que estamos fazendo é subir três containers junto com a aplicação, um deles é o exporter e o outro é uma simples aplicação que ficará votando a cada 3 segundos para simular o aumento dos votos. Note que estamos definindo `localhost` como a url de scrapping porque todos os containers estão na mesma rede local.
 
-Podemos verificar os logs de cada container criado depois com o comando `kubectl  logs deploy/vote-api -c <nome-do-container>`, se quisermos ver nosso exporter em ação basta executarmos `kubectl port-forward svc/vote-api-exporter 9837:9837` e acessarmos `localhost:9837` em nossa máquina:
+Podemos verificar os logs de cada container criado depois com o comando `kubectl  logs deploy/vote-api -c <nome-do-container>`, se quisermos ver nosso exporter em ação basta executarmos `kubectl port-forward svc/vote-api-exporter 9837:9837` e acessarmos `localhost:9837` em nossa máquina:
 
 ![](./image-30.png)
 

@@ -25,7 +25,7 @@ Assim como eu faço com outras tecnologias, o JS não é diferente! Em [2022](/n
 
 Uma das propostas que estavam abertas no TC39 era a capacidade de inverter a direção inicial da busca em um Array. Hoje, os métodos `find` e `findIndex` vão sempre começar buscando um array pelo seu primeiro elemento (que é o `0`, como deve ser).
 
-Porém, no caso de arrays ordenados, ter a capacidade de buscar ao contrário -  começando da cauda para a cabeça - é muito mais rápido e eficiente. Mas ai você pode argumentar: "Poxa, mas não é só inverter o array primeiro e depois usar o `find`?", basicamente sim, mas não.
+Porém, no caso de arrays ordenados, ter a capacidade de buscar ao contrário -  começando da cauda para a cabeça - é muito mais rápido e eficiente. Mas ai você pode argumentar: "Poxa, mas não é só inverter o array primeiro e depois usar o `find`?", basicamente sim, mas não.
 
 Quando invertemos o array usando o método `reverse`, vamos executar uma operação sobre ele que, invariavelmente vai iterar por metade dos itens desse array. Hoje esse método é bastante rápido, a especificação diz que ele deve funcionar dessa forma:
 

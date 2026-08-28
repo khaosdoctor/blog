@@ -53,7 +53,7 @@ Portanto é tecnicamente possível representar relacionamentos complexos usando 
 
 A desvantagem dos bancos chave valor geralmente aparece aí. Quando temos que arquitetar um sistema que possui vários relacionamentos, rapidamente o seu código vai se tornar um emaranhado de resolução de dependências entre as entidades da sua aplicação. Sem falar que demora muito mais tempo pra você poder escrever o seu código já que você também vai ter que escrever toda a lógica do banco de dados.
 
-> Geralmente, a solução para algo como "listar todos os alunos de um professor" e "listar todos os professores de um aluno"  onde as chaves possuem relacionamentos iguais mas resultados opostos é duplicar a chave, uma para um lado do relacionamento e outra para outro lado.
+> Geralmente, a solução para algo como "listar todos os alunos de um professor" e "listar todos os professores de um aluno"  onde as chaves possuem relacionamentos iguais mas resultados opostos é duplicar a chave, uma para um lado do relacionamento e outra para outro lado.
 
 Agora que a gente já sabe quais são as vantagens e as desvantagens dos bancos de dados chave valor, vamos entender melhor como funciona o Deno KV.
 
@@ -117,7 +117,7 @@ const res = {
 }
 ```
 
-Assim como outros bancos como o MongoDB, o KV também armazena diferentes versões de um mesmo valor para que você possa comparar com os valores que você obtém de um  `get` com os de um `set`, já que é possível que a consistência seja fraca, é também possível que o valor que você obteve no `get` seja mais velho do que o valor que foi setado por conta do tempo de replicação.
+Assim como outros bancos como o MongoDB, o KV também armazena diferentes versões de um mesmo valor para que você possa comparar com os valores que você obtém de um  `get` com os de um `set`, já que é possível que a consistência seja fraca, é também possível que o valor que você obteve no `get` seja mais velho do que o valor que foi setado por conta do tempo de replicação.
 
 Dessa forma os versionstamps são comparáveis e ordenáveis, um stamp que é maior que outro significa que esse stamp é mais recente.
 
@@ -163,7 +163,7 @@ Além disso é possível especificar o tipo de retorno no Type parameter T, iden
 const res = await kv.get<string>(['users', 'alice']) // res é string
 ```
 
-Da mesma forma, podemos usar o  `getMany` para poder obter mais de uma chave ao mesmo tempo:
+Da mesma forma, podemos usar o  `getMany` para poder obter mais de uma chave ao mesmo tempo:
 
 ```ts
 const [res1, res2, res3] = await kv.getMany<[string, string, string]>([
