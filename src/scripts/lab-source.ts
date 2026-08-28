@@ -39,7 +39,7 @@ function bindCopy(panel: HTMLElement): void {
   button.type = 'button'
   button.className = 'lab-source-copy'
   button.textContent = original.querySelector('button')?.getAttribute('title') ?? ''
-  button.addEventListener('click', () => void copyWithToast(source))
+  button.addEventListener('click', () => void copyWithToast(source, 'source'))
   original.replaceWith(button)
 }
 

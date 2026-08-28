@@ -11,6 +11,7 @@
   --em-pad: 1.25rem 1.75rem;
   --em-dropcap-size: 2.75em;
   --em-dropcap-fg: var(--accent-day);
+  --em-underline-width: 3px;
 }
 
 .prose .emphasis {
@@ -28,6 +29,13 @@
   font-size: 1.05em;
   line-height: 1.5;
   text-wrap: pretty;
+  /* Underlined in the accent, matching the two side borders. Skipping the
+     descenders keeps a rule this thick off the tails of the g and the p. */
+  text-decoration-line: underline;
+  text-decoration-color: var(--accent-day);
+  text-decoration-thickness: var(--em-underline-width);
+  text-underline-offset: 0.22em;
+  text-decoration-skip-ink: auto;
 }
 
 .prose .emphasis > :first-child { margin-block-start: 0; }

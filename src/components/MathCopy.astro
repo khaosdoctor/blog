@@ -7,6 +7,6 @@
   document.addEventListener('click', (event) => {
     const button = (event.target as HTMLElement).closest<HTMLElement>('button[data-math-copy]')
     if (button === null) return
-    void copyWithToast(button.dataset.ascii ?? '')
+    void copyWithToast(button.dataset.ascii ?? '', 'formula')
   })
 </script>

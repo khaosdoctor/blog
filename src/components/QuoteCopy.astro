@@ -42,6 +42,6 @@ const locale = localeFromPath(Astro.url.pathname)
     const bodyContainer = authorEl ? card.querySelector(':scope > .callout-content') : card
     const body = bodyContainer ? textOf(bodyContainer) : ''
     const author = authorEl ? (authorEl.textContent ?? '').replace(/^\s*»\s*/, '').trim() : ''
-    void copyWithToast(author ? `"${body}" » ${author}` : `"${body}"`)
+    void copyWithToast(author ? `"${body}" » ${author}` : `"${body}"`, 'quote')
   })
 </script>
