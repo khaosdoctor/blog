@@ -9,7 +9,6 @@
 
 :root {
   --em-pad: 1.25rem 1.75rem;
-  --em-border-width: 3px;
   /* One step in from the running text, short of the quote's own 2rem. */
   --em-indent: 1.5rem;
   --em-dropcap-size: 2.75em;
@@ -20,10 +19,11 @@
   margin-block: 2rem;
   margin-inline-start: var(--em-indent);
   padding: var(--em-pad);
-  /* The same double rule the buttons, chips and notes use, with the two sides
-     that carry the eye down the block turned solid in the accent. */
-  border-block: var(--em-border-width) double light-dark(#000000, #ffffff);
-  border-inline: var(--em-border-width) solid var(--accent-day);
+  /* The quote card's own border, read from its tokens so the two stay in step:
+     the same double rule at the same width, and the same solid edge weight the
+     quote gives its inline start. Both sides carry it here, in the accent. */
+  border-block: var(--qc-border-width) double light-dark(#000000, #ffffff);
+  border-inline: var(--border-card-edge) solid var(--accent-day);
   background: transparent;
   color: var(--fg);
   font-size: 1.05em;
@@ -34,14 +34,20 @@
 .prose .emphasis > :first-child { margin-block-start: 0; }
 .prose .emphasis > :last-child { margin-block-end: 0; }
 
-/* Same drop cap the quote card uses, in the accent rather than the quote purple. */
+/**
+ * The quote's drop cap, in the accent rather than the quote purple, but not
+ * floated: a float pins the text to the cap's top edge, which is the one thing
+ * this block should not do. Left inline, `vertical-align: middle` centres the
+ * line against the cap instead. The property only applies to ::first-letter
+ * while `float` is none, so the two go together.
+ */
 .prose .emphasis > p:first-of-type::first-letter {
-  float: inline-start;
   margin-inline-end: 0.1em;
   font-family: var(--font-display);
   font-size: var(--em-dropcap-size);
   font-style: normal;
   line-height: 0.82;
+  vertical-align: middle;
   color: var(--em-dropcap-fg);
 }
 
