@@ -17,7 +17,8 @@
   "scripts": {
     "dev": "astro dev",
     "vendor": "node scripts/vendor-media.ts",
-    "prebuild": "node scripts/vendor-media.ts",
+    "links": "node scripts/fetch-link-titles.ts",
+    "prebuild": "node scripts/vendor-media.ts && node scripts/fetch-link-titles.ts",
     "build": "astro build",
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
