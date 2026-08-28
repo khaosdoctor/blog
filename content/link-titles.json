@@ -1612,7 +1612,7 @@
   },
   "https://github.com/DefinitelyTyped/DefinitelyTyped/pull/67035": {
     "title": "node: add types for the new Date mocks in the upcoming version by khaosdoctor · Pull Request #67035 · DefinitelyTyped/DefinitelyTyped",
-    "description": "This PR adds the types for Date mocks coming in the next minor release of Node. I&#39;m attaching the original PR. Use a meaningful title for the pull request. Include the name of the package mod...",
+    "description": "This PR adds the types for Date mocks coming in the next minor release of Node. I'm attaching the original PR. Use a meaningful title for the pull request. Include the name of the package mod...",
     "publisher": "GitHub"
   },
   "https://github.com/DefinitelyTyped/DefinitelyTyped/pull/69497": {
@@ -2229,7 +2229,7 @@
   },
   "https://github.com/microsoft/TypeScript/pull/57465": {
     "title": "Infer type predicates from function bodies using control flow analysis by danvk · Pull Request #57465 · microsoft/TypeScript",
-    "description": "Fixes #16069 Fixes #38390 Fixes #10734 Fixes #50734 Fixes #12798 This PR uses the TypeScript&#39;s existing control flow analysis to infer type predicates for boolean-returning functions where appr...",
+    "description": "Fixes #16069 Fixes #38390 Fixes #10734 Fixes #50734 Fixes #12798 This PR uses the TypeScript's existing control flow analysis to infer type predicates for boolean-returning functions where appr...",
     "publisher": "GitHub"
   },
   "https://github.com/mmkal/expect-type/blob/main/src/index.ts#LL5-L5C80": {
@@ -2279,17 +2279,17 @@
   },
   "https://github.com/nodejs/node/commit/35f92d953c24d4f02f82ab397a61383103f9b796#diff-8f3520898daae8b61a84b558a2d31241031419b6dc2d25685d9f2c70b6ba2a45R26": {
     "title": "module: add --experimental-strip-types · nodejs/node@35f92d9",
-    "description": "PR-URL: https://github.com/nodejs/node/pull/53725 Refs: https://github.com/nodejs/loaders/issues/217 Reviewed-By: Yagiz Nizipli &lt;yagiz@nizipli.com&gt; Reviewed-By: Moshe Atlow &lt;moshe@atlow.co...",
+    "description": "PR-URL: https://github.com/nodejs/node/pull/53725 Refs: https://github.com/nodejs/loaders/issues/217 Reviewed-By: Yagiz Nizipli <yagiz@nizipli.com> Reviewed-By: Moshe Atlow <moshe@atlow.co...",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/commit/35f92d953c24d4f02f82ab397a61383103f9b796#diff-fddf8a06747f8c9e83cd2a3ebee0f53dbd790567ce018044e70bd0ffbbcc815eR310": {
     "title": "module: add --experimental-strip-types · nodejs/node@35f92d9",
-    "description": "PR-URL: https://github.com/nodejs/node/pull/53725 Refs: https://github.com/nodejs/loaders/issues/217 Reviewed-By: Yagiz Nizipli &lt;yagiz@nizipli.com&gt; Reviewed-By: Moshe Atlow &lt;moshe@atlow.co...",
+    "description": "PR-URL: https://github.com/nodejs/node/pull/53725 Refs: https://github.com/nodejs/loaders/issues/217 Reviewed-By: Yagiz Nizipli <yagiz@nizipli.com> Reviewed-By: Moshe Atlow <moshe@atlow.co...",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/commit/35f92d953c24d4f02f82ab397a61383103f9b796#diff-fddf8a06747f8c9e83cd2a3ebee0f53dbd790567ce018044e70bd0ffbbcc815eR313": {
     "title": "module: add --experimental-strip-types · nodejs/node@35f92d9",
-    "description": "PR-URL: https://github.com/nodejs/node/pull/53725 Refs: https://github.com/nodejs/loaders/issues/217 Reviewed-By: Yagiz Nizipli &lt;yagiz@nizipli.com&gt; Reviewed-By: Moshe Atlow &lt;moshe@atlow.co...",
+    "description": "PR-URL: https://github.com/nodejs/node/pull/53725 Refs: https://github.com/nodejs/loaders/issues/217 Reviewed-By: Yagiz Nizipli <yagiz@nizipli.com> Reviewed-By: Moshe Atlow <moshe@atlow.co...",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/issues/19308": {
@@ -2314,22 +2314,22 @@
   },
   "https://github.com/nodejs/node/pull/47775": {
     "title": "test_runner: introduces a new MockTimers API by ErickWendel · Pull Request #47775 · nodejs/node",
-    "description": "This PR introduces a new FakeTimers API for the native Node.js test runner. I&#39;m opening it for review as I&#39;ve implemented all features for this initial version (it&#39;s still missing docs ...",
+    "description": "This PR introduces a new FakeTimers API for the native Node.js test runner. I'm opening it for review as I've implemented all features for this initial version (it's still missing docs ...",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/pull/48638": {
     "title": "test_runner: Add Date to the supported mock APIs by khaosdoctor · Pull Request #48638 · nodejs/node",
-    "description": "This builds on top of @ErickWendel&#39;s #47775, I saw the next steps would be to implement the mock timers for Date.now (and thus, the Date object) and performance.now. This PR implements the Date...",
+    "description": "This builds on top of @ErickWendel's #47775, I saw the next steps would be to implement the mock timers for Date.now (and thus, the Date object) and performance.now. This PR implements the Date...",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/pull/48638#discussion_r1255170017": {
     "title": "test_runner: Add Date to the supported mock APIs by khaosdoctor · Pull Request #48638 · nodejs/node",
-    "description": "This builds on top of @ErickWendel&#39;s #47775, I saw the next steps would be to implement the mock timers for Date.now (and thus, the Date object) and performance.now. This PR implements the Date...",
+    "description": "This builds on top of @ErickWendel's #47775, I saw the next steps would be to implement the mock timers for Date.now (and thus, the Date object) and performance.now. This PR implements the Date...",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/pull/48638/files#diff-21786c167d9eed3034877e03e9bc8640bf6bcf2b7c5b33980226d76e3a69d4bdR41-R44": {
     "title": "test_runner: Add Date to the supported mock APIs by khaosdoctor · Pull Request #48638 · nodejs/node",
-    "description": "This builds on top of @ErickWendel&#39;s #47775, I saw the next steps would be to implement the mock timers for Date.now (and thus, the Date object) and performance.now. This PR implements the Date...",
+    "description": "This builds on top of @ErickWendel's #47775, I saw the next steps would be to implement the mock timers for Date.now (and thus, the Date object) and performance.now. This PR implements the Date...",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/pull/53153": {
@@ -3503,37 +3503,51 @@
     "description": "HarperDB is a full-featured data management platform that runs from edge to cloud, and anywhere in between."
   },
   "https://t.co/4KiWVROfZ1": {
-    "title": "https://twitter.com/_StaticVoid/status/1896350049963307313/photo/1"
+    "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
+    "description": "Saiu o código fonte do Command & Conquer no GitHub e eu tava lendo um pouco dele, não sei quem é o Joe, mas esse código é provavelmente um dos mais bem documentados que eu já vi na minha vida. Saudade…",
+    "publisher": "X (formerly Twitter)"
   },
   "https://t.co/6TyHKajGaJ": {
-    "title": "http://fly.pieter.com"
+    "title": "fly.pieter.com",
+    "description": "A fun free-to-play MMO flight sim, made with AI. Fly and dogfight with your friends online."
   },
   "https://t.co/NCc50FOgJa": {
-    "title": "https://twitter.com/levelsio/status/1899596115210891751/video/1"
+    "title": "@levelsio (@levelsio) on X",
+    "description": "✨ https://t.co/6TyHKajGaJ has now gone from $0 to $1 million ARR in just 17 days! 💸 Revenue update: $87,000 MRR (which is $1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: htt…",
+    "publisher": "X (formerly Twitter)"
   },
   "https://t.co/OrTgUJzKLa": {
-    "title": "https://channel9.msdn.com/Series/AKS-Bootcamp-From-zero-to-container-hero?WT.mc_id=containers-9948-ludossan"
+    "title": "Shows - Event & Video Content",
+    "description": "Browse thousands of hours of video content from Microsoft. On-demand video, certification prep, past Microsoft events, and recurring series."
   },
-  "https://t.co/PGA6oJd3xB": {
-    "title": "https://uiverse.io/challenges/search-bar-mastery"
-  },
+  "https://t.co/PGA6oJd3xB": null,
   "https://t.co/Spm1Oqflt4": {
-    "title": "https://twitter.com/costabot_/status/1509494054601560075"
+    "title": "Sage of Truth (@costabot_) on X",
+    "description": "@EngineerRabbit Boa argumentação e tals, mas minha resposta hj é não",
+    "publisher": "X (formerly Twitter)"
   },
   "https://t.co/bPWToHdJ1d": {
-    "title": "https://twitter.com/_StaticVoid/status/1318175063116451841/photo/1"
+    "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
+    "description": "Estou super feliz de anunciar que hoje acabou de ser lançado meu curso sobre #Kubernetes usando #AKS. Esse é um curso GRATUITO pra você que quer aprender a usar essa excelente ferramenta e dar mais es…",
+    "publisher": "X (formerly Twitter)"
   },
   "https://t.co/qw4QU18OXt": {
-    "title": "https://twitter.com/_StaticVoid/status/1815722344142279159/photo/1"
+    "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
+    "description": "🤓 História da computação pt 2: POR QUE O VIM USA H, J, K e L COMO SETAS???? Já que vocês curtiram minha última thread sobre TTY eu vou falar uma outra parte da história da computação aqui e por que a…",
+    "publisher": "X (formerly Twitter)"
   },
   "https://t.co/scrq1lSJOT": {
-    "title": "https://twitter.com/levelsio/status/1899498275545268453"
+    "title": "@levelsio (@levelsio) on X",
+    "description": "Guys the ▲ UFOs are back, this time they're white And with extra creepy sound There's also a mother UFO I swear I didn't add them 😬",
+    "publisher": "X (formerly Twitter)"
   },
   "https://t.co/t0YOJsljWl": {
-    "title": "https://twitter.com/levelsio/status/1896184528521081242"
+    "title": "@levelsio (@levelsio) on X",
+    "description": "Trying to fix the FPS issues today If I'm on MacBook Pro M3 with battery >20% or power connected I get 120 FPS The moment I go below <20% battery, M3 goes in power save mode I think so FPS drops to 30…",
+    "publisher": "X (formerly Twitter)"
   },
   "https://t.co/uc1J8Ia7QZ": {
-    "title": "https://buy.stripe.com/00g5lueHfbdifBudR8"
+    "title": "Stripe Checkout"
   },
   "https://t.me/BotFather": {
     "title": "BotFather",
@@ -3650,7 +3664,7 @@
   },
   "https://twitter.com/_StaticVoid/status/1896350049963307313?ref_src=twsrc%5Etfw": {
     "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
-    "description": "Saiu o código fonte do Command &amp; Conquer no GitHub e eu tava lendo um pouco dele, não sei quem é o Joe, mas esse código é provavelmente um dos mais bem documentados que eu já vi na minha vida. Sau…",
+    "description": "Saiu o código fonte do Command & Conquer no GitHub e eu tava lendo um pouco dele, não sei quem é o Joe, mas esse código é provavelmente um dos mais bem documentados que eu já vi na minha vida. Saudade…",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/_staticvoid": {
@@ -3883,8 +3897,8 @@
     "publisher": "LinkedIn"
   },
   "https://www.linkedin.com/in/addyosmani/recent-activity/all/": {
-    "title": "Addy Osmani - O&#39;Reilly | LinkedIn",
-    "description": "Addy Osmani is an Irish Software Engineer and leader who was most recently a director at… · Experience: O&#39;Reilly · Location: San Francisco Bay Area · 500+ connections on LinkedIn. View Addy Osmani…"
+    "title": "Addy Osmani - O'Reilly | LinkedIn",
+    "description": "Addy Osmani is an Irish Software Engineer and leader who was most recently a director at… · Experience: O'Reilly · Location: San Francisco Bay Area · 500+ connections on LinkedIn. View Addy Osmani’s p…"
   },
   "https://www.linkedin.com/in/caiocaladoo/": null,
   "https://www.linkedin.com/posts/addyosmani_motivation-productivity-growth-activity-7097821706542612480-BcMp?utm_source=share&utm_medium=member_desktop": {
@@ -4463,12 +4477,12 @@
   },
   "https://x.com/yegordb/status/1859290734257635439": {
     "title": "Yegor Denisov-Blanch (@yegordb) on X",
-    "description": "I’m at Stanford and I research software engineering productivity. We have data on the performance of &gt;50k engineers from 100s of companies. Inspired by @deedydas, our research shows: ~9.5% of softw…",
+    "description": "I’m at Stanford and I research software engineering productivity. We have data on the performance of >50k engineers from 100s of companies. Inspired by @deedydas, our research shows: ~9.5% of software…",
     "publisher": "X (formerly Twitter)"
   },
   "https://x.com/yegordb/status/1859291435339743361/photo/1": {
     "title": "Yegor Denisov-Blanch (@yegordb) on X",
-    "description": "Another way to look at this is counting code commits. While this is a flawed way to measure productivity, it reveals inactivity: ~58% make &lt;3 commits/month, aligning with our metric. The other 42%…",
+    "description": "Another way to look at this is counting code commits. While this is a flawed way to measure productivity, it reveals inactivity: ~58% make <3 commits/month, aligning with our metric. The other 42% mak…",
     "publisher": "X (formerly Twitter)"
   },
   "https://yieldcode.blog/post/the-curse-of-the-senior-engineer/": {

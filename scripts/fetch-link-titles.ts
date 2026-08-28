@@ -21,6 +21,7 @@ const CACHE = 'content/link-titles.json'
 const CONCURRENCY = 8
 const TIMEOUT = 10_000
 const DESCRIPTION_MAX = 200
+const REFRESH_HOPS = 3
 const DRY_RUN = process.argv.includes('--dry-run')
 const RETRY_FAILED = process.argv.includes('--retry-failed')
 
@@ -70,8 +71,10 @@ function decode(text: string): string {
     .replace(/&([a-z]+);/gi, (whole, name: string) => named[name.toLowerCase()] ?? whole)
 }
 
+// Decoded twice: GitHub and X both write &amp;amp; into a meta tag, so one pass
+// leaves the reader looking at &amp; where the title said &.
 function clean(text: string | undefined): string {
-  return text === undefined ? '' : decode(text).replace(/\s+/g, ' ').trim()
+  return text === undefined ? '' : decode(decode(text)).replace(/\s+/g, ' ').trim()
 }
 
 /** A meta tag writes its two attributes in either order, so both arrangements are tried. */
@@ -83,9 +86,33 @@ function metaContent(html: string, key: string): string {
   return clean(forward.exec(html)?.[1] ?? reverse.exec(html)?.[1])
 }
 
+/**
+ * Where a shortener sends the reader, when it does so without a 3xx. t.co
+ * answers 200 with a script that replaces the location and a <noscript> refresh
+ * beside it, so `redirect: 'follow'` never sees a hop to follow.
+ */
+function refreshTarget(html: string, from: string): string | null {
+  const head = html.slice(0, 4000)
+  const meta = /<meta[^>]+http-equiv=["']refresh["'][^>]+content=["'][^"']*url=([^"';]+)/i.exec(head)
+  const script = /location\.replace\(\s*["']([^"']+)["']/i.exec(head)
+  const target = clean(meta?.[1] ?? script?.[1]).replace(/\\\//g, '/')
+  if (target === '') return null
+  try {
+    const resolved = new URL(target, from).href
+    return resolved === from ? null : resolved
+  } catch {
+    return null
+  }
+}
+
+function isUrl(text: string): boolean {
+  return /^https?:\/\/\S+$/.test(text)
+}
+
 function parse(html: string): Meta | null {
   const title = metaContent(html, 'og:title') || clean(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1])
-  if (title === '') return null
+  // A page that titles itself with its own address has told us nothing.
+  if (title === '' || isUrl(title)) return null
 
   const description = metaContent(html, 'og:description') || metaContent(html, 'description')
   const publisher = metaContent(html, 'og:site_name')
@@ -99,7 +126,7 @@ function parse(html: string): Meta | null {
   return meta
 }
 
-async function fetchMeta(url: string): Promise<Meta | null> {
+async function fetchMeta(url: string, hops = 0): Promise<Meta | null> {
   try {
     const response = await fetch(url, {
       headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/xhtml+xml' },
@@ -108,7 +135,10 @@ async function fetchMeta(url: string): Promise<Meta | null> {
     })
     if (!response.ok) return null
     if (!(response.headers.get('content-type') ?? '').includes('html')) return null
-    return parse(await response.text())
+
+    const html = await response.text()
+    const next = hops < REFRESH_HOPS ? refreshTarget(html, response.url || url) : null
+    return next === null ? parse(html) : await fetchMeta(next, hops + 1)
   } catch {
     return null
   }

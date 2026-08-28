@@ -124,6 +124,9 @@
 .hp-title {
   display: block;
   padding-inline-end: 3rem;
+  /* The padding keeps the controls clear of the text, but a long enough word
+     overruns it and runs under them: a title is sometimes a bare URL. */
+  overflow-wrap: anywhere;
   color: var(--fg);
   font-weight: 600;
   text-decoration: none;
@@ -136,6 +139,7 @@
 
 .hp-desc {
   margin: 0.35rem 0 0;
+  overflow-wrap: anywhere;
   color: var(--muted);
 }
 
