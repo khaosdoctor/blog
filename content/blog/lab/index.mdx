@@ -476,6 +476,47 @@ Outra frase.<MarginNote>Igual, mas sem número.</MarginNote>
 
 Toda abstração vaza.<Sidenote>Uma nota numerada, que fica na margem em telas largas e vira um popover em telas estreitas, sem JavaScript nos dois casos. Aceita **negrito**, `código` e [links](https://blog.lsantos.dev).</Sidenote> E esta segunda frase carrega uma nota sem número.<MarginNote>Igual à de cima, mas sem a marca numerada no meio do texto.</MarginNote>
 
+## Ênfase (experimento, três rotas)
+
+Um trecho que merece peso, sem fingir que é citação: sem aspas de fundo, sem
+autor, sem botão de copiar, e na cor do post em vez do roxo da citação. As três
+rotas abaixo geram exatamente o mesmo bloco. Escolha uma e as outras duas somem
+junto com `src/plugins/remark-emphasis.mjs`.
+
+**Rota 1, componente.** Explícita, e a única que aceita mais de um parágrafo.
+
+```mdx
+<Emphasis>O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.</Emphasis>
+```
+
+<Emphasis>O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.</Emphasis>
+
+**Rota 2, parágrafo só de negrito.** Nenhuma sintaxe nova, mas toma para si uma
+forma que hoje significa "uma frase em negrito": qualquer parágrafo que seja só
+negrito por outro motivo vira um bloco. Isso não é hipotético: com a rota ligada,
+**16 páginas do arquivo já ganham blocos de ênfase que ninguém pediu**, entre
+elas `kv-atomic-ops` (onde `Sum`, `Min e Max` são subtítulos em negrito) e
+`npm-provenance` (onde a linha em negrito abre uma lista).
+
+```md
+**O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.**
+```
+
+**O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.**
+
+**Rota 3, parágrafo só de `==destaque==`.** A marca de destaque do Obsidian.
+Não colide com nada nestes posts, mas não vira ênfase num leitor de markdown
+comum.
+
+```md
+==O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.==
+```
+
+==O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.==
+
+E o texto continua normalmente depois, para dar para ver o espaçamento entre o
+bloco e o parágrafo seguinte.
+
 ## Citação com autor
 
 Epígrafe deixou de existir: era a mesma coisa que uma citação com outro nome. Uma citação com autor é um callout do Obsidian cujo título é o autor, que é exatamente como você já escreve no vault.

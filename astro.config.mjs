@@ -15,6 +15,7 @@ import remarkMath from 'remark-math'
 import { redirectStubs } from './src/integrations/redirect-stubs.mjs'
 import { lastModified, noindexPaths } from './src/lib/post-dates.mjs'
 import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
+import { remarkEmphasis } from './src/plugins/remark-emphasis.mjs'
 import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import { rehypeFootnoteSidenotes } from './src/plugins/rehype-footnote-sidenotes.mjs'
@@ -184,6 +185,9 @@ export default defineConfig({
         remarkMath,
         remarkEmbeds,
         remarkFigures,
+        // Experiment, see src/styles/variants/emphasis.css. After remarkFigures
+        // so a lone image is already a figure and cannot be read as a lone run.
+        remarkEmphasis,
         remarkWikilinks,
         // Last: the only one that reads files off disk and injects synthesized
         // content (an import node, and the demo's source as a code block), so it

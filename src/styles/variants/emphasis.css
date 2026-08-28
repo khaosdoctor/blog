@@ -1,0 +1,54 @@
+/**
+ * Emphasis: a block that carries weight without pretending to be a citation.
+ * Shaped like a quote so it reads as a set-apart passage, but with no quote
+ * glyph, no attribution row and no copy button, and drawn in the post's own
+ * accent rather than the quote purple.
+ *
+ * Three authoring routes emit this same markup while the shape is being
+ * chosen. Delete this file, src/components/Emphasis.astro and
+ * src/plugins/remark-emphasis.mjs to remove all of them.
+ */
+
+:root {
+  --em-pad: 1.25rem 1.75rem;
+  --em-border-width: 4px;
+  --em-accent: light-dark(
+    var(--post-accent, var(--accent-day)),
+    color-mix(in oklab, var(--post-accent, var(--accent-day)) 75%, white)
+  );
+}
+
+.prose .emphasis {
+  position: relative;
+  margin-block: 2rem;
+  padding: var(--em-pad);
+  border: 0;
+  border-inline-start: var(--em-border-width) solid var(--em-accent);
+  background: transparent;
+  color: var(--fg);
+  font-size: 1.05em;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.prose .emphasis > :first-child { margin-block-start: 0; }
+.prose .emphasis > :last-child { margin-block-end: 0; }
+
+/* The variant markers only exist so the three routes can be told apart on the
+   lab page. They carry no styling of their own. */
+.prose .emphasis[data-emphasis] { --em-marker: none; }
+
+@media (min-width: 70rem) {
+  .prose .emphasis {
+    /* Pulled into the left margin so it breaks the column the way a quote
+       does, without needing the quote's full width. */
+    margin-inline-start: calc(var(--em-border-width) * -1 - 1.75rem);
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .prose .emphasis {
+    margin-inline-start: 0;
+    padding-inline: 1rem;
+  }
+}
