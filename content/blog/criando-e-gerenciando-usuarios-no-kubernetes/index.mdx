@@ -207,14 +207,12 @@ kubectl config set-context lucas \
   --user=lucas
 ```
 
-Como clonamos a imagem base do AKS, ela está com o acesso administrativo por padrão, vamos remover o acesso de administrador antes de enviar para o nosso usuário:
+Como clonamos a imagem base do AKS, ela está com o acesso administrativo por padrão, vamos remover o acesso de administrador antes de enviar para o nosso usuário:<Sidenote>Para saber os nomes corretos, dê uma lida no seu arquivo `kubeconfig` para poder achar estas chaves.</Sidenote>
 
 ```bash
 kubectl config delete-context <nome-do-contexto> 
 kubectl config unset users.nome_do_resource-group_nome-do-cluster
 ```
-
-> Para saber os nomes corretos, dê uma lida no seu arquivo `kubeconfig` para poder achar estas chaves.
 
 Agora você pode testar com `kubectl config use-context lucas`, tente executar qualquer comando, como não criamos nenhum esquema de permissão ele sempre te devolverá uma mensagem:
 

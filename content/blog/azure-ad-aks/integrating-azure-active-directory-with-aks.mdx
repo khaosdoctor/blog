@@ -124,7 +124,7 @@ az role assignment create \
   --scope $AKSID
 ```
 
-Let's add a new user called Alice to the group we just created, and copy her ObjectID as we create her:
+Let's add a new user called Alice to the group we just created, and copy her ObjectID as we create her:<MarginNote>When creating a user we need a **valid** domain. To get this domain, run `az ad user list --query "[*].userPrincipalName" -o json` and copy everything that comes after the "@".</MarginNote>
 
 ```bash
 ALICE=$(az ad user create \
@@ -152,7 +152,7 @@ First let's create the role called `ReadOnlyRole`:
 kubectl create clusterrole ReadOnlyRole --verb=get,list,watch --resource="*"
 ```
 
-Now let's create the binding of this role to our AD group's ID:
+Now let's create the binding of this role to our AD group's ID:<Sidenote>We can also bind the role to a single user by using the user's ObjectID instead of the group's ObjectID in the command above.</Sidenote>
 
 ```bash
 kubectl create clusterrolebinding ReadOnlyBinding \

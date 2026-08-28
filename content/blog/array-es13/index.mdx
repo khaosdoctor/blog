@@ -78,9 +78,7 @@ Mas, assim como o `sort` ela aceita uma função de ordenação que segue uma as
 
 -   O retorno for `>0`, `a` vai vir depois de `b`
 -   O retorno for `<0`, `a` vai vir antes de `b`
--   O retorno for `0`, não faz nenhuma alteração
-
-> Você pode achar essa documentação no [site da MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+-   O retorno for `0`, não faz nenhuma alteração<Sidenote>Você pode achar essa documentação no [site da MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort).</Sidenote>
 
 ```js
 let x = [
@@ -116,7 +114,7 @@ A função mantém a mesma assinatura, apenas com o novo retorno: `(start, delet
 
 -   `start` e a posição para iniciar a contagem, ou onde o ponteiro vai começar
 -   `deleteCount` é a quantidade de items para remover a partir de `start`
--   `...items` é um parâmetro opcional que, se passado, vai dizer o novo valor da posição `start` depois de remover todos os items de `deleteCount`
+-   `...items` é um parâmetro opcional que, se passado, vai dizer o novo valor da posição `start` depois de remover todos os items de `deleteCount`<Sidenote>Inclusive esse exemplo mostra muito bem porque essas funções são boas. Se a gente modificasse o array no próprio array original, teríamos que recriar `x` todas as vezes.</Sidenote>
 
 ```js
 let x = [ "Cachorro", "Gato", "Zebra", "Morcego", "Tigre", "Leão" ];
