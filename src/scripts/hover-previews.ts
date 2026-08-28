@@ -107,13 +107,23 @@ function remember(href: string, meta: Meta | null): Meta | null {
   return meta
 }
 
+/**
+ * A page that titles itself with its own address has named nothing, and the
+ * link's own words say more. Shorteners do this, and so does anything whose
+ * title never reached the build.
+ */
+function named(title: string | null | undefined): string {
+  const text = (title ?? '').trim()
+  return /^https?:\/\/\S+$/.test(text) ? '' : text
+}
+
 async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
   const url = new URL(href)
   const host = url.hostname.replace(/^www\./, '')
   const known = (await loadExternalMeta())[href] ?? (await loadExternalMeta())[href.replace(/\/$/, '')]
 
   return {
-    title: known?.title?.trim() || linkText.trim() || host,
+    title: named(known?.title) || linkText.trim() || host,
     description: known?.description?.trim() || '',
     host: known?.publisher?.trim() || host,
   }
@@ -164,7 +174,7 @@ async function getMeta(href: string, linkText: string): Promise<Meta | null> {
     const html = await res.text()
     const doc = new DOMParser().parseFromString(html, 'text/html')
     const meta: Meta = {
-      title: doc.querySelector('title')?.textContent?.trim() || href,
+      title: named(doc.querySelector('title')?.textContent) || linkText.trim() || href,
       description: doc.querySelector('meta[name="description"]')?.getAttribute('content')?.trim() || '',
     }
     return remember(href, meta)
