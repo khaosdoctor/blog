@@ -1,29 +1,29 @@
 /**
  * Emphasis: a block that carries weight without pretending to be a citation.
- * Shaped like a quote so it reads as a set-apart passage, but with no quote
- * glyph, no attribution row and no copy button, and drawn in the post's own
- * accent rather than the quote purple.
+ * No quote glyph, no attribution row, no copy button.
  *
- * Three authoring routes emit this same markup while the shape is being
- * chosen. Delete this file, src/components/Emphasis.astro and
- * src/plugins/remark-emphasis.mjs to remove all of them.
+ * Written as a paragraph made only of `==text==`, Obsidian's own highlight
+ * mark, so it reads as emphasis in the vault too. See
+ * src/plugins/remark-emphasis.mjs; delete both files to remove it.
  */
 
 :root {
   --em-pad: 1.25rem 1.75rem;
-  --em-border-width: 4px;
-  --em-accent: light-dark(
-    var(--post-accent, var(--accent-day)),
-    color-mix(in oklab, var(--post-accent, var(--accent-day)) 75%, white)
-  );
+  --em-border-width: 3px;
+  /* One step in from the running text, short of the quote's own 2rem. */
+  --em-indent: 1.5rem;
+  --em-dropcap-size: 2.75em;
+  --em-dropcap-fg: var(--accent-day);
 }
 
 .prose .emphasis {
-  position: relative;
   margin-block: 2rem;
+  margin-inline-start: var(--em-indent);
   padding: var(--em-pad);
-  border: 0;
-  border-inline-start: var(--em-border-width) solid var(--em-accent);
+  /* The same double rule the buttons, chips and notes use, with the two sides
+     that carry the eye down the block turned solid in the accent. */
+  border-block: var(--em-border-width) double light-dark(#000000, #ffffff);
+  border-inline: var(--em-border-width) solid var(--accent-day);
   background: transparent;
   color: var(--fg);
   font-size: 1.05em;
@@ -34,16 +34,15 @@
 .prose .emphasis > :first-child { margin-block-start: 0; }
 .prose .emphasis > :last-child { margin-block-end: 0; }
 
-/* The variant markers only exist so the three routes can be told apart on the
-   lab page. They carry no styling of their own. */
-.prose .emphasis[data-emphasis] { --em-marker: none; }
-
-@media (min-width: 70rem) {
-  .prose .emphasis {
-    /* Pulled into the left margin so it breaks the column the way a quote
-       does, without needing the quote's full width. */
-    margin-inline-start: calc(var(--em-border-width) * -1 - 1.75rem);
-  }
+/* Same drop cap the quote card uses, in the accent rather than the quote purple. */
+.prose .emphasis > p:first-of-type::first-letter {
+  float: inline-start;
+  margin-inline-end: 0.1em;
+  font-family: var(--font-display);
+  font-size: var(--em-dropcap-size);
+  font-style: normal;
+  line-height: 0.82;
+  color: var(--em-dropcap-fg);
 }
 
 @media (max-width: 47.99rem) {

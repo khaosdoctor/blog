@@ -1,6 +1,5 @@
 import { Vimeo, YouTube } from 'astro-embed'
 import Bookmark from '../components/Bookmark.astro'
-import Emphasis from '../components/Emphasis.astro'
 import HtmlLab from '../components/HtmlLab.astro'
 import LabDemo from '../components/LabDemo.astro'
 import MarginNote from '../components/MarginNote.astro'
@@ -15,7 +14,6 @@ import Video from '../components/Video.astro'
 /** Must stay in sync with MDX_COMPONENT_NAMES in mdx-component-names.ts. */
 export const mdxComponents = {
   Bookmark,
-  Emphasis,
   HtmlLab,
   LabDemo,
   MarginNote,

@@ -476,37 +476,16 @@ Outra frase.<MarginNote>Igual, mas sem número.</MarginNote>
 
 Toda abstração vaza.<Sidenote>Uma nota numerada, que fica na margem em telas largas e vira um popover em telas estreitas, sem JavaScript nos dois casos. Aceita **negrito**, `código` e [links](https://blog.lsantos.dev).</Sidenote> E esta segunda frase carrega uma nota sem número.<MarginNote>Igual à de cima, mas sem a marca numerada no meio do texto.</MarginNote>
 
-## Ênfase (experimento, três rotas)
+## Ênfase
 
 Um trecho que merece peso, sem fingir que é citação: sem aspas de fundo, sem
-autor, sem botão de copiar, e na cor do post em vez do roxo da citação. As três
-rotas abaixo geram exatamente o mesmo bloco. Escolha uma e as outras duas somem
-junto com `src/plugins/remark-emphasis.mjs`.
+autor e sem botão de copiar. Um parágrafo escrito só com `==destaque==`, a marca
+do Obsidian, vira um bloco de ênfase. No vault ele já aparece destacado, então a
+mesma linha serve nos dois lugares.
 
-**Rota 1, componente.** Explícita, e a única que aceita mais de um parágrafo.
-
-```mdx
-<Emphasis>O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.</Emphasis>
-```
-
-<Emphasis>O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.</Emphasis>
-
-**Rota 2, parágrafo só de negrito.** Nenhuma sintaxe nova, mas toma para si uma
-forma que hoje significa "uma frase em negrito": qualquer parágrafo que seja só
-negrito por outro motivo vira um bloco. Isso não é hipotético: com a rota ligada,
-**16 páginas do arquivo já ganham blocos de ênfase que ninguém pediu**, entre
-elas `kv-atomic-ops` (onde `Sum`, `Min e Max` são subtítulos em negrito) e
-`npm-provenance` (onde a linha em negrito abre uma lista).
-
-```md
-**O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.**
-```
-
-**O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.**
-
-**Rota 3, parágrafo só de `==destaque==`.** A marca de destaque do Obsidian.
-Não colide com nada nestes posts, mas não vira ênfase num leitor de markdown
-comum.
+O bloco usa a mesma borda dupla do resto do site, com as laterais sólidas na cor
+de destaque e a capitular que a citação também tem. É a única regra: só funciona
+se o parágrafo inteiro estiver entre `==`.
 
 ```md
 ==O FORTRAN foi feito para cientistas, e é por isso que ele era difícil.==

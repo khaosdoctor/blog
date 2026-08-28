@@ -1,7 +1,6 @@
 /** Must stay in sync with lib/mdx-components.ts. */
 const MDX_COMPONENT_NAMES = [
   'Bookmark',
-  'Emphasis',
   'HtmlLab',
   'LabDemo',
   'MarginNote',
