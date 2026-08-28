@@ -37,9 +37,7 @@ Eu ODEIO mouses no geral, se eu tenho a opção de fazer tudo em um terminal eu 
 
 Então, quando eu instalei meu dual boot com o Arch Linux, eu resolvi instalar um Window manager chamado Sway, que dispensa o uso do mouse para a maioria das coisas, então eu pensei: "Por que não começar a abandonar o mouse de vez?" e foi ai que eu resolvi sair completamente do VSCode e usar apenas o Vim.
 
-Infelizmente o uso de GUIs ainda é muito grande e a maioria delas não tem um suporte muito bom para teclado, com atalhos ou movimentações, então infelizmente não vamos ter como abandonar o mouse de uma vez por todas...
-
-> Eu também tentei usar a extensão do Vim para o VSCode, mas ele é um editor feito para ser usado com um mouse, então a movimentação não era tão fluida na interface, o que era um problema.
+Infelizmente o uso de GUIs ainda é muito grande e a maioria delas não tem um suporte muito bom para teclado, com atalhos ou movimentações, então infelizmente não vamos ter como abandonar o mouse de uma vez por todas...<Sidenote>Eu também tentei usar a extensão do Vim para o VSCode, mas ele é um editor feito para ser usado com um mouse, então a movimentação não era tão fluida na interface, o que era um problema.</Sidenote>
 
 ## Adaptação inicial
 
@@ -97,9 +95,7 @@ Alguma programação em Lua quase sempre é necessário, e muitas vezes obrigat�
 
 ### LSPs
 
-O maior problema que eu tive foi configurar os LSPs. As configurações padrão para a maioria das linguagens que eu uso é ok, porém eu tive um conflito com Node e Deno. Como ambos usam a mesma linguagem porém tem arquivos-chave diferentes, eu tive que escrever uma função para verificar se o repositório era um repositório Deno ou Node e evitar que eu tenha tanto o LSP de Node quando o de Deno no mesmo arquivo.
-
-> LSPs são [Language Server Protocols](https://en.wikipedia.org/wiki/Language_Server_Protocol), um protocolo criado pela Microsoft para introduzir a capacidade de um editor se conectar a um serviço que tem a inteligência da linguagem de forma separada, independente do editor, para dar coisas como completions, intellisense e etc de forma distribuída.
+O maior problema que eu tive foi configurar os LSPs. As configurações padrão para a maioria das linguagens que eu uso é ok, porém eu tive um conflito com Node e Deno. Como ambos usam a mesma linguagem porém tem arquivos-chave diferentes, eu tive que escrever uma função para verificar se o repositório era um repositório Deno ou Node e evitar que eu tenha tanto o LSP de Node quando o de Deno no mesmo arquivo.<MarginNote>LSPs são [Language Server Protocols](https://en.wikipedia.org/wiki/Language_Server_Protocol), um protocolo criado pela Microsoft para introduzir a capacidade de um editor se conectar a um serviço que tem a inteligência da linguagem de forma separada, independente do editor, para dar coisas como completions, intellisense e etc de forma distribuída.</MarginNote>
 
 ![](./image-5.png "Função para distinguir Deno de Node")
 
