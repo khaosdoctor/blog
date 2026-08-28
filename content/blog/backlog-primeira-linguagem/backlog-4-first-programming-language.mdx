@@ -20,9 +20,7 @@ Before I answer that, we need to explore the context behind how programming lang
 
 ## Where it all started
 
-Before any computer or calculating machine, and more than 100 years before Alan Turing, a French weaver named Joseph Marie Jacquard revolutionized the way looms worked. In 1804, he created and patented the famous [Jacquard loom](https://en.wikipedia.org/wiki/Jacquard_machine), designed to automatically create complex patterns.
-
-> You thought I was going to talk about Ada Lovelace, right? Wrong.
+Before any computer or calculating machine, and more than 100 years before Alan Turing, a French weaver named Joseph Marie Jacquard revolutionized the way looms worked. In 1804, he created and patented the famous [Jacquard loom](https://en.wikipedia.org/wiki/Jacquard_machine), designed to automatically create complex patterns.<Sidenote>You thought I was going to talk about Ada Lovelace, right? Wrong.</Sidenote>
 
 ![The punched-card control mechanism of a Jacquard loom in use in 2009, Varanasi, Uttar Pradesh, India.](./loom-795692.jpg "Ironically, the cards were sewn together")
 
@@ -34,9 +32,7 @@ While the Jacquard loom was a simple application of a DSL (_Domain Specific Lang
 
 ## Ada Lovelace and Note G
 
-> Finally, she shows up!
-
-Thirty six years after Jacquard patented his loom, in 1840, professor [Charles Babbage](https://en.wikipedia.org/wiki/Charles_Babbage) was invited to give a seminar in Turin, Italy, about the progress on his most ambitious project: the analytical engine (a topic for a future _Backlog_). This seminar was the only public presentation Babbage ever gave about the revolutionary machine he was building.
+Thirty six years after Jacquard patented his loom,<MarginNote>Finally, she shows up!</MarginNote> in 1840, professor [Charles Babbage](https://en.wikipedia.org/wiki/Charles_Babbage) was invited to give a seminar in Turin, Italy, about the progress on his most ambitious project: the analytical engine (a topic for a future _Backlog_). This seminar was the only public presentation Babbage ever gave about the revolutionary machine he was building.
 
 ![](./image-3.png "Charles Babbage")
 
@@ -52,17 +48,13 @@ Ada wrote seven notes, named A through G, detailing how the analytical engine wo
 
 ![](./1280px-diagram-for-the-computation-of-be-486f33.jpg "Note G")
 
-Ada's [notes](https://en.wikipedia.org/wiki/Note_G) were three times longer than Luigi Menabrea's original article. Besides describing the algorithm (only in the last note, G), Ada detailed the entire workings of the analytical engine, explaining how it differed from the previous machine, the difference engine. In Note C, she introduced revolutionary concepts like loops, control flow (_if_, _else_), and functions, the first time these ideas appeared in history.
-
-> A funny fact is that not even Babbage himself had thought of this for the machine. Ada's ideas were far bigger than the ambitions of the machine's own creator.
+Ada's [notes](https://en.wikipedia.org/wiki/Note_G) were three times longer than Luigi Menabrea's original article. Besides describing the algorithm (only in the last note, G), Ada detailed the entire workings of the analytical engine, explaining how it differed from the previous machine, the difference engine. In Note C, she introduced revolutionary concepts like loops, control flow (_if_, _else_), and functions, the first time these ideas appeared in history.<Sidenote>A funny fact is that not even Babbage himself had thought of this for the machine. Ada's ideas were far bigger than the ambitions of the machine's own creator.</Sidenote>
 
 And she did all this without ever having even seen the machine itself (which was never fully built) or having used any part of it. And today we complain when we can't use an API without documentation...
 
 ## Plankalkül, so close...
 
-The world of computing stayed pretty much the same for about 100 years. But, between 1943 and 1948, a German scientist named [Konrad Zuse](https://en.wikipedia.org/wiki/Konrad_Zuse) (pronounced "Zuza") started noticing a big problem: no existing computing language was [Turing complete](https://en.wikipedia.org/wiki/Turing-complete), which made them unsuitable for his Z1 through Z3 computers.
-
-> Spoiler: Konrad Zuse is going to get an entire edition of _Backlog_. He's widely recognized as the inventor of the world's first programmable digital computer, the Z3.
+The world of computing stayed pretty much the same for about 100 years. But, between 1943 and 1948, a German scientist named [Konrad Zuse](https://en.wikipedia.org/wiki/Konrad_Zuse) (pronounced "Zuza") started noticing a big problem: no existing computing language was [Turing complete](https://en.wikipedia.org/wiki/Turing-complete), which made them unsuitable for his Z1 through Z3 computers.<Sidenote>Spoiler: Konrad Zuse is going to get an entire edition of _Backlog_. He's widely recognized as the inventor of the world's first programmable digital computer, the Z3.</Sidenote>
 
 Zuse's computers started as mechanical calculating machines, similar to Babbage's ideas. But by the time he reached the third version (the Z3), he'd created something revolutionary: a fully digital, programmable computer. Now, all that was missing was a language his computer could understand...
 
@@ -74,17 +66,13 @@ However, since implementing propositional calculus directly on a computer would 
 
 [Plankalkül](https://en.wikipedia.org/wiki/Plankalk%C3%BCl) is widely recognized as **the first high-level programming language**, since it abstracted away most of the computer's inner workings. With it, engineers didn't have to deal directly with repetitive tasks, like manually building loops.
 
-Even though it was a fully established language in theory, Plankalkül was never implemented on Zuse's computers, like the Z3, even though it was developed later. The Z3 itself was programmed using punched tape on movie film, read by electromechanical relays into a 1408 bit memory (64 words of 22 bits each).
-
-> I'm leaving a video about how the Z3 worked, it's in German but there are auto-translated YouTube subtitles.
+Even though it was a fully established language in theory, Plankalkül was never implemented on Zuse's computers, like the Z3, even though it was developed later. The Z3 itself was programmed using punched tape on movie film, read by electromechanical relays into a 1408 bit memory (64 words of 22 bits each).<Sidenote>I'm leaving a video about how the Z3 worked, it's in German but there are auto-translated YouTube subtitles.</Sidenote>
 
 ![](https://www.youtube.com/watch?v=aUXnhVrT4CI)
 
-Instead, his main motivation was to offer a more efficient and structured way to program, allowing the development of more sophisticated programs that were "easy to understand".
+Instead, his main motivation was to offer a more efficient and structured way to program, allowing the development of more sophisticated programs that were "easy to understand".<MarginNote>Zuse thought this was something "easy to understand", I feel for whoever had to use it.</MarginNote>
 
 ![Primer lenguaje de programación: Plankalkül - Blog de Linube](./primer-lenguaje-programacion-1280x720-f53d9d.jpg "A Plankalkül program")
-
-> Zuse thought this was something "easy to understand", I feel for whoever had to use it.
 
 I'd like to explain how this "simpler" language works, but honestly, I couldn't understand a thing (Zuse was way smarter than me). So I'll leave you with the basics:
 
@@ -134,9 +122,7 @@ The main thing the new language needed to solve was simplifying how math equatio
 
 FORTRAN had a clear goal: translate math into code. That's where the name comes from, short for _FORmula TRANslator_.
 
-The first spec of the language was finished in 1954, under the title "_The IBM Mathematical Formula Translating System_". In 1957, the first FORTRAN compiler was built, and it produced machine code fast enough to convince most programmers that a high-level language could be a viable alternative, even with all its early bugs.
-
-> Funny enough, John Backus created FORTRAN because he hated programming. While writing programs to calculate missile trajectories on the IBM 701, he thought: "There must be an easier way to do this."
+The first spec of the language was finished in 1954, under the title "_The IBM Mathematical Formula Translating System_". In 1957, the first FORTRAN compiler was built, and it produced machine code fast enough to convince most programmers that a high-level language could be a viable alternative, even with all its early bugs.<MarginNote>Funny enough, John Backus created FORTRAN because he hated programming. While writing programs to calculate missile trajectories on the IBM 701, he thought: "There must be an easier way to do this."</MarginNote>
 
 After 1958, FORTRAN got a reliable compiler and quickly became widely used on most IBM mainframes, establishing itself as the leading programming language of the time. It was so successful that by 1963, there were already more than 40 FORTRAN compilers.
 
@@ -159,11 +145,9 @@ And on those punched cards, some specific columns were set aside for control pur
 -   Columns 1 through 5 were labels, used to jump back in statements like `GO` and `IF`
 -   Column 6 said whether the card was a continuation of the previous one
 -   Columns 7 to 72 were where you wrote the actual program
--   Columns 73 to 80 were ignored because the IBM 704 only read the first 72 columns, so they were often used for notes or identification, like the card's sequence number and so on.
+-   Columns 73 to 80 were ignored because the IBM 704 only read the first 72 columns, so they were often used for notes or identification, like the card's sequence number and so on.<MarginNote>Each punched card represented only ONE statement, meaning each card was one keyword or one line. The card above could have been an `IF`.</MarginNote>
 
 ![](./image-9.png "A FORTRAN card with a statement")
-
-Remember that each punched card represented only ONE statement, meaning each card was one keyword or one line, so the card above could have been an `IF`.
 
 ### Evolutions
 
@@ -196,7 +180,9 @@ One interesting quirk about FORTRAN is how it handled comments and blank lines. 
 
 FORTRAN kept evolving, but it was only 13 years later that a major revision showed up: **FORTRAN 90**. This version is one of the most commonly used to this day, since it brought significant changes you probably wouldn't notice right away, but that made life much easier for programmers:
 
--   Text no longer had to be indented 6 characters before any statement (remember those 6 columns from the punched cards? Go look at the indentation in the earlier code snippets)
+-   Text no longer had to be indented 6 characters before any statement[^cards]
+
+[^cards]: Remember those 6 columns from the punched cards? Go look at the indentation in the earlier code snippets and compare.
 -   Keywords could be lowercase
 -   Variable names of up to 31 characters (before it was only 6)
 -   Inline comments instead of taking up the whole line

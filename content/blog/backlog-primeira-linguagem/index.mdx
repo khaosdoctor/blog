@@ -20,9 +20,7 @@ Antes de responder, a gente precisa explorar o contexto da evolução das lingua
 
 ## Onde tudo começou
 
-Antes de qualquer computador ou máquina de calcular, e mais de 100 anos antes de Alan Turing, um tecelão francês chamado Joseph Marie Jacquard revolucionou a forma como os teares funcionavam. Em 1804, ele criou e patenteou o famoso [tear de Jacquard](https://en.wikipedia.org/wiki/Jacquard_machine), projetado para criar padrões complexos automaticamente.
-
-> Você achou que eu ia falar da Ada Lovelace né? Achou errado.
+Antes de qualquer computador ou máquina de calcular, e mais de 100 anos antes de Alan Turing, um tecelão francês chamado Joseph Marie Jacquard revolucionou a forma como os teares funcionavam. Em 1804, ele criou e patenteou o famoso [tear de Jacquard](https://en.wikipedia.org/wiki/Jacquard_machine), projetado para criar padrões complexos automaticamente.<Sidenote>Você achou que eu ia falar da Ada Lovelace né? Achou errado.</Sidenote>
 
 ![The punched-card control mechanism of a Jacquard loom in use in 2009, Varanasi, Uttar Pradesh, India.](./loom-795692.jpg "Ironicamente, os cartões eram costurados juntos")
 
@@ -34,9 +32,7 @@ Embora o tear de Jacquard fosse uma aplicação simples de uma DSL (_Domain Spec
 
 ## Ada Lovelace e a nota G
 
-> Finalmente ela aparece!
-
-Trinta e seis anos após Jacquard patentear seu tear, em 1840, o professor [Charles Babbage](https://en.wikipedia.org/wiki/Charles_Babbage) foi convidado a dar um seminário em Torino, na Itália, sobre os avanços de seu projeto mais ambicioso: o motor analítico (um tema para um futuro _Backlog_). Esse seminário foi a única apresentação pública que Babbage fez sobre a máquina revolucionária que estava desenvolvendo.
+Trinta e seis anos após Jacquard patentear seu tear,<MarginNote>Finalmente ela aparece!</MarginNote> em 1840, o professor [Charles Babbage](https://en.wikipedia.org/wiki/Charles_Babbage) foi convidado a dar um seminário em Torino, na Itália, sobre os avanços de seu projeto mais ambicioso: o motor analítico (um tema para um futuro _Backlog_). Esse seminário foi a única apresentação pública que Babbage fez sobre a máquina revolucionária que estava desenvolvendo.
 
 ![](./image-3.png "Charles Babbage")
 
@@ -52,17 +48,13 @@ Ada compilou sete notas, nomeadas de A a G, detalhando o funcionamento do motor 
 
 ![](./1280px-diagram-for-the-computation-of-be-486f33.jpg "A nota G")
 
-As [notas](https://en.wikipedia.org/wiki/Note_G) de Ada eram três vezes mais extensas do que o artigo original de Luigi Menabrea. Além de descrever o algoritmo (apenas na última nota, a G), Ada detalhou todo o funcionamento do motor analítico, explicando como ele diferia da máquina anterior, o motor de diferenças. Na nota C, ela apresentou conceitos revolucionários, como loops, fluxos de controle (_if_, _else_) e funções – a primeira vez que essas ideias apareceram na história.
-
-> Um fato engraçado é que nem o próprio Babbage tinha pensado nisso para a máquina. As ideias de Ada eram muito maiores que as ambições do seu próprio criador.
+As [notas](https://en.wikipedia.org/wiki/Note_G) de Ada eram três vezes mais extensas do que o artigo original de Luigi Menabrea. Além de descrever o algoritmo (apenas na última nota, a G), Ada detalhou todo o funcionamento do motor analítico, explicando como ele diferia da máquina anterior, o motor de diferenças. Na nota C, ela apresentou conceitos revolucionários, como loops, fluxos de controle (_if_, _else_) e funções – a primeira vez que essas ideias apareceram na história.<Sidenote>Um fato engraçado é que nem o próprio Babbage tinha pensado nisso para a máquina. As ideias de Ada eram muito maiores que as ambições do seu próprio criador.</Sidenote>
 
 E ela fez isso sem nunca ter nem visto a máquina em si (que nunca foi completamente construída) ou ter usado qualquer parte dela. E hoje a gente reclama quando não consegue usar uma API sem documentação...
 
 ## Plankalkül, quase lá...
 
-O mundo da computação permaneceu praticamente o mesmo por cerca de 100 anos. Mas, entre 1943 e 1948, um cientista alemão chamado [Konrad Zuse](https://en.wikipedia.org/wiki/Konrad_Zuse) (se pronuncia “Zuza”) começou a perceber um grande problema: nenhuma linguagem de computação existente era [Turing-completa](https://en.wikipedia.org/wiki/Turing-complete), o que as tornava inadequadas para seus computadores Z1 a Z3.
-
-> Spoiler: Konrad Zuse vai ganhar uma edição inteira do _Backlog_. Ele é amplamente reconhecido como o inventor do primeiro computador digital programável do mundo, o Z3.
+O mundo da computação permaneceu praticamente o mesmo por cerca de 100 anos. Mas, entre 1943 e 1948, um cientista alemão chamado [Konrad Zuse](https://en.wikipedia.org/wiki/Konrad_Zuse) (se pronuncia “Zuza”) começou a perceber um grande problema: nenhuma linguagem de computação existente era [Turing-completa](https://en.wikipedia.org/wiki/Turing-complete), o que as tornava inadequadas para seus computadores Z1 a Z3.<Sidenote>Spoiler: Konrad Zuse vai ganhar uma edição inteira do _Backlog_. Ele é amplamente reconhecido como o inventor do primeiro computador digital programável do mundo, o Z3.</Sidenote>
 
 Os computadores de Zuse começaram como máquinas de calcular mecânicas, parecidas com as ideias de Babbage. Mas, ao chegar à terceira versão (o Z3), ele criou algo revolucionário: um computador totalmente digital e programável. Agora, tudo o que faltava era uma linguagem que seu computador pudesse entender...
 
@@ -74,17 +66,13 @@ No entanto, como implementar diretamente o cálculo proposicional em um computad
 
 O [Plankalkül](https://en.wikipedia.org/wiki/Plankalk%C3%BCl) é amplamente reconhecido como **a primeira linguagem de programação de alto nível**, pois abstraía grande parte do funcionamento interno do computador. Com ela, os engenheiros não precisavam lidar diretamente com tarefas repetitivas, como a criação manual de loops.
 
-Embora fosse uma linguagem completamente estabelecida teoricamente, o Plankalkül nunca foi implementado nos computadores de Zuse, como o Z3, mesmo tendo sido desenvolvida depois. O Z3 em si era programado usando fitas perfuradas em um filme cinematográfico, que eram lidas por relés eletromecânicos para uma memória de 1408 bits (64 palavras de 22 bits cada).
-
-> Estou deixando um vídeo sobre como o Z3 funcionava, ele está em alemão mas existem legendas auto traduzidas do YouTube.
+Embora fosse uma linguagem completamente estabelecida teoricamente, o Plankalkül nunca foi implementado nos computadores de Zuse, como o Z3, mesmo tendo sido desenvolvida depois. O Z3 em si era programado usando fitas perfuradas em um filme cinematográfico, que eram lidas por relés eletromecânicos para uma memória de 1408 bits (64 palavras de 22 bits cada).<Sidenote>Estou deixando um vídeo sobre como o Z3 funcionava, ele está em alemão mas existem legendas auto traduzidas do YouTube.</Sidenote>
 
 ![](https://www.youtube.com/watch?v=aUXnhVrT4CI)
 
-Em vez disso, sua principal motivação era oferecer uma maneira mais eficiente e estruturada de programar, permitindo o desenvolvimento de programas mais sofisticados e de "fácil compreensão".
+Em vez disso, sua principal motivação era oferecer uma maneira mais eficiente e estruturada de programar, permitindo o desenvolvimento de programas mais sofisticados e de "fácil compreensão".<MarginNote>Zuse achava que isso era algo de "fácil compreensão", tenho pena de quem precisava usar.</MarginNote>
 
 ![Primer lenguaje de programación: Plankalkül - Blog de Linube](./primer-lenguaje-programacion-1280x720-f53d9d.jpg "Um programa em plankalkül")
-
-> Zuse achava que isso era algo de "fácil compreensão", tenho pena de quem precisava usar.
 
 Eu gostaria de explicar como essa linguagem “mais simples” funciona, mas, sinceramente, não consegui entender nada (Zuse era muito mais inteligente do que eu). Então, vou deixar você com o básico:
 
@@ -134,9 +122,7 @@ A principal solução que a nova linguagem deveria oferecer era simplificar a in
 
 O FORTRAN tinha um objetivo claro: traduzir matemática para código. Daí seu nome, uma abreviação de _FORmula TRANslator_ (Tradutor de Fórmulas).
 
-A primeira especificação da linguagem foi concluída em 1954, sob o título “_The IBM Mathematical Formula Translating System_”. Em 1957, o primeiro compilador de FORTRAN foi criado, e ele produzia um código de máquina rápido o suficiente para convencer a maioria dos programadores de que uma linguagem de alto nível podia ser uma alternativa viável – mesmo com os vários bugs iniciais.
-
-> Curiosamente, John Backus criou o FORTRAN porque detestava programar. Enquanto escrevia programas para calcular trajetórias de mísseis no IBM 701, ele pensou: “Deve ter um jeito mais fácil de fazer isso.”
+A primeira especificação da linguagem foi concluída em 1954, sob o título “_The IBM Mathematical Formula Translating System_”. Em 1957, o primeiro compilador de FORTRAN foi criado, e ele produzia um código de máquina rápido o suficiente para convencer a maioria dos programadores de que uma linguagem de alto nível podia ser uma alternativa viável – mesmo com os vários bugs iniciais.<MarginNote>Curiosamente, John Backus criou o FORTRAN porque detestava programar. Enquanto escrevia programas para calcular trajetórias de mísseis no IBM 701, ele pensou: “Deve ter um jeito mais fácil de fazer isso.”</MarginNote>
 
 Depois de 1958, o FORTRAN ganhou um compilador confiável e rapidamente se tornou amplamente utilizado na maioria dos mainframes da IBM, estabelecendo-se como a principal linguagem de programação da época. Seu sucesso foi tão grande que, em 1963, já existiam mais de 40 compiladores de FORTRAN.
 
@@ -159,11 +145,9 @@ E, nesses cartões perfurados, existiam algumas colunas específicas que eram de
 -   As colunas 1 a 5 eram labels, usadas para retornar em funções como `GO` e `IF`
 -   A coluna 6 era pra dizer se o cartão era uma continuação do anterior
 -   De 7 a 72 era onde escrevíamos os programas
--   De 73 até 80 eram ignoradas porque o IBM 704 só lia 72 colunas, então eram muito usadas para anotações ou identificação, como a ordem dos cartões e etc.
+-   De 73 até 80 eram ignoradas porque o IBM 704 só lia 72 colunas, então eram muito usadas para anotações ou identificação, como a ordem dos cartões e etc.<MarginNote>Cada cartão perfurado representava somente UM statement, ou seja, cada cartão era uma keyword ou uma linha, o cartão acima poderia ter sido um `IF`.</MarginNote>
 
 ![](./image-9.png "Um cartão FORTRAN com um statement")
-
-Lembrando que cada cartão perfurado representava somente UM statement, ou seja, cada cartão era uma keyword ou uma linha, o cartão acima poderia ter sido um `IF`.
 
 ### Evoluções
 
@@ -196,7 +180,9 @@ Uma curiosidade interessante sobre o FORTRAN é como ele lidava com comentários
 
 O FORTRAN continuou evoluindo, mas foi apenas 13 anos depois que surgiu uma grande revisão: o **FORTRAN 90**. Essa versão é uma das mais comumente utilizadas até hoje, pois trouxe mudanças significativas que provavelmente você nem percebeu de imediato, mas que facilitaram muito a vida dos programadores:
 
--   O texto não precisava ser identado 6 caracteres pra frente antes de qualquer statement (lembra das 6 colunas dos cartões perfurados? Agora olha a identação dos códigos de antes, veja a identação)
+-   O texto não precisava ser identado 6 caracteres pra frente antes de qualquer statement[^cartoes]
+
+[^cartoes]: Lembra das 6 colunas dos cartões perfurados? Agora olha a identação dos códigos de antes e compara.
 -   As palavras-chave poderiam ser minúsculas
 -   Nomes de variáveis com até 31 letras (antes eram só 6)
 -   Comentários inline ao invés de ocupar a linha toda
