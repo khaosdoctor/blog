@@ -159,6 +159,7 @@ That said, there are cases where `any` has to be there. These usually come up wh
 
 So, without knowing the shape, we can't use `unknown`, because it would force us into a type cast. So the way out is using `any` to type some argument that could be completely unknown. But this is **STRONGLY** discouraged.
 
+> [!CAUTION]
 > NEVER use `any` on function returns or on interfaces that might get merged with other objects. Because as soon as TS grabs your function's return, it'll type any variable that receives that function as `any`, and you'll lose every other type inference.
 
 But it's super important to say that, in 99% of cases, you can replace `any` with some other type, and even the [official documentation itself](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html#any) says not to use `any` unless you're migrating your JavaScript codebase to TypeScript.
@@ -169,7 +170,7 @@ But it's super important to say that, in 99% of cases, you can replace `any` wit
 
 ![](./image-76.png)
 
-> It's the exact opposite of `any`, using `unknown` forces TypeScript to check your type before doing anything with it.
+It's the exact opposite of `any`, using `unknown` forces TypeScript to check your type before doing anything with it.
 
 `unknown` isn't included in any type, but unlike `any`, a type `x = unknown & string` gets inferred as `string`, because joining a set that's not inside any other with another set always results in that other set. In practice, this means that if you mix `unknown` with any other type using an intersection, it'll infer the other type, but in the case of a union (with `|`), `unknown` wins.
 
@@ -248,4 +249,5 @@ Now let's see if you've got the hang of good code practices with two exercises:
 -   **Challenge:** Implement the `FlattenDeep` function which accepts arrays of any dimension (for example a `string[][]`) and extracts the value that exists inside the array (a `string[][]` would be `string`).
 -   Implement a generic interface for a geometric shape containing `area` and `volume` as functions, and implement that interface to create the concrete classes `Quadrado`, `Circulo`, and `Triangulo`.
 
+> [!IMPORTANT]
 > Don't forget to leave your feedback about #SemanaTS here [in this form](https://forms.gle/6hAqjVmah9uyR4by8)!

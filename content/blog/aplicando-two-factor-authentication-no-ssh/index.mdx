@@ -80,6 +80,7 @@ Se você estiver utilizando qualquer tipo de sistema baseado em Debian, no meu c
 sudo apt install -y libpam-google-authenticator
 ```
 
+> [!TIP]
 > Se você não está usando uma distro baseada no Debian, ou não está conseguindo instalar a biblioteca, procure por "libpam-google-authenticator \<suadistro>" para obter instruções corretas de instalação.
 
 Execute o script digitando `google-authenticator` na linha de comando, ele vai te fazer várias perguntas, as quais você pode só responder `yes` para todas, com exceção de duas.
@@ -113,6 +114,7 @@ No final, você terá uma imagem parecida com esta:
 
 Basta apontar um aplicativo de TFA como o Authy, 1Password ou até mesmo o Google Authenticator para o QR Code para poder cadastrar a nova senha, ou então utilizar a Secret Key para poder gerar a mesma em aplicativos que não possuem leitura de QR Codes.
 
+> [!IMPORTANT]
 > Lembre-se de anotar os códigos de emergência e o código de verificação e mantê-los em locais seguros!
 
 Vamos agora editar o arquivo de configuração do pacote para podermos habilitar o uso de TFA no login, vamos abrir o arquivo `/etc/pam.d/sshd`. Este arquivo vai ter um código já pronto, vamos fazer as seguintes alterações:

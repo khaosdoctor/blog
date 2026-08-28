@@ -80,6 +80,7 @@ If you're on any Debian-based system, in my case Ubuntu Server 18.4, just instal
 sudo apt install -y libpam-google-authenticator
 ```
 
+> [!TIP]
 > If you're not on a Debian-based distro, or can't get the library installed, search for "libpam-google-authenticator \<your distro>" for the right install instructions.
 
 Run the script by typing `google-authenticator` on the command line, it'll ask you a bunch of questions, and you can just answer `yes` to all of them, except two.
@@ -113,6 +114,7 @@ At the end, you'll see something that looks like this:
 
 Just point a TFA app like Authy, 1Password, or even Google Authenticator at the QR Code to register the new credential, or use the Secret Key to generate the same thing on apps that can't read QR Codes.
 
+> [!IMPORTANT]
 > Remember to write down the emergency codes and the verification code, and keep them somewhere safe!
 
 Now let's edit the package's config file so we can enable TFA on login, let's open `/etc/pam.d/sshd`. This file already has some code in it, and we're going to make the following changes:

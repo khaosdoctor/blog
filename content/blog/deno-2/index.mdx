@@ -115,7 +115,7 @@ Isso é tão verdade que existem vários exemplos disso acontecendo, onde empres
 
 Por outro lado, centralizar pacotes dessa forma torna o ambiente mais seguro, e evita problemas como o que [aconteceu com o Faker](https://www.revenera.com/blog/software-composition-analysis/the-story-behind-colors-js-and-faker-js/) e o [Left-pad](https://en.wikipedia.org/wiki/Npm_left-pad_incident) (que mostra outro problema completamente diferente e muito mais sério, mas vamos nos ater a essa história). Nesses dois casos, o NPM conseguiu intervir e forçadamente tomar controle dos pacotes, republicando e/ou restaurando versões anteriores. Isso é um exemplo onde ter controle total é uma coisa boa, mas somente se a empresa que tem o controle tem boas intenções. Mas a pergunta que fica é:
 
-> Qual empresa tem boas intenções?
+Qual empresa tem boas intenções?
 
 Voltando ao Deno, a criação do JSR e o uso do Deno como package manager não é necessariamente algo ruim porque ele basicamente se conecta a muitos gerenciadores e é utilizado como um cliente de cada um para baixar pacotes em múltiplos lugares diferentes. O Deno meio que virou o `yarn`, inclusive ele se compara a eles:
 

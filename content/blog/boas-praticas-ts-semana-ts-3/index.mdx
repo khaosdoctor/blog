@@ -159,6 +159,7 @@ Porém, existem casos onde é necessário que o any esteja presente. Geralmente 
 
 Portanto, sem saber a estrutura, não podemo usar `unknown`, porque ele nos forçaria a um type cast. Então a saída é o uso do any para tipar algum argumento que possa ser completamente desconhecido. Mas isso é **FORTEMENTE** desencorajado.
 
+> [!CAUTION]
 > JAMAIS use `any` em retornos de funções ou em interfaces que possam ser mescladas com outros objetos. Isto porque, assim que o TS pegar o retorno da sua função, ele vai tipar qualquer variável que receber essa função como `any` e você vai perder outras inferências de tipos.
 
 Mas é super importante dizer que, em 99% dos casos, é possível substituir `any` por qualquer outro tipo, inclusive a [própria documentação oficial](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html#any) diz para não usar `any` a não ser que você esteja migrando a sua base de JavaScript para TypeScript.
@@ -169,7 +170,7 @@ O `unknown` é a saída para os casos acima. O irmão mais correto do `any`, usa
 
 ![](./image-76.png)
 
-> É o exato oposto do `any`, usando `unknown` você vai forçar o TypeScript a checar o seu tipo antes de fazer qualquer operação
+É o exato oposto do `any`, usando `unknown` você vai forçar o TypeScript a checar o seu tipo antes de fazer qualquer operação
 
 O `unknown` não está incluso em nenhum tipo, mas diferente do `any`, um tipo `x = unknown & string` vai ser inferido como `string`, porque a junção de um conjunto que não está em nenhum outro com outro conjunto vai ser sempre o outro conjunto. Na prática, isso quer dizer que se você misturar `unknown` com qualquer outro tipo usando intersecção, ele vai inferir o outro tipo, mas no caso de uma união (com `|`) o `unknown` vai vencer.
 
@@ -248,4 +249,5 @@ Agora vamos ver se você pegou bem as boas práticas de código com dois exercí
 -   **Desafio:** Implemente a função `FlattenDeep` que aceita arrays de qualquer dimensão (por exemplo um `string[][]`) e extraia o valor existente no array (uma `string[][]` seria `string`).
 -   Faça a implementação de uma interface genérica para uma forma geométrica contendo `area` e `volume` como funções, e implemente essa interface para criar as classes concretas `Quadrado`, `Circulo` e `Triangulo`
 
+> [!IMPORTANT]
 > Não esquece de deixar o seu feedback sobre a #SemanaTS aqui [nesse formulário](https://forms.gle/6hAqjVmah9uyR4by8)!

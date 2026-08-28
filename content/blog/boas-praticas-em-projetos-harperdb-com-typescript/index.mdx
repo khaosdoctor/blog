@@ -14,7 +14,8 @@ Quando você está trabalhando com HarperDB, dá pra usar TypeScript pra melhora
 
 Dá uma passada na [documentação do HarperDB](https://docs.harperdb.io/docs/install-harperdb) pra saber como instalar localmente e começar. Você também pode usar o [HarperDB Cloud](https://harperdb.io/) pra começar rapidinho. Mas vou assumir que você já tem sua instância rodando.
 
-> **Dica:** você pode conferir alguns outros tutoriais meus [aqui](https://www.harperdb.io/author/lucas-santos) ou [nesse artigo da comunidade](https://www.harperdb.io/development/tutorials/harperdb-authentication-with-oauth) pra saber como configurar sua infraestrutura localmente, com Kubernetes, ou na nuvem.
+> [!TIP]
+> Você pode conferir alguns outros tutoriais meus [aqui](https://www.harperdb.io/author/lucas-santos) ou [nesse artigo da comunidade](https://www.harperdb.io/development/tutorials/harperdb-authentication-with-oauth) pra saber como configurar sua infraestrutura localmente, com Kubernetes, ou na nuvem.
 
 Esse repositório está no [GitHub da comunidade HarperDB](https://github.com/HarperDB-Add-Ons/hdb-typescript-best-practices). Você pode clonar e acompanhar junto com o artigo. Vamos usar a versão cloud do banco, mas no repositório você vai encontrar um arquivo `docker-compose.yml` que pode ser usado pra rodar localmente com `docker compose up`.
 
@@ -26,7 +27,8 @@ Pra usar TypeScript você precisa ter o Node.js instalado, de preferência a úl
 
 Vamos criar um novo diretório (pode dar o nome que quiser) e, dentro dele, rodar o comando `npm init -y`. Isso vai gerar um novo arquivo `package.json` com os valores padrão. Agora vamos instalar o TypeScript como dependência de desenvolvimento rodando `npm install --save-dev typescript`. Isso instala a última versão do TypeScript no seu projeto.
 
-> **Dica:** você pode conferir a última versão do TypeScript [aqui](https://www.npmjs.com/package/typescript). Estou usando a versão 5.2.2
+> [!TIP]
+> Você pode conferir a última versão do TypeScript [aqui](https://www.npmjs.com/package/typescript). Estou usando a versão 5.2.2
 
 Vamos também instalar os tipos externos do Node.js rodando `npm install --save-dev @types/node`. Isso vai permitir usar os tipos do Node.js no nosso projeto.
 
@@ -78,7 +80,8 @@ Agora vamos criar uma pasta `src` e um arquivo `index.ts` dentro dela. Esse vai 
 
 O Node.js a partir da versão 20.6 [já vem com suporte nativo a arquivos de env](https://nodejs.org/en/blog/release/v20.6.0), então vamos aproveitar isso pra guardar nossos segredos num arquivo `.env`, e essa já é a primeira boa prática:
 
-> **Boa prática:** nunca commite segredos no seu repositório. Use um arquivo `.env` pra guardá-los e adicione ele no `.gitignore`.
+> [!CAUTION]
+> Nunca commite segredos no seu repositório. Use um arquivo `.env` pra guardá-los e adicione ele no `.gitignore`.
 
 Vamos criar um arquivo `.env` e adicionar o seguinte conteúdo:
 
@@ -107,7 +110,8 @@ Ambiente de teste
 
 Isso significa que está tudo configurado corretamente!
 
-> **Dica**: você também pode rodar o arquivo manualmente compilando ele, pra isso, rode `npx tsc` no diretório raiz, depois rode `node --env-file=.env dist/index.js`. Vai dar o mesmo resultado. Você pode até adicionar um script `build` que roda o `tsc` como comando, aí você roda `npm run build` e depois `npm run start` pra rodar o código.
+> [!TIP]
+> Você também pode rodar o arquivo manualmente compilando ele, pra isso, rode `npx tsc` no diretório raiz, depois rode `node --env-file=.env dist/index.js`. Vai dar o mesmo resultado. Você pode até adicionar um script `build` que roda o `tsc` como comando, aí você roda `npm run build` e depois `npm run start` pra rodar o código.
 
 ## Configurando os ambientes e o banco de dados
 
@@ -174,7 +178,8 @@ Essa é uma classe simples que representa nosso item de tarefa. Ela tem um const
 
 Agora podemos criar um novo item de tarefa rodando `new TodoItem('Meu primeiro item de tarefa', new Date())`. Isso cria um novo item de tarefa com o título `Meu primeiro item de tarefa` e a data de vencimento como a data atual.
 
-> **Dica:** você pode conferir a [documentação do Node.js](https://nodejs.org/api/crypto.html#crypto_crypto_randomuuid_options) pra saber mais sobre a função `randomUUID`.
+> [!TIP]
+> Você pode conferir a [documentação do Node.js](https://nodejs.org/api/crypto.html#crypto_crypto_randomuuid_options) pra saber mais sobre a função `randomUUID`.
 
 Vamos adicionar algumas funcionalidades no nosso objeto de domínio pra deixá-lo mais útil. Vamos adicionar um método `toJSON` que retorna o objeto como uma string JSON, e um método estático `fromObject` que recebe um objeto que bate com o nosso objeto de dados e retorna uma nova instância da classe.
 
@@ -203,7 +208,8 @@ const todoItemSchema = z.object({
 export type TodoObjectType = z.infer<typeof TodoObjectSchema>
 ```
 
-> **Nota**: também é possível imitar mais ou menos o que estamos fazendo em `z.infer<typeof TodoObjectSchema>` usando o utility type `InstanceType`, mas aí a gente precisaria remover os métodos do tipo, então prefiro usar o método `infer` pra também deixar clara a separação entre o que é nosso objeto de domínio (a classe) e o que é o objeto de transferência de dados (o JSON).
+> [!NOTE]
+> Também é possível imitar mais ou menos o que estamos fazendo em `z.infer<typeof TodoObjectSchema>` usando o utility type `InstanceType`, mas aí a gente precisaria remover os métodos do tipo, então prefiro usar o método `infer` pra também deixar clara a separação entre o que é nosso objeto de domínio (a classe) e o que é o objeto de transferência de dados (o JSON).
 
 Depois vamos usar esse schema pra garantir que nosso objeto é um item de tarefa válido. Vamos mudar a função `fromJSON` do nosso objeto de domínio:
 
@@ -232,7 +238,8 @@ toJSON() {
 }
 ```
 
-> **Dica**: outra coisa que podemos fazer aqui é não usar o método `toObject` e usar o atalho `{ ...item }` em vez disso, que já converte automaticamente pra um objeto. Mas prefiro ter um método que eu possa chamar pra deixar mais explícito. Você também pode retornar `{ ...this }`
+> [!TIP]
+> Outra coisa que podemos fazer aqui é não usar o método `toObject` e usar o atalho `{ ...item }` em vez disso, que já converte automaticamente pra um objeto. Mas prefiro ter um método que eu possa chamar pra deixar mais explícito. Você também pode retornar `{ ...this }`
 
 Nosso objeto de domínio final vai ficar assim:
 
@@ -287,7 +294,8 @@ Agora que temos nosso objeto de domínio, podemos começar a criar nossa camada 
 
 Como estamos usando o Harper, toda nossa comunicação com o banco é feita através de uma API! O que é extremamente útil porque a gente não precisa configurar drivers complicados nem nada do tipo. Então vamos criar um arquivo novo numa pasta `data` chamado `TodoItemClient.ts`. Esse vai ser nosso cliente HarperDB.
 
-> **Dica**: é uma boa prática nomear APIs externas como "clients". Se tivéssemos qualquer outra camada de dados, digamos um sistema de filas que não é conectado via API, poderíamos simplesmente chamar de `queueAdapter` ou `queue`. Isso não é uma regra, mas na minha opinião fica mais fácil entender o que o arquivo está fazendo, se é um agente externo ou um driver interno.
+> [!TIP]
+> É uma boa prática nomear APIs externas como "clients". Se tivéssemos qualquer outra camada de dados, digamos um sistema de filas que não é conectado via API, poderíamos simplesmente chamar de `queueAdapter` ou `queue`. Isso não é uma regra, mas na minha opinião fica mais fácil entender o que o arquivo está fazendo, se é um agente externo ou um driver interno.
 
 Nosso cliente é uma API HTTP, então vamos usar o `fetch` nativo do node pra nos comunicarmos com ele (lembrando que a fetch api só está disponível a partir do node 18). Vamos adicionar o seguinte código no nosso arquivo `TodoItemClient.ts`:
 
@@ -405,7 +413,8 @@ export class TodoItemClient {
 
 Como você pode ver, temos todos os métodos que precisamos pra nos comunicar com o banco. Temos o método `upsert` que cria ou atualiza um registro, o método `delete` que apaga um registro, o método `findOne` que busca um registro pelo hash, e o método `listByStatus` que lista todos os registros que batem com um determinado valor.
 
-> **Dica**: você pode conferir a [documentação do HarperDB](https://api.harperdb.io/#25977fef-53e8-40bf-a26a-43369bc3721c) pra saber mais sobre as operações.
+> [!TIP]
+> Você pode conferir a [documentação do HarperDB](https://api.harperdb.io/#25977fef-53e8-40bf-a26a-43369bc3721c) pra saber mais sobre as operações.
 
 ## A camada de serviço
 
@@ -472,7 +481,8 @@ Também implementamos um método `findAll` que chama o método `listByStatus` du
 
 Outro aspecto importante de notar é como a camada de serviço já assume que todos os dados vão estar higienizados. Isso é uma boa prática porque permite uma melhor separação de responsabilidades. A camada de apresentação deve ser a responsável por validar os dados na rota, e então mandá-los pra camada de serviço. A camada de serviço deve assumir que os dados já estão validados e higienizados.
 
-> **Dica**: de qualquer forma, já implementamos outro nível de validação no nosso objeto de domínio quando recebemos objetos, porque o TypeScript só vai forçar isso em tempo de compilação, então podemos ter certeza de que os dados são válidos.
+> [!NOTE]
+> De qualquer forma, já implementamos outro nível de validação no nosso objeto de domínio quando recebemos objetos, porque o TypeScript só vai forçar isso em tempo de compilação, então podemos ter certeza de que os dados são válidos.
 
 A última coisa a notar é que, agora que subimos um nível, a camada de serviço recebe como parâmetro a camada abaixo dela, o que significa que precisamos passar uma instância do cliente da camada de dados pra camada de serviço. Isso se chama **inversão de controle** e faz parte do [Princípio da Inversão de Dependência](https://en.wikipedia.org/wiki/Dependency_inversion_principle).
 
@@ -559,7 +569,8 @@ export default async function main() {
 await main()
 ```
 
-> **Nota**: poderíamos ter criado outro arquivo chamado `config.ts` e movido tanto o `EnvironmentSchema` quanto o objeto `conf` pra lá, mas como só estamos usando isso no `index.ts`, prefiro deixar por aqui mesmo. Porém, se você recebe essa configuração de outro lugar, vale criar um arquivo `config.ts` e mover pra lá.
+> [!NOTE]
+> Poderíamos ter criado outro arquivo chamado `config.ts` e movido tanto o `EnvironmentSchema` quanto o objeto `conf` pra lá, mas como só estamos usando isso no `index.ts`, prefiro deixar por aqui mesmo. Porém, se você recebe essa configuração de outro lugar, vale criar um arquivo `config.ts` e mover pra lá.
 
 Voltando pro nosso arquivo `restAPI.ts`, vamos implementar as rotas. A maioria delas só vai ter parâmetros de rota, então vou só colocar aqui e explicar a lógica:
 
