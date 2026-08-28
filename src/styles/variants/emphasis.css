@@ -45,10 +45,14 @@
  * The quote's drop cap, in the accent rather than the quote purple, but not
  * floated: a float pins the text to the cap's top edge, which is the one thing
  * this block should not do. Left inline, `vertical-align: middle` centres the
- * line against the cap instead. The property only applies to ::first-letter
- * while `float` is none, so the two go together.
+ * line against the cap instead.
+ *
+ * Its own element rather than ::first-letter, and inline-block: the block's
+ * underline reaches every inline descendant, and only an atomic one is spared.
+ * See src/plugins/remark-emphasis.mjs, which writes the span.
  */
-.prose .emphasis > p:first-of-type::first-letter {
+.prose .emphasis .em-cap {
+  display: inline-block;
   margin-inline-end: 0.1em;
   font-family: var(--font-display);
   font-size: var(--em-dropcap-size);

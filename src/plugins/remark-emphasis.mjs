@@ -15,6 +15,30 @@ import { visit } from 'unist-util-visit'
 const WHOLE = /^==([\s\S]+)==$/
 
 /**
+ * Splits the opening letter into its own inline element. The block is
+ * underlined, and an underline propagates through every inline descendant
+ * except an atomic one, so the drop cap has to be an inline-block to escape it.
+ * ::first-letter cannot: `display` does not apply to it.
+ */
+function withCap(children) {
+  const first = children[0]
+  if (first?.type !== 'text') return children
+  const [cap] = Array.from(first.value)
+  if (cap === undefined || cap.trim() === '') return children
+
+  return [
+    {
+      type: 'mdxJsxTextElement',
+      name: 'span',
+      attributes: [{ type: 'mdxJsxAttribute', name: 'class', value: 'em-cap' }],
+      children: [{ type: 'text', value: cap }],
+    },
+    { ...first, value: first.value.slice(cap.length) },
+    ...children.slice(1),
+  ]
+}
+
+/**
  * The children of a paragraph written wholly as `==...==`, or null. Remark has
  * no mark node, so the markers arrive as literal text on the edges.
  */
@@ -51,7 +75,7 @@ export function remarkEmphasis() {
         type: 'mdxJsxFlowElement',
         name: 'div',
         attributes: [{ type: 'mdxJsxAttribute', name: 'class', value: 'emphasis' }],
-        children: [{ type: 'paragraph', children: highlight }],
+        children: [{ type: 'paragraph', children: withCap(highlight) }],
       }
     })
   }
