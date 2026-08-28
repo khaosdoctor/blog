@@ -128,9 +128,8 @@ const iterable = {
 }
 ```
 
-Agora podemos utilizar ele normalmente, com `for (const x of iterable)` e teremos todos os valores do `array` sendo iterador um a um.
+Agora podemos utilizar ele normalmente, com `for (const x of iterable)` e teremos todos os valores do `array` sendo iterador um a um.<Sidenote>Se você quiser saber um pouco mais sobre **Symbols**, dê uma olhada [neste outro artigo que escrevi só sobre o tema](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mist%C3%A9rio-383e359e64e3).</Sidenote>
 
-> _Se você quiser saber um pouco mais sobre **Symbols**, dê uma olhada [_neste outro artigo que escrevi só sobre o tema_](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mist%C3%A9rio-383e359e64e3)_
 
 Por baixo dos panos, todos os arrays e objetor possuem um `Symbol.iterator` para que possamos fazer `for (let x of [1,2,3])` e retornar os valores que queremos.
 

@@ -29,9 +29,7 @@ A maioria dos clusters já vem com o RBAC ativado por padrão, porém é possív
 
 ### Nomenclaturas
 
-No RBAC, usuários são chamados de _**subjects**_, as APIs e recursos que os usuários poderão ou não ter acesso são chamados de **_resources_**. Temos também os _**verbs**_, que são as ações e operações que podem ser executadas em um **_resource_** por um **_subject_**.
-
-> Os verbos são basicamente as chamadas que podem ser feitas pelo usuário a um determinado recurso. Por exemplo, a criação de um Pod é um **verb** `create` sobre um **resource** `Pod` feito pelo usuário.
+No RBAC, usuários são chamados de _**subjects**_, as APIs e recursos que os usuários poderão ou não ter acesso são chamados de **_resources_**. Temos também os _**verbs**_, que são as ações e operações que podem ser executadas em um **_resource_** por um **_subject_**.<MarginNote>Os verbos são basicamente as chamadas que podem ser feitas pelo usuário a um determinado recurso. Por exemplo, a criação de um Pod é um **verb** `create` sobre um **resource** `Pod` feito pelo usuário.</MarginNote>
 
 ## Roles e ClusterRoles
 
@@ -141,7 +139,7 @@ rules:
 
 ### Criando ClusterRoles
 
-Para o Role que será aplicado ao Thiago, temos que permitir que ele possa ler e listar qualquer recurso em qualquer namespace do cluster, isso seria complicado se fossemos criar um Role comum, então vamos criar um ClusterRole para que ele possa ser aplicado automaticamente, este ClusterRole vai ser chamado de `readonly`:
+Para o Role que será aplicado ao Thiago, temos que permitir que ele possa ler e listar qualquer recurso em qualquer namespace do cluster, isso seria complicado se fossemos criar um Role comum, então vamos criar um ClusterRole para que ele possa ser aplicado automaticamente, este ClusterRole vai ser chamado de `readonly`:<MarginNote>Veja que ClusterRoles não possuem a chave `namespace`.</MarginNote>
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -153,8 +151,6 @@ rules:
   verbs: ["get", "list", "watch"]
   resources: ["*"]
 ```
-
-Veja que ClusterRoles não possuem a chave `namespace`.
 
 Para a última permissão, vamos criar o objeto que será dado à Amanda, como ela é a operadora do cluster, ela precisa ter acesso completo a todos os recusos de todos os namespaces do cluster, vamos chamar esse ClusterRole de `cluster-operator`:
 

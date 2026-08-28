@@ -87,9 +87,7 @@ So you can follow along, I've put together [this sample repository](https://gith
 > [!TIP]
 > If you want to follow along step by step, fork the repository, but don't forget to remove the `.github` folder so the actions get removed too.
 
-Before creating the pipeline files, let's create the Helm files so we can build our chart! Create a folder called `kubernetes` at the root of the repository, then create a second folder called `ship-manager`.
-
-> We could create the Helm chart automatically via the CLI, but it generates a bunch of files we don't need, so let's create it by hand to keep things simple.
+Before creating the pipeline files, let's create the Helm files so we can build our chart! Create a folder called `kubernetes` at the root of the repository, then create a second folder called `ship-manager`.<Sidenote>We could create the Helm chart automatically via the CLI, but it generates a bunch of files we don't need, so let's create it by hand to keep things simple.</Sidenote>
 
 Inside the `ship-manager` folder, create two more folders: `templates` and `charts`. Now create two files at the same level as the `templates` folder: one called `Chart.yaml` and the other `values.yaml`.
 
@@ -403,9 +401,7 @@ chave: # Accessible only to frontend as `.Values.chave`
 
 Notice there's a scope break inside the values file. Keys that share a name with their dependent charts are only accessible to those charts and to higher-order charts. Since our frontend is the highest-order chart, it has access to all the values, while the backend only has access to the keys defined under `backend:`.
 
-Also notice that inside `backend` the scope gets "leveled", meaning the scope gets stripped from inside `backend`. So you don't need to access the value as `.Values.backend.chave` if you're inside the `backend` chart, just as `.Values.chave`.
-
-> You can have more values files inside dependent charts and the rule stays the same, the difference is that the higher-order chart changes. That said, this pattern makes maintenance pretty complex.
+Also notice that inside `backend` the scope gets "leveled", meaning the scope gets stripped from inside `backend`. So you don't need to access the value as `.Values.backend.chave` if you're inside the `backend` chart, just as `.Values.chave`.<Sidenote>You can have more values files inside dependent charts and the rule stays the same, the difference is that the higher-order chart changes. That said, this pattern makes maintenance pretty complex.</Sidenote>
 
 Our values file needs the same keys we defined inside our templates, so they'll look like this:
 
@@ -492,9 +488,7 @@ jobs:
 
 The first step is a checkout of our repository. It's present in practically every action and it's always the first step. The second one defines a second variable: the tag name.
 
-By default, `$GITHUB_REF` is either the branch name or the tag name, like `/refs/heads/main` or `/refs/tags/v1.0.0`. We need to strip out the `/refs/*` part and keep only what's left, so we're using a shell substitution to add it to the global variables. Note that this variable only works **inside this job**.
-
-> We can't define the variable inside `env` because that key doesn't run any kind of shell, so we can't use value substitution or expansions there.
+By default, `$GITHUB_REF` is either the branch name or the tag name, like `/refs/heads/main` or `/refs/tags/v1.0.0`. We need to strip out the `/refs/*` part and keep only what's left, so we're using a shell substitution to add it to the global variables. Note that this variable only works **inside this job**.<Sidenote>We can't define the variable inside `env` because that key doesn't run any kind of shell, so we can't use value substitution or expansions there.</Sidenote>
 
 Now let's build the Docker part of the pipeline: building and pushing the backend and frontend images.
 
@@ -743,9 +737,7 @@ jobs:
 
 Now that we've got the pipelines created, let's go to GitHub and create our secrets! Open the repository in your browser, navigate to the `Settings` tab and then `secrets`, then click `New repository secret` to create a new local secret.
 
-Let's create a secret called `ACR_LOGIN`, which is the name of our ACR: `shipmanager`. Another one called `ACR_NAME`, which isn't really a secret since it's just our CR's DNS, but this way we avoid a hardcoded value in our action. This value is `shipmanager.azurecr.io`.
-
-> Both pieces of information can be found in the Azure portal. Once you know the ACR name, the login is the same and the DNS is always `<name>.azurecr.io`
+Let's create a secret called `ACR_LOGIN`, which is the name of our ACR: `shipmanager`. Another one called `ACR_NAME`, which isn't really a secret since it's just our CR's DNS, but this way we avoid a hardcoded value in our action. This value is `shipmanager.azurecr.io`.<MarginNote>Both pieces of information can be found in the Azure portal. Once you know the ACR name, the login is the same and the DNS is always `<name>.azurecr.io`</MarginNote>
 
 The ACR password can be grabbed with an AZ CLI command: `az acr credential show -n shipmanager --query "passwords[0].value" -o tsv`, and it should go into another secret called `ACR_PASSWORD`.
 

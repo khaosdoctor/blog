@@ -10,9 +10,7 @@ draft: false
 machineTranslated: false
 slug: "understanding-async-iterators-in-javascript"
 ---
-> Hey! If you're reading this now, note that some of the articles linked in this article are not in English, I'm doing my best to translate them and post them here as soon as possible and will update it when I do!
-
-A while ago, I made a [post](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495) on my Medium that I talked all about the Iterator protocol and its user interface. However, in addition to APIs like `Promise.finally`, ECMAScript 2018 has brought us another way of handling our iterators. The [async iterators](https://github.com/tc39/proposal-async-iteration).
+A while ago, I made a [post](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495) on my Medium that I talked all about the Iterator protocol and its user interface. However, in addition to APIs like `Promise.finally`, ECMAScript 2018 has brought us another way of handling our iterators. The [async iterators](https://github.com/tc39/proposal-async-iteration).<Sidenote>Some of the articles linked here are not in English. I'm doing my best to translate them and post them here as soon as possible, and I'll update this when I do.</Sidenote>
 
 ## The problem
 
@@ -142,9 +140,7 @@ const iterable = {
 }
 ```
 
-Now we can use it normally, with `for (const x of iterable)`  and we'll have all the values in the `array`  being iterated one by one.
-
-> If you want to know a bit more about Symbols, take a look at this [other article I wrote only about it](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mistério-383e359e64e3).
+Now we can use it normally, with `for (const x of iterable)`  and we'll have all the values in the `array`  being iterated one by one.<Sidenote>If you want to know a bit more about Symbols, take a look at this [other article I wrote only about it](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mistério-383e359e64e3).</Sidenote>
 
 Under the hood, all arrays and objects have a `Symbol.iterator` so that we can do `for (let x of [1,2,3])` and return the values we want.
 
