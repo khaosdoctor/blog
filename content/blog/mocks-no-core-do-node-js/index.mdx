@@ -17,9 +17,7 @@ O objetivo desse artigo é tanto documentar o que foi feito nesta funcionalidade
 
 ## O objetivo
 
-Tudo isso é muito bonito, mas o que são os mocks e para que a gente usaria algo assim?
-
-> Eu não vou entrar no conceito do que são mocks aqui em detalhe, mas você pode entender mais sobre eles nesse [artigo](https://medium.com/trainingcenter/testes-unit%C3%A1rios-mocks-stubs-spies-e-todas-essas-palavras-dif%C3%ADceis-f2765ac87cc8) (antigo, porém relevante)
+Tudo isso é muito bonito, mas o que são os mocks e para que a gente usaria algo assim?<MarginNote>Eu não vou entrar no conceito do que são mocks aqui em detalhe, mas você pode entender mais sobre eles nesse [artigo](https://medium.com/trainingcenter/testes-unit%C3%A1rios-mocks-stubs-spies-e-todas-essas-palavras-dif%C3%ADceis-f2765ac87cc8) (antigo, porém relevante)</MarginNote>
 
 Eu queria poder fazer algo assim:
 
@@ -744,9 +742,7 @@ tick(time = 1) { // L613
 
 O último método é o [`runAll`](https://github.com/khaosdoctor/node/blob/8991402b81d24e7479dff2e076147c19ecc07bb8/lib/internal/test_runner/mock/mock_timers.js#L728) que teve uma pequena alteração em outro arquivo. A ideia desse método é rodar todos os timers agendados, para isso a gente usa uma estrutura chamada de `PriorityQueue`, que é basicamente uma fila ordenada por tempo, ou seja, o timer com o menor timeout está no topo e o com maior timeout no final.
 
-A PriorityQueue está definida no caminho `lib/internal/priority_queue.js`, ela continha já um método chamado `peek` que pega o primeiro item da fila sem tirar ele de lá, a gente precisa pegar o último, porque agora temos que saber qual é o timer que tem o maior tempo, subtrair do tempo que já passou (o nosso `#now`) e chamar o método `tick` com essa subtração, dessa forma vamos rodar todos os timers sem adicionar tempo a mais na nossa data (porque agora o `tick` está adicionando milissegundos no nosso `#now`), para isso eu criei um método chamado [`peekBottom`](https://github.com/nodejs/node/pull/48638/files#diff-21786c167d9eed3034877e03e9bc8640bf6bcf2b7c5b33980226d76e3a69d4bdR41-R44).
-
-> Eu não vou colocar essa implementação da PriorityQueue aqui, mas o [link](https://github.com/nodejs/node/pull/48638/files#diff-21786c167d9eed3034877e03e9bc8640bf6bcf2b7c5b33980226d76e3a69d4bdR41-R44) acima vai te levar pra lá
+A PriorityQueue está definida no caminho `lib/internal/priority_queue.js`, ela continha já um método chamado `peek` que pega o primeiro item da fila sem tirar ele de lá, a gente precisa pegar o último, porque agora temos que saber qual é o timer que tem o maior tempo, subtrair do tempo que já passou (o nosso `#now`) e chamar o método `tick` com essa subtração, dessa forma vamos rodar todos os timers sem adicionar tempo a mais na nossa data (porque agora o `tick` está adicionando milissegundos no nosso `#now`), para isso eu criei um método chamado [`peekBottom`](https://github.com/nodejs/node/pull/48638/files#diff-21786c167d9eed3034877e03e9bc8640bf6bcf2b7c5b33980226d76e3a69d4bdR41-R44).<MarginNote>Eu não vou colocar essa implementação da PriorityQueue aqui, mas o [link](https://github.com/nodejs/node/pull/48638/files#diff-21786c167d9eed3034877e03e9bc8640bf6bcf2b7c5b33980226d76e3a69d4bdR41-R44) acima vai te levar pra lá</MarginNote>
 
 A implementação em si é bem direta:
 

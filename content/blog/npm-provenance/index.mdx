@@ -80,9 +80,7 @@ predicate:
       sha1: 5b8c0801d1f5d105351a403f58c38269de93f680
 ```
 
-Para gerar o seu próprio arquivo de provenance, o NPM criou uma flag chamada `--provenance`, então basta rodar `npm publish --provenance` que o seu pacote vai ser assinado.
-
-> Dá uma olhada [na documentação](https://docs.npmjs.com/generating-provenance-statements) também que existe bastante coisa interessante lá
+Para gerar o seu próprio arquivo de provenance, o NPM criou uma flag chamada `--provenance`, então basta rodar `npm publish --provenance` que o seu pacote vai ser assinado.<MarginNote>Dá uma olhada [na documentação](https://docs.npmjs.com/generating-provenance-statements) também que existe bastante coisa interessante lá</MarginNote>
 
 Mas aí temos o questionamento: Por que obter dados do CI? Simplesmente porque não é simples alterar esses dados. Principalmente porque, mesmo se você tentar modificar o processo da máquina com um `child_process` sendo injetado, ainda sim, servidores conhecidos como os do GitHub vão ter informações que você não pode tirar, como os endereços de IP, por exemplo, dessa forma o NPM pode fazer um cross-check dos dados no provenance enviado, versus os dados que o próprio GitHub devolve.
 

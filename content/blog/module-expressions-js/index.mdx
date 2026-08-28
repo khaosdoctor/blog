@@ -98,9 +98,7 @@ addEventListener("message", async ({data}) => {
 });
 ```
 
-Veja que estamos declarando uma expression que usa `import.meta.url`, no contexto dessa expression, o valor vai ser a url do arquivo `main.js`. Quando criamos um novo worker a partir de outro arquivo e enviamos o módulo via mensagem, vamos ver que o retorno de `await main()` vai ser a mesma url porque não estamos em outro contexto.
-
-> Uma extensão da proposta está prevista [aqui](https://github.com/tc39/proposal-module-expressions#worker-constructor) com a criação de workers podendo receber Module Expressions.
+Veja que estamos declarando uma expression que usa `import.meta.url`, no contexto dessa expression, o valor vai ser a url do arquivo `main.js`. Quando criamos um novo worker a partir de outro arquivo e enviamos o módulo via mensagem, vamos ver que o retorno de `await main()` vai ser a mesma url porque não estamos em outro contexto.<MarginNote>Uma extensão da proposta está prevista [aqui](https://github.com/tc39/proposal-module-expressions#worker-constructor) com a criação de workers podendo receber Module Expressions.</MarginNote>
 
 Essencialmente, a ideia é poder transportar código com o contexto local, para outro contexto sem perder nenhum tipo de informação, em conjunto com os ShadowRealms temos uma API bastante poderosa que permite executa o código de onde estamos sem ter o problema de perder informação:
 

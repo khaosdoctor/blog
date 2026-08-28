@@ -101,7 +101,7 @@ message NoteListResponse {
 }
 ```
 
-Com isso nós já sabemos basicamente tudo que precisamos para poder criar nosso servidor. Um servidor gRPC possui duas principais interfaces, a primeira é a interface base que contém todos os métodos que podem ser criados e a segunda é a implementação do servidor. Então o ideal é que pudéssemos fazer algo assim:
+Com isso nós já sabemos basicamente tudo que precisamos para poder criar nosso servidor. Um servidor gRPC possui duas principais interfaces, a primeira é a interface base que contém todos os métodos que podem ser criados e a segunda é a implementação do servidor. Então o ideal é que pudéssemos fazer algo assim:<MarginNote>Todos os tipos que estamos usando na chamada anterior, como o `ServerUnaryCall` e o `sendUnaryData` são [provenientes do `@grpc/grpc-js` nativamente](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src/server-call.ts#L84-L86), já que a lib é escrita em TypeScript, veja mais dos tipos [no repositório oficial](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src).</MarginNote>
 
 ```typescript
 class NotesServer implements NotesServerInterface {
@@ -113,8 +113,6 @@ class NotesServer implements NotesServerInterface {
 const server = new grpc.Server()
 server.addService(NotesService, new NotesServer())
 ```
-
-> Todos os tipos que estamos usando na chamada anterior, como o `ServerUnaryCall` e o `sendUnaryData` são [provenientes do `@grpc/grpc-js` nativamente](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src/server-call.ts#L84-L86), já que a lib é escrita em TypeScript, veja mais dos tipos [no repositório oficial](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src).
 
 A parte importante é, além dos tipos da classe, os tipos que vamos passar para o servidor, então nossa chamada `server.addService` tem uma assinatura como esta:
 

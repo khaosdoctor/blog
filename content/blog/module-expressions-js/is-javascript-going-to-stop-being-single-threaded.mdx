@@ -98,9 +98,7 @@ addEventListener("message", async ({data}) => {
 });
 ```
 
-Notice we're declaring an expression that uses `import.meta.url`. Within the context of that expression, the value will be the URL of the `main.js` file. When we spin up a new worker from another file and send the module over via message, we'll see that the return of `await main()` is the same URL, because we're not in a different context.
-
-> An extension to the proposal is planned [here](https://github.com/tc39/proposal-module-expressions#worker-constructor) that lets workers be created directly with Module Expressions.
+Notice we're declaring an expression that uses `import.meta.url`. Within the context of that expression, the value will be the URL of the `main.js` file. When we spin up a new worker from another file and send the module over via message, we'll see that the return of `await main()` is the same URL, because we're not in a different context.<MarginNote>An extension to the proposal is planned [here](https://github.com/tc39/proposal-module-expressions#worker-constructor) that lets workers be created directly with Module Expressions.</MarginNote>
 
 Essentially, the idea is to carry code along with its local context into another context without losing any information. Paired with ShadowRealms, we get a pretty powerful API that lets us run code from wherever we are without the problem of losing information:
 

@@ -61,9 +61,7 @@ This is the core that makes gRPC work inside dynamic languages like JS and TS. T
 
 > **Important note**: since this article was published, the `grpc` library has been marked for deprecation, so from now on **always** use the newer, maintained version, `@grpc/grpc-js`.
 
-For our case, the ideal option is the [implementation as an NPM package](https://github.com/grpc/grpc-node/tree/master/packages/grpc-native-core) which, essentially, takes the C implementation we just mentioned and uses `node-gyp` to compile this extension as a [native module](https://medium.com/the-node-js-collection/native-extensions-for-node-js-767e221b3d26) for Node.js. All the bindings between C and Node are done through [N-API](https://nodejs.org/api/n-api.html), which acts as the go-between for C++ code and JavaScript code, letting us integrate JavaScript with C++ code at runtime.
-
-> If you want to know more about how Node integrates with C++ and how it all works under the hood, I have a [10-part series on Node.js internals](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-1-conhecendo-nossas-ferramentas-34b6) I'd recommend reading.
+For our case, the ideal option is the [implementation as an NPM package](https://github.com/grpc/grpc-node/tree/master/packages/grpc-native-core) which, essentially, takes the C implementation we just mentioned and uses `node-gyp` to compile this extension as a [native module](https://medium.com/the-node-js-collection/native-extensions-for-node-js-767e221b3d26) for Node.js. All the bindings between C and Node are done through [N-API](https://nodejs.org/api/n-api.html), which acts as the go-between for C++ code and JavaScript code, letting us integrate JavaScript with C++ code at runtime.<MarginNote>If you want to know more about how Node integrates with C++ and how it all works under the hood, I have a [10-part series on Node.js internals](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-1-conhecendo-nossas-ferramentas-34b6) I'd recommend reading.</MarginNote>
 
 Right now, the NPM package for gRPC is the most widely used one for building gRPC clients, although a lot of people are currently migrating to [`grpc-js`](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js), an implementation of the gRPC client written entirely in JS.
 
@@ -71,9 +69,7 @@ Right now, the NPM package for gRPC is the most widely used one for building gRP
 
 The client-server model in gRPC is nothing more than standard HTTP/2 communication, the difference is in the headers we send. As I explained in the first part of the series, every gRPC call is, in reality, an HTTP/2 call with a binary payload encoded in base64.
 
-To illustrate this, alongside [the code we'll be building here](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), I put together a small example of a gRPC call using a tool called `grpc-web`, which lets the browser connect directly to a gRPC client, because the browser, even though it supports HTTP/2, doesn't expose that configuration so application clients can make requests using the protocol.
-
-> If you want to know a bit more about how it works, [this article by Mark Kose](https://medium.com/@Mark.io/how-to-get-a-browser-communicate-with-containerd-using-grpc-fd44f7cf7512) has a good overview of how a call like this can be made.
+To illustrate this, alongside [the code we'll be building here](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), I put together a small example of a gRPC call using a tool called `grpc-web`, which lets the browser connect directly to a gRPC client, because the browser, even though it supports HTTP/2, doesn't expose that configuration so application clients can make requests using the protocol.<MarginNote>If you want to know a bit more about how it works, [this article by Mark Kose](https://medium.com/@Mark.io/how-to-get-a-browser-communicate-with-containerd-using-grpc-fd44f7cf7512) has a good overview of how a call like this can be made.</MarginNote>
 
 The problem is that, thanks to stricter CORS rules and the lack of a server that lets me tweak those settings, the call got blocked from returning, but for what I want to show here, which is just the request, it'll do fine.
 
@@ -302,9 +298,7 @@ This is going to be our contract definition file. Think of it this way: if we ha
 
 gRPC always gives you two ways to compile things, the first is the static compilation model.
 
-In this model, we run `protoc` to compile our files into `.js` files that contain the type and encoding definitions for our messages. The upside of this model is that we get to use the types as a library instead of reading them directly, but they're a lot more complex to work with than if we just dynamically generate the package contents.
-
-> Check out the `compile` script inside [the package file in this project's repository](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample/blob/main/package.json#L8) to see how we can compile the files and what they look like once compiled.
+In this model, we run `protoc` to compile our files into `.js` files that contain the type and encoding definitions for our messages. The upside of this model is that we get to use the types as a library instead of reading them directly, but they're a lot more complex to work with than if we just dynamically generate the package contents.<MarginNote>Check out the `compile` script inside [the package file in this project's repository](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample/blob/main/package.json#L8) to see how we can compile the files and what they look like once compiled.</MarginNote>
 
 I won't go deep into the static generation model in this article, but once again Russel Brown has [a great article on building static services with gRPC](https://medium.com/expedia-group-tech/the-weird-world-of-grpc-tooling-for-node-js-part-2-daafed94cc32).
 

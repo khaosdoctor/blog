@@ -62,9 +62,7 @@ O core que faz o gRPC funcionar dentro de linguagens dinâmicas como o JS e o TS
 
 > **Nota importante**: Desde que este artigo foi publicado, a biblioteca `grpc` foi marcada para depreciação, então a partir de agora, use **sempre** a versão mantida e mais nova que é a `@grpc/grpc-js`.
 
-Para o nosso caso, o ideal é utilizarmos a [implementação como um pacote do NPM](https://github.com/grpc/grpc-node/tree/master/packages/grpc-native-core) que, essencialmente, pega a implementação em C que falamos anteriormente, utiliza o `node-gyp` para compilar esta extensão como um [native module](https://medium.com/the-node-js-collection/native-extensions-for-node-js-767e221b3d26) do Node.js, de forma que todos os bindings entre o C e o Node são feitos utilizando a [N-API](https://nodejs.org/api/n-api.html) que faz o intermédio entre os código C++ e os códigos JavaScript, permitindo que possamos integrar código JavaScript com código C++ em runtime.
-
-> Se você quiser saber mais sobre a integração do Node com o C++ e como tudo funciona por baixo dos panos, eu tenho uma [série de 10 partes sobre os internals do Node.js](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-1-conhecendo-nossas-ferramentas-34b6) que recomendo a leitura.
+Para o nosso caso, o ideal é utilizarmos a [implementação como um pacote do NPM](https://github.com/grpc/grpc-node/tree/master/packages/grpc-native-core) que, essencialmente, pega a implementação em C que falamos anteriormente, utiliza o `node-gyp` para compilar esta extensão como um [native module](https://medium.com/the-node-js-collection/native-extensions-for-node-js-767e221b3d26) do Node.js, de forma que todos os bindings entre o C e o Node são feitos utilizando a [N-API](https://nodejs.org/api/n-api.html) que faz o intermédio entre os código C++ e os códigos JavaScript, permitindo que possamos integrar código JavaScript com código C++ em runtime.<MarginNote>Se você quiser saber mais sobre a integração do Node com o C++ e como tudo funciona por baixo dos panos, eu tenho uma [série de 10 partes sobre os internals do Node.js](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-1-conhecendo-nossas-ferramentas-34b6) que recomendo a leitura.</MarginNote>
 
 Atualmente, o pacote do NPM para o gRPC é o mais utilizado para criar clientes gRPC, embora, atualmente, muitas pessoas estejam migrando para o [`grpc-js`](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js), uma implementação feita completamente em JS do client do gRPC.
 
@@ -72,9 +70,7 @@ Atualmente, o pacote do NPM para o gRPC é o mais utilizado para criar clientes 
 
 O modelo cliente e servidor que temos no gRPC não é nada mais do que uma comunicação HTTP/2 padrão, a diferença são os headers que estamos enviando. Como expliquei na primeira parte da série, toda a comunicação via gRPC é, na verdade, uma chamada HTTP/2 com um payload binário encodado em base64.
 
-Para ilustrar essa comunicação, junto com o [código que vamos fazer por aqui](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), coloquei um pequeno exemplo de uma chamada gRPC utilizando uma ferramenta chamada `grpc-web` que permite a conexão do browser diretamente com um client gRPC, pois o browser, apesar de suportar HTTP/2, não expõe essa configuração para que os clients das aplicações possam fazer requests usando o protocolo.
-
-> Se você quiser saber um pouco mais sobre como ele funciona, [este artigo do Mark Kose](https://medium.com/@Mark.io/how-to-get-a-browser-communicate-with-containerd-using-grpc-fd44f7cf7512) tem um bom overview de como uma comunicação deste tipo pode ser feita.
+Para ilustrar essa comunicação, junto com o [código que vamos fazer por aqui](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), coloquei um pequeno exemplo de uma chamada gRPC utilizando uma ferramenta chamada `grpc-web` que permite a conexão do browser diretamente com um client gRPC, pois o browser, apesar de suportar HTTP/2, não expõe essa configuração para que os clients das aplicações possam fazer requests usando o protocolo.<MarginNote>Se você quiser saber um pouco mais sobre como ele funciona, [este artigo do Mark Kose](https://medium.com/@Mark.io/how-to-get-a-browser-communicate-with-containerd-using-grpc-fd44f7cf7512) tem um bom overview de como uma comunicação deste tipo pode ser feita.</MarginNote>
 
 O problema é que, devido às regras de CORS mais restritas e a falta de um servidor que me permita alterar estas opções, a chamada foi bloqueada de retornar, porém para o que quero mostrar por aqui (que é apenas a request) vai servir.
 
@@ -303,9 +299,7 @@ Este será o nosso arquivo de definição de contrato. Pense que podemos também
 
 O gRPC sempre terá duas formas de ser compilado, a primeira forma é o modelo estático de compilação.
 
-Neste modelo, executamos o `protoc` para poder compilar os arquivos em arquivos `.js` que contém as definições de tipo e de encoding das nossas mensagens. A vantagem deste modelo é que podemos utilizar os tipos como uma lib ao invés de ler eles diretamente, porém eles são muito mais complexos de se trabalhar do que se simplesmente tentarmos gerar dinamicamente o conteúdo dos pacotes.
-
-> Veja o script `compile` dentro [do arquivo package no repositório deste projeto](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample/blob/main/package.json#L8) para entender como podemos compilar os arquivos e como eles ficam depois de compilados.
+Neste modelo, executamos o `protoc` para poder compilar os arquivos em arquivos `.js` que contém as definições de tipo e de encoding das nossas mensagens. A vantagem deste modelo é que podemos utilizar os tipos como uma lib ao invés de ler eles diretamente, porém eles são muito mais complexos de se trabalhar do que se simplesmente tentarmos gerar dinamicamente o conteúdo dos pacotes.<MarginNote>Veja o script `compile` dentro [do arquivo package no repositório deste projeto](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample/blob/main/package.json#L8) para entender como podemos compilar os arquivos e como eles ficam depois de compilados.</MarginNote>
 
 Não vou me estender no modelo de geração estática neste artigo, mas novamente o Russel Brown tem [um artigo excelente sobre a criação de serviços estáticos usando gRPC](https://medium.com/expedia-group-tech/the-weird-world-of-grpc-tooling-for-node-js-part-2-daafed94cc32).
 
