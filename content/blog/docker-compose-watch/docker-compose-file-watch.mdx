@@ -71,9 +71,7 @@ While `sync` is best suited for applications that can do a _hot reload_, meaning
 
 Both actions come with two other properties, `path` and `target`.
 
-In short, `target` is the path to the watched file inside the container. For example, if my `package.json` file is at the root of my local folder, but inside the `/app` folder in my container, then my target will be `/app/package.json`.
-
-Keep in mind that, as a rule, every path is based on your application's build directory, meaning the location where Docker found the Dockerfile.
+In short, `target` is the path to the watched file inside the container. For example, if my `package.json` file is at the root of my local folder, but inside the `/app` folder in my container, then my target will be `/app/package.json`.<MarginNote>Keep in mind that, as a rule, every path is based on your application's build directory, meaning the location where Docker found the Dockerfile.</MarginNote>
 
 ## Running it
 

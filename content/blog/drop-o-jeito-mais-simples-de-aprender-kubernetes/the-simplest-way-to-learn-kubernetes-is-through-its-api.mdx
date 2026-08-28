@@ -43,15 +43,13 @@ First we need to get the address of our control plane. That's super simple, we c
 
 > The context can be omitted if you want the info for the cluster in the current context.
 
-That will give us an output like this:
+That will give us an output like this:<MarginNote>This output can vary depending on where you're hosting your cluster.</MarginNote>
 
 ```output
 Kubernetes control plane is running at https://algundns.subdominio.tld:443
 CoreDNS is running at https://algundns.subdominio.tld:443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 Metrics-server is running at https://algundns.subdominio.tld:443/api/v1/namespaces/kube-system/services/https:metrics-server:/proxy
 ```
-
-Keep in mind this output can vary depending on where you're hosting your cluster.
 
 ### Security
 

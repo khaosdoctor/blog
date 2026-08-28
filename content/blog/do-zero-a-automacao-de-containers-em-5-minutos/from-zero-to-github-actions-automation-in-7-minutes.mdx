@@ -93,11 +93,9 @@ First, let's set a name for our workflow. This will be the name shown in the Git
 
 ![](./1-jc3jshv1vu5yravs8zhofq-c72694.png)
 
-Now let's define which kind of action we want it to run on. Since we want it to run on any push or PR to the `master` branch, we don't need to change anything, but if we needed to change this trigger, we'd have to change the `on` key. To check which triggers are available, just click the editor and hit `ENTER` and an _intellisense_ will show up:
+Now let's define which kind of action we want it to run on. Since we want it to run on any push or PR to the `master` branch, we don't need to change anything, but if we needed to change this trigger, we'd have to change the `on` key. To check which triggers are available, just click the editor and hit `ENTER` and an _intellisense_ will show up:<MarginNote>See how many possible triggers we have? For more detail, check [the official documentation](https://help.github.com/en/actions/reference/events-that-trigger-workflows#webhook-events).</MarginNote>
 
 ![](./0-bxe5hg2b5h7kil7s-024031.png)
-
-> _See how many possible triggers we have? For more detail, check [_the official documentation_](https://help.github.com/en/actions/reference/events-that-trigger-workflows#webhook-events)_
 
 Now let's create a section to share environment variables and content we'll use further down our script, for example, the container name and the resource group name. To do that, we create an `env` block:
 
