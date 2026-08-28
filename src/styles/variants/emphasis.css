@@ -9,15 +9,14 @@
 
 :root {
   --em-pad: 1.25rem 1.75rem;
-  /* One step in from the running text, short of the quote's own 2rem. */
-  --em-indent: 1.5rem;
   --em-dropcap-size: 2.75em;
   --em-dropcap-fg: var(--accent-day);
 }
 
 .prose .emphasis {
   margin-block: 2rem;
-  margin-inline-start: var(--em-indent);
+  /* The quote's indent, so the two line up wherever they meet in a post. */
+  margin-inline-start: var(--qc-indent);
   padding: var(--em-pad);
   /* The quote card's own border, read from its tokens so the two stay in step:
      the same double rule at the same width, and the same solid edge weight the
@@ -51,9 +50,10 @@
   color: var(--em-dropcap-fg);
 }
 
+/* The indent is kept on phones, as the quote keeps its own; only the padding
+   gives way, since the block is inset twice over at that width. */
 @media (max-width: 47.99rem) {
   .prose .emphasis {
-    margin-inline-start: 0;
     padding-inline: 1rem;
   }
 }

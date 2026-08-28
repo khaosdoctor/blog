@@ -6,7 +6,9 @@
   --qc-radius: 0;
   --qc-gap: 0.6rem;
   --qc-para-gap: 0.5em;
-  --qc-indent: 2rem;
+  /* Shared with the emphasis block, which reads this token: the two sit side by
+     side in a post and any difference between them reads as a mistake. */
+  --qc-indent: 1.5rem;
   --qc-dropcap-size: 2.75em;
 
   --qc-border-width: 4px;
