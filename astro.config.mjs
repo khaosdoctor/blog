@@ -178,9 +178,9 @@ export default defineConfig({
          * braces (`$\frac{a}{b}$`), and with the option off those braces reach
          * MDX's own expression parser and fail the build outright.
          *
-         * So the rule is on the writing side, in content/WRITING.md: a literal
-         * dollar in prose is `\$`. Only currency needs it; a lone `$` with no
-         * partner on the same line is already safe.
+         * So the rule is on the writing side: a literal dollar in prose is
+         * `\$`. Only currency needs it; a lone `$` with no partner on the same
+         * line is already safe.
          */
         remarkMath,
         remarkEmbeds,

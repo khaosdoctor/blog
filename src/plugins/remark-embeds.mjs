@@ -1,5 +1,4 @@
 // A bare URL or `![](url)` on its own line becomes an embed, decided by host.
-// See docs/architecture.md.
 import { readFileSync } from 'node:fs'
 import { attribute, jsxElement, soleChild } from './mdx-util.mjs'
 

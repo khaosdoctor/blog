@@ -15,7 +15,7 @@
  * the job.
  *
  * Exits non-zero on anything that is unambiguously wrong. Anything arguable is
- * a warning here and a paragraph in docs/i18n.md instead.
+ * a warning instead.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -62,8 +62,7 @@ const LANGUAGE_NEUTRAL_TEXT = new Set(['Lucas Santos', 'Spotify', 'Slides'])
  * - `per-locale`: every language needs its own copy, at src/pages/<locale>/…
  * - `shared`: one copy answers for the whole site and says so in both
  *   languages, or carries no prose at all.
- * - `source-only`: exists in the source language alone, deliberately. Each one
- *   is a limitation written down in docs/i18n.md, not an oversight.
+ * - `source-only`: exists in the source language alone, deliberately.
  *
  * A route missing from this table fails the check. That is the point: adding a
  * page is when somebody decides what it means for the other languages, and this
@@ -409,7 +408,7 @@ for (const [folder, entries] of byFolder) {
 
 if (sourceless.length > 0) {
   warnings.push(
-    `${count(sourceless.length, 'draft folder', 'draft folders')} whose index is not in ${SOURCE_LOCALE}: they publish at /<lang>/<slug>/, which check-output.ts and the scheduler both handle now. See docs/i18n.md. (${sourceless.slice(0, 3).join(', ')}${sourceless.length > 3 ? ', …' : ''})`,
+    `${count(sourceless.length, 'draft folder', 'draft folders')} whose index is not in ${SOURCE_LOCALE}: they publish at /<lang>/<slug>/, which check-output.ts and the scheduler both handle. (${sourceless.slice(0, 3).join(', ')}${sourceless.length > 3 ? ', …' : ''})`,
   )
 }
 

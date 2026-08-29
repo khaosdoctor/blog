@@ -1,60 +1,28 @@
-content/WRITING.md
-content/internal/
-# build output
 dist/
-# generated types
 .astro/
 
-# dependencies
 node_modules/
 
-# logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-
-# environment variables
 .env
 .env.production
 
-# macOS-specific files
 .DS_Store
 
-# jetbrains setting folder
-.idea/
-
-# per-machine Claude Code tool permissions, not a project setting
-.claude/settings.local.json
-
-# Obsidian vault config. Obsidian Sync already carries it across machines, and
-# most of these files rewrite themselves on every session, so tracking them here
-# only manufactures conflicts. The setup they hold is written down in
-# content/WRITING.md and the README instead, which is what makes it reproducible.
-content/.obsidian/
-
-# migration working artifacts (inventory, review lists, the Ghost export)
-.migration/
-# The Ghost importer itself. Kept on disk while the content settles, untracked
-# because it is a one-shot: the posts are the source of truth now and there is
-# no second migration coming.
-scripts/migrate/
-scripts/analyze-export.ts
-# open questions and decisions for Lucas, not part of the site
-QUESTIONS.md
-
-# incident writeup for Lucas: internal, and the repo goes public later
-SECURITY-INCIDENT.md
-# scratch build output from review agents
-dist-review/
-
-# playwright run artifacts
-test-results/
-playwright-report/
+.claude/
 .serena/
 .vscode/
-.claude/
-
-# playwright-mcp session artifacts
 .playwright-mcp/
+
+content/.obsidian/
+content/WRITING.md
+content/internal/
+
+.migration/
+
+test-results/
+playwright-report/

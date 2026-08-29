@@ -55,8 +55,7 @@ export const MARK_DEFAULT_PX: Record<MarkCandidateId, number> = {
 /**
  * A cor da marca, a mesma ideia do seletor "destaque" que `ChromeHeader.vue`
  * já usa para o resto do cabeçalho: um só acento por vez para as escolhas de
- * cor sólida. O dono pediu os dois sobreviventes coloridos; verde é o acento
- * único recomendado em `docs/theming.md` seção 11, então é o padrão daqui.
+ * cor sólida. Verde é o acento único recomendado, então é o padrão daqui.
  *
  * `todas` é a exceção deliberada: o dono pediu a marca original de volta como
  * opção, cada célula na cor do seu próprio papel (`ROLE_TOKEN`), em vez de um
@@ -83,14 +82,14 @@ export const MARK_ACCENT_ALL_ID = 'todas'
 
 /**
  * Taxa do cursor de bloco, o efeito composável que qualquer candidato de
- * cabeçalho pode ligar (`docs/theming.md` seção 3 para a proveniência).
+ * cabeçalho pode ligar.
  * `doom` é o tique do menu do Doom, 8 tiques a 35 tiques/s, de `m_menu.c`.
  * `vga` é o hardware puro: o VGA em modo texto pisca o cursor a cada 16
  * quadros verticais, 1,875Hz, sem ajuste por software num PC de verdade
  * (https://www.osdever.net/FreeVGA/vga/textcur.htm). `terminal`, 530ms por
- * fase, é o dobro dos 228,6ms do Doom: `docs/theming.md` seção 3 registra que
- * um cursor de terminal pisca mais devagar que um menu de jogo, um terminal é
- * paciente onde um menu de jogo é urgente. Era a taxa de verdade da antiga
+ * fase, é o dobro dos 228,6ms do Doom: um cursor de terminal pisca mais
+ * devagar que um menu de jogo, um terminal é paciente onde um menu de jogo é
+ * urgente. Era a taxa de verdade da antiga
  * `LogoLab.vue` antes da fusão com este arquivo, perdida quando o cursor
  * virou efeito composável só com Doom e VGA listados; o dono pediu de volta,
  * como padrão. As três taxas são reais, próximas mas não iguais, e o ponto de

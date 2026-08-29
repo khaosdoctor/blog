@@ -95,8 +95,8 @@ interface Failure extends Target {
 /**
  * Prose and fenced code, alternating, with the fences at the odd positions. A
  * URL inside a fence is source text a reader is meant to copy, not an image the
- * page loads, so nothing here downloads it or rewrites it: an example in
- * WRITING.md or in the lab post would otherwise be fetched for real.
+ * page loads, so nothing here downloads it or rewrites it: an example in the
+ * lab post would otherwise be fetched for real.
  */
 function segments(body: string): string[] {
   return body.split(/(```[\s\S]*?```)/g)

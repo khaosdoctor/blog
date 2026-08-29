@@ -1,7 +1,5 @@
 # Working in this repo
 
-Read `docs/architecture.md` before changing anything. It explains the content model, and most mistakes here come from not knowing it.
-
 ## The things that break if you do not know them
 
 **Posts are `.mdx` files containing plain markdown.** Never an import. `remark-embeds`, `remark-figures` and `remark-lab-demos` turn ordinary markdown into components at build time, and the component set is injected into every post, so the handful of tags markdown has no syntax for (`<Video>`, `<Sidenote>`, `<MarginNote>`, `<LabDemo>`, `<HtmlLab>`) are written bare. This is deliberate: `content/` is an Obsidian vault, Obsidian renders almost none of that, and writing in Obsidian is the point of the whole rebuild. Do not "modernise" the rest of a post back into components.
@@ -36,7 +34,7 @@ Read `docs/architecture.md` before changing anything. It explains the content mo
 
 **A stored preference at its default is stored as nothing at all.** Reset removes the key rather than writing the default value, so clear-to-default behaves the same everywhere. `ayu-light`/`ayu-dark` must stay first in the expressive-code `themes` array for the matching pair to be emitted for a reader with no JavaScript.
 
-**A syntax token carries a marker, not its colours.** `src/plugins/expressive-code-token-styles.mjs` rewrites the fourteen colours expressive-code puts inline on every token into `style="--t:<id>"` plus one stylesheet rule per token type per page, which is what keeps a code-heavy post from reaching megabytes. The engine's own per-theme rule selects `span[style^='--']:not([class])`, so the marker has to stay an inline custom property and a token span must never be given a class. See `docs/architecture.md`.
+**A syntax token carries a marker, not its colours.** `src/plugins/expressive-code-token-styles.mjs` rewrites the per-theme colours expressive-code puts inline on every token into `style="--t:<id>"` plus one stylesheet rule per token type per page, which is what keeps a code-heavy post from reaching megabytes. The engine's own per-theme rule selects `span[style^='--']:not([class])`, so the marker has to stay an inline custom property and a token span must never be given a class.
 
 **Popover methods are typed as always present and are not.** `showPopover` and `hidePopover` are absent in browsers without the Popover API, so every call site goes through optional chaining.
 
@@ -75,7 +73,7 @@ npm run test:e2e
 
 ## Styling conventions
 
-House rules the CSS follows. They are not build-breaking like the section above, but breaking one produces something that looks deliberate and is not. The long reasoning behind the palette and the type is in `docs/theming.md`.
+House rules the CSS follows. They are not build-breaking like the section above, but breaking one produces something that looks deliberate and is not.
 
 **Which accent a thing follows.** Transient effects, links and hovers take `--accent-day`, the day-hashed colour. Text treatments belonging to the article itself, `strong` and `em`, take `--post-accent`, the post's cover tone. Do not repoint either at the other: they answer different questions, "what colour is the site today" and "what colour is this article".
 

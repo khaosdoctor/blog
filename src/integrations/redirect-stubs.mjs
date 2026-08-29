@@ -1,5 +1,4 @@
 // Meta-refresh stubs for every moved URL: static hosting cannot issue a 301.
-// See docs/architecture.md.
 import { mkdir, readdir, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
