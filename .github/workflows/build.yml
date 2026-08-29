@@ -104,12 +104,16 @@ jobs:
       # build: it used to run in its own job downloading the pages artifact,
       # but that meant every run, including ones that can never deploy, had
       # to produce that artifact just to hand it to this step.
+      # uploadArtifacts is off because the action offers no retention setting
+      # for what it stores, and 37 reports had accumulated on the default 90
+      # days. temporaryPublicStorage still puts each report behind a link in
+      # the job summary, which is the only way anyone was reading them.
       - name: Lighthouse
         continue-on-error: true
         uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
         with:
           configPath: ./lighthouserc.json
-          uploadArtifacts: true
+          uploadArtifacts: false
           temporaryPublicStorage: true
 
       # --root-dir maps root-relative hrefs (the site uses only those) back to
@@ -168,9 +172,24 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      actions: write
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+
+      # dist/ is about 300MB and the artifact exists only to reach this job.
+      # Storage is billed for as long as an artifact is kept, so one day, the
+      # shortest retention the upload accepts, still bills a day per push.
+      # Removing it here bills minutes instead. Only on a successful deploy:
+      # a failed one leaves the artifact so the deploy can be re-run alone.
+      - name: Drop the pages artifact now the deploy has read it
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --jq '.artifacts[] | select(.name == "github-pages") | .id' \
+            | while read -r id; do gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id"; done
