@@ -31,8 +31,6 @@ const blog = defineCollection({
       heroImageAlt: z.string().optional(),
       authors: z.array(z.string()).optional(),
       draft: z.boolean().default(true),
-      // Non-public values are ignored; everything renders public.
-      visibility: z.enum(['public', 'members', 'paid']).default('public'),
       noindex: z.boolean().default(false),
       machineTranslated: z.boolean().default(false),
       seoTitle: z.string().optional(),

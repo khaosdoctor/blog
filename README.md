@@ -50,26 +50,25 @@ The first four are required. The schema is `src/content.config.ts`.
 | `updatedDate` | shown beside the publication date |
 | `heroImage`, `heroImageAlt` | the cover image and its alt text |
 | `series`, `seriesName`, `seriesOrder` | the series slug, its display title, and this part's position |
-| `authors` | git's own format, `Name <https://site>`, the site part optional. Yours when absent |
+| `authors` | git's own format, `Name <https://site>`, the site part optional. |
 | `slug` | overrides the directory name in the URL |
 | `noindex` | tells search engines to skip it, and marks it private in listings |
 | `machineTranslated` | shows the banner pointing at the source post |
 | `seoTitle`, `seoDescription` | override the title and description in the meta tags alone |
-| `visibility` | carried over from Ghost, unused |
 
 
 ## Scripts
 
 | Command | What it does |
 |---|---|
-| `npm run check` | `astro check`, `tsc -p worker`, and the i18n, component-css, content and credits guards. Run it before you finish |
+| `npm run check` | `astro check`, `tsc -p worker`, and the i18n, component-css, content and credits guards. |
 | `npm run preview` | serve `dist/` |
-| `node scripts/check-output.ts` | post-build checks, the same ones CI runs |
-| `npm run test:e2e` | Playwright over the built `dist/`. Build first |
-| `node scripts/build-redirects.ts` | regenerate `src/data/redirects.ts` after content moves |
+| `node scripts/check-output.ts` | post-build checks, the same as the CI |
+| `npm run test:e2e` | Playwright tests on the built `dist/`. Build first |
+| `node scripts/build-redirects.ts` | regenerate `src/data/redirects.ts` after content moves to some other URL |
 | `node scripts/build-icons.ts` | regenerate the PWA icons from `public/favicon.svg` |
 | `node scripts/translate.ts` | translate changed posts in place, needs `TRANSLATE_API_KEY`, or `ANTHROPIC_API_KEY` as a fallback. CI uses the workflow instead |
-| `node scripts/clean-translations.ts` | strip agent artefacts from translated files |
+| `node scripts/clean-translations.ts` | strip agent artifacts from translated files |
 
 
 ## Layout
@@ -78,7 +77,7 @@ The first four are required. The schema is `src/content.config.ts`.
 |---|---|
 | `content/blog/` | the posts, in the language they were written in |
 | `content/blog/<post>/<slug>.mdx` | a translation of that post, identified by its `lang` |
-| `content/bookmarks.json`, `content/dead-images.json` | metadata captured at migration time so the build stays offline |
+| `content/bookmarks.json`, `content/dead-images.json` | metadata captured at migration time so the build step doesn't need to be online |
 | `content/categories.json` | what each section is about, per language. Shown on the section page |
 | `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, and the same set again under `/en/` |
 | `src/components/` | the component set posts can use |
@@ -89,7 +88,7 @@ The first four are required. The schema is `src/content.config.ts`.
 
 ## Licence
 
-The **code** is MIT (`LICENSE`): the Astro site, the components, the plugins, the build scripts, the Worker.
+The **code** is MIT (`LICENSE`): the Astro site, the components, the plugins, the build scripts, the Worker, so you can use it freely.
 
 The **writing** is CC BY-NC-SA 4.0 (`LICENSE-CONTENT`): everything under `content/`, the articles in both languages and
-their images. Quote it, credit it, link back. Do not republish it whole on a site that sells ads.
+their images. Quote it, credit it, link back. Do not republish it.
