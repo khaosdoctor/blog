@@ -42,7 +42,9 @@
  * `anthropic` refuses to run without a key rather than silently producing nothing.
  * The other two need none: the CLI has a session, and a local Ollama wants no auth.
  */
-import Anthropic from '@anthropic-ai/sdk'
+// Type-only, so the default claude-cli path runs with nothing installed: the
+// `anthropic` provider imports the package itself, at the point it needs one.
+import type Anthropic from '@anthropic-ai/sdk'
 import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -194,7 +196,8 @@ ${body}`
 }
 
 async function completeWithAnthropic(system: string, user: string): Promise<Completion> {
-  const client = new Anthropic({ apiKey: API_KEY })
+  const { default: AnthropicClient } = await import('@anthropic-ai/sdk')
+  const client = new AnthropicClient({ apiKey: API_KEY })
   // Streaming: a long post plus thinking can run well past the non-streaming
   // HTTP timeout.
   const stream = client.messages.stream({
