@@ -64,7 +64,7 @@ const {
 // a foreign canonical hands the ranking to that domain.
 const indexUrl = canonical
 
-const card = image ?? sectionOgImage(section?.url)
+const card = image ?? sectionOgImage(lang, section?.url)
 const absoluteImage = new URL(card, canonical).href
 
 const jsonLd = buildPrimaryJsonLd(type, {

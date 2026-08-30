@@ -1,15 +1,43 @@
-// Generates the per-section social cards. Placeholders until the real design.
+/**
+ * Generates the per-section social cards.
+ *
+ *   node scripts/build-og.ts
+ *
+ * Rendered in Chromium rather than a rasteriser: the card carries text in
+ * Departure Mono, and the browser is the only thing here that reads a woff2.
+ * The output is committed, so this runs by hand, never in the build.
+ */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import sharp from 'sharp'
+import { chromium } from '@playwright/test'
 import { bold, count, dim, heading, ok } from './lib/cli.ts'
 import { LIGHT_GROUND } from '../src/lib/grounds.mjs'
 
 const OUT_DIR = 'public/og'
-const WIDTH = 1200
-const HEIGHT = 630
+// Mirrors OG_CARD_WIDTH, OG_CARD_HEIGHT and SITE_NAME in src/lib/seo.ts, which
+// this cannot import: that module reaches the Astro-only extensionless imports.
+const OG_CARD_WIDTH = 1200
+const OG_CARD_HEIGHT = 630
+const SITE_NAME = 'lsantos.dev'
 const PAPER = LIGHT_GROUND
 const INK = '#1a1c20'
+
+// The two sentences each language already puts in its own meta description, so
+// the card and the page it belongs to say one thing. `homeDescription` and
+// `sectionDescription` in src/i18n/ui.ts are the originals. Portuguese writes to
+// `public/og/`, English to `public/og/en/`, matching the routes.
+const LOCALES = {
+  pt: {
+    prefix: '',
+    home: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
+    section: (name: string) => `Todos os artigos da seção ${name}.`,
+  },
+  en: {
+    prefix: 'en/',
+    home: 'Articles about software development, technology and opinion.',
+    section: (name: string) => `Every article in the ${name} section.`,
+  },
+}
 
 // One accent per section, taken from the brand mark's four colours.
 const SECTIONS: Record<string, string> = {
@@ -23,40 +51,69 @@ const SECTIONS: Record<string, string> = {
   meta: '#1a1c20',
 }
 
-heading(`build-og: rendering ${Object.keys(SECTIONS).length} section cards`)
-
 const mark = readFileSync('public/favicon.svg', 'utf8')
+const face = readFileSync('public/fonts/DepartureMono-Regular.woff2').toString('base64')
 
-mkdirSync(OUT_DIR, { recursive: true })
+type Copy = (typeof LOCALES)[keyof typeof LOCALES]
 
-for (const [name, accent] of Object.entries(SECTIONS)) {
-  const logo = await sharp(Buffer.from(mark)).resize(150, 150).png().toBuffer()
-
-  // No text: a rasteriser has no fonts guaranteed to be present, and a card
-  // that fails to build is worse than one without a label.
-  const canvas = sharp({
-    create: { width: WIDTH, height: HEIGHT, channels: 4, background: PAPER },
-  }).composite([
-    { input: logo, top: 190, left: 100 },
-    {
-      input: Buffer.from(
-        `<svg width="${WIDTH}" height="24"><rect width="${WIDTH}" height="24" fill="${accent}"/></svg>`,
-      ),
-      top: HEIGHT - 24,
-      left: 0,
-    },
-    {
-      input: Buffer.from(
-        `<svg width="420" height="8"><rect width="420" height="8" fill="${INK}"/></svg>`,
-      ),
-      top: 390,
-      left: 100,
-    },
-  ])
-
-  const png = await canvas.png().toBuffer()
-  writeFileSync(join(OUT_DIR, `${name}.png`), png)
-  console.log(`  ${bold(`${name}.png`)} ${WIDTH}x${HEIGHT} ${dim(`(${(png.length / 1024).toFixed(1)}kB)`)}`)
+function card(section: string, accent: string, copy: Copy): string {
+  const home = section === 'default'
+  const label = `${SITE_NAME}/${copy.prefix}${home ? '' : section}`.replace(/\/$/, '')
+  const tagline = home ? copy.home : copy.section(section)
+  return `<!doctype html><meta charset="utf-8"><style>
+@font-face {
+  font-family: 'Departure Mono';
+  src: url(data:font/woff2;base64,${face}) format('woff2');
+}
+* { margin: 0; box-sizing: border-box; }
+body {
+  inline-size: ${OG_CARD_WIDTH}px;
+  block-size: ${OG_CARD_HEIGHT}px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 26px;
+  padding: 0 100px;
+  border-block-end: 24px solid ${accent};
+  background: ${PAPER};
+  color: ${INK};
+  font-family: 'Departure Mono', monospace;
+}
+svg { inline-size: 150px; block-size: 150px; }
+.label { color: ${accent}; font-size: 30px; letter-spacing: 0.06em; }
+h1 { font-size: 82px; font-weight: 400; letter-spacing: -0.02em; }
+p { max-inline-size: 800px; font-size: 34px; line-height: 1.35; }
+hr { inline-size: 420px; block-size: 8px; border: 0; background: ${INK}; }
+</style>
+${mark}
+<div class="label">&gt; ${label}</div>
+<h1>Lucas Santos</h1>
+<hr>
+<p>${tagline}</p>`
 }
 
-ok(`wrote ${count(Object.keys(SECTIONS).length, 'card', 'cards')} to ${OUT_DIR}`)
+const total = Object.keys(SECTIONS).length * Object.keys(LOCALES).length
+
+heading(`build-og: rendering ${total} section cards`)
+
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: OG_CARD_WIDTH, height: OG_CARD_HEIGHT } })
+
+for (const copy of Object.values(LOCALES)) {
+  const dir = join(OUT_DIR, copy.prefix)
+  mkdirSync(dir, { recursive: true })
+
+  for (const [name, accent] of Object.entries(SECTIONS)) {
+    await page.setContent(card(name, accent, copy))
+    await page.evaluate(() => document.fonts.ready)
+    const png = await page.screenshot()
+    writeFileSync(join(dir, `${name}.png`), png)
+    console.log(
+      `  ${bold(`${copy.prefix}${name}.png`)} ${OG_CARD_WIDTH}x${OG_CARD_HEIGHT} ${dim(`(${(png.length / 1024).toFixed(1)}kB)`)}`,
+    )
+  }
+}
+
+await browser.close()
+
+ok(`wrote ${count(total, 'card', 'cards')} to ${OUT_DIR}`)

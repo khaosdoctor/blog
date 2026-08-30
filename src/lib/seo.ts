@@ -46,15 +46,20 @@ const OG_SECTION_CARDS = [
 export const OG_CARD_WIDTH = 1200
 export const OG_CARD_HEIGHT = 630
 
+// Portuguese cards are the root of `public/og/`, every translated set a
+// directory named after its language. Also in sync with `scripts/build-og.ts`.
+const OG_CARD_LOCALES = ['en']
+
 /**
  * Takes the section URL, not its display name: the file is named after the URL.
  * The last segment is what names the card, because the English routes pass a
  * locale-prefixed path (`/en/infra/`) that the breadcrumb needs.
  */
-export function sectionOgImage(sectionUrl?: string): string {
+export function sectionOgImage(lang: string, sectionUrl?: string): string {
+  const dir = OG_CARD_LOCALES.includes(lang) ? `${lang}/` : ''
   const section = sectionUrl?.replace(/^\/+|\/+$/g, '').split('/').at(-1)
-  if (section && OG_SECTION_CARDS.includes(section)) return `/og/${section}.png`
-  return '/og/default.png'
+  const card = section && OG_SECTION_CARDS.includes(section) ? section : 'default'
+  return `/og/${dir}${card}.png`
 }
 
 type PageType = 'website' | 'article'
