@@ -402,7 +402,13 @@ for (const post of sources) {
   const postDir = join(SOURCE_DIR, post.slug)
   const existing = findExistingTranslation(postDir, args.locale)
 
-  if (entry !== undefined && existing !== null) {
+  if (existing !== null) {
+    // No cache entry means this script never wrote that file, so it is someone's
+    // own writing and reusing its slug would overwrite them.
+    if (entry === undefined) {
+      overrides.push(post.slug)
+      continue
+    }
     const currentOutputHash = hash(readFileSync(existing.file, 'utf8'))
     // Someone edited the generated file: their version wins, forever.
     if (currentOutputHash !== entry.outputHash) {

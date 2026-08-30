@@ -86,9 +86,10 @@ jobs:
               relative paths stay unchanged.
             - Output is MDX with plain markdown only: no import lines, no
               export lines, and no { } expressions anywhere in the file.
-            - Leave a translation alone if it already exists and
-              machineTranslated is false. A human edited it and their
-              version wins.
+            - Leave a translation alone if one already exists for that
+              language and its machineTranslated is false or absent. Only a
+              file carrying `machineTranslated: true` may be rewritten. A
+              person wrote or reviewed anything else and their version wins.
             - Do not touch the source index.md(x) file, and do not touch
               anything outside content/blog.
 
