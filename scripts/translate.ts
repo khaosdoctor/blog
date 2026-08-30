@@ -393,6 +393,9 @@ for (const post of sources) {
   // A post already written in the target language needs no translation.
   if (sourceLang === args.locale) continue
   if (field(frontmatter, 'draft') === 'true') continue
+  // The lab pages hold component demos rather than prose, so a translation of one
+  // is a page nobody reads made of source nobody should paraphrase.
+  if (field(frontmatter, 'noindex') === 'true') continue
 
   const sourceHash = hash(raw)
   const entry = cache[post.slug]

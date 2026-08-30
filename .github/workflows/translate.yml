@@ -7,15 +7,13 @@ name: Translate
 # billed against the Claude subscription rather than API credit. Without the
 # secret the job exits clean instead of failing every push.
 
-# Off by hand until the DNS cutover, same as the build workflow. Every lab
-# commit touches content/blog, so this fired constantly to translate posts
-# nobody is reading yet. Restore the trigger below when the site is live:
-#
-#   push:
-#     branches: [main]
-#     paths:
-#       - 'content/blog/**'
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/blog/**'
+      # This job writes it, so reacting to it would start a run for its own output.
+      - '!content/blog/.translation-cache.json'
   workflow_dispatch:
 
 permissions:
@@ -59,6 +57,10 @@ jobs:
           prompt: |
             Translate every post under content/blog changed in the last commit
             into English.
+
+            Skip any post whose frontmatter has `noindex: true`. Those are the
+            lab pages, which exist to hold component demos and are not read as
+            articles in any language.
 
             A translation lives in the SAME FOLDER as its source post, named
             after its own English slug: content/blog/<folder>/<english-slug>.mdx.
