@@ -10,11 +10,10 @@ import { redirects } from '../data/redirects.ts'
 // milliseconds before the refresh fires. If an /en/ redirect ever appears, pick
 // the copy from the target path here.
 //
-// data-pagefind-ignore, not the robots meta: Pagefind crawls dist/ in postbuild,
-// when these stubs are already on disk, and it does not read robots. Every stub
-// used to be a six-word document titled "Redirecionando…" competing with real
-// posts for the words in that sentence. The "all" value drops the metadata too,
-// so not even the title survives into the index.
+// data-pagefind-ignore rather than the robots meta: Pagefind crawls dist/ in
+// postbuild, when these stubs are on disk, and it does not read robots. Otherwise
+// every stub is a six-word document competing with real posts for those words. The
+// "all" value drops the metadata too, so not even the title reaches the index.
 function page(target, site) {
   const absolute = new URL(target, site).href
   return `<!doctype html>

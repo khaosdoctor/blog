@@ -5,9 +5,9 @@
  *   node scripts/clean-translations.ts --check   # exit 1 if anything is dirty
  *
  * Translations are written by agents, and an agent can leak its own tool-call
- * closing tags into the file it wrote. Three of the first sixty-two carried a
- * trailing `</content>`, which fails the MDX parse and takes the whole build
- * with it. Cheaper to strip them here than to re-run a translation.
+ * closing tags into the file it wrote. A trailing `</content>` fails the MDX parse
+ * and takes the whole build with it. Stripping it here costs less than re-running
+ * the translation.
  *
  * Only non-index files one level under content/blog are touched, so a source
  * post is never modified.

@@ -137,10 +137,9 @@ export function remarkWikilinks() {
         // the Portuguese title, which is what the reader will find on arrival.
         const text = (label ?? post.title).trim()
         // Wikipedia's convention for a page that does not exist yet: the link is a
-        // different colour and nothing else. The note it used to carry in the text
-        // moves to the title attribute, so a reader who cannot see the colour still
-        // gets told, on hover and through a screen reader, without the sentence
-        // being interrupted by a parenthesis.
+        // different colour and nothing else. The note goes in the title attribute so
+        // a reader who cannot see the colour is told on hover and through a screen
+        // reader, without a parenthesis interrupting the sentence.
         children.push({
           type: 'link',
           url: `${post.url}${anchor(fragment)}`,

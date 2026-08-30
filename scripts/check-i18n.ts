@@ -6,9 +6,10 @@
  *
  *   node scripts/check-i18n.ts
  *
- * Every language it knows about comes from LOCALES in src/i18n/ui.ts. This file
- * declares no language list of its own, so adding a third one is that array,
- * its table, and the entries this script then asks for by name.
+ * Every language it knows about comes from LOCALES, defined in src/i18n/locales.ts
+ * and re-exported by ui.ts. This file declares no language list of its own, so
+ * adding a third one is that array, its table, and the entries this script then
+ * asks for by name.
  *
  * It reads source, never build output: it runs in `npm run check`, before a
  * build exists. Link targets and rendered markup are check-output.ts's half of

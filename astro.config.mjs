@@ -29,77 +29,36 @@ import { remarkWikilinks } from './src/plugins/remark-wikilinks.mjs'
 export default defineConfig({
   site: 'https://blog.lsantos.dev',
   trailingSlash: 'always',
-  // Outside node_modules so `npm ci` (which deletes node_modules wholesale)
-  // can never throw away the image derivative cache or the content data store.
+  // Outside node_modules, which `npm ci` deletes wholesale along with anything in it.
   cacheDir: './.astro-cache',
   integrations: [
-    // Mermaid and LaTeX are day-one requirements even though no post uses a
-    // diagram yet: a review pass removed both as dead weight, which silently
-    // broke the one post with 9 formulas and would have made the first future
-    // diagram render as a plain code block. Mermaid's own script only loads on
-    // pages that actually contain a diagram.
+    // Mermaid and KaTeX stay even with no diagram post: removing them breaks the
+    // formulas in the RSA post and renders the first future diagram as a code block.
     mermaid({ theme: 'default', autoTheme: true }),
-    // Vue is here for interactive demos inside a post, which is the only thing
-    // on this site that needs a framework. A post that uses none ships no Vue:
-    // an island only loads where it is actually placed.
+    // For interactive demos inside a post. A post that places no island ships no Vue.
     vue(),
-    // expressiveCode must precede mdx: it replaces the default Shiki setup.
+    // Before mdx: it replaces the default Shiki setup.
     expressiveCode({
-      // Line numbers on every block, including the source a lab demo reveals:
-      // that source is emitted as an ordinary code node, so it goes through this
-      // same pass. A block that reads better without them can turn them off with
-      // `showLineNumbers=false` on the fence.
-      // Without pluginTokenStyles a code-heavy post reaches megabytes: it moves the
-      // fourteen colours written on every syntax token into the stylesheet.
+      // pluginTokenStyles moves the per-theme token colours into the stylesheet.
+      // Without it a code-heavy post reaches megabytes.
       plugins: [pluginLineNumbers(), pluginTokenStyles()],
-      // ayu-light/ayu-dark are the default pair (the owner's own words:
-      // "default code theme is ayu dark if the theme is dark, ayu light if
-      // the theme is light"), so they lead the list; github-light/dark-high-contrast
-      // are the picker's other option, a high contrast pair for readers who
-      // want one. Both are genuinely light/dark GitHub themes, verified
-      // against the Shiki bundle's own theme list rather than assumed.
-      //
-      // This array's order decides the default and nothing else. The order
-      // the picker itself lists its options in is CodeTheme.astro's own
-      // static <option> markup, and code-theme.ts's THEME_BY_MODE is only
-      // ever asked for one of its two names, so moving Ayu to the front here
-      // does not reshuffle the menu a reader sees.
+      // Two pairs: Normal and High Contrast. Entry 0 is the base emitted at `:root`,
+      // and the dark-mode media query overrides it with the first entry of the
+      // opposite type, so these two have to stay first and in this order.
       themes: ['ayu-light', 'ayu-dark', 'github-light-high-contrast', 'github-dark-high-contrast'],
-      // Inline <style> instead of a <link> dropped beside the first code
-      // block: that link arrived after first paint and re-laid out every post
-      // that has code (measured CLS 0.10 on phones). Inline applies at parse.
+      // A <link> beside the first code block arrives after first paint and re-lays
+      // out every post with code. Measured CLS 0.10 on phones.
       emitExternalStylesheet: false,
-      // This default only turns on automatically for exactly one light and
-      // one dark theme, so with fourteen it needs to stay explicit.
-      //
-      // What it actually generates (read out of @expressive-code/core's own
-      // getThemeStyles, not assumed): themes[0] becomes the base, emitted at
-      // `:root` with no theme selector at all, and the media query then
-      // overrides it with the *first entry of the opposite type*, wrapped in
-      // `:root:not([data-code-theme='<themes[0]>'])`. So it is not "the first
-      // two entries" in general, it is entry 0 plus the first one whose type
-      // differs. ayu-light first and ayu-dark second satisfies both readings
-      // at once and leaves no room for a later insertion to quietly change
-      // the pair.
-      //
-      // That media query asks the OS, which is only half the answer here: the
-      // site writes its own explicit `data-theme` on <html> when a reader
-      // picks light or dark in ThemeToggle, and a reader on a dark OS who
-      // chose light would otherwise read ayu-dark on a light page. BaseLayout's
-      // pre-paint snippet and code-theme.ts resolve that mismatch by naming
-      // the matching ayu outright as `data-code-theme` whenever a site-wide
-      // choice exists; see the comment on applyTheme in code-theme.ts.
+      // Automatic only for exactly one light and one dark theme, so it stays explicit.
+      // The query asks the OS; `code-theme.ts` overrides it when a reader has picked
+      // a site theme by hand.
       useDarkModeMediaQuery: true,
-      // The default selector is `[data-theme='name']`; this site has no other
-      // use of `data-theme`, but `data-code-theme` says what it is for and
-      // keeps the attribute unambiguous if a site-wide theme switch is ever
-      // added later. Set on <html> by CodeTheme.astro; unset, the media query
-      // above decides, so a reader who never opens the picker sees no change.
+      // `data-theme` is the site's own attribute. Set by CodeTheme.astro; unset, the
+      // media query above decides.
       themeCssSelector: (theme) => `[data-code-theme='${theme.name}']`,
       styleOverrides: { borderRadius: '4px', codeFontSize: '0.85rem' },
-      // Fence labels written years ago that Shiki has no grammar for, so those
-      // blocks silently lost their highlighting. Aliases rather than edits across
-      // eight posts, and a place to add the next one.
+      // Fence labels used across old posts that Shiki has no grammar for. Add the
+      // next one here rather than editing the posts.
       shiki: {
         langAlias: {
           Dockerfile: 'dockerfile',
@@ -114,13 +73,9 @@ export default defineConfig({
       },
     }),
     mdx(),
-    // The search page and the offline fallback are chrome, not content. A post
-    // with `noindex: true` is dropped too, otherwise the sitemap would advertise
-    // a page whose own meta tag tells crawlers to stay away.
-    //
-    // lastmod is not emitted by default, so every URL looked equally fresh and a
-    // 2019 post competed for crawl budget with one published today. serialize
-    // fills it in from the post dates collected during the build.
+    // Search and the offline fallback carry no content, and a `noindex` post would
+    // be advertised here while its own meta tag tells crawlers away. `lastmod` is
+    // not emitted by default, which leaves a 2019 post looking as fresh as today's.
     sitemap({
       filter: (page) =>
         !page.includes('/search/') &&
@@ -131,65 +86,42 @@ export default defineConfig({
         return modified === undefined ? item : { ...item, lastmod: modified }
       },
     }),
-    // Runs after everything else: it inspects the finished output and only
-    // writes a stub where no real page claimed the path.
+    // Last, so it can inspect the finished output and only write a stub where no
+    // real page claimed the path.
     redirectStubs(),
   ],
   markdown: {
-    // `markdown.remarkPlugins` and `markdown.rehypePlugins` are deprecated, and
-    // Astro's own notice points here: the same arrays, passed to `unified()` from
-    // `@astrojs/markdown-remark` and set as the processor. Not `satteri()`, whose
-    // `mdastPlugins`/`hastPlugins` are a different API that every plugin below
-    // would have to be rewritten against.
+    // `markdown.remarkPlugins`/`rehypePlugins` are deprecated in favour of this.
+    // Not `satteri()`, whose `mdastPlugins`/`hastPlugins` are a different API.
     processor: unified({
-      // Posts are plain markdown even though the files are .mdx: these two plugins
-      // are what turn that markdown into components, so nothing in content/ needs
-      // an import or a tag and Obsidian renders every post natively.
+      // These plugins are what let a post stay plain markdown Obsidian can render:
+      // no imports, no tags in content/.
       //
-      // remarkEmbeds must run before remarkFigures: an image and a bare link are
-      // both "the only thing in a paragraph", and once a figure is wrapped the
-      // link check would have to look one level deeper for no benefit.
-      //
-      // remarkWikilinks runs last: it turns [[slug]] into an ordinary link, and
-      // running after the embed check keeps a wikilink alone in a paragraph from
-      // being mistaken for something to embed.
+      // remarkEmbeds before remarkFigures, since an image and a bare link are both
+      // "the only thing in a paragraph" and a wrapped figure hides that.
+      // remarkWikilinks after both, so a lone wikilink is not read as an embed.
       remarkPlugins: [
         remarkReadingTime,
-        /*
-         * Inline `$x$` stays ON. It looks like a trap (two dollar signs in one
-         * paragraph become one expression, so "$4,950 ... and $9,800" rendered
-         * as a single KaTeX span with every letter between them stacked
-         * vertically) and turning it off was tried. It cannot be: the RSA post
-         * alone carries dozens of real single-dollar expressions, several with
-         * braces (`$\frac{a}{b}$`), and with the option off those braces reach
-         * MDX's own expression parser and fail the build outright.
-         *
-         * So the rule is on the writing side: a literal dollar in prose is
-         * `\$`. Only currency needs it; a lone `$` with no partner on the same
-         * line is already safe.
-         */
+        // Inline `$x$` has to stay on: the RSA post carries dozens of real
+        // single-dollar expressions, and with braces in them the option off sends
+        // `{` to MDX's expression parser and fails the build. The cost is a writing
+        // rule instead: a literal dollar in prose is `\$`.
         remarkMath,
         remarkEmbeds,
         remarkFigures,
-        // Experiment, see src/styles/variants/emphasis.css. After remarkFigures
-        // so a lone image is already a figure and cannot be read as a lone run.
+        // See src/styles/variants/emphasis.css. After remarkFigures, so a lone image
+        // is already a figure and cannot be read as a lone run.
         remarkEmphasis,
         remarkWikilinks,
-        // Last: the only one that reads files off disk and injects synthesized
-        // content (an import node, and the demo's source as a code block), so it
-        // runs once everything else has settled the tree.
+        // Last: the only one that reads files off disk and injects nodes, so it runs
+        // on a settled tree.
         remarkLabDemos,
       ],
       rehypePlugins: [
-        // Obsidian's theme, not the plugin's github default: the vocabulary the
-        // posts are written in is Obsidian's (quote, question, example and the
-        // rest), and the github theme only knows five types, so anything else
-        // rendered as a plain blockquote with a stray title line.
-        // `important` is red here (see code-and-callouts.css), and the theme's own
-        // icon for it is a flame, which reads as a fire hazard rather than "stop,
-        // this one matters". Lucide's octagon-alert is the stop-sign shape, the
-        // same silhouette a road sign uses, so the type is legible before the
-        // title is read. Every other type keeps its stock indicator.
+        // The posts use Obsidian's callout vocabulary; the plugin's github default
+        // knows five types and renders the rest as a blockquote with a stray title.
+        // `important` is red here, so its stock flame icon reads as a fire hazard.
+        // Lucide's octagon-alert is the stop-sign shape instead.
         [
           rehypeCallouts,
           {
@@ -204,10 +136,8 @@ export default defineConfig({
         ],
         rehypeKatex,
         rehypeMathCopy,
-        // Astro adds the heading ids itself, but only after this list runs, and the
-        // anchor plugin refuses to invent an id that would be the only one of its
-        // kind on the site. Running it explicitly here puts the ids in place first;
-        // Astro's own pass then finds every heading already has one.
+        // Astro adds heading ids only after this list runs, and rehypeHeadingAnchors
+        // refuses to invent one. Running it here puts the ids in place first.
         rehypeHeadingIds,
         rehypeHeadingAnchors,
         rehypeFootnoteSidenotes,
@@ -215,38 +145,23 @@ export default defineConfig({
     }),
   },
   image: {
-    // The migration colocates images next to posts; they are all local files.
     responsiveStyles: true,
-    // Real srcset/sizes for every <Image>. `constrained` fits this site's one
-    // fixed reading column, which is what remark-figures wraps an image into.
+    // `constrained` fits the one fixed reading column remark-figures wraps into.
     layout: 'constrained',
   },
   vite: {
     build: {
-      /*
-       * Never inline a font, whatever its size. Vite inlines any asset under 4 KB
-       * as a `data:` URI, and `KaTeX_Size3-Regular.woff2` is 3624 bytes, so it
-       * was being embedded in the built CSS. The site's CSP is `font-src 'self'`,
-       * which does not cover `data:`, so the browser blocked exactly that one
-       * font and display maths fell back for its largest delimiters. Found by
-       * reading the console of a built page, because nothing fails: the CSS is
-       * valid and the glyphs are simply wrong.
-       *
-       * Fixing it here rather than by adding `data:` to `font-src` keeps the
-       * policy tight. Returning undefined for everything else leaves Vite's own
-       * threshold in charge of the assets where inlining is a real win.
-       */
+      // A font under Vite's 4 KB threshold becomes a `data:` URI, which the site's
+      // `font-src 'self'` blocks. Nothing errors; the glyphs are just wrong.
+      // Undefined for everything else keeps Vite's threshold in charge.
       assetsInlineLimit: (filePath) => (/\.(woff2?|ttf|otf|eot)$/i.test(filePath) ? false : undefined),
     },
     css: {
       modules: {
-        // A post component's <style module> classes get renamed to
-        // Component__class__hash, so a class can never collide with a global
-        // one even when the dev server injects the sheet without its scope
-        // (which is how a lab component once stretched every tag chip on its
-        // page). The hash comes from the file path, so two components that
-        // share a basename in different folders still get distinct names, and
-        // the same input always builds the same output.
+        // Component__class__hash, so a post component's class cannot collide with a
+        // global one even when the dev server injects the sheet unscoped. The hash
+        // is of the file path, so a shared basename in two folders still differs and
+        // the same input always builds the same name.
         generateScopedName(name, filename) {
           const path = filename.replace(/\?.*$/, '')
           const component = path.split('/').pop()?.replace(/\.(vue|module\.css)$/, '') ?? 'style'

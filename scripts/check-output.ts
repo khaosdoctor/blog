@@ -76,11 +76,9 @@ const postFolders = [...postSources.keys()]
 const expected = postFolders.filter((slug) => !scheduled.has(slug))
 
 /**
- * Where a folder's own index actually renders. Almost always `/<folder>/`, but a
- * folder whose index is English resolves to `/en/<slug>/` instead: twelve drafts are
- * already in that shape, and publishing one used to fail this check for a page
- * that had built perfectly well. Same rule as everywhere else, imported rather
- * than restated.
+ * Where a folder's own index renders. Almost always `/<folder>/`, but a folder whose
+ * index is English resolves to `/en/<slug>/`, which several drafts already are. Same
+ * rule as everywhere else, imported rather than restated.
  */
 function pageFor(slug: string, post: { file: string; source: string }): string {
   const url = urlFor(slug, post.file.endsWith('.md') ? 'index.md' : 'index.mdx', frontmatterOf(post.source))
