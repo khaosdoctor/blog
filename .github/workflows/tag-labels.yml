@@ -33,16 +33,16 @@ jobs:
 
       # Reads the tags out of content/blog and exits without a model call when
       # every one of them is already in KNOWN_TAGS, which is almost every run.
-      # Same environment scripts/translate.ts reads, so both use whichever
-      # provider the secrets name. Without a key the step reports the new tags
-      # and exits clean: they keep their English label until `npm run tags` runs.
+      # Cloudflare Workers AI, on its own variables: a tag is one word and the
+      # daily free allowance covers a lifetime of them, where the posts go to a
+      # stronger model through scripts/translate.ts. Without a key the step
+      # reports the new tags and exits clean, so a missing secret never turns
+      # this red and the tag simply keeps its English label.
       - name: Look for new tags
         env:
-          TRANSLATE_PROVIDER: ${{ vars.TRANSLATE_PROVIDER }}
-          TRANSLATE_MODEL: ${{ vars.TRANSLATE_MODEL }}
-          TRANSLATE_BASE_URL: ${{ vars.TRANSLATE_BASE_URL }}
-          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TAGS_BASE_URL: ${{ vars.TAGS_BASE_URL }}
+          TAGS_MODEL: ${{ vars.TAGS_MODEL }}
+          TAGS_API_KEY: ${{ secrets.TAGS_API_KEY }}
         run: node scripts/build-tag-labels.ts
 
       - name: Commit the dictionary

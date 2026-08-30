@@ -8,23 +8,37 @@
  * leaves its entry behind on purpose: bringing the word back should not cost
  * another call.
  *
- * Reads the same environment as scripts/translate.ts: TRANSLATE_PROVIDER,
- * TRANSLATE_MODEL, TRANSLATE_BASE_URL and TRANSLATE_API_KEY, which falls back to
- * ANTHROPIC_API_KEY.
+ * Its own model, separate from the one scripts/translate.ts uses on the posts:
+ * this asks for single words and a small one is enough, where a post is prose
+ * published under a name.
+ *
+ *   TAGS_BASE_URL   an OpenAI-compatible /chat/completions host, no trailing
+ *                   /chat/completions. Cloudflare Workers AI is
+ *                   https://api.cloudflare.com/client/v4/accounts/<id>/ai/v1
+ *   TAGS_MODEL      default @cf/meta/llama-3.3-70b-instruct-fp8-fast
+ *   TAGS_API_KEY    a Cloudflare API token with Workers AI read
+ *
+ * Without a key it reports the new tags and exits clean, so the workflow stays
+ * green and the tag keeps its English label until this runs with one.
  */
-import Anthropic from '@anthropic-ai/sdk'
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { KNOWN_TAGS, TAG_LABELS } from '../src/i18n/tags.ts'
-import { bold, count, dim, fail, frontmatterOf, heading, ok, warn } from './lib/cli.ts'
+import { bold, count, dim, fail as failLine, frontmatterOf, heading, ok, warn } from './lib/cli.ts'
+
+function fail(message: string): never {
+  failLine(message)
+  process.exit(1)
+}
 
 const SOURCE_DIR = 'content/blog'
 const OUT_FILE = 'src/i18n/tags.ts'
 /** Portuguese only: English is the language the tags are written in. */
 const TARGET = 'pt'
 
-const MODEL = process.env.TRANSLATE_MODEL ?? 'claude-opus-5'
-const API_KEY = process.env.TRANSLATE_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? ''
+const MODEL = process.env.TAGS_MODEL ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+const BASE_URL = (process.env.TAGS_BASE_URL ?? '').replace(/\/$/, '')
+const API_KEY = process.env.TAGS_API_KEY ?? ''
 
 const dryRun = process.argv.includes('--dry-run')
 
@@ -55,22 +69,30 @@ Rules:
 
 Return ONLY a JSON object mapping every tag you were given to its label, and nothing else.`
 
-async function translate(tags: string[]): Promise<Record<string, string>> {
-  const client = new Anthropic({ apiKey: API_KEY })
-  const message = await client.messages.create({
-    model: MODEL,
-    max_tokens: 4000,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: JSON.stringify(tags) }],
-  })
-  const text = message.content
-    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-    .map((block) => block.text)
-    .join('')
-    .replace(/^```(?:json)?\n?|\n?```$/g, '')
-    .trim()
+interface ChatCompletion {
+  choices?: { message?: { content?: string } }[]
+}
 
-  const parsed = JSON.parse(text) as Record<string, string>
+async function translate(tags: string[]): Promise<Record<string, string>> {
+  const response = await fetch(`${BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${API_KEY}` },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 4000,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: JSON.stringify(tags) },
+      ],
+    }),
+  })
+  if (!response.ok) fail(`${BASE_URL} returned ${response.status}: ${await response.text()}`)
+
+  const text = ((await response.json()) as ChatCompletion).choices?.[0]?.message?.content
+  if (text === undefined) fail(`${BASE_URL} returned no completion.`)
+
+  // A small model wraps JSON in a fence often enough to be worth stripping.
+  const parsed = JSON.parse(text.replace(/^```(?:json)?\n?|\n?```$/g, '').trim()) as Record<string, string>
   for (const tag of tags) {
     if (typeof parsed[tag] === 'string') continue
     fail(`the model returned no label for "${tag}".`)
@@ -130,8 +152,8 @@ if (dryRun) {
 // report the new tags without one, which is what happens until a key is set:
 // `npm run tags` locally writes the file, and until it does the new tag reads
 // in English on a Portuguese page, which is where it was anyway.
-if (API_KEY === '') {
-  warn(`no TRANSLATE_API_KEY or ANTHROPIC_API_KEY, so these keep their English label: ${missing.join(', ')}`)
+if (API_KEY === '' || BASE_URL === '') {
+  warn(`no TAGS_API_KEY or TAGS_BASE_URL, so these keep their English label: ${missing.join(', ')}`)
   process.exit(0)
 }
 
