@@ -6,8 +6,8 @@
 // and .github/workflows/build.yml's actions/cache step, turns a cold rebuild into
 // a lookup.
 //
-// The wrap is a monkeypatch, not a second plugin appended after the real one:
-// vite resolves the plugin list once before any transform runs, so configResolved
+// The wrap is a monkeypatch rather than a plugin appended alongside the real one.
+// Vite resolves the plugin list once before any transform runs, so configResolved
 // here can find the "@mdx-js/rolldown" object in resolved.plugins and replace its
 // transform.handler in place, whatever position either plugin holds in that list.
 // scripts/check-mdx-cache.ts asserts that name and shape still hold.
@@ -190,11 +190,10 @@ export function mdxTransformCache() {
   const missNames = []
   const pendingWrites = []
   // Wall-clock span from the first transform call to the last, across however
-  // many vite passes carry a patched plugin. Individual per-file durations are
-  // not trustworthy: transforms run with enough concurrency that one file's
-  // measured time includes others interleaved into its own await gaps. A
-  // whole-phase span, compared against a stored span from a run where every
-  // file missed, is not.
+  // many vite passes carry a patched plugin. Transforms run concurrently enough
+  // that a per-file duration includes whatever interleaved into its own await
+  // gaps, so the saving is measured as a whole-phase span against a stored span
+  // from a run where every file missed.
   let phaseStart = null
   let phaseEnd = null
 

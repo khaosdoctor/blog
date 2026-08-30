@@ -8,14 +8,14 @@
  *
  *   node scripts/check-dist-parity.ts <dir-a> <dir-b>
  *
- * Two differences are expected and are not failures:
+ * Some differences are expected and are not failures:
  *
  * - scheduled.json embeds the build timestamp by design and always differs.
  * - pagefind/pagefind-entry.json's language table can come out in a different
  *   key order between two independent `pagefind --site dist` runs, depending
  *   on which language pagefind's own directory walk reaches first; the
- *   per-language hashes inside are unaffected. Checked by parsing both sides
- *   and comparing with object keys sorted, not by a broad exclusion.
+ *   per-language hashes inside are unaffected. Both sides are parsed and
+ *   compared with object keys sorted, so the file is still really checked.
  *
  * Anything else that differs is a real divergence and fails.
  */
