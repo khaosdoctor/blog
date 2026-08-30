@@ -29,6 +29,9 @@ import { remarkWikilinks } from './src/plugins/remark-wikilinks.mjs'
 export default defineConfig({
   site: 'https://blog.lsantos.dev',
   trailingSlash: 'always',
+  // Outside node_modules so `npm ci` (which deletes node_modules wholesale)
+  // can never throw away the image derivative cache or the content data store.
+  cacheDir: './.astro-cache',
   integrations: [
     // Mermaid and LaTeX are day-one requirements even though no post uses a
     // diagram yet: a review pass removed both as dead weight, which silently

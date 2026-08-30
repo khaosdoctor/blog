@@ -58,7 +58,7 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
-            node_modules/.astro
+            .astro-cache
             .astro
           key: astro-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/blog/**') }}
           restore-keys: |
@@ -96,7 +96,7 @@ jobs:
         if: always()
         with:
           path: |
-            node_modules/.astro
+            .astro-cache
             .astro
           key: ${{ steps.astro-cache.outputs.cache-primary-key }}
 
