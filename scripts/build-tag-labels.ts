@@ -16,7 +16,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { KNOWN_TAGS, TAG_LABELS } from '../src/i18n/tags.ts'
-import { bold, count, dim, fail, frontmatterOf, heading, ok, postIndex } from './lib/cli.ts'
+import { bold, count, dim, fail, frontmatterOf, heading, ok, warn } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 const OUT_FILE = 'src/i18n/tags.ts'
@@ -56,7 +56,6 @@ Rules:
 Return ONLY a JSON object mapping every tag you were given to its label, and nothing else.`
 
 async function translate(tags: string[]): Promise<Record<string, string>> {
-  if (API_KEY === '') fail(`no TRANSLATE_API_KEY or ANTHROPIC_API_KEY, and ${tags.length} tags need one.`)
   const client = new Anthropic({ apiKey: API_KEY })
   const message = await client.messages.create({
     model: MODEL,
@@ -124,6 +123,15 @@ if (missing.length === 0) {
 
 if (dryRun) {
   console.log(missing.join('\n'))
+  process.exit(0)
+}
+
+// Not an error. The key is optional so the workflow can run on every push and
+// report the new tags without one, which is what happens until a key is set:
+// `npm run tags` locally writes the file, and until it does the new tag reads
+// in English on a Portuguese page, which is where it was anyway.
+if (API_KEY === '') {
+  warn(`no TRANSLATE_API_KEY or ANTHROPIC_API_KEY, so these keep their English label: ${missing.join(', ')}`)
   process.exit(0)
 }
 

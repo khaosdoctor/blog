@@ -1,0 +1,98 @@
+name: Verify
+
+# Everything that judges the site rather than producing it. Split out of Build
+# so a post reaches the reader as soon as it is built: this job runs beside the
+# deploy, not in front of it, and a red result here is read after the fact.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Safe to cancel, unlike Build: nothing here publishes anything, so the newest
+# commit is the only one worth a verdict.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      # Restore only. Build owns the key and writes it; two jobs saving the same
+      # key would race, and this one runs beside that save rather than after it.
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            node_modules/.astro
+            .astro
+          key: astro-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/blog/**') }}
+          restore-keys: |
+            astro-${{ hashFiles('package-lock.json') }}-
+            astro-
+
+      - run: npm ci
+
+      # The build strips types without checking them, so a wrong i18n key or a
+      # wrong prop ships silently as the string "undefined" in the page.
+      - run: npm run check
+
+      # Its own build: the one Build made lives in that job and dist/ is 300MB,
+      # more than an artifact round trip is worth for a job running in parallel.
+      - run: npm run build
+
+      # Everything else here reads the output as text. These drive a real browser
+      # over dist/, which is the only way the layout rules, the per-theme code
+      # colours and the progressive-enhancement fallbacks are checked at all.
+      # Chrome only: the suite pins that channel.
+      - name: Install Chrome for the end-to-end suite
+        run: npx playwright install --with-deps chrome
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Keep the report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      # Advisory, both of them: a broken link in one of the migrated posts or a
+      # Lighthouse regression is worth knowing about, not worth a red run.
+      # uploadArtifacts is off because the action offers no retention setting for
+      # what it stores, and 37 reports had accumulated on the default 90 days.
+      # temporaryPublicStorage still puts each report behind a link in the job
+      # summary, which is the only way anyone was reading them.
+      - name: Lighthouse
+        continue-on-error: true
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: false
+          temporaryPublicStorage: true
+
+      # --root-dir maps root-relative hrefs (the site uses only those) back to
+      # dist/, so internal links resolve without a running server. External links
+      # are checked too since a lot of the migrated posts still point at
+      # six-year-old URLs.
+      - name: Check links
+        continue-on-error: true
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
+        with:
+          args: --no-progress --root-dir dist --exclude-mail 'dist/**/*.html'
+          fail: false
+          jobSummary: true

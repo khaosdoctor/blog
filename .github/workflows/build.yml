@@ -1,9 +1,10 @@
 name: Build
 
+# Only the events that can publish. A pull request goes to Verify, which is
+# where every check lives now.
 on:
   push:
     branches: [main]
-  pull_request:
   # The Cloudflare Worker fires this at a scheduled post's exact pubDate.
   repository_dispatch:
     types: [scheduled-publish]
@@ -19,12 +20,11 @@ permissions:
   pages: write
   id-token: write
 
-# Only a pull request cancels itself, and only its own runs. Everything else
-# queues, because the Worker that fires scheduled-publish has a 60 second window
-# and no persistence: cancel that run and the post simply never publishes.
+# Never cancels: the Worker that fires scheduled-publish has a 60 second window
+# and no persistence, so cancelling that run means the post never publishes.
 concurrency:
-  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: pages-main
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -69,11 +69,10 @@ jobs:
       # one Astro actually needs (esbuild).
       - run: npm ci
 
-      # The build strips types without checking them, so a wrong i18n key or a
-      # wrong prop ships silently as the string "undefined" in the page.
-      - run: npm run check
-
-      # `npm run build` = astro build + pagefind index.
+      # `npm run build` = astro build + pagefind index. Nothing runs before it
+      # any more: `npm run check`, the browser suite, Lighthouse and the link
+      # check all moved to verify.yml, which runs beside this one instead of in
+      # front of the deploy.
       - run: npm run build
 
       # Fails the run if any post still carries Ghost markup or a stray
@@ -81,62 +80,11 @@ jobs:
       - name: Check migrated output
         run: node scripts/check-output.ts
 
-      # Everything above reads the output as text. These drive a real browser
-      # over the dist/ this job just built, which is the only way the layout
-      # rules, the per-theme code colours and the progressive-enhancement
-      # fallbacks are checked at all. Chrome only: the suite pins that channel.
-      - name: Install Chrome for the end-to-end suite
-        run: npx playwright install --with-deps chrome
-
-      - name: End-to-end tests
-        run: npm run test:e2e
-
-      - name: Keep the report of a failed run
-        if: failure()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
-      # Advisory only, never a release blocker: a broken link in one of the
-      # migrated posts or a Lighthouse regression is worth knowing about, not
-      # worth stopping a deploy over. continue-on-error on each step keeps
-      # neither tool from affecting the job's outcome no matter what it finds.
-      # Runs against the dist/ this job already built instead of a second
-      # build: it used to run in its own job downloading the pages artifact,
-      # but that meant every run, including ones that can never deploy, had
-      # to produce that artifact just to hand it to this step.
-      # uploadArtifacts is off because the action offers no retention setting
-      # for what it stores, and 37 reports had accumulated on the default 90
-      # days. temporaryPublicStorage still puts each report behind a link in
-      # the job summary, which is the only way anyone was reading them.
-      - name: Lighthouse
-        continue-on-error: true
-        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
-        with:
-          configPath: ./lighthouserc.json
-          uploadArtifacts: false
-          temporaryPublicStorage: true
-
-      # --root-dir maps root-relative hrefs (the site uses only those) back to
-      # dist/, so internal links resolve without a running server. External
-      # links are checked too since a lot of the migrated posts still
-      # point at six-year-old URLs.
-      - name: Check links
-        continue-on-error: true
-        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
-        with:
-          args: --no-progress --root-dir dist --exclude-mail 'dist/**/*.html'
-          fail: false
-          jobSummary: true
-
-      # Only a run that can actually deploy needs to hand dist/ off: a pull
-      # request, and a manual run without the deploy box ticked, build and
-      # check but stop here. One day of retention is enough since the only
-      # consumer is deploy-pages, later in this same run.
+      # A manual run without the deploy box ticked builds and stops here. One
+      # day of retention is enough since the only consumer is deploy-pages,
+      # later in this same run.
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || inputs.deploy
+        if: github.event_name != 'workflow_dispatch' || inputs.deploy
         with:
           path: dist
           retention-days: 1
@@ -165,12 +113,11 @@ jobs:
             --jq '.[] | select(.key != "${{ steps.astro-cache.outputs.cache-primary-key }}") | .id' \
             | while read -r id; do gh cache delete "$id"; done
 
-  # Only the events that produce an artifact above can deploy, which is the same
-  # condition upload-pages-artifact carries: a pull request builds and checks and
-  # stops there.
+  # The same condition upload-pages-artifact carries above: only a run that
+  # produced the artifact can hand it to Pages.
   deploy:
     needs: build
-    if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || inputs.deploy
+    if: github.event_name != 'workflow_dispatch' || inputs.deploy
     runs-on: ubuntu-latest
     permissions:
       pages: write
