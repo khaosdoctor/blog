@@ -17,14 +17,16 @@
  *
  *   node scripts/translate.ts [--locale en] [--only slug] [--all] [--dry-run]
  *
- * Only new or changed posts are translated, tracked by a content hash. Editing a
- * generated file by hand makes it a human override: the script detects that and
- * never overwrites it.
+ * Two separate questions. Who owns a translation is answered by its own
+ * frontmatter: only `machineOwnedTranslation: true` may be rewritten, and absent
+ * counts as owned by a person. Whether it is stale is answered by the source
+ * hash in .translation-cache.json.
  *
  * By default it shells out to the `claude` CLI, which uses the session you are
- * already logged into and costs nothing beyond the subscription. That is the same
- * billing `.github/workflows/translate.yml` gets from claude-code-action, so a
- * local run and a CI run translate with the same model at the same price.
+ * already logged into and costs nothing beyond the subscription.
+ * `.github/workflows/translate.yml` runs this same script with
+ * CLAUDE_CODE_OAUTH_TOKEN, so a local run and a CI run do the same work at the
+ * same price, and neither has rules the other lacks.
  *
  * The model is configured by environment, so switching to an API key or a local
  * model is a matter of exporting different variables:
@@ -79,8 +81,6 @@ const LANGUAGE_NAMES: Record<Locale, string> = {
 type CacheEntry = {
   /** Hash of the source post when this translation was produced. */
   sourceHash: string
-  /** Hash of what we wrote, so a later hand-edit is detectable. */
-  outputHash: string
   translatedAt: string
 }
 
@@ -143,7 +143,7 @@ function frontmatterLine(frontmatter: string, key: string): string | null {
  */
 const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription'] as const
 
-type ExistingTranslation = { file: string; slug: string }
+type ExistingTranslation = { file: string; slug: string; machineOwned: boolean }
 
 /** Finds the translation already sitting in a post's folder for this locale, if any. */
 function findExistingTranslation(postDir: string, locale: Locale): ExistingTranslation | null {
@@ -155,7 +155,10 @@ function findExistingTranslation(postDir: string, locale: Locale): ExistingTrans
     const { frontmatter } = splitFrontmatter(readFileSync(full, 'utf8'))
     if (field(frontmatter, 'lang') !== locale) continue
     const slug = field(frontmatter, 'slug') ?? entry.name.replace(/\.mdx?$/, '')
-    return { file: full, slug }
+    // Absent counts as owned by a person, so a post written by hand in both
+    // languages is safe without needing a cache entry to prove it.
+    const machineOwned = field(frontmatter, 'machineOwnedTranslation') === 'true'
+    return { file: full, slug, machineOwned }
   }
   return null
 }
@@ -349,7 +352,7 @@ function buildFrontmatter(original: string, fields: Map<string, string>, locale:
   }
 
   lines.push(`slug: ${yamlString(slug)}`)
-  lines.push('machineTranslated: true')
+  lines.push('machineOwnedTranslation: true')
   lines.push('draft: false')
 
   return lines.join('\n')
@@ -403,19 +406,13 @@ for (const post of sources) {
   const existing = findExistingTranslation(postDir, args.locale)
 
   if (existing !== null) {
-    // No cache entry means this script never wrote that file, so it is someone's
-    // own writing and reusing its slug would overwrite them.
-    if (entry === undefined) {
+    // The translation says who owns it, so reviewing one by hand is a matter of
+    // setting machineOwnedTranslation to false rather than of hashes matching.
+    if (!existing.machineOwned) {
       overrides.push(post.slug)
       continue
     }
-    const currentOutputHash = hash(readFileSync(existing.file, 'utf8'))
-    // Someone edited the generated file: their version wins, forever.
-    if (currentOutputHash !== entry.outputHash) {
-      overrides.push(post.slug)
-      continue
-    }
-    if (entry.sourceHash === sourceHash && !args.all) continue
+    if (entry?.sourceHash === sourceHash && !args.all) continue
   }
 
   changed.push({ slug: post.slug, file: post.file, raw, sourceHash, existingSlug: existing?.slug ?? null })
@@ -425,7 +422,7 @@ console.log(
   `${count(sources.length, 'source post', 'source posts')}, ${count(changed.length, 'post', 'posts')} to translate into ${args.locale} with ${MODEL}`,
 )
 if (overrides.length > 0) {
-  warn(`skipping ${count(overrides.length, 'hand-edited translation', 'hand-edited translations')}: ${overrides.join(', ')}`)
+  warn(`skipping ${count(overrides.length, 'translation a person owns', 'translations a person owns')}: ${overrides.join(', ')}`)
 }
 if (args.dryRun) {
   console.log(changed.map((post) => post.slug).join('\n'))
@@ -481,7 +478,6 @@ for (const post of changed) {
 
   cache[post.slug] = {
     sourceHash: post.sourceHash,
-    outputHash: hash(output),
     translatedAt: new Date().toISOString(),
   }
   writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2))

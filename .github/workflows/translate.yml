@@ -3,6 +3,10 @@ name: Translate
 # Translates changed posts into English and opens a PR. Model output is
 # untrusted, so it never goes straight to main.
 #
+# The work is scripts/translate.ts, the same script a local run uses. Which
+# posts are stale, which are owned by a person, and what the prompt says all
+# live there, so this file cannot drift from what happens on your machine.
+#
 # Auth is CLAUDE_CODE_OAUTH_TOKEN, generated locally with `claude setup-token`,
 # billed against the Claude subscription rather than API credit. Without the
 # secret the job exits clean instead of failing every push.
@@ -37,7 +41,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.ref_name }}
-          fetch-depth: 2
 
       - name: Check for the token
         id: auth
@@ -49,49 +52,24 @@ jobs:
             echo "present=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.auth.outputs.present == 'true'
+        with:
+          node-version: 26
+
+      # translate.ts imports @anthropic-ai/sdk, and its default provider spawns
+      # the `claude` CLI, which reads CLAUDE_CODE_OAUTH_TOKEN from the environment.
+      - name: Install the script's dependencies
+        if: steps.auth.outputs.present == 'true'
+        run: |
+          npm ci
+          npm i -g @anthropic-ai/claude-code
+
       - name: Translate changed posts
         if: steps.auth.outputs.present == 'true'
-        uses: anthropics/claude-code-action@239e3a730883eeb5c53db12b0fc9573b3024b126 # v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: |
-            Translate every post under content/blog changed in the last commit
-            into English.
-
-            Skip any post whose frontmatter has `noindex: true`. Those are the
-            lab pages, which exist to hold component demos and are not read as
-            articles in any language.
-
-            A translation lives in the SAME FOLDER as its source post, named
-            after its own English slug: content/blog/<folder>/<english-slug>.mdx.
-            content/blog/<folder>/index.mdx is the source. Never edit, rename,
-            or move that source file.
-
-            Frontmatter for the translation:
-            - title, description, and seoTitle/seoDescription (only if the
-              source has them): translated.
-            - pubDate, updatedDate, category, tags, series, seriesOrder:
-              copied verbatim from the source, untranslated.
-            - lang: en
-            - slug: the english slug used for the filename.
-            - machineTranslated: true
-            - draft: false
-            - Do not write translationOf, seriesName, heroImage, visibility,
-              or canonicalUrl. Those keys are gone from the schema.
-
-            - Do not translate code blocks, identifiers, or inline code
-              spans.
-            - Keep every link, image path and embed exactly as it is: the
-              translation sits in the same folder as the source's images, so
-              relative paths stay unchanged.
-            - Output is MDX with plain markdown only: no import lines, no
-              export lines, and no { } expressions anywhere in the file.
-            - Leave a translation alone if one already exists for that
-              language and its machineTranslated is false or absent. Only a
-              file carrying `machineTranslated: true` may be rewritten. A
-              person wrote or reviewed anything else and their version wins.
-            - Do not touch the source index.md(x) file, and do not touch
-              anything outside content/blog.
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: node scripts/translate.ts
 
       - name: Stage the produced translations
         id: diff
@@ -135,6 +113,9 @@ jobs:
           name: translations
           path: ${{ steps.diff.outputs.stage }}
           if-no-files-found: error
+          # .translation-cache.json is dot-prefixed, and the default excludes it.
+          # Losing it would make the next run translate the same posts again.
+          include-hidden-files: true
           # Unreviewed output, of no use past the next job in this same run.
           retention-days: 1
 

@@ -32,7 +32,9 @@ const blog = defineCollection({
       authors: z.array(z.string()).optional(),
       draft: z.boolean().default(true),
       noindex: z.boolean().default(false),
-      machineTranslated: z.boolean().default(false),
+      // Absent means a person owns the file, so translate.ts may only rewrite
+      // a translation that says true here.
+      machineOwnedTranslation: z.boolean().default(false),
       seoTitle: z.string().optional(),
       seoDescription: z.string().optional(),
     }),

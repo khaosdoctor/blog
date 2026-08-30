@@ -53,7 +53,7 @@ const sectionPath = localePath(locale, `/${post.data.category}/`)
   <PostToc headings={headings} locale={locale} />
   <PostArticle post={post} series={series} readingTime={readingTime} locale={locale}>
     <Fragment slot="banner">
-      {post.data.machineTranslated && sourcePath !== null && (
+      {post.data.machineOwnedTranslation && sourcePath !== null && (
         <LangBanner lang={locale} originalHref={sourcePath} />
       )}
     </Fragment>
