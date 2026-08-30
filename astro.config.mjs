@@ -24,6 +24,7 @@ import { rehypeMathCopy } from './src/plugins/rehype-math-copy.mjs'
 import { remarkLabDemos } from './src/plugins/remark-lab-demos.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
 import { remarkWikilinks } from './src/plugins/remark-wikilinks.mjs'
+import { mdxTransformCache } from './src/plugins/mdx-transform-cache.mjs'
 
 // https://astro.build/config
 export default defineConfig({
@@ -150,6 +151,10 @@ export default defineConfig({
     layout: 'constrained',
   },
   vite: {
+    // Monkeypatches the "@mdx-js/rolldown" plugin's own transform in place, so
+    // it must sit in this array with that plugin already resolvable; see the
+    // comment at the top of mdx-transform-cache.mjs. MDX_CACHE=0 disables it.
+    plugins: [mdxTransformCache()],
     build: {
       // A font under Vite's 4 KB threshold becomes a `data:` URI, which the site's
       // `font-src 'self'` blocks. Nothing errors; the glyphs are just wrong.

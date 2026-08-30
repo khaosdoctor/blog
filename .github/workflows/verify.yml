@@ -21,6 +21,11 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # The cache-parity steps below purge the Actions cache entry and dispatch
+    # a fresh Build on a real divergence, on top of the job's default read.
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -35,7 +40,11 @@ jobs:
 
       # Restore only. Build owns the key and writes it; two jobs saving the same
       # key would race, and this one runs beside that save rather than after it.
-      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      # id'd so the cache-parity steps below can delete this exact key on a real
+      # divergence: this run computes the identical key from the identical
+      # commit, so the primary key here is the entry Build would restore too.
+      - id: astro-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             .astro-cache
@@ -49,9 +58,46 @@ jobs:
       # wrong prop ships silently as the string "undefined" in the page.
       - run: npm run check
 
-      # Its own build: the one Build made lives in that job and dist/ is 300MB,
-      # more than an artifact round trip is worth for a job running in parallel.
-      - run: npm run build
+      # Proves the MDX transform cache is not lying: one build with it off, one
+      # with it warm from the restore above, then a byte diff of the two dist/
+      # trees. dist/ from the cache-enabled build is what the rest of this job
+      # (e2e, Lighthouse, link check) runs against below, same as before.
+      - name: Build with the MDX cache disabled
+        run: MDX_CACHE=0 npm run build
+
+      - name: Set aside the cache-disabled build for comparison
+        run: mv dist dist-nocache
+
+      - name: Build with the MDX cache enabled
+        run: npm run build
+
+      - name: Confirm the MDX cache did not lie
+        id: cache-parity
+        run: node scripts/check-dist-parity.ts dist dist-nocache
+
+      # A real divergence means some cache hit returned something the real
+      # transform would not have. The corrupt entry is keyed to this exact
+      # commit (same hashFiles inputs as Build's own save key), so deleting it
+      # here removes exactly what Build would otherwise restore and reuse.
+      #
+      # No loop: dispatching build.yml below is a workflow_dispatch event, and
+      # this workflow's own triggers are push, pull_request and workflow_dispatch
+      # from a person or the Cloudflare Worker, never a dispatch this job makes
+      # itself, so nothing re-triggers Verify on this commit. Separately, the
+      # dispatched Build run's own restore falls back through this same key's
+      # prefixes to whatever it finds, if anything, but every entry is looked
+      # up by this exact content-plus-config hash: the one entry that could
+      # still carry the corruption is the one just deleted, so every file on
+      # that run is a genuine cache miss, and a miss always returns the real
+      # transform's own output unchanged. That run's cache-on and cache-off
+      # output is trivially identical before its own Verify run ever checks.
+      - name: Purge the corrupt MDX cache entry and rebuild
+        if: steps.cache-parity.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh cache delete "astro-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/blog/**') }}" --ref "${{ github.ref }}"
+          gh workflow run build.yml --ref main -f deploy=true
 
       # Everything else here reads the output as text. These drive a real browser
       # over dist/, which is the only way the layout rules, the per-theme code

@@ -23,7 +23,9 @@ import { slugFrom } from '../lib/post-file.mjs'
 import { localeFromFile } from './mdx-util.mjs'
 
 const BASE = 'content/blog'
-const PATTERN = /\[\[([^\]|#]+)(#[^\]|]+)?(?:\|([^\]]+))?\]\]/g
+// Exported so the MDX transform cache can scan a post's raw text for the same
+// targets this plugin resolves, without keeping a second copy of the syntax.
+export const PATTERN = /\[\[([^\]|#]+)(#[^\]|]+)?(?:\|([^\]]+))?\]\]/g
 
 /** folder name (the pt slug) -> locale -> { draft, title, url }, read once per build. */
 let posts = null
