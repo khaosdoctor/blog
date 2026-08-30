@@ -1,8 +1,8 @@
 // Wraps the vite plugin @astrojs/mdx registers under the name "@mdx-js/rolldown"
 // (see node_modules/@astrojs/mdx/dist/vite-plugin-mdx.js) and short-circuits its
-// transform on a content hash. The transform is deterministic and 370 files cost
-// 93ms each with nothing remembering the result between builds, so a cache entry
-// under .astro-cache/mdx, carried between CI runs by astro.config.mjs's cacheDir
+// transform on a content hash. The transform is deterministic and costs around
+// 90ms per post with nothing remembering the result between builds, so a cache
+// entry under .astro-cache/mdx, carried between CI runs by astro.config.mjs's cacheDir
 // and .github/workflows/build.yml's actions/cache step, turns a cold rebuild into
 // a lookup.
 //

@@ -6,9 +6,9 @@
 //
 // - `name` (the filename) is derived from `src`, so it is never typed twice.
 // - `source` is the URL of the page that file is highlighted on, built by the
-//   `labSource` collection. The source is never inlined here: twenty-one demos
-//   highlighted into one post came to 15MB of HTML that a reader who opens no
-//   demo pays for in full.
+//   `labSource` collection. The source is never inlined here: a post carrying a
+//   folder of demos, all highlighted into one page, reaches many megabytes of HTML
+//   that a reader who opens no demo pays for in full.
 // - `<LabDemo>` needs a real component reference for its client directive, not
 //   a string, so this also synthesises the `import Counter from
 //   './components/Counter.vue'` line as an `mdxjsEsm` node at the top of the

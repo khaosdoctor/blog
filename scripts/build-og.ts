@@ -39,7 +39,7 @@ const LOCALES = {
   },
 }
 
-// One accent per section, taken from the brand mark's four colours.
+// One accent per section, taken from the brand mark's palette.
 const SECTIONS: Record<string, string> = {
   default: '#e30613',
   javascript: '#f5b200',

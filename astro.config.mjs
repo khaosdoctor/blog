@@ -120,7 +120,8 @@ export default defineConfig({
       ],
       rehypePlugins: [
         // The posts use Obsidian's callout vocabulary; the plugin's github default
-        // knows five types and renders the rest as a blockquote with a stray title.
+        // knows a handful of types and renders the rest as a blockquote with a stray
+        // title.
         // `important` is red here, so its stock flame icon reads as a fire hazard.
         // Lucide's octagon-alert is the stop-sign shape instead.
         [

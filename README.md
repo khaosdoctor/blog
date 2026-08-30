@@ -61,7 +61,7 @@ The first four are required. The schema is `src/content.config.ts`.
 
 | Command | What it does |
 |---|---|
-| `npm run check` | `astro check`, `tsc -p worker`, and the i18n, component-css, content and credits guards. |
+| `npm run check` | `astro check`, `tsc -p worker`, and the i18n, component-css, content, credits, tag and MDX-cache guards |
 | `npm run preview` | serve `dist/` |
 | `node scripts/check-output.ts` | post-build checks, the same as the CI |
 | `npm run test:e2e` | Playwright tests on the built `dist/`. Build first |
