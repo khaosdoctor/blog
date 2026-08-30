@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { tagLabel } from '../../i18n/tags'
 import { alternatesFor, HREFLANG, t, type Locale } from '../../i18n/ui'
 import { getTags } from '../../lib/taxonomy'
 import TagCloud from '../TagCloud.astro'
@@ -11,7 +12,9 @@ interface Props {
 const { locale } = Astro.props
 
 const tags = [...(await getTags(locale)).entries()]
-  .sort(([a], [b]) => a.localeCompare(b, HREFLANG[locale]))
+  // By the label, not the tag: the cloud reads alphabetically in the language
+  // it is being read in.
+  .sort(([a], [b]) => tagLabel(a, locale).localeCompare(tagLabel(b, locale), HREFLANG[locale]))
   .map(([name, posts]) => ({ name, count: posts.length }))
 ---
 

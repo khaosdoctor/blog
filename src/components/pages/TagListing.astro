@@ -1,6 +1,7 @@
 ---
 import type { Page } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { tagLabel } from '../../i18n/tags'
 import { alternatesFor, localePath, t, type Locale } from '../../i18n/ui'
 import type { Post } from '../../lib/posts'
 import { slugify } from '../../lib/taxonomy'
@@ -18,18 +19,20 @@ const { locale, tag, languages, page } = Astro.props
 
 // Always page 1: the counterpart tag may have fewer pages than this one.
 const path = `/tags/${slugify(tag)}/`
-const title = page.currentPage > 1 ? `LS: ${tag} | ${t(locale, 'page')} ${page.currentPage}` : `LS: ${tag}`
+// The URL keeps the English tag; only what the reader sees is translated.
+const label = tagLabel(tag, locale)
+const title = page.currentPage > 1 ? `LS: ${label} | ${t(locale, 'page')} ${page.currentPage}` : `LS: ${label}`
 ---
 
 <BaseLayout
   title={title}
-  description={t(locale, 'tagDescription', tag)}
+  description={t(locale, 'tagDescription', label)}
   lang={locale}
   alternates={alternatesFor(path, Astro.site, languages)}
 >
   <p class="kicker listing-heading">{t(locale, 'tag')}</p>
   <h1 class="listing-heading">
-    {tag} <span class="page-count">[{page.total}]</span>
+    {label} <span class="page-count">[{page.total}]</span>
   </h1>
   <PostList posts={page.data} />
   <Pagination page={page} basePath={localePath(locale, path)} locale={locale} />

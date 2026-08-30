@@ -6,6 +6,7 @@ import SeriesToc from './SeriesToc.astro'
 import { parseAuthors } from '../lib/authors'
 import { formatDate, slugOf, urlOf, type Post } from '../lib/posts'
 import { chipColor, getSeriesNavigation, slugify } from '../lib/taxonomy'
+import { tagLabel } from '../i18n/tags'
 import { localePath, t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -90,11 +91,11 @@ const listed = !post.data.noindex
                 class="chip"
                 style={`--chip-color: ${chipColor(tag)}`}
               >
-                {tag}
+                {tagLabel(tag, locale)}
               </a>
             ) : (
               <span class="chip" style={`--chip-color: ${chipColor(tag)}`}>
-                {tag}
+                {tagLabel(tag, locale)}
               </span>
             )}
           </li>

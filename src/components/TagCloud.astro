@@ -1,5 +1,6 @@
 ---
 import { chipColor, slugify, tagCloudLift, tagCloudScale } from '../lib/taxonomy'
+import { tagLabel } from '../i18n/tags'
 import { localePath, t, type Locale } from '../i18n/ui'
 
 interface Props {
@@ -26,7 +27,7 @@ const most = Math.max(...counts)
           class="chip"
           style={`--chip-color: ${chipColor(name)}; --chip-scale: ${tagCloudScale(count, fewest, most)}; --chip-lift: ${tagCloudLift(name)}em`}
         >
-          {name} ({count})
+          {tagLabel(name, locale)} ({count})
         </a>
       </li>
     ))
@@ -54,8 +55,12 @@ const most = Math.max(...counts)
 
   /* Padding, rule and lift are all in `em` so a chip scaled up by its count
      keeps a chip's proportions and drifts proportionally off the row. */
+  /* The vw ceiling is what keeps the most-used tag on a narrow screen: its chip
+     is the largest the count scale draws, and a long label has no width of its
+     own to stop at. overflow-wrap is the backstop for a label longer still. */
   .chips .chip {
-    font-size: calc(var(--text-tiny) * var(--chip-scale, 1));
+    font-size: min(calc(var(--text-tiny) * var(--chip-scale, 1)), 6vw);
+    overflow-wrap: anywhere;
     padding: 0.15em 0.55em;
     border-width: 0.2em;
     transform: translateY(var(--chip-lift, 0em));

@@ -1,0 +1,52 @@
+name: Tag labels
+
+# Its own workflow, and never a dependency of Build: a post publishes on its own
+# schedule and a new tag reading in English for one deploy is not worth holding
+# it back. The run commits the dictionary, which triggers Build again.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/blog/**'
+      - 'scripts/build-tag-labels.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tag-labels
+  cancel-in-progress: false
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Reads the tags out of content/blog and exits without a model call when
+      # every one of them is already in KNOWN_TAGS, which is almost every run.
+      - name: Look for new tags
+        id: labels
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/build-tag-labels.ts
+
+      - name: Commit the dictionary
+        run: |
+          if git diff --quiet -- src/i18n/tags.ts; then
+            echo "no new tags"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/i18n/tags.ts
+          git commit -m "chore: label the new tags in Portuguese"
+          git push
