@@ -15,7 +15,7 @@ npm run dev     # http://localhost:4321
 npm run build   # astro build, then pagefind indexes dist/
 ```
 
-Node 22.12 or newer.
+Node 26 or newer.
 
 ## Writing
 

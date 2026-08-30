@@ -28,22 +28,22 @@ jobs:
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version: 26
           cache: npm
+
+      - run: npm ci
 
       # Restore only. Build owns the key and writes it; two jobs saving the same
       # key would race, and this one runs beside that save rather than after it.
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
-            node_modules/.astro
+            .astro-cache
             .astro
           key: astro-${{ hashFiles('package-lock.json') }}-${{ hashFiles('content/blog/**') }}
           restore-keys: |
             astro-${{ hashFiles('package-lock.json') }}-
             astro-
-
-      - run: npm ci
 
       # The build strips types without checking them, so a wrong i18n key or a
       # wrong prop ships silently as the string "undefined" in the page.
