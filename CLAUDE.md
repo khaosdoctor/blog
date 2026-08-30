@@ -2,6 +2,8 @@
 
 `AGENTS.md` at the root is the real instruction file. Read it before touching anything. Everything below is repeated from it because these are the rules broken most often.
 
+`content/internal/HANDOFF.md` is where the last session left things: current state, the shell and cache traps that waste an hour, and what was deliberately left undone. It is gitignored, so it exists only on this machine. Read it at the start of a session and rewrite it at the end.
+
 ## Comments
 
 Comments are rare and say why, never what. Only comment code a reader would otherwise stop at.
