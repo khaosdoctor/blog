@@ -5,13 +5,12 @@
  * Portuguese page and "development" on an English one.
  *
  * A tag Portuguese uses in English (kubernetes, deploy, docker) has no entry and
- * falls through to the tag itself. `scripts/build-tag-labels.ts` maintains the
- * file and only asks the model about a tag missing from KNOWN_TAGS below.
+ * falls through to the tag itself.
  *
- * A leaf module: importing nothing is what lets that script read it back.
+ * A leaf module: importing nothing is what lets `scripts/check-tags.ts` read it.
  */
 
-/** Every tag the generator has already judged, so a rerun asks about none of them. */
+/** Every tag that has been decided about. `check-tags.ts` fails on one that has not. */
 export const KNOWN_TAGS = [
   'acr',
   'aks',

@@ -21,22 +21,27 @@
  * generated file by hand makes it a human override: the script detects that and
  * never overwrites it.
  *
- * The model is configured by environment, so switching to a smaller or local model is a
- * matter of exporting different variables:
+ * By default it shells out to the `claude` CLI, which uses the session you are
+ * already logged into and costs nothing beyond the subscription. That is the same
+ * billing `.github/workflows/translate.yml` gets from claude-code-action, so a
+ * local run and a CI run translate with the same model at the same price.
  *
- *   TRANSLATE_PROVIDER    anthropic (default) | openai-compatible
+ * The model is configured by environment, so switching to an API key or a local
+ * model is a matter of exporting different variables:
+ *
+ *   TRANSLATE_PROVIDER    claude-cli (default) | anthropic | openai-compatible
  *   TRANSLATE_MODEL       default claude-opus-5
  *   TRANSLATE_BASE_URL    required by openai-compatible, e.g.
- *                         https://api.groq.com/openai/v1,
  *                         https://openrouter.ai/api/v1,
  *                         http://localhost:11434/v1
  *   TRANSLATE_MAX_TOKENS  default 64000, lower it for models with a smaller cap
- *   TRANSLATE_API_KEY     falls back to ANTHROPIC_API_KEY
+ *   TRANSLATE_API_KEY     anthropic only, falls back to ANTHROPIC_API_KEY
  *
- * It refuses to run without a key rather than silently producing nothing. A local
- * Ollama is the exception: it needs no key, so openai-compatible allows none.
+ * `anthropic` refuses to run without a key rather than silently producing nothing.
+ * The other two need none: the CLI has a session, and a local Ollama wants no auth.
  */
 import Anthropic from '@anthropic-ai/sdk'
+import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -51,10 +56,13 @@ const SOURCE_DIR = 'content/blog'
 // glob and never looks like a translation to check-translations.ts either.
 const CACHE_FILE = join(SOURCE_DIR, '.translation-cache.json')
 
-const PROVIDERS = ['anthropic', 'openai-compatible'] as const
+const PROVIDERS = ['claude-cli', 'anthropic', 'openai-compatible'] as const
 type Provider = (typeof PROVIDERS)[number]
 
-const PROVIDER = (process.env.TRANSLATE_PROVIDER ?? 'anthropic') as Provider
+// The CLI by default: it bills against the Claude subscription the same way
+// `claude-code-action` does in the workflow, so a local run costs nothing extra
+// and both paths translate with the same model.
+const PROVIDER = (process.env.TRANSLATE_PROVIDER ?? 'claude-cli') as Provider
 const MODEL = process.env.TRANSLATE_MODEL ?? 'claude-opus-5'
 const BASE_URL = (process.env.TRANSLATE_BASE_URL ?? '').replace(/\/$/, '')
 const MAX_TOKENS = Number(process.env.TRANSLATE_MAX_TOKENS ?? 64000)
@@ -257,8 +265,42 @@ async function completeWithOpenAICompatible(system: string, user: string): Promi
   }
 }
 
+/**
+ * Spawns `claude -p`, which reads the logged-in session rather than an API key.
+ * The prompt goes in on stdin because a post is far past any safe argv length.
+ */
+async function completeWithClaudeCli(system: string, user: string): Promise<Completion> {
+  const child = spawn('claude', ['-p', '--model', MODEL, '--append-system-prompt', system], {
+    stdio: ['pipe', 'pipe', 'pipe'],
+  })
+  child.stdin.end(user)
+
+  const out: Buffer[] = []
+  const err: Buffer[] = []
+  child.stdout.on('data', (chunk: Buffer) => out.push(chunk))
+  child.stderr.on('data', (chunk: Buffer) => err.push(chunk))
+
+  const code = await new Promise<number | null>((resolve, reject) => {
+    child.on('error', reject)
+    child.on('close', resolve)
+  })
+
+  const text = Buffer.concat(out).toString('utf8').trim()
+  if (code !== 0) throw new Error(`claude exited ${code}: ${Buffer.concat(err).toString('utf8').trim()}`)
+
+  return {
+    text,
+    // The CLI reports neither a refusal nor a token count, so the body marker
+    // check downstream is what catches a response that did not translate.
+    refusal: text === '' ? 'claude returned nothing' : null,
+    usage: 'billed to the Claude subscription',
+  }
+}
+
 function complete(system: string, user: string): Promise<Completion> {
   switch (PROVIDER) {
+    case 'claude-cli':
+      return completeWithClaudeCli(system, user)
     case 'anthropic':
       return completeWithAnthropic(system, user)
     case 'openai-compatible':

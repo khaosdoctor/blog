@@ -46,13 +46,13 @@ The first four are required. The schema is `src/content.config.ts`.
 | `description` | one sentence, used as the meta description and the hover-preview excerpt |
 | `draft` | keeps the post out of the build. Defaults to `true` |
 | `lang` | the language it was written in. Defaults to `pt` |
-| `tags` | many and free-form, each one gets `/tags/<tag>/` |
+| `tags` | many and free-form, written in English. Each one gets `/tags/<tag>/`, and `src/i18n/tags.ts` holds the Portuguese label |
 | `updatedDate` | shown beside the publication date |
 | `heroImage`, `heroImageAlt` | the cover image and its alt text |
 | `series`, `seriesName`, `seriesOrder` | the series slug, its display title, and this part's position |
 | `authors` | git's own format, `Name <https://site>`, the site part optional. |
 | `slug` | overrides the directory name in the URL |
-| `noindex` | tells search engines to skip it, and marks it private in listings |
+| `noindex` | keeps it out of every listing, both feeds, `llms.txt` and the search index. The page still builds, so the URL answers for anyone holding the link |
 | `machineTranslated` | shows the banner pointing at the source post |
 | `seoTitle`, `seoDescription` | override the title and description in the meta tags alone |
 
@@ -67,7 +67,8 @@ The first four are required. The schema is `src/content.config.ts`.
 | `npm run test:e2e` | Playwright tests on the built `dist/`. Build first |
 | `node scripts/build-redirects.ts` | regenerate `src/data/redirects.ts` after content moves to some other URL |
 | `node scripts/build-icons.ts` | regenerate the PWA icons from `public/favicon.svg` |
-| `node scripts/translate.ts` | translate changed posts in place, needs `TRANSLATE_API_KEY`, or `ANTHROPIC_API_KEY` as a fallback. CI uses the workflow instead |
+| `node scripts/build-og.ts` | regenerate the social cards in `public/og/`, both languages. Renders in Chromium, so the card carries real text |
+| `node scripts/translate.ts` | translate changed posts in place, through the `claude` CLI and its logged-in session. `TRANSLATE_PROVIDER` switches to an API key or a local model |
 | `node scripts/clean-translations.ts` | strip agent artifacts from translated files |
 
 
@@ -82,6 +83,8 @@ The first four are required. The schema is `src/content.config.ts`.
 | `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, and the same set again under `/en/` |
 | `src/components/` | the component set posts can use |
 | `src/plugins/` | the remark and rehype plugins that turn markdown into figures, embeds and margin notes |
+| `src/i18n/` | the UI strings per language, and the Portuguese labels for the English tag vocabulary |
+| `public/og/` | the social cards, Portuguese at the root and English under `og/en/` |
 | `tests/e2e/` | the browser suite |
 | `worker/` | Cloudflare Worker that rebuilds the site when a scheduled post is due |
 
