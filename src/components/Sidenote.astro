@@ -19,7 +19,7 @@ const toggleId = `${anchorId}-toggle`
   <input type="checkbox" id={toggleId} class="note-toggle" aria-label={t(locale, 'showNote')} />
   <label for={toggleId} class="note-marker" style={`anchor-name: --${toggleId}`}></label>
   <span class="note-text" style={`position-anchor: --${toggleId}`}
-    ><slot /><button
+    ><span class="note-head" aria-hidden="true"></span><slot /><button
       type="button"
       class="note-copy-link"
       data-copy-anchor={`#${anchorId}`}

@@ -120,6 +120,20 @@ main {
   transition: transform var(--note-grow-duration) var(--note-grow-ease);
 }
 
+/* Reads the same counter as the marker, so the note in the margin names the
+   letter a reader just passed in the sentence. */
+.note-head {
+  display: block;
+  margin-block-end: 0.25rem;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: var(--fg);
+}
+
+.note-head::before {
+  content: '[' counter(sidenote, lower-alpha) ']';
+}
+
 /* A transform, because font-size or padding would reflow the floated column. */
 .note.note-grow .note-text {
   transform: scale(1.02);
@@ -240,7 +254,10 @@ main {
 }
 
 @media print {
+  /* The note prints inline inside its own parentheses, where a heading naming
+     the letter would read as part of the sentence. */
   .note-toggle,
+  .note-head,
   .note-copy-link,
   .note-scrim {
     display: none;
