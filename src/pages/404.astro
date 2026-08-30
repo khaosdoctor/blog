@@ -2,9 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PostList from '../components/PostList.astro'
 import { localePath, LOCALES, SOURCE_LOCALE, t } from '../i18n/ui'
-import { getPublishedPosts } from '../lib/posts'
+import { getListedPosts } from '../lib/posts'
 
-const recent = (await getPublishedPosts()).slice(0, 5)
+const recent = (await getListedPosts()).slice(0, 5)
 ---
 
 {/* One 404 answers for the whole host, every language prefix included, so all

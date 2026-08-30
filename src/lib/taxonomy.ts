@@ -1,11 +1,11 @@
 import type { PaginateFunction } from 'astro'
 import { hashString } from './chip-color'
-import { getPublishedPosts, LIST_PAGE_SIZE, type Post } from './posts'
+import { getListedPosts, getPublishedPosts, LIST_PAGE_SIZE, type Post } from './posts'
 import { slugify } from './slugify'
 import { LOCALES, type Locale } from '../i18n/ui'
 
 export async function getCategories(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
-  return Map.groupBy(await getPublishedPosts(lang), (post) => post.data.category)
+  return Map.groupBy(await getListedPosts(lang), (post) => post.data.category)
 }
 
 // A section page only exists in a language that has a post in it, so the
@@ -17,7 +17,7 @@ export async function categoryLocales(): Promise<(readonly [Locale, Set<string>]
 }
 
 export async function getTags(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
-  const posts = await getPublishedPosts(lang)
+  const posts = await getListedPosts(lang)
   const byTag = new Map<string, Post[]>()
   for (const post of posts) {
     for (const tag of post.data.tags) {
@@ -98,7 +98,7 @@ export function buildSeriesMap(posts: Post[]): Map<string, Post[]> {
 // One language at a time, so a series page never mixes languages and a
 // half-translated series comes out shorter rather than mixed.
 export async function getSeries(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
-  const posts = await getPublishedPosts(lang)
+  const posts = await getListedPosts(lang)
   return buildSeriesMap(posts)
 }
 

@@ -17,12 +17,16 @@ interface Props {
 
 const { post, series, readingTime, locale } = Astro.props
 const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
+// A noindex post is in no listing, so its section and tag pages may not exist
+// at all. Its own chips are plain text rather than links into a 404.
+const listed = !post.data.noindex
 ---
 
 {/* The only data-pagefind-body on the site, so the index holds posts alone:
     once one page declares a body region, Pagefind stops indexing whole pages
-    everywhere else, and the listings drop out. */}
-<article data-pagefind-body>
+    everywhere else, and the listings drop out. Absent on a noindex post, which
+    keeps it out of search along with every other index. */}
+<article data-pagefind-body={listed ? true : undefined}>
   <CoverHero
     slug={slugOf(post)}
     title={post.data.title}
@@ -35,13 +39,23 @@ const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
   <p class="meta">
     <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
     <span aria-hidden="true">·</span>
-    <a
-      href={localePath(locale, `/${post.data.category}/`)}
-      class="chip"
-      style={`--chip-color: ${chipColor(post.data.category)}`}
-    >
-      {post.data.category}
-    </a>
+    <Fragment>
+      {
+        listed ? (
+          <a
+            href={localePath(locale, `/${post.data.category}/`)}
+            class="chip"
+            style={`--chip-color: ${chipColor(post.data.category)}`}
+          >
+            {post.data.category}
+          </a>
+        ) : (
+          <span class="chip" style={`--chip-color: ${chipColor(post.data.category)}`}>
+            {post.data.category}
+          </span>
+        )
+      }
+    </Fragment>
     {
       readingTime !== undefined && (
         <>
@@ -70,13 +84,19 @@ const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
       <ul class="chips">
         {post.data.tags.map((tag) => (
           <li>
-            <a
-              href={localePath(locale, `/tags/${slugify(tag)}/`)}
-              class="chip"
-              style={`--chip-color: ${chipColor(tag)}`}
-            >
-              {tag}
-            </a>
+            {listed ? (
+              <a
+                href={localePath(locale, `/tags/${slugify(tag)}/`)}
+                class="chip"
+                style={`--chip-color: ${chipColor(tag)}`}
+              >
+                {tag}
+              </a>
+            ) : (
+              <span class="chip" style={`--chip-color: ${chipColor(tag)}`}>
+                {tag}
+              </span>
+            )}
           </li>
         ))}
       </ul>

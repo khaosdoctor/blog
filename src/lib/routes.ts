@@ -13,6 +13,7 @@ import { LOCALES, SOURCE_LOCALE, type Locale } from '../i18n/ui'
 import { categoryDescription } from './categories'
 import {
   folderOf,
+  getListedPosts,
   getPublishedByFolder,
   getPublishedPosts,
   LIST_PAGE_SIZE,
@@ -36,7 +37,7 @@ export function postListPaths(locale: Locale): GetStaticPaths {
   return async ({ paginate }) => {
     // paginate() returns one page even for an empty array, which is what lets
     // the "no translated posts yet" notice render.
-    const posts = await getPublishedPosts(locale)
+    const posts = await getListedPosts(locale)
     return paginate(posts, { pageSize: LIST_PAGE_SIZE, props: { locale } })
   }
 }
@@ -119,8 +120,14 @@ export function seriesPaths(locale: Locale): GetStaticPaths {
 
 export function postPaths(locale: Locale): GetStaticPaths {
   return async () => {
-    const [posts, byFolder] = await Promise.all([getPublishedPosts(locale), getPublishedByFolder()])
-    const seriesMap = buildSeriesMap(posts)
+    const [posts, byFolder, listed] = await Promise.all([
+      getPublishedPosts(locale),
+      getPublishedByFolder(),
+      getListedPosts(locale),
+    ])
+    // Built from the listed posts, so an unlisted one neither carries series
+    // navigation nor appears in a sibling's.
+    const seriesMap = buildSeriesMap(listed)
     return posts.map((post) => {
       const siblings = byFolder.get(folderOf(post)) ?? [post]
       const source = siblings.find((entry) => entry.data.lang === SOURCE_LOCALE)

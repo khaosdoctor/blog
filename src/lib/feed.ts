@@ -1,13 +1,13 @@
 import rss from '@astrojs/rss'
 import type { APIContext } from 'astro'
 import { HREFLANG, localePath, t, type Locale } from '../i18n/ui'
-import { getPublishedPosts, urlOf } from './posts'
+import { getListedPosts, urlOf } from './posts'
 
 const FALLBACK_SITE = 'https://blog.lsantos.dev'
 
 export function feedRoute(locale: Locale) {
   return async (context: APIContext) => {
-    const posts = await getPublishedPosts(locale)
+    const posts = await getListedPosts(locale)
     const site = context.site ?? new URL(FALLBACK_SITE)
     return rss({
       title: 'Lucas Santos',

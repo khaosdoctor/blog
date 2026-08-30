@@ -19,9 +19,8 @@ function categoryUrl(post: Post): string {
 }
 
 
-// A noindex post is still listed, so nothing on the row says it is unlisted
-// everywhere else. The marker is for the author while writing and never ships.
-const showPrivate = import.meta.env.DEV
+// Only ever true on the dev server: a scheduled post is not in the build at all.
+const showScheduled = import.meta.env.DEV
 ---
 
 <ol class="listing">
@@ -32,8 +31,7 @@ const showPrivate = import.meta.env.DEV
           <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, post.data.lang)}</time>
         </span>
         <a href={urlOf(post)} class="listing-title">
-          {showPrivate && post.data.noindex && <span class="listing-private">[private]</span>}
-          {showPrivate && isScheduled(post) && (
+          {showScheduled && isScheduled(post) && (
             <span class="listing-scheduled">
               <svg viewBox="0 0 16 16" aria-hidden="true">
                 <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" />

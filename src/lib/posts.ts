@@ -43,6 +43,15 @@ export async function getPublishedPosts(lang: Locale = SOURCE_LOCALE): Promise<P
   return (await getPublished()).filter((post) => post.data.lang === lang)
 }
 
+/**
+ * Everything a reader can arrive at without being handed the URL. A `noindex`
+ * post keeps its page and its markdown twin, and leaves every listing, the
+ * feeds, llms.txt and the search index, so the only way in is the link itself.
+ */
+export async function getListedPosts(lang: Locale = SOURCE_LOCALE): Promise<Post[]> {
+  return (await getPublishedPosts(lang)).filter((post) => !post.data.noindex)
+}
+
 export async function getPublishedByFolder(): Promise<Map<string, Post[]>> {
   return Map.groupBy(await getPublished(), folderOf)
 }
