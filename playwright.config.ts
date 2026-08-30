@@ -18,7 +18,11 @@ export default defineConfig({
     channel: 'chrome',
   },
   webServer: {
-    command: 'npm run preview -- --port 4322',
+    // --force because .astro/ is a CI cache: a run that ended without stopping
+    // its preview leaves preview.json behind, and the next run restores that
+    // lock and refuses to start. reuseExistingServer means this only runs when
+    // nothing is answering on the port, so the lock it replaces is always stale.
+    command: 'npm run preview -- --port 4322 --force',
     url: 'http://localhost:4322',
     reuseExistingServer: true,
   },
