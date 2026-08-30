@@ -530,7 +530,7 @@ export const redirects: Redirect[] = [
   },
   {
     "from": "/tag/microsservicos/",
-    "to": "/tags/microsservicos/",
+    "to": "/tags/microservices/",
     "note": "tag archive"
   },
   {
