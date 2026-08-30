@@ -14,8 +14,12 @@ const LINKS: { key: LinkKey; path: string }[] = [
   { key: 'navPosts', path: '/' },
   { key: 'navSeries', path: '/series/' },
   { key: 'navTags', path: '/tags/' },
-  { key: 'navAbout', path: '/about/' },
+  { key: 'navAbout', path: 'https://lsantos.dev' },
 ]
+
+function href(locale: Locale, path: string): string {
+  return path.startsWith('https://') ? path : localePath(locale, path)
+}
 
 const OTHER_LOCALES = LOCALES.filter((entry) => entry !== SOURCE_LOCALE)
 const localePrefix = OTHER_LOCALES.find(
@@ -42,7 +46,8 @@ function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): bool
       // No pagination arm: series listings never paginate.
       return path === '/series/' || /^\/series\/[^/]+\/$/.test(path)
     case 'navAbout':
-      return path === '/about/'
+      // Leaves the site, so it is never the page being read.
+      return false
     default:
       return key satisfies never
   }
@@ -53,7 +58,7 @@ function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): bool
   {
     LINKS.map((link) => (
       <a
-        href={localePath(locale, link.path)}
+        href={href(locale, link.path)}
         aria-current={isCurrent(link.key, path, categorySlugs) ? 'page' : undefined}
       >
         {t(locale, link.key)}
