@@ -650,7 +650,7 @@ m() // hi!
 
 An object we haven't used here yet is the `access` object that comes from inside decorator contexts.
 
-A very useful example is building a **dependency injection container**, a very handy tool for automatically creating instances of dependent classes for classes that need those dependencies, so you don't have to pass every dependency as a parameter.<MarginNote>This is already a reality with the [TSyringe](http://npm.im/tsyringe) library, built by Microsoft to show off the power of decorators in TypeScript.</MarginNote>
+A very useful example is building a **dependency injection container**, a very handy tool for automatically creating instances of dependent classes for classes that need those dependencies, so you don't have to pass every dependency as a parameter.<Sidenote>This is already a reality with the [TSyringe](http://npm.im/tsyringe) library, built by Microsoft to show off the power of decorators in TypeScript.</Sidenote>
 
 Essentially what we need is a global list of classes and their dependencies:
 

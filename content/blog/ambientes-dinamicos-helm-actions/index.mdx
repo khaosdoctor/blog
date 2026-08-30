@@ -736,7 +736,7 @@ jobs:
 
 Agora que já temos as pipelines criadas, vamos ao GitHub criar nossos secrets! Abra o repositório no seu browser, navegue até a aba `Settings` e depois `secrets`, então clique em `New repository secret` para criar um novo secret local.
 
-Vamos criar um secret chamado `ACR_LOGIN` que será o nome do nosso ACR, ou seja, `shipmanager`. Outro chamado `ACR_NAME`, que não é bem um segredo, porque é o DNS do nosso CR, porém assim evitamos de ter um valor fixo na nossa action, este valor é o `shipmanager.azurecr.io`.<MarginNote>Ambas as informações podem ser obtidas no portal da Azure, sabendo o nome do ACR o login é o mesmo e o DNS é sempre `<nome>.azurecr.io`</MarginNote>
+Vamos criar um secret chamado `ACR_LOGIN` que será o nome do nosso ACR, ou seja, `shipmanager`. Outro chamado `ACR_NAME`, que não é bem um segredo, porque é o DNS do nosso CR, porém assim evitamos de ter um valor fixo na nossa action, este valor é o `shipmanager.azurecr.io`.<Sidenote>Ambas as informações podem ser obtidas no portal da Azure, sabendo o nome do ACR o login é o mesmo e o DNS é sempre `<nome>.azurecr.io`</Sidenote>
 
 A senha do ACR pode ser obtida com um comando do AZ CLI: `az acr credential show -n shipmanager --query "passwords[0].value" -o tsv` e deve ser colocada em outro secret chamado `ACR_PASSWORD`.
 

@@ -206,7 +206,7 @@ describe('local context with it', () => {
 })
 ```
 
-The big advantage (and the reason I recommend using the local context **always**) is that when a test finishes, it automatically cleans up and removes the mock, so one mock never interferes with another.<MarginNote>**Fun Fact:** We ran into this problem during one of the livestreams in our [Formação TS](https://formacaots.com.br?utm_source=personal-blog&utm_medium=post&utm_campaign=ntr-mocks&utm_id=fixed) community. While building the testing module with the Node.js Test Runner, we accidentally created a global mock that ended up interfering with every test in the project.</MarginNote>
+The big advantage (and the reason I recommend using the local context **always**) is that when a test finishes, it automatically cleans up and removes the mock, so one mock never interferes with another.<Sidenote>**Fun Fact:** We ran into this problem during one of the livestreams in our [Formação TS](https://formacaots.com.br?utm_source=personal-blog&utm_medium=post&utm_campaign=ntr-mocks&utm_id=fixed) community. While building the testing module with the Node.js Test Runner, we accidentally created a global mock that ended up interfering with every test in the project.</Sidenote>
 
 ## Conclusion
 

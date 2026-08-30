@@ -123,7 +123,7 @@ az role assignment create \
   --scope $AKSID
 ```
 
-Vamos adicionar um novo usuário chamado Alice a este grupo que acabamos de criar, vamos então copiar o ObjectID quando criarmos:<MarginNote>Quando criarmos um usuário precisamos de um domínio **válido**. Para obter este domínio podemos executar `az ad user list --query "[*].userPrincipalName" -o json` e copiar tudo o que vier depois do "@".</MarginNote>
+Vamos adicionar um novo usuário chamado Alice a este grupo que acabamos de criar, vamos então copiar o ObjectID quando criarmos:<Sidenote>Quando criarmos um usuário precisamos de um domínio **válido**. Para obter este domínio podemos executar `az ad user list --query "[*].userPrincipalName" -o json` e copiar tudo o que vier depois do "@".</Sidenote>
 
 ```bash
 ALICE=$(az ad user create \

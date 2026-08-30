@@ -95,7 +95,7 @@ Some Lua programming is almost always necessary, and often required. In other ca
 
 ### LSPs
 
-The biggest problem I had was setting up the LSPs. The default configs for most languages I use are fine, but I ran into a conflict between Node and Deno. Since both use the same language but have different key files, I had to write a function to check whether the repo was a Deno or Node repo and avoid having both the Node and Deno LSP running on the same file.<MarginNote>LSPs are [Language Server Protocols](https://en.wikipedia.org/wiki/Language_Server_Protocol), a protocol created by Microsoft to let an editor connect to a service that holds the language's intelligence separately, independent of the editor, to provide things like completions, intellisense, and so on in a distributed way.</MarginNote>
+The biggest problem I had was setting up the LSPs. The default configs for most languages I use are fine, but I ran into a conflict between Node and Deno. Since both use the same language but have different key files, I had to write a function to check whether the repo was a Deno or Node repo and avoid having both the Node and Deno LSP running on the same file.<Sidenote>LSPs are [Language Server Protocols](https://en.wikipedia.org/wiki/Language_Server_Protocol), a protocol created by Microsoft to let an editor connect to a service that holds the language's intelligence separately, independent of the editor, to provide things like completions, intellisense, and so on in a distributed way.</Sidenote>
 
 ![](./image-5.png "Function to tell Deno and Node apart")
 

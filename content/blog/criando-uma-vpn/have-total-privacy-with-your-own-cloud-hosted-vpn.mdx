@@ -55,7 +55,7 @@ Less important than that, but still worth mentioning, is the ability you'll have
 
 The biggest use of VPNs today is unfortunately not to protect yourself from prying eyes, but to change your geographic location so you appear to be in other countries, breaking some Geo-IP locks that some sites have, that stop you from consuming content meant for a specific country, for example.
 
-While it's possible to create a server using cloud providers like [Azure](https://azure.microsoft.com/?WT.mc_id=cxa-0000-ludossan), which provide several virtual machines in various locations around the world, the cost of creating a VPN server in each region is still extremely high compared to the cost of hiring a ready-made VPN service, like NordVPN or TunnelBear. Although it's completely possible if you're willing to spend a few hundred reais a month.<MarginNote>You can also create several servers and leave them deallocated (stopped), which uses a lot fewer resources and costs a lot less, turning the server on only when you're going to use it or scheduling an automatic shutdown.</MarginNote>
+While it's possible to create a server using cloud providers like [Azure](https://azure.microsoft.com/?WT.mc_id=cxa-0000-ludossan), which provide several virtual machines in various locations around the world, the cost of creating a VPN server in each region is still extremely high compared to the cost of hiring a ready-made VPN service, like NordVPN or TunnelBear. Although it's completely possible if you're willing to spend a few hundred reais a month.<Sidenote>You can also create several servers and leave them deallocated (stopped), which uses a lot fewer resources and costs a lot less, turning the server on only when you're going to use it or scheduling an automatic shutdown.</Sidenote>
 
 ## Creating your own VPN
 
@@ -138,7 +138,7 @@ ssh-keygen -t rsa -b 4096
 
 Press ENTER when asked where you want to save the key to save it in the default directory (which is usually `~/.ssh`), otherwise select a location where you'll have access to keep your keys (you might run into problems later if you don't put it in the default directory).<Sidenote>You'll be asked for a passphrase for your key, it's completely optional, but it adds an extra layer of security, feel free to add one if you want.</Sidenote>
 
-Let's log in to the server to make the changes, for that just use the command:<MarginNote>Remember that the user is the same user you set when you created the server, and the IP is the public IP address that shows up as a link on your VM panel in Azure.</MarginNote>
+Let's log in to the server to make the changes, for that just use the command:<Sidenote>Remember that the user is the same user you set when you created the server, and the IP is the public IP address that shows up as a link on your VM panel in Azure.</Sidenote>
 
 ```bash
 ssh usuario@ip
@@ -289,7 +289,7 @@ At the end of the installation process, you'll get a `.ovpn` config file. This f
 
 Lastly, let's do what most VPN services don't do, which is **disable logging**.
 
-To do that let's open the OpenVPN config file with:<MarginNote>Remember `vim` can be any editor.</MarginNote>
+To do that let's open the OpenVPN config file with:<Sidenote>Remember `vim` can be any editor.</Sidenote>
 
 ```bash
 sudo vim /etc/openvpn/server/server.conf
@@ -312,7 +312,7 @@ sudo mv /root/nomedoarquivo.ovpn ~
 sudo chown novousuario nomedoarquivo.ovpn
 ```
 
-Now let's download the file. To do that, go to a local terminal and open an `sftp` connection to your VPN server with the command `sftp minhavpn` (or whatever name you gave your alias), then run the following commands:<MarginNote>Keep in mind you can access it through other means too, sftp is just one of them, but you can use `scp` or even SFTP clients like FileZilla.</MarginNote>
+Now let's download the file. To do that, go to a local terminal and open an `sftp` connection to your VPN server with the command `sftp minhavpn` (or whatever name you gave your alias), then run the following commands:<Sidenote>Keep in mind you can access it through other means too, sftp is just one of them, but you can use `scp` or even SFTP clients like FileZilla.</Sidenote>
 
 ```sftp
 get nomedoarquivo.ovpn pasta/de/destino

@@ -20,7 +20,7 @@ In some [previous](/tsx-loader/) editions, I said it was possible to run TypeScr
 
 What happens is that we can use _loaders_. Loaders are special hooks that let us change the behavior of the native _module loader_, used whenever we load any [ESM](/os-ecmascript-modules-estao-aqui/) module. These loaders are pretty powerful because, among other things, they let us act directly on the code that gets loaded into memory. Which is exactly how **TSX** behaves.
 
-But now that's no longer necessary! Starting with [Node 22.6](https://nodejs.org/en/blog/release/v22.6.0), two new experimental flags were added:<MarginNote>The funny thing here is that this flag's name was supposed to be `enable-transformation`, and I [suggested](https://github.com/nodejs/node/pull/54283#discussion_r1711462259) we change it to something like `enable-type-transformation` to keep the semantics right.</MarginNote>
+But now that's no longer necessary! Starting with [Node 22.6](https://nodejs.org/en/blog/release/v22.6.0), two new experimental flags were added:<Sidenote>The funny thing here is that this flag's name was supposed to be `enable-transformation`, and I [suggested](https://github.com/nodejs/node/pull/54283#discussion_r1711462259) we change it to something like `enable-type-transformation` to keep the semantics right.</Sidenote>
 
 -   `--experimental-strip-types`: This takes a TS file and completely strips out any type annotation that exists in it. It's the simplest form of transpiling, just removing what isn't native JavaScript. It's worth saying that features requiring code transformation, like `enum` and `namespace`, will **not** work.
 -   `--experimental-transform-types`: This implies the previous flag will be active too, meaning if you pass this flag, the other one gets passed automatically. And it enables type transformation, so we can use features that weren't enabled before, essentially giving us near complete TypeScript support.
@@ -65,7 +65,7 @@ Since version 23, whenever any code gets imported, there's basically a [check](h
 
 ## Getting the best TS experience with Node
 
-As much as Node tried to support every native TypeScript setting, it was never going to support `tsconfig` natively (as [Marco Ippolito's article](https://satanacchio.hashnode.dev/everything-you-need-to-know-about-nodejs-type-stripping#heading-why-typescript) already pointed out), and it wouldn't even make sense for it to. So, a few settings are necessary to line up how TypeScript works with how Node.js works.<MarginNote>You can also check out the [Node docs article](https://nodejs.org/api/typescript.html) about this change.</MarginNote>
+As much as Node tried to support every native TypeScript setting, it was never going to support `tsconfig` natively (as [Marco Ippolito's article](https://satanacchio.hashnode.dev/everything-you-need-to-know-about-nodejs-type-stripping#heading-why-typescript) already pointed out), and it wouldn't even make sense for it to. So, a few settings are necessary to line up how TypeScript works with how Node.js works.<Sidenote>You can also check out the [Node docs article](https://nodejs.org/api/typescript.html) about this change.</Sidenote>
 
 First of all, you need to set your `tsconfig` to use `esnext` as the `target` and `nodenext` as the `module`:
 

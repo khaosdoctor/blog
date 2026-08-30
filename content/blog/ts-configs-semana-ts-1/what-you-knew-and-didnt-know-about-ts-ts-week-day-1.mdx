@@ -47,7 +47,7 @@ Today TS is one of the most used tools in the world and one of the most loved by
 
 Now that we have the context of where it came from, let's understand the **why** behind its existence.
 
-During my career I've worked on small and large projects using JavaScript. The language itself isn't the problem, in fact, a lot of these projects were only possible because JavaScript is much simpler than other languages. The biggest problem by far is the scalability of these applications, which is a direct reflection of JavaScript having _dynamic typing_.<MarginNote>I've already talked a bit about static and dynamic typing in [my article series about Node.js under the hood](https://dev.to/_staticvoid/series/2080)</MarginNote>
+During my career I've worked on small and large projects using JavaScript. The language itself isn't the problem, in fact, a lot of these projects were only possible because JavaScript is much simpler than other languages. The biggest problem by far is the scalability of these applications, which is a direct reflection of JavaScript having _dynamic typing_.<Sidenote>I've already talked a bit about static and dynamic typing in [my article series about Node.js under the hood](https://dev.to/_staticvoid/series/2080)</Sidenote>
 
 Let's show some code. Imagine you have this application using Express with Node.js:
 
@@ -91,7 +91,7 @@ TypeScript is written in TypeScript (how poetic) and published on NPM as a packa
 
 > Always remember to add the `-D` flag, because TypeScript **isn't** a package that should go to production
 
-To help even more, we can install all of Node.js's typings, so TS will know everything about the environment we're running in. We can do that with the command `npm install -D @types/node`<MarginNote>`@types` is the scope of an organization called [DefinitelyTyped](https://github.com/definitelytyped) that holds types for lots of famous packages. We'll talk more about it in the coming days.</MarginNote>
+To help even more, we can install all of Node.js's typings, so TS will know everything about the environment we're running in. We can do that with the command `npm install -D @types/node`<Sidenote>`@types` is the scope of an organization called [DefinitelyTyped](https://github.com/definitelytyped) that holds types for lots of famous packages. We'll talk more about it in the coming days.</Sidenote>
 
 #### Compiling
 

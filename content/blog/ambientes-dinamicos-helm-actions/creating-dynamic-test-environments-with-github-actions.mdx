@@ -737,7 +737,7 @@ jobs:
 
 Now that we've got the pipelines created, let's go to GitHub and create our secrets! Open the repository in your browser, navigate to the `Settings` tab and then `secrets`, then click `New repository secret` to create a new local secret.
 
-Let's create a secret called `ACR_LOGIN`, which is the name of our ACR: `shipmanager`. Another one called `ACR_NAME`, which isn't really a secret since it's just our CR's DNS, but this way we avoid a hardcoded value in our action. This value is `shipmanager.azurecr.io`.<MarginNote>Both pieces of information can be found in the Azure portal. Once you know the ACR name, the login is the same and the DNS is always `<name>.azurecr.io`</MarginNote>
+Let's create a secret called `ACR_LOGIN`, which is the name of our ACR: `shipmanager`. Another one called `ACR_NAME`, which isn't really a secret since it's just our CR's DNS, but this way we avoid a hardcoded value in our action. This value is `shipmanager.azurecr.io`.<Sidenote>Both pieces of information can be found in the Azure portal. Once you know the ACR name, the login is the same and the DNS is always `<name>.azurecr.io`</Sidenote>
 
 The ACR password can be grabbed with an AZ CLI command: `az acr credential show -n shipmanager --query "passwords[0].value" -o tsv`, and it should go into another secret called `ACR_PASSWORD`.
 

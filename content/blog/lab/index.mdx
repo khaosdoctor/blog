@@ -147,7 +147,7 @@ Uma separação visual entre duas partes do texto que não merecem um título no
 
 ## Notas de rodapé
 
-Uma nota de rodapé para a fonte de uma afirmação, ou para um detalhe que interromperia a frase. Ela vira um link para o pé da página, com um link de volta.
+Uma nota de rodapé para a fonte de uma afirmação, ou para um detalhe que interromperia a frase. Ela vira um link para o pé da página, com um link de volta. A marca é numerada, `[1]`, contra a letra que a `Sidenote` usa.
 
 ```markdown
 Uma afirmação que precisa de fonte.[^1]
@@ -467,15 +467,13 @@ https://news.lsantos.dev
 
 ## Notas na margem
 
-Uma `Sidenote` é numerada e ancorada na palavra que ela segue. Uma `MarginNote` é igual, mas sem número. As duas aceitam só conteúdo inline: texto, negrito, itálico, links e código.
+Uma `Sidenote` é marcada com uma letra e ancorada na palavra que ela segue. A contagem vai de `[a]` a `[z]` e continua em `[aa]`, como uma coluna de planilha, para não se confundir com o `[1]` das notas de rodapé. Aceita só conteúdo inline: texto, negrito, itálico, links e código.
 
 ```mdx
-Alguma afirmação no texto.<Sidenote>Uma nota numerada, na margem.</Sidenote>
-
-Outra frase.<MarginNote>Igual, mas sem número.</MarginNote>
+Alguma afirmação no texto.<Sidenote>Uma nota na margem.</Sidenote>
 ```
 
-Toda abstração vaza.<Sidenote>Uma nota numerada, que fica na margem em telas largas e vira um popover em telas estreitas, sem JavaScript nos dois casos. Aceita **negrito**, `código` e [links](https://blog.lsantos.dev).</Sidenote> E esta segunda frase carrega uma nota sem número.<MarginNote>Igual à de cima, mas sem a marca numerada no meio do texto.</MarginNote>
+Toda abstração vaza.<Sidenote>Uma nota que fica na margem em telas largas e vira um popover em telas estreitas, sem JavaScript nos dois casos. Aceita **negrito**, `código` e [links](https://blog.lsantos.dev).</Sidenote> E esta segunda frase carrega outra.<Sidenote>Igual à de cima, uma letra adiante na contagem.</Sidenote>
 
 ## Ênfase
 

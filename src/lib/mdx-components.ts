@@ -2,7 +2,6 @@ import { Vimeo, YouTube } from 'astro-embed'
 import Bookmark from '../components/Bookmark.astro'
 import HtmlLab from '../components/HtmlLab.astro'
 import LabDemo from '../components/LabDemo.astro'
-import MarginNote from '../components/MarginNote.astro'
 import MissingImage from '../components/MissingImage.astro'
 import RawEmbed from '../components/RawEmbed.astro'
 import Sidenote from '../components/Sidenote.astro'
@@ -16,7 +15,6 @@ export const mdxComponents = {
   Bookmark,
   HtmlLab,
   LabDemo,
-  MarginNote,
   MissingImage,
   RawEmbed,
   Sidenote,

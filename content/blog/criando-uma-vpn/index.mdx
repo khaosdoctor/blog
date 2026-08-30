@@ -54,7 +54,7 @@ Menos importante do que isso também, é a capacidade que você terá de permiti
 
 O maior uso de VPNs atualmente infelizmente não é para se proteger de olhos alheios, mas sim para poder trocar a sua localização geográfica de forma que você aparentará estar em outros países, quebrando assim algumas travas de Geo-IP que alguns sites possuem, que impedem você de consumir algum conteúdo que será destinado a um país específico, por exemplo.
 
-Enquanto é possível criar um servidor utilizando provedores de cloud como a [Azure](https://azure.microsoft.com/?WT.mc_id=cxa-0000-ludossan), que providenciam várias máquinas virtuais em diversos locais do mundo, ainda sim o custo que você terá para criar um servidor de VPN em cada região é extremamente alto comparado ao custo de você contratar um serviço de VPN pronto, como a NordVPN ou a TunnelBear. Embora seja completamente possível se você estiver disposto a gastar algumas centenas de reais por mês.<MarginNote>Você também pode criar diversos servidores e deixar os mesmos desalocados (parados), o que consome muito menos recursos e gasta muito menos, ligando o servidor somente quando for utilizar ou agendando um auto desligamento.</MarginNote>
+Enquanto é possível criar um servidor utilizando provedores de cloud como a [Azure](https://azure.microsoft.com/?WT.mc_id=cxa-0000-ludossan), que providenciam várias máquinas virtuais em diversos locais do mundo, ainda sim o custo que você terá para criar um servidor de VPN em cada região é extremamente alto comparado ao custo de você contratar um serviço de VPN pronto, como a NordVPN ou a TunnelBear. Embora seja completamente possível se você estiver disposto a gastar algumas centenas de reais por mês.<Sidenote>Você também pode criar diversos servidores e deixar os mesmos desalocados (parados), o que consome muito menos recursos e gasta muito menos, ligando o servidor somente quando for utilizar ou agendando um auto desligamento.</Sidenote>
 
 ## Criando sua própria VPN
 
@@ -137,7 +137,7 @@ ssh-keygen -t rsa -b 4096
 
 Pressione ENTER quando for perguntado aonde você quer salvar a chave para salvar no diretório padrão (que é geralmente `~/.ssh`), se não selecione um local aonde você terá acesso para deixar as suas chaves (você pode ter problemas no futuro se não colocar no diretório padrão).<Sidenote>Você será questionado por uma senha na sua chave, ela é completamente opcional, mas adiciona um nível extra de segurança, se quiser adicionar, pode ficar a vontade.</Sidenote>
 
-Vamos logar no servidor para poder realizar as alterações, para isso é só utilizar o comando:<MarginNote>Lembrando que o usuário é o mesmo usuário que você colocou quando criou o servidor, e o IP é o endereço de IP público que aparece como um link no seu painel da VM na Azure.</MarginNote>
+Vamos logar no servidor para poder realizar as alterações, para isso é só utilizar o comando:<Sidenote>Lembrando que o usuário é o mesmo usuário que você colocou quando criou o servidor, e o IP é o endereço de IP público que aparece como um link no seu painel da VM na Azure.</Sidenote>
 
 ```bash
 ssh usuario@ip
@@ -288,7 +288,7 @@ No final do processo de instalação, você vai obter um arquivo `.ovpn` de conf
 
 Por fim, vamos fazer o que a maioria dos serviços de VPN não fazem, que é **desativar os logs**.
 
-Para isso vamos acessar o arquivo de configuração do OpenVPN com:<MarginNote>Lembrando que o `vim` pode ser qualquer editor.</MarginNote>
+Para isso vamos acessar o arquivo de configuração do OpenVPN com:<Sidenote>Lembrando que o `vim` pode ser qualquer editor.</Sidenote>
 
 ```bash
 sudo vim /etc/openvpn/server/server.conf
@@ -311,7 +311,7 @@ sudo mv /root/nomedoarquivo.ovpn ~
 sudo chown novousuario nomedoarquivo.ovpn
 ```
 
-Vamos agora baixar o arquivo. Para isso, vá em um terminal local e abra uma conexão `sftp` com o seu servidor de VPN através do comando `sftp minhavpn` (ou qualquer que seja o nome que você colocou no seu alias), depois execute os seguintes comandos:<MarginNote>Lembrando que você pode acessar por outros meios também, o sftp é só um deles, mas você pode usar o `scp` ou até mesmo clientes de SFTP como o FileZilla.</MarginNote>
+Vamos agora baixar o arquivo. Para isso, vá em um terminal local e abra uma conexão `sftp` com o seu servidor de VPN através do comando `sftp minhavpn` (ou qualquer que seja o nome que você colocou no seu alias), depois execute os seguintes comandos:<Sidenote>Lembrando que você pode acessar por outros meios também, o sftp é só um deles, mas você pode usar o `scp` ou até mesmo clientes de SFTP como o FileZilla.</Sidenote>
 
 ```sftp
 get nomedoarquivo.ovpn pasta/de/destino

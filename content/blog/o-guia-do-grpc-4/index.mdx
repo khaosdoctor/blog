@@ -108,7 +108,7 @@ Por esse motivo, streams são muito utilizadas com arquivos e dados de grande po
 
 Como é tão simples de utilizar streams no gRPC, já era de se esperar que o suporte a elas no protocolo fosse muito bom. E isso é, de fato o que acontece, o suporte a streams no gRPC um dos melhores existentes e integram com quase todas as linguagens suportadas.
 
-Para esta demonstração, vamos utilizar a mesma aplicação [que usamos no artigo número 2](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), e vamos fazer algumas alterações sobre ela para transformar uma chamada unária em uma chamada assíncrona.<MarginNote>O código desta demonstração está [no meu GitHub](https://github.com/khaosdoctor/grpc-guide-part-4-sample)</MarginNote>
+Para esta demonstração, vamos utilizar a mesma aplicação [que usamos no artigo número 2](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), e vamos fazer algumas alterações sobre ela para transformar uma chamada unária em uma chamada assíncrona.<Sidenote>O código desta demonstração está [no meu GitHub](https://github.com/khaosdoctor/grpc-guide-part-4-sample)</Sidenote>
 
 Vamos começar de uma base, clonamos o repositório original do artigo 2 para podermos ter a aplicação completa. A primeira coisa que precisamos fazer é trocar o nosso arquivo `.proto` para adicionar uma stream ao serviço de listagem de notas.
 

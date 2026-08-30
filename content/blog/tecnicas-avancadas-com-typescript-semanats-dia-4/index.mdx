@@ -148,7 +148,7 @@ Junto com as assertion functions, os type guards são as formas mais seguras de 
 
 ## Enums
 
-Enumeradores estão presentes na maioria das linguagens de programação que são estaticamente tipadas desde sempre. Porém eles [ainda não são uma realidade no JavaScript](https://github.com/rbuckton/proposal-enum). O TS implementa o padrão de enumerador, e eles não são considerados uma técnica avançada, mas saber quando usar enums e quando não usar sim.<MarginNote>Meu ex colega de empresa, Robin Pokorny, tem [um artigo muito bom](https://robinpokorny.com/blog/typescript-enums-i-want-to-actually-use/) sobre isso no blog dele, vou tentar resumir esse ponto com minhas opiniões, mas vale a leitura.</MarginNote>
+Enumeradores estão presentes na maioria das linguagens de programação que são estaticamente tipadas desde sempre. Porém eles [ainda não são uma realidade no JavaScript](https://github.com/rbuckton/proposal-enum). O TS implementa o padrão de enumerador, e eles não são considerados uma técnica avançada, mas saber quando usar enums e quando não usar sim.<Sidenote>Meu ex colega de empresa, Robin Pokorny, tem [um artigo muito bom](https://robinpokorny.com/blog/typescript-enums-i-want-to-actually-use/) sobre isso no blog dele, vou tentar resumir esse ponto com minhas opiniões, mas vale a leitura.</Sidenote>
 
 Existem diversas pessoas que são contra e outras a favor do uso de enums, eu particularmente gosto bastante de usá-los, mas temos que concordar que eles possuem desvantagens, principalmente por serem **o único construto do TS que gera um código JavaScript**. Isso mesmo, se você escrever um enum como esse:
 

@@ -183,7 +183,7 @@ A não ser que a pessoa que esteja usando essa função passe o argumento de ret
 
 O não-tipo. O tipo `never` é o tipo que não representa nenhum tipo, ele não pode ser intersectado ou unido com ninguém, ele é ele mesmo e representa o resultado de uma operação que nunca pode acontecer, ou seja, se você chegou no fim de um caso, recursão ou qualquer outra coisa, o `never` é seu amigo porque ele impede que este retorno seja misturado com qualquer outra coisa.
 
-Os usos mais comuns do `never` são para indicar caminhos que uma função não pode percorrer, ou seja, formas que ela não pode ser usada.<MarginNote>O `never` é bem mais comum em bibliotecas e outras tipagens que são estendidas por outras pessoas, raramente você vai ter que usar manualmente em um código de produção.</MarginNote>
+Os usos mais comuns do `never` são para indicar caminhos que uma função não pode percorrer, ou seja, formas que ela não pode ser usada.<Sidenote>O `never` é bem mais comum em bibliotecas e outras tipagens que são estendidas por outras pessoas, raramente você vai ter que usar manualmente em um código de produção.</Sidenote>
 
 Um exemplo, é o uso de `never` para fazer uma divisão onde o denominador é zero e não queremos que isso aconteça. Então se tivermos uma função desse tipo:
 

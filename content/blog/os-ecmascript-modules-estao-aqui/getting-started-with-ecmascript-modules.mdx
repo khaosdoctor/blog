@@ -10,7 +10,7 @@ description: "ES Modules are the next generation of module imports in JavaScript
 machineTranslated: true
 draft: false
 ---
-It's been a while since we started hearing about the availability of ECMAScript Modules in our JavaScript packages and code. Even though the model has been supported across the web through a `<script type="module">` tag for some time now, it's only now, with the official deprecation of Node 10 in favor of Node 16, that we get full support for it on the server too!<MarginNote>Check an example of ESM module usage in the browser [in this repository](https://github.com/khaosdoctor/js-containerd-example/tree/main/child-process/static)</MarginNote>
+It's been a while since we started hearing about the availability of ECMAScript Modules in our JavaScript packages and code. Even though the model has been supported across the web through a `<script type="module">` tag for some time now, it's only now, with the official deprecation of Node 10 in favor of Node 16, that we get full support for it on the server too!<Sidenote>Check an example of ESM module usage in the browser [in this repository](https://github.com/khaosdoctor/js-containerd-example/tree/main/child-process/static)</Sidenote>
 
 ## A bit of history
 
@@ -58,7 +58,7 @@ import foo from './foo.js'
 
 This means the resolution system doesn't have to guess what type of file we're trying to import, since with `require()` we could import several file types besides `.js`, like JSON. Which brings us to the second big change: a lot of the file types that used to be supported through direct import now need to be read via `fs.promises.readFile`.
 
-For example, when we wanted to import a JSON file directly, we could run a `require('file.json')`. Now we no longer have that capability, and we need to use the file reading module to natively read the JSON.<MarginNote>There's still an experimental API to enable this functionality in Node.js, but it comes disabled by default. Read more about it [here](https://nodejs.org/api/esm.html#esm_json_modules)</MarginNote>
+For example, when we wanted to import a JSON file directly, we could run a `require('file.json')`. Now we no longer have that capability, and we need to use the file reading module to natively read the JSON.<Sidenote>There's still an experimental API to enable this functionality in Node.js, but it comes disabled by default. Read more about it [here](https://nodejs.org/api/esm.html#esm_json_modules)</Sidenote>
 
 So, to import a JSON as an object you can do it like this:
 

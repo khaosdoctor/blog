@@ -12,7 +12,7 @@ draft: false
 ---
 One of the oldest features of JavaScript is what we call **timer APIs**. And what they do is pretty straightforward: they let us schedule a piece of code to run in the future.
 
-These APIs are pretty well known by the commands `setTimeout`, `setImmediate` and `setInterval`. And even though they're used to schedule the execution of a given piece of code, we can often take advantage of this kind of API to turn synchronous operations into asynchronous ones, avoiding blocking the main thread and the event loop.<MarginNote>We'll have a dedicated article just to cover the event loop in Node.js and all the nuances that timers apply to it. For now, that content already exists in [my series of articles about how Node.js works internally](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-3-um-mergulho-no-event-loop-38l9), which is worth checking out.</MarginNote>
+These APIs are pretty well known by the commands `setTimeout`, `setImmediate` and `setInterval`. And even though they're used to schedule the execution of a given piece of code, we can often take advantage of this kind of API to turn synchronous operations into asynchronous ones, avoiding blocking the main thread and the event loop.<Sidenote>We'll have a dedicated article just to cover the event loop in Node.js and all the nuances that timers apply to it. For now, that content already exists in [my series of articles about how Node.js works internally](https://dev.to/khaosdoctor/node-js-por-baixo-dos-panos-3-um-mergulho-no-event-loop-38l9), which is worth checking out.</Sidenote>
 
 ## Why are we talking about timers?
 

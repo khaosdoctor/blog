@@ -184,7 +184,7 @@ Unless the person using that function passes in the return argument, the output 
 
 The non-type. The `never` type is the type that represents no type at all, it can't be intersected or unioned with anything, it just is what it is, and it represents the result of an operation that can never happen. So, if you've reached the end of a case, a recursion, or anything else, `never` is your friend because it stops that return from being mixed with anything else.
 
-The most common uses of `never` are to flag paths a function can't take, meaning ways it can't be used.<MarginNote>`never` is much more common in libraries and other typings that get extended by other people, you'll rarely have to use it by hand in production code.</MarginNote>
+The most common uses of `never` are to flag paths a function can't take, meaning ways it can't be used.<Sidenote>`never` is much more common in libraries and other typings that get extended by other people, you'll rarely have to use it by hand in production code.</Sidenote>
 
 One example is using `never` to handle a division where the denominator is zero and we don't want that to happen. So if we have a function like this:
 

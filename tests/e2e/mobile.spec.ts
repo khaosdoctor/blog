@@ -189,16 +189,15 @@ test.describe('hover previews on touch', () => {
   })
 })
 
-/** An unnumbered note has no number to press, so the underlined sentence is the target. */
-test.describe('unnumbered notes on touch', () => {
+test.describe('notes on touch', () => {
   test.use({ viewport: { width: 360, height: 780 }, hasTouch: true, isMobile: true })
 
-  test('the underlined sentence opens the note as a panel at the bottom edge', async ({ page }) => {
+  test('the marker opens the note as a panel at the bottom edge', async ({ page }) => {
     await page.goto('/lab/')
-    const toggle = page.locator('#marginnote-1 .note-toggle')
-    const panel = page.locator('#marginnote-1 .note-text')
+    const toggle = page.locator('#sidenote-1 .note-toggle')
+    const panel = page.locator('#sidenote-1 .note-text')
 
-    await page.locator('.note-sentence').first().tap()
+    await page.locator('#sidenote-1 .note-marker').tap()
     await expect(toggle).toBeChecked()
 
     // Polled: the panel is mid-slide right after the tap.

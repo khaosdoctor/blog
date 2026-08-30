@@ -18,7 +18,7 @@ Bom, enquanto a ideia de rodar nativamente TS, sem um processo de compilação, 
 
 Os loaders são funções que atuam como ganchos entre a leitura de um módulo e e a execução do mesmo, por exemplo, muita gente está acostumada a usar o `ts-node` ou o `ts-node-dev`.
 
-Ambos esses pacotes são loaders, eles recebem os arquivos que serão carregados pelo runtime e podem realizar ações sobre eles, no nosso caso, a ação é compilar o arquivo de TypeScript para JavaScript.<MarginNote>Você pode ver mais sobre essa funcionalidade [na documentação oficial](https://nodejs.org/api/module.html#transpilation), inclusive, usando o próprio exemplo da transpilação.</MarginNote>
+Ambos esses pacotes são loaders, eles recebem os arquivos que serão carregados pelo runtime e podem realizar ações sobre eles, no nosso caso, a ação é compilar o arquivo de TypeScript para JavaScript.<Sidenote>Você pode ver mais sobre essa funcionalidade [na documentação oficial](https://nodejs.org/api/module.html#transpilation), inclusive, usando o próprio exemplo da transpilação.</Sidenote>
 
 Um loader então pode escolher qual é o arquivo que ele vai trabalhar, no nosso caso o `.ts`, e ai realizar uma ação sobre ele que, no caso, vai ser transpilar para JavaScript e mandar para o Node avaliar o código.
 

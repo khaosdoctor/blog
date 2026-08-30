@@ -29,7 +29,7 @@ Most clusters already ship with RBAC enabled by default, but you can start a new
 
 ### Naming
 
-In RBAC, users are called _**subjects**_, and the APIs and resources that users may or may not have access to are called **_resources_**. We also have _**verbs**_, which are the actions and operations that can be run on a **_resource_** by a **_subject_**.<MarginNote>Verbs are basically the calls a user can make against a given resource. For example, creating a Pod is the **verb** `create` on the **resource** `Pod`, done by the user.</MarginNote>
+In RBAC, users are called _**subjects**_, and the APIs and resources that users may or may not have access to are called **_resources_**. We also have _**verbs**_, which are the actions and operations that can be run on a **_resource_** by a **_subject_**.<Sidenote>Verbs are basically the calls a user can make against a given resource. For example, creating a Pod is the **verb** `create` on the **resource** `Pod`, done by the user.</Sidenote>
 
 ## Roles and ClusterRoles
 
@@ -139,7 +139,7 @@ rules:
 
 ### Creating ClusterRoles
 
-For the Role that will apply to Thiago, we need to let him read and list any resource in any namespace of the cluster. That would be a pain if we tried to do it with a regular Role, so let's create a ClusterRole so it can be applied automatically. We'll call this ClusterRole `readonly`:<MarginNote>Notice that ClusterRoles don't have a `namespace` key.</MarginNote>
+For the Role that will apply to Thiago, we need to let him read and list any resource in any namespace of the cluster. That would be a pain if we tried to do it with a regular Role, so let's create a ClusterRole so it can be applied automatically. We'll call this ClusterRole `readonly`:<Sidenote>Notice that ClusterRoles don't have a `namespace` key.</Sidenote>
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
