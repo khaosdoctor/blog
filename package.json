@@ -23,7 +23,7 @@
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
     "test:e2e": "playwright test",
-    "check": "astro check && npm run check:worker && node scripts/check-i18n.ts && node scripts/check-component-css.ts && node scripts/check-content.ts && node scripts/check-credits.ts",
+    "check": "astro check && npm run check:worker && node scripts/check-i18n.ts && node scripts/check-component-css.ts && node scripts/check-content.ts && node scripts/check-credits.ts && node scripts/check-mdx-cache.ts",
     "check:worker": "tsc -p worker",
     "astro": "astro",
     "cover": "node scripts/cover.ts",
