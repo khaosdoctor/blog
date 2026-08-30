@@ -21,7 +21,7 @@ export function buildPersonJsonLd(url: string): Record<string, unknown> {
   };
 }
 
-// og:locale wants pt_BR style locale tags, not BCP-47 pt-BR.
+// og:locale needs pt_BR style locale tags, not BCP-47 pt-BR.
 const OG_LOCALES: Record<string, string> = {
   pt: "pt_BR",
   en: "en_US",
@@ -31,8 +31,8 @@ export function toOgLocale(lang: string): string {
   return OG_LOCALES[lang] ?? lang;
 }
 
-// Must stay in sync with `public/og/`: one entry per card that exists, so an
-// unlisted section shares the default instead of a PNG nobody drew.
+// Must stay in sync with `public/og/`: one entry per card that exists
+// unlisted section shares the default
 const OG_SECTION_CARDS = [
   "career",
   "infra",
@@ -166,7 +166,7 @@ export function buildBreadcrumbJsonLd(
 }
 
 // JSON.stringify() never escapes `<`, so a value containing `</script` would
-// close the tag it is written into. The escape is lossless for any JSON parser.
+// close the tag it is written into.
 export function toJsonLdScript(data: Record<string, unknown>): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
