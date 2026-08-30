@@ -22,8 +22,8 @@ test.describe('the code language chip', () => {
   // The page theme is deliberately the opposite of the code theme in each case:
   // the two are separate choices and the chip must follow the block.
   for (const [pageTheme, codeTheme, expected] of [
-    ['light', 'dracula', 'oklch(1 0 0)'],
-    ['dark', 'github-light', 'oklch(0 0 0)'],
+    ['light', 'ayu-dark', 'oklch(1 0 0)'],
+    ['dark', 'ayu-light', 'oklch(0 0 0)'],
   ] as const) {
     test(`is ${expected === 'oklch(1 0 0)' ? 'white' : 'black'} on ${codeTheme} over a ${pageTheme} page`, async ({
       page,

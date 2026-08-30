@@ -14,6 +14,9 @@
 
   --ec-tm-markBg: color-mix(in oklab, var(--brand-yellow) var(--cc-marker-fill), transparent);
   --ec-tm-markBrdCol: color-mix(in oklab, var(--brand-yellow) var(--cc-marker-edge), transparent);
+
+  /* Otherwise the plugin's own default stack wins over --dial-face-code. */
+  --ec-codeFontFml: var(--font-mono);
 }
 
 .prose .expressive-code .frame,

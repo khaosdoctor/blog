@@ -51,34 +51,17 @@ export default defineConfig({
       plugins: [pluginLineNumbers(), pluginTokenStyles()],
       // ayu-light/ayu-dark are the default pair (the owner's own words:
       // "default code theme is ayu dark if the theme is dark, ayu light if
-      // the theme is light"), so they lead the list; the rest are the
-      // picker's other options, still grouped by family: GitHub light/dark,
-      // Monokai (dark only, no light variant ships in the Shiki bundle),
-      // Dracula (same, dark only), all four Catppuccin variants, all three
-      // Kanagawa variants (two dark, one light), and Snazzy (the bundle only
-      // ships a light Snazzy, despite the name).
+      // the theme is light"), so they lead the list; github-light/dark-high-contrast
+      // are the picker's other option, a high contrast pair for readers who
+      // want one. Both are genuinely light/dark GitHub themes, verified
+      // against the Shiki bundle's own theme list rather than assumed.
       //
       // This array's order decides the default and nothing else. The order
       // the picker itself lists its options in is CodeTheme.astro's own
-      // static <optgroup>/<option> markup, and code-theme.ts's THEMES array
-      // is only ever asked `includes()`, so moving Ayu to the front here
+      // static <option> markup, and code-theme.ts's THEME_BY_MODE is only
+      // ever asked for one of its two names, so moving Ayu to the front here
       // does not reshuffle the menu a reader sees.
-      themes: [
-        'ayu-light',
-        'ayu-dark',
-        'github-light',
-        'github-dark',
-        'monokai',
-        'dracula',
-        'catppuccin-latte',
-        'catppuccin-frappe',
-        'catppuccin-macchiato',
-        'catppuccin-mocha',
-        'kanagawa-wave',
-        'kanagawa-dragon',
-        'kanagawa-lotus',
-        'snazzy-light',
-      ],
+      themes: ['ayu-light', 'ayu-dark', 'github-light-high-contrast', 'github-dark-high-contrast'],
       // Inline <style> instead of a <link> dropped beside the first code
       // block: that link arrived after first paint and re-laid out every post
       // that has code (measured CLS 0.10 on phones). Inline applies at parse.

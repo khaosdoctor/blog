@@ -12,53 +12,13 @@ const { locale } = Astro.props
   class="ct-settings"
   hidden
   data-label={t(locale, 'codeTheme')}
-  data-auto={t(locale, 'codeThemeAuto')}
-  data-github-light="GitHub Light"
-  data-github-dark="GitHub Dark"
-  data-monokai="Monokai"
-  data-dracula="Dracula"
-  data-catppuccin-latte="Catppuccin Latte"
-  data-catppuccin-frappe="Catppuccin Frappé"
-  data-catppuccin-macchiato="Catppuccin Macchiato"
-  data-catppuccin-mocha="Catppuccin Mocha"
-  data-kanagawa-wave="Kanagawa Wave"
-  data-kanagawa-dragon="Kanagawa Dragon"
-  data-kanagawa-lotus="Kanagawa Lotus"
-  data-ayu-light="Ayu Light"
-  data-ayu-dark="Ayu Dark"
-  data-snazzy-light="Snazzy"
+  data-normal={t(locale, 'codeThemeNormal')}
+  data-high-contrast={t(locale, 'codeThemeHighContrast')}
 >
   <label for="ct-theme"></label>
   <select id="ct-theme">
-    <option value="auto"></option>
-    <optgroup label="GitHub">
-      <option value="github-light"></option>
-      <option value="github-dark"></option>
-    </optgroup>
-    <optgroup label="Monokai">
-      <option value="monokai"></option>
-    </optgroup>
-    <optgroup label="Dracula">
-      <option value="dracula"></option>
-    </optgroup>
-    <optgroup label="Catppuccin">
-      <option value="catppuccin-latte"></option>
-      <option value="catppuccin-frappe"></option>
-      <option value="catppuccin-macchiato"></option>
-      <option value="catppuccin-mocha"></option>
-    </optgroup>
-    <optgroup label="Kanagawa">
-      <option value="kanagawa-wave"></option>
-      <option value="kanagawa-dragon"></option>
-      <option value="kanagawa-lotus"></option>
-    </optgroup>
-    <optgroup label="Ayu">
-      <option value="ayu-light"></option>
-      <option value="ayu-dark"></option>
-    </optgroup>
-    <optgroup label="Snazzy">
-      <option value="snazzy-light"></option>
-    </optgroup>
+    <option value="normal"></option>
+    <option value="high-contrast"></option>
   </select>
 </p>
 

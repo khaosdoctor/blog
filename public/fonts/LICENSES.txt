@@ -1,11 +1,11 @@
 Fonts served from this folder, and what each one obliges us to do.
 
-Four of these are applied to the site: Departure Mono (the default face, and every
-header, button and control), PxPlus IBM VGA8 (subtitles), Literata (body text) and
-Atkinson Hyperlegible (the settings panel's other reading font). The rest are still
-served because the archived bench at /theme-lab-arquivo/ renders every one of them
-at a real size, so deleting a file costs that page a specimen. A licence note only
-leaves here when its font file does.
+Five of these are applied to the site: Departure Mono (the default face, and every
+header, button and control), PxPlus IBM VGA8 (subtitles), Literata (body text),
+Atkinson Hyperlegible (the settings panel's other reading font) and Cascadia Code
+(code blocks). The rest are still served because the archived bench at
+/theme-lab-arquivo/ renders every one of them at a real size, so deleting a file
+costs that page a specimen. A licence note only leaves here when its font file does.
 
 --------------------------------------------------------------------------------
 SIL Open Font License 1.1 (OFL)
@@ -66,6 +66,11 @@ font file.
   AtkinsonHyperlegible-700.woff2 https://fonts.google.com/specimen/Atkinson+Hyperlegible
                                 Designed for maximum letterform distinction, commissioned
                                 for low-vision readers.
+
+  CascadiaCode-400.woff2        Cascadia Code, Microsoft
+                                https://github.com/microsoft/cascadia-code
+                                The ligature variant, not Cascadia Mono: calt substitutes
+                                pairs like => and !== for a single connected glyph.
 
 --------------------------------------------------------------------------------
 Apache License, Version 2.0

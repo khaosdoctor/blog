@@ -47,6 +47,7 @@ const LANGUAGE_NEUTRAL_KEYS = new Set([
   'navTags',
   'accentAuto',
   'copyright',
+  'codeThemeNormal',
 ])
 
 /**

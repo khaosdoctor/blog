@@ -92,7 +92,7 @@
   /* ==========================================================================
    * 3. TYPEFACES
    *
-   * All four are self-hosted in public/fonts. Adding one means a @font-face
+   * All five are self-hosted in public/fonts. Adding one means a @font-face
    * in fonts.css as well as a change here.
    * ======================================================================== */
 
@@ -108,8 +108,9 @@
      only crisp at 16px and whole multiples of it. Size it in px, not rem. */
   --dial-face-subtitle: 'PxPlus IBM VGA8', 'PxPlus IBM VGA8 Fallback', ui-monospace, SFMono-Regular, monospace;
 
-  /* Code, and anything that has to line up in columns. */
-  --dial-face-code: ui-monospace, SFMono-Regular, monospace;
+  /* Code, and anything that has to line up in columns. Ligatures (=>, !==,
+     >=) ship under 'calt', which is on by default: nothing here disables it. */
+  --dial-face-code: 'Cascadia Code', ui-monospace, SFMono-Regular, monospace;
 
   /* ==========================================================================
    * 4. TEXT SIZE AND SPACING

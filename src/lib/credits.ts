@@ -40,6 +40,12 @@ export const fonts: AttributedCredit[] = [
     licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
     author: 'VileR, The Oldschool PC Font Resource',
   },
+  {
+    name: 'Cascadia Code',
+    url: 'https://github.com/microsoft/cascadia-code',
+    license: 'OFL 1.1',
+    author: 'Microsoft',
+  },
 ]
 
 export const icons: AttributedCredit[] = [

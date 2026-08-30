@@ -5,59 +5,53 @@ import { onReady } from './ready'
 const STORAGE_KEY = 'code-theme'
 const ATTR = 'data-code-theme'
 
-const AUTO_LIGHT = 'ayu-light'
-const AUTO_DARK = 'ayu-dark'
+const THEME_BY_MODE = {
+  normal: { light: 'ayu-light', dark: 'ayu-dark' },
+  'high-contrast': { light: 'github-light-high-contrast', dark: 'github-dark-high-contrast' },
+} as const
 
-const THEMES = [
-  'github-light',
-  'github-dark',
-  'monokai',
-  'dracula',
-  'catppuccin-latte',
-  'catppuccin-frappe',
-  'catppuccin-macchiato',
-  'catppuccin-mocha',
-  'kanagawa-wave',
-  'kanagawa-dragon',
-  'kanagawa-lotus',
-  'ayu-light',
-  'ayu-dark',
-  'snazzy-light',
-] as const
+type Mode = keyof typeof THEME_BY_MODE
 
-type ThemeName = (typeof THEMES)[number]
-
-function isThemeName(value: string): value is ThemeName {
-  return (THEMES as readonly string[]).includes(value)
+function isMode(value: string): value is Mode {
+  return value === 'normal' || value === 'high-contrast'
 }
 
 function rawStored(): string | null {
   return readStorage(STORAGE_KEY)
 }
 
-function storedTheme(): ThemeName | null {
+function storedMode(): Mode | null {
   const value = rawStored()
-  return value !== null && isThemeName(value) ? value : null
+  return value !== null && isMode(value) ? value : null
 }
 
-// "Auto" sets no attribute until a site-wide scheme exists; ayu-light is named
-// deliberately, since the generated dark override is scoped to exclude it.
-function applyTheme(theme: ThemeName | null): void {
-  if (theme !== null) {
-    document.documentElement.setAttribute(ATTR, theme)
+function currentMode(): Mode {
+  return storedMode() ?? 'normal'
+}
+
+function osScheme(): 'light' | 'dark' {
+  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+// Normal's ayu pair is expressive-code's own automatic dark-mode pairing (see
+// the themes comment in astro.config.mjs), so leaving the attribute unset
+// when no site-wide scheme is chosen already resolves it through CSS alone.
+// High contrast has no such pairing, so it is named outright either way.
+function applyTheme(mode: Mode): void {
+  const scheme = pageScheme()
+  if (mode === 'normal' && scheme === null) {
+    document.documentElement.removeAttribute(ATTR)
     return
   }
-  const scheme = pageScheme()
-  if (scheme === null) document.documentElement.removeAttribute(ATTR)
-  else document.documentElement.setAttribute(ATTR, scheme === 'dark' ? AUTO_DARK : AUTO_LIGHT)
+  document.documentElement.setAttribute(ATTR, THEME_BY_MODE[mode][scheme ?? osScheme()])
 }
 
 let picker: HTMLSelectElement | null = null
 
 export function resetCodeTheme(): void {
   removeStorage(STORAGE_KEY)
-  applyTheme(null)
-  if (picker !== null) picker.value = 'auto'
+  applyTheme('normal')
+  if (picker !== null) picker.value = 'normal'
 }
 
 function init(): void {
@@ -72,51 +66,38 @@ function init(): void {
   const label = wrapper.querySelector('label')
   if (label) label.textContent = strings.label ?? 'Code theme'
 
-  const captions: Partial<Record<string, string | undefined>> = {
-    auto: strings.auto,
-    'github-light': strings.githubLight,
-    'github-dark': strings.githubDark,
-    monokai: strings.monokai,
-    dracula: strings.dracula,
-    'catppuccin-latte': strings.catppuccinLatte,
-    'catppuccin-frappe': strings.catppuccinFrappe,
-    'catppuccin-macchiato': strings.catppuccinMacchiato,
-    'catppuccin-mocha': strings.catppuccinMocha,
-    'kanagawa-wave': strings.kanagawaWave,
-    'kanagawa-dragon': strings.kanagawaDragon,
-    'kanagawa-lotus': strings.kanagawaLotus,
-    'ayu-light': strings.ayuLight,
-    'ayu-dark': strings.ayuDark,
-    'snazzy-light': strings.snazzyLight,
+  const captions: Partial<Record<Mode, string | undefined>> = {
+    normal: strings.normal,
+    'high-contrast': strings.highContrast,
   }
   for (const option of select.options) {
-    option.textContent = captions[option.value] ?? option.value
+    option.textContent = captions[option.value as Mode] ?? option.value
   }
 
-  // The pre-paint snippet cannot validate what it read and may already have set
-  // a theme name that no longer exists. This is the first point that can.
+  // The pre-paint snippet cannot validate what it read and may already have
+  // set a theme from a mode this build no longer knows. This is the first
+  // point that can.
   const raw = rawStored()
-  const valid = storedTheme()
+  const valid = storedMode()
   if (raw !== null && valid === null) removeStorage(STORAGE_KEY)
-  applyTheme(valid)
+  applyTheme(valid ?? 'normal')
 
-  select.value = valid ?? 'auto'
+  select.value = valid ?? 'normal'
 
   select.addEventListener('change', () => {
-    if (select.value === 'auto') {
-      removeStorage(STORAGE_KEY)
-      applyTheme(null)
-      return
-    }
-    if (!isThemeName(select.value)) return
+    if (!isMode(select.value)) return
     writeStorage(STORAGE_KEY, select.value)
     applyTheme(select.value)
   })
 
-  new MutationObserver(() => applyTheme(storedTheme())).observe(document.documentElement, {
+  new MutationObserver(() => applyTheme(currentMode())).observe(document.documentElement, {
     attributes: true,
     attributeFilter: [THEME_ATTR],
   })
+
+  // Normal's OS-driven half is free, through the CSS media query; high
+  // contrast has no such rule, so an OS change needs this to repaint it live.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(currentMode()))
 
   wrapper.removeAttribute('hidden')
 }

@@ -62,7 +62,7 @@ test('the code theme picker repaints the tokens', async ({ page }) => {
   await page.goto(POST)
   const before = await tokenColours(page)
 
-  await pickCodeTheme(page, 'dracula')
+  await pickCodeTheme(page, 'ayu-dark')
 
   expect(await tokenColours(page), 'picking a theme changed nothing').not.toEqual(before)
 })

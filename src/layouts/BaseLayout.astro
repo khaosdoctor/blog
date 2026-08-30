@@ -107,14 +107,16 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
     </script>
     <script is:inline>
       try {
-        const stored = localStorage.getItem('code-theme')
-        if (stored !== null && stored !== 'auto') {
-          document.documentElement.setAttribute('data-code-theme', stored)
-        } else {
-          const scheme = localStorage.getItem('color-scheme')
-          if (scheme === 'light' || scheme === 'dark') {
-            document.documentElement.setAttribute('data-code-theme', scheme === 'dark' ? 'ayu-dark' : 'ayu-light')
-          }
+        const mode = localStorage.getItem('code-theme') === 'high-contrast' ? 'high-contrast' : 'normal'
+        const scheme = localStorage.getItem('color-scheme')
+        if (mode === 'high-contrast') {
+          const dark = scheme === 'dark' || (scheme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.setAttribute(
+            'data-code-theme',
+            dark ? 'github-dark-high-contrast' : 'github-light-high-contrast',
+          )
+        } else if (scheme === 'light' || scheme === 'dark') {
+          document.documentElement.setAttribute('data-code-theme', scheme === 'dark' ? 'ayu-dark' : 'ayu-light')
         }
       } catch {}
     </script>
