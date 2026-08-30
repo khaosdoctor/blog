@@ -19,7 +19,10 @@ const { post, series, readingTime, locale } = Astro.props
 const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
 ---
 
-<article>
+{/* The only data-pagefind-body on the site, so the index holds posts alone:
+    once one page declares a body region, Pagefind stops indexing whole pages
+    everywhere else, and the listings drop out. */}
+<article data-pagefind-body>
   <CoverHero
     slug={slugOf(post)}
     title={post.data.title}

@@ -48,6 +48,9 @@ function applyHint(): void {
   const mod = isApple ? 'Cmd' : 'Ctrl'
   if (hintModEl !== null) hintModEl.textContent = mod
   if (hintKeyEl !== null) hintKeyEl.textContent = shortcutLetter
+  const keysEl = document.querySelector<HTMLElement>('.sx-keys')
+  const hint = keysEl?.dataset.hint
+  if (keysEl && hint !== undefined) keysEl.textContent = hint.replace('%s', mod)
   const opener = hintModEl?.closest('a')
   const base = opener?.getAttribute('data-base-label')
   if (opener && base !== null && base !== undefined) {

@@ -42,6 +42,9 @@ const searchHref = localePath(locale, '/search/')
     <p class="sx-status" aria-live="polite" aria-atomic="true"></p>
     <ul class="sx-results"></ul>
     <p class="sx-more"></p>
+    {/* Empty until the script fills it: the %s is Cmd or Ctrl, which only the
+        browser can decide. */}
+    <p class="sx-keys" aria-hidden="true" data-hint={t(locale, 'searchKeysHint')}></p>
   </dialog>
 </div>
 
@@ -270,5 +273,21 @@ const searchHref = localePath(locale, '/search/')
   .sx-more :global(a) {
     color: var(--accent);
     font-size: var(--text-tiny);
+  }
+
+  .sx-keys {
+    margin: 0.6rem 0 0;
+    padding-block-start: 0.5rem;
+    border-block-start: 1px solid var(--rule);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+  }
+
+  /* A touch device has no modifier and no hjkl, so the line is noise there. */
+  @media (hover: none) {
+    .sx-keys {
+      display: none;
+    }
   }
 </style>

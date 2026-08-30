@@ -42,6 +42,7 @@ const pt = {
   moreResults: 'E mais %d resultado(s).',
   searchResultsFound: '%d resultado(s).',
   searchLabel: 'Buscar no blog',
+  searchKeysHint: '%s+1-9 abre um resultado, hjkl move entre eles',
   searchPlaceholder: 'ex: deno, astro, observabilidade',
   searchNoJs:
     'A busca completa depende de JavaScript. Sem ele, o formulário acima ainda funciona: ele recarrega esta página com sua consulta salva na URL.',
@@ -196,6 +197,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     moreResults: 'And %d more result(s).',
     searchResultsFound: '%d result(s).',
     searchLabel: 'Search the blog',
+    searchKeysHint: '%s+1-9 opens a result, hjkl moves between them',
     searchPlaceholder: 'e.g. deno, astro, observability',
     searchNoJs:
       'Full search needs JavaScript. Without it the form above still works: it reloads this page with your query in the URL.',
