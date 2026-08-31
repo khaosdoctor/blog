@@ -18,7 +18,7 @@ Well, while the idea of running TS natively, without a compilation process, is s
 
 Loaders are functions that act as hooks between reading a module and executing it, for example, many people are used to using `ts-node` or `ts-node-dev`.
 
-Both of these packages are loaders, they receive the files that will be loaded by the runtime and can perform actions on them, in our case, the action is to compile the file from TypeScript to JavaScript.<Sidenote>You can see more about this functionality in the [official documentation](https://nodejs.org/api/module.html#transpilation), including using the transpiling example itself.</Sidenote>
+Both of these packages are loaders, they receive the files that will be loaded by the runtime and can perform actions on them, in our case, the action is to compile the file from TypeScript to JavaScript.[^n1]
 
 A loader can then choose which file it's going to work with, in our case `.ts`, and perform an action on it. In this case, that action is transpiling it to JavaScript and sending it to Node to evaluate the code.
 
@@ -76,3 +76,5 @@ NODE_OPTIONS='--import tsx' node --env-file=.env index.ts
 ```
 
 Read more about the new API in the [official documentation](https://nodejs.org/api/module.html#enabling).
+
+[^n1]: You can see more about this functionality in the [official documentation](https://nodejs.org/api/module.html#transpilation), including using the transpiling example itself.

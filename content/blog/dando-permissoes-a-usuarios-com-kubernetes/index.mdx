@@ -28,7 +28,7 @@ A maioria dos clusters já vem com o RBAC ativado por padrão, porém é possív
 
 ### Nomenclaturas
 
-No RBAC, usuários são chamados de _**subjects**_, as APIs e recursos que os usuários poderão ou não ter acesso são chamados de **_resources_**. Temos também os _**verbs**_, que são as ações e operações que podem ser executadas em um **_resource_** por um **_subject_**.<Sidenote>Os verbos são basicamente as chamadas que podem ser feitas pelo usuário a um determinado recurso. Por exemplo, a criação de um Pod é um **verb** `create` sobre um **resource** `Pod` feito pelo usuário.</Sidenote>
+No RBAC, usuários são chamados de _**subjects**_, as APIs e recursos que os usuários poderão ou não ter acesso são chamados de **_resources_**. Temos também os _**verbs**_, que são as ações e operações que podem ser executadas em um **_resource_** por um **_subject_**.[^n1]
 
 ## Roles e ClusterRoles
 
@@ -138,7 +138,7 @@ rules:
 
 ### Criando ClusterRoles
 
-Para o Role que será aplicado ao Thiago, temos que permitir que ele possa ler e listar qualquer recurso em qualquer namespace do cluster, isso seria complicado se fossemos criar um Role comum, então vamos criar um ClusterRole para que ele possa ser aplicado automaticamente, este ClusterRole vai ser chamado de `readonly`:<Sidenote>Veja que ClusterRoles não possuem a chave `namespace`.</Sidenote>
+Para o Role que será aplicado ao Thiago, temos que permitir que ele possa ler e listar qualquer recurso em qualquer namespace do cluster, isso seria complicado se fossemos criar um Role comum, então vamos criar um ClusterRole para que ele possa ser aplicado automaticamente, este ClusterRole vai ser chamado de `readonly`:[^n2]
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -291,3 +291,7 @@ Agora com os bindings criados, poderemos executar os comandos como cada usuário
 Agora já sabemos como criar usuários e como podemos atribuir as permissões a estes usuários, nos próximos artigos, vamos ver como podemos melhorar ainda mais o modelo de autenticação usando o Azure Managed AD com AKS!
 
 Vejo vocês por lá!
+
+[^n1]: Os verbos são basicamente as chamadas que podem ser feitas pelo usuário a um determinado recurso. Por exemplo, a criação de um Pod é um **verb** `create` sobre um **resource** `Pod` feito pelo usuário.
+
+[^n2]: Veja que ClusterRoles não possuem a chave `namespace`.

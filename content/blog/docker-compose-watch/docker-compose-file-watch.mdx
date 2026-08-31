@@ -71,7 +71,7 @@ While `sync` is best suited for applications that can do a _hot reload_, meaning
 
 Both actions come with two other properties, `path` and `target`.
 
-In short, `target` is the path to the watched file inside the container. For example, if my `package.json` file is at the root of my local folder, but inside the `/app` folder in my container, then my target will be `/app/package.json`.<Sidenote>Keep in mind that, as a rule, every path is based on your application's build directory, meaning the location where Docker found the Dockerfile.</Sidenote>
+In short, `target` is the path to the watched file inside the container. For example, if my `package.json` file is at the root of my local folder, but inside the `/app` folder in my container, then my target will be `/app/package.json`.[^n1]
 
 ## Running it
 
@@ -86,3 +86,5 @@ Docker watch is a command that will come in handy for most development workflows
 With this command, we can open the door to developing inside containers more and more, meaning we won't have substantial differences between machines, and we can finally be done with "works on my machine" once and for all!
 
 > **Important:** Keep in mind the command is still in alpha, so its API might change in the coming months. If that happens, I'll try to update the article to reflect the changes!
+
+[^n1]: Keep in mind that, as a rule, every path is based on your application's build directory, meaning the location where Docker found the Dockerfile.

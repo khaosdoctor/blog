@@ -1,5 +1,10 @@
-/* The foot-of-post section is only ever hidden, never removed: the reference
-   anchor needs somewhere to resolve to. */
+/* One note, three presentations. The foot-of-post section is the canonical
+   copy and is only ever hidden, never removed: the back-arrow needs somewhere
+   to resolve to, and it is the only copy a reader with CSS off or an RSS
+   reader ever sees. rehype-footnote-asides clones it into an aside beside
+   the paragraph, and that aside carries `popover`, so the browser opens it
+   from the bottom edge on a narrow screen while the rules below float it into
+   the margin on a wide one. No JavaScript in either direction. */
 
 :root {
   /* Read by JS; the media query below repeats the literal since it can't take a var(). */
@@ -7,6 +12,7 @@
 
   --footnote-aside-width: 9rem;
   --footnote-aside-gap: 1.5rem;
+  --footnote-border-thin: 3px;
 }
 
 .prose section[data-footnotes] {
@@ -18,38 +24,44 @@
   margin-block: 0.4rem;
 }
 
-/* On the wrapping <sup>, not the <a>: keeps the brackets out of copied text and
-   avoids links.css's `::after { content: none }`, which reaches the anchor. */
-.prose sup:has(> a[data-footnote-ref])::before,
-.prose sup:has(> a[data-footnote-ref])::after {
+/* On the wrapping <sup>, not the button: keeps the brackets out of copied text
+   and avoids links.css's `::after { content: none }`. */
+.prose sup:has(> .footnote-ref)::before,
+.prose sup:has(> .footnote-ref)::after {
   color: var(--accent);
   user-select: none;
 }
 
-.prose sup:has(> a[data-footnote-ref])::before {
+.prose sup:has(> .footnote-ref)::before {
   content: '[';
 }
 
-.prose sup:has(> a[data-footnote-ref])::after {
+.prose sup:has(> .footnote-ref)::after {
   content: ']';
 }
 
-.prose a[data-footnote-ref] {
-  text-decoration: none;
+/* The reference is a button so `popovertarget` can act on it, which means
+   undoing everything a button brings with it. */
+.prose button.footnote-ref {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  appearance: none;
+  color: var(--accent);
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
 }
+
+.prose button.footnote-ref:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 
 .prose sup.footnote-ref-highlighted {
   background-color: var(--note-highlight);
-}
-
-.footnote-aside {
-  display: none;
-  transition: transform var(--note-grow-duration) var(--note-grow-ease);
-}
-
-.footnote-aside.footnote-aside-grow {
-  transform: scale(1.02);
-  transform-origin: top left;
 }
 
 .footnote-aside p {
@@ -61,16 +73,66 @@
 }
 
 /* The aside is inside `.prose`, so emphasis.css would otherwise paint an
-   *emphasis* run in it the accent colour. */
+   *emphasis* run in it the accent colour. Upright, because the body around it
+   is already italic and a second italic would say nothing. */
 .footnote-aside em {
   color: inherit;
   font-weight: inherit;
+  font-style: normal;
 }
 
-/* Too narrow for the margin copy, so this list is the only notes on screen: it
-   takes back the label GFM ships hidden, and the post's own section break.
-   69.99rem, matching where the margin notes take over, or a tablet shows the
-   list with nothing introducing it. */
+.footnote-aside-head {
+  display: block;
+  font-style: normal;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: var(--fg);
+}
+
+/* The heading rule from prose/headings.css, at a smaller dash. */
+.footnote-aside-head::after {
+  content: '';
+  display: block;
+  block-size: 1px;
+  margin-block: 0.25rem 0.4rem;
+  background-image: repeating-linear-gradient(to right, var(--heading-rule) 0 6px, transparent 6px 10px);
+  mask-image: linear-gradient(to right, #000 0 55%, transparent 100%);
+}
+
+/* Narrow: the note opens over the page from the bottom edge, and the foot list
+   stays where it is so the reader can also read every note in one place. */
+.footnote-aside:popover-open {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
+  width: auto;
+  max-width: none;
+  max-height: 60dvh;
+  margin: 0;
+  padding: 0.9rem 1.2rem 1.1rem;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  border: 0;
+  border-block-start: var(--footnote-border-thin) double var(--fg);
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -2px 12px rgb(0 0 0 / 0.22);
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--fg);
+  text-align: left;
+  text-wrap: pretty;
+}
+
+.footnote-aside::backdrop {
+  background: rgb(0 0 0 / 0.32);
+}
+
+/* Too narrow for the margin copy, so the foot list is the only place every
+   note reads in one go: it takes back the label GFM ships hidden, and the
+   post's own section break. 69.99rem, matching where the margin notes take
+   over, or a tablet shows the list with nothing introducing it. */
 @media (max-width: 69.99rem) {
   .prose section[data-footnotes]::before {
     content: '';
@@ -96,8 +158,16 @@
     display: none;
   }
 
+  /* An author rule, so it beats the UA's `[popover]:not(:popover-open)`
+     hiding and the note simply lives in the margin. Nothing opens it here:
+     it is already on screen. */
   .footnote-aside {
     display: block;
+    /* The UA gives every [popover] `position: fixed`, which computes float to
+       none and would leave the note in the text column. */
+    position: static;
+    inset: auto;
+    overflow: visible;
     float: right;
     clear: right;
     width: var(--footnote-aside-width);
@@ -105,12 +175,34 @@
     margin-bottom: 0.4rem;
     margin-left: var(--footnote-aside-gap);
     margin-right: calc(-1 * (var(--footnote-aside-width) + var(--footnote-aside-gap)));
-    padding-inline-start: 0.6rem;
+    padding: 0.35rem 0.5rem 0.4rem 0.6rem;
     font-size: 0.82rem;
     font-style: italic;
     line-height: 1.5;
     color: var(--muted);
     border-inline-start: var(--border-card-edge) solid var(--fg);
+    border-block-start: var(--footnote-border-thin) double var(--fg);
+    border-inline-end: var(--footnote-border-thin) double var(--fg);
+    border-block-end: var(--footnote-border-thin) double var(--fg);
+  }
+
+  /* Hovering a marker picks its note out of a margin holding several. The
+     offset shadow is the one figure images carry, and only the note being
+     asked about lifts onto it. */
+  .footnote-aside.footnote-aside-active {
+    color: var(--fg);
+    border-color: var(--post-accent-cover);
+    box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--post-accent-cover);
+  }
+
+  .footnote-aside.footnote-aside-active .footnote-aside-head {
+    color: var(--post-accent-cover);
+  }
+
+  /* The note is already beside the sentence, so the marker reads as a label
+     rather than something to press. */
+  .prose button.footnote-ref {
+    pointer-events: none;
   }
 }
 

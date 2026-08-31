@@ -5,16 +5,16 @@ const locale = localeFromPath(Astro.url.pathname)
 ---
 
 <script is:inline define:vars={{ copyLabel: t(locale, 'copyQuote') }}>
-  ;(function () {
-    var SELECTOR = '.prose .callout[data-callout="quote"], .prose blockquote:not(.callout):not(.twitter-tweet)'
-    document.querySelectorAll(SELECTOR).forEach(function (card) {
-      if (card.querySelector(':scope > .qc-copy')) return
-      var button = document.createElement('button')
+  ;(() => {
+    const SELECTOR = '.prose .callout[data-callout="quote"], .prose blockquote:not(.callout):not(.twitter-tweet)'
+    for (const card of document.querySelectorAll(SELECTOR)) {
+      if (card.querySelector(':scope > .qc-copy')) continue
+      const button = document.createElement('button')
       button.type = 'button'
       button.className = 'qc-copy'
       button.setAttribute('aria-label', copyLabel)
       card.append(button)
-    })
+    }
   })()
 </script>
 

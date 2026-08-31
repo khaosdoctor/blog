@@ -205,10 +205,12 @@ describe('contexto local com it', () => {
 })
 ```
 
-A grande vantagem (e o motivo pelo qual eu recomendo usar o contexto local **sempre**) é que, quando um teste acabar, ele vai automaticamente limpar e remover o mock, dessa forma um mock não vai interferir em outro mock.<Sidenote>**Fun Fact:** Tivemos esse problema durante uma das lives na nossa comunidade da [Formação TS](https://formacaots.com.br?utm_source=personal-blog&utm_medium=post&utm_campaign=ntr-mocks&utm_id=fixed). Quando estávamos fazendo o módulo de testes com o Node.js Test Runner, acidentalmente criamos um mock global que acabou interferindo em todos os testes do projeto.</Sidenote>
+A grande vantagem (e o motivo pelo qual eu recomendo usar o contexto local **sempre**) é que, quando um teste acabar, ele vai automaticamente limpar e remover o mock, dessa forma um mock não vai interferir em outro mock.[^n1]
 
 ## Conclusão
 
 O Node.js Test Runner é uma ferramenta incrível. E ele tem muito a oferecer mesmo estando com algumas funcionalidades faltando, porém mesmo com o módulo de mocks incompleto, podemos ver que é possível fazer tudo que precisamos usando somente o test runner.
 
 Se você está interessado em ver um test completo de um projeto grande, veja o nosso repositório do [projeto número 3 da Formação TS](https://github.dev/Formacao-Typescript/projeto-3/tree/node-test-runner) que eu resolvo passo a passo com os alunos durante o curso!
+
+[^n1]: **Fun Fact:** Tivemos esse problema durante uma das lives na nossa comunidade da [Formação TS](https://formacaots.com.br?utm_source=personal-blog&utm_medium=post&utm_campaign=ntr-mocks&utm_id=fixed). Quando estávamos fazendo o módulo de testes com o Node.js Test Runner, acidentalmente criamos um mock global que acabou interferindo em todos os testes do projeto.

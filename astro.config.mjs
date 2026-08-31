@@ -18,7 +18,7 @@ import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
 import { remarkEmphasis } from './src/plugins/remark-emphasis.mjs'
 import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
-import { rehypeFootnoteSidenotes } from './src/plugins/rehype-footnote-sidenotes.mjs'
+import { rehypeFootnoteAsides } from './src/plugins/rehype-footnote-asides.mjs'
 import { rehypeHeadingAnchors } from './src/plugins/rehype-heading-anchors.mjs'
 import { rehypeMathCopy } from './src/plugins/rehype-math-copy.mjs'
 import { remarkLabDemos } from './src/plugins/remark-lab-demos.mjs'
@@ -142,7 +142,7 @@ export default defineConfig({
         // refuses to invent one. Running it here puts the ids in place first.
         rehypeHeadingIds,
         rehypeHeadingAnchors,
-        rehypeFootnoteSidenotes,
+        rehypeFootnoteAsides,
       ],
     }),
   },

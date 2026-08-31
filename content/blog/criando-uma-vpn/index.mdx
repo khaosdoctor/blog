@@ -54,13 +54,13 @@ Menos importante do que isso também, é a capacidade que você terá de permiti
 
 O maior uso de VPNs atualmente infelizmente não é para se proteger de olhos alheios, mas sim para poder trocar a sua localização geográfica de forma que você aparentará estar em outros países, quebrando assim algumas travas de Geo-IP que alguns sites possuem, que impedem você de consumir algum conteúdo que será destinado a um país específico, por exemplo.
 
-Enquanto é possível criar um servidor utilizando provedores de cloud como a [Azure](https://azure.microsoft.com/?WT.mc_id=cxa-0000-ludossan), que providenciam várias máquinas virtuais em diversos locais do mundo, ainda sim o custo que você terá para criar um servidor de VPN em cada região é extremamente alto comparado ao custo de você contratar um serviço de VPN pronto, como a NordVPN ou a TunnelBear. Embora seja completamente possível se você estiver disposto a gastar algumas centenas de reais por mês.<Sidenote>Você também pode criar diversos servidores e deixar os mesmos desalocados (parados), o que consome muito menos recursos e gasta muito menos, ligando o servidor somente quando for utilizar ou agendando um auto desligamento.</Sidenote>
+Enquanto é possível criar um servidor utilizando provedores de cloud como a [Azure](https://azure.microsoft.com/?WT.mc_id=cxa-0000-ludossan), que providenciam várias máquinas virtuais em diversos locais do mundo, ainda sim o custo que você terá para criar um servidor de VPN em cada região é extremamente alto comparado ao custo de você contratar um serviço de VPN pronto, como a NordVPN ou a TunnelBear. Embora seja completamente possível se você estiver disposto a gastar algumas centenas de reais por mês.[^n1]
 
 ## Criando sua própria VPN
 
 Com isso tudo dito, vamos partir para a criação da nossa própria VPN, o primeiro passo é criar um servidor onde possamos acessar a VPN a partir da Internet, existem várias maneiras de se fazer isso, uma delas (que vou postar aqui assim que terminar) é utilizar um RaspberryPI como servidor e o serviço do No-IP para poder expor o mesmo para a Internet.
 
-Como vamos criar o nosso próprio servidor e **não vamos armazenar logs**, não há problema em criarmos em serviços de cloud como a Azure, então vamos começar criando um servidor por lá.<Sidenote>Você pode utilizar outros serviços cloud também, como a DigitalOcean, Linode ou qualquer outro que você se sinta mais a vontade utilizando.</Sidenote>
+Como vamos criar o nosso próprio servidor e **não vamos armazenar logs**, não há problema em criarmos em serviços de cloud como a Azure, então vamos começar criando um servidor por lá.[^n2]
 
 ### Criando o servidor
 
@@ -99,7 +99,7 @@ Na próxima seção, vamos ter as configurações de autenticação.
 
 Aqui temos um disclaimer importante. Vou utilizar o "password" para que todos saibam o que fazer quando para trocar para um acesso via chave SSH, uma vez que a senha é trafegada em texto puro, portanto pode ser um meio de ataque para hackers.
 
-O que vamos fazer é setar uma senha inicial para fazer o login, porém a primeira alteração no servidor será alterar o SSH para que possamos acessar em portas diferentes e também através de uma chave SSH ao invés da senha.<Sidenote>Se você já é familiarizado com os métodos de login do SSH e já sabe como fazer a alteração, então você pode marcar "SSH Public Key" para evitar um retrabalho.</Sidenote>
+O que vamos fazer é setar uma senha inicial para fazer o login, porém a primeira alteração no servidor será alterar o SSH para que possamos acessar em portas diferentes e também através de uma chave SSH ao invés da senha.[^n3]
 
 Por fim temos as configurações de portas. Vamos deixar somente uma das portas habilitadas, a 22 que é a porta padrão do SSH:
 
@@ -135,9 +135,9 @@ Vamos usar o seguinte comando para gerar uma chave:
 ssh-keygen -t rsa -b 4096
 ```
 
-Pressione ENTER quando for perguntado aonde você quer salvar a chave para salvar no diretório padrão (que é geralmente `~/.ssh`), se não selecione um local aonde você terá acesso para deixar as suas chaves (você pode ter problemas no futuro se não colocar no diretório padrão).<Sidenote>Você será questionado por uma senha na sua chave, ela é completamente opcional, mas adiciona um nível extra de segurança, se quiser adicionar, pode ficar a vontade.</Sidenote>
+Pressione ENTER quando for perguntado aonde você quer salvar a chave para salvar no diretório padrão (que é geralmente `~/.ssh`), se não selecione um local aonde você terá acesso para deixar as suas chaves (você pode ter problemas no futuro se não colocar no diretório padrão).[^n4]
 
-Vamos logar no servidor para poder realizar as alterações, para isso é só utilizar o comando:<Sidenote>Lembrando que o usuário é o mesmo usuário que você colocou quando criou o servidor, e o IP é o endereço de IP público que aparece como um link no seu painel da VM na Azure.</Sidenote>
+Vamos logar no servidor para poder realizar as alterações, para isso é só utilizar o comando:[^n5]
 
 ```bash
 ssh usuario@ip
@@ -288,13 +288,13 @@ No final do processo de instalação, você vai obter um arquivo `.ovpn` de conf
 
 Por fim, vamos fazer o que a maioria dos serviços de VPN não fazem, que é **desativar os logs**.
 
-Para isso vamos acessar o arquivo de configuração do OpenVPN com:<Sidenote>Lembrando que o `vim` pode ser qualquer editor.</Sidenote>
+Para isso vamos acessar o arquivo de configuração do OpenVPN com:[^n6]
 
 ```bash
 sudo vim /etc/openvpn/server/server.conf
 ```
 
-Mude a linha que tem escrito `verb 3` para `verb 0`, salve o arquivo e reinicie o serviço com:<Sidenote>É possível que o nome do serviço seja um pouco diferente dependendo da máquina que você instalou o OpenVPN e a sua versão, então talvez você precise encontrar o nome do serviço para reiniciá-lo.</Sidenote>
+Mude a linha que tem escrito `verb 3` para `verb 0`, salve o arquivo e reinicie o serviço com:[^n7]
 
 ```bash
 sudo systemctl restart openvpn-server@server.service
@@ -311,7 +311,7 @@ sudo mv /root/nomedoarquivo.ovpn ~
 sudo chown novousuario nomedoarquivo.ovpn
 ```
 
-Vamos agora baixar o arquivo. Para isso, vá em um terminal local e abra uma conexão `sftp` com o seu servidor de VPN através do comando `sftp minhavpn` (ou qualquer que seja o nome que você colocou no seu alias), depois execute os seguintes comandos:<Sidenote>Lembrando que você pode acessar por outros meios também, o sftp é só um deles, mas você pode usar o `scp` ou até mesmo clientes de SFTP como o FileZilla.</Sidenote>
+Vamos agora baixar o arquivo. Para isso, vá em um terminal local e abra uma conexão `sftp` com o seu servidor de VPN através do comando `sftp minhavpn` (ou qualquer que seja o nome que você colocou no seu alias), depois execute os seguintes comandos:[^n8]
 
 ```sftp
 get nomedoarquivo.ovpn pasta/de/destino
@@ -347,3 +347,19 @@ Nele você pode adicionar novos clientes para poder dar a outras pessoas a capac
 O artigo ficou um pouco longo, porém ele contém tudo que é necessário para você criar a sua própria VPN! Nos próximos artigos vou mostrar como você pode aumentar ainda mais a segurança do seu servidor com Two-Factor Authentication e também adicionar upgrades automáticos para manter o sistema sempre atualizado.
 
 Fiquem ligados para os próximos capítulos!
+
+[^n1]: Você também pode criar diversos servidores e deixar os mesmos desalocados (parados), o que consome muito menos recursos e gasta muito menos, ligando o servidor somente quando for utilizar ou agendando um auto desligamento.
+
+[^n2]: Você pode utilizar outros serviços cloud também, como a DigitalOcean, Linode ou qualquer outro que você se sinta mais a vontade utilizando.
+
+[^n3]: Se você já é familiarizado com os métodos de login do SSH e já sabe como fazer a alteração, então você pode marcar "SSH Public Key" para evitar um retrabalho.
+
+[^n4]: Você será questionado por uma senha na sua chave, ela é completamente opcional, mas adiciona um nível extra de segurança, se quiser adicionar, pode ficar a vontade.
+
+[^n5]: Lembrando que o usuário é o mesmo usuário que você colocou quando criou o servidor, e o IP é o endereço de IP público que aparece como um link no seu painel da VM na Azure.
+
+[^n6]: Lembrando que o `vim` pode ser qualquer editor.
+
+[^n7]: É possível que o nome do serviço seja um pouco diferente dependendo da máquina que você instalou o OpenVPN e a sua versão, então talvez você precise encontrar o nome do serviço para reiniciá-lo.
+
+[^n8]: Lembrando que você pode acessar por outros meios também, o sftp é só um deles, mas você pode usar o `scp` ou até mesmo clientes de SFTP como o FileZilla.

@@ -71,7 +71,7 @@ The private key (commonly called **Sk**, for _Secret Key_) is a key generated fr
 > [!CAUTION] 👀
 > In this section we'll talk about the private key in general terms. Further down we'll talk about it in the context of the RSA algorithm specifically
 
-Private keys are used to **decrypt** data encrypted by the public key, or to **sign** data that can later be validated by the public key.<Sidenote>Asymmetric cryptography is a **cryptographic system** (_cryptosystem_) that gets implemented by several algorithms. **One of them** is RSA, but it's not the only one, so there are several different implementations of private keys, but they'll all share the same properties.</Sidenote> **It's not advisable to encrypt data using the private key**, because any public key can decrypt that data. That's exactly why these keys are called **signers** (we'll get into the concept of signatures in the other articles).
+Private keys are used to **decrypt** data encrypted by the public key, or to **sign** data that can later be validated by the public key.[^n1] **It's not advisable to encrypt data using the private key**, because any public key can decrypt that data. That's exactly why these keys are called **signers** (we'll get into the concept of signatures in the other articles).
 
 ![](./image-8.png)
 
@@ -133,7 +133,7 @@ Then we join the two together and send them to our recipient. This way, even if 
 
 ![](./image-2.png "Decrypting a DEM Block")
 
-We take the DEM block, split it into key and file, decrypt the symmetric key using the private key, get back the original symmetric key, and use it to decrypt the encrypted file.<Sidenote>The HTTPS protocol works "roughly" like this.</Sidenote>
+We take the DEM block, split it into key and file, decrypt the symmetric key using the private key, get back the original symmetric key, and use it to decrypt the encrypted file.[^n2]
 
 ## RSA
 
@@ -148,7 +148,7 @@ Key points:
 -   A good key is generally somewhere between 1024 and 4096 bits
 -   The bigger the key (more bits), the more computation time is needed
 -   Very large keys (like 65536 bits) are **very secure**, but too slow for practical use, since they can take hours to generate
--   Any key above 3072 bits is considered secure<Sidenote>When we talk about keys here, we're talking about numbers, nothing more. It's like a password, except it has 1234 digits (`2^4096`).</Sidenote>
+-   Any key above 3072 bits is considered secure[^n3]
 
 When we're "encrypting" something, we're applying an exponentiation operation between the key and the value we want to encrypt.
 
@@ -238,7 +238,7 @@ That means we can encrypt messages up to 12 bits, meaning numbers up to 4096.
 
 The next step is defining the modulus, which is the multiplication of `q` by `p`, so:
 
--   `n` is `p*q`, which is `41*97=3977`. Now we have the first value you saw back in step 3 above (try factoring 3977 to get back to its primes, how many steps did it take?)<Sidenote>Remember that `p` and `q` are private and can't be shared, while `n` is public.</Sidenote>
+-   `n` is `p*q`, which is `41*97=3977`. Now we have the first value you saw back in step 3 above (try factoring 3977 to get back to its primes, how many steps did it take?)[^n4]
 
 So far we have this:
 
@@ -634,3 +634,11 @@ To encrypt text or any other non-numeric value, you need to convert that message
 The code for both implementations is [here](https://gist.github.com/khaosdoctor/aa2995b56caabf13f086ef6ee44efd6e) and [here](https://gist.github.com/khaosdoctor/549d1a62e840974e8cd75518d1826273), and I'll see you in the next stop, with symmetric keys!
 
 See you around!
+
+[^n1]: Asymmetric cryptography is a **cryptographic system** (_cryptosystem_) that gets implemented by several algorithms. **One of them** is RSA, but it's not the only one, so there are several different implementations of private keys, but they'll all share the same properties.
+
+[^n2]: The HTTPS protocol works "roughly" like this.
+
+[^n3]: When we talk about keys here, we're talking about numbers, nothing more. It's like a password, except it has 1234 digits (`2^4096`).
+
+[^n4]: Remember that `p` and `q` are private and can't be shared, while `n` is public.

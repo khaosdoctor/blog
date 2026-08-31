@@ -1,6 +1,6 @@
 import type { PaginateFunction } from 'astro'
 import { hashString } from './chip-color'
-import { getListedPosts, getPublishedPosts, LIST_PAGE_SIZE, type Post } from './posts'
+import { getListedPosts, LIST_PAGE_SIZE, type Post } from './posts'
 import { slugify } from './slugify'
 import { LOCALES, type Locale } from '../i18n/ui'
 

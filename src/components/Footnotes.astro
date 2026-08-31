@@ -1,0 +1,42 @@
+---
+// Pairs a marker with its note in the margin, in both directions, which no
+// selector can express: the two are neither siblings nor nested. Presentation
+// only, the note reads and opens without this script.
+---
+
+<script is:inline>
+  ;(() => {
+    try {
+      const HIGHLIGHT = 'footnote-ref-highlighted'
+      const ACTIVE = 'footnote-aside-active'
+      const REF = '[data-footnote-ref]'
+      let highlighted = null
+      let active = null
+
+      const swap = (previous, next, name) => {
+        if (previous === next) return next
+        previous?.classList.remove(name)
+        next?.classList.add(name)
+        return next
+      }
+
+      const markerFor = (aside) => document.getElementById(aside.dataset.footnoteRefId ?? '')?.closest('sup') ?? null
+
+      const asideFor = (ref) => (ref.id ? document.querySelector(`[data-footnote-ref-id="${ref.id}"]`) : null)
+
+      const show = ({ target }) => {
+        if (!(target instanceof Element)) return
+        const aside = target.closest('.footnote-aside')
+        // The marker is inert where the note already reads in the margin, so
+        // the hover arrives on the sup around it rather than on the button.
+        const ref = target.closest('sup')?.querySelector(REF) ?? null
+
+        highlighted = swap(highlighted, aside ? markerFor(aside) : null, HIGHLIGHT)
+        active = swap(active, ref ? asideFor(ref) : aside, ACTIVE)
+      }
+
+      document.addEventListener('mouseover', show)
+      document.addEventListener('focusin', show)
+    } catch {}
+  })()
+</script>

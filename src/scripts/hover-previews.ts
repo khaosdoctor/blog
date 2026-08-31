@@ -31,7 +31,6 @@ interface PopoverHTMLElement extends HTMLElement {
 
 const STORAGE_KEY = 'hp-pinned'
 const PERSIST_KEY = 'hp-persist'
-const FOOTNOTES_KEY = 'hp-footnotes'
 
 const strings: DOMStringMap = document.querySelector<HTMLElement>('.hp-settings')?.dataset ?? {}
 
@@ -64,11 +63,6 @@ function ensureDock(): HTMLElement {
 // browser's own link menu, and a pinned card cannot be moved out of the way.
 const hoverPointerMedia = matchMedia('(hover: hover) and (pointer: fine)')
 
-// Kept live so previewable() answers correctly after a resize.
-const footnoteWideMedia = matchMedia(
-  `(min-width: ${getComputedStyle(document.documentElement).getPropertyValue('--footnote-wide-breakpoint').trim() || '70rem'})`,
-)
-
 let current: { link: HTMLAnchorElement; card: PopoverHTMLElement } | null = null
 let openTimer = 0
 let closeTimer = 0
@@ -78,15 +72,9 @@ function samePath(a: URL, b: URL): boolean {
   return a.pathname.replace(/\/?$/, '/') === b.pathname.replace(/\/?$/, '/')
 }
 
-// Read on every hover, so the settings panel's checkbox takes effect at once.
-function footnotePreviews(): boolean {
-  return readStorage(FOOTNOTES_KEY) === '1'
-}
-
 function previewable(link: HTMLAnchorElement): boolean {
   if (!link.href || link.closest('.hp-card') || link.closest('.bookmark') || link.closest('.no-preview')) return false
   if (link.classList.contains('link-unwritten')) return true
-  if (link.hasAttribute('data-footnote-ref')) return footnotePreviews() && footnoteWideMedia.matches
   let url: URL
   try {
     url = new URL(link.href)
@@ -550,6 +538,7 @@ function init(): void {
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return
     if (current) closeCard(current.card)
+    // A copy: closeCard splices the array it is walking.
     for (const card of [...pinned]) closeCard(card)
   })
 

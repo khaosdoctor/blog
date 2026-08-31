@@ -13,7 +13,7 @@ Recentemente vi um pessoal postando uma "novidade":
 
 ![](https://www.youtube.com/watch?v=M-VU0fLjIUU)
 
-No canal dele, o Primeagen mostrou como se faz o que ele chamou de "negative space programming", fico feliz que esse assunto tenha aparecido em canais grandes, mas essa técnica não é nova, existe há muitos e muitos anos, inclusive o próprio TypeScript tem uma função que faz exatamente isso, só que com tipos.<Sidenote>Eu [até falei sobre elas há uns anos](https://speakerdeck.com/khaosdoctor/typescript-tips-that-could-save-your-life?slide=30).</Sidenote>
+No canal dele, o Primeagen mostrou como se faz o que ele chamou de "negative space programming", fico feliz que esse assunto tenha aparecido em canais grandes, mas essa técnica não é nova, existe há muitos e muitos anos, inclusive o próprio TypeScript tem uma função que faz exatamente isso, só que com tipos.[^n1]
 
 Assertion functions são parte de um conjunto chamado de **Type Guards**. Junto com os [enums](/enums-no-typescript/), essas duas funções são uma das poucas que fazem o TypeScript sair do mundo da compilação e ir para o mundo do runtime, ou seja, o código que você escreve ali é, de fato, executado em runtime.
 
@@ -144,3 +144,5 @@ Assertion functions são muito usadas em lugares onde a gente tem parâmetros op
 Assertion functions são uma excelente forma de você garantir não só a tipagem do seu código em tempo de compilação, mas também garantir que, durante a execução, o código vai se comportar da mesma forma que você previu. Afinal de contas **computação é determinística** e a gente precisa saber o que a gente recebe e envia dos nossos programas.
 
 Para completar essa série eu vou falar mais sobre branded types em outro artigo, então fica por ai!
+
+[^n1]: Eu [até falei sobre elas há uns anos](https://speakerdeck.com/khaosdoctor/typescript-tips-that-could-save-your-life?slide=30).

@@ -11,7 +11,7 @@ draft: false
 ---
 Quando estamos trabalhando com clusters Kubernetes, é comum termos aplicações que precisam estar em nós específicos. Isso é ainda mais comum quando temos uma série de nós que fazem parte do nosso cluster através de **Node Pools**.
 
-Neste artigo vamos aprender a controlar nossos nós com seletores, vamos aprender o conceito de **Node Pools** e também o conceito de **Node Affinity**. Por fim vamos entender todo a ideia por trás de **taints e tolerations**. E, com isso, vamos aprender a ter o controle completo do nosso cluster e de onde queremos nossas aplicações.<Sidenote>Como este artigo já assume que você conhece um pouco mais de Kubernetes, não vou dar as bases para entendê-lo, mas se você quiser entender um pouco mais, veja [meu curso gratuito de Kubernetes no Channel9](https://aka.ms/aks-bootcamp) e, para se aprofundar mais, [dê uma olhada no meu livro de Kubernetes da Casa do Código](https://tudosobrekubernetes.tech).</Sidenote>
+Neste artigo vamos aprender a controlar nossos nós com seletores, vamos aprender o conceito de **Node Pools** e também o conceito de **Node Affinity**. Por fim vamos entender todo a ideia por trás de **taints e tolerations**. E, com isso, vamos aprender a ter o controle completo do nosso cluster e de onde queremos nossas aplicações.[^n1]
 
 ## Por que precisamos de controle?
 
@@ -313,3 +313,5 @@ A [documentação oficial recomenda uma série de labels](https://kubernetes.io/
 Com taints, tolerations, affinity e selectors damos um passo a frente no controle dos nossos clusters de forma que podemos controlar ainda melhor o nosso ecossistema!
 
 Até mais!
+
+[^n1]: Como este artigo já assume que você conhece um pouco mais de Kubernetes, não vou dar as bases para entendê-lo, mas se você quiser entender um pouco mais, veja [meu curso gratuito de Kubernetes no Channel9](https://aka.ms/aks-bootcamp) e, para se aprofundar mais, [dê uma olhada no meu livro de Kubernetes da Casa do Código](https://tudosobrekubernetes.tech).

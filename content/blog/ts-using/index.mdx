@@ -162,7 +162,7 @@ export async function fazerQuery (query: string) {
 }
 ```
 
-Agora não temos mais a lógica de gerenciamento de recursos dentro do nosso app, o que torna muito mais fácil gerenciar essas conexões e abstrair a funcionalidade de usuários, especialmente para quem cria libs!<Sidenote>Se você quiser aprender a usar essa funcionalidade, aproveita e dá uma olhada no meu [treinamento completo de TypeScript](https://hotm.art/yd4IsL)!</Sidenote>
+Agora não temos mais a lógica de gerenciamento de recursos dentro do nosso app, o que torna muito mais fácil gerenciar essas conexões e abstrair a funcionalidade de usuários, especialmente para quem cria libs![^n1]
 
 Disposals funcionam como uma stack, então eles vão ser chamados da última criação para a primeira. Como esse exemplo da documentação mostra bem:
 
@@ -357,3 +357,5 @@ Para usar o using nas versões mais novas do TS você precisa mudar algumas opç
 ```
 
 Você pode ler mais sobre essa nova feature lá no [blog do TS](https://devblogs.microsoft.com/typescript/announcing-typescript-5-2-beta/#using-declarations-and-explicit-resource-management) e também aprender a usar tudo certinho lá no meu treinamento da [Formação TS!](https://hotm.art/yd4IsL).
+
+[^n1]: Se você quiser aprender a usar essa funcionalidade, aproveita e dá uma olhada no meu [treinamento completo de TypeScript](https://hotm.art/yd4IsL)!

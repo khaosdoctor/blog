@@ -46,7 +46,7 @@ Hoje o TS é uma das ferramentas mais usadas no mundo e uma das mais queridas po
 
 Agora que a gente já tem o contexto de onde ele veio, bora entender o **porquê** dele existir.
 
-Durante a minha carreira eu já trabalhei com projetos pequenos e grandes usando JavaScript. A linguagem em si não é o problema, na verdade, muitos desses projetos só foram possíveis porque o JavaScript é muito mais simples do que outras linguagens, o maior problema de longe é a escalabilidade dessas aplicações, que é um reflexo direto de o JavaScript possuir uma _tipagem dinâmica_.<Sidenote>Eu já falei um pouco sobre tipagem estática e dinâmica na [minha série de artigos sobre Node.js por baixo dos panos](https://dev.to/_staticvoid/series/2080)</Sidenote>
+Durante a minha carreira eu já trabalhei com projetos pequenos e grandes usando JavaScript. A linguagem em si não é o problema, na verdade, muitos desses projetos só foram possíveis porque o JavaScript é muito mais simples do que outras linguagens, o maior problema de longe é a escalabilidade dessas aplicações, que é um reflexo direto de o JavaScript possuir uma _tipagem dinâmica_.[^n1]
 
 Vamos mostrar código. Imagina que você tem essa aplicação usando express com Node.js:
 
@@ -90,7 +90,7 @@ O TypeScript é escrito em TypeScript (olha que poético) e publicado no NPM com
 
 > Lembre-se sempre de adicionar o `-D` porque o TypeScript **não** é um pacote que deva ir para produção
 
-Para ajudar ainda mais, podemos instalar toda a tipagem do Node.js, assim o TS vai saber tudo sobre o ambiente que a gente está rodando. A gente pode fazer isso com o comando `npm install -D @types/node`<Sidenote>O `@types` é o escopo de uma organização chamada [DefinitelyTyped](https://github.com/definitelytyped) que possui tipos para vários pacotes famosos, nós vamos falar mais sobre ela nos próximos dias.</Sidenote>
+Para ajudar ainda mais, podemos instalar toda a tipagem do Node.js, assim o TS vai saber tudo sobre o ambiente que a gente está rodando. A gente pode fazer isso com o comando `npm install -D @types/node`[^n2]
 
 #### Compilando
 
@@ -170,3 +170,7 @@ Os desafios de hoje são:
 ![](./image_o-1-dc58fde7.png)
 
 Te vejo amanhã! E não esquece de deixar o [seu feedback](https://forms.gle/6hAqjVmah9uyR4by8) sobre a semana [nesse formulário](https://forms.gle/6hAqjVmah9uyR4by8)!
+
+[^n1]: Eu já falei um pouco sobre tipagem estática e dinâmica na [minha série de artigos sobre Node.js por baixo dos panos](https://dev.to/_staticvoid/series/2080)
+
+[^n2]: O `@types` é o escopo de uma organização chamada [DefinitelyTyped](https://github.com/definitelytyped) que possui tipos para vários pacotes famosos, nós vamos falar mais sobre ela nos próximos dias.

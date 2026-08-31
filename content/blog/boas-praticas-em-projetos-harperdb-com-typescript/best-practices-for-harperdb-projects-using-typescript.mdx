@@ -22,7 +22,7 @@ This repository is located at [the HarperDB Community GitHub](https://github.com
 
 ### Setting up Node and TypeScript
 
-To use TypeScript you need Node.js installed, be sure to use the latest LTS version. You can check it by running `node -v` in your terminal. If you don't have it installed, you can download it [here](https://nodejs.org/en/download/), or use a version manager like [asdf](https://asdf-vm.com/#/core-manage-asdf-vm), [nvm](https://github.com/nvm-sh/nvm), or even [volta](https://volta.sh/).<Sidenote>I'm using version 20.7.0 of Node.js, but you can use any version above 18 at the time of writing this article.</Sidenote>
+To use TypeScript you need Node.js installed, be sure to use the latest LTS version. You can check it by running `node -v` in your terminal. If you don't have it installed, you can download it [here](https://nodejs.org/en/download/), or use a version manager like [asdf](https://asdf-vm.com/#/core-manage-asdf-vm), [nvm](https://github.com/nvm-sh/nvm), or even [volta](https://volta.sh/).[^n1]
 
 Let's create a new directory (you can name whatever you want) and, inside it, we'll run the command `npm init -y`. This will generate a new `package.json` file with the default values. Now, let's install TypeScript as a development dependency by running `npm install --save-dev typescript`. This will install the latest version of TypeScript in your project.
 
@@ -296,7 +296,7 @@ Since we're using Harper, all our communication with the DB is done through an A
 > [!TIP]
 > It's a best practice to name external APIs as 'clients', if we had any other data layer, let's say a queue system that's not connected through an API, we could just name it `queueAdapter` or `queue` and it would be fine. This is not a rule, but I personally think it's easier to understand what the file is doing, if an external agent or an internal driver.
 
-Our client is an HTTP API, so let's use the native `fetch` from node to communicate with it.<Sidenote>The fetch api is only available in node from version 18 and up.</Sidenote> Let's add the following code to our `TodoItemClient.ts` file:
+Our client is an HTTP API, so let's use the native `fetch` from node to communicate with it.[^n2] Let's add the following code to our `TodoItemClient.ts` file:
 
 ```ts
 import { TodoItem, TodoObjectType } from '../domain/TodoItem.js'
@@ -726,3 +726,7 @@ You can also make requests yourself to the API using `curl` or any other tool yo
 In this article, we learned how to set up a TypeScript project with HarperDB, we learned how to separate our code into layers, and we learned how to test our application. We also learned some best practices along the way.
 
 The idea is that those layers are not set in stone, you can add more layers if you need to, or remove some layers if you don't need them. The important thing is to have a clear separation of concerns and to make sure that your code is maintainable.
+
+[^n1]: I'm using version 20.7.0 of Node.js, but you can use any version above 18 at the time of writing this article.
+
+[^n2]: The fetch api is only available in node from version 18 and up.

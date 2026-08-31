@@ -98,7 +98,7 @@ addEventListener("message", async ({data}) => {
 });
 ```
 
-Notice we're declaring an expression that uses `import.meta.url`. Within the context of that expression, the value will be the URL of the `main.js` file. When we spin up a new worker from another file and send the module over via message, we'll see that the return of `await main()` is the same URL, because we're not in a different context.<Sidenote>An extension to the proposal is planned [here](https://github.com/tc39/proposal-module-expressions#worker-constructor) that lets workers be created directly with Module Expressions.</Sidenote>
+Notice we're declaring an expression that uses `import.meta.url`. Within the context of that expression, the value will be the URL of the `main.js` file. When we spin up a new worker from another file and send the module over via message, we'll see that the return of `await main()` is the same URL, because we're not in a different context.[^n1]
 
 Essentially, the idea is to carry code along with its local context into another context without losing any information. Paired with ShadowRealms, we get a pretty powerful API that lets us run code from wherever we are without the problem of losing information:
 
@@ -140,3 +140,5 @@ worker.postMessage(module { export default function() { return "hello!" } });
 Pay attention to `new Worker({type: 'module'})` and to the worker declaration already carrying a module expression right there on the last line.
 
 That wraps up this rundown on **Block Expressions**, but unfortunately, since the proposal is long, a lot of content got left out so this wouldn't turn into a giant article. So I'd suggest reading the original proposal too, so you can get an even better picture of it!
+
+[^n1]: An extension to the proposal is planned [here](https://github.com/tc39/proposal-module-expressions#worker-constructor) that lets workers be created directly with Module Expressions.

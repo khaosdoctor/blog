@@ -147,7 +147,7 @@ Uma separação visual entre duas partes do texto que não merecem um título no
 
 ## Notas de rodapé
 
-Uma nota de rodapé para a fonte de uma afirmação, ou para um detalhe que interromperia a frase. Ela vira um link para o pé da página, com um link de volta. A marca é numerada, `[1]`, contra a letra que a `Sidenote` usa.
+Uma nota de rodapé para a fonte de uma afirmação, ou para um detalhe que interromperia a frase. É markdown puro, então o Obsidian renderiza enquanto você escreve.
 
 ```markdown
 Uma afirmação que precisa de fonte.[^1]
@@ -155,7 +155,7 @@ Uma afirmação que precisa de fonte.[^1]
 [^1]: A fonte, no pé da página.
 ```
 
-Uma afirmação que precisa de fonte.[^1]
+Uma afirmação que precisa de fonte.[^1] A mesma nota aparece de três jeitos, dependendo de onde você está lendo.[^n2] Em tela larga ela fica na margem, com a marca repetida no topo.[^n3] Em tela estreita a marca abre um painel na base da tela, e a lista completa continua no pé da página. Sem JavaScript em nenhum dos dois casos.
 
 ## Callouts
 
@@ -465,16 +465,6 @@ https://news.lsantos.dev
 
 https://news.lsantos.dev
 
-## Notas na margem
-
-Uma `Sidenote` é marcada com uma letra e ancorada na palavra que ela segue. A contagem vai de `[a]` a `[z]` e continua em `[aa]`, como uma coluna de planilha, para não se confundir com o `[1]` das notas de rodapé. Aceita só conteúdo inline: texto, negrito, itálico, links e código.
-
-```mdx
-Alguma afirmação no texto.<Sidenote>Uma nota na margem.</Sidenote>
-```
-
-Toda abstração vaza.<Sidenote>Uma nota que fica na margem em telas largas e vira um popover em telas estreitas, sem JavaScript nos dois casos. Aceita **negrito**, `código` e [links](https://blog.lsantos.dev).</Sidenote> E esta segunda frase carrega outra.<Sidenote>Igual à de cima, uma letra adiante na contagem.</Sidenote>
-
 ## Ênfase
 
 Um trecho que merece peso, sem fingir que é citação: sem aspas de fundo, sem
@@ -556,3 +546,7 @@ Quando a demonstração já é uma página HTML completa, com script e estilo pr
 <HtmlLab src="./components/counter.html" title="um contador em HTML puro" />
 
 [^1]: A fonte, no pé da página. Note o link de volta para o ponto de origem no texto.
+
+[^n2]: Aceita **negrito**, `código` e [links](https://blog.lsantos.dev), como qualquer nota de rodapé, porque é uma nota de rodapé.
+
+[^n3]: A marca no topo desta caixa é a mesma que você acabou de passar na frase, então uma margem com várias notas continua dizendo qual responde o quê.

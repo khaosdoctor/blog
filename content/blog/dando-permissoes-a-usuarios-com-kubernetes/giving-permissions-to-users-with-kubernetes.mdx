@@ -29,7 +29,7 @@ Most clusters already ship with RBAC enabled by default, but you can start a new
 
 ### Naming
 
-In RBAC, users are called _**subjects**_, and the APIs and resources that users may or may not have access to are called **_resources_**. We also have _**verbs**_, which are the actions and operations that can be run on a **_resource_** by a **_subject_**.<Sidenote>Verbs are basically the calls a user can make against a given resource. For example, creating a Pod is the **verb** `create` on the **resource** `Pod`, done by the user.</Sidenote>
+In RBAC, users are called _**subjects**_, and the APIs and resources that users may or may not have access to are called **_resources_**. We also have _**verbs**_, which are the actions and operations that can be run on a **_resource_** by a **_subject_**.[^n1]
 
 ## Roles and ClusterRoles
 
@@ -139,7 +139,7 @@ rules:
 
 ### Creating ClusterRoles
 
-For the Role that will apply to Thiago, we need to let him read and list any resource in any namespace of the cluster. That would be a pain if we tried to do it with a regular Role, so let's create a ClusterRole so it can be applied automatically. We'll call this ClusterRole `readonly`:<Sidenote>Notice that ClusterRoles don't have a `namespace` key.</Sidenote>
+For the Role that will apply to Thiago, we need to let him read and list any resource in any namespace of the cluster. That would be a pain if we tried to do it with a regular Role, so let's create a ClusterRole so it can be applied automatically. We'll call this ClusterRole `readonly`:[^n2]
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -292,3 +292,7 @@ Now that the bindings are created, we can run commands as each user and each of 
 Now we know how to create users and how to assign permissions to them. In the next articles, we'll see how to take our authentication model even further using Azure Managed AD with AKS!
 
 See you there!
+
+[^n1]: Verbs are basically the calls a user can make against a given resource. For example, creating a Pod is the **verb** `create` on the **resource** `Pod`, done by the user.
+
+[^n2]: Notice that ClusterRoles don't have a `namespace` key.

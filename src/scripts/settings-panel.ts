@@ -25,8 +25,6 @@ import { onReady } from './ready'
 
 const HP_PERSIST_KEY = 'hp-persist'
 
-const HP_FOOTNOTES_KEY = 'hp-footnotes'
-
 const NUDGE_KEY = 'settings-nudge-seen'
 
 const FONT_SIZE_KEY = 'font-size'
@@ -239,18 +237,6 @@ function init(): void {
     syncSearchKey()
     searchKey.addEventListener('change', () => setShortcutLetter(searchKey.value))
     resetHandlers.push(syncSearchKey)
-  }
-
-  const hpFootnotes = menu.querySelector<HTMLInputElement>('#hp-footnotes')
-  if (hpFootnotes !== null) {
-    hpFootnotes.checked = readStorage(HP_FOOTNOTES_KEY) === '1'
-    hpFootnotes.addEventListener('change', () => {
-      writeStorage(HP_FOOTNOTES_KEY, hpFootnotes.checked ? '1' : null)
-    })
-    resetHandlers.push(() => {
-      hpFootnotes.checked = false
-      removeStorage(HP_FOOTNOTES_KEY)
-    })
   }
 
   const hpPersist = menu.querySelector<HTMLInputElement>('#hp-persist')

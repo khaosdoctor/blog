@@ -80,7 +80,7 @@ predicate:
       sha1: 5b8c0801d1f5d105351a403f58c38269de93f680
 ```
 
-To generate your own provenance file, NPM created a flag called `--provenance`, so all you need to do is run `npm publish --provenance` and your package gets signed.<Sidenote>Take a look [at the docs](https://docs.npmjs.com/generating-provenance-statements) too, there's a lot of interesting stuff there</Sidenote>
+To generate your own provenance file, NPM created a flag called `--provenance`, so all you need to do is run `npm publish --provenance` and your package gets signed.[^n1]
 
 But then comes the question: why pull data from CI? Simply because it's not easy to tamper with that data. Mainly because even if you try to mess with the machine's process by injecting a `child_process`, well-known servers like GitHub's will still hold information you can't strip out, like IP addresses, for example. That way NPM can cross-check the data in the submitted provenance against the data GitHub itself returns.
 
@@ -126,3 +126,5 @@ There you can scroll down to the **Data** section and see that all the CI-relate
 The provenance process is pretty interesting on its own, and it's an excellent way to protect the package chain that's essential to modern development, but it's also one of the easiest ways for someone to get hacked.
 
 Right now, only GitHub Actions has the verification needed to get a provenance, but, according to NPM, other CIs are being added.
+
+[^n1]: Take a look [at the docs](https://docs.npmjs.com/generating-provenance-statements) too, there's a lot of interesting stuff there

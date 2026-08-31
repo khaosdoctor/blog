@@ -22,7 +22,7 @@ Esse repositório está no [GitHub da comunidade HarperDB](https://github.com/Ha
 
 ### Configurando Node e TypeScript
 
-Pra usar TypeScript você precisa ter o Node.js instalado, de preferência a última versão LTS. Você confere rodando `node -v` no terminal. Se ainda não tiver instalado, pode baixar [aqui](https://nodejs.org/en/download/), ou usar um gerenciador de versões como [asdf](https://asdf-vm.com/#/core-manage-asdf-vm), [nvm](https://github.com/nvm-sh/nvm), ou até o [volta](https://volta.sh/).<Sidenote>Estou usando a versão 20.7.0 do Node.js, mas você pode usar qualquer versão acima da 18 no momento em que esse artigo foi escrito.</Sidenote>
+Pra usar TypeScript você precisa ter o Node.js instalado, de preferência a última versão LTS. Você confere rodando `node -v` no terminal. Se ainda não tiver instalado, pode baixar [aqui](https://nodejs.org/en/download/), ou usar um gerenciador de versões como [asdf](https://asdf-vm.com/#/core-manage-asdf-vm), [nvm](https://github.com/nvm-sh/nvm), ou até o [volta](https://volta.sh/).[^n1]
 
 Vamos criar um novo diretório (pode dar o nome que quiser) e, dentro dele, rodar o comando `npm init -y`. Isso vai gerar um novo arquivo `package.json` com os valores padrão. Agora vamos instalar o TypeScript como dependência de desenvolvimento rodando `npm install --save-dev typescript`. Isso instala a última versão do TypeScript no seu projeto.
 
@@ -296,7 +296,7 @@ Como estamos usando o Harper, toda nossa comunicação com o banco é feita atra
 > [!TIP]
 > É uma boa prática nomear APIs externas como "clients". Se tivéssemos qualquer outra camada de dados, digamos um sistema de filas que não é conectado via API, poderíamos simplesmente chamar de `queueAdapter` ou `queue`. Isso não é uma regra, mas na minha opinião fica mais fácil entender o que o arquivo está fazendo, se é um agente externo ou um driver interno.
 
-Nosso cliente é uma API HTTP, então vamos usar o `fetch` nativo do node pra nos comunicarmos com ele.<Sidenote>A fetch api só está disponível a partir do node 18.</Sidenote> Vamos adicionar o seguinte código no nosso arquivo `TodoItemClient.ts`:
+Nosso cliente é uma API HTTP, então vamos usar o `fetch` nativo do node pra nos comunicarmos com ele.[^n2] Vamos adicionar o seguinte código no nosso arquivo `TodoItemClient.ts`:
 
 ```ts
 import { TodoItem, TodoObjectType } from '../domain/TodoItem.js'
@@ -726,3 +726,7 @@ Você também pode fazer requisições você mesmo pra API usando `curl` ou qual
 Nesse artigo aprendemos como configurar um projeto TypeScript com HarperDB, aprendemos a separar nosso código em camadas, e aprendemos a testar nossa aplicação. Também aprendemos algumas boas práticas pelo caminho.
 
 A ideia é que essas camadas não estão gravadas em pedra, você pode adicionar mais camadas se precisar, ou remover algumas se não precisar delas. O importante é ter uma separação clara de responsabilidades e garantir que seu código seja fácil de manter.
+
+[^n1]: Estou usando a versão 20.7.0 do Node.js, mas você pode usar qualquer versão acima da 18 no momento em que esse artigo foi escrito.
+
+[^n2]: A fetch api só está disponível a partir do node 18.

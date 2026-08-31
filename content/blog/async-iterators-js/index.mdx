@@ -127,7 +127,7 @@ const iterable = {
 }
 ```
 
-Agora podemos utilizar ele normalmente, com `for (const x of iterable)` e teremos todos os valores do `array` sendo iterador um a um.<Sidenote>Se você quiser saber um pouco mais sobre **Symbols**, dê uma olhada [neste outro artigo que escrevi só sobre o tema](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mist%C3%A9rio-383e359e64e3).</Sidenote>
+Agora podemos utilizar ele normalmente, com `for (const x of iterable)` e teremos todos os valores do `array` sendo iterador um a um.[^n1]
 
 
 Por baixo dos panos, todos os arrays e objetor possuem um `Symbol.iterator` para que possamos fazer `for (let x of [1,2,3])` e retornar os valores que queremos.
@@ -353,3 +353,5 @@ Desta forma podemos fazer um loop por todas as nossas linhas retornadas sem prec
 Async iterators são extremamente poderosos, especialmente em linguagens dinâmicas e assíncronas como o Javascript, com eles você pode transformar uma execução complexa em um código simples, escondendo a maioria da complexidade do usuário.
 
 Não deixe de acompanhar mais do meu conteúdo aqui no blog!
+
+[^n1]: Se você quiser saber um pouco mais sobre **Symbols**, dê uma olhada [neste outro artigo que escrevi só sobre o tema](https://medium.com/trainingcenter/javascript-symbols-decifrando-o-mist%C3%A9rio-383e359e64e3).

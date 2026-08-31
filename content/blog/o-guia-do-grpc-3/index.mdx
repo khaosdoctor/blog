@@ -100,7 +100,7 @@ message NoteListResponse {
 }
 ```
 
-Com isso nós já sabemos basicamente tudo que precisamos para poder criar nosso servidor. Um servidor gRPC possui duas principais interfaces, a primeira é a interface base que contém todos os métodos que podem ser criados e a segunda é a implementação do servidor. Então o ideal é que pudéssemos fazer algo assim:<Sidenote>Todos os tipos que estamos usando na chamada anterior, como o `ServerUnaryCall` e o `sendUnaryData` são [provenientes do `@grpc/grpc-js` nativamente](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src/server-call.ts#L84-L86), já que a lib é escrita em TypeScript, veja mais dos tipos [no repositório oficial](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src).</Sidenote>
+Com isso nós já sabemos basicamente tudo que precisamos para poder criar nosso servidor. Um servidor gRPC possui duas principais interfaces, a primeira é a interface base que contém todos os métodos que podem ser criados e a segunda é a implementação do servidor. Então o ideal é que pudéssemos fazer algo assim:[^n1]
 
 ```typescript
 class NotesServer implements NotesServerInterface {
@@ -641,3 +641,5 @@ Como pudermos ver, temos uma grande facilidade em transformar tudo em TypeScript
 Apesar de gRPC com TypeScript ser incrível, ainda temos alguns passos a percorrer para transformar essa modalidade em uma forma mais útil para que todos possamos utilizá-lo. Estou tentando fazer isso com algumas libs como o [protots](https://github.com/khaosdoctor/protots) para gerar interfaces e não apenas tipos, dessa forma podemos abstrair um pouco mais das funcionalidades de forma que não precisemos da uma implementação completa do gRPC para ter os tipos funcionais.
 
 Nas próximas partes da série, vamos abordar muitas coisas, como `buf` e `streams`, então curta e compartilhe este post com seus amigos e amigas para que possamos espalhar a palavra do gRPC e mostrar que não é tão difícil assim fazer uma API que possa ser utilizada de forma unificada por todos!
+
+[^n1]: Todos os tipos que estamos usando na chamada anterior, como o `ServerUnaryCall` e o `sendUnaryData` são [provenientes do `@grpc/grpc-js` nativamente](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src/server-call.ts#L84-L86), já que a lib é escrita em TypeScript, veja mais dos tipos [no repositório oficial](https://github.com/grpc/grpc-node/blob/master/packages/grpc-js/src).

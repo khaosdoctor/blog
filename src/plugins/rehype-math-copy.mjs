@@ -41,7 +41,7 @@ function isKatexDisplay(node) {
 /**
  * Both strings a reader can perceive. Kept here rather than in src/i18n/ui.ts:
  * the plugin layer keeps its own copy rather than importing from the app's
- * i18n module, the same choice rehype-footnote-sidenotes.mjs makes for its own
+ * i18n module, the same choice rehype-footnote-asides.mjs makes for its own
  * table.
  */
 const COPY_LABEL = { pt: 'copiar a fórmula como texto', en: 'copy formula as text' }

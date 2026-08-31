@@ -650,7 +650,7 @@ m() // hi!
 
 An object we haven't used here yet is the `access` object that comes from inside decorator contexts.
 
-A very useful example is building a **dependency injection container**, a very handy tool for automatically creating instances of dependent classes for classes that need those dependencies, so you don't have to pass every dependency as a parameter.<Sidenote>This is already a reality with the [TSyringe](http://npm.im/tsyringe) library, built by Microsoft to show off the power of decorators in TypeScript.</Sidenote>
+A very useful example is building a **dependency injection container**, a very handy tool for automatically creating instances of dependent classes for classes that need those dependencies, so you don't have to pass every dependency as a parameter.[^n1]
 
 Essentially what we need is a global list of classes and their dependencies:
 
@@ -837,3 +837,5 @@ Decorators are an incredible design pattern with huge potential to become one of
 Personally, I see strong adoption coming from monitoring tools like NewRelic, NSolid, and Datadog for Node.js, and even JavaScript in the browser!
 
 Comment below on what you think of this proposal and tag me [on Twitter](https://twitter.lsantos.dev) so I know your take!
+
+[^n1]: This is already a reality with the [TSyringe](http://npm.im/tsyringe) library, built by Microsoft to show off the power of decorators in TypeScript.

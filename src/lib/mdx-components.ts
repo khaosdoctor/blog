@@ -4,7 +4,6 @@ import HtmlLab from '../components/HtmlLab.astro'
 import LabDemo from '../components/LabDemo.astro'
 import MissingImage from '../components/MissingImage.astro'
 import RawEmbed from '../components/RawEmbed.astro'
-import Sidenote from '../components/Sidenote.astro'
 import SpeakerDeck from '../components/SpeakerDeck.astro'
 import Spotify from '../components/Spotify.astro'
 import Tweet from '../components/Tweet.astro'
@@ -17,7 +16,6 @@ export const mdxComponents = {
   LabDemo,
   MissingImage,
   RawEmbed,
-  Sidenote,
   SpeakerDeck,
   Spotify,
   Tweet,

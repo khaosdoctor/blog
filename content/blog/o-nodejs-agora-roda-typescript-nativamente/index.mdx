@@ -19,7 +19,7 @@ Em algumas edições [anteriores](/tsx-loader/), eu falei que era possível roda
 
 O que acontece é que podemos utilizar _loaders_. Loaders são hooks especiais que permitem que a gente modifique o comportamento do _module loader_ nativo, utilizado quando carregamos qualquer módulo [ESM](/os-ecmascript-modules-estao-aqui/). Esses loaders são bastante poderosos porque eles permitem, entre outras coisas, que a gente faça ações diretamente com o código que será carregado em memória. Que é exatamente como o **TSX** se comporta.
 
-Mas agora isso não é mais necessário! A partir da versão [22.6 do Node](https://nodejs.org/en/blog/release/v22.6.0) duas novas flags experimentais foram adicionadas:<Sidenote>O fato curioso aqui é que o nome dessa flag era para ser `enable-transformation` e eu [sugeri](https://github.com/nodejs/node/pull/54283#discussion_r1711462259) que mudássemos para algo como `enable-type-transformation` para manter a semântica.</Sidenote>
+Mas agora isso não é mais necessário! A partir da versão [22.6 do Node](https://nodejs.org/en/blog/release/v22.6.0) duas novas flags experimentais foram adicionadas:[^n1]
 
 -   `--experimental-strip-types`: Que vai receber um arquivo TS e remover completamente qualquer anotação de tipo que exista nele. É a forma mais simples de transpilação, apenas removendo o que não é JavaScript nativo. É importante dizer que funcionalidades que requerem transformação de código como `enum` e `namespace` **não** vão funcionar.
 -   `--experimental-transform-types`: implica que a flag anterior vai estar ativa, ou seja, se você passar essa flag, a anterior vai ser automaticamente passada. E permite transformação de tipos, dessa forma podemos utilizar as funcionalidades que antes não seriam habilitadas, fazendo essencialmente o suporte quase completo a TypeScript.
@@ -64,7 +64,7 @@ Desde a versão 23, quando qualquer código é importado, basicamente existe uma
 
 ## Tendo a melhor experiência com TS no Node
 
-Por mais que o Node tentasse suportar todas as configurações nativas do TypeScript, ele nunca iria suportar o `tsconfig` nativamente (como foi dito [no artigo do Marco Ippolito](https://satanacchio.hashnode.dev/everything-you-need-to-know-about-nodejs-type-stripping#heading-why-typescript)), e nem faria sentido isso acontecer. Por isso, algumas configurações são necessárias para alinhar o funcionamento do TypeScript com o do Node.js.<Sidenote>Você também pode ver o [artigo da documentação do Node](https://nodejs.org/api/typescript.html) sobre essa mudança.</Sidenote>
+Por mais que o Node tentasse suportar todas as configurações nativas do TypeScript, ele nunca iria suportar o `tsconfig` nativamente (como foi dito [no artigo do Marco Ippolito](https://satanacchio.hashnode.dev/everything-you-need-to-know-about-nodejs-type-stripping#heading-why-typescript)), e nem faria sentido isso acontecer. Por isso, algumas configurações são necessárias para alinhar o funcionamento do TypeScript com o do Node.js.[^n2]
 
 Primeiro de tudo, você precisa setar o seu `tsconfig` para usar `esnext` como `target` e `nodenext` como `module`:
 
@@ -163,3 +163,7 @@ Provavelmente, na versão 5.8, o time do TS vai incluir uma [flag](https://githu
 Muita gente acha que esse é o fim do TypeScript, mas é justamente o contrário, agora o TypeScript estará mais presente do que nunca! Com todos os runtimes suportando TS nativamente, ele está gradualmente caminhando para ser, provavelmente, a linguagem padrão da web.
 
 Claro, ainda existem algumas mudanças que precisam ser feitas, principalmente para a configuração ser mais amigável e menos dolorosa, mas essa mudança é o início de uma pequena revolução que, talvez, substitua o JavaScript como a linguagem mais usada da Web.
+
+[^n1]: O fato curioso aqui é que o nome dessa flag era para ser `enable-transformation` e eu [sugeri](https://github.com/nodejs/node/pull/54283#discussion_r1711462259) que mudássemos para algo como `enable-type-transformation` para manter a semântica.
+
+[^n2]: Você também pode ver o [artigo da documentação do Node](https://nodejs.org/api/typescript.html) sobre essa mudança.

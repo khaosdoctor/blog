@@ -22,7 +22,7 @@ Mas e ai? Como a gente começa a fazer um teste usando o Node.js Test Runner (NT
 
 Diferente da maioria dos test runners como o [Jest](/jest-com-typescript/), você não precisa baixar nenhum tipo de dependência pra usar o NTR, é só ter a o Node.js na versão 20 ou superior instalada na sua máquina e está tudo certo.
 
-Para saber se você tem tudo certo, é só rodar o comando `node --test` em uma pasta vazia.<Sidenote>O comando é recursivo, então ele vai tentar entrar em todas as suas pastas.</Sidenote> Como o node não vai encontrar nenhum arquivo, a sua saída deve ser essa:
+Para saber se você tem tudo certo, é só rodar o comando `node --test` em uma pasta vazia.[^n1] Como o node não vai encontrar nenhum arquivo, a sua saída deve ser essa:
 
 ![](./image.png)
 
@@ -273,7 +273,7 @@ Vamos alterar o nosso comando no `package.json` para isso aqui:
 }
 ```
 
-Se você rodar o comando agora, nada vai mudar, porque nosso arquivo mjs ainda é o mesmo e o TSX consegue rodar esse arquivo tranquilamente. Agora vamos alterar as extensões para `.mts` e rodar o teste de novo com `npm t`. A sua saída vai ser algo assim:<Sidenote>O erro que estamos vendo no code coverage é o motivo pelo qual ele ainda está como `--experimental`. Ele já foi reportado [aqui](https://github.com/nodejs/node/issues/52775) e parece ter uma correção [aqui](https://github.com/nodejs/node/pull/53153).</Sidenote>
+Se você rodar o comando agora, nada vai mudar, porque nosso arquivo mjs ainda é o mesmo e o TSX consegue rodar esse arquivo tranquilamente. Agora vamos alterar as extensões para `.mts` e rodar o teste de novo com `npm t`. A sua saída vai ser algo assim:[^n2]
 
 ```js
 ▶ sum
@@ -296,3 +296,7 @@ Se você rodar o comando agora, nada vai mudar, porque nosso arquivo mjs ainda �
 O Node.js Test Runner é atualmente o mais rápido e mais simples runner de testes no ecossistema JavaScript/TypeScript, e também um dos mais simples de configurar.
 
 Nesse artigo cobrimos apenas o básico do básico, mas vou voltar com mais coisas sobre como criar mocks, como mockar timers e como eu implementei funcionalidades no core do Node.js, especificamente neste módulo!
+
+[^n1]: O comando é recursivo, então ele vai tentar entrar em todas as suas pastas.
+
+[^n2]: O erro que estamos vendo no code coverage é o motivo pelo qual ele ainda está como `--experimental`. Ele já foi reportado [aqui](https://github.com/nodejs/node/issues/52775) e parece ter uma correção [aqui](https://github.com/nodejs/node/pull/53153).

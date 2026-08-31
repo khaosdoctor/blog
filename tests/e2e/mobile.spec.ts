@@ -189,32 +189,28 @@ test.describe('hover previews on touch', () => {
   })
 })
 
-test.describe('notes on touch', () => {
+test.describe('footnotes on touch', () => {
   test.use({ viewport: { width: 360, height: 780 }, hasTouch: true, isMobile: true })
 
   test('the marker opens the note as a panel at the bottom edge', async ({ page }) => {
     await page.goto('/lab/')
-    const toggle = page.locator('#sidenote-1 .note-toggle')
-    const panel = page.locator('#sidenote-1 .note-text')
+    const marker = page.locator('button.footnote-ref').first()
+    const panel = page.locator('.footnote-aside').first()
 
-    await page.locator('#sidenote-1 .note-marker').tap()
-    await expect(toggle).toBeChecked()
+    // The foot-of-post list is the only place every note reads in one go, so it
+    // has to survive the panel taking over the marker.
+    await expect(page.locator('section[data-footnotes]')).toBeVisible()
 
-    // Polled: the panel is mid-slide right after the tap.
-    await expect
-      .poll(async () => {
-        const box = await panel.boundingBox()
-        return box ? Math.round(box.y + box.height) : -1
-      })
-      .toBe(780)
+    await marker.tap()
+    await expect(panel).toBeVisible()
 
     const box = await panel.boundingBox()
+    expect(Math.round(box!.y + box!.height)).toBe(780)
     expect(box!.x).toBe(0)
-    expect(box!.width).toBe(360)
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0)
 
-    await page.touchscreen.tap(8, 200)
-    await expect(toggle).not.toBeChecked()
+    await page.keyboard.press('Escape')
+    await expect(panel).toBeHidden()
   })
 })
 

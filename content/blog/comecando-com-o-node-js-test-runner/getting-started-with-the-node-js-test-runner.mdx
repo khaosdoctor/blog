@@ -23,7 +23,7 @@ But ok, how do we actually start writing a test using the Node.js Test Runner (N
 
 Unlike most test runners like [Jest](/jest-com-typescript/), you don't need to install any dependency to use the NTR. You just need Node.js version 20 or higher installed on your machine and you're set.
 
-To check if everything's fine, just run `node --test` in an empty directory.<Sidenote>The command is recursive, so it'll try to go into every directory below it.</Sidenote> Since Node won't find any files, your output should look like this:
+To check if everything's fine, just run `node --test` in an empty directory.[^n1] Since Node won't find any files, your output should look like this:
 
 ![](./image.png)
 
@@ -274,7 +274,7 @@ Let's change our command in `package.json` to this:
 }
 ```
 
-If you run the command now, nothing will change, because our mjs file is still the same and TSX can run it just fine. Now let's change the extensions to `.mts` and run the test again with `npm t`. Your output will look something like this:<Sidenote>The error we're seeing on code coverage is the reason it's still marked `--experimental`. It's already been reported [here](https://github.com/nodejs/node/issues/52775) and there seems to be a fix [here](https://github.com/nodejs/node/pull/53153).</Sidenote>
+If you run the command now, nothing will change, because our mjs file is still the same and TSX can run it just fine. Now let's change the extensions to `.mts` and run the test again with `npm t`. Your output will look something like this:[^n2]
 
 ```js
 ▶ sum
@@ -297,3 +297,7 @@ If you run the command now, nothing will change, because our mjs file is still t
 The Node.js Test Runner is currently the fastest and simplest test runner in the JavaScript/TypeScript ecosystem, and also one of the easiest to set up.
 
 In this article we only covered the basics of the basics, but I'll be back with more on how to create mocks, how to mock timers, and how I implemented features in Node.js core, specifically in this very module!
+
+[^n1]: The command is recursive, so it'll try to go into every directory below it.
+
+[^n2]: The error we're seeing on code coverage is the reason it's still marked `--experimental`. It's already been reported [here](https://github.com/nodejs/node/issues/52775) and there seems to be a fix [here](https://github.com/nodejs/node/pull/53153).

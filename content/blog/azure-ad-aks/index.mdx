@@ -123,7 +123,7 @@ az role assignment create \
   --scope $AKSID
 ```
 
-Vamos adicionar um novo usuário chamado Alice a este grupo que acabamos de criar, vamos então copiar o ObjectID quando criarmos:<Sidenote>Quando criarmos um usuário precisamos de um domínio **válido**. Para obter este domínio podemos executar `az ad user list --query "[*].userPrincipalName" -o json` e copiar tudo o que vier depois do "@".</Sidenote>
+Vamos adicionar um novo usuário chamado Alice a este grupo que acabamos de criar, vamos então copiar o ObjectID quando criarmos:[^n1]
 
 ```bash
 ALICE=$(az ad user create \
@@ -149,7 +149,7 @@ Primeiro vamos criar o role chamado `ReadOnlyRole`:
 kubectl create clusterrole ReadOnlyRole --verb=get,list,watch --resource="*"
 ```
 
-Vamos criar agora o binding deste role ao nosso ID do grupo no AD:<Sidenote>Podemos também vincular o role a um usuário utilizando o ObjectID do usuário ao invés do ObjectID do grupo no comando acima.</Sidenote>
+Vamos criar agora o binding deste role ao nosso ID do grupo no AD:[^n2]
 
 ```bash
 kubectl create clusterrolebinding ReadOnlyBinding \
@@ -178,3 +178,7 @@ Você vai receber uma mensagem de "proibido".
 Aprendemos como podemos utilizar ainda mais do poder da Azure para integrar autenticações e mais facilidades no nosso cluster AKS. Com esse tipo de integração podemos deixar nosso cluster ainda mais seguro.
 
 Até mais!
+
+[^n1]: Quando criarmos um usuário precisamos de um domínio **válido**. Para obter este domínio podemos executar `az ad user list --query "[*].userPrincipalName" -o json` e copiar tudo o que vier depois do "@".
+
+[^n2]: Podemos também vincular o role a um usuário utilizando o ObjectID do usuário ao invés do ObjectID do grupo no comando acima.

@@ -206,7 +206,7 @@ kubectl config set-context lucas \
   --user=lucas
 ```
 
-Como clonamos a imagem base do AKS, ela está com o acesso administrativo por padrão, vamos remover o acesso de administrador antes de enviar para o nosso usuário:<Sidenote>Para saber os nomes corretos, dê uma lida no seu arquivo `kubeconfig` para poder achar estas chaves.</Sidenote>
+Como clonamos a imagem base do AKS, ela está com o acesso administrativo por padrão, vamos remover o acesso de administrador antes de enviar para o nosso usuário:[^n1]
 
 ```bash
 kubectl config delete-context <nome-do-contexto> 
@@ -261,3 +261,5 @@ Vimos como podemos criar usuários no Kubernetes através de certificados digita
 Com isso, a segurança do seu cluster irá aumentar muito e você se tornará capaz de entender e gerenciar os usuários para que ninguém possa fazer algo diferente do que você está permitindo. Melhorando a auditoria no processo.
 
 Até mais!
+
+[^n1]: Para saber os nomes corretos, dê uma lida no seu arquivo `kubeconfig` para poder achar estas chaves.

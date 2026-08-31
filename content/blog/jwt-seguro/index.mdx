@@ -15,7 +15,7 @@ Segurança na Web é uma preocupação que deveria ser de todas as pessoas, prin
 
 Se você já leu meus conteúdos, sabe que eu sou um grande fã do padrão da RFC7519, o famoso [JWT](https://jwt.io), tanto é que há um bom tempo eu cheguei a [escrever um artigo](https://medium.com/trainingcenter/jwt-usando-tokens-para-comunicação-eficiente-cf0551c0dd99) sobre como tudo funciona e explicar todos os detalhes da implementação de um token desse tipo.
 
-O problema é que essa implementação é inerentemente **insegura**, e eu vou te dizer o por quê.<Sidenote>O código usado nesse exemplo pode ser encontrado [no meu GitHub](https://github.com/khaosdoctor/secure-jwt-tokens)</Sidenote>
+O problema é que essa implementação é inerentemente **insegura**, e eu vou te dizer o por quê.[^n1]
 
 https://github.com/khaosdoctor/secure-jwt-tokens
 
@@ -120,7 +120,7 @@ Essa solução ainda sim não é a ideal, porque ainda sim temos um token que po
 
 Uma forma que podemos manter os tokens de refresh seguros é o uso do que chamamos de _fingerprints_, eles se parecem bastante com tokens CSRF. A ideia é ter um valor único que é gerado do lado do servidor e armazenado como um Cookie seguro.
 
-Além disso a fingerprint é incluída no token, de forma que ela não possa ser alterada sem invalidar o token.<Sidenote>O código para este exemplo está no branch `fingerprinting` do [repositório do GitHub](https://github.com/khaosdoctor/secure-jwt-tokens). Veja o arquivo `handlers.ts` e `index.js` para as [diferenças](https://github.com/khaosdoctor/secure-jwt-tokens/compare/fingerprinting)</Sidenote>
+Além disso a fingerprint é incluída no token, de forma que ela não possa ser alterada sem invalidar o token.[^n2]
 
 Quando o usuário fizer uma request para um refresh, a fingerprint irá junto com o token de refresh, podemos então decodificar o token e verificar se a fingerprint do token é a mesma do Cookie, se por algum motivo a fingerprint do Cookie for diferente da que está no token, teremos um acesso inválido.
 
@@ -879,3 +879,7 @@ Veja como ficou o resultado final animado:
 Essa saga ainda não terminou! Vamos explorar muito mais sobre como podemos armazenar e utilizar tokens de forma segura nos próximos artigos! Duas leituras que recomendo bastante são [as do blog da Hasura sobre tokens](https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/) e [esse artigo super legal do Ryan Chenkie](https://medium.com/@ryanchenkie_40935/react-authentication-how-to-store-jwt-in-a-cookie-346519310e81).
 
 Não deixa de voltar para ver e [assinar a newsletter](https://news.lsantos.dev) para conteúdo novo e exclusivo!
+
+[^n1]: O código usado nesse exemplo pode ser encontrado [no meu GitHub](https://github.com/khaosdoctor/secure-jwt-tokens)
+
+[^n2]: O código para este exemplo está no branch `fingerprinting` do [repositório do GitHub](https://github.com/khaosdoctor/secure-jwt-tokens). Veja o arquivo `handlers.ts` e `index.js` para as [diferenças](https://github.com/khaosdoctor/secure-jwt-tokens/compare/fingerprinting)

@@ -152,7 +152,7 @@ Nem todo registro DNS guarda o mesmo tipo de coisa, e confundir um pelo outro é
 | `TXT`   | Texto arbitrário                     | provar que você é dono do domínio |
 | `NS`    | Quem é a autoridade daquela zona     | delegar um subdomínio inteiro  |
 
-A consulta raramente para no primeiro registro encontrado. Um `CNAME` manda o resolvedor perguntar de novo pelo nome novo, e essa cadeia pode ter vários elos antes de chegar a um `A` de verdade.<Sidenote>Uma cadeia de `CNAME` longa demais é uma causa clássica de lentidão silenciosa: cada elo é uma volta extra ao resolvedor, mesmo que cada volta individual seja rápida.</Sidenote> Nenhum desses registros expira sozinho: quem decide por quanto tempo ele fica em cache é o `TTL`, um número em segundos que acompanha cada resposta.<Sidenote>Um `TTL` baixo demais multiplica o tráfego sobre a autoridade; um `TTL` alto demais atrasa qualquer correção depois de um erro de configuração. A prática comum é baixar o `TTL` horas antes de uma migração planejada e subir de volta depois que o novo endereço já se espalhou.</Sidenote>
+A consulta raramente para no primeiro registro encontrado. Um `CNAME` manda o resolvedor perguntar de novo pelo nome novo, e essa cadeia pode ter vários elos antes de chegar a um `A` de verdade.[^n1] Nenhum desses registros expira sozinho: quem decide por quanto tempo ele fica em cache é o `TTL`, um número em segundos que acompanha cada resposta.[^n2]
 
 > A internet inteira funciona porque ninguém precisa saber o endereço de ninguém, só o nome.
 
@@ -445,3 +445,6 @@ isso apagaria a textura das células inteira.
 
 <LabDemo src="./components/GameOfLife.vue" client:visible />
 
+[^n1]: Uma cadeia de `CNAME` longa demais é uma causa clássica de lentidão silenciosa: cada elo é uma volta extra ao resolvedor, mesmo que cada volta individual seja rápida.
+
+[^n2]: Um `TTL` baixo demais multiplica o tráfego sobre a autoridade; um `TTL` alto demais atrasa qualquer correção depois de um erro de configuração. A prática comum é baixar o `TTL` horas antes de uma migração planejada e subir de volta depois que o novo endereço já se espalhou.

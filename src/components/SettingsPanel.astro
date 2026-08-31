@@ -134,11 +134,6 @@ const { locale } = Astro.props
     <CodeTheme locale={locale} />
 
     <label class="sp-row">
-      <input type="checkbox" id="hp-footnotes" />
-      {t(locale, 'footnotePreviews')}
-    </label>
-
-    <label class="sp-row">
       <input type="checkbox" id="hp-persist" />
       {t(locale, 'keepPreviews')}
     </label>
@@ -407,9 +402,8 @@ const { locale } = Astro.props
     display: none;
   }
 
-  /* Preview cards only open on a hovering pointer: neither row can do anything here. */
+  /* Preview cards only open on a hovering pointer: the row can do nothing here. */
   @media (hover: none), (pointer: coarse) {
-    .sp-row:has(#hp-footnotes),
     .sp-row:has(#hp-persist) {
       display: none;
     }

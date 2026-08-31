@@ -177,13 +177,13 @@ Quando você não sabe o resultado de uma chamada de API ou quando você quer ob
 
 ![](./image-75.png)
 
-A não ser que a pessoa que esteja usando essa função passe o argumento de retorno, a saída não pode ser manipulada.<Sidenote>Na verdade, essa é a forma que o `fetch` nativo do browser é implementado.</Sidenote>
+A não ser que a pessoa que esteja usando essa função passe o argumento de retorno, a saída não pode ser manipulada.[^n1]
 
 ### Never say never
 
 O não-tipo. O tipo `never` é o tipo que não representa nenhum tipo, ele não pode ser intersectado ou unido com ninguém, ele é ele mesmo e representa o resultado de uma operação que nunca pode acontecer, ou seja, se você chegou no fim de um caso, recursão ou qualquer outra coisa, o `never` é seu amigo porque ele impede que este retorno seja misturado com qualquer outra coisa.
 
-Os usos mais comuns do `never` são para indicar caminhos que uma função não pode percorrer, ou seja, formas que ela não pode ser usada.<Sidenote>O `never` é bem mais comum em bibliotecas e outras tipagens que são estendidas por outras pessoas, raramente você vai ter que usar manualmente em um código de produção.</Sidenote>
+Os usos mais comuns do `never` são para indicar caminhos que uma função não pode percorrer, ou seja, formas que ela não pode ser usada.[^n2]
 
 Um exemplo, é o uso de `never` para fazer uma divisão onde o denominador é zero e não queremos que isso aconteça. Então se tivermos uma função desse tipo:
 
@@ -199,11 +199,11 @@ Podemos usar várias outras técnicas pra deixar a função completamente TypeSa
 
 ## Configuração
 
-Além das boas práticas de código, existem também as boas práticas de configuração, ou seja, configurar o compilador do TS de forma que ele consiga dar pra você o melhor da inferência de tipos sem deixar que você caia em ciladas.<Sidenote>Todas as opções que eu vou falar aqui são colocadas dentro da chave `compilerOptions` no seu `tsconfig.json`.</Sidenote>
+Além das boas práticas de código, existem também as boas práticas de configuração, ou seja, configurar o compilador do TS de forma que ele consiga dar pra você o melhor da inferência de tipos sem deixar que você caia em ciladas.[^n3]
 
 ### Sempre use `strict: true`
 
-Como primeira recomendação, mantenha a opção `strict: true` ativa, isso vai garantir uma série de checagens de código explícitas que o compilador vai fazer por padrão, além de ser o modelo mais seguro e recomendado até mesmo pelos devs do TS.<Sidenote>Ativar essa opção vai automaticamente ativar as opções seguintes e mais [várias outras](https://www.typescriptlang.org/tsconfig#strict).</Sidenote>
+Como primeira recomendação, mantenha a opção `strict: true` ativa, isso vai garantir uma série de checagens de código explícitas que o compilador vai fazer por padrão, além de ser o modelo mais seguro e recomendado até mesmo pelos devs do TS.[^n4]
 
 ### Checagem estrita de nulls
 
@@ -219,7 +219,7 @@ A configuração `noImplicityAny` faz com que o TS deixe de ser uma ferramenta o
 
 ![](./image-83.png)
 
-Tenha em mente que essa é uma opção bastante severa, especialmente se você está migrando uma plataforma de JS para TS, dessa forma, a migração não vai ser só trocar os nomes dos arquivos, mas vai precisar de algumas mudanças manuais.<Sidenote>Se você estiver a fim de usar o TS da forma como ele foi feito para ser usado, você pode ativar uma configuração [do ESLint chamada](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-explicit-any.md) `noExplicitAny`, que vai impedir que você use `any` em **qualquer lugar.**</Sidenote>
+Tenha em mente que essa é uma opção bastante severa, especialmente se você está migrando uma plataforma de JS para TS, dessa forma, a migração não vai ser só trocar os nomes dos arquivos, mas vai precisar de algumas mudanças manuais.[^n5]
 
 ### Outras boas configurações
 
@@ -240,3 +240,13 @@ Agora vamos ver se você pegou bem as boas práticas de código com dois exercí
 
 > [!IMPORTANT]
 > Não esquece de deixar o seu feedback sobre a #SemanaTS aqui [nesse formulário](https://forms.gle/6hAqjVmah9uyR4by8)!
+
+[^n1]: Na verdade, essa é a forma que o `fetch` nativo do browser é implementado.
+
+[^n2]: O `never` é bem mais comum em bibliotecas e outras tipagens que são estendidas por outras pessoas, raramente você vai ter que usar manualmente em um código de produção.
+
+[^n3]: Todas as opções que eu vou falar aqui são colocadas dentro da chave `compilerOptions` no seu `tsconfig.json`.
+
+[^n4]: Ativar essa opção vai automaticamente ativar as opções seguintes e mais [várias outras](https://www.typescriptlang.org/tsconfig#strict).
+
+[^n5]: Se você estiver a fim de usar o TS da forma como ele foi feito para ser usado, você pode ativar uma configuração [do ESLint chamada](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-explicit-any.md) `noExplicitAny`, que vai impedir que você use `any` em **qualquer lugar.**

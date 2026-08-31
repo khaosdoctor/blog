@@ -2,7 +2,7 @@
 
 ## The things that break if you do not know them
 
-**Posts are `.mdx` files containing plain markdown.** Never an import. `remark-embeds`, `remark-figures` and `remark-lab-demos` turn ordinary markdown into components at build time, and the component set is injected into every post, so the handful of tags markdown has no syntax for (`<Video>`, `<Sidenote>`, `<LabDemo>`, `<HtmlLab>`) are written bare. This is deliberate: `content/` is an Obsidian vault, Obsidian renders almost none of that, and writing in Obsidian is the point of the whole rebuild. Do not "modernise" the rest of a post back into components.
+**Posts are `.mdx` files containing plain markdown.** Never an import. `remark-embeds`, `remark-figures` and `remark-lab-demos` turn ordinary markdown into components at build time, and the component set is injected into every post, so the handful of tags markdown has no syntax for (`<Video>`, `<LabDemo>`, `<HtmlLab>`) are written bare. This is deliberate: `content/` is an Obsidian vault, Obsidian renders almost none of that, and writing in Obsidian is the point of the whole rebuild. Do not "modernise" the rest of a post back into components.
 
 **A `.md` post silently loses content.** The plugins emit MDX nodes, and the plain markdown pipeline drops them without an error. Posts must be `.mdx`, translations included. The file extension therefore stops nothing, and the translation guard is what keeps model-written code out.
 

@@ -21,7 +21,7 @@ import '../styles/lab-demo.css'
 import '../styles/core.css'
 import BrandHeader from '../components/BrandHeader.astro'
 import ConwayField from '../components/ConwayField.astro'
-import FootnoteSidenotes from '../components/FootnoteSidenotes.astro'
+import Footnotes from '../components/Footnotes.astro'
 import HoverPreviews from '../components/HoverPreviews.astro'
 import Github from '../components/icons/Github.astro'
 import LinkedIn from '../components/icons/LinkedIn.astro'
@@ -220,7 +220,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       </p>
     </footer>
     <MathCopy />
-    <FootnoteSidenotes />
+    <Footnotes />
     <QuoteCopy />
     <HoverPreviews locale={locale} />
     {
@@ -242,7 +242,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       })
     </script>
     <script is:inline define:vars={{ commitShort }}>
-      var isLocal = ['localhost', '127.0.0.1', '[::1]', '::1'].indexOf(location.hostname) !== -1
+      const isLocal = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(location.hostname)
       if ('serviceWorker' in navigator && isLocal) {
         navigator.serviceWorker
           .getRegistrations()

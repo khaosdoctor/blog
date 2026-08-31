@@ -149,7 +149,7 @@ Together with assertion functions, type guards are the safest ways to guarantee 
 
 ## Enums
 
-Enums have been present in most statically typed programming languages forever. But they're [still not a reality in JavaScript](https://github.com/rbuckton/proposal-enum). TS implements the enum pattern, and enums themselves aren't considered an advanced technique, but knowing when to use them and when not to sure is.<Sidenote>My former coworker, Robin Pokorny, has [a really good article](https://robinpokorny.com/blog/typescript-enums-i-want-to-actually-use/) about this on his blog. I'll try to sum up this point with my own opinions, but it's worth the read.</Sidenote>
+Enums have been present in most statically typed programming languages forever. But they're [still not a reality in JavaScript](https://github.com/rbuckton/proposal-enum). TS implements the enum pattern, and enums themselves aren't considered an advanced technique, but knowing when to use them and when not to sure is.[^n1]
 
 There are plenty of people against enums and plenty in favor of them, I personally like using them a lot, but we have to agree they come with downsides, mainly because they're **the only TS construct that generates JavaScript code**. That's right, if you write an enum like this:
 
@@ -214,3 +214,5 @@ For today's challenge:
 -   Using the type declarations we saw before, extend JavaScript's native `setTimeout` and `setInterval` methods to return a branded type of `TimeoutID` and `IntervalID`, then extend the `clearTimeout` and `clearInterval` functions to accept only the branded types as parameters, not just any number.
 
 > Don't forget to leave your feedback about #SemanaTS here [in this form](https://forms.gle/6hAqjVmah9uyR4by8)!
+
+[^n1]: My former coworker, Robin Pokorny, has [a really good article](https://robinpokorny.com/blog/typescript-enums-i-want-to-actually-use/) about this on his blog. I'll try to sum up this point with my own opinions, but it's worth the read.

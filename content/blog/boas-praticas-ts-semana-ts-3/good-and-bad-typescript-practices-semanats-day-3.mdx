@@ -178,13 +178,13 @@ When you don't know the result of an API call, or when you want to force your us
 
 ![](./image-75.png)
 
-Unless the person using that function passes in the return argument, the output can't be manipulated.<Sidenote>Actually, that's how the browser's native `fetch` is implemented.</Sidenote>
+Unless the person using that function passes in the return argument, the output can't be manipulated.[^n1]
 
 ### Never say never
 
 The non-type. The `never` type is the type that represents no type at all, it can't be intersected or unioned with anything, it just is what it is, and it represents the result of an operation that can never happen. So, if you've reached the end of a case, a recursion, or anything else, `never` is your friend because it stops that return from being mixed with anything else.
 
-The most common uses of `never` are to flag paths a function can't take, meaning ways it can't be used.<Sidenote>`never` is much more common in libraries and other typings that get extended by other people, you'll rarely have to use it by hand in production code.</Sidenote>
+The most common uses of `never` are to flag paths a function can't take, meaning ways it can't be used.[^n2]
 
 One example is using `never` to handle a division where the denominator is zero and we don't want that to happen. So if we have a function like this:
 
@@ -200,11 +200,11 @@ We can use several other techniques to make the function completely type safe. A
 
 ## Configuration
 
-On top of code best practices, there are also configuration best practices, meaning setting up the TS compiler so it can give you the best of type inference without letting you fall into traps.<Sidenote>Every option I'm going to mention here goes inside the `compilerOptions` key in your `tsconfig.json`.</Sidenote>
+On top of code best practices, there are also configuration best practices, meaning setting up the TS compiler so it can give you the best of type inference without letting you fall into traps.[^n3]
 
 ### Always use `strict: true`
 
-As a first recommendation, keep the `strict: true` option on, that'll guarantee a whole set of explicit code checks the compiler runs by default, on top of being the safest setup, recommended even by the TS devs themselves.<Sidenote>Turning this option on automatically turns on the following options and [several others](https://www.typescriptlang.org/tsconfig#strict).</Sidenote>
+As a first recommendation, keep the `strict: true` option on, that'll guarantee a whole set of explicit code checks the compiler runs by default, on top of being the safest setup, recommended even by the TS devs themselves.[^n4]
 
 ### Strict null checks
 
@@ -220,7 +220,7 @@ The `noImplicitAny` setting turns TS from an optionally typed tool into somethin
 
 ![](./image-83.png)
 
-Keep in mind this is a fairly strict option, especially if you're migrating a platform from JS to TS, in that case the migration won't just be renaming files, it'll need some manual changes too.<Sidenote>If you're up for using TS the way it was meant to be used, you can turn on an [ESLint setting called](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-explicit-any.md) `noExplicitAny`, which will stop you from using `any` **anywhere at all.**</Sidenote>
+Keep in mind this is a fairly strict option, especially if you're migrating a platform from JS to TS, in that case the migration won't just be renaming files, it'll need some manual changes too.[^n5]
 
 ### Other good settings
 
@@ -241,3 +241,13 @@ Now let's see if you've got the hang of good code practices with two exercises:
 
 > [!IMPORTANT]
 > Don't forget to leave your feedback about #SemanaTS here [in this form](https://forms.gle/6hAqjVmah9uyR4by8)!
+
+[^n1]: Actually, that's how the browser's native `fetch` is implemented.
+
+[^n2]: `never` is much more common in libraries and other typings that get extended by other people, you'll rarely have to use it by hand in production code.
+
+[^n3]: Every option I'm going to mention here goes inside the `compilerOptions` key in your `tsconfig.json`.
+
+[^n4]: Turning this option on automatically turns on the following options and [several others](https://www.typescriptlang.org/tsconfig#strict).
+
+[^n5]: If you're up for using TS the way it was meant to be used, you can turn on an [ESLint setting called](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-explicit-any.md) `noExplicitAny`, which will stop you from using `any` **anywhere at all.**

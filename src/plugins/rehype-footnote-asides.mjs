@@ -45,7 +45,7 @@ const FOOTNOTES_LABEL = { pt: 'Notas de rodapé', en: 'Footnotes' }
  */
 const BACKREF_LABEL = { pt: 'Voltar para a referência %s', en: 'Back to reference %s' }
 
-export function rehypeFootnoteSidenotes() {
+export function rehypeFootnoteAsides() {
   return (tree, file) => {
     const section = findFootnoteSection(tree)
     if (!section) return
@@ -131,7 +131,13 @@ function insertAsides(children, definitions, handled) {
     if (refs.length === 0) continue
     for (const ref of refs) handled.add(ref)
 
-    const asides = refs.map((ref) => buildAside(ref, definitions)).filter(Boolean)
+    const asides = []
+    for (const ref of refs) {
+      const aside = buildAside(ref, definitions)
+      if (aside === null) continue
+      makeTrigger(ref, aside.properties.id)
+      asides.push(aside)
+    }
     if (asides.length === 0) continue
 
     if (node.tagName === 'p') {
@@ -175,17 +181,51 @@ function buildAside(ref, definitions) {
   // matches the reference's own numbering. Same bracket shape the reference
   // renders (see the sup ::before/::after in footnotes.css).
   const number = textContent(ref).trim()
-  if (number) prependText(clonedBody, `[${number}] `)
+  const head = {
+    type: 'element',
+    tagName: 'span',
+    properties: { className: ['footnote-aside-head'] },
+    children: [{ type: 'text', value: `[${number}]` }],
+  }
 
   return {
     type: 'element',
     tagName: 'aside',
-    // The hook src/components/FootnoteSidenotes.astro needs to pair this
+    // The hook src/components/Footnotes.astro needs to pair this
     // aside with its reference for the hover/focus highlight-and-grow: the
     // reference's own id, not a fresh one, so the script resolves it with a
     // plain getElementById instead of parsing anything at runtime.
-    properties: { className: ['footnote-aside'], id: `${refId}-margin`, dataFootnoteRefId: refId },
-    children: clonedBody,
+    //
+    // `popover` is what makes this one element serve both layouts: the browser
+    // keeps it hidden and opens it in the top layer below the margin
+    // breakpoint, and footnotes.css overrides that display back to a float
+    // above it, where the note is already on screen.
+    properties: {
+      className: ['footnote-aside'],
+      id: `${refId}-margin`,
+      dataFootnoteRefId: refId,
+      popover: '',
+    },
+    children: number ? [head, ...clonedBody] : clonedBody,
+  }
+}
+
+/**
+ * Turns GFM's reference link into the popover's trigger, in place. A button
+ * rather than an anchor because the note now opens where the reader is
+ * standing instead of sending them to the foot of the post, and `popovertarget`
+ * only acts on a button. The reference keeps its own id, so the back-arrow in
+ * the foot-of-post copy still has somewhere to return to.
+ */
+function makeTrigger(ref, asideId) {
+  const id = typeof ref.properties?.id === 'string' ? ref.properties.id : undefined
+  ref.tagName = 'button'
+  ref.properties = {
+    type: 'button',
+    id,
+    className: ['footnote-ref'],
+    popovertarget: asideId,
+    dataFootnoteRef: '',
   }
 }
 
@@ -197,22 +237,6 @@ function textContent(node) {
   if (node.type === 'text') return node.value
   if (!Array.isArray(node.children)) return ''
   return node.children.map(textContent).join('')
-}
-
-/** Prepends text to the first text node found down the leftmost branch of
- * `nodes`, in place. That is always the first thing a reader would see, so
- * this is where the `[1] ` prefix goes regardless of how deep the footnote
- * body's first bit of text lives (a bare paragraph, or something wrapping it
- * like `<em>`). A no-op if the branch bottoms out without hitting text (an
- * image as the very first thing in a footnote, for instance). */
-function prependText(nodes, prefix) {
-  const first = nodes[0]
-  if (!first) return
-  if (first.type === 'text') {
-    first.value = prefix + first.value
-    return
-  }
-  if (first.type === 'element' && Array.isArray(first.children)) prependText(first.children, prefix)
 }
 
 /** Deep-clones the footnote body, drops the backref arrow (meaningless in
@@ -227,7 +251,7 @@ function cloneNode(node) {
   if (node.type === 'text') return { type: 'text', value: node.value }
   if (node.type !== 'element') return { ...node }
 
-  const { id, ...properties } = node.properties ?? {}
+  const { id: _id, ...properties } = node.properties ?? {}
   return {
     type: 'element',
     tagName: node.tagName,

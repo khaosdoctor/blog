@@ -108,7 +108,7 @@ That's why streams are widely used with files and large-scale data: they can han
 
 Since streams are so simple to use in gRPC, you'd expect the protocol's support for them to be really good. And that's exactly what happens: gRPC's stream support is one of the best out there, and it integrates with almost every supported language.
 
-For this demo, we're going to use the same application [we used in article number 2](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), and we'll make a few changes to it to turn a unary call into an asynchronous call.<Sidenote>The code for this demo is [on my GitHub](https://github.com/khaosdoctor/grpc-guide-part-4-sample)</Sidenote>
+For this demo, we're going to use the same application [we used in article number 2](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample), and we'll make a few changes to it to turn a unary call into an asynchronous call.[^n1]
 
 Let's start from a base: we clone the original repository from article 2 so we have the complete application. The first thing we need to do is change our `.proto` file to add a stream to the note listing service.
 
@@ -328,3 +328,5 @@ duplex.on('data' (data) => {
 duplex.write('sends data to the server')
 duplex.close() // client closes connection
 ```
+
+[^n1]: The code for this demo is [on my GitHub](https://github.com/khaosdoctor/grpc-guide-part-4-sample)

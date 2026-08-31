@@ -649,7 +649,7 @@ m() // oi!
 
 Um objeto que não utilizamos aqui foi o objeto `access` que vem de dentro dos contextos dos decorators.
 
-Um exemplo muito útil é a criação de um **contâiner de injeção de dependências**. Que é uma ferramenta muito útil para poder criar automaticamente instâncias de classes dependentes para classes que levam essas dependências, dessa forma você não precisa passar todas as dependências como parâmetros.<Sidenote>Isso já é uma realidade com a biblioteca [TSyringe](http://npm.im/tsyringe) feita pela Microsoft para demonstrar o poder dos decorators no TypeScript.</Sidenote>
+Um exemplo muito útil é a criação de um **contâiner de injeção de dependências**. Que é uma ferramenta muito útil para poder criar automaticamente instâncias de classes dependentes para classes que levam essas dependências, dessa forma você não precisa passar todas as dependências como parâmetros.[^n1]
 
 Essencialmente o que precisamos fazer é ter uma lista global de classes e suas dependências:
 
@@ -836,3 +836,5 @@ Os decorators são um padrão de projeto incrível e possuem um potencial imenso
 Eu, particularmente, vejo uma grande adoção por ferramentas de monitoramento como NewRelic, NSolid e Datadog para Node.js e até mesmo o JavaScript no browser!
 
 Comenta ai embaixo o que você achou dessa proposta e me marca [lá no Twitter](https://twitter.lsantos.dev) pra eu saber sua opinião!
+
+[^n1]: Isso já é uma realidade com a biblioteca [TSyringe](http://npm.im/tsyringe) feita pela Microsoft para demonstrar o poder dos decorators no TypeScript.

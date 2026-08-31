@@ -103,10 +103,10 @@ const BILINGUAL_PAGES = new Set(['404.astro', 'offline.astro'])
  */
 const MIRRORED_TABLES = [
   { file: 'src/plugins/remark-wikilinks.mjs', constant: 'NOT_WRITTEN_YET', key: 'notWrittenYet' },
-  { file: 'src/plugins/rehype-footnote-sidenotes.mjs', constant: 'FOOTNOTES_LABEL', key: 'footnotes' },
+  { file: 'src/plugins/rehype-footnote-asides.mjs', constant: 'FOOTNOTES_LABEL', key: 'footnotes' },
   // No `key`: these two say something the ui tables never needed a word for,
   // so only their language coverage can be checked.
-  { file: 'src/plugins/rehype-footnote-sidenotes.mjs', constant: 'BACKREF_LABEL', key: undefined },
+  { file: 'src/plugins/rehype-footnote-asides.mjs', constant: 'BACKREF_LABEL', key: undefined },
   { file: 'src/plugins/rehype-heading-anchors.mjs', constant: 'ANCHOR_LABEL', key: undefined },
 ] as const
 
@@ -122,7 +122,7 @@ const MIRRORED_TABLES = [
 const LOCALE_AWARE_FILES = [
   'src/i18n/ui.ts',
   'src/lib/seo.ts',
-  'src/plugins/rehype-footnote-sidenotes.mjs',
+  'src/plugins/rehype-footnote-asides.mjs',
   'src/components/LangSwitcher.astro',
 ]
 

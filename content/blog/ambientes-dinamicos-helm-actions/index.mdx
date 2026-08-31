@@ -86,7 +86,7 @@ Para que você possa acompanhar, preparei [este repositório de exemplo](https:/
 > [!TIP]
 > Se você quiser acompanhar passo a passo, faça um _fork_ do repositório, mas não se esqueça de remover a pasta `.github` para que as actions sejam removidas.
 
-Antes de criar os arquivos da pipeline, vamos criar os arquivos do Helm, para podermos criar nosso chart! Crie uma pasta chamada `kubernetes` na raiz do repositório, depois crie uma segunda pasta chamada `ship-manager`.<Sidenote>Poderíamos criar o chart do helm de forma automática via CLI, porém ele cria vários arquivos que não precisamos, então vamos criá-lo manualmente para facilitar.</Sidenote>
+Antes de criar os arquivos da pipeline, vamos criar os arquivos do Helm, para podermos criar nosso chart! Crie uma pasta chamada `kubernetes` na raiz do repositório, depois crie uma segunda pasta chamada `ship-manager`.[^n1]
 
 Dentro da pasta `ship-manager` crie mais duas pastas: `templates` e `charts`. Agora crie dois arquivos no mesmo nível da pasta `templates`, um deles se chamará `Chart.yaml` e o outro `values.yaml`.
 
@@ -400,7 +400,7 @@ chave: # Acessível somente ao frontend como `.Values.chave`
 
 Perceba que temos uma quebra de escopo dentro do arquivo values, as chaves que tem o mesmo nome dos seus charts dependentes serão acessadas somente por eles e pelos charts de mais alta ordem, então como o nosso frontend é o chart de maior ordem, ele tem acesso a todos os valores, enquanto o backend só tem acesso às chaves definidas sob `backend:`.
 
-Perceba também que dentro de `backend` o escopo sofre um "levelling", ou seja, o escopo é removido de dentro de `backend` então você não precisa acessar o valor como `.Values.backend.chave` se você estiver dentro do chart `backend`, mas somente como `.Values.chave`.<Sidenote>É possível ter mais arquivos values dentro dos charts dependentes e a regra se mantém a mesma, a diferença é que o chart de maior ordem será alterado, porém este padrão torna a manutenção bastante complexa.</Sidenote>
+Perceba também que dentro de `backend` o escopo sofre um "levelling", ou seja, o escopo é removido de dentro de `backend` então você não precisa acessar o valor como `.Values.backend.chave` se você estiver dentro do chart `backend`, mas somente como `.Values.chave`.[^n2]
 
 Nosso arquivo values precisa ter as mesmas chaves que definimos dentro dos nossos templates, então elas vão ser as seguintes:
 
@@ -487,7 +487,7 @@ jobs:
 
 O primeiro passo é um checkout do nosso repositório, ele está praticamente presente em todas as actions e é sempre o primeiro passo. O segundo é a definição de uma segunda variável, o nome da tag.
 
-Por padrão `$GITHUB_REF` é ou o nome do branch ou o nome da tag como `/refs/heads/main` ou `/refs/tags/v1.0.0`, temos que remover o `/refs/*` e ficar só com o final, por isso estamos usando uma substituição via shell para adicioná-la as variáveis globais, porém esta variável só funciona **dentro deste job**.<Sidenote>Não podemos definir a variável dentro de `env` porque esta chave não executa nenhum tipo de shell, portanto não podemos usar substituição de valores e nem expansões.</Sidenote>
+Por padrão `$GITHUB_REF` é ou o nome do branch ou o nome da tag como `/refs/heads/main` ou `/refs/tags/v1.0.0`, temos que remover o `/refs/*` e ficar só com o final, por isso estamos usando uma substituição via shell para adicioná-la as variáveis globais, porém esta variável só funciona **dentro deste job**.[^n3]
 
 Agora vamos fazer o pipeline do Docker, ou seja, build e push das imagens do backend e frontend.
 
@@ -736,7 +736,7 @@ jobs:
 
 Agora que já temos as pipelines criadas, vamos ao GitHub criar nossos secrets! Abra o repositório no seu browser, navegue até a aba `Settings` e depois `secrets`, então clique em `New repository secret` para criar um novo secret local.
 
-Vamos criar um secret chamado `ACR_LOGIN` que será o nome do nosso ACR, ou seja, `shipmanager`. Outro chamado `ACR_NAME`, que não é bem um segredo, porque é o DNS do nosso CR, porém assim evitamos de ter um valor fixo na nossa action, este valor é o `shipmanager.azurecr.io`.<Sidenote>Ambas as informações podem ser obtidas no portal da Azure, sabendo o nome do ACR o login é o mesmo e o DNS é sempre `<nome>.azurecr.io`</Sidenote>
+Vamos criar um secret chamado `ACR_LOGIN` que será o nome do nosso ACR, ou seja, `shipmanager`. Outro chamado `ACR_NAME`, que não é bem um segredo, porque é o DNS do nosso CR, porém assim evitamos de ter um valor fixo na nossa action, este valor é o `shipmanager.azurecr.io`.[^n4]
 
 A senha do ACR pode ser obtida com um comando do AZ CLI: `az acr credential show -n shipmanager --query "passwords[0].value" -o tsv` e deve ser colocada em outro secret chamado `ACR_PASSWORD`.
 
@@ -765,3 +765,11 @@ A criação de um ambiente dinâmico não é simples, porém pode ser a soluçã
 Por este motivo, utilizar outro banco de dados ao invés da mesma instância é muito mais preferível, o ideal seria criarmos uma dependência no chart backend para um chart do MongoDB completamente vazio, desta forma podemos ter certeza que este ambiente está totalmente isolado e podemos remover todo o ambiente sem nenhum problema.
 
 Deixem seus comentários e quem sabe podemos continuar essa série!
+
+[^n1]: Poderíamos criar o chart do helm de forma automática via CLI, porém ele cria vários arquivos que não precisamos, então vamos criá-lo manualmente para facilitar.
+
+[^n2]: É possível ter mais arquivos values dentro dos charts dependentes e a regra se mantém a mesma, a diferença é que o chart de maior ordem será alterado, porém este padrão torna a manutenção bastante complexa.
+
+[^n3]: Não podemos definir a variável dentro de `env` porque esta chave não executa nenhum tipo de shell, portanto não podemos usar substituição de valores e nem expansões.
+
+[^n4]: Ambas as informações podem ser obtidas no portal da Azure, sabendo o nome do ACR o login é o mesmo e o DNS é sempre `<nome>.azurecr.io`

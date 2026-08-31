@@ -207,7 +207,7 @@ kubectl config set-context lucas \
   --user=lucas
 ```
 
-Since we cloned the AKS base image, it has admin access by default, so let's strip the admin access before sending it off to our user:<Sidenote>To find the right names, take a look at your `kubeconfig` file to find these keys.</Sidenote>
+Since we cloned the AKS base image, it has admin access by default, so let's strip the admin access before sending it off to our user:[^n1]
 
 ```bash
 kubectl config delete-context <nome-do-contexto> 
@@ -262,3 +262,5 @@ We saw how we can create users in Kubernetes through digital certificates and to
 With this, your cluster's security is going to improve a lot, and you'll be able to understand and manage users so nobody can do anything you're not explicitly allowing. Improving the audit trail along the way.
 
 See you!
+
+[^n1]: To find the right names, take a look at your `kubeconfig` file to find these keys.

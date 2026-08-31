@@ -78,7 +78,7 @@ But just like `sort`, it accepts a sorting function that follows a `(a, b) => nu
 
 -   The return is `>0`, `a` comes after `b`
 -   The return is `<0`, `a` comes before `b`
--   The return is `0`, nothing changes<Sidenote>You can find this documentation on [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort).</Sidenote>
+-   The return is `0`, nothing changes[^n1]
 
 ```js
 let x = [
@@ -114,7 +114,7 @@ The function keeps the same signature, just with a new return type: `(start, del
 
 -   `start` is the position to start counting from, or where the pointer begins
 -   `deleteCount` is the number of items to remove starting from `start`
--   `...items` is an optional parameter that, if passed, sets the new value at position `start` after removing all the items from `deleteCount`<Sidenote>This example actually shows very well why these functions are good. If we modified the array in the original array itself, we'd have to recreate `x` every time.</Sidenote>
+-   `...items` is an optional parameter that, if passed, sets the new value at position `start` after removing all the items from `deleteCount`[^n2]
 
 ```js
 let x = [ "Cachorro", "Gato", "Zebra", "Morcego", "Tigre", "Leão" ];
@@ -180,3 +180,7 @@ console.log(x.with(1, "Cobra"))
 ```
 
 This feature is expected to ship in the next ECMAScript version, along with a bunch of super cool features I've already talked about [here](/o-futuro-do-js/).
+
+[^n1]: You can find this documentation on [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort).
+
+[^n2]: This example actually shows very well why these functions are good. If we modified the array in the original array itself, we'd have to recreate `x` every time.

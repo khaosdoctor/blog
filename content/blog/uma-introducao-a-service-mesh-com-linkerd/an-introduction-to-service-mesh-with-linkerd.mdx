@@ -99,7 +99,7 @@ Istio is more focused on providing more tools and features and, because of that,
 
 Time to leave the theory behind and get into practice! Let's get our hands dirty and understand how we can build a service mesh using Linkerd.
 
-To run this hands-on, I'll create a cluster on [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=personal-blog-ludossan), but you can do it on any Kubernetes cluster you have, **including one already in production**, since Linkerd isn't destructive and installs its own information in a separate namespace.<Sidenote>You can also use solutions to run K8S locally, like [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), [Docker](https://www.docker.com/products/docker-desktop) or [other options](https://kubernetes.io/docs/setup/).</Sidenote>
+To run this hands-on, I'll create a cluster on [AKS](https://docs.microsoft.com/azure/aks/?WT.mc_id=personal-blog-ludossan), but you can do it on any Kubernetes cluster you have, **including one already in production**, since Linkerd isn't destructive and installs its own information in a separate namespace.[^n1]
 
 Inside this cluster I'll deploy the application from the repository below.
 
@@ -314,3 +314,5 @@ Linkerd can make life a lot easier for anyone building distributed applications.
 Don't forget to subscribe to the newsletter to get this content plus weekly news! Like it and share your feedback in the comments!
 
 See you!
+
+[^n1]: You can also use solutions to run K8S locally, like [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), [Docker](https://www.docker.com/products/docker-desktop) or [other options](https://kubernetes.io/docs/setup/).

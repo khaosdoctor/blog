@@ -58,7 +58,7 @@ Sparkplug's main goal is to be fast, really fast. It's so fast that it's possibl
 
 The secret to that, honestly, isn't much of a secret, it's a hack. The reality is that it doesn't compile functions from scratch. They've already been compiled to bytecode before by Ignition, which already did most of the work figuring out variable values, whether parentheses are arrow functions, turning destructurings into assignments, and much more.
 
-The real trick is that Sparkplug won't generate any intermediate representation (called IR). IR is basically code that sits halfway between machine code and bytecode, usually grouped in trios of instructions, and it's very common in most compilers. Instead, the code skips a few steps and gets compiled directly to machine code.<Sidenote>An interesting fact is that Sparkplug is actually one big [`switch`](https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=465;drc=55cbb2ce3be503d9096688b72d5af0e40a9e598b) inside a [`for`](https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=290;drc=9013bf7765d7febaa58224542782307fa952ac14) that basically reads each bytecode individually and sends the instruction off to machine code generation</Sidenote>
+The real trick is that Sparkplug won't generate any intermediate representation (called IR). IR is basically code that sits halfway between machine code and bytecode, usually grouped in trios of instructions, and it's very common in most compilers. Instead, the code skips a few steps and gets compiled directly to machine code.[^n1]
 
 That's great for speed, but unfortunately there isn't much you can optimize with just that information. That's why Sparkplug is a compiler with no optimizations.
 
@@ -71,3 +71,5 @@ According to the V8 team, Sparkplug's performance gains are 5-15% over not havin
 ![](./image-3.png)
 
 Go read the [original article](https://v8.dev/blog/sparkplug) for a lot more information about how Sparkplug keeps this compatibility with the entire existing ecosystem!
+
+[^n1]: An interesting fact is that Sparkplug is actually one big [`switch`](https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=465;drc=55cbb2ce3be503d9096688b72d5af0e40a9e598b) inside a [`for`](https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=290;drc=9013bf7765d7febaa58224542782307fa952ac14) that basically reads each bytecode individually and sends the instruction off to machine code generation

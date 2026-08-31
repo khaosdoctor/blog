@@ -37,7 +37,7 @@ I HATE mice in general, if I have the option to do everything in a terminal I wi
 
 So, when I installed my dual boot with Arch Linux, I decided to install a window manager called Sway, which does away with the mouse for most things, so I thought: "why not just start ditching the mouse for good?" and that's when I decided to leave VSCode entirely and use only Vim.
 
-Unfortunately GUI usage is still huge and most of them don't have great keyboard support, with shortcuts or navigation, so unfortunately there's no way to ditch the mouse once and for all...<Sidenote>I also tried using the Vim extension for VSCode, but it's an editor built to be used with a mouse, so the movement wasn't as smooth in the interface, which was a problem.</Sidenote>
+Unfortunately GUI usage is still huge and most of them don't have great keyboard support, with shortcuts or navigation, so unfortunately there's no way to ditch the mouse once and for all...[^n1]
 
 ## Initial adaptation
 
@@ -95,7 +95,7 @@ Some Lua programming is almost always necessary, and often required. In other ca
 
 ### LSPs
 
-The biggest problem I had was setting up the LSPs. The default configs for most languages I use are fine, but I ran into a conflict between Node and Deno. Since both use the same language but have different key files, I had to write a function to check whether the repo was a Deno or Node repo and avoid having both the Node and Deno LSP running on the same file.<Sidenote>LSPs are [Language Server Protocols](https://en.wikipedia.org/wiki/Language_Server_Protocol), a protocol created by Microsoft to let an editor connect to a service that holds the language's intelligence separately, independent of the editor, to provide things like completions, intellisense, and so on in a distributed way.</Sidenote>
+The biggest problem I had was setting up the LSPs. The default configs for most languages I use are fine, but I ran into a conflict between Node and Deno. Since both use the same language but have different key files, I had to write a function to check whether the repo was a Deno or Node repo and avoid having both the Node and Deno LSP running on the same file.[^n2]
 
 ![](./image-5.png "Function to tell Deno and Node apart")
 
@@ -225,3 +225,7 @@ I think the main thing for me is that I can see myself improving, it's easy to s
 If you've already tried using Vim, leave a comment on [my socials](https://lsantos.dev)! I really want to know how **your** experience with Vim went!
 
 See you around!
+
+[^n1]: I also tried using the Vim extension for VSCode, but it's an editor built to be used with a mouse, so the movement wasn't as smooth in the interface, which was a problem.
+
+[^n2]: LSPs are [Language Server Protocols](https://en.wikipedia.org/wiki/Language_Server_Protocol), a protocol created by Microsoft to let an editor connect to a service that holds the language's intelligence separately, independent of the editor, to provide things like completions, intellisense, and so on in a distributed way.
