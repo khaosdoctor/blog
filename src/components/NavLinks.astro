@@ -8,10 +8,11 @@ interface Props {
 
 const { locale } = Astro.props
 
-type LinkKey = 'navPosts' | 'navSeries' | 'navTags' | 'navAbout'
+type LinkKey = 'navPosts' | 'navSections' | 'navSeries' | 'navTags' | 'navAbout'
 
 const LINKS: { key: LinkKey; path: string }[] = [
   { key: 'navPosts', path: '/' },
+  { key: 'navSections', path: '/sections/' },
   { key: 'navSeries', path: '/series/' },
   { key: 'navTags', path: '/tags/' },
   { key: 'navAbout', path: 'https://lsantos.dev' },
@@ -33,8 +34,10 @@ const categorySlugs = new Set((await getCategories()).keys())
 
 function isCurrent(key: LinkKey, path: string, categorySlugs: Set<string>): boolean {
   switch (key) {
-    case 'navPosts': {
-      if (path === '/' || /^\/\d+\/$/.test(path)) return true
+    case 'navPosts':
+      return path === '/' || /^\/\d+\/$/.test(path)
+    case 'navSections': {
+      if (path === '/sections/') return true
       // The category test has to be there, or this also catches /tags/<name>/
       // and every individual post.
       const section = /^\/([^/]+)\/(?:\d+\/)?$/.exec(path)

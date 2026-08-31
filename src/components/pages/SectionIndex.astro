@@ -1,0 +1,151 @@
+---
+import { alternatesFor, HREFLANG, type Locale, localePath, t } from '../../i18n/ui'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { categoryDescription } from '../../lib/categories'
+import { brandPool } from '../../lib/chip-color'
+import { formatDate } from '../../lib/posts'
+import { getCategories } from '../../lib/taxonomy'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+
+// By position rather than by hashed name: the hash puts three of the sections
+// on the same colour, and telling the cards apart is the point here.
+const pool = brandPool()
+
+// getListedPosts sorts by date descending, so the first entry is the latest.
+const sections = [...(await getCategories(locale)).entries()]
+  .sort(([a], [b]) => a.localeCompare(b, HREFLANG[locale]))
+  .map(([name, posts], index) => ({
+    name,
+    description: categoryDescription(name, locale),
+    count: posts.length,
+    latest: posts[0].data.pubDate,
+    color: pool[index % pool.length],
+  }))
+---
+
+<BaseLayout
+  title={`LS: ${t(locale, 'sections')}`}
+  description={t(locale, 'sectionsIntro')}
+  lang={locale}
+  alternates={alternatesFor('/sections/', Astro.site)}
+>
+  <h1 class="listing-heading">
+    {t(locale, 'sections')} <span class="page-count">[{sections.length}]</span>
+  </h1>
+  <ul class="section-cards">
+    {
+      sections.map((section) => (
+        <li>
+          <a
+            href={localePath(locale, `/${section.name}/`)}
+            class="section-card brand-ink"
+            style={`--chip-color: ${section.color}`}
+          >
+            <span class="section-name">{section.name}</span>
+            {section.description !== null && <span class="section-about">{section.description}</span>}
+            <span class="section-meta">
+              <span class="section-count">
+                [{section.count}] {t(locale, 'articles')}
+              </span>
+              <time datetime={section.latest.toISOString()}>
+                {t(locale, 'lastPost', formatDate(section.latest, locale))}
+              </time>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .section-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1rem;
+    margin-block-start: 2rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Same break-out as `.listing`: 50% puts the start edge at main's centre and
+     the translate pulls back by half this box's own width. */
+  @media (min-width: 70rem) {
+    .section-cards {
+      inline-size: var(--content-width);
+      padding-inline: var(--shell-inset);
+      margin-inline-start: 50%;
+      transform: translateX(calc(var(--content-width) / -2));
+    }
+  }
+
+  .section-card {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    padding: 1rem 1.1rem;
+    border: 3px double var(--chip-ink);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--fg);
+    text-decoration: none;
+    box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--code-shadow-color);
+    transition:
+      background-color var(--duration) var(--ease),
+      color var(--duration) var(--ease);
+  }
+
+  .section-name {
+    color: var(--chip-ink);
+    font-family: var(--font-mono);
+    font-size: calc(1.1rem * var(--font-scale));
+    letter-spacing: 0.04em;
+  }
+
+  .section-about {
+    flex: 1;
+    margin-block-start: 0.45rem;
+    color: var(--muted);
+    font-family: var(--font-subtitle);
+    font-size: calc(15px * var(--font-scale));
+    line-height: 1.45;
+  }
+
+  .section-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.2rem 0.8rem;
+    margin-block-start: 0.9rem;
+    padding-block-start: 0.6rem;
+    border-block-start: 1px dashed color-mix(in oklab, var(--chip-ink) 45%, transparent);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-tiny);
+  }
+
+  .section-count {
+    color: var(--chip-ink);
+  }
+
+  .section-card:hover,
+  .section-card:focus-visible {
+    background: var(--chip-ink);
+    color: var(--bg);
+  }
+
+  .section-card:hover :is(.section-name, .section-about, .section-meta, .section-count),
+  .section-card:focus-visible :is(.section-name, .section-about, .section-meta, .section-count) {
+    color: var(--bg);
+  }
+
+  .section-card:hover .section-meta,
+  .section-card:focus-visible .section-meta {
+    border-block-start-color: color-mix(in oklab, var(--bg) 60%, transparent);
+  }
+</style>

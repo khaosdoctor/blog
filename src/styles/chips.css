@@ -1,11 +1,14 @@
-.chip {
-  /* Both halves are needed: each carries --chip-color away from its own ground,
-     and mixing toward black in both makes the ink unreadable on the dark page. */
+/* Both halves are needed: each carries --chip-color away from its own ground,
+   and mixing toward black in both makes the ink unreadable on the dark page. */
+.chip,
+.brand-ink {
   --chip-ink: light-dark(
     color-mix(in oklab, var(--chip-color) 50%, black),
     color-mix(in oklab, var(--chip-color) 52%, white)
   );
+}
 
+.chip {
   display: inline-block;
   padding: 0.15rem 0.55rem;
   border: 3px double var(--chip-ink);
