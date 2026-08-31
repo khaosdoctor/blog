@@ -15,7 +15,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
 import { readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve as resolvePath } from 'node:path'
-import { frontmatterOf } from '../lib/post-file.mjs'
+import { frontmatterOf } from '../lib/post-file.ts'
 import { PATTERN as WIKILINK_PATTERN } from './remark-wikilinks.mjs'
 
 const TARGET_PLUGIN_NAME = '@mdx-js/rolldown'

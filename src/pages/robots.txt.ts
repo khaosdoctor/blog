@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { noindexPaths } from '../lib/post-dates.mjs'
+import { noindexPaths } from '../lib/post-dates.ts'
 
 // These have no frontmatter, so noindexPaths cannot reach them.
 const CHROME_PATHS = ['/search/', '/en/search/', '/offline/']

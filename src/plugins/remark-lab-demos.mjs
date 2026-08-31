@@ -23,7 +23,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { basename, extname, resolve } from 'node:path'
 import { Parser } from 'acorn'
-import { labSourceId, labSourceUrl } from '../lib/lab-source.mjs'
+import { labSourceId, labSourceUrl } from '../lib/lab-source.ts'
 import { attribute, jsxElement } from './mdx-util.mjs'
 
 function plainAttributes(node) {

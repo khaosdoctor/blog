@@ -1,5 +1,5 @@
 import { HREFLANG, type Locale, localePath, t } from '../i18n/ui'
-import { LIGHT_GROUND } from './grounds.mjs'
+import { LIGHT_GROUND } from './grounds.ts'
 
 // `scope` must stay at the site root for every locale, so crossing languages
 // inside an installed app does not open a browser tab.

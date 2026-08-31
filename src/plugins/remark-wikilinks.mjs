@@ -19,7 +19,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import GithubSlugger from 'github-slugger'
 import { visit } from 'unist-util-visit'
 import { asLocale, postUrl } from '../i18n/locales.ts'
-import { slugFrom } from '../lib/post-file.mjs'
+import { slugFrom } from '../lib/post-file.ts'
 import { localeFromFile } from './mdx-util.mjs'
 
 const BASE = 'content/blog'

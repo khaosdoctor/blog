@@ -1,8 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import type { Loader } from 'astro/loaders'
-import { labSourceId } from './lab-source.mjs'
-import { urlFor } from './post-dates.mjs'
+import { labSourceId } from './lab-source.ts'
+import { urlFor } from './post-dates.ts'
 
 const POSTS = 'content/blog'
 const SOURCES = 'components'

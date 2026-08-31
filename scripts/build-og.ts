@@ -10,7 +10,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
-import { LIGHT_GROUND } from '../src/lib/grounds.mjs'
+import { LIGHT_GROUND } from '../src/lib/grounds.ts'
 import { bold, count, dim, heading, ok } from './lib/cli.ts'
 
 const OUT_DIR = 'public/og'

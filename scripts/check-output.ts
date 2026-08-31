@@ -10,7 +10,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
-import { urlFor } from '../src/lib/post-dates.mjs'
+import { urlFor } from '../src/lib/post-dates.ts'
 import { count, type Failure, frontmatterOf, heading, postIndex, reportFailures, walkFiles, warn } from './lib/cli.ts'
 
 const DIST = 'dist'

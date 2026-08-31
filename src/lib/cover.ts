@@ -2,7 +2,7 @@
 // node, whose ESM resolver does not add one.
 import type { Locale } from '../i18n/locales.ts'
 import { chipColor, hashString } from './chip-color.ts'
-import { DARK_GROUND, LIGHT_GROUND } from './grounds.mjs'
+import { DARK_GROUND, LIGHT_GROUND } from './grounds.ts'
 
 const CARD_W = 1200
 const CARD_H = 630

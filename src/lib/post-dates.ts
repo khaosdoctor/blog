@@ -1,15 +1,15 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { asLocale, postUrl } from '../i18n/locales.ts'
-import { frontmatterOf, slugFrom } from './post-file.mjs'
+import { frontmatterOf, slugFrom } from './post-file.ts'
 
-export const field = (frontmatter, name) =>
+export const field = (frontmatter: string, name: string): string | undefined =>
   new RegExp(`^${name}:\\s*(.+)$`, 'm')
     .exec(frontmatter)?.[1]
     .trim()
     .replace(/^["']|["']$/g, '')
 
-export function urlFor(directory, filename, frontmatter) {
+export function urlFor(directory: string, filename: string, frontmatter: string): string {
   const slug = field(frontmatter, 'slug') ?? slugFrom(directory, filename)
   return postUrl(slug, asLocale(field(frontmatter, 'lang')))
 }
