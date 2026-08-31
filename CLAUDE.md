@@ -4,6 +4,12 @@
 
 `content/internal/HANDOFF.md` is where the last session left things: current state, the shell and cache traps that waste an hour, and what was deliberately left undone. It is gitignored, so it exists only on this machine. Read it at the start of a session and rewrite it at the end.
 
+## TypeScript
+
+New code is `.ts`, or `.astro` with a typed frontmatter block. Reach for `.mjs` only when something genuinely refuses a `.ts`, and say in one line what refused it.
+
+The `.mjs` files still in `src/plugins/`, `src/integrations/` and `astro.config.mjs` predate this. Convert one while you are already changing it, with real hast and mdast types rather than a rename that leaves every parameter an implicit `any`.
+
 ## Comments
 
 Comments are rare and say why, never what. Only comment code a reader would otherwise stop at.
