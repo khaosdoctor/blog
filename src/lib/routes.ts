@@ -9,7 +9,7 @@
  */
 
 import type { GetStaticPaths } from 'astro'
-import { LOCALES, SOURCE_LOCALE, type Locale } from '../i18n/ui'
+import { LOCALES, type Locale, SOURCE_LOCALE } from '../i18n/ui'
 import { categoryDescription } from './categories'
 import {
   folderOf,
@@ -100,21 +100,21 @@ export function seriesPaths(locale: Locale): GetStaticPaths {
   return async () => {
     const byLocale = await Promise.all(LOCALES.map(async (entry) => [entry, await getSeries(entry)] as const))
     const own = byLocale.find(([entry]) => entry === locale)?.[1] ?? new Map()
-    return [...own.entries()]
-      // A series of one builds no page, so the index has to filter the same way.
-      .filter(([, posts]) => posts.length > 1)
-      .map(([slug, posts]) => ({
-        params: { name: slug },
-        props: {
-          locale,
-          slug,
-          name: seriesTitle(slug, posts),
-          posts,
-          languages: byLocale
-            .filter(([, entries]) => (entries.get(slug)?.length ?? 0) > 1)
-            .map(([entry]) => entry),
-        },
-      }))
+    return (
+      [...own.entries()]
+        // A series of one builds no page, so the index has to filter the same way.
+        .filter(([, posts]) => posts.length > 1)
+        .map(([slug, posts]) => ({
+          params: { name: slug },
+          props: {
+            locale,
+            slug,
+            name: seriesTitle(slug, posts),
+            posts,
+            languages: byLocale.filter(([, entries]) => (entries.get(slug)?.length ?? 0) > 1).map(([entry]) => entry),
+          },
+        }))
+    )
   }
 }
 

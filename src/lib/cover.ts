@@ -32,7 +32,10 @@ function parseHex(hex: string): Rgb {
 }
 
 function toHex([r, g, b]: Rgb): string {
-  const part = (n: number) => Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, '0')
+  const part = (n: number) =>
+    Math.round(Math.max(0, Math.min(255, n)))
+      .toString(16)
+      .padStart(2, '0')
   return `#${part(r)}${part(g)}${part(b)}`
 }
 
@@ -124,7 +127,6 @@ const DIMMED_WHITE = dimmedInk(TITLE_INK, DARK_BG)
 
 const BRANDS: BrandId[] = [...BRAND_COLORS, Brand.White, Brand.WhiteDim]
 
-
 export type CoverScheme = 'dark' | 'light'
 
 interface Ground {
@@ -140,7 +142,14 @@ interface Ground {
 // `chipTint` and `chipMix` mirror chips.css, where each branch carries the chip ink away from its own ground.
 const GROUNDS: Record<CoverScheme, Ground> = {
   dark: { bg: DARK_BG, shadow: DARK_SHADOW, ink: TITLE_INK, dim: DIMMED_WHITE, chipTint: '#ffffff', chipMix: 52 },
-  light: { bg: LIGHT_BG, shadow: LIGHT_SHADOW, ink: LIGHT_INK, dim: dimmedInk(LIGHT_INK, LIGHT_BG), chipTint: '#000000', chipMix: 50 },
+  light: {
+    bg: LIGHT_BG,
+    shadow: LIGHT_SHADOW,
+    ink: LIGHT_INK,
+    dim: dimmedInk(LIGHT_INK, LIGHT_BG),
+    chipTint: '#000000',
+    chipMix: 50,
+  },
 }
 
 // The SVG needs literal hexes since it carries no custom properties and the raster has no page at all; the
@@ -227,7 +236,7 @@ function generateSolidParams(rng: () => number): SolidParams {
   const sides = 3 + Math.floor(rng() * 6)
   const ringCount = 1 + Math.floor(rng() * 3)
   let topClose = rng() < 0.5
-  let bottomClose = rng() < 0.5
+  const bottomClose = rng() < 0.5
   if (ringCount === 1 && !topClose && !bottomClose) topClose = true
   const taper = 0.55 + rng() * 0.45
   const brace = rng() < 0.45
@@ -493,7 +502,15 @@ function n(value: number): number {
   return Math.round(value * 100) / 100
 }
 
-export function buildCoverSvg({ slug, title, category, byline, readingMinutes, drawMeta = true, scheme = 'dark' }: CoverInput): string {
+export function buildCoverSvg({
+  slug,
+  title,
+  category,
+  byline,
+  readingMinutes,
+  drawMeta = true,
+  scheme = 'dark',
+}: CoverInput): string {
   const seed = coverSeed(slug)
   const ground = GROUNDS[scheme]
   const { hex: brandTone } = coverTone(slug, scheme)
@@ -510,8 +527,18 @@ export function buildCoverSvg({ slug, title, category, byline, readingMinutes, d
     })
     .join('')
 
-  const outer = { x: BORDER_OUTER_INSET, y: BORDER_OUTER_INSET, w: CARD_W - BORDER_OUTER_INSET * 2, h: CARD_H - BORDER_OUTER_INSET * 2 }
-  const inner = { x: BORDER_INNER_INSET, y: BORDER_INNER_INSET, w: CARD_W - BORDER_INNER_INSET * 2, h: CARD_H - BORDER_INNER_INSET * 2 }
+  const outer = {
+    x: BORDER_OUTER_INSET,
+    y: BORDER_OUTER_INSET,
+    w: CARD_W - BORDER_OUTER_INSET * 2,
+    h: CARD_H - BORDER_OUTER_INSET * 2,
+  }
+  const inner = {
+    x: BORDER_INNER_INSET,
+    y: BORDER_INNER_INSET,
+    w: CARD_W - BORDER_INNER_INSET * 2,
+    h: CARD_H - BORDER_INNER_INSET * 2,
+  }
 
   // Every line is drawn twice: shadow tone first to knock the wireframe glyphs out from behind the text, then real ink.
   // SVG letter-spacing applies after every glyph including the last, so the real width is one spacing short of the naive sum.
@@ -543,14 +570,20 @@ export function buildCoverSvg({ slug, title, category, byline, readingMinutes, d
 
   const shadowByline = `<text x="${card.padX + SHADOW_OFFSET}" y="${n(card.bylineY + SHADOW_OFFSET)}" font-family="${LABEL_FONT}" font-size="${BYLINE_SIZE}" letter-spacing="4" fill="${ground.shadow}">${escapeXml(byline)}</text>`
   const shadowTitle = card.titleYs
-    .map((y, i) => `<text x="${card.padX + SHADOW_OFFSET}" y="${n(y + SHADOW_OFFSET)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${ground.shadow}">${escapeXml(card.lines[i])}</text>`)
+    .map(
+      (y, i) =>
+        `<text x="${card.padX + SHADOW_OFFSET}" y="${n(y + SHADOW_OFFSET)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${ground.shadow}">${escapeXml(card.lines[i])}</text>`,
+    )
     .join('')
   const shadowMeta = drawMeta ? metaLine(SHADOW_OFFSET, SHADOW_OFFSET, ground.shadow, ground.shadow, 1) : ''
 
   const bylineLine = `<text x="${card.padX}" y="${n(card.bylineY)}" font-family="${LABEL_FONT}" font-size="${BYLINE_SIZE}" letter-spacing="4" fill="${brandTone}">${escapeXml(byline)}</text>`
   const rule = `<line x1="${card.padX}" y1="${n(card.ruleY)}" x2="${CARD_W - card.padX}" y2="${n(card.ruleY)}" stroke="${brandTone}" stroke-width="2" stroke-dasharray="10 6" opacity="0.7"/>`
   const titleLines = card.titleYs
-    .map((y, i) => `<text x="${card.padX}" y="${n(y)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${ground.ink}">${escapeXml(card.lines[i])}</text>`)
+    .map(
+      (y, i) =>
+        `<text x="${card.padX}" y="${n(y)}" font-family="${TITLE_FONT}" font-size="${card.fontSize}" fill="${ground.ink}">${escapeXml(card.lines[i])}</text>`,
+    )
     .join('')
   const metaInk = drawMeta ? metaLine(0, 0, coverChipInk(category, scheme), ground.ink, DIM_OPACITY) : ''
 

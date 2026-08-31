@@ -2,8 +2,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
-import { bold, count, dim, heading, ok } from './lib/cli.ts'
 import { LIGHT_GROUND } from '../src/lib/grounds.mjs'
+import { bold, count, dim, heading, ok } from './lib/cli.ts'
 
 const SOURCE = 'public/favicon.svg'
 const OUT_DIR = 'public/icons'

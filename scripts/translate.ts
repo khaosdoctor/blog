@@ -44,11 +44,12 @@
  */
 // Type-only, so the default claude-cli path runs with nothing installed: the
 // `anthropic` provider imports the package itself, at the point it needs one.
-import type Anthropic from '@anthropic-ai/sdk'
+
 import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import type Anthropic from '@anthropic-ai/sdk'
 import { asLocale, type Locale } from '../src/i18n/locales.ts'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 import { slugify } from '../src/lib/slugify.ts'
@@ -73,7 +74,6 @@ const MAX_TOKENS = Number(process.env.TRANSLATE_MAX_TOKENS ?? 64000)
 // The specific variable wins: an ANTHROPIC_API_KEY left over in the shell should
 // not be sent to Groq or OpenRouter.
 const API_KEY = process.env.TRANSLATE_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? ''
-
 
 const LANGUAGE_NAMES: Record<Locale, string> = {
   pt: 'Brazilian Portuguese',
@@ -371,7 +371,9 @@ if (!PROVIDERS.includes(PROVIDER)) {
 }
 
 if (PROVIDER === 'anthropic' && API_KEY.length === 0) {
-  fail('Neither TRANSLATE_API_KEY nor ANTHROPIC_API_KEY is set. Refusing to run so the build does not silently skip translations.')
+  fail(
+    'Neither TRANSLATE_API_KEY nor ANTHROPIC_API_KEY is set. Refusing to run so the build does not silently skip translations.',
+  )
   process.exit(1)
 }
 
@@ -425,7 +427,9 @@ console.log(
   `${count(sources.length, 'source post', 'source posts')}, ${count(changed.length, 'post', 'posts')} to translate into ${args.locale} with ${MODEL}`,
 )
 if (overrides.length > 0) {
-  warn(`skipping ${count(overrides.length, 'translation a person owns', 'translations a person owns')}: ${overrides.join(', ')}`)
+  warn(
+    `skipping ${count(overrides.length, 'translation a person owns', 'translations a person owns')}: ${overrides.join(', ')}`,
+  )
 }
 if (args.dryRun) {
   console.log(changed.map((post) => post.slug).join('\n'))

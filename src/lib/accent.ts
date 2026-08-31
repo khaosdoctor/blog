@@ -29,8 +29,7 @@ function resolveAccent(): string {
 export function applyAccent(): void {
   try {
     document.documentElement.style.setProperty('--accent-day', resolveAccent())
-  } catch {
-  }
+  } catch {}
 }
 
 export function setAccent(name: string | null): void {

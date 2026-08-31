@@ -2,10 +2,10 @@ import { asLocale, localePath } from '../i18n/ui'
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
 import {
   searchPaletteDebounceMilliseconds as DEBOUNCE_MS,
-  searchPaletteResultLimit as MAX_RESULTS,
   searchShortcutDefaultLetter as DEFAULT_LETTER,
+  searchPaletteResultLimit as MAX_RESULTS,
 } from '../lib/tweaks'
-import { loadPagefind, searchLabel as label, type PagefindModule } from './pagefind'
+import { searchLabel as label, loadPagefind, type PagefindModule } from './pagefind'
 import { onReady } from './ready'
 
 const SHORTCUT_KEY = 'search-shortcut'

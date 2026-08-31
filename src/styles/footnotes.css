@@ -59,7 +59,6 @@
   outline-offset: 2px;
 }
 
-
 .prose sup.footnote-ref-highlighted {
   background-color: var(--note-highlight);
 }

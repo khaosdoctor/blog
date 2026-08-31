@@ -1,10 +1,10 @@
 import { applyAccent } from '../lib/accent'
-import { runDecode, SCRAMBLE_TICK_MS, SCRAMBLE_LOCK_TICKS, type DecodeRun } from '../lib/decode-scramble'
+import { type DecodeRun, runDecode, SCRAMBLE_LOCK_TICKS, SCRAMBLE_TICK_MS } from '../lib/decode-scramble'
 import { GLITCH_GLYPHS } from '../lib/logo-mark'
 import {
-  cursorBlinkPhaseMilliseconds as CURSOR_RATE_MS,
   cursorRampFrameCount as CURSOR_RAMP_FRAMES,
   cursorRampMilliseconds as CURSOR_RAMP_MS,
+  cursorBlinkPhaseMilliseconds as CURSOR_RATE_MS,
   glitchMaximumIntervalMilliseconds as GLITCH_MAX_MS,
   glitchMinimumIntervalMilliseconds as GLITCH_MIN_MS,
   glitchPulseGapMaximumMilliseconds as PULSE_GAP_MAX_MS,
@@ -140,7 +140,10 @@ function init(): void {
   function pulseWordmark(): void {
     word.style.setProperty('--glitch-a', `${(Math.random() * 4 - 2).toFixed(1)}px`)
     word.style.setProperty('--glitch-b', `${(Math.random() * 4 - 2).toFixed(1)}px`)
-    word.style.setProperty('--glitch-band', `inset(${Math.floor(Math.random() * 60)}% 0 ${Math.floor(Math.random() * 30)}% 0)`)
+    word.style.setProperty(
+      '--glitch-band',
+      `inset(${Math.floor(Math.random() * 60)}% 0 ${Math.floor(Math.random() * 30)}% 0)`,
+    )
     word.setAttribute('data-glitch', 'true')
   }
 
@@ -165,10 +168,13 @@ function init(): void {
     }
     pulseWordmark()
     pulseMark()
-    glitchPulseTimer = setTimeout(() => {
-      endPulse()
-      glitchGapTimer = setTimeout(() => runPulses(remaining - 1), randomBetween(PULSE_GAP_MIN_MS, PULSE_GAP_MAX_MS))
-    }, randomBetween(PULSE_MIN_MS, PULSE_MAX_MS))
+    glitchPulseTimer = setTimeout(
+      () => {
+        endPulse()
+        glitchGapTimer = setTimeout(() => runPulses(remaining - 1), randomBetween(PULSE_GAP_MIN_MS, PULSE_GAP_MAX_MS))
+      },
+      randomBetween(PULSE_MIN_MS, PULSE_MAX_MS),
+    )
   }
 
   // Every path back to waiting for the next burst goes through here and must

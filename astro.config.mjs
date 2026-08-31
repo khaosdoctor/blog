@@ -1,30 +1,29 @@
 // @ts-check
 import { createHash } from 'node:crypto'
+import { rehypeHeadingIds, unified } from '@astrojs/markdown-remark'
 import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
-import { defineConfig } from 'astro/config'
-import { unified } from '@astrojs/markdown-remark'
-import expressiveCode from 'astro-expressive-code'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
-import { pluginTokenStyles } from './src/plugins/expressive-code-token-styles.mjs'
+import { defineConfig } from 'astro/config'
+import expressiveCode from 'astro-expressive-code'
 import mermaid from 'astro-mermaid'
 import rehypeCallouts from 'rehype-callouts'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import { redirectStubs } from './src/integrations/redirect-stubs.mjs'
 import { lastModified, noindexPaths } from './src/lib/post-dates.mjs'
-import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
-import { remarkEmphasis } from './src/plugins/remark-emphasis.mjs'
-import { remarkFigures } from './src/plugins/remark-figures.mjs'
-import { rehypeHeadingIds } from '@astrojs/markdown-remark'
+import { pluginTokenStyles } from './src/plugins/expressive-code-token-styles.mjs'
+import { mdxTransformCache } from './src/plugins/mdx-transform-cache.mjs'
 import { rehypeFootnoteAsides } from './src/plugins/rehype-footnote-asides.mjs'
 import { rehypeHeadingAnchors } from './src/plugins/rehype-heading-anchors.mjs'
 import { rehypeMathCopy } from './src/plugins/rehype-math-copy.mjs'
+import { remarkEmbeds } from './src/plugins/remark-embeds.mjs'
+import { remarkEmphasis } from './src/plugins/remark-emphasis.mjs'
+import { remarkFigures } from './src/plugins/remark-figures.mjs'
 import { remarkLabDemos } from './src/plugins/remark-lab-demos.mjs'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
 import { remarkWikilinks } from './src/plugins/remark-wikilinks.mjs'
-import { mdxTransformCache } from './src/plugins/mdx-transform-cache.mjs'
 
 // https://astro.build/config
 export default defineConfig({
@@ -79,9 +78,7 @@ export default defineConfig({
     // not emitted by default, which leaves a 2019 post looking as fresh as today's.
     sitemap({
       filter: (page) =>
-        !page.includes('/search/') &&
-        !page.includes('/offline/') &&
-        !noindexPaths.has(new URL(page).pathname),
+        !page.includes('/search/') && !page.includes('/offline/') && !noindexPaths.has(new URL(page).pathname),
       serialize: (item) => {
         const modified = lastModified.get(new URL(item.url).pathname)
         return modified === undefined ? item : { ...item, lastmod: modified }
@@ -170,7 +167,11 @@ export default defineConfig({
         // the same input always builds the same name.
         generateScopedName(name, filename) {
           const path = filename.replace(/\?.*$/, '')
-          const component = path.split('/').pop()?.replace(/\.(vue|module\.css)$/, '') ?? 'style'
+          const component =
+            path
+              .split('/')
+              .pop()
+              ?.replace(/\.(vue|module\.css)$/, '') ?? 'style'
           const hash = createHash('sha256').update(path.replace(process.cwd(), '')).digest('base64url').slice(0, 4)
           return `${component}__${name}__${hash}`
         },

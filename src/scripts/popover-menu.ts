@@ -10,7 +10,11 @@ export function clampAxis(value: number, size: number, extent: number, inset: nu
   return Math.min(Math.max(value, inset), Math.max(inset, extent - size - inset))
 }
 
-export function placeNear(el: HTMLElement, anchor: HTMLElement, { margin, align }: { margin: number; align: Align }): void {
+export function placeNear(
+  el: HTMLElement,
+  anchor: HTMLElement,
+  { margin, align }: { margin: number; align: Align },
+): void {
   const rect = anchor.getBoundingClientRect()
   const w = el.offsetWidth
   const h = el.offsetHeight

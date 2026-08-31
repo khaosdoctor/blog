@@ -29,10 +29,7 @@ function patchFrameAttrs(source: string, frameTitle: string): string {
       /<(iframe|embed)(?![^>]*\breferrerpolicy=)([^>]*)>/gi,
       '<$1$2 referrerpolicy="strict-origin-when-cross-origin">',
     )
-    .replace(
-      /<(iframe)(?![^>]*\bsandbox=)([^>]*)>/gi,
-      '<$1$2 sandbox="allow-scripts allow-popups allow-presentation">',
-    )
+    .replace(/<(iframe)(?![^>]*\bsandbox=)([^>]*)>/gi, '<$1$2 sandbox="allow-scripts allow-popups allow-presentation">')
 }
 ---
 

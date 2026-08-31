@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import worker, { type Env, dueNow } from './index.ts'
+import worker, { dueNow, type Env } from './index.ts'
 
 /**
  * The window check is the whole scheduler: it is what lets the Worker stay
@@ -75,11 +75,7 @@ test('a late tick still publishes the post on its window boundary', async () => 
       waitUntil: (promise: Promise<unknown>) => pending.push(promise),
       passThroughOnException: () => {},
     }
-    await worker.scheduled(
-      controller as unknown as ScheduledController,
-      env,
-      ctx as unknown as ExecutionContext,
-    )
+    await worker.scheduled(controller as unknown as ScheduledController, env, ctx as unknown as ExecutionContext)
     await Promise.all(pending)
   } finally {
     globalThis.fetch = realFetch

@@ -4,7 +4,10 @@ import { asLocale, postUrl } from '../i18n/locales.ts'
 import { frontmatterOf, slugFrom } from './post-file.mjs'
 
 export const field = (frontmatter, name) =>
-  new RegExp(`^${name}:\\s*(.+)$`, 'm').exec(frontmatter)?.[1].trim().replace(/^["']|["']$/g, '')
+  new RegExp(`^${name}:\\s*(.+)$`, 'm')
+    .exec(frontmatter)?.[1]
+    .trim()
+    .replace(/^["']|["']$/g, '')
 
 export function urlFor(directory, filename, frontmatter) {
   const slug = field(frontmatter, 'slug') ?? slugFrom(directory, filename)

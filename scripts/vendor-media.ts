@@ -14,11 +14,12 @@
  * prints it, and every failure is written to .migration/unreachable-media.md as
  * a checklist so the file can be found by hand and dropped in.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+
 import { createHash } from 'node:crypto'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, extname, join } from 'node:path'
-import { bold, count, dim, heading, list, ok, postFiles, warn } from './lib/cli.ts'
 import { slugify } from '../src/lib/slugify.ts'
+import { bold, count, dim, heading, list, ok, postFiles, warn } from './lib/cli.ts'
 
 const CONTENT_DIR = 'content/blog'
 const DEAD_IMAGES = 'content/dead-images.json'
@@ -170,7 +171,8 @@ async function download(url: string): Promise<{ bytes: Buffer; contentType: stri
         redirect: 'follow',
         // Several CDNs (Wikimedia, some image hosts) refuse a bare fetch agent.
         headers: {
-          'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140 Safari/537.36',
+          'user-agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140 Safari/537.36',
           accept: 'image/avif,image/webp,image/png,image/*,video/*,*/*;q=0.8',
         },
       })
@@ -239,7 +241,11 @@ console.log(
 const failures: Failure[] = []
 let vendored = 0
 
-if (DRY_RUN) list(targets.map((t) => `would fetch ${t.url}`), { max: 20 })
+if (DRY_RUN)
+  list(
+    targets.map((t) => `would fetch ${t.url}`),
+    { max: 20 },
+  )
 
 // Serial on purpose: this is a one-off per image over the life of a post, and a
 // polite crawl rate matters more than finishing a second sooner.

@@ -71,7 +71,11 @@ for (const file of walkFiles(CONTENT).filter((path) => path.endsWith('.vue'))) {
 
   for (const [, attrs, css] of blocks) {
     if (!/\bmodule\b/.test(attrs)) {
-      report(file, `<style${attrs}> must be <style module>: only CSS modules rename classes, ` + `and a literal class name is one dev-server leak away from styling the whole page`)
+      report(
+        file,
+        `<style${attrs}> must be <style module>: only CSS modules rename classes, ` +
+          `and a literal class name is one dev-server leak away from styling the whole page`,
+      )
       continue
     }
 

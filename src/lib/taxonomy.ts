@@ -1,8 +1,8 @@
 import type { PaginateFunction } from 'astro'
+import { LOCALES, type Locale } from '../i18n/ui'
 import { hashString } from './chip-color'
 import { getListedPosts, LIST_PAGE_SIZE, type Post } from './posts'
 import { slugify } from './slugify'
-import { LOCALES, type Locale } from '../i18n/ui'
 
 export async function getCategories(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
   return Map.groupBy(await getListedPosts(lang), (post) => post.data.category)
@@ -11,9 +11,7 @@ export async function getCategories(lang?: Post['data']['lang']): Promise<Map<st
 // A section page only exists in a language that has a post in it, so the
 // language switcher must be built from this rather than assuming both locales.
 export async function categoryLocales(): Promise<(readonly [Locale, Set<string>])[]> {
-  return Promise.all(
-    LOCALES.map(async (locale) => [locale, new Set((await getCategories(locale)).keys())] as const),
-  )
+  return Promise.all(LOCALES.map(async (locale) => [locale, new Set((await getCategories(locale)).keys())] as const))
 }
 
 export async function getTags(lang?: Post['data']['lang']): Promise<Map<string, Post[]>> {
@@ -128,5 +126,5 @@ export function getSeriesNavigation(
   }
 }
 
-export { slugify } from './slugify'
 export { chipColor } from './chip-color'
+export { slugify } from './slugify'

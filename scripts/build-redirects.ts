@@ -133,7 +133,13 @@ for (const category of [...categories].sort()) {
 // Ghost chrome with no equivalent here.
 rows.push({ from: '/rss/', to: '/rss.xml', note: 'Ghost feed path' })
 rows.push({ from: '/feed/', to: '/rss.xml', note: 'Ghost feed path' })
-for (const name of ['sitemap.xml', 'sitemap-posts.xml', 'sitemap-pages.xml', 'sitemap-tags.xml', 'sitemap-authors.xml']) {
+for (const name of [
+  'sitemap.xml',
+  'sitemap-posts.xml',
+  'sitemap-pages.xml',
+  'sitemap-tags.xml',
+  'sitemap-authors.xml',
+]) {
   rows.push({ from: `/${name}`, to: '/sitemap-index.xml', note: 'Ghost sitemap' })
 }
 for (const author of ['lucas-santos', 'khaosdoctor']) {

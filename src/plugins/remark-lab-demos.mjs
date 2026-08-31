@@ -113,7 +113,11 @@ export function remarkLabDemos() {
     if (identifiers.size === 0) return
     const esmNodes = [...identifiers].map(([identifier, src]) => {
       const code = `import ${identifier} from ${JSON.stringify(src)}`
-      return { type: 'mdxjsEsm', value: code, data: { estree: Parser.parse(code, { sourceType: 'module', ecmaVersion: 'latest' }) } }
+      return {
+        type: 'mdxjsEsm',
+        value: code,
+        data: { estree: Parser.parse(code, { sourceType: 'module', ecmaVersion: 'latest' }) },
+      }
     })
     tree.children.unshift(...esmNodes)
   }

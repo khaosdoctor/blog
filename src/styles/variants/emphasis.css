@@ -38,8 +38,12 @@
   text-decoration-skip-ink: auto;
 }
 
-.prose .emphasis > :first-child { margin-block-start: 0; }
-.prose .emphasis > :last-child { margin-block-end: 0; }
+.prose .emphasis > :first-child {
+  margin-block-start: 0;
+}
+.prose .emphasis > :last-child {
+  margin-block-end: 0;
+}
 
 /**
  * The quote's drop cap, in the accent rather than the quote purple, but not

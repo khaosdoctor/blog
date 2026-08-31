@@ -9,9 +9,9 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
-import { count, frontmatterOf, heading, postIndex, reportFailures, warn, walkFiles, type Failure } from './lib/cli.ts'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
 import { urlFor } from '../src/lib/post-dates.mjs'
+import { count, type Failure, frontmatterOf, heading, postIndex, reportFailures, walkFiles, warn } from './lib/cli.ts'
 
 const DIST = 'dist'
 const CONTENT = 'content/blog'
@@ -206,7 +206,8 @@ for (const page of pages) {
     if (!files.includes(asset)) missingImages.add(match[1])
   }
 }
-for (const image of missingImages) failures.push({ check: 'missing built image', detail: image, file: join(DIST, image) })
+for (const image of missingImages)
+  failures.push({ check: 'missing built image', detail: image, file: join(DIST, image) })
 
 // 6. Pagefind ran. Not fatal on its own, but the search page is dead without it.
 if (!files.some((file) => file.startsWith(join(DIST, 'pagefind')))) {

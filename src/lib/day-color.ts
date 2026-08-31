@@ -1,4 +1,4 @@
-import { brandPool, hashString, type ChipColorOptions } from './chip-color'
+import { brandPool, type ChipColorOptions, hashString } from './chip-color'
 
 // Local calendar day, not UTC: this runs client-side, so the day that matters
 // is the reader's own. `toISOString` would give the UTC day instead.

@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss'
 import type { APIContext } from 'astro'
-import { HREFLANG, localePath, t, type Locale } from '../i18n/ui'
+import { HREFLANG, type Locale, localePath, t } from '../i18n/ui'
 import { getListedPosts, urlOf } from './posts'
 
 const FALLBACK_SITE = 'https://blog.lsantos.dev'

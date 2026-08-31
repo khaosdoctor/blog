@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 
 /**
  * The desktop meter is a run of dashes with a head that writes along it; the
@@ -14,7 +14,7 @@ async function cursorX(page: Page): Promise<string> {
 }
 
 /** The head is eased over frames, so a reading taken right after a scroll is mid-flight. */
-async function settled(page: Page, read: () => Promise<string>): Promise<string> {
+async function settled(_page: Page, read: () => Promise<string>): Promise<string> {
   let previous = ''
   await expect
     .poll(
@@ -58,9 +58,7 @@ test('the phone header fills as the post is read', async ({ page }) => {
   await page.goto(POST)
 
   const read = (): Promise<string> =>
-    page.evaluate(
-      () => document.querySelector<HTMLElement>('.shell')?.style.getPropertyValue('--read-progress') ?? '',
-    )
+    page.evaluate(() => document.querySelector<HTMLElement>('.shell')?.style.getPropertyValue('--read-progress') ?? '')
 
   await page.evaluate(() => scrollTo(0, (document.documentElement.scrollHeight - innerHeight) / 2))
   const middle = parseFloat(await settled(page, read))

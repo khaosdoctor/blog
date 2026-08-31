@@ -1,5 +1,5 @@
-import { glob } from 'astro/loaders'
 import { defineCollection, z } from 'astro:content'
+import { glob } from 'astro/loaders'
 import { LOCALES, SOURCE_LOCALE } from './i18n/locales.ts'
 import { labSources } from './lib/lab-sources'
 

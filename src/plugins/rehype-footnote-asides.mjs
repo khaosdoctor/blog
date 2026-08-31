@@ -78,12 +78,12 @@ function relabelBackrefs(section, locale) {
   walkElements(section, (node) => {
     if (node.type !== 'element' || node.properties?.dataFootnoteBackref === undefined) return
 
-    const current = node.properties['ariaLabel']
+    const current = node.properties.ariaLabel
     if (typeof current !== 'string') return
     // The number is the only part worth keeping: everything else is English GFM
     // hardcodes and cannot be configured.
     const reference = /(\d+(?:[-:]\d+)*)\s*$/.exec(current)?.[1] ?? ''
-    node.properties['ariaLabel'] = BACKREF_LABEL[locale].replace('%s', reference)
+    node.properties.ariaLabel = BACKREF_LABEL[locale].replace('%s', reference)
   })
 }
 

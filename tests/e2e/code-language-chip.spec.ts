@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 import { POST, pickCodeTheme } from './helpers.ts'
 
 /**
@@ -86,8 +86,7 @@ test.describe('the code language chip', () => {
         const button = figure.querySelector('.copy button')
         if (pre === null || button === null) continue
         const chip = getComputedStyle(pre, '::after')
-        const chipTop =
-          pre.getBoundingClientRect().height - parseFloat(chip.bottom) - parseFloat(chip.height)
+        const chipTop = pre.getBoundingClientRect().height - parseFloat(chip.bottom) - parseFloat(chip.height)
         const room = chipTop - (button.getBoundingClientRect().bottom - pre.getBoundingClientRect().top)
         if (smallest === null || room < smallest) smallest = room
       }

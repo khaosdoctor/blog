@@ -48,8 +48,14 @@ html :is(main, footer) a:not(:where(.chip, .heading-anchor, footer .credits a, f
   content: none;
 }
 
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .credits a, footer .version a, footer .icon-link)):hover,
-html :is(main, footer) a:not(:where(.chip, .heading-anchor, .bookmark, footer .credits a, footer .version a, footer .icon-link)):focus-visible {
+html
+  :is(main, footer)
+  a:not(:where(.chip, .heading-anchor, .bookmark, footer .credits a, footer .version a, footer .icon-link)):hover,
+html
+  :is(main, footer)
+  a:not(
+    :where(.chip, .heading-anchor, .bookmark, footer .credits a, footer .version a, footer .icon-link)
+  ):focus-visible {
   background: var(--post-accent-fill);
   color: var(--bg);
   text-decoration-line: none;

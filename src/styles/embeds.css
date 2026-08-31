@@ -16,6 +16,7 @@ lite-youtube {
 
 /* widgets.js replaces the blockquote with an <iframe> or <twitterwidget>, so the
    class above no longer matches; !important overrides the widget's own inline styles. */
+/* biome-ignore lint/correctness/noUnknownTypeSelector: widgets.js defines this element at runtime */
 twitterwidget,
 iframe[id^='twitter-widget-'] {
   display: block !important;

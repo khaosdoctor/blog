@@ -3,10 +3,7 @@ import type { APIRoute } from 'astro'
 import { folderOf, PUBLISH_CUTOFF, slugOf } from '../lib/posts'
 
 export const GET: APIRoute = async () => {
-  const upcoming = await getCollection(
-    'blog',
-    ({ data }) => !data.draft && data.pubDate > PUBLISH_CUTOFF,
-  )
+  const upcoming = await getCollection('blog', ({ data }) => !data.draft && data.pubDate > PUBLISH_CUTOFF)
 
   // Deduped by directory, not language, so an English-only post stays listed.
   const earliestByFolder = new Map<string, (typeof upcoming)[number]>()

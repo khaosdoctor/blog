@@ -1,5 +1,5 @@
-import { getCollection, type CollectionEntry } from 'astro:content'
-import { DATE_LOCALE, postUrl, SOURCE_LOCALE, type Locale } from '../i18n/ui'
+import { type CollectionEntry, getCollection } from 'astro:content'
+import { DATE_LOCALE, type Locale, postUrl, SOURCE_LOCALE } from '../i18n/ui'
 
 export type Post = CollectionEntry<'blog'>
 
@@ -13,7 +13,10 @@ export function folderOf(post: Post): string {
 
 export function slugOf(post: Post): string {
   if (post.data.slug !== undefined) return post.data.slug
-  const name = post.filePath?.split('/').at(-1)?.replace(/\.mdx?$/, '')
+  const name = post.filePath
+    ?.split('/')
+    .at(-1)
+    ?.replace(/\.mdx?$/, '')
   if (name === undefined || name === 'index') return folderOf(post)
   return name
 }

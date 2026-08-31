@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro'
 import type { CollectionEntry } from 'astro:content'
+import type { APIRoute } from 'astro'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from './mdx-component-names'
 import { urlOf } from './posts'
 
@@ -16,10 +16,7 @@ export const markdownTwinRoute: APIRoute = ({ props, site }) => {
 }
 
 // By name, never by shape: a catch-all `<[A-Z]...>` would also eat `Promise<T>`.
-const COMPONENT = new RegExp(
-  `</?(?:${MDX_COMPONENT_PATTERN}|${RETIRED_COMPONENT_PATTERN})\\b[^>]*>`,
-  'g',
-)
+const COMPONENT = new RegExp(`</?(?:${MDX_COMPONENT_PATTERN}|${RETIRED_COMPONENT_PATTERN})\\b[^>]*>`, 'g')
 
 const CODE = /(^```[\s\S]*?^```[^\n]*|`[^`\n]+`)/gm
 
@@ -32,12 +29,14 @@ function componentsToText(body: string): string {
 }
 
 function replaceComponents(prose: string): string {
-  return prose
-    .replace(/<Video\b[^>]*src="([^"]*)"[^>]*\/>/g, (_match, src) => `[Video: ${src}]`)
-    // Lazy to `/>`: a RawEmbed's html attribute holds a whole iframe.
-    .replace(/<RawEmbed\b[\s\S]*?\/>/g, '[Embedded content]')
-    .replace(/<MissingImage\b[^>]*\/>/g, '[Image no longer available]')
-    .replace(COMPONENT, '')
+  return (
+    prose
+      .replace(/<Video\b[^>]*src="([^"]*)"[^>]*\/>/g, (_match, src) => `[Video: ${src}]`)
+      // Lazy to `/>`: a RawEmbed's html attribute holds a whole iframe.
+      .replace(/<RawEmbed\b[\s\S]*?\/>/g, '[Embedded content]')
+      .replace(/<MissingImage\b[^>]*\/>/g, '[Image no longer available]')
+      .replace(COMPONENT, '')
+  )
 }
 
 function toAgentMarkdown(post: Post, site: URL | undefined): string {
@@ -63,5 +62,5 @@ function toAgentMarkdown(post: Post, site: URL | undefined): string {
     '',
   ].join('\n')
 
-  return header + componentsToText(post.body ?? '').trim() + '\n'
+  return `${header + componentsToText(post.body ?? '').trim()}\n`
 }

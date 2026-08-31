@@ -1,7 +1,7 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
 import PostList from '../components/PostList.astro'
-import { localePath, LOCALES, SOURCE_LOCALE, t } from '../i18n/ui'
+import { LOCALES, localePath, SOURCE_LOCALE, t } from '../i18n/ui'
+import BaseLayout from '../layouts/BaseLayout.astro'
 import { getListedPosts } from '../lib/posts'
 
 const recent = (await getListedPosts()).slice(0, 5)

@@ -15,8 +15,8 @@ import {
   conwayMinimumOpacity as MIN_OPACITY,
 } from '../lib/tweaks'
 import { prefersReducedMotion } from './motion'
-import { THEME_ATTR } from './scheme'
 import { onReady } from './ready'
+import { THEME_ATTR } from './scheme'
 
 const MOTION_KEY = 'motion'
 const BG_LIFE_KEY = 'background-life'
@@ -52,7 +52,8 @@ function rotate90(cells: Array<[number, number]>, size: number): Array<[number, 
 }
 
 const GLIDER_ORIENTATIONS: Array<Array<[number, number]>> = [GLIDER_BASE]
-for (let i = 0; i < 3; i++) GLIDER_ORIENTATIONS.push(rotate90(GLIDER_ORIENTATIONS[GLIDER_ORIENTATIONS.length - 1], GLIDER_BOX))
+for (let i = 0; i < 3; i++)
+  GLIDER_ORIENTATIONS.push(rotate90(GLIDER_ORIENTATIONS[GLIDER_ORIENTATIONS.length - 1], GLIDER_BOX))
 
 function clampNumber(raw: string | null, fallback: number, min: number, max: number): number {
   if (raw === null) return fallback
@@ -348,7 +349,8 @@ export function resetSettings(): void {
   gps = DEFAULT_GPS
   autoFeedSeconds = DEFAULT_AUTOFEED
   opacity = DEFAULT_OPACITY
-  for (const key of [MOTION_KEY, BG_LIFE_KEY, DENSITY_KEY, GPS_KEY, AUTOFEED_KEY, PAUSED_KEY, OPACITY_KEY]) writeStorage(key, null)
+  for (const key of [MOTION_KEY, BG_LIFE_KEY, DENSITY_KEY, GPS_KEY, AUTOFEED_KEY, PAUSED_KEY, OPACITY_KEY])
+    writeStorage(key, null)
   applyMotionAttr()
   applyBgLifeAttr()
   seed()

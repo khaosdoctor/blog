@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { SOURCE_LOCALE, type Locale } from '../i18n/ui'
+import { type Locale, SOURCE_LOCALE } from '../i18n/ui'
 
 type Described = string | Partial<Record<Locale, string>>
 

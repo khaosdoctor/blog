@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 
 /**
  * The mobile ruler: every page type, both languages, at the common phone and
@@ -104,8 +104,8 @@ for (const { name, selector, path, minWidth, minHeight } of TAP_TARGETS) {
     await page.goto(path)
     const box = await page.locator(selector).first().boundingBox()
     expect(box, `${selector} not found on ${path}`).not.toBeNull()
-    expect(box!.width, `${selector} width`).toBeGreaterThanOrEqual(minWidth)
-    expect(box!.height, `${selector} height`).toBeGreaterThanOrEqual(minHeight)
+    expect(box?.width, `${selector} width`).toBeGreaterThanOrEqual(minWidth)
+    expect(box?.height, `${selector} height`).toBeGreaterThanOrEqual(minHeight)
   })
 }
 
@@ -205,12 +205,12 @@ test.describe('footnotes on touch', () => {
     await expect(panel).toBeVisible()
 
     const box = await panel.boundingBox()
-    expect(Math.round(box!.y + box!.height)).toBe(780)
-    expect(box!.x).toBe(0)
+    if (box === null) throw new Error('the open panel reported no box')
+    expect(Math.round(box.y + box.height)).toBe(780)
+    expect(box.x).toBe(0)
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0)
 
     await page.keyboard.press('Escape')
     await expect(panel).toBeHidden()
   })
 })
-

@@ -1,10 +1,10 @@
 ---
+import { type Locale, t } from '../i18n/ui'
+import { LISTING_LEADER } from '../lib/listing'
 import type { Post } from '../lib/posts'
 import { estimateReadingTime, formatDate } from '../lib/posts'
-import { t, type Locale } from '../i18n/ui'
 import PostList from './PostList.astro'
 import ReadingTime from './ReadingTime.astro'
-import { LISTING_LEADER } from '../lib/listing'
 
 interface Props {
   entries: { slug: string; title: string; posts: Post[] }[]
@@ -12,7 +12,6 @@ interface Props {
 }
 
 const { entries, locale } = Astro.props
-
 
 const rows = entries
   .map((entry) => ({

@@ -133,6 +133,7 @@ export function reportFailures(failures: Failure[], clean: string): never {
     for (const failure of group.slice(0, 10)) console.error(`  ${failure.detail}`)
     if (group.length > 10) console.error(`  ${dim(`...and ${group.length - 10} more`)}`)
   }
-  for (const failure of failures) annotate('error', { file: failure.file, message: `${failure.check}: ${failure.detail}` })
+  for (const failure of failures)
+    annotate('error', { file: failure.file, message: `${failure.check}: ${failure.detail}` })
   process.exit(1)
 }

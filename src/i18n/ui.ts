@@ -1,6 +1,6 @@
-import { asLocale, LOCALES, localePath, postUrl, SOURCE_LOCALE, type Locale } from './locales.ts'
+import { asLocale, LOCALES, type Locale, localePath, postUrl, SOURCE_LOCALE } from './locales.ts'
 
-export { asLocale, LOCALES, localePath, postUrl, SOURCE_LOCALE, type Locale }
+export { asLocale, LOCALES, type Locale, localePath, postUrl, SOURCE_LOCALE }
 
 // Search engines match on the region, so Portuguese is announced as pt-BR.
 export const HREFLANG: Record<Locale, string> = {
@@ -141,7 +141,8 @@ const pt = {
   twitterProfile: 'Perfil no Twitter',
   youtubeChannel: 'Canal no YouTube',
   ossTitle: 'Código aberto',
-  ossDescription: 'Cada projeto de código aberto, fonte e ferramenta usados para construir este site, com um link para cada um.',
+  ossDescription:
+    'Cada projeto de código aberto, fonte e ferramenta usados para construir este site, com um link para cada um.',
   ossIntro: 'Este site é construído sobre o trabalho de muita gente.',
   ossFontsHeading: 'Tipografia',
   ossIconsHeading: 'Ícones',

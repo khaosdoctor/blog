@@ -43,9 +43,7 @@ function withCap(children) {
  * no mark node, so the markers arrive as literal text on the edges.
  */
 function loneHighlight(node) {
-  const children = node.children.filter(
-    (child) => !(child.type === 'text' && child.value.trim() === ''),
-  )
+  const children = node.children.filter((child) => !(child.type === 'text' && child.value.trim() === ''))
   const first = children[0]
   const last = children[children.length - 1]
   if (first?.type !== 'text' || last?.type !== 'text') return null

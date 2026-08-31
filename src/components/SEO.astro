@@ -1,19 +1,19 @@
 ---
+import { HREFLANG, type Locale, SOURCE_LOCALE } from '../i18n/ui'
 import {
   AUTHOR_NAME,
   AUTHOR_TWITTER_HANDLE,
+  type BreadcrumbItem,
   buildBreadcrumbJsonLd,
   buildPersonJsonLd,
   buildPrimaryJsonLd,
   OG_CARD_HEIGHT,
   OG_CARD_WIDTH,
-  sectionOgImage,
   SITE_NAME,
+  sectionOgImage,
   toJsonLdScript,
   toOgLocale,
-  type BreadcrumbItem,
 } from '../lib/seo'
-import { HREFLANG, SOURCE_LOCALE, type Locale } from '../i18n/ui'
 
 export interface Alternate {
   /** A hreflang tag, not a locale code: `pt` is announced as `pt-BR`. */
@@ -95,8 +95,7 @@ const breadcrumbItems: BreadcrumbItem[] = [
 const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems)
 const personJsonLd = buildPersonJsonLd(homeUrl)
 
-const xDefault =
-  alternates.find((alt) => alt.lang === HREFLANG[SOURCE_LOCALE]) ?? alternates[0]
+const xDefault = alternates.find((alt) => alt.lang === HREFLANG[SOURCE_LOCALE]) ?? alternates[0]
 const robots = noindex ? 'noindex,nofollow' : 'index,follow'
 ---
 

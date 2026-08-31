@@ -19,6 +19,4 @@ export const MDX_COMPONENT_PATTERN = [...MDX_COMPONENT_NAMES].sort((a, b) => b.l
 /** Removed components the guards still watch for, so a post using one fails loudly. */
 const RETIRED_COMPONENT_NAMES = ['Epigraph', 'Figure', 'CourseCTA', 'MarginNote', 'Sidenote'] as const
 
-export const RETIRED_COMPONENT_PATTERN = [...RETIRED_COMPONENT_NAMES]
-  .sort((a, b) => b.length - a.length)
-  .join('|')
+export const RETIRED_COMPONENT_PATTERN = [...RETIRED_COMPONENT_NAMES].sort((a, b) => b.length - a.length).join('|')

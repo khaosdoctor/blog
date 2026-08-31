@@ -48,7 +48,9 @@ for (const name of credited.keys()) {
 
 for (const [name, url] of credited) {
   if (declared.has(name) && url === '') {
-    failures.push(`${name} has neither a homepage nor a usable repository.url in its own package.json: needs a decision, not a guess`)
+    failures.push(
+      `${name} has neither a homepage nor a usable repository.url in its own package.json: needs a decision, not a guess`,
+    )
   }
 }
 

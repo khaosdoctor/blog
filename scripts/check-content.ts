@@ -38,12 +38,18 @@ function check(file: string): void {
 
   for (const [id, line] of defined) {
     if (!referenced.has(id)) {
-      failures.push({ file: `${file}:${line}`, detail: `[^${id}] is defined but never referenced, so it renders nowhere` })
+      failures.push({
+        file: `${file}:${line}`,
+        detail: `[^${id}] is defined but never referenced, so it renders nowhere`,
+      })
     }
   }
   for (const [id, line] of referenced) {
     if (!defined.has(id)) {
-      failures.push({ file: `${file}:${line}`, detail: `[^${id}] is referenced but never defined, so it shows as literal text` })
+      failures.push({
+        file: `${file}:${line}`,
+        detail: `[^${id}] is referenced but never defined, so it shows as literal text`,
+      })
     }
   }
 }

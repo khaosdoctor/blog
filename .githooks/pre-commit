@@ -1,0 +1,20 @@
+#!/bin/sh
+# Formats and lints what is about to be committed, then restages whatever was
+# fixed. An unfixable finding exits non-zero, which aborts the commit.
+#
+# Installed by the `prepare` npm script, which points core.hooksPath here, so a
+# fresh clone gets it from `npm install` rather than from a setup step nobody
+# remembers.
+set -e
+
+staged=$(git diff --name-only --cached --diff-filter=ACMR)
+
+npx --no-install biome check --write --staged --no-errors-on-unmatched
+
+# Only the paths that were already staged: a fix to a file the author left out
+# of this commit deliberately stays out of it.
+if [ -n "$staged" ]; then
+  printf '%s\n' "$staged" | while IFS= read -r file; do
+    [ -e "$file" ] && git add -- "$file"
+  done
+fi

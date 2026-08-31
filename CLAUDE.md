@@ -19,6 +19,7 @@ No em-dashes anywhere. Banned words, comments included: land/lands/landed, sweep
 ## Before you finish
 
 ```
+npm run format
 npm run check
 npm run build
 node scripts/check-output.ts

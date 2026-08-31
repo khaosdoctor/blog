@@ -22,7 +22,8 @@ const TARGET_PLUGIN_NAME = '@mdx-js/rolldown'
 const CACHE_SUBDIR = '.astro-cache/mdx'
 const CONTENT_BASE = 'content/blog'
 const RELATIVE_IMPORT_EXTENSIONS = ['.ts', '.mts', '.mjs', '.js', '.tsx', '.jsx']
-const IMPORT_SPECIFIER = /(?:import|export)\s+(?:type\s+)?(?:[^'";]*?\bfrom\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g
+const IMPORT_SPECIFIER =
+  /(?:import|export)\s+(?:type\s+)?(?:[^'";]*?\bfrom\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g
 const LAB_TAG = /<(?:LabDemo|HtmlLab)\b([^>]*)>/g
 const LAB_SRC = /\bsrc=["']([^"']+)["']/
 const MAX_NAMED_MISSES = 5
@@ -110,7 +111,9 @@ function wikilinkTargetsSalt(root, code) {
     } catch {
       continue
     }
-    for (const entry of entries.filter((e) => e.isFile() && /\.mdx?$/.test(e.name)).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of entries
+      .filter((e) => e.isFile() && /\.mdx?$/.test(e.name))
+      .sort((a, b) => a.name.localeCompare(b.name))) {
       const raw = readTextOrNull(join(dir, entry.name))
       if (raw !== null) parts.push(`${slug}/${entry.name}:${frontmatterOf(raw)}`)
     }
@@ -161,7 +164,9 @@ function reasonFor(missNames, cold, saltChanged) {
 function report({ hits, missNames, cold, saltChanged, savedMs }) {
   const misses = missNames.length
   const detail = misses === 0 ? '' : ` (${reasonFor(missNames, cold, saltChanged)})`
-  console.log(`mdx-cache: ${hits} hits, ${misses} ${misses === 1 ? 'miss' : 'misses'}${detail}, saved ~${formatDuration(savedMs)}`)
+  console.log(
+    `mdx-cache: ${hits} hits, ${misses} ${misses === 1 ? 'miss' : 'misses'}${detail}, saved ~${formatDuration(savedMs)}`,
+  )
 }
 
 export function mdxTransformCache() {
@@ -255,7 +260,11 @@ export function mdxTransformCache() {
       statsFile = join(cacheDir, '.stats.json')
 
       const target = resolved.plugins.find((plugin) => plugin.name === TARGET_PLUGIN_NAME)
-      if (target === undefined || typeof target.transform !== 'object' || typeof target.transform.handler !== 'function') {
+      if (
+        target === undefined ||
+        typeof target.transform !== 'object' ||
+        typeof target.transform.handler !== 'function'
+      ) {
         if (!warnedMissing) {
           warnedMissing = true
           console.warn(

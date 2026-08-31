@@ -178,7 +178,11 @@ if (missing.length === 0) {
   // posts point at now, not a history of what they once did.
   const live = new Set(urls)
   const kept = Object.fromEntries(Object.entries(cache).filter(([url]) => live.has(url)))
-  const sorted = Object.fromEntries(Object.keys(kept).sort().map((url) => [url, kept[url]]))
+  const sorted = Object.fromEntries(
+    Object.keys(kept)
+      .sort()
+      .map((url) => [url, kept[url]]),
+  )
   writeFileSync(CACHE, `${JSON.stringify(sorted, null, 2)}\n`)
 
   const dead = Object.entries(sorted).filter(([, meta]) => meta === null)

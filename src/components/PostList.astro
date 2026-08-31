@@ -1,9 +1,9 @@
 ---
+import { localePath } from '../i18n/ui'
+import { LISTING_LEADER } from '../lib/listing'
 import type { Post } from '../lib/posts'
 import { estimateReadingTime, formatDate, isScheduled, urlOf } from '../lib/posts'
-import { localePath } from '../i18n/ui'
 import ReadingTime from './ReadingTime.astro'
-import { LISTING_LEADER } from '../lib/listing'
 
 interface Props {
   posts: Post[]
@@ -17,7 +17,6 @@ const { posts, showCategory = true } = Astro.props
 function categoryUrl(post: Post): string {
   return localePath(post.data.lang, `/${post.data.category}/`)
 }
-
 
 // Only ever true on the dev server: a scheduled post is not in the build at all.
 const showScheduled = import.meta.env.DEV

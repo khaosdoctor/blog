@@ -15,7 +15,7 @@
 // that locale's title: the reader is going to arrive at a Portuguese article, so
 // the link should say so.
 
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import GithubSlugger from 'github-slugger'
 import { visit } from 'unist-util-visit'
 import { asLocale, postUrl } from '../i18n/locales.ts'

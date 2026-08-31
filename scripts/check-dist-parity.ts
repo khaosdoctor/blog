@@ -54,7 +54,10 @@ function sortedJson(value: unknown): unknown {
 
 function sameJsonIgnoringKeyOrder(a: Buffer, b: Buffer): boolean {
   try {
-    return JSON.stringify(sortedJson(JSON.parse(a.toString('utf8')))) === JSON.stringify(sortedJson(JSON.parse(b.toString('utf8'))))
+    return (
+      JSON.stringify(sortedJson(JSON.parse(a.toString('utf8')))) ===
+      JSON.stringify(sortedJson(JSON.parse(b.toString('utf8'))))
+    )
   } catch {
     return false
   }

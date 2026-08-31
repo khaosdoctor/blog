@@ -59,6 +59,7 @@
 Run these, in order:
 
 ```
+npm run format
 npm run check
 npm run build
 node scripts/check-output.ts

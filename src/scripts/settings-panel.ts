@@ -1,3 +1,12 @@
+import { setAccent, storedAccent } from '../lib/accent'
+import { readStorage, removeStorage, writeStorage } from '../lib/storage'
+import {
+  fontSizeDefaultPercent as FONT_SIZE_DEFAULT,
+  fontSizeMaximumPercent as FONT_SIZE_MAX,
+  fontSizeMinimumPercent as FONT_SIZE_MIN,
+  fontSizeStepPercent as FONT_SIZE_STEP,
+} from '../lib/tweaks'
+import { resetCodeTheme } from './code-theme'
 import {
   getSettings,
   reseed,
@@ -10,18 +19,9 @@ import {
   setOpacity,
   setPaused,
 } from './conway'
-import { getShortcutLetter, resetShortcutLetter, RESERVED_LETTERS, setShortcutLetter } from './search-palette'
-import { resetCodeTheme } from './code-theme'
-import { setAccent, storedAccent } from '../lib/accent'
-import { readStorage, removeStorage, writeStorage } from '../lib/storage'
-import {
-  fontSizeDefaultPercent as FONT_SIZE_DEFAULT,
-  fontSizeMaximumPercent as FONT_SIZE_MAX,
-  fontSizeMinimumPercent as FONT_SIZE_MIN,
-  fontSizeStepPercent as FONT_SIZE_STEP,
-} from '../lib/tweaks'
 import { markCurrent, promoteToPopover, wireMenu } from './popover-menu'
 import { onReady } from './ready'
+import { getShortcutLetter, RESERVED_LETTERS, resetShortcutLetter, setShortcutLetter } from './search-palette'
 
 const HP_PERSIST_KEY = 'hp-persist'
 
@@ -72,7 +72,6 @@ function init(): void {
   const resetHandlers: Array<() => void> = []
 
   wireMenu(wrapper, opener, menu)
-
 
   const motionOptions = [...menu.querySelectorAll<HTMLButtonElement>('.sp-motion-option')]
   const markMotion = (value: string): void => {
@@ -181,7 +180,7 @@ function init(): void {
     id: string,
     read: () => number,
     write: (value: number) => void,
-    format: (value: number) => string
+    format: (value: number) => string,
   ): void => {
     const input = menu.querySelector<HTMLInputElement>(`#${id}`)
     if (input === null) return
@@ -199,10 +198,30 @@ function init(): void {
     resetHandlers.push(sync)
   }
 
-  wireKnob('sp-density', () => getSettings().density, setDensity, (value) => `${value}%`)
-  wireKnob('sp-gps', () => getSettings().gps, setGps, (value) => `${value}/s`)
-  wireKnob('sp-autofeed', () => getSettings().autoFeedSeconds, setAutoFeed, (value) => `${value}s`)
-  wireKnob('sp-opacity', () => getSettings().opacity, setOpacity, (value) => `${Math.round(value * 100)}%`)
+  wireKnob(
+    'sp-density',
+    () => getSettings().density,
+    setDensity,
+    (value) => `${value}%`,
+  )
+  wireKnob(
+    'sp-gps',
+    () => getSettings().gps,
+    setGps,
+    (value) => `${value}/s`,
+  )
+  wireKnob(
+    'sp-autofeed',
+    () => getSettings().autoFeedSeconds,
+    setAutoFeed,
+    (value) => `${value}s`,
+  )
+  wireKnob(
+    'sp-opacity',
+    () => getSettings().opacity,
+    setOpacity,
+    (value) => `${Math.round(value * 100)}%`,
+  )
 
   const pause = menu.querySelector<HTMLButtonElement>('#sp-pause')
   if (pause !== null) {

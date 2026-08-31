@@ -1,4 +1,4 @@
-import { HREFLANG, localePath, t, type Locale } from '../i18n/ui'
+import { HREFLANG, type Locale, localePath, t } from '../i18n/ui'
 import { LIGHT_GROUND } from './grounds.mjs'
 
 // `scope` must stay at the site root for every locale, so crossing languages

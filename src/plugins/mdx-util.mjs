@@ -14,9 +14,7 @@ export function localeFromFile(file) {
 /** The one meaningful child of a paragraph, or null if there is more than one. */
 export function soleChild(node) {
   if (node.type !== 'paragraph') return null
-  const meaningful = node.children.filter(
-    (child) => !(child.type === 'text' && child.value.trim() === ''),
-  )
+  const meaningful = node.children.filter((child) => !(child.type === 'text' && child.value.trim() === ''))
   return meaningful.length === 1 ? meaningful[0] : null
 }
 

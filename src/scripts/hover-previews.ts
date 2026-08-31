@@ -1,11 +1,11 @@
 import { readStorage } from '../lib/storage'
 import {
   hoverPreviewCacheEntryLimit as CACHE_MAX,
+  hoverPreviewPinnedCardLimit as CARD_MAX,
   hoverPreviewCloseDelayMilliseconds as CLOSE_DELAY,
   hoverPreviewDragThresholdPixels as DRAG_THRESHOLD,
   hoverPreviewFootnoteCharacterLimit as FOOTNOTE_TEXT_MAX,
   hoverPreviewOpenDelayMilliseconds as HOVER_DELAY,
-  hoverPreviewPinnedCardLimit as CARD_MAX,
   hoverPreviewViewportMarginPixels as VIEWPORT_MARGIN,
 } from '../lib/tweaks'
 import { ALIGN, canPopover, clampAxis, placeNear } from './popover-menu'
@@ -125,7 +125,8 @@ function getFootnoteMeta(hash: string, linkText: string): Meta | null {
   for (const backref of clone.querySelectorAll('[data-footnote-backref]')) backref.remove()
 
   const paragraphs = clone.querySelectorAll('p')
-  const raw = paragraphs.length > 0 ? Array.from(paragraphs, (p) => p.textContent ?? '').join(' ') : (clone.textContent ?? '')
+  const raw =
+    paragraphs.length > 0 ? Array.from(paragraphs, (p) => p.textContent ?? '').join(' ') : (clone.textContent ?? '')
   const text = raw.replace(/\s+/g, ' ').trim()
   if (!text) return null
 
@@ -365,8 +366,7 @@ function buildCard(href: string, unwritten = false): PopoverHTMLElement {
   minimize.className = 'hp-min'
   minimize.setAttribute('aria-pressed', 'false')
   minimize.setAttribute('aria-label', strings.minimize ?? '')
-  minimize.innerHTML =
-    '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 9h10v2H3z"/></svg>'
+  minimize.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 9h10v2H3z"/></svg>'
   minimize.addEventListener('click', () => {
     if (isDocked(card)) undockCard(card)
     else dockCard(card)

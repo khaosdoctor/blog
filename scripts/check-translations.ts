@@ -20,8 +20,8 @@
  * this guard, not the extension.
  */
 import { readFileSync, statSync } from 'node:fs'
-import { annotate, bold, count, dim, fail, frontmatterOf, heading, ok, postFiles } from './lib/cli.ts'
 import { MDX_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
+import { annotate, bold, count, dim, fail, frontmatterOf, heading, ok, postFiles } from './lib/cli.ts'
 
 const DIR = 'content/blog'
 
@@ -34,9 +34,7 @@ const DIR = 'content/blog'
 const HTML_ELEMENTS =
   'br|hr|figure|figcaption|em|strong|code|pre|kbd|sup|sub|abbr|del|ins|mark|span|a|img|p|ul|ol|li|blockquote|table|thead|tbody|tr|th|td|h[1-6]|details|summary|div'
 
-const UNKNOWN_ELEMENT = new RegExp(
-  `<(?!/)(?!${MDX_COMPONENT_PATTERN}|${HTML_ELEMENTS})[A-Za-z][A-Za-z0-9]*\\b`,
-)
+const UNKNOWN_ELEMENT = new RegExp(`<(?!/)(?!${MDX_COMPONENT_PATTERN}|${HTML_ELEMENTS})[A-Za-z][A-Za-z0-9]*\\b`)
 
 const BANNED: [RegExp, string][] = [
   [/<script\b/i, '<script> element'],
@@ -70,16 +68,18 @@ const BANNED: [RegExp, string][] = [
  * the component's entire purpose and is checked by RawEmbed itself.
  */
 function withoutCode(source: string): string {
-  return source
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/`[^`\n]*`/g, '')
-    // Maths is raw to MDX: remark-math's tokenizer claims the whole span, so
-    // \frac{a}{b} inside $...$ is LaTeX, never an expression to execute.
-    .replace(/\$\$[\s\S]*?\$\$/g, '')
-    .replace(/\$[^$\n]+\$/g, '')
-    .replace(/\\[<{}]/g, '')
-    .replace(/\]\(<[^>]*>\)/g, ']()')
-    .replace(/<(?:RawEmbed|Video|MissingImage|Tweet|Bookmark)\b[\s\S]*?\/>/g, '')
+  return (
+    source
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/`[^`\n]*`/g, '')
+      // Maths is raw to MDX: remark-math's tokenizer claims the whole span, so
+      // \frac{a}{b} inside $...$ is LaTeX, never an expression to execute.
+      .replace(/\$\$[\s\S]*?\$\$/g, '')
+      .replace(/\$[^$\n]+\$/g, '')
+      .replace(/\\[<{}]/g, '')
+      .replace(/\]\(<[^>]*>\)/g, ']()')
+      .replace(/<(?:RawEmbed|Video|MissingImage|Tweet|Bookmark)\b[\s\S]*?\/>/g, '')
+  )
 }
 
 heading('check-translations: scanning machine-written translations for unsafe markup')
@@ -99,8 +99,10 @@ for (const file of postFiles(DIR, { index: false })) {
 
   // The folder is the pairing now: a translation must say which language it
   // is, and must not carry the old cross-collection key.
-  if (!/^lang:\s*\S/m.test(frontmatter)) problems.push({ file, message: 'translation is missing the lang frontmatter key' })
-  if (/^translationOf:\s*\S/m.test(frontmatter)) problems.push({ file, message: 'translationOf is gone from the schema, remove it' })
+  if (!/^lang:\s*\S/m.test(frontmatter))
+    problems.push({ file, message: 'translation is missing the lang frontmatter key' })
+  if (/^translationOf:\s*\S/m.test(frontmatter))
+    problems.push({ file, message: 'translationOf is gone from the schema, remove it' })
 
   const prose = withoutCode(raw)
   for (const [pattern, label] of BANNED) {

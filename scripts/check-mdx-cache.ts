@@ -13,8 +13,9 @@
  * does and asserts the plugin the cache depends on is still there, under the
  * name and shape the wrapper expects.
  */
-import mdx from '@astrojs/mdx'
+
 import { unified } from '@astrojs/markdown-remark'
+import mdx from '@astrojs/mdx'
 import { fail, heading, ok } from './lib/cli.ts'
 
 const EXPECTED_NAME = '@mdx-js/rolldown'
@@ -55,7 +56,11 @@ if (target === undefined) {
   process.exit(1)
 }
 
-if (typeof target.transform !== 'object' || target.transform === null || typeof target.transform.handler !== 'function') {
+if (
+  typeof target.transform !== 'object' ||
+  target.transform === null ||
+  typeof target.transform.handler !== 'function'
+) {
   fail(`"${EXPECTED_NAME}" no longer exposes transform.handler as a function (found ${typeof target.transform})`)
   process.exit(1)
 }

@@ -1,6 +1,6 @@
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
-import { pageScheme, THEME_ATTR } from './scheme'
 import { onReady } from './ready'
+import { pageScheme, THEME_ATTR } from './scheme'
 
 const STORAGE_KEY = 'code-theme'
 const ATTR = 'data-code-theme'

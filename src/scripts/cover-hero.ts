@@ -1,7 +1,7 @@
 // `drawMeta: false` leaves that slot for the page's real `.meta` row below.
-import { buildCoverSvg, coverOverlay, type CoverScheme } from '../lib/cover'
-import { pageScheme, THEME_ATTR } from './scheme'
+import { buildCoverSvg, type CoverScheme, coverOverlay } from '../lib/cover'
 import { onReady } from './ready'
+import { pageScheme, THEME_ATTR } from './scheme'
 
 const darkMedia = matchMedia('(prefers-color-scheme: dark)')
 

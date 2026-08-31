@@ -20,8 +20,8 @@
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { HREFLANG, LOCALES, SOURCE_LOCALE, ui, type Locale } from '../src/i18n/ui.ts'
-import { count, field, frontmatterOf, heading, reportFailures, warn, walkFiles, type Failure } from './lib/cli.ts'
+import { HREFLANG, LOCALES, type Locale, SOURCE_LOCALE, ui } from '../src/i18n/ui.ts'
+import { count, type Failure, field, frontmatterOf, heading, reportFailures, walkFiles, warn } from './lib/cli.ts'
 
 const PAGES = 'src/pages'
 const CONTENT = 'content/blog'
@@ -259,7 +259,11 @@ for (const route of routeFiles) {
   if (locale === undefined) continue
   const shared = route.slice(locale.length + 1)
   if (!sourceRoutes.has(shared)) {
-    report('route exists only outside the source language', `${route} has no ${SOURCE_LOCALE} counterpart`, join(PAGES, route))
+    report(
+      'route exists only outside the source language',
+      `${route} has no ${SOURCE_LOCALE} counterpart`,
+      join(PAGES, route),
+    )
   }
 }
 
@@ -281,11 +285,7 @@ for (const route of routeFiles) {
   const own = localeOfRoute(route)
   for (const match of source.matchAll(/\bt\(\s*['"]([a-z-]+)['"]/g)) {
     if (match[1] === own) continue
-    report(
-      'page reads another language',
-      `${route} calls t('${match[1]}', …) but renders in ${own}`,
-      file,
-    )
+    report('page reads another language', `${route} calls t('${match[1]}', …) but renders in ${own}`, file)
   }
 }
 

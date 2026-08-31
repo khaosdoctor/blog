@@ -48,7 +48,7 @@ async function reveal(link: HTMLAnchorElement): Promise<void> {
   if (row === null || pending.has(link)) return
 
   const revealed = row.nextElementSibling
-  if (revealed !== null && revealed.classList.contains('lab-source-code')) {
+  if (revealed?.classList.contains('lab-source-code')) {
     const hidden = revealed.hasAttribute('hidden')
     revealed.toggleAttribute('hidden', !hidden)
     setExpanded(link, hidden)

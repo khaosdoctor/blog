@@ -1,0 +1,62 @@
+name: Lint
+
+# Runs ahead of everything else so nothing reaches the reader unformatted.
+# Biome fixes what it safely can and pushes the result back; whatever it cannot
+# fix fails the job, because that needs a person to read it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The branch itself, not the merge commit a pull_request event checks
+          # out by default, or the push below has nowhere to go.
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26
+          cache: npm
+
+      - run: npm ci
+
+      # Separate from the check below: this applies the safe fixes, and its own
+      # exit code is not the verdict.
+      - name: Apply what Biome can fix
+        run: npx biome check --write || true
+
+      - name: Commit the formatting, if there is any
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Nothing to format."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style: biome"
+          # Never --force: a rejection means someone pushed while this ran, and
+          # their commit is worth more than a reformat that will happen again.
+          git push origin "HEAD:$BRANCH"
+
+      # The verdict. Anything still reported here needed a person, so the job
+      # goes red rather than committing a half-fix.
+      - name: Fail on what Biome cannot fix
+        run: npx biome check

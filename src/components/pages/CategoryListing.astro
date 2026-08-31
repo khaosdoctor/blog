@@ -1,7 +1,7 @@
 ---
 import type { Page } from 'astro'
+import { alternatesFor, type Locale, localePath, t } from '../../i18n/ui'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { alternatesFor, localePath, t, type Locale } from '../../i18n/ui'
 import type { Post } from '../../lib/posts'
 import Pagination from '../Pagination.astro'
 import PostList from '../PostList.astro'
@@ -17,8 +17,7 @@ interface Props {
 const { locale, category, description, languages, page } = Astro.props
 
 const path = `/${category}/`
-const title =
-  page.currentPage > 1 ? `LS: ${category} | ${t(locale, 'page')} ${page.currentPage}` : `LS: ${category}`
+const title = page.currentPage > 1 ? `LS: ${category} | ${t(locale, 'page')} ${page.currentPage}` : `LS: ${category}`
 ---
 
 <BaseLayout

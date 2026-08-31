@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
-import { localePath, t, type Locale } from '../i18n/ui'
-import { PUBLISH_CUTOFF, type Post, urlOf } from '../lib/posts'
+import { type Locale, localePath, t } from '../i18n/ui'
+import { type Post, PUBLISH_CUTOFF, urlOf } from '../lib/posts'
 import { seriesTitle } from '../lib/taxonomy'
 
 interface Props {
@@ -14,9 +14,9 @@ const { series, current, locale } = Astro.props
 
 // Drafts stay in the series map without a link. Filtered by language: a
 // translation shares its source's `series` and would link to a route that never builds.
-const parts = (
-  await getCollection('blog', ({ data }) => data.series === series && data.lang === locale)
-).sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0))
+const parts = (await getCollection('blog', ({ data }) => data.series === series && data.lang === locale)).sort(
+  (a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0),
+)
 const title = seriesTitle(series, parts)
 
 const isPublished = (part: Post) => !part.data.draft && part.data.pubDate <= PUBLISH_CUTOFF

@@ -1,7 +1,7 @@
 import { readStorage, removeStorage, writeStorage } from '../lib/storage'
 import { markCurrent, promoteToPopover, wireMenu } from './popover-menu'
-import { isScheme, type Scheme, THEME_ATTR } from './scheme'
 import { onReady } from './ready'
+import { isScheme, type Scheme, THEME_ATTR } from './scheme'
 
 const STORAGE_KEY = 'color-scheme'
 

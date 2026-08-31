@@ -10,8 +10,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
-import { bold, count, dim, heading, ok } from './lib/cli.ts'
 import { LIGHT_GROUND } from '../src/lib/grounds.mjs'
+import { bold, count, dim, heading, ok } from './lib/cli.ts'
 
 const OUT_DIR = 'public/og'
 // Mirrors OG_CARD_WIDTH, OG_CARD_HEIGHT and SITE_NAME in src/lib/seo.ts, which

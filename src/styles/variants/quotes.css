@@ -16,18 +16,12 @@
   --qc-bg: transparent;
   --qc-fg: var(--fg);
   --qc-muted-fg: var(--muted);
-  --qc-border: light-dark(
-    var(--brand-purple),
-    color-mix(in oklab, var(--brand-purple) 75%, white)
-  );
+  --qc-border: light-dark(var(--brand-purple), color-mix(in oklab, var(--brand-purple) 75%, white));
   --qc-dropcap-fg: var(--qc-border);
 
   --qc-glyph-size: 240px;
   --qc-glyph-inset: -0.08em;
-  --qc-glyph: light-dark(
-    color-mix(in oklab, black 3%, transparent),
-    color-mix(in oklab, white 6%, transparent)
-  );
+  --qc-glyph: light-dark(color-mix(in oklab, black 3%, transparent), color-mix(in oklab, white 6%, transparent));
 
   --qc-rule-weight: 2px;
   --qc-rule-extent: 50%;
