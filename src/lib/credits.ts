@@ -12,8 +12,9 @@ export interface AttributedCredit extends Credit {
   author?: string
 }
 
-// Hand-maintained: PxPlus IBM VGA 9x16 is CC BY-SA 4.0, which requires
-// attribution reachable from the site.
+// Hand-maintained: WebPlus IBM VGA 9x16 is CC BY-SA 4.0, which requires
+// attribution reachable from the site. Its name has to match the cut named in
+// public/fonts/LICENSES.txt, since that is the file being attributed.
 export const fonts: AttributedCredit[] = [
   {
     name: 'Departure Mono',
@@ -34,7 +35,7 @@ export const fonts: AttributedCredit[] = [
     author: 'Braille Institute of America',
   },
   {
-    name: 'PxPlus IBM VGA 9x16',
+    name: 'WebPlus IBM VGA 9x16',
     url: 'https://int10h.org/oldschool-pc-fonts/',
     license: 'CC BY-SA 4.0',
     licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',

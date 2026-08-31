@@ -177,7 +177,13 @@ footer .credits a {
   margin: -0.95rem -0.5rem;
 }
 
-footer .credits a:hover {
+/* `background` has to be restated here, or the fill from `footer a:hover`
+   applies: this rule wins only the properties it declares. On the credits link
+   that fill covers the whole tap padding rather than the word. */
+footer .credits a:hover,
+footer .credits a:focus-visible {
+  background: none;
+  color: inherit;
   text-decoration: underline dotted;
 }
 
@@ -192,7 +198,10 @@ footer .version a {
   background: none;
 }
 
-footer .version a:hover {
+footer .version a:hover,
+footer .version a:focus-visible {
+  background: none;
+  color: inherit;
   text-decoration: underline dotted;
 }
 
