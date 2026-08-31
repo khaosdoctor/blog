@@ -6,6 +6,8 @@
 
 **A `.md` post silently loses content.** The plugins emit MDX nodes, and the plain markdown pipeline drops them without an error. Posts must be `.mdx`, translations included. The file extension therefore stops nothing, and the translation guard is what keeps model-written code out.
 
+**A draft is not in the collection.** A post being written is a folder in `content/internal/draft ideas/`, which Astro never reads and git ignores, and its frontmatter already matches `internal/templates/new-post.md` so it is ready the moment it ships. Publishing moves the folder into `content/blog/` and sets `draft: false`. One consequence: a `[[wikilink]]` resolves only inside `content/blog/`, so `content/blog/exemplo-de-rascunho/` exists solely as the lab post's draft-link target and deleting it breaks the build.
+
 **One folder is one article, in every language.** `content/blog/<folder>/index.mdx` is the source; any other `.mdx` in that folder is a translation, identified by its `lang` and given its own URL by `slug`. The folder is the pairing, which is where `hreflang` comes from, so there is no field to keep in sync. Images are `./image.png` from either file.
 
 **Post URLs are frozen.** Every slug came from six years of Ghost and is linked from elsewhere. Route paths are English (`/search/`, `/tags/`, `/series/`), Portuguese post slugs are whatever was written. Never rename a post directory. English lives under `/en/` with an English slug, Portuguese stays unprefixed at the root because those root URLs are the frozen ones. Moving a post between sections changes its `category` and nothing else. `/rss.xml` is the frozen Portuguese feed so existing subscribers keep working; the English feed is `/en/rss.xml`. Paginated listings take a rest param (`[...page]`, never `[page]`) so page 1 stays at the bare path instead of `/1/`.
@@ -112,7 +114,7 @@ The author is strict about prose, in code comments as much as anywhere else.
 
 ## Commits
 
-Conventional commits. The subject can be descriptive, **the body must be under about 330 characters.**
+Conventional commits, **subject only**. The subject can be descriptive, and there is no body at all. Explanation that feels necessary goes in the PR description or in the reply, never in the commit.
 
 `feat` bumps the minor version, `fix` the patch, `!` or `BREAKING CHANGE` the major. Use `content:` when publishing or editing posts, which is ignored by the release tooling so writing never moves the version.
 

@@ -36,7 +36,7 @@ The e2e suite reads `dist/`, so build before running it.
 
 ## Commits
 
-Conventional commits, body under about 330 characters. No attribution lines, no co-author trailers, no gitmoji.
+Conventional commits, subject only, no body. No attribution lines, no co-author trailers, no gitmoji.
 
 ## Scope
 
