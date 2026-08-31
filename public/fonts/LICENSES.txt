@@ -95,8 +95,10 @@ Serving it as a webfont is fine, but the credit below has to stay reachable from
 site, and a modified version of the font would have to be released under the same
 licence.
 
-  PxPlusIBMVGA8-9x16.woff       "Web437 IBM VGA 9x16", from The Oldschool PC Font
-                                Resource v2.2 by VileR.
+  PxPlusIBMVGA8-9x16.woff       "WebPlus IBM VGA 9x16", from The Oldschool PC Font
+                                Resource v2.2 by VileR. The WebPlus cut rather than
+                                the Web437 one: code page 437 has no a-tilde or
+                                o-tilde, which Portuguese needs on every page.
                                 https://int10h.org/oldschool-pc-fonts/
                                 Licence: https://creativecommons.org/licenses/by-sa/4.0/
 
