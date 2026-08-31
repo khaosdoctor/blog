@@ -50,7 +50,7 @@ interface Props {
   alternates?: { lang: string; href: string }[]
   markdown?: string
   noindex?: boolean
-  section?: { name: string; url: string }
+  category?: { name: string; url: string }
   progress?: boolean
   postAccent?: string
 }
@@ -67,7 +67,7 @@ const {
   series,
   authors,
   alternates,
-  section,
+  category,
   markdown,
   noindex,
   progress = false,
@@ -172,7 +172,7 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
       series={series}
       authors={authors}
       alternates={alternates}
-      section={section}
+      category={category}
       markdown={markdown}
       noindex={noindex}
     />

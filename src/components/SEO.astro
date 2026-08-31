@@ -7,10 +7,10 @@ import {
   buildBreadcrumbJsonLd,
   buildPersonJsonLd,
   buildPrimaryJsonLd,
+  categoryOgImage,
   OG_CARD_HEIGHT,
   OG_CARD_WIDTH,
   SITE_NAME,
-  sectionOgImage,
   toJsonLdScript,
   toOgLocale,
 } from '../lib/seo'
@@ -38,7 +38,7 @@ interface Props {
   noindex?: boolean
   alternates?: Alternate[]
   markdown?: string
-  section?: { name: string; url: string }
+  category?: { name: string; url: string }
 }
 
 const {
@@ -56,7 +56,7 @@ const {
   authors,
   noindex = false,
   alternates = [],
-  section,
+  category,
   markdown,
 } = Astro.props
 
@@ -64,7 +64,7 @@ const {
 // a foreign canonical hands the ranking to that domain.
 const indexUrl = canonical
 
-const card = image ?? sectionOgImage(lang, section?.url)
+const card = image ?? categoryOgImage(lang, category?.url)
 const absoluteImage = new URL(card, canonical).href
 
 const jsonLd = buildPrimaryJsonLd(type, {
@@ -82,13 +82,13 @@ const jsonLd = buildPrimaryJsonLd(type, {
 
 const homeUrl = Astro.site ? new URL('/', Astro.site).href : '/'
 
-// The URL comparison is what keeps a section index from repeating itself: a
+// The URL comparison is what keeps a category listing from repeating itself: a
 // BreadcrumbList whose last two items share a URL is rejected as malformed.
-const sectionUrl = section === undefined ? null : new URL(section.url, canonical).href
+const categoryUrl = category === undefined ? null : new URL(category.url, canonical).href
 const breadcrumbItems: BreadcrumbItem[] = [
   { name: SITE_NAME, url: homeUrl },
-  ...(section !== undefined && sectionUrl !== null && sectionUrl !== canonical
-    ? [{ name: section.name, url: sectionUrl }]
+  ...(category !== undefined && categoryUrl !== null && categoryUrl !== canonical
+    ? [{ name: category.name, url: categoryUrl }]
     : []),
   { name: title, url: canonical },
 ]

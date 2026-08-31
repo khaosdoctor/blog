@@ -44,7 +44,7 @@ export function postListPaths(locale: Locale): GetStaticPaths {
 
 export function categoryListPaths(locale: Locale): GetStaticPaths {
   return async ({ paginate }) => {
-    const [byCategory, sectionsByLocale, posts] = await Promise.all([
+    const [byCategory, categoriesByLocale, posts] = await Promise.all([
       getCategories(locale),
       categoryLocales(),
       getPublishedPosts(locale),
@@ -67,7 +67,7 @@ export function categoryListPaths(locale: Locale): GetStaticPaths {
           locale,
           category,
           description: categoryDescription(category, locale),
-          languages: sectionsByLocale.filter(([, names]) => names.has(category)).map(([entry]) => entry),
+          languages: categoriesByLocale.filter(([, names]) => names.has(category)).map(([entry]) => entry),
         },
       }),
     )

@@ -16,7 +16,7 @@ const OUT = 'src/data/redirects.ts'
 // Astro/Vite. This script runs under plain node, so that import chain cannot
 // resolve here; src/lib/slugify.ts is the leaf module both sides import instead.
 
-// The newsletter section has no published posts yet, so /newsletter/ is not a
+// The newsletter category has no published posts yet, so /newsletter/ is not a
 // page. Sending 48 URLs to a 404 is worse than sending them home, and sending
 // them home is a soft-404 signal to Google either way.
 //
@@ -87,7 +87,7 @@ if (NEWSLETTER_SLUGS.length === 0) {
 
 const tags = new Set<string>()
 const categories = new Set<string>()
-/** Only sections with a published post get a page, so only those are valid targets. */
+/** Only categories with a published post get a page, so only those are valid targets. */
 const liveCategories = new Set<string>()
 const liveSlugs = new Set<string>()
 
@@ -97,16 +97,19 @@ for (const entry of readdirSync(SOURCE_DIR, { withFileTypes: true })) {
   if (file === undefined) continue
   const frontmatter = frontmatterOf(readFileSync(file, 'utf8'))
   const published = /^draft:\s*false/m.test(frontmatter)
+  // A noindex post keeps its own page and leaves every listing, so the two
+  // answers differ: it is a valid redirect target itself, and it contributes
+  // no tag or category page. This mirrors getListedPosts, which is what the
+  // taxonomy routes build from.
+  const listed = published && !/^noindex:\s*true/m.test(frontmatter)
   if (published) liveSlugs.add(entry.name)
   const category = /^category:\s*"?([^"\n]+)"?/m.exec(frontmatter)?.[1]
   if (category !== undefined) {
     const name = category.trim().replace(/"$/, '')
     categories.add(name)
-    if (published) liveCategories.add(name)
+    if (listed) liveCategories.add(name)
   }
-  // Tag pages are generated from published posts too, so a tag that only ever
-  // appears on drafts has no page to point at either.
-  if (!published) continue
+  if (!listed) continue
   const tagLine = /^tags:\s*\[(.*)\]/m.exec(frontmatter)?.[1] ?? ''
   for (const match of tagLine.matchAll(/"([^"]+)"/g)) tags.add(match[1])
 }
@@ -117,8 +120,8 @@ const rows: { from: string; to: string; note: string }[] = []
 for (const tag of [...tags].sort()) {
   rows.push({ from: `/tag/${slugify(tag)}/`, to: `/tags/${slugify(tag)}/`, note: 'tag archive' })
 }
-// A tag that became a section goes to the section instead. Pushed after the tag
-// rules so the dedupe below keeps this one. A section whose posts are all drafts
+// A tag that became a category goes to the category instead. Pushed after the tag
+// rules so the dedupe below keeps this one. A category whose posts are all drafts
 // (newsletter, today) has no page, so its old tag archive goes home instead of
 // into a 404.
 for (const category of [...categories].sort()) {
@@ -126,7 +129,7 @@ for (const category of [...categories].sort()) {
   rows.push({
     from: `/tag/${slugify(category)}/`,
     to: live ? `/${category}/` : NEWSLETTER_TARGET,
-    note: live ? 'tag became a section' : 'section has no published posts yet',
+    note: live ? 'tag became a category' : 'category has no published posts yet',
   })
 }
 
@@ -157,7 +160,7 @@ for (const slug of NEWSLETTER_SLUGS) {
   rows.push({ from: `/${slug}/`, to: NEWSLETTER_TARGET, note: 'newsletter issue' })
 }
 
-// Later entries win, so a tag that is also a section resolves to the section.
+// Later entries win, so a tag that is also a category resolves to the category.
 const bySource = new Map<string, (typeof rows)[number]>()
 for (const row of rows) bySource.set(row.from, row)
 const final = [...bySource.values()].sort((a, b) => a.from.localeCompare(b.from))

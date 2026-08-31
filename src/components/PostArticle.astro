@@ -18,7 +18,7 @@ interface Props {
 
 const { post, series, readingTime, locale } = Astro.props
 const authorName = parseAuthors(post.data.authors)[0]?.name ?? 'Lucas Santos'
-// A noindex post is in no listing, so its section and tag pages may not exist
+// A noindex post is in no listing, so its category and tag pages may not exist
 // at all. Its own chips are plain text rather than links into a 404.
 const listed = !post.data.noindex
 ---

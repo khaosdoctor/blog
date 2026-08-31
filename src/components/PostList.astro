@@ -13,7 +13,7 @@ interface Props {
 const { posts, showCategory = true } = Astro.props
 
 // This list renders inside both page trees, so the link has to carry the post's
-// own language or an English reader leaves for the Portuguese section index.
+// own language or an English reader leaves for the Portuguese category page.
 function categoryUrl(post: Post): string {
   return localePath(post.data.lang, `/${post.data.category}/`)
 }

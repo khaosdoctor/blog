@@ -22,10 +22,10 @@ const title = page.currentPage > 1 ? `LS: ${category} | ${t(locale, 'page')} ${p
 
 <BaseLayout
   title={title}
-  description={description ?? t(locale, 'sectionDescription', category)}
+  description={description ?? t(locale, 'categoryDescription', category)}
   lang={locale}
   alternates={alternatesFor(path, Astro.site, languages)}
-  section={{ name: category, url: localePath(locale, path) }}
+  category={{ name: category, url: localePath(locale, path) }}
 >
   <h1 class="listing-heading">
     {category} <span class="page-count">[{page.total}]</span>

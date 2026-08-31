@@ -52,7 +52,7 @@ function toAgentMarkdown(post: Post, site: URL | undefined): string {
     `- URL: ${url}`,
     `- Published: ${pubDate.toISOString().slice(0, 10)}`,
     ...(updatedDate ? [`- Updated: ${updatedDate.toISOString().slice(0, 10)}`] : []),
-    `- Section: ${category}`,
+    `- Category: ${category}`,
     ...(series ? [`- Series: ${series}`] : []),
     ...(tags.length > 0 ? [`- Tags: ${tags.join(', ')}`] : []),
     `- Language: ${lang}`,

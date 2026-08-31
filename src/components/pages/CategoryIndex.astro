@@ -12,12 +12,12 @@ interface Props {
 
 const { locale } = Astro.props
 
-// By position rather than by hashed name: the hash puts three of the sections
+// By position rather than by hashed name: the hash puts three of the categories
 // on the same colour, and telling the cards apart is the point here.
 const pool = brandPool()
 
 // getListedPosts sorts by date descending, so the first entry is the latest.
-const sections = [...(await getCategories(locale)).entries()]
+const categories = [...(await getCategories(locale)).entries()]
   .sort(([a], [b]) => a.localeCompare(b, HREFLANG[locale]))
   .map(([name, posts], index) => ({
     name,
@@ -29,31 +29,31 @@ const sections = [...(await getCategories(locale)).entries()]
 ---
 
 <BaseLayout
-  title={`LS: ${t(locale, 'sections')}`}
-  description={t(locale, 'sectionsIntro')}
+  title={`LS: ${t(locale, 'categories')}`}
+  description={t(locale, 'categoriesIntro')}
   lang={locale}
-  alternates={alternatesFor('/sections/', Astro.site)}
+  alternates={alternatesFor('/categories/', Astro.site)}
 >
   <h1 class="listing-heading">
-    {t(locale, 'sections')} <span class="page-count">[{sections.length}]</span>
+    {t(locale, 'categories')} <span class="page-count">[{categories.length}]</span>
   </h1>
-  <ul class="section-cards">
+  <ul class="category-cards">
     {
-      sections.map((section) => (
+      categories.map((category) => (
         <li>
           <a
-            href={localePath(locale, `/${section.name}/`)}
-            class="section-card brand-ink"
-            style={`--chip-color: ${section.color}`}
+            href={localePath(locale, `/${category.name}/`)}
+            class="category-card brand-ink"
+            style={`--chip-color: ${category.color}`}
           >
-            <span class="section-name">{section.name}</span>
-            {section.description !== null && <span class="section-about">{section.description}</span>}
-            <span class="section-meta">
-              <span class="section-count">
-                [{section.count}] {t(locale, 'articles')}
+            <span class="category-name">{category.name}</span>
+            {category.description !== null && <span class="category-about">{category.description}</span>}
+            <span class="category-meta">
+              <span class="category-count">
+                [{category.count}] {t(locale, 'articles')}
               </span>
-              <time datetime={section.latest.toISOString()}>
-                {t(locale, 'lastPost', formatDate(section.latest, locale))}
+              <time datetime={category.latest.toISOString()}>
+                {t(locale, 'lastPost', formatDate(category.latest, locale))}
               </time>
             </span>
           </a>
@@ -64,7 +64,7 @@ const sections = [...(await getCategories(locale)).entries()]
 </BaseLayout>
 
 <style>
-  .section-cards {
+  .category-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
     gap: 1rem;
@@ -76,7 +76,7 @@ const sections = [...(await getCategories(locale)).entries()]
   /* Same break-out as `.listing`: 50% puts the start edge at main's centre and
      the translate pulls back by half this box's own width. */
   @media (min-width: 70rem) {
-    .section-cards {
+    .category-cards {
       inline-size: var(--content-width);
       padding-inline: var(--shell-inset);
       margin-inline-start: 50%;
@@ -84,7 +84,7 @@ const sections = [...(await getCategories(locale)).entries()]
     }
   }
 
-  .section-card {
+  .category-card {
     display: flex;
     flex-direction: column;
     block-size: 100%;
@@ -100,14 +100,14 @@ const sections = [...(await getCategories(locale)).entries()]
       color var(--duration) var(--ease);
   }
 
-  .section-name {
+  .category-name {
     color: var(--chip-ink);
     font-family: var(--font-mono);
     font-size: calc(1.1rem * var(--font-scale));
     letter-spacing: 0.04em;
   }
 
-  .section-about {
+  .category-about {
     flex: 1;
     margin-block-start: 0.45rem;
     color: var(--muted);
@@ -116,7 +116,7 @@ const sections = [...(await getCategories(locale)).entries()]
     line-height: 1.45;
   }
 
-  .section-meta {
+  .category-meta {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -129,23 +129,23 @@ const sections = [...(await getCategories(locale)).entries()]
     font-size: var(--text-tiny);
   }
 
-  .section-count {
+  .category-count {
     color: var(--chip-ink);
   }
 
-  .section-card:hover,
-  .section-card:focus-visible {
+  .category-card:hover,
+  .category-card:focus-visible {
     background: var(--chip-ink);
     color: var(--bg);
   }
 
-  .section-card:hover :is(.section-name, .section-about, .section-meta, .section-count),
-  .section-card:focus-visible :is(.section-name, .section-about, .section-meta, .section-count) {
+  .category-card:hover :is(.category-name, .category-about, .category-meta, .category-count),
+  .category-card:focus-visible :is(.category-name, .category-about, .category-meta, .category-count) {
     color: var(--bg);
   }
 
-  .section-card:hover .section-meta,
-  .section-card:focus-visible .section-meta {
+  .category-card:hover .category-meta,
+  .category-card:focus-visible .category-meta {
     border-block-start-color: color-mix(in oklab, var(--bg) 60%, transparent);
   }
 </style>

@@ -11,7 +11,7 @@ function load(): Record<string, Described> {
   try {
     raw = readFileSync('content/categories.json', 'utf8')
   } catch {
-    // No sidecar yet: every section falls back to its generated line. A file
+    // No sidecar yet: every category falls back to its generated line. A file
     // that exists but does not parse is a typo in prose, so it throws instead.
     cache = {}
     return cache

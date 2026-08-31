@@ -28,8 +28,8 @@ export function toOgLocale(lang: string): string {
 }
 
 // Must stay in sync with `public/og/`: one entry per card that exists
-// unlisted section shares the default
-const OG_SECTION_CARDS = ['career', 'infra', 'javascript', 'meta', 'opinion', 'security', 'typescript']
+// unlisted category shares the default
+const OG_CATEGORY_CARDS = ['career', 'infra', 'javascript', 'meta', 'opinion', 'security', 'typescript']
 
 export const OG_CARD_WIDTH = 1200
 export const OG_CARD_HEIGHT = 630
@@ -39,17 +39,17 @@ export const OG_CARD_HEIGHT = 630
 const OG_CARD_LOCALES = ['en']
 
 /**
- * Takes the section URL, not its display name: the file is named after the URL.
- * The last segment is what names the card, because the English routes pass a
- * locale-prefixed path (`/en/infra/`) that the breadcrumb needs.
+ * Takes the category URL rather than its display name: the file is named after
+ * the URL. The last segment is what names the card, because the English routes
+ * pass a locale-prefixed path (`/en/infra/`) that the breadcrumb needs.
  */
-export function sectionOgImage(lang: string, sectionUrl?: string): string {
+export function categoryOgImage(lang: string, categoryUrl?: string): string {
   const dir = OG_CARD_LOCALES.includes(lang) ? `${lang}/` : ''
-  const section = sectionUrl
+  const category = categoryUrl
     ?.replace(/^\/+|\/+$/g, '')
     .split('/')
     .at(-1)
-  const card = section && OG_SECTION_CARDS.includes(section) ? section : 'default'
+  const card = category && OG_CATEGORY_CARDS.includes(category) ? category : 'default'
   return `/og/${dir}${card}.png`
 }
 

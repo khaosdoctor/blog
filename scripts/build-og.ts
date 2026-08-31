@@ -1,5 +1,5 @@
 /**
- * Generates the per-section social cards.
+ * Generates the per-category social cards.
  *
  *   node scripts/build-og.ts
  *
@@ -24,23 +24,23 @@ const INK = '#1a1c20'
 
 // The two sentences each language already puts in its own meta description, so
 // the card and the page it belongs to say one thing. `homeDescription` and
-// `sectionDescription` in src/i18n/ui.ts are the originals. Portuguese writes to
-// `public/og/`, English to `public/og/en/`, matching the routes.
+// `categoryDescription` in src/i18n/ui.ts are the originals. Portuguese writes
+// to `public/og/`, English to `public/og/en/`, matching the routes.
 const LOCALES = {
   pt: {
     prefix: '',
     home: 'Artigos sobre desenvolvimento, tecnologia e opinião.',
-    section: (name: string) => `Todos os artigos da seção ${name}.`,
+    category: (name: string) => `Todos os artigos da categoria ${name}.`,
   },
   en: {
     prefix: 'en/',
     home: 'Articles about software development, technology and opinion.',
-    section: (name: string) => `Every article in the ${name} section.`,
+    category: (name: string) => `Every article in the ${name} category.`,
   },
 }
 
-// One accent per section, taken from the brand mark's palette.
-const SECTIONS: Record<string, string> = {
+// One accent per category, taken from the brand mark's palette.
+const CATEGORIES: Record<string, string> = {
   default: '#e30613',
   javascript: '#f5b200',
   typescript: '#0578be',
@@ -56,10 +56,10 @@ const face = readFileSync('public/fonts/DepartureMono-Regular.woff2').toString('
 
 type Copy = (typeof LOCALES)[keyof typeof LOCALES]
 
-function card(section: string, accent: string, copy: Copy): string {
-  const home = section === 'default'
-  const label = `${SITE_NAME}/${copy.prefix}${home ? '' : section}`.replace(/\/$/, '')
-  const tagline = home ? copy.home : copy.section(section)
+function card(category: string, accent: string, copy: Copy): string {
+  const home = category === 'default'
+  const label = `${SITE_NAME}/${copy.prefix}${home ? '' : category}`.replace(/\/$/, '')
+  const tagline = home ? copy.home : copy.category(category)
   return `<!doctype html><meta charset="utf-8"><style>
 @font-face {
   font-family: 'Departure Mono';
@@ -92,9 +92,9 @@ ${mark}
 <p>${tagline}</p>`
 }
 
-const total = Object.keys(SECTIONS).length * Object.keys(LOCALES).length
+const total = Object.keys(CATEGORIES).length * Object.keys(LOCALES).length
 
-heading(`build-og: rendering ${total} section cards`)
+heading(`build-og: rendering ${total} category cards`)
 
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: OG_CARD_WIDTH, height: OG_CARD_HEIGHT } })
@@ -103,7 +103,7 @@ for (const copy of Object.values(LOCALES)) {
   const dir = join(OUT_DIR, copy.prefix)
   mkdirSync(dir, { recursive: true })
 
-  for (const [name, accent] of Object.entries(SECTIONS)) {
+  for (const [name, accent] of Object.entries(CATEGORIES)) {
     await page.setContent(card(name, accent, copy))
     await page.evaluate(() => document.fonts.ready)
     const png = await page.screenshot()

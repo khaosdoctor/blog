@@ -8,7 +8,7 @@ export async function getCategories(lang?: Post['data']['lang']): Promise<Map<st
   return Map.groupBy(await getListedPosts(lang), (post) => post.data.category)
 }
 
-// A section page only exists in a language that has a post in it, so the
+// A category page only exists in a language that has a post in it, so the
 // language switcher must be built from this rather than assuming both locales.
 export async function categoryLocales(): Promise<(readonly [Locale, Set<string>])[]> {
   return Promise.all(LOCALES.map(async (locale) => [locale, new Set((await getCategories(locale)).keys())] as const))
