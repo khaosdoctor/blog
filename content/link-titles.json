@@ -367,6 +367,11 @@
     "description": "This specification defines UUIDs (Universally Unique IDentifiers) -- also known as GUIDs (Globally Unique IDentifiers) -- and a Uniform Resource Name namespace for UUIDs. A UUID is 128 bits long and i…",
     "publisher": "IETF Datatracker"
   },
+  "https://deepwiki.com/": {
+    "title": "DeepWiki | AI documentation you can talk to, for every repo",
+    "description": "DeepWiki provides up-to-date documentation you can talk to, for every repo in the world. Think Deep Research for GitHub - powered by Devin.",
+    "publisher": "DeepWiki"
+  },
   "https://deno.com": {
     "title": "Deno, the drop-in JavaScript runtime for Node developers",
     "description": "A drop-in JavaScript runtime with built-in TypeScript, npm support, and security by default. Run your existing Node project on Deno with no setup.",
@@ -1518,11 +1523,6 @@
   "https://gist.github.com/acutmore/9d2ce837f019608f26ff54e0b1c23d6e": {
     "title": "Emulating a 4-Bit Virtual Machine in (TypeScript\\JavaScript) (just Types no Script)",
     "description": "Emulating a 4-Bit Virtual Machine in (TypeScript\\JavaScript) (just Types no Script) - README.md",
-    "publisher": "Gist"
-  },
-  "https://gist.github.com/jbreckmckye/32587f2907e473dd06d68b0362fb0048": {
-    "title": "The CloudFlare outage was a good thing",
-    "description": "The CloudFlare outage was a good thing. GitHub Gist: instantly share code, notes, and snippets.",
     "publisher": "Gist"
   },
   "https://gist.github.com/khaosdoctor/549d1a62e840974e8cd75518d1826273": {
@@ -2850,9 +2850,6 @@
     "title": "Your GraphQL guide to handling JWTs on frontend clients",
     "description": "JWTs are a popular way of handling auth. Learn what a JWT is, pros/cons, and best practices in implementing JWT on the client-side with security in mind."
   },
-  "https://heatherburns.tech/2025/10/22/democracy-and-the-open-internet-die-in-daylight/": {
-    "title": "Democracy and the open internet die in daylight – Hi, I'm Heather Burns"
-  },
   "https://helm.sh": {
     "title": "Helm"
   },
@@ -3102,10 +3099,6 @@
     "title": "Fixing JavaScript Date – Web Compatibility and Reality",
     "description": "In my previous post, I discussed things that could be fixed in JavaScript’s date implementation – if we wanted to. In this post, I’ll discuss things that can’t be fixed &#82…",
     "publisher": "Maggie's Blog"
-  },
-  "https://manuelmoreale.com/thoughts/look-another-ai-browser": {
-    "title": "Look, another AI browser – Manu",
-    "description": "Yesterday, OpenAI announced Atlas, its AI browser. To the surprise of literally nobody, it’s Chromium with AI slapped on top. Perplexity also has a …"
   },
   "https://marketplace.visualstudio.com/items?itemName=gabrielepmattia.wordcount&WT.mc_id=blog-devto-ludossan": {
     "title": "Word Count - Visual Studio Marketplace",
@@ -4364,11 +4357,6 @@
     "description": "As práticas de negociação salarial que mais deram certo pra mim ao longo dos anos, desde como negociar salário durante uma entrevista de emprego até sobre es...",
     "publisher": "YouTube"
   },
-  "https://www.youtube.com/watch?v=tNmgmwEtoWE&t=2s&pp=ygUNZGV2aW4gYWkgc2NhbQ%3D%3D": {
-    "title": "Debunking Devin: \"First AI Software Engineer\" Upwork lie exposed!",
-    "description": "Recently, Devin the supposed \"First AI Software Engineer\" was announced. The company lied and said that their video showed Devin completing and getting paid...",
-    "publisher": "YouTube"
-  },
   "https://www.youtube.com/watch?v=tX3gQGfwvgA": {
     "title": "10 coisas que você não sabia que o NPM era capaz de fazer",
     "description": "Nesse vídeo vamos entender o que é o NPM e como ele se tornou o package manager mais popular que existe! E vamos passar por 10 coisas que eu aposto que você ...",
@@ -4484,16 +4472,6 @@
     "title": "Yegor Denisov-Blanch (@yegordb) on X",
     "description": "Another way to look at this is counting code commits. While this is a flawed way to measure productivity, it reveals inactivity: ~58% make <3 commits/month, aligning with our metric. The other 42% mak…",
     "publisher": "X (formerly Twitter)"
-  },
-  "https://yieldcode.blog/post/the-curse-of-the-senior-engineer/": {
-    "title": "The Curse of the Senior Software Engineer - Dmitry Kudryavtsev",
-    "description": "While looking for a job recently, I stumbled upon an interesting phenomen that I consider to be a curse for senior software engineers.",
-    "publisher": "Dmitry Kudryavtsev"
-  },
-  "https://yieldcode.blog/post/your-team-might-be-holding-you-back/": {
-    "title": "Why your team might be holding you back - Dmitry Kudryavtsev",
-    "description": "A tale on why software engineering might not be a team sports after all, despite what eveyrone wants us to believe",
-    "publisher": "Dmitry Kudryavtsev"
   },
   "https://youtu.be/VQFvugpxNJE?si=0vfYqCuB_7R7G2Dn&t=335": {
     "title": "Why \"vibe coding\" is NOT my future",
