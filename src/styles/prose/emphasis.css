@@ -5,7 +5,6 @@
   );
   --em-bold-bg: var(--post-accent-cover);
   --em-bold-fg: var(--bg);
-  --em-italic-fg: var(--post-accent-cover);
 }
 
 .prose strong {
@@ -22,6 +21,5 @@
 }
 
 .prose em {
-  color: var(--em-italic-fg);
   font-weight: var(--em-italic-weight);
 }
