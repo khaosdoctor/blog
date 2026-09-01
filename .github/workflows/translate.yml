@@ -62,7 +62,7 @@ jobs:
       # CLAUDE_CODE_OAUTH_TOKEN from the environment. No npm ci, no node_modules.
       - name: Install the Claude CLI
         if: steps.auth.outputs.present == 'true'
-        run: npm i -g @anthropic-ai/claude-code
+        run: npm i -g --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code
 
       - name: Translate changed posts
         if: steps.auth.outputs.present == 'true'
