@@ -1,30 +1,19 @@
 name: Release
 
-# Manual. Nothing here fires because a post was published.
+# Automatic. Every push to main reads the conventional commits since the last
+# tag, bumps package.json, commits, tags, and creates a GitHub release. No PR
+# step, no manual trigger needed (though you can still dispatch manually).
 #
-# 1. When you want a release, run this workflow from the Actions tab.
-#    release-please reads the conventional commits since the last tag and opens
-#    (or refreshes) a "chore(main): release x.y.z" PR carrying the new version
-#    and a changelog.
-# 2. Merge that PR. The push trigger below matches only that merge commit, so
-#    the tag and the GitHub release are created without you clicking again.
-#
-# Which commits move the version: feat -> minor, fix -> patch, a `!` or a
-# BREAKING CHANGE footer -> major. Use `content:` for writing, which
-# release-please ignores, so posts never inflate the number.
-#
-# Between releases the footer shows the semver plus a count of posts published
-# since it, derived from git history by src/lib/version.ts, so that counter
-# resets on its own when a new tag is created.
+# feat -> minor, fix -> patch, BREAKING CHANGE / ! -> major.
+# Commits that don't match (chore, docs, content, ci, etc.) are skipped.
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
   group: release
@@ -33,12 +22,99 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # On a manual run, always. On a push, only for the release PR merge, so an
-    # ordinary push never opens a release PR on its own.
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      startsWith(github.event.head_commit.message, 'chore(main): release')
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     steps:
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+      - uses: actions/checkout@v4
         with:
-          release-type: node
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version bump
+        id: bump
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            RANGE="HEAD"
+          else
+            RANGE="${LAST_TAG}..HEAD"
+          fi
+
+          BUMP=""
+          CHANGELOG=""
+
+          while IFS= read -r line; do
+            # Skip empty lines and merge commits
+            [ -z "$line" ] && continue
+
+            subject=$(echo "$line" | sed 's/^[^ ]* //')
+            hash=$(echo "$line" | awk '{print $1}')
+            short=${hash:0:7}
+
+            # Check for breaking change
+            if echo "$subject" | grep -qE '^[a-z]+(\(.+\))?!:'; then
+              BUMP="major"
+              entry=$(echo "$subject" | sed 's/^[a-z]*\([^)]*\)\?!: //')
+              CHANGELOG="${CHANGELOG}\n- **BREAKING:** ${entry} (${short})"
+              continue
+            fi
+
+            type=$(echo "$subject" | grep -oE '^[a-z]+' || true)
+            msg=$(echo "$subject" | sed 's/^[a-z]*\([^)]*\)\?: //')
+
+            case "$type" in
+              feat)
+                [ "$BUMP" != "major" ] && BUMP="minor"
+                CHANGELOG="${CHANGELOG}\n- ${subject} (${short})"
+                ;;
+              fix)
+                [ -z "$BUMP" ] && BUMP="patch"
+                CHANGELOG="${CHANGELOG}\n- ${subject} (${short})"
+                ;;
+              perf|refactor)
+                [ -z "$BUMP" ] && BUMP="patch"
+                CHANGELOG="${CHANGELOG}\n- ${subject} (${short})"
+                ;;
+            esac
+          done < <(git log --format="%H %s" $RANGE)
+
+          if [ -z "$BUMP" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No releasable commits since ${LAST_TAG:-the beginning}."
+            exit 0
+          fi
+
+          CURRENT=$(jq -r .version package.json)
+          IFS='.' read -r major minor patch <<< "$CURRENT"
+
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+
+          NEXT="${major}.${minor}.${patch}"
+          echo "version=${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          printf '%b' "$CHANGELOG" > /tmp/changelog.md
+          echo "Bumping ${CURRENT} -> ${NEXT} (${BUMP})"
+
+      - name: Bump, tag, and release
+        if: steps.bump.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.bump.outputs.version }}
+          TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          jq --arg v "$VERSION" '.version = $v' package.json > package.tmp && mv package.tmp package.json
+          git add package.json
+          git commit -m "chore(release): v${VERSION}"
+          git tag -a "$TAG" -m "v${VERSION}"
+          git push origin main --follow-tags
+
+          gh release create "$TAG" \
+            --title "v${VERSION}" \
+            --notes-file /tmp/changelog.md
