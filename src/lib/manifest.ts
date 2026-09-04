@@ -22,6 +22,12 @@ export function buildManifest(locale: Locale): string {
         { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
         { src: '/icons/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       ],
+      // form_factor drives which shot Chrome's richer install UI shows on
+      // desktop vs. mobile; without both it silently drops the richer UI.
+      screenshots: [
+        { src: '/screenshots/desktop-wide.png', sizes: '1280x800', type: 'image/png', form_factor: 'wide' },
+        { src: '/screenshots/mobile-narrow.png', sizes: '390x844', type: 'image/png' },
+      ],
     },
     null,
     2,
