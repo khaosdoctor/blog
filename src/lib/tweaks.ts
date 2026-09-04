@@ -13,16 +13,16 @@ export const hoverPreviewViewportMarginPixels = 8
 // The cellular-automaton field drawn behind every page, and the settings
 // panel's four sliders that drive it. Bounds must match SettingsPanel.astro.
 export const conwayCellSizePixels = 12
-export const conwayDefaultDensityPercent = 10
+export const conwayDefaultDensityPercent = 6
 export const conwayMinimumDensityPercent = 1
 export const conwayMaximumDensityPercent = 20
-export const conwayDefaultGenerationsPerSecond = 6
+export const conwayDefaultGenerationsPerSecond = 3
 export const conwayMinimumGenerationsPerSecond = 1
 export const conwayMaximumGenerationsPerSecond = 25
 export const conwayDefaultAutoFeedSeconds = 3
 export const conwayMinimumAutoFeedSeconds = 0
 export const conwayMaximumAutoFeedSeconds = 20
-export const conwayDefaultOpacity = 0.04
+export const conwayDefaultOpacity = 0.03
 export const conwayMinimumOpacity = 0
 export const conwayMaximumOpacity = 0.5
 
