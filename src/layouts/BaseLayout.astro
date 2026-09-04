@@ -34,7 +34,9 @@ import SEO from '../components/SEO.astro'
 import { type Locale, localePath, t } from '../i18n/ui'
 import { contentSecurityPolicy } from '../lib/embed-hosts'
 import { DARK_GROUND, LIGHT_GROUND } from '../lib/grounds.ts'
+import { toJsonLdScript } from '../lib/seo'
 import { commitShort, commitUrl, REPO, siteVersion as version } from '../lib/version'
+import { buildWebmcpData } from '../lib/webmcp-data'
 
 interface Props {
   title: string
@@ -84,6 +86,8 @@ const copyrightYear = new Date().getFullYear()
 const LINKEDIN_URL = 'https://linkedin.lsantos.dev'
 const TWITTER_URL = 'https://twitter.lsantos.dev'
 const YOUTUBE_URL = 'https://youtube.lsantos.dev'
+
+const webmcpData = await buildWebmcpData()
 ---
 
 <!doctype html>
@@ -240,6 +244,14 @@ const YOUTUBE_URL = 'https://youtube.lsantos.dev'
         if (anchor === null) return
         void copyWithToast(anchor.href)
       })
+    </script>
+    <script
+      type="application/json"
+      id="webmcp-data"
+      set:html={toJsonLdScript(webmcpData as unknown as Record<string, unknown>)}
+    />
+    <script>
+      import '../scripts/webmcp'
     </script>
     <script is:inline define:vars={{ commitShort }}>
       const isLocal = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(location.hostname)
