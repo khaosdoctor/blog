@@ -228,8 +228,7 @@ const tree = treeOf(flat)
       const fits = room >= panel + gutter + GAP_REM * rem
       document.documentElement.dataset.tocMode = fits ? 'panel' : 'handle'
       if (!fits) return
-      const maxLeft = 6 * rem
-      toc.style.setProperty('--toc-left', `${Math.min(maxLeft, Math.max(gutter, room - panel - GAP_REM * rem))}px`)
+      toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - 7 * rem)}px`)
     }
 
     fitMode()
