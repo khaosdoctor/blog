@@ -53,7 +53,7 @@ export function categoryOgImage(lang: string, categoryUrl?: string): string {
   return `/og/${dir}${card}.png`
 }
 
-type PageType = 'website' | 'article'
+type PageType = 'website' | 'article' | 'blog' | 'collection'
 
 export interface BreadcrumbItem {
   name: string
@@ -110,10 +110,40 @@ function buildWebSiteJsonLd(input: JsonLdInput): Record<string, unknown> {
   }
 }
 
+function buildBlogJsonLd(input: JsonLdInput): Record<string, unknown> {
+  const { title, description, canonical, lang } = input
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    name: title,
+    description,
+    url: canonical,
+    inLanguage: lang,
+    publisher: { '@type': 'Person', name: AUTHOR_NAME, url: AUTHOR_GITHUB },
+  }
+}
+
+function buildCollectionPageJsonLd(input: JsonLdInput): Record<string, unknown> {
+  const { title, description, canonical, lang } = input
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: canonical,
+    inLanguage: lang,
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME },
+  }
+}
+
 export function buildPrimaryJsonLd(type: PageType, input: JsonLdInput): Record<string, unknown> {
   switch (type) {
     case 'article':
       return buildArticleJsonLd(input)
+    case 'blog':
+      return buildBlogJsonLd(input)
+    case 'collection':
+      return buildCollectionPageJsonLd(input)
     case 'website':
       return buildWebSiteJsonLd(input)
     default:

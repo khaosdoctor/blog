@@ -24,6 +24,7 @@ const title = page.currentPage > 1 ? `LS: ${category} | ${t(locale, 'page')} ${p
   title={title}
   description={description ?? t(locale, 'categoryDescription', category)}
   lang={locale}
+  type="collection"
   alternates={alternatesFor(path, Astro.site, languages)}
   category={{ name: category, url: localePath(locale, path) }}
 >

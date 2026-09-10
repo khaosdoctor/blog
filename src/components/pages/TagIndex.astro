@@ -22,6 +22,7 @@ const tags = [...(await getTags(locale)).entries()]
   title={`LS: ${t(locale, 'tags')}`}
   description={t(locale, 'tagsIntro')}
   lang={locale}
+  type="collection"
   alternates={alternatesFor('/tags/', Astro.site)}
 >
   <TagCloud locale={locale} tags={tags} />

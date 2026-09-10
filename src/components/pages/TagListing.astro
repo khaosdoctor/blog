@@ -28,6 +28,7 @@ const title = page.currentPage > 1 ? `LS: ${label} | ${t(locale, 'page')} ${page
   title={title}
   description={t(locale, 'tagDescription', label)}
   lang={locale}
+  type="collection"
   alternates={alternatesFor(path, Astro.site, languages)}
 >
   <p class="kicker listing-heading">{t(locale, 'tag')}</p>

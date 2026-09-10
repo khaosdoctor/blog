@@ -21,6 +21,7 @@ const series = [...(await getSeries(locale)).entries()]
   title={`LS: ${t(locale, 'allSeries')}`}
   description={t(locale, 'seriesIntro')}
   lang={locale}
+  type="collection"
   alternates={alternatesFor('/series/', Astro.site)}
 >
   <h1 class="listing-heading">

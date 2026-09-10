@@ -19,6 +19,7 @@ const { locale, slug, name, posts, languages } = Astro.props
   title={`LS: ${name}`}
   description={t(locale, 'seriesDescription', name)}
   lang={locale}
+  type="collection"
   alternates={alternatesFor(`/series/${slug}/`, Astro.site, languages)}
 >
   <p class="kicker listing-heading">{t(locale, 'series')}</p>
