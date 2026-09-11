@@ -115,7 +115,7 @@
 
 :root[data-body-face='sans'] {
   --font-body: var(--font-body-sans);
-  --font-display: var(--font-mono);
+  --font-display: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
   --text-base: calc(1.25rem * var(--font-scale));
   --leading: 1.53;
   --tracking-body: 0em;
