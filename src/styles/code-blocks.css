@@ -17,6 +17,7 @@
 
   /* Otherwise the plugin's own default stack wins over --dial-face-code. */
   --ec-codeFontFml: var(--font-mono);
+  --ec-codeFontSize: 1rem;
 }
 
 .prose .expressive-code .frame,
