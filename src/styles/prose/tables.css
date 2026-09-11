@@ -1,6 +1,6 @@
 .prose table {
   inline-size: 100%;
-  margin-block: 1.75rem;
+  margin-block: var(--block-spacing);
   border-collapse: collapse;
   font-size: var(--text-small);
 }

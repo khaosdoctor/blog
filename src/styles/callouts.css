@@ -5,6 +5,10 @@
 
 /* rehype-callouts switches its two colours with a `.dark` class this site never
    adds, so both are read through light-dark() instead. */
+.callout {
+  margin-block: var(--block-spacing);
+}
+
 .callout:not([data-callout='quote']) {
   --callout-color: light-dark(
     var(--rc-color-light, var(--rc-color-default, #888)),

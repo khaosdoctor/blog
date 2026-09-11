@@ -16,6 +16,16 @@
   --text-tiny: calc(0.75rem * var(--font-scale));
 }
 
+.prose :not(pre) > code {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.prose p {
+  margin-block: 1.25rem;
+}
+
 .prose :is(figure, .expressive-code) + :is(figure, .expressive-code) {
   margin-block-start: var(--block-spacing);
 }

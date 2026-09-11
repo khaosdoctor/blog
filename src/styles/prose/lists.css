@@ -15,6 +15,10 @@
   content: '◦  ';
 }
 
+.prose :is(ul, ol) li + li {
+  margin-block-start: 0.4em;
+}
+
 .prose ol > li::marker {
   font-family: var(--font-mono);
   font-size: 1.15em;
