@@ -68,8 +68,8 @@
 
   /* Body text. Warm on the sepia page, because a cool near-black on a warm
      ground reads as a mistake. */
-  --dial-text-light: #14120e;
-  --dial-text-dark: #f3f1ee;
+  --dial-text-light: #4f493f;
+  --dial-text-dark: #ccc8bf;
 
   /* Quieter text: dates, captions, the byline, anything secondary. */
   --dial-text-quiet-light: #6b6353;
