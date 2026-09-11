@@ -130,7 +130,7 @@
   --dial-line-height: 1.63;
   /* Extra air between letters and between words. Measured for Literata. */
   --dial-letter-spacing: 0.05em;
-  --dial-word-spacing: 0.15em;
+  --dial-word-spacing: 0.06em;
 
   /* Space between two blocks in a post: a paragraph and the figure after it. */
   --dial-block-spacing: 2rem;
@@ -144,7 +144,7 @@
 
   /* A post's running text, and the article card around it. In characters: past
      roughly 80 the eye loses its place returning to the next line. */
-  --dial-reading-width: 78ch;
+  --dial-reading-width: 70ch;
 
   /* Left and right edge of every page, on a narrow window. */
   --dial-page-margin: 1.5rem;
