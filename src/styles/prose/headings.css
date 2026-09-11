@@ -10,11 +10,41 @@ article :is(h2, h3)::after {
 
 article h1 {
   text-shadow: 0 0 var(--heading-glow-blur) var(--heading-glow);
+  color: light-dark(#000000, #ffffff);
 }
 
 article :is(h1, h2, h3, h4, h5, h6) {
   position: relative;
   scroll-margin-block-start: 1.5rem;
+  margin-block: 2.5em 0.6em;
+  color: light-dark(#000000, #ffffff);
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+article h1 {
+  font-size: 2.5rem;
+}
+article h2 {
+  font-size: 2rem;
+}
+article h3 {
+  font-size: 1.5rem;
+}
+article h4 {
+  font-size: 1.25rem;
+}
+article h5 {
+  font-size: 1.125rem;
+}
+article h6 {
+  font-size: 1rem;
+}
+
+article > :is(h1, h2, h3, h4, h5, h6):first-child {
+  margin-block-start: 0;
 }
 
 .heading-anchor {
