@@ -37,6 +37,45 @@
 
       document.addEventListener('mouseover', show)
       document.addEventListener('focusin', show)
+
+      // Pull margin notes toward their references. Floated notes with
+      // clear:right stack downward when consecutive; a negative margin-top
+      // on each float closes the distance without breaking the clear chain.
+      const wideQuery = matchMedia('(min-width: 70rem)')
+      const allAsides = [...document.querySelectorAll('.footnote-aside')]
+
+      const repositionNotes = () => {
+        for (const a of allAsides) a.style.marginTop = ''
+        if (!wideQuery.matches || allAsides.length === 0) return
+
+        const GAP = 12
+        let prevBottom = -Infinity
+
+        for (const a of allAsides) {
+          const refEl = document.getElementById(a.dataset.footnoteRefId ?? '')
+          if (!refEl) continue
+
+          const refTop = refEl.getBoundingClientRect().top
+          const asideTop = a.getBoundingClientRect().top
+          let target = refTop
+          if (target < prevBottom + GAP) target = prevBottom + GAP
+
+          const shift = target - asideTop
+          if (Math.abs(shift) > 2) a.style.marginTop = `${shift}px`
+
+          prevBottom = a.getBoundingClientRect().top + a.offsetHeight
+        }
+      }
+
+      if (allAsides.length > 0) {
+        const run = () => requestAnimationFrame(repositionNotes)
+        if (document.fonts?.ready) document.fonts.ready.then(run)
+        else addEventListener('load', run)
+        addEventListener('resize', run, { passive: true })
+        wideQuery.addEventListener('change', run)
+        const prose = document.querySelector('.prose')
+        if (prose) new ResizeObserver(run).observe(prose)
+      }
     } catch {}
   })()
 </script>
