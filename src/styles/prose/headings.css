@@ -16,7 +16,7 @@ article h1 {
 article :is(h1, h2, h3, h4, h5, h6) {
   position: relative;
   scroll-margin-block-start: 1.5rem;
-  margin-block: 2.5em 0.6em;
+  margin-block: 3.88rem 0.6em;
   color: light-dark(#000000, #ffffff);
   text-transform: uppercase;
   font-family: var(--font-display);

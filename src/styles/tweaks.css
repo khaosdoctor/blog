@@ -144,7 +144,7 @@
 
   /* A post's running text, and the article card around it. In characters: past
      roughly 80 the eye loses its place returning to the next line. */
-  --dial-reading-width: 70ch;
+  --dial-reading-width: 68ch;
 
   /* Left and right edge of every page, on a narrow window. */
   --dial-page-margin: 1.5rem;
