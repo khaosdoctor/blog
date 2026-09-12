@@ -9,7 +9,7 @@
 
 .prose {
   font-family: var(--font-body);
-  font-weight: 500;
+  font-weight: 400;
   overflow-wrap: break-word;
   /* Scaled here rather than in theme.css: the same tokens size the shell, which
      must not follow a reading preference. */

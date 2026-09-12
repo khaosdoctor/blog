@@ -26,6 +26,10 @@
 
 /* On the wrapping <sup>, not the button: keeps the brackets out of copied text
    and avoids links.css's `::after { content: none }`. */
+.prose sup:has(> .footnote-ref) {
+  white-space: nowrap;
+}
+
 .prose sup:has(> .footnote-ref)::before,
 .prose sup:has(> .footnote-ref)::after {
   color: var(--accent);
@@ -183,21 +187,22 @@
     font-size: 0.82rem;
     font-style: italic;
     line-height: 1.5;
-    color: var(--muted);
-    opacity: 0.55;
-    transition: opacity 0.2s ease;
-    border-inline-start: var(--border-card-edge) solid var(--fg);
-    border-block-start: var(--footnote-border-thin) double var(--fg);
-    border-inline-end: var(--footnote-border-thin) double var(--fg);
-    border-block-end: var(--footnote-border-thin) double var(--fg);
+    color: color-mix(in srgb, var(--muted) 70%, transparent);
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+    border-inline-start: var(--border-card-edge) solid color-mix(in srgb, var(--fg) 70%, transparent);
+    border-block-start: var(--footnote-border-thin) double color-mix(in srgb, var(--fg) 70%, transparent);
+    border-inline-end: var(--footnote-border-thin) double color-mix(in srgb, var(--fg) 70%, transparent);
+    border-block-end: var(--footnote-border-thin) double color-mix(in srgb, var(--fg) 70%, transparent);
   }
 
   .footnote-aside:hover {
-    opacity: 1;
+    color: var(--muted);
+    border-color: var(--fg);
   }
 
   .footnote-aside.footnote-aside-active {
-    opacity: 1;
     color: var(--fg);
     border-color: var(--post-accent-cover);
     box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--post-accent-cover);

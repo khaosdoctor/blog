@@ -22,4 +22,5 @@
 
 .prose em {
   font-weight: var(--em-italic-weight);
+  color: var(--em-bold-bg);
 }
