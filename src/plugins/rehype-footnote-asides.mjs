@@ -60,7 +60,7 @@ export function rehypeFootnoteAsides() {
     }
     if (definitions.size === 0) return
 
-    insertAsides(tree.children, definitions, new Set())
+    insertAsides(tree.children, definitions, new Set(), new Map())
   }
 }
 
@@ -116,13 +116,13 @@ function findListItems(node, out = []) {
  * (a footnote in a list item's own paragraph: both the `<p>` and the `<li>`
  * qualify, and the `<p>` should win since it is the closer match).
  */
-function insertAsides(children, definitions, handled) {
+function insertAsides(children, definitions, handled, usedNumbers) {
   for (let i = 0; i < children.length; i++) {
     const node = children[i]
     if (node.type !== 'element') continue
 
     if (Array.isArray(node.children)) {
-      insertAsides(node.children, definitions, handled)
+      insertAsides(node.children, definitions, handled, usedNumbers)
     }
 
     if (!BLOCK_TAGS.has(node.tagName)) continue
@@ -133,7 +133,7 @@ function insertAsides(children, definitions, handled) {
 
     const asides = []
     for (const ref of refs) {
-      const aside = buildAside(ref, definitions)
+      const aside = buildAside(ref, definitions, usedNumbers)
       if (aside === null) continue
       makeTrigger(ref, aside.properties.id)
       asides.push(aside)
@@ -163,29 +163,41 @@ function findFootnoteRefs(node, out = []) {
   return out
 }
 
-function buildAside(ref, definitions) {
+function buildAside(ref, definitions, usedNumbers) {
   const href = ref.properties?.href
   if (typeof href !== 'string' || !href.startsWith('#')) return null
 
   const body = definitions.get(href.slice(1))
   if (!body) return null
 
-  // Falls back to the target id on the rare footnote whose reference link
-  // carries no id of its own, so the aside still gets something unique.
   const refId = typeof ref.properties?.id === 'string' ? ref.properties.id : href.slice(1)
 
   const clonedBody = cloneFootnoteBody(body)
-  // The reference number is already known at build time (it is the text GFM
-  // put inside the <a data-footnote-ref> itself), so it is written here as
-  // real text rather than a CSS counter, which has no way to guarantee it
-  // matches the reference's own numbering. Same bracket shape the reference
-  // renders (see the sup ::before/::after in footnotes.css).
-  const number = textContent(ref).trim()
+  const title = parseTitleFromLabel(href.slice(1))
+  const labelNumber = parseLabelNumber(href.slice(1))
+  let displayNumber = textContent(ref).trim()
+
+  if (labelNumber) {
+    const count = usedNumbers.get(labelNumber) ?? 0
+    usedNumbers.set(labelNumber, count + 1)
+    displayNumber = count === 0 ? labelNumber : `${labelNumber}${String.fromCharCode(97 + count)}`
+    ref.children = [{ type: 'text', value: displayNumber }]
+  }
+
+  const headChildren = [{ type: 'text', value: `[${displayNumber}]` }]
+  if (title) {
+    headChildren.push({
+      type: 'element',
+      tagName: 'span',
+      properties: { className: ['footnote-aside-title'] },
+      children: [{ type: 'text', value: ` ${title}` }],
+    })
+  }
   const head = {
     type: 'element',
     tagName: 'span',
     properties: { className: ['footnote-aside-head'] },
-    children: [{ type: 'text', value: `[${number}]` }],
+    children: headChildren,
   }
 
   return {
@@ -206,7 +218,7 @@ function buildAside(ref, definitions) {
       dataFootnoteRefId: refId,
       popover: '',
     },
-    children: number ? [head, ...clonedBody] : clonedBody,
+    children: displayNumber ? [head, ...clonedBody] : clonedBody,
   }
 }
 
@@ -271,6 +283,25 @@ function dropBackref(nodes) {
   const last = out.at(-1)
   if (last?.type === 'text' && /^\s+$/.test(last.value)) out.pop()
   return out
+}
+
+/** Extracts a title from a GFM footnote id like `user-content-fn-1-some-title`.
+ *  Returns `null` when the label carries no title (plain `[^1]` or `[^n1]`). */
+function parseTitleFromLabel(id) {
+  if (typeof id !== 'string') return null
+  const label = id.replace(/^user-content-fn-/, '')
+  const match = /^\d+-(.+)$/.exec(label)
+  if (!match) return null
+  return match[1]
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+function parseLabelNumber(id) {
+  if (typeof id !== 'string') return null
+  const label = id.replace(/^user-content-fn-/, '')
+  return /^(\d+)-/.exec(label)?.[1] ?? null
 }
 
 // mdast-util-to-hast (node_modules/mdast-util-to-hast/lib/{footer,handlers/

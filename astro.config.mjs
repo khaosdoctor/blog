@@ -14,6 +14,7 @@ import remarkMath from 'remark-math'
 import { redirectStubs } from './src/integrations/redirect-stubs.mjs'
 import { lastModified, noindexPaths } from './src/lib/post-dates.ts'
 import { pluginTokenStyles } from './src/plugins/expressive-code-token-styles.mjs'
+import { mdAsMdx } from './src/plugins/md-as-mdx.mjs'
 import { mdxTransformCache } from './src/plugins/mdx-transform-cache.mjs'
 import { rehypeFootnoteAsides } from './src/plugins/rehype-footnote-asides.mjs'
 import { rehypeHeadingAnchors } from './src/plugins/rehype-heading-anchors.mjs'
@@ -149,10 +150,12 @@ export default defineConfig({
     layout: 'constrained',
   },
   vite: {
-    // Monkeypatches the "@mdx-js/rolldown" plugin's own transform in place, so
-    // it must sit in this array with that plugin already resolvable; see the
-    // comment at the top of mdx-transform-cache.mjs. MDX_CACHE=0 disables it.
-    plugins: [mdxTransformCache()],
+    // mdAsMdx patches "@mdx-js/rolldown" to also transform .md files and
+    // prevents "astro:markdown" from handling them, so content .md files go
+    // through the MDX compiler (the remark chain emits MDX JSX nodes).
+    // mdxTransformCache wraps the same plugin's transform with a content-hash
+    // cache. MDX_CACHE=0 disables the cache.
+    plugins: [mdAsMdx(), mdxTransformCache()],
     build: {
       // A font under Vite's 4 KB threshold becomes a `data:` URI, which the site's
       // `font-src 'self'` blocks. Nothing errors; the glyphs are just wrong.

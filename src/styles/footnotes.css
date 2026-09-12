@@ -10,7 +10,7 @@
   /* Read by JS; the media query below repeats the literal since it can't take a var(). */
   --footnote-wide-breakpoint: 70rem;
 
-  --footnote-aside-width: 9rem;
+  --footnote-aside-width: 15rem;
   --footnote-aside-gap: 1.5rem;
   --footnote-border-thin: 3px;
 }
@@ -86,6 +86,11 @@
   font-size: 0.95rem;
   line-height: 1.2;
   color: var(--fg);
+}
+
+.footnote-aside-title {
+  font-style: italic;
+  color: #fff;
 }
 
 /* The heading rule from prose/headings.css, at a smaller dash. */
@@ -179,16 +184,20 @@
     font-style: italic;
     line-height: 1.5;
     color: var(--muted);
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
     border-inline-start: var(--border-card-edge) solid var(--fg);
     border-block-start: var(--footnote-border-thin) double var(--fg);
     border-inline-end: var(--footnote-border-thin) double var(--fg);
     border-block-end: var(--footnote-border-thin) double var(--fg);
   }
 
-  /* Hovering a marker picks its note out of a margin holding several. The
-     offset shadow is the one figure images carry, and only the note being
-     asked about lifts onto it. */
+  .footnote-aside:hover {
+    opacity: 1;
+  }
+
   .footnote-aside.footnote-aside-active {
+    opacity: 1;
     color: var(--fg);
     border-color: var(--post-accent-cover);
     box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--post-accent-cover);
