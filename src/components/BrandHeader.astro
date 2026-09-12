@@ -1,6 +1,7 @@
 ---
 import { type Locale, t } from '../i18n/ui'
 import { MARK_RECTS, markCells, ROLE_TOKEN } from '../lib/logo-mark'
+import FontToggle from './FontToggle.astro'
 import LangSwitcher from './LangSwitcher.astro'
 import NavLinks from './NavLinks.astro'
 import SearchPalette from './SearchPalette.astro'
@@ -63,10 +64,14 @@ const RULE = '──────────────────────
     <nav class="controls">
       <SearchPalette locale={locale} />
       <LangSwitcher locale={locale} alternates={alternates} />
+      <FontToggle locale={locale} />
       <ThemeToggle locale={locale} />
       <SettingsPanel locale={locale} />
     </nav>
   </div>
+  <span class="mobile-font-toggle">
+    <FontToggle locale={locale} />
+  </span>
   <span class="edge" aria-hidden="true">─┐</span>
 </header>
 
@@ -261,6 +266,7 @@ const RULE = '──────────────────────
       margin-inline-start: auto;
     }
 
+    .shell[data-menu-open] .controls :global(.font-toggle),
     .shell[data-menu-open] .controls :global(.tt-open),
     .shell[data-menu-open] .controls :global(.sp-open) {
       font-size: 1.3rem;
@@ -321,6 +327,23 @@ const RULE = '──────────────────────
     }
   }
 
+  .mobile-font-toggle {
+    display: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    .shell[data-menu-ready] .mobile-font-toggle {
+      display: block;
+      position: absolute;
+      inset-inline-end: calc((var(--icon-btn-chip) - var(--icon-btn-hit)) / 2);
+      z-index: 2;
+    }
+
+    .shell[data-menu-open] .mobile-font-toggle {
+      display: none;
+    }
+  }
+
   .edge {
     color: var(--muted);
     font-family: var(--font-display);
@@ -361,6 +384,10 @@ const RULE = '──────────────────────
   /* Negative: the container's 0.5rem column spacing also separates the nav links, so pulling the switch back tightens just the controls. */
   .controls :global(.lang-switch) {
     margin-inline-start: -0.25rem;
+  }
+
+  .controls :global(.font-toggle) {
+    margin-inline-start: calc(-0.25rem - (var(--icon-btn-hit) - var(--icon-btn-chip)) / 2);
   }
 
   /* Starts the second group: subtracts the one side of invisible hit box the opener carries and the switch does not, so the step is chip-to-chip. */

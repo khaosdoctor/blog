@@ -359,7 +359,7 @@ function buildWireCells(solid: GeneratedSolid): WireCell[] {
   return [...best.values()]
 }
 
-const BYLINE_SIZE = 22
+const BYLINE_SIZE = 32
 const META_SIZE = 20
 const LINE_HEIGHT_RATIO = 1.22
 const MONO_ADVANCE = 0.62

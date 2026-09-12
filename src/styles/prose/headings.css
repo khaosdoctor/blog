@@ -43,6 +43,18 @@ article h6 {
   font-size: 1rem;
 }
 
+@media (max-width: 47.99rem) {
+  article h1 {
+    font-size: 2rem;
+  }
+  article h2 {
+    font-size: 1.65rem;
+  }
+  article h3 {
+    font-size: 1.3rem;
+  }
+}
+
 article > :is(h1, h2, h3, h4, h5, h6):first-child {
   margin-block-start: 0;
 }
