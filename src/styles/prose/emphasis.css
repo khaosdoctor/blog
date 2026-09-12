@@ -24,3 +24,9 @@
   font-weight: var(--em-italic-weight);
   color: var(--em-bold-bg);
 }
+
+.prose strong em,
+.prose em strong {
+  color: var(--em-bold-fg);
+  font-weight: bold;
+}
