@@ -118,3 +118,5 @@ jobs:
           gh release create "$TAG" \
             --title "v${VERSION}" \
             --notes-file /tmp/changelog.md
+
+          gh workflow run build.yml
