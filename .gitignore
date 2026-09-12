@@ -29,5 +29,4 @@ test-results/
 playwright-report/
 
 # Agent screenshots
-unixfoo-full.png
-lsantosdev-full.png
+/*.png
