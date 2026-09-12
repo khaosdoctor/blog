@@ -85,15 +85,14 @@ const tree = treeOf(flat)
   }
 
   .title {
-    margin: 0 0 0.35rem;
+    margin: 0 0 1.5rem;
     padding-inline-start: 0.3rem;
     font-family: var(--font-display);
-    font-size: 0.75rem;
-    /* Departure Mono ships a single weight, so font-weight: 700 would be
-       synthesised. */
+    font-size: 1rem;
     text-shadow: 1px 0 currentColor;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+    color: light-dark(#000000, #ffffff);
   }
 
   .handle {
@@ -119,7 +118,7 @@ const tree = treeOf(flat)
   }
 
   .handle:has(+ .toc[data-open='true']) {
-    transform: translate(-13rem, -50%);
+    transform: translate(calc(-1 * min(75vw, 20rem)), -50%);
   }
 
   .handle-glyph {
@@ -148,6 +147,7 @@ const tree = treeOf(flat)
       inset-block: 50% auto;
       inset-inline: auto 0;
       transform: translate(100%, -50%);
+      inline-size: min(75vw, 20rem);
       max-block-size: 60vh;
       background: var(--bg);
       border-inline-end: 0;
@@ -170,6 +170,7 @@ const tree = treeOf(flat)
     inset-block: 50% auto;
     inset-inline: auto 0;
     transform: translate(100%, -50%);
+    inline-size: min(75vw, 20rem);
     max-block-size: 60vh;
     background: var(--bg);
     border-inline-end: 0;
@@ -193,9 +194,11 @@ const tree = treeOf(flat)
     inset-inline: var(--toc-left, var(--gutter)) auto;
     transform: translateY(-50%);
     max-block-size: 64vh;
+    inline-size: 15rem;
+    font-size: 1rem;
     display: block;
     border: 3px double var(--toc-ink);
-    background: transparent;
+    background: var(--bg);
   }
 
   :root[data-toc-mode='panel'] .handle {
@@ -216,7 +219,7 @@ const tree = treeOf(flat)
     const eased = matchMedia('(prefers-reduced-motion: no-preference)').matches
 
     const article = document.querySelector('article')
-    const PANEL_REM = 13
+    const PANEL_REM = 15
     const GAP_REM = 1.5
 
     const fitMode = (): void => {
@@ -228,7 +231,7 @@ const tree = treeOf(flat)
       const fits = room >= panel + gutter + GAP_REM * rem
       document.documentElement.dataset.tocMode = fits ? 'panel' : 'handle'
       if (!fits) return
-      toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - 7 * rem)}px`)
+      toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - 4 * rem)}px`)
     }
 
     fitMode()

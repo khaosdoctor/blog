@@ -51,8 +51,14 @@ const { items, locale } = Astro.props
     list-style: none;
   }
 
+  li + li {
+    margin-block-start: 0.25em;
+  }
+
   .sub > div > ul {
     padding-inline-start: 1.1ch;
+    border-inline-start: 1px solid light-dark(rgba(0,0,0,0.15), rgba(255,255,255,0.15));
+    margin-inline-start: 0.3ch;
   }
 
   .row {
@@ -66,12 +72,10 @@ const { items, locale } = Astro.props
     flex: 1;
     padding: 0.1rem 0.3rem;
     color: inherit;
-    font-size: 0.72rem;
+    font-size: 0.85em;
     line-height: 1.5;
     text-decoration: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
     transition:
       background var(--duration) var(--ease),
       color var(--duration) var(--ease);
@@ -95,7 +99,7 @@ const { items, locale } = Astro.props
     background: light-dark(#000000, #ffffff);
     color: var(--bg);
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.85em;
     line-height: 1.5;
     overflow-wrap: anywhere;
     pointer-events: none;
