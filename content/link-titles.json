@@ -2812,6 +2812,11 @@
     "description": "Example repository for my \"Guide to gRPC Series\". Contribute to khaosdoctor/grpc-guide-part3-typescript-sample development by creating an account on GitHub.",
     "publisher": "GitHub"
   },
+  "https://github.lsantos.dev/my-notes": {
+    "title": "GitHub - khaosdoctor/my-notes: :memo: Just a repo with my study notes. A simple notebook",
+    "description": ":memo: Just a repo with my study notes. A simple notebook - khaosdoctor/my-notes",
+    "publisher": "GitHub"
+  },
   "https://go.dev/tour/flowcontrol/12": {
     "title": "A Tour of Go"
   },

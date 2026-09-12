@@ -38,6 +38,9 @@ export default defineConfig({
     mermaid({ theme: 'default', autoTheme: true }),
     // For interactive demos inside a post. A post that places no island ships no Vue.
     vue(),
+    // Before mdx: routes content .md through the MDX compiler so
+    // mdxJsxFlowElement nodes (emphasis blocks, embeds, figures) compile.
+    mdAsMdx(),
     // Before mdx: it replaces the default Shiki setup.
     expressiveCode({
       // pluginTokenStyles moves the per-theme token colours into the stylesheet.
@@ -150,12 +153,9 @@ export default defineConfig({
     layout: 'constrained',
   },
   vite: {
-    // mdAsMdx patches "@mdx-js/rolldown" to also transform .md files and
-    // prevents "astro:markdown" from handling them, so content .md files go
-    // through the MDX compiler (the remark chain emits MDX JSX nodes).
-    // mdxTransformCache wraps the same plugin's transform with a content-hash
-    // cache. MDX_CACHE=0 disables the cache.
-    plugins: [mdAsMdx(), mdxTransformCache()],
+    // mdxTransformCache wraps "@mdx-js/rolldown"'s transform with a
+    // content-hash cache. MDX_CACHE=0 disables the cache.
+    plugins: [mdxTransformCache()],
     build: {
       // A font under Vite's 4 KB threshold becomes a `data:` URI, which the site's
       // `font-src 'self'` blocks. Nothing errors; the glyphs are just wrong.
