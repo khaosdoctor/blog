@@ -11,9 +11,9 @@ tags:
 series: sobre-escrever
 seriesName: Minhas motivações para escrever
 seriesOrder: 1
+heroImage: "./cover.png"
 description: Depois de mais de um ano, eu estou de volta à escrita. Esse post fala um pouco sobre o que eu passei por esse tempo, e explicar o por quê do meu desaparecimento.
 draft: false
-heroImage: "./cover.png"
 ---
 Não sei se vocês chegaram a perceber mas o meu último post nesse blog foi em março de 2025! E foi uma newsletter do Backlog![^1] E agora, mais de um ano depois, eu resolvi que é hora de voltar com o blog, e tomar vergonha na cara de recriar com um tema mais interessante que não seja só um _copy paste_ de um tema genérico de algum CMS padrão[^2].
 
@@ -45,13 +45,13 @@ Mas, vamos expandir um pouco no que rolou.
 
 ## O que aconteceu durante esse tempo
 
-Durante todo o tempo que eu fiquei fora, eu tive bastante espaço e momentos para pensar no que eu gosto mesmo de fazer e também no que eu já estava fazendo. Além de me reconciliar um pouco mais com toda a situação da temida __inteligência artificial__[^5]. 
+Durante todo o tempo que eu fiquei fora, eu tive bastante espaço e momentos para pensar no que eu gosto mesmo de fazer e também no que eu já estava fazendo. Além de me reconciliar um pouco mais com toda a situação da temida __inteligência artificial__[^5].
 
 Então vamos por partes.
 
 ### O que pensamos de nós mesmos
 
-Eu não vou expandir sobre IA aqui, mas eu preciso falar algumas coisas para dar um contexto. 
+Eu não vou expandir sobre IA aqui, mas eu preciso falar algumas coisas para dar um contexto.
 
 Quando a IA se tornou mais presente nas vidas dos devs e ela estava, de fato, sendo uma ferramenta boa que criava coisas funcionais e até úteis, eu me peguei pensando:
 
@@ -85,8 +85,6 @@ E por isso que eu acho que esse blog, agora além de tudo, vale muito mais a pen
 Mas não quero me estender muito nisso agora, vamos ter posts específicos para cada uma dessas coisas!
 
 Até mais!
-
----
 
 [^1]: Que eu pretendo continuar ainda! Mas vamos com calma!
 [^2]: Que, inclusive eu também abandonei

@@ -341,7 +341,7 @@ function yamlString(value: string): string {
 function buildFrontmatter(original: string, fields: Map<string, string>, locale: Locale, slug: string): string {
   const lines: string[] = [`title: ${yamlString(fields.get('title') ?? '')}`]
 
-  for (const key of ['pubDate', 'updatedDate', 'category', 'tags', 'series', 'seriesOrder', 'heroImage', 'heroImageAlt']) {
+  for (const key of ['pubDate', 'updatedDate', 'category', 'tags', 'series', 'seriesOrder']) {
     const line = frontmatterLine(original, key)
     if (line !== null) lines.push(line)
   }

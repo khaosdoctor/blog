@@ -14,6 +14,7 @@ description: "After more than a year, I'm back to writing. This post talks a bit
 slug: "i-m-back"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 I don't know if you noticed, but my last post on this blog was in March 2025! And it was a Backlog newsletter![^1] And now, more than a year later, I decided it's time to come back to the blog, and finally have the decency to rebuild it with a more interesting theme that isn't just a _copy paste_ of some generic theme from a stock CMS[^2].
