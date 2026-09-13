@@ -64,6 +64,9 @@
   "allowScripts": {
     "esbuild@0.28.2": true
   },
+  "lint-staged": {
+    "*.{js,ts,mjs,astro,json,jsonc,css,vue}": "biome check --write --no-errors-on-unmatched"
+  },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
     "@astrojs/check": "^0.9.10",
@@ -73,6 +76,7 @@
     "@types/node": "^26.2.0",
     "@types/turndown": "^5.0.6",
     "acorn": "^8.15.0",
+    "lint-staged": "^17.5.1",
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2",
     "typescript": "^6.0.3",
