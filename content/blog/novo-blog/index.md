@@ -13,6 +13,7 @@ seriesName: Minhas motivações para escrever
 seriesOrder: 1
 description: Depois de mais de um ano, eu estou de volta à escrita. Esse post fala um pouco sobre o que eu passei por esse tempo, e explicar o por quê do meu desaparecimento.
 draft: false
+heroImage: "./cover.png"
 ---
 Não sei se vocês chegaram a perceber mas o meu último post nesse blog foi em março de 2025! E foi uma newsletter do Backlog![^1] E agora, mais de um ano depois, eu resolvi que é hora de voltar com o blog, e tomar vergonha na cara de recriar com um tema mais interessante que não seja só um _copy paste_ de um tema genérico de algum CMS padrão[^2].
 
