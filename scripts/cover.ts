@@ -17,7 +17,7 @@
  * Covers generate in parallel (8 at a time) since sharp already uses libuv
  * threads for the PNG encode.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
 import { basename, join } from 'node:path'
 import sharp from 'sharp'
@@ -25,7 +25,7 @@ import { asLocale } from '../src/i18n/locales.ts'
 import { parseAuthors } from '../src/lib/authors.ts'
 import { buildCoverSvg, formatCoverByline } from '../src/lib/cover.ts'
 import { estimateReadingTime } from '../src/lib/reading-time.ts'
-import { fail as failLine, field, frontmatterOf, heading, ok, postIndex } from './lib/cli.ts'
+import { fail as failLine, field, frontmatterOf, heading, ok } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 const DEFAULT_LANG = 'pt'
@@ -78,13 +78,7 @@ async function generateCoverForFile(filePath: string, slug: string): Promise<boo
   if (hasHero) {
     raw = readFileSync(filePath, 'utf8')
     frontmatter = frontmatterOf(raw)
-    writeFileSync(
-      filePath,
-      raw.replace(
-        /^heroImage:.*$/m,
-        `heroImage: "./${filename}"`,
-      ),
-    )
+    writeFileSync(filePath, raw.replace(/^heroImage:.*$/m, `heroImage: "./${filename}"`))
   } else {
     writeFileSync(
       filePath,

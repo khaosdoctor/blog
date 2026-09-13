@@ -292,7 +292,11 @@ async function completeWithClaudeCli(system: string, user: string): Promise<Comp
   })
 
   const text = Buffer.concat(out).toString('utf8').trim()
-  if (code !== 0) throw new Error(`claude exited ${code}: ${Buffer.concat(err).toString('utf8').trim()}`)
+  const stderr = Buffer.concat(err).toString('utf8').trim()
+  if (code !== 0)
+    throw new Error(
+      `claude exited ${code}${stderr ? `: ${stderr}` : text ? `: ${text}` : ' (no output, check CLAUDE_CODE_OAUTH_TOKEN)'}`,
+    )
 
   return {
     text,
