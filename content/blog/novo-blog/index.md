@@ -80,9 +80,11 @@ Eu já tinha feito isso para o Backlog no passado, onde eu falava de história, 
 
 Para ser sincero, eu ainda não sinto vontade de falar sobre desenvolvimento de software propriamente dito de novo. Mas esse tempo fora me fez perceber que eu tenho outras paixões que eu adoraria compartilhar com as pessoas, por exemplo, eu sempre tive vontade de aprender eletrônica mas nunca tive força de vontade de começar a aprender. Mas durante esse período eu não só comecei a aprender mas também comecei a construir coisas[^10], comecei a me envolver mais com música[^11], comecei a entender que tecnologia não é só o que eu trabalhava antes, não é só a Web, tem muito mais além disso.
 
-E por isso que eu acho que esse blog, agora além de tudo, vale muito mais a pena. Então, esperem conteúdo diverso sobre várias outras coisas aqui, não tenho uma agenda de posts, e nem vou ter, os posts vão sair quando saírem. Começando com um post já sobre o que o blog novo é capaz de fazer!
+## Daqui para frente
 
-Mas não quero me estender muito nisso agora, vamos ter posts específicos para cada uma dessas coisas!
+Esse blog, agora além de tudo, vale muito mais a pena. Então, esperem conteúdo diverso sobre várias outras coisas aqui, não tenho uma agenda de posts, e nem vou ter, os posts vão sair quando saírem. Começando com um post já sobre o que o blog novo é capaz de fazer!
+
+Mas não quero me estender muito nisso agora, vamos ter posts específicos para cada uma dessas coisas! Estou super animado em mostrar tudo que foi feito aqui e também compartilhar mais do que eu gosto de fazer.
 
 Até mais!
 
