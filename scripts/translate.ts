@@ -73,6 +73,7 @@ const MAX_TOKENS = Number(process.env.TRANSLATE_MAX_TOKENS ?? 64000)
 // The specific variable wins: an ANTHROPIC_API_KEY left over in the shell should
 // not be sent to Groq or OpenRouter.
 const API_KEY = process.env.TRANSLATE_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? ''
+const CONCURRENCY = Number(process.env.TRANSLATE_CONCURRENCY ?? 4)
 
 const LANGUAGE_NAMES: Record<Locale, string> = {
   pt: 'Brazilian Portuguese',
@@ -457,63 +458,77 @@ if (args.dryRun) {
 let translated = 0
 let skipped = 0
 
-for (const post of changed) {
-  const { frontmatter, body } = splitFrontmatter(post.raw)
-  const sourceLang = asLocale(field(frontmatter, 'lang'))
+// ponytail: CONCURRENCY parallel model calls per batch, file writes between batches
+for (let i = 0; i < changed.length; i += CONCURRENCY) {
+  const batch = changed.slice(i, i + CONCURRENCY)
 
-  const fields = new Map<string, string>()
-  for (const key of TRANSLATABLE_FIELDS) {
-    const value = field(frontmatter, key)
-    if (value === null) continue
-    fields.set(key, value)
+  const results = await Promise.allSettled(
+    batch.map(async (post) => {
+      const { frontmatter, body } = splitFrontmatter(post.raw)
+      const sourceLang = asLocale(field(frontmatter, 'lang'))
+
+      const fields = new Map<string, string>()
+      for (const key of TRANSLATABLE_FIELDS) {
+        const value = field(frontmatter, key)
+        if (value === null) continue
+        fields.set(key, value)
+      }
+
+      const completion = await complete(SYSTEM_PROMPT, buildUserPrompt(body, fields, sourceLang, args.locale))
+      return { post, frontmatter, completion }
+    }),
+  )
+
+  for (const result of results) {
+    if (result.status === 'rejected') {
+      warn(`error: ${result.reason}`)
+      skipped += 1
+      continue
+    }
+
+    const { post, frontmatter, completion } = result.value
+
+    if (completion.refusal !== null) {
+      warn(`refused: ${post.slug} (${completion.refusal}), skipped`)
+      skipped += 1
+      continue
+    }
+
+    if (!completion.text.includes('<<<BODY>>>')) {
+      warn(`unparseable response for ${post.slug}, skipped`)
+      skipped += 1
+      continue
+    }
+
+    const parsed = parseResponse(completion.text)
+
+    const unsafeField = [...parsed.fields].find(([, value]) => sanitizeCaption(value) !== value)
+    if (unsafeField !== undefined || sanitizeCaption(parsed.body) !== parsed.body) {
+      warn(`unsafe HTML in translated output for ${post.slug} (field: ${unsafeField?.[0] ?? 'body'}), skipped`)
+      skipped += 1
+      continue
+    }
+
+    const slug = post.existingSlug ?? slugify(parsed.fields.get('title') ?? post.slug)
+    const output = `---\n${buildFrontmatter(frontmatter, parsed.fields, args.locale, slug)}\n---\n\n${parsed.body}\n`
+    const target = join(SOURCE_DIR, post.slug, `${slug}.md`)
+    mkdirSync(dirname(target), { recursive: true })
+    writeFileSync(target, output)
+
+    if (post.existingFile !== null && post.existingFile !== target && existsSync(post.existingFile)) {
+      unlinkSync(post.existingFile)
+    }
+
+    cache[post.slug] = {
+      sourceHash: post.sourceHash,
+      translatedAt: new Date().toISOString(),
+    }
+
+    translated += 1
+    console.log(`  ${bold(post.slug)} ${dim('->')} ${args.locale} (${completion.usage})`)
   }
 
-  const completion = await complete(SYSTEM_PROMPT, buildUserPrompt(body, fields, sourceLang, args.locale))
-
-  if (completion.refusal !== null) {
-    warn(`refused: ${post.slug} (${completion.refusal}), skipped`)
-    skipped += 1
-    continue
-  }
-
-  if (!completion.text.includes('<<<BODY>>>')) {
-    warn(`unparseable response for ${post.slug}, skipped`)
-    skipped += 1
-    continue
-  }
-
-  const parsed = parseResponse(completion.text)
-
-  // The model is untrusted output, not reviewed migration content: run it through
-  // the same denylist captions get before it's allowed anywhere near set:html.
-  const unsafeField = [...parsed.fields].find(([, value]) => sanitizeCaption(value) !== value)
-  if (unsafeField !== undefined || sanitizeCaption(parsed.body) !== parsed.body) {
-    warn(`unsafe HTML in translated output for ${post.slug} (field: ${unsafeField?.[0] ?? 'body'}), skipped`)
-    skipped += 1
-    continue
-  }
-
-  // Reuse the slug a previous run already picked, so a rerun updates the same
-  // file instead of renaming it out from under existing links.
-  const slug = post.existingSlug ?? slugify(parsed.fields.get('title') ?? post.slug)
-  const output = `---\n${buildFrontmatter(frontmatter, parsed.fields, args.locale, slug)}\n---\n\n${parsed.body}\n`
-  const target = join(SOURCE_DIR, post.slug, `${slug}.md`)
-  mkdirSync(dirname(target), { recursive: true })
-  writeFileSync(target, output)
-
-  // Clean up the old .mdx twin so two files don't claim the same language.
-  if (post.existingFile !== null && post.existingFile !== target && existsSync(post.existingFile)) {
-    unlinkSync(post.existingFile)
-  }
-
-  cache[post.slug] = {
-    sourceHash: post.sourceHash,
-    translatedAt: new Date().toISOString(),
-  }
   writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2))
-
-  translated += 1
-  console.log(`  ${bold(post.slug)} ${dim('->')} ${args.locale} (${completion.usage})`)
 }
 
 if (changed.length === 0) ok('nothing to translate (no-op)')
