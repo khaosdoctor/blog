@@ -3736,6 +3736,11 @@
   "https://undici.nodejs.org/#/": {
     "title": "undici | Node.js Undici"
   },
+  "https://unix.foo/posts/last-people-who-know-how-it-works/": {
+    "title": "The Last People Who Know How It Works · unix.foo",
+    "description": "You only ever know the things you can lose to.",
+    "publisher": "unix.foo"
+  },
   "https://unsplash.com/?utm_source=medium&utm_medium=referral": null,
   "https://unsplash.com/@glenncarstenspeters?utm_source=medium&utm_medium=referral": null,
   "https://unsplash.com/@markusspiske?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText": null,
