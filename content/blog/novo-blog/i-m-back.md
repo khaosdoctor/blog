@@ -64,7 +64,7 @@ I won't say I wasn't really upset about it. After all, I always wrote about tech
 
 And then something occurred to me: I defined myself as a tech guy, but I'm not just a tech guy. I can talk about infinite things.
 
-I like to define myself as someone with serial curiosity[^8-nota-de-tradução]. It's a nice way to say I'm interested in anything, literally, from cooking[^7] to astronomy. Most of the time this is really cool because I become someone very interesting in bar conversations, but at the same time, having so many interests ends up taking a heavy toll. Especially on someone who already judges themselves as not being enough.
+I like to define myself as someone with serial curiosity[^8-translation-note]. It's a nice way to say I'm interested in anything, literally, from cooking[^7] to astronomy. Most of the time this is really cool because I become someone very interesting in bar conversations, but at the same time, having so many interests ends up taking a heavy toll. Especially on someone who already judges themselves as not being enough.
 
 Because of that I turned my hobbies into work. I always said I "had to create a post" or "had to create content." But the reality is:
 
@@ -95,7 +95,7 @@ See you later!
 [^4]: Comparison is exactly what destroys the joy of anything.
 [^5]: That part in itself deserves a separate post, so I won't go into details here. For now I'll use this post just to talk about myself
 [^7]: Everyone had their bread-making period during the pandemic. Mine just happened much later
-[^8-nota-de-tradução]: In English this term is much cooler: _"serial curiosity"_
+[^8-translation-note]: In Portuguese this term is much less catchy: _"curiosidade em série"_
 [^9]: Unfortunately I had to leave the GDE program in 2025 precisely because of this little "burnout" I had
 [^10]: Which also gave me a completely different perspective on how we can use AI in a better way
 [^11]: Electronics and music have a very close relationship, especially when we're talking about electric instruments. In fact, one of my great current passions is building guitar effect pedals
