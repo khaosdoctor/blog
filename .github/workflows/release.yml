@@ -5,7 +5,9 @@ name: Release
 # step, no manual trigger needed (though you can still dispatch manually).
 #
 # feat -> minor, fix -> patch, BREAKING CHANGE / ! -> major.
-# Commits that don't match (chore, docs, content, ci, etc.) are skipped.
+# Commits that don't match (chore, docs, refactor, perf, ci, etc.) are skipped.
+# Only commits touching blog source (src/, public/, scripts/,
+# astro.config.mjs, package.json, tsconfig.json) count for a release.
 
 on:
   push:
@@ -51,16 +53,28 @@ jobs:
             hash=$(echo "$line" | awk '{print $1}')
             short=${hash:0:7}
 
-            # Check for breaking change
+            type=$(echo "$subject" | grep -oE '^[a-z]+' || true)
+
+            # Only feat, fix, and breaking changes create releases
+            is_breaking=false
             if echo "$subject" | grep -qE '^[a-z]+(\(.+\))?!:'; then
+              is_breaking=true
+            elif [ "$type" != "feat" ] && [ "$type" != "fix" ]; then
+              continue
+            fi
+
+            # Only commits touching blog source count for a release
+            changed=$(git diff-tree --no-commit-id --name-only -r "$hash")
+            if ! echo "$changed" | grep -qE '^(src/|public/|scripts/|astro\.config\.mjs|package\.json|tsconfig\.json)'; then
+              continue
+            fi
+
+            if [ "$is_breaking" = true ]; then
               BUMP="major"
               entry=$(echo "$subject" | sed 's/^[a-z]*\([^)]*\)\?!: //')
               CHANGELOG="${CHANGELOG}\n- **BREAKING:** ${entry} (${short})"
               continue
             fi
-
-            type=$(echo "$subject" | grep -oE '^[a-z]+' || true)
-            msg=$(echo "$subject" | sed 's/^[a-z]*\([^)]*\)\?: //')
 
             case "$type" in
               feat)
@@ -68,10 +82,6 @@ jobs:
                 CHANGELOG="${CHANGELOG}\n- ${subject} (${short})"
                 ;;
               fix)
-                [ -z "$BUMP" ] && BUMP="patch"
-                CHANGELOG="${CHANGELOG}\n- ${subject} (${short})"
-                ;;
-              perf|refactor)
                 [ -z "$BUMP" ] && BUMP="patch"
                 CHANGELOG="${CHANGELOG}\n- ${subject} (${short})"
                 ;;
