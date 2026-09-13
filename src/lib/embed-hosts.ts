@@ -47,6 +47,19 @@ const EMBED_PROVIDERS: EmbedProvider[] = [
     note: 'Cookieless, and only emitted when PUBLIC_CF_ANALYTICS_TOKEN is set.',
   },
   {
+    component: 'ShareButton',
+    referenced: [
+      'bsky.app',
+      'mastodonshare.com',
+      'news.ycombinator.com',
+      'www.linkedin.com',
+      'www.reddit.com',
+      'www.threads.net',
+      'x.com',
+    ],
+    note: 'Outbound share links built in the client. No scripts or frames, just navigation targets.',
+  },
+  {
     component: 'LinkLab',
     referenced: ['developer.mozilla.org'],
     note: 'A sample external href inside the lab component, never loaded. Referenced only, so it widens no CSP directive.',
