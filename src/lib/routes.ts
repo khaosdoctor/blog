@@ -130,7 +130,7 @@ export function postPaths(locale: Locale): GetStaticPaths {
     const seriesMap = buildSeriesMap(listed)
     return posts.map((post) => {
       const siblings = byFolder.get(folderOf(post)) ?? [post]
-      const source = siblings.find((entry) => entry.data.lang === SOURCE_LOCALE)
+      const source = siblings.find((entry) => !entry.data.machineOwnedTranslation && entry.id !== post.id)
       return {
         params: { slug: slugOf(post) },
         props: {
@@ -138,8 +138,8 @@ export function postPaths(locale: Locale): GetStaticPaths {
           post,
           series: getSeriesNavigation(post, seriesMap),
           // A machine-translated page links back to what it was translated
-          // from, which is the source-language sibling and never itself.
-          sourcePath: source === undefined || source.id === post.id ? null : urlOf(source),
+          // from: the sibling that is not itself machine-translated.
+          sourcePath: source === undefined ? null : urlOf(source),
           alternates: siblings.map((entry) => ({ lang: entry.data.lang, path: urlOf(entry) })),
         },
       }

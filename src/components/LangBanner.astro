@@ -22,7 +22,7 @@ suggestFixUrl.searchParams.set('body', 'Suggest a translation fix for this page'
   <p>
     {t(lang, 'machineTranslated')}
     {' '}
-    <a href={originalHref}>{t(lang, 'readOriginal')}</a>
+    <a href={originalHref} class="read-original">{t(lang, 'readOriginal')}</a>
     {' / '}
     <a href={suggestFixUrl.href}>{t(lang, 'suggestFix')}</a>
   </p>
@@ -53,3 +53,14 @@ suggestFixUrl.searchParams.set('body', 'Suggest a translation fix for this page'
     font-weight: 500;
   }
 </style>
+
+<script>
+  import { asLocale } from '../i18n/ui'
+  import { writeStorage } from '../lib/storage'
+
+  document.querySelector('.lang-banner .read-original')?.addEventListener('click', (e) => {
+    const href = (e.currentTarget as HTMLAnchorElement).pathname
+    const segment = href.split('/')[1] ?? ''
+    writeStorage('lang', asLocale(segment))
+  })
+</script>
