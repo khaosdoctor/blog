@@ -11,6 +11,7 @@ seoDescription: "Understand how one of the most interesting TypeScript features 
 slug: "auto-accessors-in-typescript"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 TypeScript has a bunch of really interesting features that few people know about, one of them is the use of [auto-accessors in classes](https://devblogs.microsoft.com/typescript/announcing-typescript-4-9/#auto-accessors-in-classes).

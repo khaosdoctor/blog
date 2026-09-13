@@ -11,6 +11,7 @@ seoDescription: "Using only passwords or keys is no longer secure. We need to ta
 slug: "applying-two-factor-authentication-to-ssh"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 We're already very used to SSH for logging into virtual machines, like we did in our [post where we created a VPN](/criando-uma-vpn/). But we know SSH accepts several levels of security when it comes to local access.

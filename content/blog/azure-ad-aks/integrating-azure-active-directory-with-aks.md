@@ -9,6 +9,7 @@ description: "Let's learn how to keep your cluster even more secure with the Azu
 slug: "integrating-azure-active-directory-with-aks"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 We've already gone through articles on [how to create users](/criando-e-gerenciando-usuarios-no-kubernetes/) and also how to assign [permissions to these users using RBAC](/dando-permissoes-a-usuarios-com-kubernetes/). But using Kubernetes to handle user management, while simple, isn't very practical precisely because of the distributed nature of clusters.

@@ -9,6 +9,7 @@ description: "Ever imagined having a different environment for every feature you
 slug: "creating-dynamic-test-environments-with-github-actions"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 How to optimize a test pipeline so teams don't run into concurrency problems while testing their features and modules is a recurring subject in several topics I've covered both in the past and recently.

@@ -10,6 +10,7 @@ seoDescription: "Helm has amazing tooling, but chart storage has always been a p
 slug: "storing-your-helm-charts-in-azure-container-registry"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 One of the big advantages of understanding how the [container ecosystem](/oci-cri-docker-ecossistema-de-containers/) works is that we can figure out when the same standard can be used for several different specifications.

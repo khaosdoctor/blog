@@ -10,6 +10,7 @@ seoTitle: "How to write tests with the Node.js Test Runner"
 slug: "getting-started-with-the-node-js-test-runner"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 I've been talking a lot about the Test Runner in a bunch of places (including [here on the blog](/node-test-runner/)), and I recently took part in a really cool podcast with Ryan talking more about this tool that showed up not long ago and has already won everyone's heart.

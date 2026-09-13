@@ -9,6 +9,7 @@ description: "Let's explore the history of computing inside our own history! To 
 slug: "backlog-1-the-first-pc-in-history"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Hello and welcome to another edition of **Backlog!** The newsletter where I distill everything I'd like to say about topics I find really interesting!

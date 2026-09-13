@@ -9,6 +9,7 @@ description: "A personal story about almost giving up and getting a fresh start.
 slug: "backlog-0-a-rant"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Hi!

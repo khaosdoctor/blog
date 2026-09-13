@@ -9,6 +9,7 @@ description: "Learn what Docker is and what Kubernetes is in a simple and quick 
 slug: "learn-kubernetes-on-aks"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Hey folks! Once again I'm with the great Wesley Willians to talk about Kubernetes and containers! In this live stream we talked about what Kubernetes is, how it works on Azure these days, and we had practical examples of how we can run our applications with the container services Azure offers!

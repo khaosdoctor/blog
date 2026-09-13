@@ -9,6 +9,7 @@ description: "Learn how to scale your Kubernetes applications based on HTTP requ
 slug: "introducing-the-keda-http-add-on"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 One of the things that makes me even happier about working with open source is when we can turn projects into reality and help a lot of people with what we set out to do!

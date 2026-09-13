@@ -10,6 +10,7 @@ seoTitle: "Working hard won't get you that far"
 slug: "backlog-2-hard-work-wont-take-you-that-far"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 What if I told you that success is pure luck? That the month you were born in might have made the difference between you being super rich or not? In this edition, we're going to discuss why **success is pure luck, or almost...**

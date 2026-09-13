@@ -9,6 +9,7 @@ description: "After almost 11 years in this career, I decided to write a bit abo
 slug: "5-hardest-things-in-computer-science"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 There's a super famous quote in the computing world that goes like this:

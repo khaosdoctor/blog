@@ -9,6 +9,7 @@ description: "No more grouping objects and keys by hand or reaching for external
 slug: "array-groupby-stage-3"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Ever since I started programming, I've always found myself in situations where I needed to use a simple function that, at the same time, didn't exist in the languages I was working with.[^n1]

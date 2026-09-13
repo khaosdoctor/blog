@@ -10,6 +10,7 @@ seoDescription: "One of the biggest problems we have in TypeScript projects is s
 slug: "sharing-types-with-typescript"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 When we talk about TypeScript, we automatically get two kinds of reactions: the person who loves it and wants to use it for everything, like me, and the person who doesn't like it for a number of reasons.

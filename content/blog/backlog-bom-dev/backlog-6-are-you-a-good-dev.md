@@ -10,6 +10,7 @@ seoTitle: "Can you measure efficiency in tech?"
 slug: "backlog-6-are-you-a-good-dev"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Another day, another backlog out the door! Today I want to bring something different: it's not about history, and not directly about development either, but about devs in general. Let's talk about the **act of doing engineering** and the _software engineering profession as a whole_.

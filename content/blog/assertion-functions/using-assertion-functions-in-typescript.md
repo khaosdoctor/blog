@@ -9,6 +9,7 @@ description: "Learn how to use one of the most important and yet least known fea
 slug: "using-assertion-functions-in-typescript"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Recently I saw some folks posting a "new thing":

@@ -9,6 +9,7 @@ description: "December 4th, 1995 was a special day because it was the release of
 slug: "backlog-3-29-years-of-javascript"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 December 4th, 1995 is a very special day. Not only because it's the year I was born, but also because it was the release of the language that, today, everyone loves to hate! **JavaScript**.

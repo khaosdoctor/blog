@@ -13,6 +13,7 @@ seoTitle: "Everything I learned about Vim after 6 months of continuous use"
 slug: "backlog-8-my-journey-with-vim-what-changed-in-6-months"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 About 6 months ago I decided it was time to drop the fussiness, leave behind my long-time editor (VSCode) and start using this famous **Vim** everyone talks about. When I finished configuring it and was happy with my initial progress, I wrote [this article](/instalando-e-configurando-o-neovim/). In it, I documented most of my journey through the installation and my first impressions of Vim, but I didn't want to go too deep into actually using it because I hadn't used the editor long enough to have opinions (or statistics) about it.

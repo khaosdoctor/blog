@@ -9,6 +9,7 @@ description: "What if I told you the first programming language came out of a lo
 slug: "backlog-4-first-programming-language"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 > This edition of _Backlog_ is special because it's the first (and probably the only one for years) to be published on Christmas. Consider this email my gift to you, who follows this project that means so much to me. Thank you so much for the support 💙

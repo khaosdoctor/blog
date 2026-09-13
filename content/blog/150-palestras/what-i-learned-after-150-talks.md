@@ -9,6 +9,7 @@ description: "I've been creating content for 6 years now and I want to show you 
 slug: "what-i-learned-after-150-talks"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 ![](https://www.youtube.com/watch?v=FrEavuadZP0)

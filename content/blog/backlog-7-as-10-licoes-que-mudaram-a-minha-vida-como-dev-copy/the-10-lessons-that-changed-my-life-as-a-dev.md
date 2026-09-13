@@ -10,6 +10,7 @@ seoTitle: "The lessons that changed my life as a dev"
 slug: "the-10-lessons-that-changed-my-life-as-a-dev"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Another day, another backlog! Today I'm bringing something different: the 10 most important lessons I learned in 13 years as a dev.

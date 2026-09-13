@@ -11,6 +11,7 @@ seoDescription: "How about configuring your server so it never needs your input 
 slug: "automatic-os-updates-unattended-upgrades"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 When we're creating virtual machines, one of the biggest problems we have is keeping our operating systems up to date and free of bugs and security flaws.

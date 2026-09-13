@@ -10,6 +10,7 @@ seoDescription: "Learn everything about the new methods included in arrays in th
 slug: "everything-about-the-new-array-methods-in-javascript"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 Once again we're going to talk about the main news in JavaScript! This time we're going to talk about one of the coolest [proposals](https://github.com/tc39/proposal-change-array-by-copy) around right now. Today it's at stage 3, which means it's going to be live soon!

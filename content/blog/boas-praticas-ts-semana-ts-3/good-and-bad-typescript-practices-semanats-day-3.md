@@ -12,6 +12,7 @@ seoTitle: "TypeScript good and bad practices"
 slug: "good-and-bad-typescript-practices-semanats-day-3"
 machineOwnedTranslation: true
 draft: false
+heroImage: "./cover-en.png"
 ---
 
 ---
