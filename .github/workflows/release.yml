@@ -6,8 +6,8 @@ name: Release
 #
 # feat -> minor, fix -> patch, BREAKING CHANGE / ! -> major.
 # Commits that don't match (chore, docs, refactor, perf, ci, etc.) are skipped.
-# Only commits touching blog source (src/, public/, scripts/,
-# astro.config.mjs, package.json, tsconfig.json) count for a release.
+# Only commits touching user-facing source (src/, public/) count for a
+# release.
 
 on:
   push:
@@ -65,7 +65,7 @@ jobs:
 
             # Only commits touching blog source count for a release
             changed=$(git diff-tree --no-commit-id --name-only -r "$hash")
-            if ! echo "$changed" | grep -qE '^(src/|public/|scripts/|astro\.config\.mjs|package\.json|tsconfig\.json)'; then
+            if ! echo "$changed" | grep -qE '^(src/|public/)'; then
               continue
             fi
 
