@@ -46,8 +46,6 @@ const byline = formatCoverByline(pubDate, lang, authorName)
     aspect-ratio: var(--cover-span) / 630;
     width: 100%;
     margin-block-end: 2.5rem;
-    overflow: hidden;
-    /* `n * (100cqw / var(--cover-span))` is SVG unit n at every viewport, so the overlay below is written in the card's own coordinates. */
     container-type: inline-size;
   }
 
@@ -65,6 +63,10 @@ const byline = formatCoverByline(pubDate, lang, authorName)
     .cover-hero-meta {
       margin-block-start: 0.75rem;
     }
+  }
+
+  .cover-hero-canvas {
+    overflow: hidden;
   }
 
   .cover-hero-canvas :global(svg) {

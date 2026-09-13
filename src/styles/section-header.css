@@ -12,6 +12,12 @@ main h1::after {
   mask-image: linear-gradient(to right, #000 0 55%, transparent 100%);
 }
 
+@media (max-width: 47.99rem) {
+  main h1::after {
+    display: none;
+  }
+}
+
 .page-count {
   color: var(--muted);
   font-size: 0.5em;

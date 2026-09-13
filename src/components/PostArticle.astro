@@ -8,6 +8,7 @@ import Authors from './Authors.astro'
 import CoverHero from './CoverHero.astro'
 import ReadingTime from './ReadingTime.astro'
 import SeriesToc from './SeriesToc.astro'
+import ShareButton from './ShareButton.astro'
 
 interface Props {
   post: Post
@@ -37,7 +38,7 @@ const listed = !post.data.noindex
     authorName={authorName}
   />
   <h1>{post.data.title}</h1>
-  <p class="meta">
+  <div class="meta">
     <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
     <span aria-hidden="true">·</span>
     <Fragment>
@@ -65,7 +66,9 @@ const listed = !post.data.noindex
         </>
       )
     }
-  </p>
+    <span aria-hidden="true">·</span>
+    <ShareButton locale={locale} />
+  </div>
   <Authors authors={post.data.authors} locale={locale} />
   <slot name="banner" />
   {post.data.series && <SeriesToc series={post.data.series} current={post.id} locale={locale} />}
@@ -103,6 +106,9 @@ const listed = !post.data.noindex
       </ul>
     )
   }
+  <div class="post-share">
+    <ShareButton locale={locale} class="share-bottom" />
+  </div>
   {
     series !== null && (
       <nav class="series-nav" aria-label={t(locale, 'seriesNav')}>
@@ -139,6 +145,14 @@ const listed = !post.data.noindex
     border-inline-start: 3px solid var(--accent);
     background: color-mix(in oklab, var(--accent) 8%, transparent);
     font-size: var(--text-small);
+  }
+
+  .post-share {
+    display: flex;
+    justify-content: flex-end;
+    margin-block-start: 2rem;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--rule);
   }
 
   .series-nav {
