@@ -102,7 +102,7 @@ function mdAsVitePlugin() {
         mdxPlugin.resolveId.handler = async function (source, importer, options) {
           if (importer?.endsWith('.md') || importer?.endsWith('.mdx')) {
             let resolved = await this.resolve(source, importer, options)
-            if (!resolved) resolved = await this.resolve('./' + source, importer, options)
+            if (!resolved) resolved = await this.resolve(`./${source}`, importer, options)
             return resolved
           }
           return originalResolveId.call(this, source, importer, options)

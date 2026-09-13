@@ -235,16 +235,6 @@ function makeTrigger(ref, asideId) {
   }
 }
 
-/** Flattens an element's text content, the way `ref` (an `<a
- * data-footnote-ref>` whose only child is the counter GFM assigned it, see
- * mdast-util-to-hast's footnote-reference handler) needs to be read as a
- * plain string. */
-function textContent(node) {
-  if (node.type === 'text') return node.value
-  if (!Array.isArray(node.children)) return ''
-  return node.children.map(textContent).join('')
-}
-
 /** Deep-clones the footnote body, drops the backref arrow (meaningless in
  * the margin) and the whitespace it leaves behind, and drops every `id`
  * (a straight copy would duplicate one, which is invalid regardless of
