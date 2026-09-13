@@ -4,13 +4,14 @@
  * 3D"), rasterised locally with sharp. No network call and no external
  * service.
  *
- *   node scripts/cover.ts <slug>
+ *   node scripts/cover.ts <slug>     # one post
+ *   node scripts/cover.ts            # every post missing a cover
  *
  * Colour, seed and the generated solid all come from `hashSlug(slug)`
  * (src/lib/cover.ts), never `Math.random()`, so the same post always draws
  * the same cover and the social-card cache does not break on every build.
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import { asLocale } from '../src/i18n/locales.ts'
@@ -26,49 +27,94 @@ function fail(message: string): never {
   process.exit(1)
 }
 
-const slug = process.argv[2] ?? fail('Usage: node scripts/cover.ts <slug>')
+async function generateCover(slug: string): Promise<boolean> {
+  const dir = join(SOURCE_DIR, slug)
+  const postFile = postIndex(dir)
+  if (!postFile) return false
 
-heading(`cover: making the cover for ${slug}`)
+  const raw = readFileSync(postFile, 'utf8')
+  const frontmatter = frontmatterOf(raw)
 
-const dir = join(SOURCE_DIR, slug)
-const postFile = postIndex(dir) ?? fail(`No post at ${dir}.`)
+  if (/^heroImage:/m.test(frontmatter)) return false
 
-const raw = readFileSync(postFile, 'utf8')
-const frontmatter = frontmatterOf(raw)
-const title = field(frontmatter, 'title') ?? fail(`${postFile} has no title in its frontmatter.`)
-const category = field(frontmatter, 'category') ?? ''
-const lang = asLocale(field(frontmatter, 'lang'))
-const pubDateRaw = field(frontmatter, 'pubDate') ?? fail(`${postFile} has no pubDate in its frontmatter.`)
-const pubDate = new Date(pubDateRaw)
+  const title = field(frontmatter, 'title')
+  if (!title) return false
+  const category = field(frontmatter, 'category') ?? ''
+  const lang = asLocale(field(frontmatter, 'lang'))
+  const pubDateRaw = field(frontmatter, 'pubDate')
+  if (!pubDateRaw) return false
+  const pubDate = new Date(pubDateRaw)
+  const draft = field(frontmatter, 'draft')
+  if (draft === 'true') return false
+  const noindex = field(frontmatter, 'noindex')
+  if (noindex === 'true') return false
 
-// No post sets `authors` today (a plain frontmatter line reader like `field`
-// cannot follow a YAML list safely), so this reads the site's own
-// default the same way Authors.astro does when a post is silent about it.
-const [author] = parseAuthors(undefined)
-const byline = formatCoverByline(pubDate, lang, author.name)
+  const [author] = parseAuthors(undefined)
+  const byline = formatCoverByline(pubDate, lang, author.name)
+  const readingMinutes = estimateReadingTime(raw.replace(/^---\n[\s\S]*?\n---/, ''))
 
-// The card's meta line carries the reading time, and this script has no
-// render() to read the exact remark-computed number off (src/plugins/
-// remark-reading-time.mjs runs inside Astro). The regex estimate every list
-// page already shows is the one available here, so an MDX-heavy post's
-// og:image can read a minute off its own page. Same trade PostList makes, and
-// the same reason.
-const readingMinutes = estimateReadingTime(raw.replace(/^---\n[\s\S]*?\n---/, ''))
+  const svg = buildCoverSvg({ slug, title, category, byline, readingMinutes })
+  const png = await sharp(Buffer.from(svg)).png().toBuffer()
 
-const svg = buildCoverSvg({ slug, title, category, byline, readingMinutes })
-const png = await sharp(Buffer.from(svg)).png().toBuffer()
+  const target = join(dir, 'cover.png')
+  writeFileSync(target, png)
 
-const target = join(dir, 'cover.png')
-writeFileSync(target, png)
-ok(`wrote ${target}`)
-
-if (/^heroImage:/m.test(frontmatter)) {
-  console.log(`${postFile} already sets heroImage, left alone`)
-  process.exit(0)
+  writeFileSync(
+    postFile,
+    raw.replace(/^---\n([\s\S]*?)\n---/, (_, fm: string) => `---\n${fm}\nheroImage: "./cover.png"\n---`),
+  )
+  ok(`${slug}: wrote cover and set heroImage`)
+  return true
 }
 
-writeFileSync(
-  postFile,
-  raw.replace(/^---\n([\s\S]*?)\n---/, (_, fm: string) => `---\n${fm}\nheroImage: "./cover.png"\n---`),
-)
-ok('set heroImage: "./cover.png"')
+const slug = process.argv[2]
+
+if (slug) {
+  heading(`cover: making the cover for ${slug}`)
+  const dir = join(SOURCE_DIR, slug)
+  if (!postIndex(dir)) fail(`No post at ${dir}.`)
+  const raw = readFileSync(postIndex(dir)!, 'utf8')
+  const frontmatter = frontmatterOf(raw)
+  const title = field(frontmatter, 'title') ?? fail(`${postIndex(dir)} has no title in its frontmatter.`)
+  const category = field(frontmatter, 'category') ?? ''
+  const lang = asLocale(field(frontmatter, 'lang'))
+  const pubDateRaw = field(frontmatter, 'pubDate') ?? fail(`${postIndex(dir)} has no pubDate in its frontmatter.`)
+  const pubDate = new Date(pubDateRaw)
+
+  const [author] = parseAuthors(undefined)
+  const byline = formatCoverByline(pubDate, lang, author.name)
+  const readingMinutes = estimateReadingTime(raw.replace(/^---\n[\s\S]*?\n---/, ''))
+
+  const svg = buildCoverSvg({ slug, title, category, byline, readingMinutes })
+  const png = await sharp(Buffer.from(svg)).png().toBuffer()
+
+  const target = join(dir, 'cover.png')
+  writeFileSync(target, png)
+  ok(`wrote ${target}`)
+
+  if (/^heroImage:/m.test(frontmatter)) {
+    console.log(`${postIndex(dir)} already sets heroImage, left alone`)
+  } else {
+    writeFileSync(
+      postIndex(dir)!,
+      raw.replace(/^---\n([\s\S]*?)\n---/, (_, fm: string) => `---\n${fm}\nheroImage: "./cover.png"\n---`),
+    )
+    ok('set heroImage: "./cover.png"')
+  }
+} else {
+  heading('cover: generating missing covers')
+  const folders = readdirSync(SOURCE_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+
+  let generated = 0
+  for (const folder of folders) {
+    if (await generateCover(folder)) generated++
+  }
+
+  if (generated === 0) {
+    ok('all posts have covers')
+  } else {
+    ok(`generated ${generated} cover${generated === 1 ? '' : 's'}`)
+  }
+}

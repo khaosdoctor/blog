@@ -334,14 +334,14 @@ function yamlString(value: string): string {
 
 /**
  * Builds the translation's frontmatter from scratch rather than patching the
- * source's: the field set is deliberately smaller (no heroImage, no
- * translationOf, no seriesName, no visibility, no canonicalUrl), so starting
- * clean is simpler than subtracting keys out of a copy.
+ * source's: the field set is deliberately smaller (no translationOf, no
+ * seriesName, no visibility, no canonicalUrl), so starting clean is simpler
+ * than subtracting keys out of a copy.
  */
 function buildFrontmatter(original: string, fields: Map<string, string>, locale: Locale, slug: string): string {
   const lines: string[] = [`title: ${yamlString(fields.get('title') ?? '')}`]
 
-  for (const key of ['pubDate', 'updatedDate', 'category', 'tags', 'series', 'seriesOrder']) {
+  for (const key of ['pubDate', 'updatedDate', 'category', 'tags', 'series', 'seriesOrder', 'heroImage', 'heroImageAlt']) {
     const line = frontmatterLine(original, key)
     if (line !== null) lines.push(line)
   }
