@@ -1,119 +1,119 @@
 {
   "1-meetrybe-arquitetura-de-codigo": {
-    "sourceHash": "47d81600d21e07f6",
-    "translatedAt": "2026-08-17T22:56:12.514Z"
+    "sourceHash": "2f8ea9c930bc8df1",
+    "translatedAt": "2026-09-13T00:59:53.834Z"
   },
   "150-palestras": {
-    "sourceHash": "18e60886f237ad0b",
-    "translatedAt": "2026-08-17T22:56:12.515Z"
+    "sourceHash": "e41c3145bb57b243",
+    "translatedAt": "2026-09-13T01:00:02.736Z"
   },
   "5-coisas-dificeis-computacao": {
-    "sourceHash": "356fd1e4ff2ece05",
-    "translatedAt": "2026-08-28T00:57:52.340Z"
+    "sourceHash": "7a55f12acb78034f",
+    "translatedAt": "2026-09-13T01:01:26.221Z"
   },
   "5-dicas-de-cfp": {
-    "sourceHash": "b9c85acd14c5154f",
-    "translatedAt": "2026-08-17T22:56:12.519Z"
+    "sourceHash": "819df8771f6f938d",
+    "translatedAt": "2026-09-13T01:01:34.453Z"
   },
   "acessores-automaticos-com-typescript": {
-    "sourceHash": "d14987a44c521c6c",
-    "translatedAt": "2026-08-28T01:05:54.222Z"
+    "sourceHash": "52946df45e021d9c",
+    "translatedAt": "2026-09-13T01:01:46.992Z"
   },
   "ambientes-dinamicos-helm-actions": {
-    "sourceHash": "aaa36c14c8cab3c8",
-    "translatedAt": "2026-08-28T01:33:26.907Z"
+    "sourceHash": "5615554f257af7f7",
+    "translatedAt": "2026-09-13T01:03:28.495Z"
   },
   "aplicando-two-factor-authentication-no-ssh": {
-    "sourceHash": "06b10405f411a46b",
-    "translatedAt": "2026-08-28T01:00:34.972Z"
+    "sourceHash": "902d74e3604dd5fe",
+    "translatedAt": "2026-09-13T01:04:39.410Z"
   },
   "aprenda-kubernetes-no-aks": {
-    "sourceHash": "ae69f2a5436dd93a",
-    "translatedAt": "2026-08-17T22:56:12.524Z"
+    "sourceHash": "0eba1e2186169926",
+    "translatedAt": "2026-09-13T01:04:39.410Z"
   },
   "apresentando-o-keda-http-add-on": {
-    "sourceHash": "4d0cb7db6bc1d417",
-    "translatedAt": "2026-08-17T22:56:12.525Z"
+    "sourceHash": "bcf9a4d5acf69d1f",
+    "translatedAt": "2026-09-13T01:04:39.411Z"
   },
   "armazenando-seus-helm-charts-no-azure-container-registry": {
-    "sourceHash": "38845b08437b8d32",
-    "translatedAt": "2026-08-17T22:56:12.527Z"
+    "sourceHash": "3161d3f2e9a690e7",
+    "translatedAt": "2026-09-13T01:04:39.411Z"
   },
   "array-es13": {
-    "sourceHash": "dee2a3856839c982",
-    "translatedAt": "2026-08-28T01:06:01.974Z"
+    "sourceHash": "85d73758212e8b37",
+    "translatedAt": "2026-09-13T01:05:10.861Z"
   },
   "array-groupby-stage-3": {
-    "sourceHash": "7dc9f582527c7495",
-    "translatedAt": "2026-08-28T01:06:16.106Z"
+    "sourceHash": "c2e9dae4751ea736",
+    "translatedAt": "2026-09-13T01:05:10.862Z"
   },
   "assertion-functions": {
-    "sourceHash": "7f2a9012543da96c",
-    "translatedAt": "2026-08-28T01:05:57.002Z"
+    "sourceHash": "b54c21ec888b09c1",
+    "translatedAt": "2026-09-13T01:05:10.862Z"
   },
   "async-iterators-js": {
     "sourceHash": "3df476d546225525",
     "translatedAt": "2026-08-28T01:33:56.436Z"
   },
   "atualizacao-automatica-de-so-com-unattended-upgrades": {
-    "sourceHash": "2d4a3ea9d47f7be2",
-    "translatedAt": "2026-08-17T22:56:12.537Z"
+    "sourceHash": "f9b02f44b15a4cfd",
+    "translatedAt": "2026-09-13T01:05:10.862Z"
   },
   "azure-ad-aks": {
-    "sourceHash": "13425e29bb9a7b3e",
-    "translatedAt": "2026-08-28T01:08:58.978Z"
+    "sourceHash": "9f1a5d959ecc754e",
+    "translatedAt": "2026-09-13T01:06:10.787Z"
   },
   "backlog-0": {
-    "sourceHash": "2e0fe99605aca2ce",
-    "translatedAt": "2026-08-28T01:09:01.241Z"
+    "sourceHash": "b443882d3f959928",
+    "translatedAt": "2026-09-13T01:06:10.787Z"
   },
   "backlog-1-o-primeiro-pc-de-todos": {
-    "sourceHash": "cd788d21ff437c62",
-    "translatedAt": "2026-08-28T01:27:52.336Z"
+    "sourceHash": "a145844cf39fc9e0",
+    "translatedAt": "2026-09-13T01:06:10.788Z"
   },
   "backlog-2": {
-    "sourceHash": "d757526785e8868e",
-    "translatedAt": "2026-08-28T01:03:14.411Z"
+    "sourceHash": "9b369f25bced25ef",
+    "translatedAt": "2026-09-13T01:06:10.788Z"
   },
   "backlog-3-29-anos-de-javascript": {
-    "sourceHash": "1fb3478f6b8b257e",
-    "translatedAt": "2026-08-28T01:28:21.292Z"
+    "sourceHash": "2f0334c28eb65bac",
+    "translatedAt": "2026-09-13T01:07:33.740Z"
   },
   "backlog-5-o-show-da-bolha": {
     "sourceHash": "20c15fdf2b42c897",
     "translatedAt": "2026-08-31T14:58:14.568Z"
   },
   "backlog-7-as-10-licoes-que-mudaram-a-minha-vida-como-dev-copy": {
-    "sourceHash": "3997d5f8f280344b",
-    "translatedAt": "2026-08-17T22:56:12.567Z"
+    "sourceHash": "d9e035a2deb31e78",
+    "translatedAt": "2026-09-13T01:07:33.740Z"
   },
   "backlog-bom-dev": {
-    "sourceHash": "145884fff14c374b",
-    "translatedAt": "2026-08-28T01:09:04.884Z"
+    "sourceHash": "61c67f7c0736dc45",
+    "translatedAt": "2026-09-13T01:07:33.741Z"
   },
   "backlog-primeira-linguagem": {
-    "sourceHash": "811ae1f9f23dc09d",
-    "translatedAt": "2026-08-28T01:24:27.771Z"
+    "sourceHash": "78a4a3747627b02f",
+    "translatedAt": "2026-09-13T01:07:33.741Z"
   },
   "backlog-vim": {
-    "sourceHash": "f6bc5489221ab033",
-    "translatedAt": "2026-08-28T01:28:19.176Z"
+    "sourceHash": "74417483a578a1da",
+    "translatedAt": "2026-09-13T01:09:15.504Z"
   },
   "boas-praticas-em-projetos-harperdb-com-typescript": {
     "sourceHash": "56c23e0df8129584",
     "translatedAt": "2026-08-28T01:38:39.187Z"
   },
   "boas-praticas-ts-semana-ts-3": {
-    "sourceHash": "6cde2560a747209d",
-    "translatedAt": "2026-08-28T01:38:24.319Z"
+    "sourceHash": "199b0ad4edd4ce14",
+    "translatedAt": "2026-09-13T01:09:15.505Z"
   },
   "comecando-com-o-node-js-test-runner": {
-    "sourceHash": "02564e7ae8dd445f",
-    "translatedAt": "2026-08-28T01:38:49.737Z"
+    "sourceHash": "8d45083eed63976d",
+    "translatedAt": "2026-09-13T01:09:15.505Z"
   },
   "compatilhamento-de-tipos-com-typescript": {
-    "sourceHash": "45562d531ad8b6c4",
-    "translatedAt": "2026-08-17T22:56:12.618Z"
+    "sourceHash": "9ddc54096b817c6a",
+    "translatedAt": "2026-09-13T01:09:15.505Z"
   },
   "conheca-o-github-container-registry": {
     "sourceHash": "a0494d54b7de0ee5",
@@ -692,7 +692,7 @@
     "translatedAt": "2026-08-17T22:56:13.036Z"
   },
   "novo-blog": {
-    "sourceHash": "ce70e2f81911272b",
-    "translatedAt": "2026-09-13T00:17:50.460Z"
+    "sourceHash": "020e94939e4e4159",
+    "translatedAt": "2026-09-13T01:24:46.266Z"
   }
 }
