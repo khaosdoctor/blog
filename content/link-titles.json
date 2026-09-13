@@ -1286,6 +1286,9 @@
   "https://en.wikipedia.org/wiki/Bram_Moolenaar": {
     "title": "Bram Moolenaar - Wikipedia"
   },
+  "https://en.wikipedia.org/wiki/Bézout%27s_identity": {
+    "title": "Bézout's identity - Wikipedia"
+  },
   "https://en.wikipedia.org/wiki/CAP_theorem": {
     "title": "CAP theorem - Wikipedia"
   },
@@ -1428,6 +1431,7 @@
   "https://en.wikipedia.org/wiki/Quality_of_service": {
     "title": "Quality of service - Wikipedia"
   },
+  "https://en.wikipedia.org/wiki/RSA_(cryptosystem": null,
   "https://en.wikipedia.org/wiki/RSA_\\(cryptosystem\\": null,
   "https://en.wikipedia.org/wiki/Raft_\\(algorithm\\": null,
   "https://en.wikipedia.org/wiki/Robert_Noyce": {
@@ -1457,9 +1461,6 @@
     "title": "Turing completeness - Wikipedia"
   },
   "https://en.wikipedia.org/wiki/Vi_\\(text_editor\\": null,
-  "https://en.wikipedia.org/wiki/WebSocket": {
-    "title": "WebSocket - Wikipedia"
-  },
   "https://esbuild.github.io": {
     "title": "esbuild - An extremely fast bundler for the web"
   },
@@ -3928,6 +3929,10 @@
     "title": "Você é o profissional de TI que o mercado procura?",
     "description": "Antigamente a pergunta “Você programa em que?” poderia ser facilmente respondida com uma unica palavra. “Java”, “C”, “C++” costumavam ser as réplicas mais comuns a este tipo de pergunta, mas com o pas…"
   },
+  "https://www.linkedin.com/pulse/você-é-o-profissional-de-ti-que-mercado-procura-lucas-santos-2/": {
+    "title": "Você é o profissional de TI que o mercado procura?",
+    "description": "Antigamente a pergunta “Você programa em que?” poderia ser facilmente respondida com uma unica palavra. “Java”, “C”, “C++” costumavam ser as réplicas mais comuns a este tipo de pergunta, mas com o pas…"
+  },
   "https://www.meetup.com/Docker-Sao-Paulo/": {
     "title": "Docker São Paulo | Meetup",
     "description": "# 🚀 Bem-vindo ao Docker São Paulo!Seja muito bem-vindo ao **Docker São Paulo**, o Docker Community Group oficial da cidade! 🎉Nosso propósito é conectar a comunidade, compartilhar conhecimento e fort…",
@@ -4138,9 +4143,6 @@
     "title": "Lucas Santos",
     "description": "Que tal aprender tecnologia de forma divertida!? - Vídeos todas as quintas as 11h! Sou desenvolvedor de sistemas desde 2010 um grande fã da produção de conteúdo e do ensino aberto! Neste canal, você p…",
     "publisher": "YouTube"
-  },
-  "https://www.youtube.com/redirect?redir_token=QUFFLUhqa05peURIMk9MZkRPN2dKZVU5MmlGRnJ3QkxtQXxBQ3Jtc0tra1VSd1hHLWRpWkthYmpmY1JtRk83b3o3MUFLTUdPdF9lalA0QWdRSFFWdU9DMWRVYy1LZkZaNE1ELTA2ckNqM2hlSnlGUUVZdldFbDZiazdpS2lVM0p6c2pPVTBEbnR2WnpOM0dRYVRWVFJMUmpKcw%3D%3D&q=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fcardosoanacp%2F&v=3fmUp3PICLo&event=video_description": {
-    "title": "YouTube"
   },
   "https://www.youtube.com/redirect?redir_token=QUFFLUhqa05peURIMk9MZkRPN2dKZVU5MmlGRnJ3QkxtQXxBQ3Jtc0tra1VSd1hHLWRpWkthYmpmY1JtRk83b3o3MUFLTUdPdF9lalA0QWdRSFFWdU9DMWRVYy1LZkZaNE1OLTA2ckNqM2hlSnlGUUVZdldFbDZiazdpS2lVM0p6c2pPVTBEbnR2WnpOM0dRYVRWVFJMUmpKcw%3D%3D&q=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fcardosoanacp%2F&v=3fmUp3PICLo&event=video_description": {
     "title": "YouTube"
