@@ -119,6 +119,7 @@
   --text-base: calc(1.25rem * var(--font-scale));
   --leading: 1.53;
   --tracking-body: 0em;
+  --measure: 48.7rem;
 }
 
 /* Phone: the cover's side frame lines are cropped off-screen, so the text has

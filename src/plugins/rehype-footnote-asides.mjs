@@ -60,7 +60,7 @@ export function rehypeFootnoteAsides() {
     }
     if (definitions.size === 0) return
 
-    insertAsides(tree.children, definitions, new Set(), new Map())
+    insertAsides(tree.children, definitions, new Set(), { n: 0 })
   }
 }
 
@@ -116,13 +116,13 @@ function findListItems(node, out = []) {
  * (a footnote in a list item's own paragraph: both the `<p>` and the `<li>`
  * qualify, and the `<p>` should win since it is the closer match).
  */
-function insertAsides(children, definitions, handled, usedNumbers) {
+function insertAsides(children, definitions, handled, counter) {
   for (let i = 0; i < children.length; i++) {
     const node = children[i]
     if (node.type !== 'element') continue
 
     if (Array.isArray(node.children)) {
-      insertAsides(node.children, definitions, handled, usedNumbers)
+      insertAsides(node.children, definitions, handled, counter)
     }
 
     if (!BLOCK_TAGS.has(node.tagName)) continue
@@ -133,8 +133,9 @@ function insertAsides(children, definitions, handled, usedNumbers) {
 
     const asides = []
     for (const ref of refs) {
-      const aside = buildAside(ref, definitions, usedNumbers)
+      const aside = buildAside(ref, definitions, counter.n + 1)
       if (aside === null) continue
+      counter.n++
       makeTrigger(ref, aside.properties.id)
       asides.push(aside)
     }
@@ -163,7 +164,7 @@ function findFootnoteRefs(node, out = []) {
   return out
 }
 
-function buildAside(ref, definitions, usedNumbers) {
+function buildAside(ref, definitions, seqNumber) {
   const href = ref.properties?.href
   if (typeof href !== 'string' || !href.startsWith('#')) return null
 
@@ -174,15 +175,8 @@ function buildAside(ref, definitions, usedNumbers) {
 
   const clonedBody = cloneFootnoteBody(body)
   const title = parseTitleFromLabel(href.slice(1))
-  const labelNumber = parseLabelNumber(href.slice(1))
-  let displayNumber = textContent(ref).trim()
-
-  if (labelNumber) {
-    const count = usedNumbers.get(labelNumber) ?? 0
-    usedNumbers.set(labelNumber, count + 1)
-    displayNumber = count === 0 ? labelNumber : `${labelNumber}${String.fromCharCode(97 + count)}`
-    ref.children = [{ type: 'text', value: displayNumber }]
-  }
+  const displayNumber = String(seqNumber)
+  ref.children = [{ type: 'text', value: displayNumber }]
 
   const headChildren = [{ type: 'text', value: `[${displayNumber}]` }]
   if (title) {
@@ -289,19 +283,18 @@ function dropBackref(nodes) {
  *  Returns `null` when the label carries no title (plain `[^1]` or `[^n1]`). */
 function parseTitleFromLabel(id) {
   if (typeof id !== 'string') return null
-  const label = id.replace(/^user-content-fn-/, '')
+  let label
+  try {
+    label = decodeURIComponent(id.replace(/^user-content-fn-/, ''))
+  } catch {
+    label = id.replace(/^user-content-fn-/, '')
+  }
   const match = /^\d+-(.+)$/.exec(label)
   if (!match) return null
   return match[1]
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ')
-}
-
-function parseLabelNumber(id) {
-  if (typeof id !== 'string') return null
-  const label = id.replace(/^user-content-fn-/, '')
-  return /^(\d+)-/.exec(label)?.[1] ?? null
 }
 
 // mdast-util-to-hast (node_modules/mdast-util-to-hast/lib/{footer,handlers/

@@ -1,8 +1,5 @@
 .prose {
-  --post-accent-cover: light-dark(
-    color-mix(in oklab, var(--post-accent) 85%, black),
-    color-mix(in oklab, var(--post-accent) 95%, white)
-  );
+  --post-accent-cover: color-mix(in oklab, var(--post-accent) 90%, var(--fg));
   --em-bold-bg: var(--post-accent-cover);
   --em-bold-fg: var(--bg);
 }
@@ -29,4 +26,11 @@
 .prose em strong {
   color: var(--em-bold-fg);
   font-weight: bold;
+}
+
+.prose :is(h1, h2, h3, h4, h5, h6) strong em,
+.prose :is(h1, h2, h3, h4, h5, h6) em strong,
+.prose .callout-title strong em,
+.prose .callout-title em strong {
+  color: inherit;
 }

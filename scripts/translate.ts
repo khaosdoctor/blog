@@ -4,14 +4,13 @@
  * Every post is written in one language (`lang` in its frontmatter). This script
  * translates the ones that changed into the other locale and writes the result
  * into the SAME FOLDER as the source, named after its own slug:
- * content/blog/<folder>/index.mdx is the source, and
- * content/blog/<folder>/<translated-slug>.mdx is the translation. The folder is
+ * content/blog/<folder>/index.md (or .mdx for older posts) is the source, and
+ * content/blog/<folder>/<translated-slug>.md is the translation. The folder is
  * the pairing, there is no separate collection and no `translationOf` key.
  *
- * Output stays .mdx, same as the source: the figures, embeds and wikilink
- * markers on this site are produced by remark plugins that emit MDX nodes, and
- * a plain .md translation would silently lose every one of them. The model is
- * told never to write an `import`, an `export`, or a `{ }` expression, and
+ * Output is .md: md-as-mdx.mjs routes content .md files through the MDX
+ * compiler, so the remark chain works identically. The model is told never to
+ * write an `import`, an `export`, or a `{ }` expression, and
  * scripts/check-translations.ts rejects the output if it did anyway before it
  * is ever committed.
  *
@@ -47,7 +46,7 @@
 
 import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type Anthropic from '@anthropic-ai/sdk'
 import { asLocale, type Locale } from '../src/i18n/locales.ts'
@@ -134,7 +133,8 @@ function splitFrontmatter(raw: string): { frontmatter: string; body: string } {
 
 /** Copies a frontmatter key through byte for byte, whatever shape its value has. */
 function frontmatterLine(frontmatter: string, key: string): string | null {
-  const match = new RegExp(`^${key}:.*$`, 'm').exec(frontmatter)
+  const re = new RegExp(`^${key}:.*(?:\\n(?:[ \\t]+-[^\\n]*))*`, 'm')
+  const match = re.exec(frontmatter)
   return match === null ? null : match[0]
 }
 
@@ -165,7 +165,7 @@ function findExistingTranslation(postDir: string, locale: Locale): ExistingTrans
   return null
 }
 
-const SYSTEM_PROMPT = `You translate technical blog posts written in MDX. The post you are given is MDX; what you return is MDX too, but plain markdown, no imports and no { } expressions of any kind. You are given a post body and a few frontmatter strings, and you return the same content in the target language.
+const SYSTEM_PROMPT = `You translate technical blog posts written in markdown. The post may contain component tags (like <Video> or <LabDemo>) that were injected at build time; copy them through byte for byte. What you return is plain markdown, no imports and no { } expressions of any kind. You are given a post body and a few frontmatter strings, and you return the same content in the target language.
 
 Rules, in order of importance:
 
@@ -176,7 +176,7 @@ Rules, in order of importance:
 5. Translate prose so it reads as if it had been written in the target language by the same author: an experienced software engineer writing for other engineers, direct and conversational, technically precise. Do not add, remove, explain or summarise anything. Do not soften opinions.
 6. Keep technical terms that the target audience uses in English in English (backend, deploy, feature, pull request, container). Translate everything else.
 7. Never use an em dash. Use a comma, parentheses, or two sentences.
-8. Write plain markdown only. Copy a component tag that is already in the post through byte for byte, and never invent a new one. Never write an "import" or an "export" line, and never write a { } expression of any kind, anywhere: the output is MDX and any of those would execute as code when the site builds, and the file is checked for them and rejected if it has any.
+8. Write plain markdown only. Copy a component tag that is already in the post through byte for byte, and never invent a new one. Never write an "import" or an "export" line, and never write a { } expression of any kind, anywhere: the file goes through the MDX compiler at build time and any of those would execute as code, and the file is checked for them and rejected if it has any.
 
 Return ONLY the translated content, with no preamble, no closing remark, and no code fence wrapping the whole thing.`
 
@@ -390,7 +390,14 @@ const sources = readdirSync(SOURCE_DIR, { withFileTypes: true })
   .map((slug) => ({ slug, file: sourceFile(slug) }))
   .filter((post): post is { slug: string; file: string } => post.file !== null)
 
-const changed: { slug: string; file: string; raw: string; sourceHash: string; existingSlug: string | null }[] = []
+const changed: {
+  slug: string
+  file: string
+  raw: string
+  sourceHash: string
+  existingSlug: string | null
+  existingFile: string | null
+}[] = []
 const overrides: string[] = []
 
 for (const post of sources) {
@@ -420,7 +427,14 @@ for (const post of sources) {
     if (entry?.sourceHash === sourceHash && !args.all) continue
   }
 
-  changed.push({ slug: post.slug, file: post.file, raw, sourceHash, existingSlug: existing?.slug ?? null })
+  changed.push({
+    slug: post.slug,
+    file: post.file,
+    raw,
+    sourceHash,
+    existingSlug: existing?.slug ?? null,
+    existingFile: existing?.file ?? null,
+  })
 }
 
 console.log(
@@ -479,9 +493,14 @@ for (const post of changed) {
   // file instead of renaming it out from under existing links.
   const slug = post.existingSlug ?? slugify(parsed.fields.get('title') ?? post.slug)
   const output = `---\n${buildFrontmatter(frontmatter, parsed.fields, args.locale, slug)}\n---\n\n${parsed.body}\n`
-  const target = join(SOURCE_DIR, post.slug, `${slug}.mdx`)
+  const target = join(SOURCE_DIR, post.slug, `${slug}.md`)
   mkdirSync(dirname(target), { recursive: true })
   writeFileSync(target, output)
+
+  // Clean up the old .mdx twin so two files don't claim the same language.
+  if (post.existingFile !== null && post.existingFile !== target && existsSync(post.existingFile)) {
+    unlinkSync(post.existingFile)
+  }
 
   cache[post.slug] = {
     sourceHash: post.sourceHash,

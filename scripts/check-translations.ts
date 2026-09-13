@@ -7,17 +7,14 @@
  * reviewer skimming a few hundred lines in a second language is exactly who
  * misses one added line.
  *
- * A translation now lives in the same folder as its source post, named after
- * its own slug: content/blog/<slug>/index.mdx is the source, and
- * content/blog/<slug>/<translated-slug>.mdx is the translation. The folder is
+ * A translation lives in the same folder as its source post, named after its
+ * own slug: content/blog/<slug>/index.md is the source, and
+ * content/blog/<slug>/<translated-slug>.md is the translation. The folder is
  * the pairing, so every non-index .md/.mdx file one level under content/blog
  * is a translation and gets scanned.
  *
  * Code fences are stripped before checking, because posts legitimately contain
  * script tags as examples.
- *
- * Translations are .mdx like everything else now, so the real protection is
- * this guard, not the extension.
  */
 import { readFileSync, statSync } from 'node:fs'
 import { MDX_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'

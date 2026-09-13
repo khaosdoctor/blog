@@ -88,13 +88,15 @@
   display: block;
   font-style: normal;
   font-size: 0.95rem;
+  font-weight: 500;
   line-height: 1.2;
   color: var(--fg);
 }
 
 .footnote-aside-title {
   font-style: italic;
-  color: #fff;
+  font-weight: 500;
+  color: var(--fg);
 }
 
 /* The heading rule from prose/headings.css, at a smaller dash. */
@@ -187,22 +189,24 @@
     font-size: 0.82rem;
     font-style: italic;
     line-height: 1.5;
-    color: color-mix(in srgb, var(--muted) 70%, transparent);
+    color: var(--muted);
+    opacity: 0.5;
     transition:
-      color 0.2s ease,
+      opacity 0.2s ease,
       border-color 0.2s ease;
-    border-inline-start: var(--border-card-edge) solid color-mix(in srgb, var(--fg) 70%, transparent);
-    border-block-start: var(--footnote-border-thin) double color-mix(in srgb, var(--fg) 70%, transparent);
-    border-inline-end: var(--footnote-border-thin) double color-mix(in srgb, var(--fg) 70%, transparent);
-    border-block-end: var(--footnote-border-thin) double color-mix(in srgb, var(--fg) 70%, transparent);
+    border-inline-start: var(--border-card-edge) solid var(--fg);
+    border-block-start: var(--footnote-border-thin) double var(--fg);
+    border-inline-end: var(--footnote-border-thin) double var(--fg);
+    border-block-end: var(--footnote-border-thin) double var(--fg);
   }
 
   .footnote-aside:hover {
-    color: var(--muted);
+    opacity: 0.9;
     border-color: var(--fg);
   }
 
   .footnote-aside.footnote-aside-active {
+    opacity: 1;
     color: var(--fg);
     border-color: var(--post-accent-cover);
     box-shadow: var(--code-shadow-offset) var(--code-shadow-offset) 0 var(--post-accent-cover);

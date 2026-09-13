@@ -16,6 +16,7 @@ import { lastModified, noindexPaths } from './src/lib/post-dates.ts'
 import { pluginTokenStyles } from './src/plugins/expressive-code-token-styles.mjs'
 import { mdAsMdx } from './src/plugins/md-as-mdx.mjs'
 import { mdxTransformCache } from './src/plugins/mdx-transform-cache.mjs'
+import { rehypeExternalLinks } from './src/plugins/rehype-external-links.mjs'
 import { rehypeFootnoteAsides } from './src/plugins/rehype-footnote-asides.mjs'
 import { rehypeHeadingAnchors } from './src/plugins/rehype-heading-anchors.mjs'
 import { rehypeMathCopy } from './src/plugins/rehype-math-copy.mjs'
@@ -144,6 +145,7 @@ export default defineConfig({
         rehypeHeadingIds,
         rehypeHeadingAnchors,
         rehypeFootnoteAsides,
+        rehypeExternalLinks,
       ],
     }),
   },
