@@ -1,19 +1,7 @@
 {
-  "javascript": {
-    "pt": "A linguagem mais usada no mundo, e a que eu mais escrevo e tenho experiência. Também é a que todo mundo ama odiar.",
-    "en": "The most used language in the world, and the one I know and write the most. Also the one everyone loves to hate."
-  },
-  "typescript": {
-    "pt": "Superset de JavaScript, minha especialização. Aqui falamos de tipos e muito mais!",
-    "en": "JavaScript with types, also my area of expertise within JS. Here we will talk about types and much more!"
-  },
-  "infra": {
-    "pt": "Containers, Kubernetes, deploy e essas coisas que a gente só percebe que quebraram no sábado a noite.",
-    "en": "Containers, Kubernetes, deployment, and the things that we only notice are broken on a Saturday evening."
-  },
-  "security": {
-    "pt": "Criptografia, autenticação e as maneiras criativas de perder (ou não) uma chave.",
-    "en": "Cryptography, authentication, and the creative ways to lose a key, or not."
+  "technology": {
+    "pt": "Desenvolvimento, segurança, infra, e essas coisas que eram coisa de nerd e agora são 'cool'",
+    "en": "Development, security, infra, and all those things that used to be nerdy but are now 'cool'."
   },
   "career": {
     "pt": "Carreira em engenharia, entrevistas, palestras e o que eu aprendi durante mais de uma década como dev.",
@@ -28,7 +16,23 @@
     "en": "About the blog itself. Writing about writing."
   },
   "ramblings": {
-      "pt": "O lugar onde eu deixo as vozes da minha cabeça falarem mais alto",
-      "en": "Where I let the microplastics in my brain talk louder than they should".
+    "pt": "O lugar onde eu deixo as vozes da minha cabeça falarem mais alto",
+    "en": "Where I let the microplastics in my brain talk louder than they should"
+  },
+  "electronics": {
+    "pt": "Sobre elétrica e eletrônica raiz. Aquela com componentes pequenininhos e coloridos em cima de placas verdes.",
+    "en": "Real electricity and electronics. The kind with tiny colorful components on green boards."
+  },
+  "science": {
+    "pt": "Física, biologia, sociologia, história e qualquer outro assunto que possa ser considerado uma matéria de escola",
+    "en": "Physics, biology, sociology, history, and any other subject that could pass as a school class."
+  },
+  "music": {
+    "pt": "Teoria musical, instrumentos, produção. Coisas que eu aprendi sendo um péssimo instrumentista",
+    "en": "Music theory, instruments, production. Things I learned being a terrible instrumentalist."
+  },
+  "diy": {
+    "pt": "Projetos manuais, impressão 3D, consertos, fazer seu próprio servidor de email e outras atrocidades.",
+    "en": "Hands-on projects, 3D printing, repairs, hosting your own email server, and other atrocities."
   }
 }
