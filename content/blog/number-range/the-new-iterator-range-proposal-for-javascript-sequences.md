@@ -1,16 +1,20 @@
 ---
-title: "What is the new number sequence proposal with Iterator.range in JavaScript"
+title: What is the new number sequence proposal with Iterator.range in JavaScript
 pubDate: 2023-02-16T11:00:08.000Z
 updatedDate: 2026-07-16T16:03:35.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "development", "typescript"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - development
+  - typescript
 lang: en
-description: "An API you never imagine you need until you do! Learn about sequences in JavaScript!"
-seoTitle: "Understand ranges in JavaScript with the new Number.range"
-slug: "the-new-iterator-range-proposal-for-javascript-sequences"
+description: An API you never imagine you need until you do! Learn about sequences in JavaScript!
+seoTitle: Understand ranges in JavaScript with the new Number.range
+slug: the-new-iterator-range-proposal-for-javascript-sequences
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Sometimes the simplest proposals are the ones that bring the most value to a project, and this one is no exception.

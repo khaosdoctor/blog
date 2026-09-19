@@ -1,15 +1,18 @@
 ---
-title: "\"JavaScript Will Be Completely Different in 2025\""
+title: '"JavaScript Will Be Completely Different in 2025"'
 pubDate: 2024-10-16T11:00:01.000Z
 updatedDate: 2026-07-16T17:50:52.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "development"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - development
 lang: en
-description: "\"JavaScript may change quite a bit in 2025, some very interesting proposals were approved, check them out!\""
-slug: "javascript-will-be-completely-different-in-2025"
+description: '"JavaScript may change quite a bit in 2025, some very interesting proposals were approved, check them out!"'
+slug: javascript-will-be-completely-different-in-2025
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Not long ago I made a series of [predictions for JS in 2025](/js-2025/), and I wasn't that far off from reality! TC39 met this week in Tokyo to discuss the proposals that would move forward in the next versions of JS, this was the 104th meeting of the committee since its creation.

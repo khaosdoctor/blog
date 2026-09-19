@@ -2,14 +2,15 @@
 title: "Backlog #1 - The first PC in history!"
 pubDate: 2024-11-14T11:00:54.000Z
 updatedDate: 2026-07-16T17:50:15.000Z
-category: "career"
-tags: ["backlog-newsletter"]
+category: career
+tags:
+  - backlog-newsletter
 lang: en
-description: "Let's explore the history of computing inside our own history! To start, what was the world's first personal computer?"
-slug: "backlog-1-the-first-pc-in-history"
+description: Let's explore the history of computing inside our own history! To start, what was the world's first personal computer?
+slug: backlog-1-the-first-pc-in-history
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Hello and welcome to another edition of **Backlog!** The newsletter where I distill everything I'd like to say about topics I find really interesting!

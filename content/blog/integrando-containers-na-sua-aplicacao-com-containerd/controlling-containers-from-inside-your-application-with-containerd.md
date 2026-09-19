@@ -1,15 +1,24 @@
 ---
-title: "Controlling containers from inside your application with ContainerD"
+title: Controlling containers from inside your application with ContainerD
 pubDate: 2021-02-04T14:00:00.000Z
 updatedDate: 2026-07-16T16:19:10.000Z
-category: "infra"
-tags: ["containerd", "containers", "docker", "oci", "cri", "golang", "devops", "kubernetes", "technology"]
+category: infra
+tags:
+  - containerd
+  - containers
+  - docker
+  - oci
+  - cri
+  - golang
+  - devops
+  - kubernetes
+  - technology
 lang: en
-description: "Ever thought of a Docker alternative? What about manipulating containers programmatically in your API? Let's integrate your app with the containers world!"
-slug: "controlling-containers-from-inside-your-application-with-containerd"
+description: Ever thought of a Docker alternative? What about manipulating containers programmatically in your API? Let's integrate your app with the containers world!
+slug: controlling-containers-from-inside-your-application-with-containerd
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 As we discussed in the [previous article](/oci-cri-docker-ecossistema-de-containers/), Kubernetes recently deprecated Docker, meaning we can't use Docker integration directly from inside a Pod unless we install it manually.

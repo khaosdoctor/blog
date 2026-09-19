@@ -1,16 +1,20 @@
 ---
-title: "What is Infer in TypeScript and What Does It Do?"
+title: What is Infer in TypeScript and What Does It Do?
 pubDate: 2022-04-18T14:00:00.000Z
 updatedDate: 2026-07-16T16:09:42.000Z
-category: "typescript"
-tags: ["typescript", "development", "javascript", "nodejs"]
+category: typescript
+tags:
+  - typescript
+  - development
+  - javascript
+  - nodejs
 lang: en
-description: "If you've written TypeScript code, you may not have seen the famous infer instruction yet. But believe me, one day it will appear and you'll know what it is!"
-seoDescription: "If you've written TypeScript code, you may not have seen the famous infer instruction yet. But one day it will appear and you'll know what it is!"
-slug: "typescript-infer-explained"
+description: If you've written TypeScript code, you may not have seen the famous infer instruction yet. But believe me, one day it will appear and you'll know what it is!
+seoDescription: If you've written TypeScript code, you may not have seen the famous infer instruction yet. But one day it will appear and you'll know what it is!
+slug: typescript-infer-explained
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 If you've already used TypeScript, you've probably heard of the `infer` keyword. It's not very common in everyday coding, but most advanced libraries will use `infer` at some point for some type of operation.

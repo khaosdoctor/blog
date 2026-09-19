@@ -1,17 +1,23 @@
 ---
-title: "A Deep Dive into Container Images - Part 3"
+title: A Deep Dive into Container Images - Part 3
 pubDate: 2020-08-14T17:34:25.000Z
 updatedDate: 2026-07-16T16:26:37.000Z
-category: "infra"
-tags: ["docker", "containers", "javascript", "development", "technology", "typescript"]
+category: infra
+tags:
+  - docker
+  - containers
+  - javascript
+  - development
+  - technology
+  - typescript
 series: container-images
 seriesOrder: 3
 lang: en
-description: "How to build a fast, lightweight, and efficient image for your application using a dynamic language like JavaScript?"
-slug: "a-deep-dive-into-container-images-part-3"
+description: How to build a fast, lightweight, and efficient image for your application using a dynamic language like JavaScript?
+slug: a-deep-dive-into-container-images-part-3
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In the [previous article](/um-mergulho-em-imagens-de-containers-parte-2/) we discussed how to create a Docker image the best way for languages considered static, like C or Go. In this article we will explore a bit more about creating images using **dynamic** languages, like Python or JavaScript.

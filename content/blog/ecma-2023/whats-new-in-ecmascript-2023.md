@@ -2,15 +2,20 @@
 title: "\"What's New in ECMAScript 2023?\""
 pubDate: 2023-05-04T10:00:18.000Z
 updatedDate: 2026-07-16T16:00:40.000Z
-category: "typescript"
-tags: ["ecmascript", "javascript", "typescript", "nodejs", "development"]
+category: typescript
+tags:
+  - ecmascript
+  - javascript
+  - typescript
+  - nodejs
+  - development
 lang: en
-description: "\"ECMAScript 2023 is officially finalized, and we already know which features will arrive in the new JavaScript specification\""
-seoDescription: "\"ECMAScript 2023 is officially finalized and we already know which features will come in the new JavaScript specification\""
-slug: "whats-new-in-ecmascript-2023"
+description: '"ECMAScript 2023 is officially finalized, and we already know which features will arrive in the new JavaScript specification"'
+seoDescription: '"ECMAScript 2023 is officially finalized and we already know which features will come in the new JavaScript specification"'
+slug: whats-new-in-ecmascript-2023
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Another year, another ECMAScript version. For those unfamiliar, ECMA is the primary specification on which JavaScript is based. It undergoes changes every year, with minor updates released throughout the months and larger changes over the years.

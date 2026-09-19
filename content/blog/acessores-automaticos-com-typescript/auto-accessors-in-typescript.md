@@ -1,17 +1,18 @@
 ---
-title: "Do you already know about auto-accessors in TypeScript?"
+title: Do you already know about auto-accessors in TypeScript?
 pubDate: 2024-03-20T11:00:23.000Z
 updatedDate: 2026-07-16T17:57:47.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 lang: en
-description: "Have you heard about auto-accessors? Do you know what this feature is? Then let's understand better how it works!"
-seoTitle: "Auto-accessors in TypeScript"
-seoDescription: "Understand how one of the most interesting TypeScript features that doesn't get used much works. Auto-accessors!"
-slug: "auto-accessors-in-typescript"
+description: Have you heard about auto-accessors? Do you know what this feature is? Then let's understand better how it works!
+seoTitle: Auto-accessors in TypeScript
+seoDescription: Understand how one of the most interesting TypeScript features that doesn't get used much works. Auto-accessors!
+slug: auto-accessors-in-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 TypeScript has a bunch of really interesting features that few people know about, one of them is the use of [auto-accessors in classes](https://devblogs.microsoft.com/typescript/announcing-typescript-4-9/#auto-accessors-in-classes).

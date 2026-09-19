@@ -1,15 +1,19 @@
 ---
-title: "What's New in TypeScript 5.3 - Beta!"
+title: What's New in TypeScript 5.3 - Beta!
 pubDate: 2023-11-01T21:21:53.000Z
 updatedDate: 2026-07-16T15:55:35.000Z
-category: "typescript"
-tags: ["typescript", "javascript", "nodejs", "deno"]
+category: typescript
+tags:
+  - typescript
+  - javascript
+  - nodejs
+  - deno
 lang: en
-description: "Let's understand all the new features of TypeScript 5.3 beta version!"
-slug: "typescript-5-3-beta-features"
+description: Let's understand all the new features of TypeScript 5.3 beta version!
+slug: typescript-5-3-beta-features
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 As usual, another TypeScript version is out and I'm here to tell you more about it! This time we'll even compare it with what I proposed in the [previous article](/ts-53-alpha/) when we talked about the alpha version!

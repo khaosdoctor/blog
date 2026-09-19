@@ -1,15 +1,16 @@
 ---
-title: "What is Corepack and how can you use it?"
+title: What is Corepack and how can you use it?
 pubDate: 2024-07-11T11:00:51.000Z
 updatedDate: 2026-07-16T17:55:13.000Z
-category: "javascript"
-tags: ["nodejs"]
+category: javascript
+tags:
+  - nodejs
 lang: en
-description: "Learn how to use Corepack, the tool causing controversy in the Node.js world"
-slug: "what-is-corepack-and-how-to-use-it"
+description: Learn how to use Corepack, the tool causing controversy in the Node.js world
+slug: what-is-corepack-and-how-to-use-it
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 If you've been following the [controversy](https://socket.dev/blog/node-community-debates-enabling-corepack-unbundling-npm) around Node.js and NPM in 2024, you probably already know what I'm going to talk about. But today, I want to show you what **Corepack** is, the tool that promises to end the war between Node package managers!

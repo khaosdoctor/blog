@@ -1,17 +1,27 @@
 ---
-title: "Making VSCode your only development environment with Docker and Kubernetes"
+title: Making VSCode your only development environment with Docker and Kubernetes
 pubDate: 2020-10-05T00:34:43.000Z
 updatedDate: 2026-07-16T16:22:55.000Z
-category: "infra"
-tags: ["kubernetes", "docker", "containers", "vscode", "azure", "cloud", "development", "technology", "video", "workshop"]
+category: infra
+tags:
+  - kubernetes
+  - docker
+  - containers
+  - vscode
+  - azure
+  - cloud
+  - development
+  - technology
+  - video
+  - workshop
 lang: en
-description: "Ever thought about never having to leave your favorite editor to develop native Kubernetes applications? What if I told you this is possible, and very easy?"
-seoTitle: "Making VSCode your only development environment"
-seoDescription: "Ever thought about never having to leave your favorite editor to develop native applications for Kubernetes? Discover new VSCode features!"
-slug: "making-vscode-your-only-dev-environment-docker-kubernetes"
+description: Ever thought about never having to leave your favorite editor to develop native Kubernetes applications? What if I told you this is possible, and very easy?
+seoTitle: Making VSCode your only development environment
+seoDescription: Ever thought about never having to leave your favorite editor to develop native applications for Kubernetes? Discover new VSCode features!
+slug: making-vscode-your-only-dev-environment-docker-kubernetes
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 On October 3rd, I participated in **BrazilJS.live()**, a completely online event organized by the well-known BrazilJS team!

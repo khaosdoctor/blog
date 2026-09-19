@@ -2,14 +2,15 @@
 title: "Types versus interfaces in 2024: which to use?"
 pubDate: 2024-04-10T11:00:35.000Z
 updatedDate: 2026-07-16T17:57:10.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 lang: en
-description: "What's the difference between types and interfaces in TypeScript? When to use one and the other?"
-slug: "types-versus-interfaces-in-typescript-2024"
+description: What's the difference between types and interfaces in TypeScript? When to use one and the other?
+slug: types-versus-interfaces-in-typescript-2024
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 That's the million-dollar question. I think that after "do I have to know JavaScript to learn TypeScript", this has been the question I've received most often: **"When should I use interfaces and when should I use types?"**

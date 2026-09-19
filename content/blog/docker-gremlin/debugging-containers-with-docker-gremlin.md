@@ -1,16 +1,20 @@
 ---
-title: "Debugging containers with Docker Gremlin"
+title: Debugging containers with Docker Gremlin
 pubDate: 2023-06-22T11:00:32.000Z
 updatedDate: 2026-07-16T15:59:53.000Z
-category: "infra"
-tags: ["docker", "containers", "development", "devops"]
+category: infra
+tags:
+  - docker
+  - containers
+  - development
+  - devops
 lang: en
-description: "You've been debugging your Docker containers wrong this entire time and I can prove it! Let's discover Gremlin, the extension that will change everything!"
-seoDescription: "You've been debugging your Docker containers wrong I can prove it! Let's discover Gremlin, the extension that will change everything!"
-slug: "debugging-containers-with-docker-gremlin"
+description: You've been debugging your Docker containers wrong this entire time and I can prove it! Let's discover Gremlin, the extension that will change everything!
+seoDescription: You've been debugging your Docker containers wrong I can prove it! Let's discover Gremlin, the extension that will change everything!
+slug: debugging-containers-with-docker-gremlin
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 It's been a while since I've written about Docker here, but this time I received exciting news, the **Docker Gremlin**. An extension that significantly changes how you debug your containers.

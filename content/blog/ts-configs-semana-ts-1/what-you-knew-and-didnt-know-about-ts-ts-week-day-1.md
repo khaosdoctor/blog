@@ -1,17 +1,20 @@
 ---
-title: "What you knew and didn't know about TS - TS Week day 1"
+title: What you knew and didn't know about TS - TS Week day 1
 pubDate: 2023-04-03T11:00:04.000Z
 updatedDate: 2026-07-16T16:02:32.000Z
-category: "typescript"
-tags: ["typescript", "javascript", "development"]
+category: typescript
+tags:
+  - typescript
+  - javascript
+  - development
 series: typescript-week
 seriesOrder: 1
 lang: en
-description: "Learn everything about TypeScript and how you can take your first steps in this technology that is growing more and more!"
-slug: "what-you-knew-and-didnt-know-about-ts-ts-week-day-1"
+description: Learn everything about TypeScript and how you can take your first steps in this technology that is growing more and more!
+slug: what-you-knew-and-didnt-know-about-ts-ts-week-day-1
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 ## TypeScript

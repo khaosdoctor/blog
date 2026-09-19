@@ -1,15 +1,17 @@
 ---
-title: "Where to use ANY in TypeScript"
+title: Where to use ANY in TypeScript
 pubDate: 2024-08-07T11:00:19.000Z
 updatedDate: 2026-07-16T17:54:12.000Z
-category: "typescript"
-tags: ["typescript", "javascript"]
+category: typescript
+tags:
+  - typescript
+  - javascript
 lang: en
-description: "We already know that \"any\" is a bad usage pattern, but learn about some use cases where any is our only option!"
-slug: "when-to-use-any-in-typescript"
+description: We already know that "any" is a bad usage pattern, but learn about some use cases where any is our only option!
+slug: when-to-use-any-in-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Anyone who was at my **TypeScript Formation** streams (or took the training) knows I'm extremely against `any` in code. Mainly because `any` has become an escape valve, whenever we want to disable TypeScript we can just use `any` in our code and everything resolves. Many people have already asked me: "Well, why does TypeScript have `any` if we can't use it?"

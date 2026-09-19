@@ -1,15 +1,18 @@
 ---
-title: "What's New in the TypeScript 4.3 Beta"
+title: What's New in the TypeScript 4.3 Beta
 pubDate: 2021-05-10T18:38:14.000Z
 updatedDate: 2026-07-16T16:15:49.000Z
-category: "typescript"
-tags: ["drop", "typescript", "javascript"]
+category: typescript
+tags:
+  - drop
+  - typescript
+  - javascript
 lang: en
-description: "Let's understand everything about what just came out for TypeScript 4.3 and what you can already test!"
-slug: "whats-new-in-the-typescript-4-3-beta"
+description: Let's understand everything about what just came out for TypeScript 4.3 and what you can already test!
+slug: whats-new-in-the-typescript-4-3-beta
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 The new TypeScript version [went into beta](https://devblogs.microsoft.com/typescript/announcing-typescript-4-3-beta/) on April 1, 2021! For now this version isn't ready to use in production, but it already includes some really cool changes and fixes!

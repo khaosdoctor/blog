@@ -1,15 +1,17 @@
 ---
-title: "From zero to automation with GitHub Actions in 7 minutes"
+title: From zero to automation with GitHub Actions in 7 minutes
 pubDate: 2020-05-08T03:00:00.000Z
 updatedDate: 2026-07-16T16:29:04.000Z
-category: "infra"
-tags: ["containers", "docker"]
+category: infra
+tags:
+  - containers
+  - docker
 lang: en
-description: "How to start from scratch and automate your entire container pipeline in less than 7 minutes! All with GitHub Actions"
-slug: "from-zero-to-github-actions-automation-in-7-minutes"
+description: How to start from scratch and automate your entire container pipeline in less than 7 minutes! All with GitHub Actions
+slug: from-zero-to-github-actions-automation-in-7-minutes
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In a [previous article](https://dev.to/azure/construindo-e-publicando-um-backend-graphql-completo-sem-escrever-uma-linha-de-codigo-g40), I discussed how we could create a complete GraphQL backend using only a Docker image and a configuration file. All of it hosted on [Azure](https://docs.microsoft.com/azure/container-instances/?WT.mc_id=blog-devto-ludossan). Now let's learn how to automate the deployments to our hosting and automatically update our backend!

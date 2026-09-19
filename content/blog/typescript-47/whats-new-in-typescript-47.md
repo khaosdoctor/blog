@@ -1,16 +1,20 @@
 ---
-title: "What's New in TypeScript 4.7"
+title: What's New in TypeScript 4.7
 pubDate: 2022-06-08T14:27:00.000Z
 updatedDate: 2026-07-16T16:08:55.000Z
-category: "typescript"
-tags: ["typescript", "development", "javascript", "nodejs"]
+category: typescript
+tags:
+  - typescript
+  - development
+  - javascript
+  - nodejs
 lang: en
-description: "Stay up to date with the main features of TypeScript 4.7. Which includes, among many things, the ability to use native ESModules!"
-seoDescription: "Stay up to date with the main features of TypeScript 4.7. Which includes, among many things, the ability to use ESModules"
-slug: "whats-new-in-typescript-47"
+description: Stay up to date with the main features of TypeScript 4.7. Which includes, among many things, the ability to use native ESModules!
+seoDescription: Stay up to date with the main features of TypeScript 4.7. Which includes, among many things, the ability to use ESModules
+slug: whats-new-in-typescript-47
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 TypeScript 4.7 has arrived and, as we cannot overlook it, we will go through the main parts that were announced by the development team.

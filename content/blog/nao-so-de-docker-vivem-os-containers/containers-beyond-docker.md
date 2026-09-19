@@ -1,16 +1,21 @@
 ---
-title: "Containers Beyond Docker"
+title: Containers Beyond Docker
 pubDate: 2021-05-13T20:18:00.000Z
 updatedDate: 2026-07-16T16:15:15.000Z
-category: "infra"
-tags: ["containerd", "containers", "docker", "video", "golang"]
+category: infra
+tags:
+  - containerd
+  - containers
+  - docker
+  - video
+  - golang
 lang: en
-description: "Want to learn more about containers? Check out this collection of content we discussed in an incredible live stream!"
-seoTitle: "Containers with containerd and Golang"
-slug: "containers-beyond-docker"
+description: Want to learn more about containers? Check out this collection of content we discussed in an incredible live stream!
+seoTitle: Containers with containerd and Golang
+slug: containers-beyond-docker
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I had the pleasure of being invited to a live stream with Fabrício Veronez about how we can better understand the container environment far beyond Docker, with practical examples and working code!

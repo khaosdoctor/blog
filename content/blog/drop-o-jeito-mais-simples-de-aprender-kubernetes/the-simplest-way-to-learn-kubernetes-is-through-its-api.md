@@ -1,15 +1,18 @@
 ---
-title: "The simplest way to learn Kubernetes is through its API"
+title: The simplest way to learn Kubernetes is through its API
 pubDate: 2021-05-06T18:50:34.000Z
 updatedDate: 2026-07-16T16:16:01.000Z
-category: "infra"
-tags: ["kubernetes", "drop", "containers"]
+category: infra
+tags:
+  - kubernetes
+  - drop
+  - containers
 lang: en
-description: "In this short article we'll discover the simplest way to learn the concepts behind Kubernetes in a practical way."
-slug: "the-simplest-way-to-learn-kubernetes-is-through-its-api"
+description: In this short article we'll discover the simplest way to learn the concepts behind Kubernetes in a practical way.
+slug: the-simplest-way-to-learn-kubernetes-is-through-its-api
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 > **NEWS!**  

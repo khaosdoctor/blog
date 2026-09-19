@@ -1,15 +1,18 @@
 ---
-title: "\"Pipeline operators in JavaScript\""
+title: '"Pipeline operators in JavaScript"'
 pubDate: 2022-04-04T14:00:00.000Z
 updatedDate: 2026-07-16T16:10:07.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "development"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - development
 lang: en
-description: "\"Learn everything about the proposal gaining significant adoption in ECMAScript, the pipeline operators.\""
-slug: "pipeline-operators-in-javascript"
+description: '"Learn everything about the proposal gaining significant adoption in ECMAScript, the pipeline operators."'
+slug: pipeline-operators-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 **JavaScript** is always evolving, and [a](/js-tipos-proposal/)[s](/js-tipos-proposal/) is [customary](/novos-tipos-js/), I'll write about another one of the [proposals](https://github.com/tc39/proposal-pipeline-operator#tacit-unary-function-application-syntax) that's gaining adoption in the community. These are **pipeline operators**. This proposal is currently at stage 1, which is very early in the process, but it's been dragging on for [roughly 6 years](https://github.com/tc39/proposal-pipeline-operator/commit/3d4e985dba6e2a5b2bdc1999268537e2071131b6). Although you can test it online using [Babel](https://babeljs.io/repl#?browsers=&build=&builtIns=false&corejs=false&spec=false&loose=false&code_lz=MYewdgzgLgBAZgSzAQwDYwLwwNoHICyApjBAgObK4C6MAUAD4B8MApAHShjDJQAUeKCDABOhACaEhEEMATIEEagEoGzdp2588IAK4xCAW1wAaGLgAWUKAAcIALgD0D1BGRgoICGwkA3ZatY2ACsQJF5cMxUmGE5pVEI2VBAyXhYlIA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=true&fileSize=false&timeTravel=false&sourceType=module&lineWrap=false&presets=env%2Cstage-1&prettier=true&targets=Node-16&version=7.17.8&externalPlugins=%40babel%2Fplugin-syntax-typescript%407.16.7%2Cbabel-plugin-const-enum%401.2.0&assumptions=%7B%7D).

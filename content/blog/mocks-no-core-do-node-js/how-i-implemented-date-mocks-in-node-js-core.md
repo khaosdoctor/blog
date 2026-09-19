@@ -1,16 +1,19 @@
 ---
-title: "How I Implemented Date Mocks in Node.js Core"
+title: How I Implemented Date Mocks in Node.js Core
 pubDate: 2024-07-31T11:00:32.000Z
 updatedDate: 2026-07-16T17:54:23.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "open source"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - open source
 lang: en
-description: "Ever wanted to contribute to an open source project? Let me explain how I added my code to Node.js!"
+description: Ever wanted to contribute to an open source project? Let me explain how I added my code to Node.js!
 seoTitle: "Implementing Date Mocks in the Node Test Runner: A Story"
-slug: "how-i-implemented-date-mocks-in-node-js-core"
+slug: how-i-implemented-date-mocks-in-node-js-core
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 A little over a year ago, I had the great pleasure of working on the [Node.js core](https://github.com/nodejs/node/pull/48638), and it was one of the most interesting experiences I've had. If you're using Node today, there's my code in there! I'm now returning to help grow the community around it. But what I want to tell you here is how [Date mocks](/node-test-runner-mocks/) work inside the [Node Test Runner](/comecando-com-o-node-js-test-runner/), piece by piece.

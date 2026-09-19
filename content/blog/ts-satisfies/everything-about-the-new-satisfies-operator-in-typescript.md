@@ -1,16 +1,18 @@
 ---
-title: "Everything about the new satisfies operator in TypeScript"
+title: Everything about the new satisfies operator in TypeScript
 pubDate: 2022-10-05T13:00:52.000Z
 updatedDate: 2026-07-16T16:05:55.000Z
-category: "typescript"
-tags: ["typescript", "javascript"]
+category: typescript
+tags:
+  - typescript
+  - javascript
 lang: en
-description: "In TypeScript 4.9 beta, we got a new operator, \"satisfies\". Let's understand how this new operator can be useful and why it's so cool!"
-seoDescription: "In TypeScript 4.9 beta, we got a new operator, \"satisfies\". Let's understand how this new operator can be useful."
-slug: "everything-about-the-new-satisfies-operator-in-typescript"
+description: In TypeScript 4.9 beta, we got a new operator, "satisfies". Let's understand how this new operator can be useful and why it's so cool!
+seoDescription: In TypeScript 4.9 beta, we got a new operator, "satisfies". Let's understand how this new operator can be useful.
+slug: everything-about-the-new-satisfies-operator-in-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In the latest open TypeScript beta, the devs showed what's coming in version 4.9 of the language. Besides some optimizations, which are pretty common, in type inference, we'll have a new operator in the language, `satisfies`. Let's understand a bit more about how this operator will work.

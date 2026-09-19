@@ -2,16 +2,21 @@
 title: "The Complete Guide to gRPC Part 4: Streams"
 pubDate: 2021-07-07T12:00:00.000Z
 updatedDate: 2026-07-16T16:13:40.000Z
-category: "infra"
-tags: ["grpc", "javascript", "protobuf", "architecture", "series"]
+category: infra
+tags:
+  - grpc
+  - javascript
+  - protobuf
+  - architecture
+  - series
 series: grpc
 seriesOrder: 4
 lang: en
-description: "Learn how to use one of the most interesting features of gRPC, streams! Performance and speed for large data in a super simple way!"
-slug: "the-complete-grpc-guide-part-4-streams"
+description: Learn how to use one of the most interesting features of gRPC, streams! Performance and speed for large data in a super simple way!
+slug: the-complete-grpc-guide-part-4-streams
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In the previous articles in this series, we learned what gRPC is, how it works, and how we can use this protocol to transfer data between systems with different technologies and languages. However, all of this was done using only the simplest models of protobuf definition, meaning we were sending a simple request and receiving a simple response in a client/server model.

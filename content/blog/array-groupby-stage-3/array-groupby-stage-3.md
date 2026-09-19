@@ -1,15 +1,18 @@
 ---
-title: "Grouping with Array.prototype.groupBy"
+title: Grouping with Array.prototype.groupBy
 pubDate: 2022-01-12T15:00:00.000Z
 updatedDate: 2026-07-16T16:11:06.000Z
-category: "javascript"
-tags: ["javascript", "development", "ecmascript"]
+category: javascript
+tags:
+  - javascript
+  - development
+  - ecmascript
 lang: en
-description: "No more grouping objects and keys by hand or reaching for external libraries. JavaScript now has a native grouping method!"
-slug: "array-groupby-stage-3"
+description: No more grouping objects and keys by hand or reaching for external libraries. JavaScript now has a native grouping method!
+slug: array-groupby-stage-3
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Ever since I started programming, I've always found myself in situations where I needed to use a simple function that, at the same time, didn't exist in the languages I was working with.[^n1]

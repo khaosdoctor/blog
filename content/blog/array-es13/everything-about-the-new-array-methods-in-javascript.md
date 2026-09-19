@@ -1,16 +1,20 @@
 ---
-title: "Everything about the new array methods in JavaScript"
+title: Everything about the new array methods in JavaScript
 pubDate: 2022-09-22T13:00:15.000Z
 updatedDate: 2026-07-16T16:06:29.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "development", "nodejs"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - development
+  - nodejs
 lang: en
-description: "One of the promises of ECMAScript is the inclusion of new array methods, in this article we'll go through all of them and give a use case for each one, so you won't be left out!"
-seoDescription: "Learn everything about the new methods included in arrays in the next versions of ECMAScript! Understand each one with a use case!"
-slug: "everything-about-the-new-array-methods-in-javascript"
+description: One of the promises of ECMAScript is the inclusion of new array methods, in this article we'll go through all of them and give a use case for each one, so you won't be left out!
+seoDescription: Learn everything about the new methods included in arrays in the next versions of ECMAScript! Understand each one with a use case!
+slug: everything-about-the-new-array-methods-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Once again we're going to talk about the main news in JavaScript! This time we're going to talk about one of the coolest [proposals](https://github.com/tc39/proposal-change-array-by-copy) around right now. Today it's at stage 3, which means it's going to be live soon!

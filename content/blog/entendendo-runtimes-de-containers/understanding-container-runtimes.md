@@ -1,16 +1,27 @@
 ---
-title: "Understanding container runtimes"
+title: Understanding container runtimes
 pubDate: 2021-02-18T12:37:00.000Z
 updatedDate: 2026-07-16T16:18:24.000Z
-category: "infra"
-tags: ["cloud", "containerd", "containers", "cri", "devops", "docker", "kubernetes", "microservices", "oci", "technology", "cri-o"]
+category: infra
+tags:
+  - cloud
+  - containerd
+  - containers
+  - cri
+  - devops
+  - docker
+  - kubernetes
+  - microservices
+  - oci
+  - technology
+  - cri-o
 lang: en
-description: "Did you know there are different types of container runtimes? What if we understood a bit more about the differences between them?"
-seoTitle: "Understanding the differences between containerd and CRI-O runtimes"
-slug: "understanding-container-runtimes"
+description: Did you know there are different types of container runtimes? What if we understood a bit more about the differences between them?
+seoTitle: Understanding the differences between containerd and CRI-O runtimes
+slug: understanding-container-runtimes
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We discussed in [the previous post on the topic](/oci-cri-docker-ecossistema-de-containers/) how container runtimes work, and we also talked about what OCI is, what CRI is, and even [created a container using ContainerD](/integrando-containers-na-sua-aplicacao-com-containerd/) directly through application integration.

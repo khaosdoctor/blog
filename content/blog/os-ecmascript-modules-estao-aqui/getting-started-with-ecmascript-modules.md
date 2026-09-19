@@ -1,15 +1,17 @@
 ---
-title: "Getting Started with ECMAScript Modules"
+title: Getting Started with ECMAScript Modules
 pubDate: 2021-06-23T11:00:00.000Z
 updatedDate: 2026-07-16T16:14:16.000Z
-category: "javascript"
-tags: ["javascript", "nodejs"]
+category: javascript
+tags:
+  - javascript
+  - nodejs
 lang: en
-description: "ES Modules are the next generation of module imports in JavaScript. Learn how this feature promises to revolutionize what we know."
-slug: "getting-started-with-ecmascript-modules"
+description: ES Modules are the next generation of module imports in JavaScript. Learn how this feature promises to revolutionize what we know.
+slug: getting-started-with-ecmascript-modules
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 It has been a while since people have been talking about using ECMAScript Modules in our packages and JavaScript code. Although the model has been supported on the web as a whole through a `<script type="module">` tag for some time, only now with the official deprecation of Node 10 in favor of Node 16 can we have this complete support on the server![^n1]

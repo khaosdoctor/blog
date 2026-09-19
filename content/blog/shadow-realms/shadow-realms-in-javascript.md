@@ -1,16 +1,20 @@
 ---
-title: "Safer code with Shadow Realms in JavaScript"
+title: Safer code with Shadow Realms in JavaScript
 pubDate: 2022-06-21T13:00:00.000Z
 updatedDate: 2026-07-16T16:08:44.000Z
-category: "javascript"
-tags: ["javascript", "nodejs", "ecmascript", "development"]
+category: javascript
+tags:
+  - javascript
+  - nodejs
+  - ecmascript
+  - development
 lang: en
-description: "One of the most interesting proposals in JavaScript recently has been making waves. Learn what shadow realms are and how it will be possible to execute code more securely."
-seoDescription: "One of the most interesting proposals in JavaScript recently. What are shadow realms and how do they improve your code security!"
-slug: "shadow-realms-in-javascript"
+description: One of the most interesting proposals in JavaScript recently has been making waves. Learn what shadow realms are and how it will be possible to execute code more securely.
+seoDescription: One of the most interesting proposals in JavaScript recently. What are shadow realms and how do they improve your code security!
+slug: shadow-realms-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 JavaScript has always been and continues to be a highly dynamic language. Because of that, I'm starting a new series of articles where I'll discuss increasingly about new proposals and possible features of this incredible ecosystem!

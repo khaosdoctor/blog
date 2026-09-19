@@ -1,16 +1,19 @@
 ---
-title: "What are \"do expressions\" in JavaScript?"
+title: What are "do expressions" in JavaScript?
 pubDate: 2022-09-07T13:00:17.000Z
 updatedDate: 2026-07-16T16:06:41.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "development"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - development
 lang: en
-description: "Understand what one of the most famous and important forms of expressions coming to JavaScript soon is!"
-seoTitle: "What are \"do expressions\" in JavaScript?"
-slug: "what-are-do-expressions-in-javascript"
+description: Understand what one of the most famous and important forms of expressions coming to JavaScript soon is!
+seoTitle: What are "do expressions" in JavaScript?
+slug: what-are-do-expressions-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In yet another series of articles about the most recent and exciting proposals we have at [TC39](https://github.com/tc39/proposals) I bring you another one of these ideas that I find super cool and really hope (and give my support when possible) they enter the language in the future.

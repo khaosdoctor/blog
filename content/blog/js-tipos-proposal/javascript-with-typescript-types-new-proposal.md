@@ -1,15 +1,19 @@
 ---
-title: "JavaScript with TypeScript's type system? Understand everything about the new proposal!"
+title: JavaScript with TypeScript's type system? Understand everything about the new proposal!
 pubDate: 2022-03-28T14:00:00.000Z
 updatedDate: 2026-07-16T16:10:18.000Z
-category: "javascript"
-tags: ["javascript", "typescript", "nodejs", "ecmascript"]
+category: javascript
+tags:
+  - javascript
+  - typescript
+  - nodejs
+  - ecmascript
 lang: en
-description: "Understand everything about TypeScript's new proposal for JavaScript to embed native types in its interpreter."
-slug: "javascript-with-typescript-types-new-proposal"
+description: Understand everything about TypeScript's new proposal for JavaScript to embed native types in its interpreter.
+slug: javascript-with-typescript-types-new-proposal
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Recently a [news](https://devblogs.microsoft.com/typescript/a-proposal-for-type-syntax-in-javascript/) story caused a lot of buzz in the JavaScript development community, with special focus on TypeScript.

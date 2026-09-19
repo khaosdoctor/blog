@@ -1,15 +1,21 @@
 ---
-title: "Code anywhere with Codespaces"
+title: Code anywhere with Codespaces
 pubDate: 2020-08-13T22:20:32.000Z
 updatedDate: 2026-07-16T16:26:49.000Z
-category: "infra"
-tags: ["docker", "containers", "codespaces", "cloud", "development", "technology"]
+category: infra
+tags:
+  - docker
+  - containers
+  - codespaces
+  - cloud
+  - development
+  - technology
 lang: en
-description: "What would your life be like if you could have your computer everywhere without ever actually having it?"
-slug: "write-code-anywhere-with-codespaces"
+description: What would your life be like if you could have your computer everywhere without ever actually having it?
+slug: write-code-anywhere-with-codespaces
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 The dream of anyone working in technology is to always have their best friend, their computer, with them. There are many solutions that transform small devices like [Raspberry Pis](https://www.raspberrypi.org/) into complete computers, and others create pocket-sized computers that can be accessed at any time.

@@ -1,16 +1,19 @@
 ---
-title: "\"Do you already know Deno KV?\""
+title: '"Do you already know Deno KV?"'
 pubDate: 2023-07-20T11:00:50.000Z
 updatedDate: 2026-07-16T15:59:17.000Z
-category: "javascript"
-tags: ["deno", "databases", "typescript"]
+category: javascript
+tags:
+  - deno
+  - databases
+  - typescript
 lang: en
 description: "\"Have you heard of the new Deno KV? Then it's time to discover this tool that could save your life\""
-seoTitle: "\"Principles of Deno KV\""
-slug: "have-you-heard-of-deno-kv"
+seoTitle: '"Principles of Deno KV"'
+slug: have-you-heard-of-deno-kv
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I've been talking about [Deno](/deno/) for a while now, and I've already [discussed Deno KV here](/deno-kv/) when it was still an alpha experiment with no defined API. Now we finally have the **official** beta version that's being tested.

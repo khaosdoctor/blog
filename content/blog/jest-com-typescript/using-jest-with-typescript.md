@@ -1,15 +1,19 @@
 ---
-title: "Using Jest with TypeScript"
+title: Using Jest with TypeScript
 pubDate: 2024-06-19T11:00:32.000Z
 updatedDate: 2026-07-16T17:55:51.000Z
-category: "typescript"
-tags: ["tests", "typescript", "jest", "nodejs"]
+category: typescript
+tags:
+  - tests
+  - typescript
+  - jest
+  - nodejs
 lang: en
-description: "Learn how to configure your application to run automated tests with Jest written in TypeScript"
-slug: "using-jest-with-typescript"
+description: Learn how to configure your application to run automated tests with Jest written in TypeScript
+slug: using-jest-with-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In another [article here on the blog](/comecando-com-o-node-js-test-runner/) I talked about how we get started with the Node.js Test Runner to write our tests. Many people have sent me messages asking what the difference is between Node Test Runner and [Jest](https://jestjs.io), and how we can get started with Jest and TypeScript.

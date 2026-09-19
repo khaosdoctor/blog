@@ -1,15 +1,18 @@
 ---
-title: "Are UUIDs bad? Understanding ULID"
+title: Are UUIDs bad? Understanding ULID
 pubDate: 2024-08-14T11:00:09.000Z
 updatedDate: 2026-07-16T17:54:00.000Z
-category: "meta"
-tags: ["theory", "computing", "architecture"]
+category: meta
+tags:
+  - theory
+  - computing
+  - architecture
 lang: en
-description: "How can you implement random IDs that are also sortable? Meet ULIDs and what they promise to change!"
-slug: "are-uuids-bad-understanding-ulid"
+description: How can you implement random IDs that are also sortable? Meet ULIDs and what they promise to change!
+slug: are-uuids-bad-understanding-ulid
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In development, the ability to generate unique IDs has always been necessary, especially when dealing with large volumes of data. Over time we encountered another problem: we can't only generate sequential IDs. They have several problems, one of which is that they are predictable and susceptible to external attacks.

@@ -1,15 +1,19 @@
 ---
-title: "What's New About JavaScript Signals"
+title: What's New About JavaScript Signals
 pubDate: 2024-08-21T11:00:14.000Z
 updatedDate: 2026-07-16T17:53:49.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "development", "signals"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - development
+  - signals
 lang: en
-description: "What is the new JavaScript signals proposal? How does it work and what is it for?"
-slug: "whats-new-about-javascript-signals"
+description: What is the new JavaScript signals proposal? How does it work and what is it for?
+slug: whats-new-about-javascript-signals
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In 2023, a TC39 member named [Rob Eisenberg](https://github.com/EisenbergEffect) mentioned that he wanted to create a common standard for _signals_ and it really turned into a [proposal](https://github.com/tc39/proposal-signals) at TC39!

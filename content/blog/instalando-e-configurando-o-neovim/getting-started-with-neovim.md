@@ -1,16 +1,19 @@
 ---
-title: "First steps with Neovim"
+title: First steps with Neovim
 pubDate: 2024-09-25T11:00:53.000Z
 updatedDate: 2026-07-16T17:51:09.000Z
-category: "meta"
-tags: ["vim", "tools", "development"]
+category: meta
+tags:
+  - vim
+  - tools
+  - development
 lang: en
-description: "I surrendered to Vim and it wasn't easy to get it the way I wanted. So I want to teach you so you don't have to go through the same problem!"
-seoTitle: "How to install and configure Neovim with LazyVim"
-slug: "getting-started-with-neovim"
+description: I surrendered to Vim and it wasn't easy to get it the way I wanted. So I want to teach you so you don't have to go through the same problem!
+seoTitle: How to install and configure Neovim with LazyVim
+slug: getting-started-with-neovim
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I've always liked Vim, but this editor is worldwide known as one of the most complex pieces of software ever created to learn, even gaining the reputation of being the place you enter and never leave again.

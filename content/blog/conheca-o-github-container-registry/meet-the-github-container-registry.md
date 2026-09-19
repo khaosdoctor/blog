@@ -1,15 +1,20 @@
 ---
-title: "Meet GitHub Container Registry"
+title: Meet GitHub Container Registry
 pubDate: 2020-09-18T22:59:27.000Z
 updatedDate: 2026-07-16T16:24:09.000Z
-category: "infra"
-tags: ["docker", "containers", "github", "development", "technology"]
+category: infra
+tags:
+  - docker
+  - containers
+  - github
+  - development
+  - technology
 lang: en
-description: "Have you ever thought about the convenience of storing your Docker images in the same place where you version your code?"
-slug: "meet-the-github-container-registry"
+description: Have you ever thought about the convenience of storing your Docker images in the same place where you version your code?
+slug: meet-the-github-container-registry
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Some time ago, GitHub announced they were creating **GitHub Packages**. This was yet another tool from this incredible network to make developers' lives even easier.

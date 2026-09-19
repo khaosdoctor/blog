@@ -1,18 +1,23 @@
 ---
-title: "A Deep Dive into Container Images - Part 2"
+title: A Deep Dive into Container Images - Part 2
 pubDate: 2020-07-29T13:00:00.000Z
 updatedDate: 2026-07-16T16:27:56.000Z
-category: "infra"
-tags: ["containers", "docker", "golang", "development", "technology"]
+category: infra
+tags:
+  - containers
+  - docker
+  - golang
+  - development
+  - technology
 series: container-images
 seriesOrder: 2
 lang: en
-description: "We already know what each type of image is for. Let's apply our knowledge to a compiled application! Is the smallest image always the best?"
-seoDescription: "Now that we know what each type of image is for, it's time to apply our knowledge to an application!"
-slug: "a-deep-dive-into-container-images-part-2"
+description: We already know what each type of image is for. Let's apply our knowledge to a compiled application! Is the smallest image always the best?
+seoDescription: Now that we know what each type of image is for, it's time to apply our knowledge to an application!
+slug: a-deep-dive-into-container-images-part-2
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In the [previous post](/um-mergulho-em-imagens-de-containers-parte-1/?utm_source=series&utm_medium=post&utm_campaign=deep_dive_2) of our series we talked a bit about what container images are and how they are divided. We covered what a `slim` image is, a `full` image, and we talked about `alpine` images. But what impact does this have on your application?

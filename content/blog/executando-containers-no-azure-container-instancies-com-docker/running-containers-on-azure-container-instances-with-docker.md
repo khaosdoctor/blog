@@ -1,15 +1,20 @@
 ---
-title: "Running Containers on Azure Container Instances with Docker"
+title: Running Containers on Azure Container Instances with Docker
 pubDate: 2020-08-03T13:00:00.000Z
 updatedDate: 2026-07-16T16:27:22.000Z
-category: "infra"
-tags: ["containers", "docker", "azure", "technology", "cloud"]
+category: infra
+tags:
+  - containers
+  - docker
+  - azure
+  - technology
+  - cloud
 lang: en
-description: "Have you ever imagined what it would be like if you could run a container directly on cloud infrastructure without doing anything new?"
-slug: "running-containers-on-azure-container-instances-with-docker"
+description: Have you ever imagined what it would be like if you could run a container directly on cloud infrastructure without doing anything new?
+slug: running-containers-on-azure-container-instances-with-docker
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 If you already use Docker, then you've probably run a container on your machine. But have you ever imagined what it would be like if you could run a container directly on cloud infrastructure without doing anything new?

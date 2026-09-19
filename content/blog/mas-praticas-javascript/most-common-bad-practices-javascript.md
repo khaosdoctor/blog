@@ -1,15 +1,17 @@
 ---
-title: "The most common bad practices in JavaScript"
+title: The most common bad practices in JavaScript
 pubDate: 2022-02-01T13:00:00.000Z
 updatedDate: 2026-07-16T16:10:54.000Z
-category: "javascript"
-tags: ["javascript", "architecture"]
+category: javascript
+tags:
+  - javascript
+  - architecture
 lang: en
-description: "Come learn some of the practices considered \"bad\" in JavaScript and how you can work around them to make your code better!"
-slug: "most-common-bad-practices-javascript"
+description: Come learn some of the practices considered "bad" in JavaScript and how you can work around them to make your code better!
+slug: most-common-bad-practices-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 ![](https://www.youtube.com/watch?v=QPSju6SY570)

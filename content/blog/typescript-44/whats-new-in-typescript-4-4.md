@@ -1,15 +1,18 @@
 ---
-title: "What's new in TypeScript 4.4"
+title: What's new in TypeScript 4.4
 pubDate: 2021-09-15T11:00:00.000Z
 updatedDate: 2026-07-16T16:12:30.000Z
-category: "typescript"
-tags: ["typescript", "javascript", "development"]
+category: typescript
+tags:
+  - typescript
+  - javascript
+  - development
 lang: en
-description: "Let's dive deeper into TypeScript 4.4's new features and understand what's new in each one!"
-slug: "whats-new-in-typescript-4-4"
+description: Let's dive deeper into TypeScript 4.4's new features and understand what's new in each one!
+slug: whats-new-in-typescript-4-4
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 On August 26, 2021, we got the [announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-4-4/) of TypeScript version 4.4 and, as is customary, I'll highlight everything new that happened and all the coolest updates to our favorite superset!

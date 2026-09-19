@@ -1,15 +1,17 @@
 ---
-title: "Node 21 Release Highlights!"
+title: Node 21 Release Highlights!
 pubDate: 2023-11-10T16:22:47.000Z
 updatedDate: 2026-07-16T15:55:22.000Z
-category: "javascript"
-tags: ["nodejs", "javascript"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
 lang: en
-description: "Learn about the major features coming in Node 21 and 21.1!"
-slug: "whats-new-in-node-21"
+description: Learn about the major features coming in Node 21 and 21.1!
+slug: whats-new-in-node-21
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Another Node.js version has just been released! Let's talk about the major features in this new release.

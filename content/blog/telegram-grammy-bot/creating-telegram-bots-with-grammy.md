@@ -1,16 +1,21 @@
 ---
-title: "Creating bots for Telegram with GrammY"
+title: Creating bots for Telegram with GrammY
 pubDate: 2022-10-05T13:00:00.000Z
 updatedDate: 2026-07-16T16:06:06.000Z
-category: "javascript"
-tags: ["deno", "typescript", "bots", "telegram", "grammy"]
+category: javascript
+tags:
+  - deno
+  - typescript
+  - bots
+  - telegram
+  - grammy
 lang: en
-description: "Learn how to create amazing bots for Telegram using an excellent tool that will revolutionize the way you work with automation."
-seoDescription: "Have you ever tried to create a Telegram bot and got confused about how everything works? Not anymore! With GrammY, everything is much easier."
-slug: "creating-telegram-bots-with-grammy"
+description: Learn how to create amazing bots for Telegram using an excellent tool that will revolutionize the way you work with automation.
+seoDescription: Have you ever tried to create a Telegram bot and got confused about how everything works? Not anymore! With GrammY, everything is much easier.
+slug: creating-telegram-bots-with-grammy
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 When we talk about modern applications, we inevitably end up with bots. Using bots to automate tasks or even facilitate communication with APIs is becoming increasingly common, and one of the platforms where bots are most common is [Telegram](https://telegram.org/).

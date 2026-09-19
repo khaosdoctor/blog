@@ -1,16 +1,19 @@
 ---
-title: "Queues have arrived in Deno KV"
+title: Queues have arrived in Deno KV
 pubDate: 2024-01-10T11:00:32.000Z
 updatedDate: 2026-07-16T15:54:36.000Z
-category: "javascript"
-tags: ["deno", "typescript", "development"]
+category: javascript
+tags:
+  - deno
+  - typescript
+  - development
 lang: en
-description: "The simplest way to build message-based systems is now Deno Queues, let's understand everything about this new tool!"
-seoTitle: "Discover Deno Queues"
-slug: "queues-have-arrived-in-deno-kv"
+description: The simplest way to build message-based systems is now Deno Queues, let's understand everything about this new tool!
+seoTitle: Discover Deno Queues
+slug: queues-have-arrived-in-deno-kv
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Since [Deno KV](/deno-kv-beta/) was released, the Deno team has been doing excellent work adding more features to what could have been just a simple key-value database, but now it's much more than that!

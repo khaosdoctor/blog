@@ -1,16 +1,22 @@
 ---
-title: "Granting permissions to users with Kubernetes"
+title: Granting permissions to users with Kubernetes
 pubDate: 2021-02-23T12:00:00.000Z
 updatedDate: 2026-07-16T16:18:12.000Z
-category: "infra"
-tags: ["kubernetes", "aks", "azure", "containers", "devops", "technology"]
+category: infra
+tags:
+  - kubernetes
+  - aks
+  - azure
+  - containers
+  - devops
+  - technology
 lang: en
-description: "We know how to create users in Kubernetes, now let's learn how to grant them permissions using Roles and ClusterRoles!"
-seoDescription: "We know how to create users in Kubernetes, let's learn how to grant them permissions using Roles and ClusterRoles!"
-slug: "giving-permissions-to-users-with-kubernetes"
+description: We know how to create users in Kubernetes, now let's learn how to grant them permissions using Roles and ClusterRoles!
+seoDescription: We know how to create users in Kubernetes, let's learn how to grant them permissions using Roles and ClusterRoles!
+slug: giving-permissions-to-users-with-kubernetes
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In the [previous article](/criando-e-gerenciando-usuarios-no-kubernetes/), we discussed how to create users in Kubernetes so we don't have the problem of everyone having the same level of access across all namespaces. However, we didn't elaborate on how we can actually grant those permissions.

@@ -1,15 +1,18 @@
 ---
-title: "Using Mocks with Node Test Runner"
+title: Using Mocks with Node Test Runner
 pubDate: 2024-06-05T11:00:45.000Z
 updatedDate: 2026-07-16T17:56:17.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "typescript"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - typescript
 lang: en
-description: "How to use mocks, stubs and spies in your tests using the native Node.js Test Runner"
-slug: "using-mocks-with-the-node-test-runner"
+description: How to use mocks, stubs and spies in your tests using the native Node.js Test Runner
+slug: using-mocks-with-the-node-test-runner
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In the [previous article](/comecando-com-o-node-js-test-runner/) I showed how we can start using the **Node.js Test Runner**. Now, how do we do more than just "get started" with the Node.js Test Runner?

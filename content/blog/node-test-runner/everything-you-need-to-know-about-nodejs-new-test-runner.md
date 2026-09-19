@@ -1,15 +1,18 @@
 ---
-title: "Everything you need to know about Node.js's new test runner"
+title: Everything you need to know about Node.js's new test runner
 pubDate: 2022-05-25T11:53:00.000Z
 updatedDate: 2026-07-16T16:09:19.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "development"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - development
 lang: en
-description: "Learn everything about Node.js 18's new test runner and how you can use it to test your code."
-slug: "everything-you-need-to-know-about-nodejs-new-test-runner"
+description: Learn everything about Node.js 18's new test runner and how you can use it to test your code.
+slug: everything-you-need-to-know-about-nodejs-new-test-runner
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 As I've mentioned [in another article](/node-18/), Node.js 18 came with lots of new features, including global availability of the `fetch` command and the start of adopting the `node:` prefix for importing system modules, which, by the way, we'll need to use to discuss another addition: the **native test runner**.

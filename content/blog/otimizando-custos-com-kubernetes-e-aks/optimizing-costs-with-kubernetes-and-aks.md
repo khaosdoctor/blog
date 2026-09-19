@@ -1,16 +1,23 @@
 ---
-title: "Cost Optimization with Kubernetes and AKS"
+title: Cost Optimization with Kubernetes and AKS
 pubDate: 2020-09-03T15:41:57.000Z
 updatedDate: 2026-07-16T16:25:10.000Z
-category: "infra"
-tags: ["kubernetes", "azure", "cloud", "containers", "docker", "technology", "development"]
+category: infra
+tags:
+  - kubernetes
+  - azure
+  - cloud
+  - containers
+  - docker
+  - technology
+  - development
 lang: en
-description: "Kubernetes is often seen as a much more expensive approach than normal for most applications. Want to know how you can efficiently optimize your costs?"
-seoDescription: "Kubernetes is often seen as a much more expensive approach than normal for most applications. How can you efficiently optimize your costs?"
-slug: "optimizing-costs-with-kubernetes-and-aks"
+description: Kubernetes is often seen as a much more expensive approach than normal for most applications. Want to know how you can efficiently optimize your costs?
+seoDescription: Kubernetes is often seen as a much more expensive approach than normal for most applications. How can you efficiently optimize your costs?
+slug: optimizing-costs-with-kubernetes-and-aks
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Since the early days of distributed computing and the arrival of the cloud, everyone has had to deal with cost optimization in some way. Whether that optimization is in the form of reducing storage space or even reducing network traffic!

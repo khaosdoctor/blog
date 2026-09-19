@@ -2,14 +2,17 @@
 title: "5 things you should know before giving a talk: Call For Papers"
 pubDate: 2021-10-14T13:40:00.000Z
 updatedDate: 2026-07-16T16:12:05.000Z
-category: "career"
-tags: ["video", "events", "career"]
+category: career
+tags:
+  - video
+  - events
+  - career
 lang: en
-description: "How about learning the 5 main tips for speaking at tech events?"
-slug: "5-things-to-know-before-speaking-cfp"
+description: How about learning the 5 main tips for speaking at tech events?
+slug: 5-things-to-know-before-speaking-cfp
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Shall we talk a bit about tech events and how they can help your career?

@@ -1,16 +1,17 @@
 ---
-title: "TypeScript's Biggest Update in Years - TypeScript 5.5"
+title: TypeScript's Biggest Update in Years - TypeScript 5.5
 pubDate: 2024-07-10T17:23:32.000Z
 updatedDate: 2026-07-16T17:55:26.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 lang: en
-description: "Learn everything about TypeScript's biggest update in years!"
-seoTitle: "What's New in TypeScript 5.5?"
-slug: "typescript-5-5-biggest-update-in-years"
+description: Learn everything about TypeScript's biggest update in years!
+seoTitle: What's New in TypeScript 5.5?
+slug: typescript-5-5-biggest-update-in-years
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 After a while without posting TypeScript news here, I'm finally back to show what's new in the world of the most beloved language!

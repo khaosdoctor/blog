@@ -1,16 +1,18 @@
 ---
-title: "Sharing Types with TypeScript"
+title: Sharing Types with TypeScript
 pubDate: 2022-04-11T14:00:00.000Z
 updatedDate: 2026-07-16T16:09:54.000Z
-category: "typescript"
-tags: ["typescript", "development"]
+category: typescript
+tags:
+  - typescript
+  - development
 lang: en
-description: "One of the biggest problems we have in TypeScript projects is sharing types across several projects. Let's look at some techniques to mitigate that!"
-seoDescription: "One of the biggest problems we have in TypeScript projects is sharing types across several projects. Let's learn how to make this better!"
-slug: "sharing-types-with-typescript"
+description: One of the biggest problems we have in TypeScript projects is sharing types across several projects. Let's look at some techniques to mitigate that!
+seoDescription: One of the biggest problems we have in TypeScript projects is sharing types across several projects. Let's learn how to make this better!
+slug: sharing-types-with-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 When we talk about TypeScript, we automatically get two kinds of reactions: the person who loves it and wants to use it for everything, like me, and the person who doesn't like it for a number of reasons.

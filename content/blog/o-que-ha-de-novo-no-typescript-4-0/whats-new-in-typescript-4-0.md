@@ -1,15 +1,18 @@
 ---
-title: "What's New in TypeScript 4.0"
+title: What's New in TypeScript 4.0
 pubDate: 2020-08-31T20:45:39.000Z
 updatedDate: 2026-07-16T16:25:22.000Z
-category: "typescript"
-tags: ["typescript", "development", "technology"]
+category: typescript
+tags:
+  - typescript
+  - development
+  - technology
 lang: en
-description: "Let's dive into the newest TypeScript update! Version 4.0!"
-slug: "whats-new-in-typescript-4-0"
+description: Let's dive into the newest TypeScript update! Version 4.0!
+slug: whats-new-in-typescript-4-0
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 On August 20, 2020, TypeScript announced its newest version, 4.0! In this article, I've prepared to walk you through the latest changes and features of this release.

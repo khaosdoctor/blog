@@ -1,15 +1,16 @@
 ---
-title: "Typing environment variables the right way with TS"
+title: Typing environment variables the right way with TS
 pubDate: 2024-07-19T11:00:44.000Z
 updatedDate: 2026-07-16T17:54:50.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 lang: en
-description: "Probably one of the biggest problems we face in TypeScript, discover the solution for typing envs and how to apply it in your project!"
-slug: "typing-environment-variables-the-right-way-with-ts"
+description: Probably one of the biggest problems we face in TypeScript, discover the solution for typing envs and how to apply it in your project!
+slug: typing-environment-variables-the-right-way-with-ts
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 An extremely common problem we face with TypeScript is typing external files, the main one being when we need to type things that come from the system where we're running the application, for example, **process.env**.

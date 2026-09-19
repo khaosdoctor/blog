@@ -1,15 +1,16 @@
 ---
-title: "ES2021 is Approved! Check Out the JavaScript Updates"
+title: ES2021 is Approved! Check Out the JavaScript Updates
 pubDate: 2021-07-14T13:00:00.000Z
 updatedDate: 2026-07-16T16:13:28.000Z
-category: "javascript"
-tags: ["javascript"]
+category: javascript
+tags:
+  - javascript
 lang: en
-description: "Want to know what's coming in ES2021? Let's understand it part by part!"
-slug: "es2021-approved-javascript-features"
+description: Want to know what's coming in ES2021? Let's understand it part by part!
+slug: es2021-approved-javascript-features
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 As we already know, every year ECMA publishes a list of updates coming in its next versions. These changes are based on [proposals in the TC39 repository](https://github.com/tc39/proposals) and need to be approved before they enter any language version.

@@ -1,17 +1,21 @@
 ---
-title: "A Deep Dive into Container Images - Part 1"
+title: A Deep Dive into Container Images - Part 1
 pubDate: 2020-07-24T13:00:00.000Z
 updatedDate: 2026-07-16T16:28:31.000Z
-category: "infra"
-tags: ["containers", "docker", "development", "technology"]
+category: infra
+tags:
+  - containers
+  - docker
+  - development
+  - technology
 series: container-images
 seriesOrder: 1
 lang: en
-description: "Learn what different types of container images are for and how to choose the best image for your project!"
-slug: "a-deep-dive-into-container-images-part-1"
+description: Learn what different types of container images are for and how to choose the best image for your project!
+slug: a-deep-dive-into-container-images-part-1
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Recently, I read a series of articles by [Scott Coulton](https://itnext.io/@scott.coulton?source=post_page-----44b45e47a1f7----------------------)[^1][^2][^3] on Medium about how to choose base images for your containers. I decided to write these articles so that other people can understand how to better choose and get started creating their containers using Docker the right way!

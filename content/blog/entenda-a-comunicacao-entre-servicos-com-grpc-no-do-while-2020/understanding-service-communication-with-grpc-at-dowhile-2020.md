@@ -1,15 +1,22 @@
 ---
-title: "\"Understanding service communication with gRPC at DoWhile 2020\""
+title: '"Understanding service communication with gRPC at DoWhile 2020"'
 pubDate: 2020-11-30T14:52:51.000Z
 updatedDate: 2026-07-16T16:20:54.000Z
-category: "infra"
-tags: ["events", "talk", "workshop", "grpc", "architecture", "development", "javascript"]
+category: infra
+tags:
+  - events
+  - talk
+  - workshop
+  - grpc
+  - architecture
+  - development
+  - javascript
 lang: en
-description: "\"Want to learn how to retire REST from your service-to-service communication using gRPC? Join me for this FREE workshop!\""
-slug: "understanding-service-communication-with-grpc-at-dowhile-2020"
+description: '"Want to learn how to retire REST from your service-to-service communication using gRPC? Join me for this FREE workshop!"'
+slug: understanding-service-communication-with-grpc-at-dowhile-2020
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I'm super excited to announce that I was invited by [RocketSeat](https://rocketseat.com.br/) to be part of the speaker lineup at their biggest event, [DoWhile 2020](https://dowhile.rocketseat.com.br/inscricao/convite/khaosdoctor)!

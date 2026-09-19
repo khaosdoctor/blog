@@ -1,16 +1,21 @@
 ---
-title: "Why You Should Reconsider Using Date.now"
+title: Why You Should Reconsider Using Date.now
 pubDate: 2022-06-28T07:00:00.000Z
 updatedDate: 2026-07-16T16:08:32.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "typescript", "ecmascript", "development"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - typescript
+  - ecmascript
+  - development
 lang: en
-description: "In this article I'll show you why Date.now() is very problematic, especially when we need to measure time or measure duration with JavaScript and why you need to stop using it."
-seoDescription: "In this article I'll show you why Date.now() is very problematic and why you need to stop using it."
-slug: "why-you-should-rethink-using-date-now"
+description: In this article I'll show you why Date.now() is very problematic, especially when we need to measure time or measure duration with JavaScript and why you need to stop using it.
+seoDescription: In this article I'll show you why Date.now() is very problematic and why you need to stop using it.
+slug: why-you-should-rethink-using-date-now
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Measuring time is something we do routinely, whether walking down the street or waiting for an important meeting, and since time is an important part of our lives, it's natural to expect that when we're coding something, it should be too.

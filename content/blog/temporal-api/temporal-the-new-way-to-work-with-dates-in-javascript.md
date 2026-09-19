@@ -2,15 +2,19 @@
 title: "Temporal: the new way to work with dates in JavaScript"
 pubDate: 2021-09-24T00:49:00.000Z
 updatedDate: 2026-07-16T16:12:18.000Z
-category: "javascript"
-tags: ["javascript", "typescript", "development", "ecmascript"]
+category: javascript
+tags:
+  - javascript
+  - typescript
+  - development
+  - ecmascript
 lang: en
-description: "Learn the new JavaScript specification for dates that will replace Date."
-seoTitle: "Forget Date and embrace the new way to manipulate dates in JavaScript"
-slug: "temporal-the-new-way-to-work-with-dates-in-javascript"
+description: Learn the new JavaScript specification for dates that will replace Date.
+seoTitle: Forget Date and embrace the new way to manipulate dates in JavaScript
+slug: temporal-the-new-way-to-work-with-dates-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 It's no secret that JavaScript's date API needs urgent changes. For a long time, many developers have complained that it's not very intuitive and not very reliable. Moreover, the date API has some conventions that are, let's say, unconventional, such as starting months at 0 instead of 1.

@@ -1,15 +1,17 @@
 ---
-title: "Deno 1.40 Release Highlights"
+title: Deno 1.40 Release Highlights
 pubDate: 2024-02-28T11:00:45.000Z
 updatedDate: 2026-07-16T15:52:50.000Z
-category: "javascript"
-tags: ["deno", "typescript"]
+category: javascript
+tags:
+  - deno
+  - typescript
 lang: en
-description: "Understand the main changes in Deno 1.40 and how they directly impact your experience with the tool!"
-slug: "whats-new-in-deno-1-40"
+description: Understand the main changes in Deno 1.40 and how they directly impact your experience with the tool!
+slug: whats-new-in-deno-1-40
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Deno has reached [version 1.40](https://deno.com/blog/v1.40) and this is one of the coolest versions yet! First, because it includes the addition of the [Temporal API](/temporal-api/) that I've been talking about here since 2020! And I think it's the first runtime to actually implement this functionality!

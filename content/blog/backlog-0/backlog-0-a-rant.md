@@ -2,14 +2,16 @@
 title: "Backlog #0 - Getting things off my chest"
 pubDate: 2024-11-09T00:44:58.000Z
 updatedDate: 2026-07-16T17:50:28.000Z
-category: "opinion"
-tags: ["backlog-newsletter", "opinion"]
+category: opinion
+tags:
+  - backlog-newsletter
+  - opinion
 lang: en
-description: "A personal story about almost giving up and getting a fresh start. Welcome to my new project, Backlog."
-slug: "backlog-0-a-rant"
+description: A personal story about almost giving up and getting a fresh start. Welcome to my new project, Backlog.
+slug: backlog-0-a-rant
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Hi!

@@ -1,17 +1,20 @@
 ---
-title: "Applying Two Factor Authentication to SSH"
+title: Applying Two Factor Authentication to SSH
 pubDate: 2020-11-05T22:07:56.000Z
 updatedDate: 2026-07-16T16:21:44.000Z
-category: "infra"
-tags: ["azure", "cloud", "security"]
+category: infra
+tags:
+  - azure
+  - cloud
+  - security
 lang: en
-description: "These days, using only passwords or public keys is no longer the answer, we need to take security further by applying two-factor authentication to our servers."
-seoTitle: "Using Two-Factor Authentication with SSH"
-seoDescription: "Using only passwords or keys is no longer secure. We need to take security one step further with two-factor authentication on our servers."
-slug: "applying-two-factor-authentication-to-ssh"
+description: These days, using only passwords or public keys is no longer the answer, we need to take security further by applying two-factor authentication to our servers.
+seoTitle: Using Two-Factor Authentication with SSH
+seoDescription: Using only passwords or keys is no longer secure. We need to take security one step further with two-factor authentication on our servers.
+slug: applying-two-factor-authentication-to-ssh
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We're already very used to SSH for logging into virtual machines, like we did in our [post where we created a VPN](/criando-uma-vpn/). But we know SSH accepts several levels of security when it comes to local access.

@@ -1,15 +1,17 @@
 ---
-title: "\"Why is writing important for your career?\""
+title: '"Why is writing important for your career?"'
 pubDate: 2021-11-04T12:46:00.000Z
 updatedDate: 2026-07-16T16:11:30.000Z
-category: "career"
-tags: ["video", "career"]
+category: career
+tags:
+  - video
+  - career
 lang: en
 description: "\"Why don't you write content? Have you thought that this could be really good for your career and for your own life?\""
-slug: "why-writing-matters-for-your-career"
+slug: why-writing-matters-for-your-career
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We have a new video up! You can check it out on YouTube! Today we're talking about career and writing articles!

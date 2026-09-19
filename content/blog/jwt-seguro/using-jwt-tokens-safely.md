@@ -1,16 +1,19 @@
 ---
-title: "Using JWT tokens securely"
+title: Using JWT tokens securely
 pubDate: 2022-08-18T14:00:00.000Z
 updatedDate: 2026-07-16T16:07:18.000Z
-category: "javascript"
-tags: ["javascript", "security", "typescript"]
+category: javascript
+tags:
+  - javascript
+  - security
+  - typescript
 lang: en
-description: "You've been using JWT tokens insecurely in all your projects! In this article you'll learn how to protect your tokens against attacks!"
-seoTitle: "You're using JWT wrong! Using tokens securely"
-slug: "using-jwt-tokens-safely"
+description: You've been using JWT tokens insecurely in all your projects! In this article you'll learn how to protect your tokens against attacks!
+seoTitle: You're using JWT wrong! Using tokens securely
+slug: using-jwt-tokens-safely
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Web security is a concern that should be everyone's priority, especially those working on software development projects. For developers, it's far more worrying to build systems that don't follow security rules, because any malicious action can escalate very quickly.

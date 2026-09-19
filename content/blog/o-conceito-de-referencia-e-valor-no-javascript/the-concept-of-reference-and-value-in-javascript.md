@@ -1,16 +1,18 @@
 ---
-title: "\"The concept of \\\"reference\\\" and \\\"value\\\" in JavaScript\""
+title: '"The concept of \"reference\" and \"value\" in JavaScript"'
 pubDate: 2024-02-21T11:00:38.000Z
 updatedDate: 2026-07-16T15:53:01.000Z
-category: "javascript"
-tags: ["javascript", "typescript"]
+category: javascript
+tags:
+  - javascript
+  - typescript
 lang: en
-description: "\"Understand the differences between reference and value in JavaScript: primitives are copied, objects create shared pointers. Learn cloning techniques.\""
-seoDescription: "\"Understand the differences between reference and value in JavaScript: primitives are copied, objects create shared pointers.\""
-slug: "the-concept-of-reference-and-value-in-javascript"
+description: '"Understand the differences between reference and value in JavaScript: primitives are copied, objects create shared pointers. Learn cloning techniques."'
+seoDescription: '"Understand the differences between reference and value in JavaScript: primitives are copied, objects create shared pointers."'
+slug: the-concept-of-reference-and-value-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 During a conversation in the [Formação TS](https://formacaots.com.br) community, one of the students asked about one of the topics that were very famous in the past, but I haven't heard about it for years. The concept of **reference vs value** in JavaScript.

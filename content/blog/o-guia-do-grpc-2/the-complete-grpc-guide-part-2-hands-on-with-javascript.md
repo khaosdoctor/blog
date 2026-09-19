@@ -2,18 +2,22 @@
 title: "The complete gRPC guide part 2: Hands-on with JavaScript"
 pubDate: 2021-05-12T13:00:00.000Z
 updatedDate: 2026-07-16T16:15:27.000Z
-category: "infra"
-tags: ["grpc", "javascript", "protobuf", "nodejs"]
+category: infra
+tags:
+  - grpc
+  - javascript
+  - protobuf
+  - nodejs
 series: grpc
 seriesOrder: 2
 lang: en
-description: "Understand what gRPC is for JavaScript, how a gRPC call works, and how you can transform all your APIs to be faster and more descriptive!"
+description: Understand what gRPC is for JavaScript, how a gRPC call works, and how you can transform all your APIs to be faster and more descriptive!
 seoTitle: "The complete gRPC guide: gRPC and JavaScript"
-seoDescription: "Understand what gRPC is for JavaScript, how a gRPC call works, and how you can transform all your APIs to be faster."
-slug: "the-complete-grpc-guide-part-2-hands-on-with-javascript"
+seoDescription: Understand what gRPC is for JavaScript, how a gRPC call works, and how you can transform all your APIs to be faster.
+slug: the-complete-grpc-guide-part-2-hands-on-with-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We've reached the **second part of our series** on what gRPC is and how we can use it efficiently to replace what we use today with REST. In the [first part of this series](/guia-grpc-1/) I gave the full explanation of how gRPC works internally and how it's assembled in a standard HTTP/2 request with a binary payload using **protobuf** as the encoding layer.

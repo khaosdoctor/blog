@@ -1,16 +1,20 @@
 ---
-title: "JavaScript Decorators"
+title: JavaScript Decorators
 pubDate: 2022-11-04T14:00:14.000Z
 updatedDate: 2026-07-16T16:05:19.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "development", "typescript"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - development
+  - typescript
 lang: en
-description: "One of the most important proposals for JavaScript has just reached stage 3! Understand what decorators are and why they are not the only novelty of this proposal!"
-seoDescription: "One of the most important proposals for JavaScript is at stage 3! What are decorators and why are they not the only novelty of this proposal?"
-slug: "javascript-decorators"
+description: One of the most important proposals for JavaScript has just reached stage 3! Understand what decorators are and why they are not the only novelty of this proposal!
+seoDescription: One of the most important proposals for JavaScript is at stage 3! What are decorators and why are they not the only novelty of this proposal?
+slug: javascript-decorators
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Decorators are one of the oldest [proposals](https://github.com/tc39/proposal-decorators) for JavaScript. How many times have you heard that "JavaScript will have decorators soon"? But what are these decorators and what will they change in our lives? Today it is at stage 3, which means the time for it to go live is drastically reduced, but we still don't have a concrete answer.

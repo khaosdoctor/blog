@@ -1,15 +1,18 @@
 ---
-title: "Meet SparkPlug, the new JS compiler for V8"
+title: Meet SparkPlug, the new JS compiler for V8
 pubDate: 2021-08-17T20:16:48.000Z
 updatedDate: 2026-07-16T16:13:06.000Z
-category: "javascript"
-tags: ["javascript", "nodejs", "architecture"]
+category: javascript
+tags:
+  - javascript
+  - nodejs
+  - architecture
 lang: en
-description: "Meet the reason for a 15% performance boost in V8-based browsers and how it will change your code!"
-slug: "meet-sparkplug-the-new-v8-js-compiler"
+description: Meet the reason for a 15% performance boost in V8-based browsers and how it will change your code!
+slug: meet-sparkplug-the-new-v8-js-compiler
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 JavaScript is a box of surprises, it seems to be an extremely simple language that runs everywhere. But it's precisely this versatility that makes JS increasingly complex.

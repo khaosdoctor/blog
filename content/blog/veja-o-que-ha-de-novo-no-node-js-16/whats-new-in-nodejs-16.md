@@ -1,15 +1,18 @@
 ---
-title: "See what's new in Node.js 16"
+title: See what's new in Node.js 16
 pubDate: 2021-05-19T17:46:04.000Z
 updatedDate: 2026-07-16T16:15:02.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "drop"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - drop
 lang: en
-description: "Come learn what's new in version 16 of the world's most famous JavaScript runtime!"
-slug: "whats-new-in-nodejs-16"
+description: Come learn what's new in version 16 of the world's most famous JavaScript runtime!
+slug: whats-new-in-nodejs-16
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In April 2021, [the launch of Node.js version 16 was announced](https://medium.com/the-node-js-collection/node-js-16-available-now-7f5099a97e70), and as is customary, even-numbered versions of the runtime are considered _production ready_, meaning they are the versions that will be definitive for production.

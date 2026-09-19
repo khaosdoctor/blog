@@ -2,15 +2,19 @@
 title: "Meetup: 1st Meetrybe - Code architecture"
 pubDate: 2020-07-25T17:01:16.000Z
 updatedDate: 2026-07-16T16:28:20.000Z
-category: "meta"
-tags: ["video", "meetup", "development", "architecture"]
+category: meta
+tags:
+  - video
+  - meetup
+  - development
+  - architecture
 lang: en
-description: "On the 25th I took part in the first Meetrybe, the Trybe school's online meetup, with several heavyweight people talking about software architecture. See how it went!"
-seoDescription: "On the 25th I took part in the first Meetrybe, the Trybe school's online meetup, with several heavyweight people talking about software architecture"
-slug: "meetrybe-code-architecture"
+description: On the 25th I took part in the first Meetrybe, the Trybe school's online meetup, with several heavyweight people talking about software architecture. See how it went!
+seoDescription: On the 25th I took part in the first Meetrybe, the Trybe school's online meetup, with several heavyweight people talking about software architecture
+slug: meetrybe-code-architecture
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Today I took part in **Meetrybe**, the first online event by [**Trybe**](https://betrybe.com) along with a bunch of heavyweight people like: [Elton Minetto](https://twitter.com/eminetto), [Rogério Munhoz](https://twitter.com/roziscoding) and [Igor Halfeld](https://twitter.com/igorhalfeld).

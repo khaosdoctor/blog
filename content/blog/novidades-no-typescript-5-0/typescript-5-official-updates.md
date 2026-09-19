@@ -1,15 +1,18 @@
 ---
-title: "TypeScript 5.0's Official Features"
+title: TypeScript 5.0's Official Features
 pubDate: 2023-03-23T11:00:38.000Z
 updatedDate: 2026-07-16T16:03:10.000Z
-category: "typescript"
-tags: ["typescript", "development", "technology"]
+category: typescript
+tags:
+  - typescript
+  - development
+  - technology
 lang: en
-description: "It's official! TypeScript has released version 5.0, and I'm going to tell you all about what's new!"
-slug: "typescript-5-official-updates"
+description: It's official! TypeScript has released version 5.0, and I'm going to tell you all about what's new!
+slug: typescript-5-official-updates
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 It's official! In my [last post](/typescript-5/) on this subject, I covered the semi-official release of TS 5.0. The beta version was almost ready but still wasn't fully 100%, so I'm covering a new release here with all the official features that came out in the latest version of our blue friend!

@@ -1,16 +1,19 @@
 ---
-title: "\"Will JavaScript stop being single-threaded? Understanding Module Expressions\""
+title: '"Will JavaScript stop being single-threaded? Understanding Module Expressions"'
 pubDate: 2022-12-08T13:00:41.000Z
 updatedDate: 2026-07-16T16:04:57.000Z
-category: "typescript"
-tags: ["ecmascript", "javascript", "development"]
+category: typescript
+tags:
+  - ecmascript
+  - javascript
+  - development
 lang: en
 description: "\"What if JavaScript were as good with multiple threads as it behaves today with just one? Let's understand Block Expressions!\""
-seoTitle: "\"What are Module Expressions in JavaScript\""
-slug: "is-javascript-going-to-stop-being-single-threaded"
+seoTitle: '"What are Module Expressions in JavaScript"'
+slug: is-javascript-going-to-stop-being-single-threaded
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We grew up hearing as developers that JavaScript is a _single-threaded_ language, meaning we only have a single process and we cannot leave it. This proved wrong a few years ago when new APIs like [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) and [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) were created.

@@ -1,17 +1,21 @@
 ---
-title: "What are errors and what does error.cause do in JavaScript?"
+title: What are errors and what does error.cause do in JavaScript?
 pubDate: 2023-01-18T11:00:30.000Z
 updatedDate: 2026-07-16T16:04:10.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "typescript", "development"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - typescript
+  - development
 lang: en
-description: "Error handling is one of the most important and most difficult skills for any developer. But almost nobody knows there's a much easier way to handle your errors."
-seoTitle: "What are errors in JavaScript and what is error.cause?"
-seoDescription: "Error handling is one of the most important skills for any developer and app, but what most people don't know is there's a much easier way!"
-slug: "what-are-errors-and-what-is-error-cause-for-in-javascript"
+description: Error handling is one of the most important and most difficult skills for any developer. But almost nobody knows there's a much easier way to handle your errors.
+seoTitle: What are errors in JavaScript and what is error.cause?
+seoDescription: Error handling is one of the most important skills for any developer and app, but what most people don't know is there's a much easier way!
+slug: what-are-errors-and-what-is-error-cause-for-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Errors are probably the main construct of any programming language. They exist in all of them, we have several names for them: bugs, errors, exceptions, etc.

@@ -1,15 +1,18 @@
 ---
-title: "Atomic operations with Deno KV"
+title: Atomic operations with Deno KV
 pubDate: 2023-07-27T08:00:25.000Z
 updatedDate: 2026-07-16T15:59:05.000Z
-category: "javascript"
-tags: ["deno", "typescript", "databases"]
+category: javascript
+tags:
+  - deno
+  - typescript
+  - databases
 lang: en
-description: "Deno KV is advancing faster and faster. Let's learn what atomic transactions are and how they're useful in a KV database."
-slug: "atomic-operations-with-deno-kv"
+description: Deno KV is advancing faster and faster. Let's learn what atomic transactions are and how they're useful in a KV database.
+slug: atomic-operations-with-deno-kv
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In [another article](/deno-kv-beta/) we discussed the new closed beta version of Deno KV and also talked about the concept of key and value. But unfortunately, since the article was already quite large, some things were left out, one of those things was the incredible atomicity capability of KV.

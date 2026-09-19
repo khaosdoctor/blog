@@ -1,16 +1,18 @@
 ---
-title: "\"What are generators for in JS?\""
+title: '"What are generators for in JS?"'
 pubDate: 2023-01-05T13:00:46.000Z
 updatedDate: 2026-07-16T16:04:21.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
 lang: en
 description: "\"Generators are not a recent API in JavaScript, yet they remain little known. Let's learn what generators are for, how you can use them in your applications, and how to take your skills to the next level with this feature.\""
 seoDescription: "\"Generators are not a recent API in JavaScript, yet they remain little known. Let's learn what generators are for and how you can use them in your applications.\""
-slug: "what-are-generators-in-js-for"
+slug: what-are-generators-in-js-for
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Two of the most interesting, and also most complex, structures in JavaScript are **iterators** and **generators**. These two structures are not new. In fact, I wrote about both [generators](https://medium.com/trainingcenter/javascript-entendendo-generators-408cbce9aee) and [iterators](https://medium.com/trainingcenter/iterators-em-javascript-880adef14495) back in 2017. But even though these two structures (especially iterators) are heavily used in many frameworks and even in core language constructs like Promises and our beloved async/await, generators are still not widely known or used.

@@ -2,17 +2,18 @@
 title: "Type-level programming - #TypeScriptWeek day 5"
 pubDate: 2023-04-07T11:00:08.000Z
 updatedDate: 2026-07-16T16:01:39.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 series: typescript-week
 seriesOrder: 5
 lang: en
-description: "You've heard of object-oriented programming, but what about type-oriented? A development style that can help you write much safer code with TypeScript"
-seoTitle: "Type-level programming - Type orientation with TypeScript"
-slug: "type-level-programming-semanats-day-5"
+description: You've heard of object-oriented programming, but what about type-oriented? A development style that can help you write much safer code with TypeScript
+seoTitle: Type-level programming - Type orientation with TypeScript
+slug: type-level-programming-semanats-day-5
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We're reaching the end of our week of TypeScript content, and most of what we've seen here so far relates to how we combine our types with our code—in other words, how we can add more safety when running our application in production.

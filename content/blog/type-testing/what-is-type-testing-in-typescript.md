@@ -1,16 +1,20 @@
 ---
-title: "What is type-testing with TypeScript? Is it an anti-pattern? Is it worth it?"
+title: What is type-testing with TypeScript? Is it an anti-pattern? Is it worth it?
 pubDate: 2023-06-14T22:46:19.000Z
 updatedDate: 2026-07-16T16:00:04.000Z
-category: "typescript"
-tags: ["typescript", "javascript", "nodejs", "development"]
+category: typescript
+tags:
+  - typescript
+  - javascript
+  - nodejs
+  - development
 lang: en
-description: "Did you know there's a type of test you can't do in JavaScript? Learn all about Type Testing with TypeScript!"
-seoTitle: "Is type testing with TypeScript worth it?"
-slug: "what-is-type-testing-in-typescript"
+description: Did you know there's a type of test you can't do in JavaScript? Learn all about Type Testing with TypeScript!
+seoTitle: Is type testing with TypeScript worth it?
+slug: what-is-type-testing-in-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Recently I [posted about this](https://www.linkedin.com/feed/update/urn:li:share:7062034333103976448) commenting on **Type-Testing**, and it went so well! I was really happy about all the comments and questions people left there.

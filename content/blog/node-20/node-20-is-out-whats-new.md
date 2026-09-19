@@ -1,16 +1,20 @@
 ---
-title: "Node.js 20 is out! Learn about the new features"
+title: Node.js 20 is out! Learn about the new features
 pubDate: 2023-04-27T10:00:07.000Z
 updatedDate: 2026-07-16T16:01:05.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "ecmascript", "development"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - ecmascript
+  - development
 lang: en
-description: "Another year, another official Node.js version is out. Version 20 brings significant changes, learn all about them here!"
-seoTitle: "What are the new features that Node.js 20 brought?"
-slug: "node-20-is-out-whats-new"
+description: Another year, another official Node.js version is out. Version 20 brings significant changes, learn all about them here!
+seoTitle: What are the new features that Node.js 20 brought?
+slug: node-20-is-out-whats-new
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Another year, another Node version is available! And as usual, I'll share all the coolest new features here in this post so you don't miss anything!

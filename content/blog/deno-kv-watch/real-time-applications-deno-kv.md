@@ -1,15 +1,17 @@
 ---
-title: "Real-time applications with Deno KV"
+title: Real-time applications with Deno KV
 pubDate: 2024-01-24T11:00:34.000Z
 updatedDate: 2026-07-16T15:53:37.000Z
-category: "javascript"
-tags: ["deno", "typescript"]
+category: javascript
+tags:
+  - deno
+  - typescript
 lang: en
-description: "Creating real-time applications became much easier with a new tool released by Deno in version 1.38.5, the watch mode!"
-slug: "real-time-applications-deno-kv"
+description: Creating real-time applications became much easier with a new tool released by Deno in version 1.38.5, the watch mode!
+slug: real-time-applications-deno-kv
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Real-time applications have always been a major challenge for most developers, mainly because they follow a paradigm quite different from what we are used to working with.

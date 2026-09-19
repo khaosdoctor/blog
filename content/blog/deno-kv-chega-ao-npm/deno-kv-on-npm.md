@@ -1,15 +1,18 @@
 ---
-title: "Deno KV on NPM - the database you needed and didn't know it"
+title: Deno KV on NPM - the database you needed and didn't know it
 pubDate: 2024-03-27T11:00:15.000Z
 updatedDate: 2026-07-16T17:57:36.000Z
-category: "javascript"
-tags: ["deno", "typescript", "databases"]
+category: javascript
+tags:
+  - deno
+  - typescript
+  - databases
 lang: en
-description: "The coolest database in the world just arrived for Node.js users with NPM."
-slug: "deno-kv-on-npm"
+description: The coolest database in the world just arrived for Node.js users with NPM.
+slug: deno-kv-on-npm
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We already discussed [Deno KV here](/deno-kv-beta/) in the past, but the big difference is that this database only worked on Deno, until now!

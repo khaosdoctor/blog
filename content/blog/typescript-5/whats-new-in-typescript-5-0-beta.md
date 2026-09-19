@@ -1,16 +1,21 @@
 ---
-title: "What's New in TypeScript 5.0 Beta"
+title: What's New in TypeScript 5.0 Beta
 pubDate: 2023-02-02T11:11:51.000Z
 updatedDate: 2026-07-16T16:03:46.000Z
-category: "typescript"
-tags: ["typescript", "development", "ecmascript", "javascript", "nodejs"]
+category: typescript
+tags:
+  - typescript
+  - development
+  - ecmascript
+  - javascript
+  - nodejs
 lang: en
-description: "TypeScript 5.0 beta is out! Time to discover what's new in this version of the superset we all love!"
-seoTitle: "TypeScript 5.0 Beta What's New"
-slug: "whats-new-in-typescript-5-0-beta"
+description: TypeScript 5.0 beta is out! Time to discover what's new in this version of the superset we all love!
+seoTitle: TypeScript 5.0 Beta What's New
+slug: whats-new-in-typescript-5-0-beta
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Another day, another version of our beloved JavaScript superset is here! On January 26, 2023, [Microsoft released the TypeScript 5.0 beta](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/), and this version includes some of the most interesting and important features launched in TypeScript in a long time! Let's discover what they are!

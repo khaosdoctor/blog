@@ -2,14 +2,18 @@
 title: "\"We're at 4k! Thank you!\""
 pubDate: 2020-12-09T17:33:25.000Z
 updatedDate: 2026-07-16T16:20:19.000Z
-category: "meta"
-tags: ["blog", "events", "news", "info"]
+category: meta
+tags:
+  - blog
+  - events
+  - news
+  - info
 lang: en
 description: "\"Thank you for reaching 4k followers! To celebrate this milestone, I'm running some awesome giveaways!\""
-slug: "we-are-4k-thank-you"
+slug: we-are-4k-thank-you
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I want to thank everyone who made this achievement possible! We're now 4,000 people on Twitter who love technology and enjoy chatting and discovering more content!

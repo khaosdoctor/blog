@@ -2,15 +2,19 @@
 title: "TypeScript 5.2's New Feature: Introducing Using"
 pubDate: 2023-08-03T11:00:11.000Z
 updatedDate: 2026-07-16T15:58:29.000Z
-category: "typescript"
-tags: ["typescript", "javascript", "nodejs", "development"]
+category: typescript
+tags:
+  - typescript
+  - javascript
+  - nodejs
+  - development
 lang: en
-description: "TypeScript 5.2 is implementing a new keyword called using. But do you know what it's for?"
-seoTitle: "Everything about TypeScript 5.2's \"using\" and its benefits"
-slug: "typescript-5-2-using"
+description: TypeScript 5.2 is implementing a new keyword called using. But do you know what it's for?
+seoTitle: Everything about TypeScript 5.2's "using" and its benefits
+slug: typescript-5-2-using
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Once again we're here for **[TypeScript](https://hotm.art/yd4IsL)** updates! This time we're talking about a feature that's not just new to TS but is also [coming](https://github.com/tc39/proposal-explicit-resource-management) to JavaScript soon!

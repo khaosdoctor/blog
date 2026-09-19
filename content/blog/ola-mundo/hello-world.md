@@ -1,15 +1,18 @@
 ---
-title: "Hello, World!"
+title: Hello, World!
 pubDate: 2020-07-23T00:23:11.000Z
 updatedDate: 2026-07-16T16:28:42.000Z
-category: "meta"
-tags: ["blog", "news", "info"]
+category: meta
+tags:
+  - blog
+  - news
+  - info
 lang: en
-description: "After months of researching and working toward a new phase of content production, this blog has finally come to life!"
-slug: "hello-world"
+description: After months of researching and working toward a new phase of content production, this blog has finally come to life!
+slug: hello-world
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Hey everyone! This is the **first article on this blog!**

@@ -1,15 +1,18 @@
 ---
-title: "Simpler CLIs with Util.parseArgs"
+title: Simpler CLIs with Util.parseArgs
 pubDate: 2022-10-20T13:00:04.000Z
 updatedDate: 2026-07-16T16:05:43.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "typescript"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - typescript
 lang: en
-description: "Learn how Node.js made building command-line tools easier with the new parseArgs method!"
-slug: "simpler-clis-with-util-parseargs"
+description: Learn how Node.js made building command-line tools easier with the new parseArgs method!
+slug: simpler-clis-with-util-parseargs
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Command-line applications, often called CLIs (Command Line Interfaces), are extremely common, especially when working with developers.

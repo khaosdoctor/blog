@@ -2,17 +2,24 @@
 title: "The complete gRPC guide part 3: Types everywhere with TypeScript!"
 pubDate: 2021-05-26T15:10:32.000Z
 updatedDate: 2026-07-16T16:14:51.000Z
-category: "infra"
-tags: ["grpc", "typescript", "nodejs", "series", "protobuf", "rest", "architecture"]
+category: infra
+tags:
+  - grpc
+  - typescript
+  - nodejs
+  - series
+  - protobuf
+  - rest
+  - architecture
 series: grpc
 seriesOrder: 3
 lang: en
-description: "In this chapter of our gRPC series, we'll learn how to integrate TypeScript with gRPC and leverage its complete type system!"
-seoDescription: "In this chapter of our gRPC series, learn how to integrate TypeScript with gRPC and leverage its complete type system!"
-slug: "the-complete-grpc-guide-part-3-types-everywhere-with-typescript"
+description: In this chapter of our gRPC series, we'll learn how to integrate TypeScript with gRPC and leverage its complete type system!
+seoDescription: In this chapter of our gRPC series, learn how to integrate TypeScript with gRPC and leverage its complete type system!
+slug: the-complete-grpc-guide-part-3-types-everywhere-with-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In our [previous guide article](/o-guia-do-grpc-2/) we saw how to integrate gRPC with JavaScript in a simple and quick way. Now it's time to level up and add types to this application! And when we talk about types, we automatically think of **TypeScript**!

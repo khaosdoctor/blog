@@ -1,16 +1,19 @@
 ---
-title: "Getting Started with the Node.js Test Runner"
+title: Getting Started with the Node.js Test Runner
 pubDate: 2024-05-30T11:00:15.000Z
 updatedDate: 2026-07-16T17:56:29.000Z
-category: "javascript"
-tags: ["nodejs", "typescript", "tests"]
+category: javascript
+tags:
+  - nodejs
+  - typescript
+  - tests
 lang: en
 description: "Learn how to start writing your tests with Node.js in the simplest, easiest way possible: using the Node.js Test Runner"
-seoTitle: "How to write tests with the Node.js Test Runner"
-slug: "getting-started-with-the-node-js-test-runner"
+seoTitle: How to write tests with the Node.js Test Runner
+slug: getting-started-with-the-node-js-test-runner
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I've been talking a lot about the Test Runner in a bunch of places (including [here on the blog](/node-test-runner/)), and I recently took part in a really cool podcast with Ryan talking more about this tool that showed up not long ago and has already won everyone's heart.

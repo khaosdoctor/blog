@@ -1,17 +1,30 @@
 ---
-title: "Custom metrics with AKS"
+title: Custom metrics with AKS
 pubDate: 2021-02-09T13:00:00.000Z
 updatedDate: 2026-07-16T16:18:46.000Z
-category: "infra"
-tags: ["kubernetes", "azure", "containers", "monitor", "devops", "cloud", "technology", "aks", "azure monitor", "prometheus", "golang", "nodejs", "docker"]
+category: infra
+tags:
+  - kubernetes
+  - azure
+  - containers
+  - monitor
+  - devops
+  - cloud
+  - technology
+  - aks
+  - azure monitor
+  - prometheus
+  - golang
+  - nodejs
+  - docker
 lang: en
-description: "Monitoring is very important for distributed applications. Learn how to create and monitor your applications with custom Prometheus metrics for Azure Monitor."
-seoTitle: "Custom metrics with AKS and Azure Monitor"
-seoDescription: "Monitoring is very important for distributed applications. Learn how to create and monitor your applications with custom metrics for Azure Monitor."
-slug: "custom-metrics-with-aks"
+description: Monitoring is very important for distributed applications. Learn how to create and monitor your applications with custom Prometheus metrics for Azure Monitor.
+seoTitle: Custom metrics with AKS and Azure Monitor
+seoDescription: Monitoring is very important for distributed applications. Learn how to create and monitor your applications with custom metrics for Azure Monitor.
+slug: custom-metrics-with-aks
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 When working with microservices, we always hear that **monitoring** and **observability** are key metrics to keep our ecosystem cohesive, functional, and maintain sanity about what's happening. We talked about this in the [#FalaDev podcast I participated in with several guests](/podcast-faladev-vamos-falar-de-microsservicos/).

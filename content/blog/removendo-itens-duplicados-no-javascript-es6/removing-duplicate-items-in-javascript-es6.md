@@ -1,16 +1,20 @@
 ---
-title: "Removing duplicate items in JavaScript ES6"
+title: Removing duplicate items in JavaScript ES6
 pubDate: 2021-09-08T12:00:00.000Z
 updatedDate: 2026-07-16T16:12:41.000Z
-category: "javascript"
-tags: ["javascript", "performance", "ecmascript", "es2020"]
+category: javascript
+tags:
+  - javascript
+  - performance
+  - ecmascript
+  - es2020
 lang: en
-description: "One of the biggest challenges for developers when using Maps and Sets is removing duplicate objects that are not primitives. Learn the best way to make this change."
-seoDescription: "One of the biggest challenges when using Maps and Sets is removing duplicate objects that are not primitives. Learn the best way to make this change."
-slug: "removing-duplicate-items-in-javascript-es6"
+description: One of the biggest challenges for developers when using Maps and Sets is removing duplicate objects that are not primitives. Learn the best way to make this change.
+seoDescription: One of the biggest challenges when using Maps and Sets is removing duplicate objects that are not primitives. Learn the best way to make this change.
+slug: removing-duplicate-items-in-javascript-es6
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I think everyone, like me, has had to remove duplicate items from an Array list at some point, but is the way we learned really the best?

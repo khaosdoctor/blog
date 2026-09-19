@@ -2,17 +2,18 @@
 title: "Advanced TypeScript Techniques - #SemanaTS day 4"
 pubDate: 2023-04-06T11:00:47.000Z
 updatedDate: 2026-07-16T16:01:51.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 series: typescript-week
 seriesOrder: 4
 lang: en
-description: "Learn all about more advanced TypeScript techniques, from type narrowing to generics and branded types."
-seoTitle: "Advanced TypeScript Techniques"
-slug: "advanced-typescript-techniques-semanats-day-4"
+description: Learn all about more advanced TypeScript techniques, from type narrowing to generics and branded types.
+seoTitle: Advanced TypeScript Techniques
+slug: advanced-typescript-techniques-semanats-day-4
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We have been talking a lot about types and gone through some good and bad code practices using TypeScript, but I still feel we are missing something here. That something is the less conventional techniques you'll see around.

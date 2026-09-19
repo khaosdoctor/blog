@@ -1,16 +1,18 @@
 ---
-title: "JavaScript gains new Set methods"
+title: JavaScript gains new Set methods
 pubDate: 2024-07-04T11:00:40.000Z
 updatedDate: 2026-07-16T17:55:39.000Z
-category: "typescript"
-tags: ["ecmascript", "javascript"]
+category: typescript
+tags:
+  - ecmascript
+  - javascript
 lang: en
-description: "JavaScript has just gained new Set methods in 2024, let's explore them!"
-seoTitle: "Everything about the new Set methods in JavaScript"
-slug: "javascript-new-set-methods"
+description: JavaScript has just gained new Set methods in 2024, let's explore them!
+seoTitle: Everything about the new Set methods in JavaScript
+slug: javascript-new-set-methods
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Seven years ago, people asked for Sets to have more methods beyond the standard `add`, `has`, etc. These methods were designed for cases where you need to work with multiple sets, for example, creating unions, intersections, etc., which are very common operations.

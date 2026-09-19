@@ -1,15 +1,24 @@
 ---
-title: "\"How to take control of your Kubernetes cluster with affinity and tolerations\""
+title: '"How to take control of your Kubernetes cluster with affinity and tolerations"'
 pubDate: 2021-03-02T12:00:00.000Z
 updatedDate: 2026-07-16T16:17:48.000Z
-category: "infra"
-tags: ["kubernetes", "aks", "azure", "cloud", "containers", "development", "devops", "docker", "technology"]
+category: infra
+tags:
+  - kubernetes
+  - aks
+  - azure
+  - cloud
+  - containers
+  - development
+  - devops
+  - docker
+  - technology
 lang: en
 description: "\"Do you control your Kubernetes cluster? Let's learn techniques and concepts that will help you have control of your applications within the distributed model\""
-slug: "how-to-control-your-kubernetes-cluster-with-affinity-and-tolerations"
+slug: how-to-control-your-kubernetes-cluster-with-affinity-and-tolerations
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 When working with Kubernetes clusters, it's common to have applications that need to be on specific nodes. This is even more common when we have a series of nodes that are part of our cluster through **Node Pools**.

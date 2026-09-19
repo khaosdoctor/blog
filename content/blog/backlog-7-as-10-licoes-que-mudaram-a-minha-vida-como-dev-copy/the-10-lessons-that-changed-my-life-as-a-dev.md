@@ -2,15 +2,18 @@
 title: "Backlog #7 - The 10 Lessons That Changed My Life as a Dev"
 pubDate: 2025-02-15T14:56:35.000Z
 updatedDate: 2026-07-16T17:48:28.000Z
-category: "opinion"
-tags: ["backlog-newsletter", "career", "opinion"]
+category: opinion
+tags:
+  - backlog-newsletter
+  - career
+  - opinion
 lang: en
-description: "Over 13 years I built a dev career I'm proud of. But I didn't do it alone. These were the 10 most important lessons I learned along the way."
-seoTitle: "The lessons that changed my life as a dev"
-slug: "the-10-lessons-that-changed-my-life-as-a-dev"
+description: Over 13 years I built a dev career I'm proud of. But I didn't do it alone. These were the 10 most important lessons I learned along the way.
+seoTitle: The lessons that changed my life as a dev
+slug: the-10-lessons-that-changed-my-life-as-a-dev
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Another day, another backlog! Today I'm bringing something different: the 10 most important lessons I learned in 13 years as a dev.

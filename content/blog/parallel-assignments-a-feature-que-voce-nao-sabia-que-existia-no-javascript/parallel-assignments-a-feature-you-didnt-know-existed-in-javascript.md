@@ -1,16 +1,18 @@
 ---
-title: "Parallel Assignments - A feature you didn't know existed in JavaScript"
+title: Parallel Assignments - A feature you didn't know existed in JavaScript
 pubDate: 2024-03-13T11:00:54.000Z
 updatedDate: 2026-07-16T15:52:12.000Z
-category: "javascript"
-tags: ["javascript", "typescript"]
+category: javascript
+tags:
+  - javascript
+  - typescript
 lang: en
-description: "Do you know what double assignments or parallel assignments are? Let's discover this unknown feature of JavaScript!"
-seoTitle: "Do you know what parallel assignments in JavaScript are?"
-slug: "parallel-assignments-a-feature-you-didnt-know-existed-in-javascript"
+description: Do you know what double assignments or parallel assignments are? Let's discover this unknown feature of JavaScript!
+seoTitle: Do you know what parallel assignments in JavaScript are?
+slug: parallel-assignments-a-feature-you-didnt-know-existed-in-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Today for another short article here, I'll show you a feature you probably didn't know existed in JavaScript. **Parallel assignments**.

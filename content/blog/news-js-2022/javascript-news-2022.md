@@ -1,16 +1,20 @@
 ---
-title: "JavaScript News in 2022"
+title: JavaScript News in 2022
 pubDate: 2022-07-28T07:00:00.000Z
 updatedDate: 2026-07-16T16:07:56.000Z
-category: "javascript"
-tags: ["javascript", "ecmascript", "nodejs", "development"]
+category: javascript
+tags:
+  - javascript
+  - ecmascript
+  - nodejs
+  - development
 lang: en
-description: "JavaScript is always evolving! Join me in this article where I show you what's new in the world's most loved language in 2022."
-seoDescription: "JavaScript is always evolving! Join me in this article where I show you what's new in the world's most loved language in 2022."
-slug: "javascript-news-2022"
+description: JavaScript is always evolving! Join me in this article where I show you what's new in the world's most loved language in 2022.
+seoDescription: JavaScript is always evolving! Join me in this article where I show you what's new in the world's most loved language in 2022.
+slug: javascript-news-2022
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Every month we have various news in our favorite languages, and JavaScript is no different!

@@ -1,15 +1,16 @@
 ---
-title: "What's New in TypeScript 5.4"
+title: What's New in TypeScript 5.4
 pubDate: 2024-02-14T11:00:19.000Z
 updatedDate: 2026-07-16T15:53:14.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 lang: en
-description: "See the main changes in the TypeScript 5.4 beta, including the new NoInfer type with detailed explanations!"
-slug: "whats-new-in-typescript-5-4-beta"
+description: See the main changes in the TypeScript 5.4 beta, including the new NoInfer type with detailed explanations!
+slug: whats-new-in-typescript-5-4-beta
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Another day, another TS version! This time we're going to talk about the main changes coming in the TypeScript 5.4 beta.

@@ -1,15 +1,19 @@
 ---
-title: "\"What is NPM package provenance?\""
+title: '"What is NPM package provenance?"'
 pubDate: 2023-05-12T11:00:16.000Z
 updatedDate: 2026-07-16T16:00:29.000Z
-category: "security"
-tags: ["security", "nodejs", "javascript", "development"]
+category: security
+tags:
+  - security
+  - nodejs
+  - javascript
+  - development
 lang: en
-description: "\"NPM launched a quite interesting feature that will greatly improve the security of our packages. Learn about package provenance!\""
-slug: "what-is-npm-package-provenance"
+description: '"NPM launched a quite interesting feature that will greatly improve the security of our packages. Learn about package provenance!"'
+slug: what-is-npm-package-provenance
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 When we're talking about web development, one of the biggest problems we face is security. Especially when we're talking about Node.js development with packages distributed through NPM.

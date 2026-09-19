@@ -1,18 +1,26 @@
 ---
-title: "\"The complete gRPC guide part 1: What is gRPC?\""
+title: '"The complete gRPC guide part 1: What is gRPC?"'
 pubDate: 2021-04-20T11:00:00.000Z
 updatedDate: 2026-07-16T16:16:26.000Z
-category: "infra"
-tags: ["grpc", "series", "javascript", "typescript", "development", "protobuf", "rest", "architecture"]
+category: infra
+tags:
+  - grpc
+  - series
+  - javascript
+  - typescript
+  - development
+  - protobuf
+  - rest
+  - architecture
 series: grpc
 seriesOrder: 1
 lang: en
-description: "\"In this series of articles we will learn everything there is to learn about gRPC and how we use this incredible tool in our applications!\""
-seoDescription: "\"In this series of articles I talk about everything about gRPC. We start with the history and go all the way to more elaborate implementations using this incredible technology!\""
-slug: "the-complete-grpc-guide-part-1-what-is-grpc"
+description: '"In this series of articles we will learn everything there is to learn about gRPC and how we use this incredible tool in our applications!"'
+seoDescription: '"In this series of articles I talk about everything about gRPC. We start with the history and go all the way to more elaborate implementations using this incredible technology!"'
+slug: the-complete-grpc-guide-part-1-what-is-grpc
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 If you've been following me for a while, you know I'm a big fan of talking about new technologies, especially those that aren't that new, and above all, I'm a big fan of gRPC!

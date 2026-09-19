@@ -2,14 +2,16 @@
 title: "Backlog #3 - 29 years of JavaScript!"
 pubDate: 2024-12-12T11:00:40.000Z
 updatedDate: 2026-07-16T17:49:51.000Z
-category: "javascript"
-tags: ["backlog-newsletter", "javascript"]
+category: javascript
+tags:
+  - backlog-newsletter
+  - javascript
 lang: en
-description: "December 4th, 1995 was a special day because it was the release of the language everyone loves to hate! Let's get into the history of JavaScript!"
-slug: "backlog-3-29-years-of-javascript"
+description: December 4th, 1995 was a special day because it was the release of the language everyone loves to hate! Let's get into the history of JavaScript!
+slug: backlog-3-29-years-of-javascript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 December 4th, 1995 is a very special day. Not only because it's the year I was born, but also because it was the release of the language that, today, everyone loves to hate! **JavaScript**.

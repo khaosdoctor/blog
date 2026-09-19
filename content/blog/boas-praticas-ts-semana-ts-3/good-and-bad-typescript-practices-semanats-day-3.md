@@ -2,17 +2,18 @@
 title: "TypeScript good and bad practices - #SemanaTS day 3"
 pubDate: 2023-04-05T11:00:41.000Z
 updatedDate: 2026-07-16T16:02:06.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 series: typescript-week
 seriesOrder: 3
 lang: en
-description: "Have you ever wondered what the best TypeScript practices are for keeping your code typed and safe? I'm going to show you!"
-seoTitle: "TypeScript good and bad practices"
-slug: "good-and-bad-typescript-practices-semanats-day-3"
+description: Have you ever wondered what the best TypeScript practices are for keeping your code typed and safe? I'm going to show you!
+seoTitle: TypeScript good and bad practices
+slug: good-and-bad-typescript-practices-semanats-day-3
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 ---

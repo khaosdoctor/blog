@@ -6,12 +6,12 @@ category: career
 tags:
   - backlog-newsletter
 lang: en
-description: "Do you know what Slopware is? Well, let me introduce you to something that will probably leave you quite concerned."
-seoTitle: "The End of Well-Made Code. Meet \"Slopware\""
-slug: "backlog-10-slopware-the-end-of-well-made-code"
+description: Do you know what Slopware is? Well, let me introduce you to something that will probably leave you quite concerned.
+seoTitle: The End of Well-Made Code. Meet "Slopware"
+slug: backlog-10-slopware-the-end-of-well-made-code
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In my [previous Backlog](/o-que-aconteceu-com-devs/), I addressed a topic that has been bothering me a lot over the last few months: the fact that developers today are becoming increasingly lazy and delegating more and more tasks to AI. Since then we've had the advent of this, which I'm now naming as **Slopware**:

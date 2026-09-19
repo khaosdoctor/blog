@@ -2,18 +2,22 @@
 title: "Cryptography #1 - Asymmetric Cryptography with RSA"
 pubDate: 2024-03-06T11:00:32.000Z
 updatedDate: 2026-07-16T15:52:25.000Z
-category: "security"
-tags: ["security", "development", "cryptography", "series"]
+category: security
+tags:
+  - security
+  - development
+  - cryptography
+  - series
 series: cryptography-beginners
 seriesOrder: 1
 lang: en
-description: "Do you know how asymmetric key pairs that are all around us work? Want to learn how to calculate a key manually? Then this article is for you!"
-seoTitle: "Asymmetric cryptography and RSA keys - How do they work?"
-seoDescription: "In this article we will deeply learn what RSA and asymmetry are by creating our own RSA key manually and understanding all the concepts!"
-slug: "asymmetric-cryptography-with-rsa"
+description: Do you know how asymmetric key pairs that are all around us work? Want to learn how to calculate a key manually? Then this article is for you!
+seoTitle: Asymmetric cryptography and RSA keys - How do they work?
+seoDescription: In this article we will deeply learn what RSA and asymmetry are by creating our own RSA key manually and understanding all the concepts!
+slug: asymmetric-cryptography-with-rsa
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In the first article of this series we covered some basic cryptography concepts, and now that you know them, let's dive into one of the most common topics for developers in general. **Asymmetric Cryptography**.

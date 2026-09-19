@@ -1,15 +1,16 @@
 ---
-title: "Filtering classes and methods from a type in TypeScript"
+title: Filtering classes and methods from a type in TypeScript
 pubDate: 2024-04-03T11:00:57.000Z
 updatedDate: 2026-07-16T17:57:24.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 lang: en
-description: "Learn how to create a type in TypeScript that can help you build filtering functionality by removing methods from classes!"
-slug: "filtering-class-methods-from-a-type-in-typescript"
+description: Learn how to create a type in TypeScript that can help you build filtering functionality by removing methods from classes!
+slug: filtering-class-methods-from-a-type-in-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In this short post I want to introduce a problem we always have when dealing with TypeScript: **how can we list all the properties of a class**?

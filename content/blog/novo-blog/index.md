@@ -11,7 +11,7 @@ tags:
 series: sobre-escrever
 seriesName: Minhas motivações para escrever
 seriesOrder: 1
-heroImage: "./cover.png"
+heroImage: ./cover.png
 description: Depois de mais de um ano, eu estou de volta à escrita. Esse post fala um pouco sobre o que eu passei por esse tempo, e explicar o por quê do meu desaparecimento.
 draft: false
 ---

@@ -1,15 +1,18 @@
 ---
-title: ".env Support, API Changes and Deno 1.38 Features"
+title: .env Support, API Changes and Deno 1.38 Features
 pubDate: 2024-01-03T11:00:52.000Z
 updatedDate: 2026-07-16T15:54:48.000Z
-category: "javascript"
-tags: ["deno", "typescript", "development"]
+category: javascript
+tags:
+  - deno
+  - typescript
+  - development
 lang: en
-description: ".env file support, test runner in the REPL, unix socket support and much more in the new Deno version!"
-slug: "deno-1-38-new-features"
+description: .env file support, test runner in the REPL, unix socket support and much more in the new Deno version!
+slug: deno-1-38-new-features
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 In November the most beloved TypeScript runtime of all gained one more version! And, as is customary, we will cover here what we can expect new in this version 1.38 of Deno!

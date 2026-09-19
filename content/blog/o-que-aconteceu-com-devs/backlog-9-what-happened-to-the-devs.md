@@ -8,11 +8,11 @@ tags:
   - career
   - opinion
 lang: en
-description: "What happened to a profession that once prided itself on being super smart and focused on what it does? Did devs stop caring about their work?"
-slug: "backlog-9-what-happened-to-the-devs"
+description: What happened to a profession that once prided itself on being super smart and focused on what it does? Did devs stop caring about their work?
+slug: backlog-9-what-happened-to-the-devs
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Over the past few years, especially after the pandemic and the explosion of AI, I've witnessed a quiet decline in a profession that prided itself on pragmatism and attention to detail: software development.

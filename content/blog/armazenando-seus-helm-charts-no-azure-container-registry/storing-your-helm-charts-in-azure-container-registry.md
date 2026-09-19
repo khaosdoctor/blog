@@ -1,16 +1,24 @@
 ---
-title: "Storing your Helm Charts in Azure Container Registry"
+title: Storing your Helm Charts in Azure Container Registry
 pubDate: 2021-03-30T13:00:00.000Z
 updatedDate: 2026-07-16T16:17:13.000Z
-category: "infra"
-tags: ["helm", "kubernetes", "containers", "azure", "acr", "docker", "aks", "cloud"]
+category: infra
+tags:
+  - helm
+  - kubernetes
+  - containers
+  - azure
+  - acr
+  - docker
+  - aks
+  - cloud
 lang: en
-description: "Helm has a lot of amazing tooling around it, but chart storage has always been a problem. Learn how we can make the process much easier!"
-seoDescription: "Helm has amazing tooling, but chart storage has always been a problem. Learn how we can make the process much easier!"
-slug: "storing-your-helm-charts-in-azure-container-registry"
+description: Helm has a lot of amazing tooling around it, but chart storage has always been a problem. Learn how we can make the process much easier!
+seoDescription: Helm has amazing tooling, but chart storage has always been a problem. Learn how we can make the process much easier!
+slug: storing-your-helm-charts-in-azure-container-registry
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 One of the big advantages of understanding how the [container ecosystem](/oci-cri-docker-ecossistema-de-containers/) works is that we can figure out when the same standard can be used for several different specifications.

@@ -2,14 +2,18 @@
 title: "Backlog #4 - The first programming language"
 pubDate: 2024-12-25T11:00:16.000Z
 updatedDate: 2026-07-16T17:49:37.000Z
-category: "career"
-tags: ["backlog-newsletter", "computing", "development", "history"]
+category: career
+tags:
+  - backlog-newsletter
+  - computing
+  - development
+  - history
 lang: en
-description: "What if I told you the first programming language came out of a loom? Let's understand what sewing has to do with code!"
-slug: "backlog-4-first-programming-language"
+description: What if I told you the first programming language came out of a loom? Let's understand what sewing has to do with code!
+slug: backlog-4-first-programming-language
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 > This edition of _Backlog_ is special because it's the first (and probably the only one for years) to be published on Christmas. Consider this email my gift to you, who follows this project that means so much to me. Thank you so much for the support 💙

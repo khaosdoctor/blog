@@ -1,15 +1,16 @@
 ---
-title: "About Technical Interviews - It Was Never About the Code"
+title: About Technical Interviews - It Was Never About the Code
 pubDate: 2024-01-31T11:00:42.000Z
 updatedDate: 2026-07-16T15:53:26.000Z
-category: "career"
-tags: ["career"]
+category: career
+tags:
+  - career
 lang: en
-description: "In this article, we discuss the point of technical interviews and why I believe none of us really understood their true purpose."
-slug: "on-technical-interviews-it-was-never-about-the-code"
+description: In this article, we discuss the point of technical interviews and why I believe none of us really understood their true purpose.
+slug: on-technical-interviews-it-was-never-about-the-code
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 For over a decade working in IT, I've done my share of interviews across very small companies, medium companies, large companies, and absurdly large ones. Both nationally and internationally.

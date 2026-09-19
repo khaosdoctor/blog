@@ -1,15 +1,21 @@
 ---
-title: "\"Learn Everything About Your Services with Jaeger and Linkerd\""
+title: '"Learn Everything About Your Services with Jaeger and Linkerd"'
 pubDate: 2020-09-14T17:16:46.000Z
 updatedDate: 2026-07-16T16:24:20.000Z
-category: "infra"
-tags: ["kubernetes", "linkerd", "jaeger", "containers", "development", "technology"]
+category: infra
+tags:
+  - kubernetes
+  - linkerd
+  - jaeger
+  - containers
+  - development
+  - technology
 lang: en
 description: "\"Want to observe all the calls to your system in depth and understand when everything happened? Let's install Jaeger and have all that power!\""
-slug: "know-everything-about-your-services-with-jaeger-and-linkerd"
+slug: know-everything-about-your-services-with-jaeger-and-linkerd
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 We've talked a bit about Linkerd in a [previous post](/uma-introducao-a-service-mesh-com-linkerd/), and now, to expand our knowledge about service mesh even further, let's discuss an interesting concept that we'll explore more carefully in other articles. But here we'll have a practical example! **Tracing.**

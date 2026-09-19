@@ -1,15 +1,19 @@
 ---
-title: "\"Understanding timers/promises and AbortControllers in Node.js\""
+title: '"Understanding timers/promises and AbortControllers in Node.js"'
 pubDate: 2022-03-14T14:00:00.000Z
 updatedDate: 2026-07-16T16:10:41.000Z
-category: "javascript"
-tags: ["javascript", "nodejs", "development", "architecture"]
+category: javascript
+tags:
+  - javascript
+  - nodejs
+  - development
+  - architecture
 lang: en
-description: "\"Learn everything about new ways to cancel asynchronous functions and declare time intervals with promises in Node.js\""
-slug: "understanding-timers-promises-and-abortcontrollers-in-nodejs"
+description: '"Learn everything about new ways to cancel asynchronous functions and declare time intervals with promises in Node.js"'
+slug: understanding-timers-promises-and-abortcontrollers-in-nodejs
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 One of the oldest functionalities in JavaScript is what we call **timer APIs**. Their functionality is quite straightforward: they allow us to schedule code execution for the future!

@@ -1,15 +1,18 @@
 ---
-title: "Introducing the KEDA HTTP Add-on"
+title: Introducing the KEDA HTTP Add-on
 pubDate: 2021-07-02T20:01:58.000Z
 updatedDate: 2026-07-16T16:13:51.000Z
-category: "infra"
-tags: ["keda", "kubernetes", "containers"]
+category: infra
+tags:
+  - keda
+  - kubernetes
+  - containers
 lang: en
-description: "Learn how to scale your Kubernetes applications based on HTTP requests in Kubernetes with the KEDA HTTP Add-on"
-slug: "introducing-the-keda-http-add-on"
+description: Learn how to scale your Kubernetes applications based on HTTP requests in Kubernetes with the KEDA HTTP Add-on
+slug: introducing-the-keda-http-add-on
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 One of the things that makes me even happier about working with open source is when we can turn projects into reality and help a lot of people with what we set out to do!

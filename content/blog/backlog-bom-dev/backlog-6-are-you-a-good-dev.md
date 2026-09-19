@@ -2,15 +2,17 @@
 title: "Backlog #6 - Are you a good dev?"
 pubDate: 2025-01-23T11:00:04.000Z
 updatedDate: 2026-07-16T17:48:55.000Z
-category: "career"
-tags: ["backlog-newsletter", "career"]
+category: career
+tags:
+  - backlog-newsletter
+  - career
 lang: en
-description: "What makes a good dev a good dev? What is a strong engineer and a weak engineer? Are you one of the good ones?"
-seoTitle: "Can you measure efficiency in tech?"
-slug: "backlog-6-are-you-a-good-dev"
+description: What makes a good dev a good dev? What is a strong engineer and a weak engineer? Are you one of the good ones?
+seoTitle: Can you measure efficiency in tech?
+slug: backlog-6-are-you-a-good-dev
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Another day, another backlog out the door! Today I want to bring something different: it's not about history, and not directly about development either, but about devs in general. Let's talk about the **act of doing engineering** and the _software engineering profession as a whole_.

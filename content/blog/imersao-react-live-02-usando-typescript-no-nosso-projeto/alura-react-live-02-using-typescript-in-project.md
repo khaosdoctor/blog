@@ -2,15 +2,20 @@
 title: "Alura React Live #02 - Using TypeScript in our project"
 pubDate: 2020-07-29T23:28:30.000Z
 updatedDate: 2026-07-16T16:27:45.000Z
-category: "typescript"
-tags: ["video", "typescript", "react", "development", "technology"]
+category: typescript
+tags:
+  - video
+  - typescript
+  - react
+  - development
+  - technology
 lang: en
-description: "Do you know TypeScript? Did you know we can use TypeScript on the front-end? Let's explore an application and understand how TypeScript works using React!"
-seoDescription: "Do you know TypeScript? Did you know we can use TypeScript on the front-end? Let's explore an application and understand how TypeScript works on the front!"
-slug: "alura-react-live-02-using-typescript-in-project"
+description: Do you know TypeScript? Did you know we can use TypeScript on the front-end? Let's explore an application and understand how TypeScript works using React!
+seoDescription: Do you know TypeScript? Did you know we can use TypeScript on the front-end? Let's explore an application and understand how TypeScript works on the front!
+slug: alura-react-live-02-using-typescript-in-project
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Today I had the pleasure of participating with [Mario Souto](https://www.youtube.com/DevSoutinho/) in **#AluraImmersion**, a very engaging live session about how we can use [TypeScript](https://docs.microsoft.com/archive/msdn-magazine/2015/january/typescript-understanding-typescript?WT.mc_id=personal-blog-ludossan) in our React project!

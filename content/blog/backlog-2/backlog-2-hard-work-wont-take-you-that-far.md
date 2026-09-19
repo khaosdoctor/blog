@@ -2,15 +2,18 @@
 title: "Backlog #2 - Working hard won't get you that far"
 pubDate: 2024-11-28T11:00:38.000Z
 updatedDate: 2026-07-16T17:50:05.000Z
-category: "opinion"
-tags: ["backlog-newsletter", "opinion", "career"]
+category: opinion
+tags:
+  - backlog-newsletter
+  - opinion
+  - career
 lang: en
-description: "Talent is a myth, work and effort are nothing without context. In this edition, we're going to explore why success is pure luck, or almost..."
-seoTitle: "Working hard won't get you that far"
-slug: "backlog-2-hard-work-wont-take-you-that-far"
+description: Talent is a myth, work and effort are nothing without context. In this edition, we're going to explore why success is pure luck, or almost...
+seoTitle: Working hard won't get you that far
+slug: backlog-2-hard-work-wont-take-you-that-far
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 What if I told you that success is pure luck? That the month you were born in might have made the difference between you being super rich or not? In this edition, we're going to discuss why **success is pure luck, or almost...**

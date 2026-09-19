@@ -1,16 +1,19 @@
 ---
-title: "Node 21.2 is the most special version of all!"
+title: Node 21.2 is the most special version of all!
 pubDate: 2023-11-24T23:50:58.000Z
 updatedDate: 2026-07-16T15:55:11.000Z
-category: "javascript"
-tags: ["nodejs", "javascript", "development"]
+category: javascript
+tags:
+  - nodejs
+  - javascript
+  - development
 lang: en
-description: "Join me in understanding what changed in Node.js version 21.2, why this is one of the most special versions of all! And what it means!"
-seoTitle: "Node 21.2 improves the test runner with Date Mocks support"
-slug: "node-21-2-is-the-most-special-version-of-all"
+description: Join me in understanding what changed in Node.js version 21.2, why this is one of the most special versions of all! And what it means!
+seoTitle: Node 21.2 improves the test runner with Date Mocks support
+slug: node-21-2-is-the-most-special-version-of-all
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I recently posted [an article](/node-21/) discussing the new features in Node version 21, but one of those updates was left out!

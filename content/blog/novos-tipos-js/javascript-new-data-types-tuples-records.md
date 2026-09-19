@@ -1,15 +1,17 @@
 ---
-title: "Meet the new JavaScript data types - Tuples and Records"
+title: Meet the new JavaScript data types - Tuples and Records
 pubDate: 2022-03-22T14:00:00.000Z
 updatedDate: 2026-07-16T16:10:30.000Z
-category: "javascript"
-tags: ["javascript", "nodejs"]
+category: javascript
+tags:
+  - javascript
+  - nodejs
 lang: en
-description: "Meet the proposal for tuples and records that could change JavaScript history for the better! And you can still help shape this idea!"
-slug: "javascript-new-data-types-tuples-records"
+description: Meet the proposal for tuples and records that could change JavaScript history for the better! And you can still help shape this idea!
+slug: javascript-new-data-types-tuples-records
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 If you follow the [JavaScript proposals list](https://github.com/tc39/proposals) in the TC39 repository, you've probably already come across the latest proposals for the language.[^n1]

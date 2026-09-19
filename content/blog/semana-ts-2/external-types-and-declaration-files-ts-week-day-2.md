@@ -2,17 +2,18 @@
 title: "External types and declaration packages - #TypeScript Week day 2"
 pubDate: 2023-04-04T11:00:24.000Z
 updatedDate: 2026-07-16T16:02:20.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 series: typescript-week
 seriesOrder: 2
 lang: en
-description: "On the second day of TS week we'll talk about type declaration files and best practices for creating libraries!"
-seoTitle: "What are .d.ts type declaration files in TypeScript"
-slug: "external-types-and-declaration-files-ts-week-day-2"
+description: On the second day of TS week we'll talk about type declaration files and best practices for creating libraries!
+seoTitle: What are .d.ts type declaration files in TypeScript
+slug: external-types-and-declaration-files-ts-week-day-2
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Today we'll discuss **type declaration files**, the famous `.d.ts` files you've probably seen around if you've done any kind of project with TypeScript. I'll also show some best practices for publishing your type library to NPM (or another package manager).

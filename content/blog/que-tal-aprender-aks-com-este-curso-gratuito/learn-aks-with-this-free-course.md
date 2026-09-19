@@ -1,15 +1,20 @@
 ---
-title: "Want to learn AKS with this FREE course?"
+title: Want to learn AKS with this FREE course?
 pubDate: 2020-10-23T14:34:51.000Z
 updatedDate: 2026-07-16T16:22:19.000Z
-category: "infra"
-tags: ["azure", "containers", "kubernetes", "video", "cloud"]
+category: infra
+tags:
+  - azure
+  - containers
+  - kubernetes
+  - video
+  - cloud
 lang: en
-description: "In this free 8-hour training, I show how we can learn Kubernetes from zero to being capable of managing our own applications!"
-slug: "learn-aks-with-this-free-course"
+description: In this free 8-hour training, I show how we can learn Kubernetes from zero to being capable of managing our own applications!
+slug: learn-aks-with-this-free-course
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Last week I announced on my Twitter that I had just launched a **free** Kubernetes course with AKS as you can see in the tweet below

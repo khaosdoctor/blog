@@ -1,17 +1,20 @@
 ---
-title: "Automatic OS Updates with Unattended Upgrades"
+title: Automatic OS Updates with Unattended Upgrades
 pubDate: 2020-11-11T16:10:23.000Z
 updatedDate: 2026-07-16T16:21:31.000Z
-category: "infra"
-tags: ["cloud", "security", "architecture"]
+category: infra
+tags:
+  - cloud
+  - security
+  - architecture
 lang: en
-description: "How about configuring your server so it never needs your input again to install security updates?"
-seoTitle: "Updating VMs Automatically with Unattended Upgrades"
-seoDescription: "How about configuring your server so it never needs your input again to install operating system updates?"
-slug: "automatic-os-updates-unattended-upgrades"
+description: How about configuring your server so it never needs your input again to install security updates?
+seoTitle: Updating VMs Automatically with Unattended Upgrades
+seoDescription: How about configuring your server so it never needs your input again to install operating system updates?
+slug: automatic-os-updates-unattended-upgrades
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 When we're creating virtual machines, one of the biggest problems we have is keeping our operating systems up to date and free of bugs and security flaws.

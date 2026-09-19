@@ -1,15 +1,18 @@
 ---
-title: "What to Expect from JavaScript in 2025"
+title: What to Expect from JavaScript in 2025
 pubDate: 2024-07-24T11:00:49.000Z
 updatedDate: 2026-07-16T17:54:37.000Z
-category: "typescript"
-tags: ["ecmascript", "javascript", "development"]
+category: typescript
+tags:
+  - ecmascript
+  - javascript
+  - development
 lang: en
-description: "What to expect from JavaScript in 2025? Learn about the major proposals and features you may receive in the future!"
-slug: "what-to-expect-from-javascript-in-2025"
+description: What to expect from JavaScript in 2025? Learn about the major proposals and features you may receive in the future!
+slug: what-to-expect-from-javascript-in-2025
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Every year the committee that oversees ECMAScript, known as TC39, meets to discuss major changes and to advance, approve, or reject existing [proposals](https://github.com/tc39/proposals).

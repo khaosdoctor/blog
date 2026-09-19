@@ -1,16 +1,20 @@
 ---
-title: "\"Is this the end of the software development career?\""
+title: '"Is this the end of the software development career?"'
 pubDate: 2020-10-02T21:47:10.000Z
 updatedDate: 2026-07-16T16:23:07.000Z
-category: "opinion"
-tags: ["opinion", "technology", "development", "career"]
+category: opinion
+tags:
+  - opinion
+  - technology
+  - development
+  - career
 lang: en
-description: "\"Are technology advancements and the current state of the software development market contributing to a decline in the \\\"Developer\\\" profession? Are we digging our own graves?\""
-seoDescription: "\"Are we digging our own graves by evolving our ecosystem even more? Discover how the current state of technology can affect the future of developers\""
-slug: "is-this-the-end-of-the-software-development-career"
+description: '"Are technology advancements and the current state of the software development market contributing to a decline in the \"Developer\" profession? Are we digging our own graves?"'
+seoDescription: '"Are we digging our own graves by evolving our ecosystem even more? Discover how the current state of technology can affect the future of developers"'
+slug: is-this-the-end-of-the-software-development-career
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Recently I read [a post](https://medium.com/young-coder/is-the-golden-age-of-programming-over-ec9631e1f8ad) on Medium that was quite interesting, saying that the "Golden Age of programming" was coming to an end. That, just like everything else, whoever today knows how to write code and understands the nuances of the digital world will be just another person tomorrow. The same way it happened in the past with reading and writing.

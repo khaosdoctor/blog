@@ -1,16 +1,20 @@
 ---
-title: "All about the new Docker compose file watch"
+title: All about the new Docker compose file watch
 pubDate: 2023-07-06T11:00:05.000Z
 updatedDate: 2026-07-16T15:59:28.000Z
-category: "infra"
-tags: ["docker", "containers", "development", "devops"]
+category: infra
+tags:
+  - docker
+  - containers
+  - development
+  - devops
 lang: en
-description: "Recently Docker announced a new API for Docker compose that allows you to take automatic actions based on modified files! Let's understand all about it!"
-seoDescription: "Recently Docker announced a new API for Docker compose that allows you to take actions based on modified files! Let's understand it!"
-slug: "docker-compose-file-watch"
+description: Recently Docker announced a new API for Docker compose that allows you to take automatic actions based on modified files! Let's understand all about it!
+seoDescription: Recently Docker announced a new API for Docker compose that allows you to take actions based on modified files! Let's understand it!
+slug: docker-compose-file-watch
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 After many years of requests, Docker finally decided to implement a [watch](https://docs.docker.com/compose/file-watch/) mode in the compose command! With it we'll be able to start a kind of automatic update of our containers whenever our files are modified on disk!

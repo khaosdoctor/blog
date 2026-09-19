@@ -1,15 +1,17 @@
 ---
-title: "What's New in JavaScript in 2024"
+title: What's New in JavaScript in 2024
 pubDate: 2024-07-17T11:00:20.000Z
 updatedDate: 2026-07-16T17:55:01.000Z
-category: "typescript"
-tags: ["ecmascript", "javascript"]
+category: typescript
+tags:
+  - ecmascript
+  - javascript
 lang: en
-description: "Find out everything new in the latest version of JavaScript in 2024!"
-slug: "whats-new-javascript-2024"
+description: Find out everything new in the latest version of JavaScript in 2024!
+slug: whats-new-javascript-2024
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 The ECMA262 folks got together and we have the new JavaScript specification fresh out of the oven.

@@ -1,5 +1,5 @@
 ---
-title: "I'm back!"
+title: I'm back!
 pubDate: 2026-09-11
 category: meta
 tags:
@@ -10,11 +10,11 @@ tags:
 series: sobre-escrever
 seriesOrder: 1
 lang: en
-description: "After more than a year, I'm back to writing. This post talks about what I went through during this time and explains why I disappeared."
-slug: "i-m-back"
+description: After more than a year, I'm back to writing. This post talks about what I went through during this time and explains why I disappeared.
+slug: i-m-back
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 I'm not sure if you noticed, but my last post on this blog was in March 2025! And it was a Backlog newsletter![^1] And now, more than a year later, I've decided it's time to come back to the blog. I've finally gotten the courage to rebuild it with a more interesting theme that isn't just a copy-paste of some generic CMS template[^2].

@@ -1,15 +1,20 @@
 ---
-title: "Creating test environments dynamically with GitHub Actions"
+title: Creating test environments dynamically with GitHub Actions
 pubDate: 2021-06-09T13:00:00.000Z
 updatedDate: 2026-07-16T16:14:27.000Z
-category: "infra"
-tags: ["github", "kubernetes", "helm", "aks", "ci"]
+category: infra
+tags:
+  - github
+  - kubernetes
+  - helm
+  - aks
+  - ci
 lang: en
-description: "Ever imagined having a different environment for every feature you want to test? So how about doing that with GitHub Actions and the power of Kubernetes?"
-slug: "creating-dynamic-test-environments-with-github-actions"
+description: Ever imagined having a different environment for every feature you want to test? So how about doing that with GitHub Actions and the power of Kubernetes?
+slug: creating-dynamic-test-environments-with-github-actions
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 How to optimize a test pipeline so teams don't run into concurrency problems while testing their features and modules is a recurring subject in several topics I've covered both in the past and recently.

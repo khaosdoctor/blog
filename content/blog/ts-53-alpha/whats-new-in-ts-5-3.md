@@ -1,15 +1,19 @@
 ---
-title: "TypeScript 5.3 What's New"
+title: TypeScript 5.3 What's New
 pubDate: 2023-08-30T09:00:30.000Z
 updatedDate: 2026-07-16T15:57:03.000Z
-category: "typescript"
-tags: ["typescript", "development", "nodejs", "javascript"]
+category: typescript
+tags:
+  - typescript
+  - development
+  - nodejs
+  - javascript
 lang: en
-description: "Let's understand what could come in TS 5.3 with this amazing list of features!"
-slug: "whats-new-in-ts-5-3"
+description: Let's understand what could come in TS 5.3 with this amazing list of features!
+slug: whats-new-in-ts-5-3
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 As usual, I want to bring you the main TypeScript news as it comes out! Recently, I learned that the TypeScript team is working on a [new version of the language](https://github.com/microsoft/TypeScript/issues/55486). To do this, they create something called an **iteration plan**.

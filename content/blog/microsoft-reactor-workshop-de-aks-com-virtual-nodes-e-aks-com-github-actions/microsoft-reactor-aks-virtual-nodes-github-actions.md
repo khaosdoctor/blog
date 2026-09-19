@@ -2,16 +2,24 @@
 title: "Microsoft Reactor: Workshop on AKS with Virtual Nodes and AKS with GitHub Actions"
 pubDate: 2020-10-01T17:17:34.000Z
 updatedDate: 2026-07-16T16:23:20.000Z
-category: "infra"
-tags: ["azure", "kubernetes", "docker", "github", "ci", "containers", "video", "workshop"]
+category: infra
+tags:
+  - azure
+  - kubernetes
+  - docker
+  - github
+  - ci
+  - containers
+  - video
+  - workshop
 lang: en
-description: "A free workshop on how we can harness the power of Virtual Nodes to create applications that scale infinitely, and how we can automate the deployment of all this using GitHub Actions and AKS!"
-seoTitle: "Learn everything about GitHub Actions with Kubernetes in this workshop!"
-seoDescription: "See how to harness Azure's power to create apps that scale infinitely. Learn how to do automatic deployments using GitHub Actions! Free!"
-slug: "microsoft-reactor-aks-virtual-nodes-github-actions"
+description: A free workshop on how we can harness the power of Virtual Nodes to create applications that scale infinitely, and how we can automate the deployment of all this using GitHub Actions and AKS!
+seoTitle: Learn everything about GitHub Actions with Kubernetes in this workshop!
+seoDescription: See how to harness Azure's power to create apps that scale infinitely. Learn how to do automatic deployments using GitHub Actions! Free!
+slug: microsoft-reactor-aks-virtual-nodes-github-actions
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 On the 29th I participated in an amazing live stream from Microsoft Reactor with [Caio Calado](https://www.linkedin.com/in/caiocaladoo/) as host!

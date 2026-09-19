@@ -1,15 +1,17 @@
 ---
-title: "Everything about running TypeScript natively on Node!"
+title: Everything about running TypeScript natively on Node!
 pubDate: 2025-01-22T11:01:10.000Z
 updatedDate: 2026-07-16T17:49:09.000Z
-category: "typescript"
-tags: ["typescript", "nodejs"]
+category: typescript
+tags:
+  - typescript
+  - nodejs
 lang: en
-description: "Node 22 supports TypeScript natively! What now? Is that all? Let's learn how you can run TS much more easily and what the main configurations are!"
-slug: "everything-about-node-running-typescript-natively"
+description: Node 22 supports TypeScript natively! What now? Is that all? Let's learn how you can run TS much more easily and what the main configurations are!
+slug: everything-about-node-running-typescript-natively
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Finally, the article I've been promising for a while is out! And I'm very proud to be part of the team that helped implement this functionality (even though I didn't contribute as much as I would have liked).

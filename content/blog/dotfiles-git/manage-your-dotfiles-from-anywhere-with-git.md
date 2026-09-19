@@ -1,15 +1,21 @@
 ---
-title: "Manage your dotfiles from anywhere with Git"
+title: Manage your dotfiles from anywhere with Git
 pubDate: 2021-03-23T13:00:00.000Z
 updatedDate: 2026-07-16T16:17:37.000Z
-category: "infra"
-tags: ["github", "git", "cloud", "technology", "virtual machines", "tips"]
+category: infra
+tags:
+  - github
+  - git
+  - cloud
+  - technology
+  - virtual machines
+  - tips
 lang: en
-description: "Configuring a new computer is one of the most tedious tasks any developer has to do when switching machines, but what if it were much easier?"
-slug: "manage-your-dotfiles-from-anywhere-with-git"
+description: Configuring a new computer is one of the most tedious tasks any developer has to do when switching machines, but what if it were much easier?
+slug: manage-your-dotfiles-from-anywhere-with-git
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 Setting up a new computer is one of those tasks that is both really cool and really tedious. We have all probably had to switch computers and reconfigure all of our files.

@@ -1,16 +1,17 @@
 ---
-title: "What are 'const assertions' in TypeScript? The famous 'as const'"
+title: What are 'const assertions' in TypeScript? The famous 'as const'
 pubDate: 2024-04-24T11:00:59.000Z
 updatedDate: 2026-07-16T17:56:43.000Z
-category: "typescript"
-tags: ["typescript"]
+category: typescript
+tags:
+  - typescript
 lang: en
-description: "What are const assertions? Do you know the difference between the weird 'const as const' and Object.freeze?"
-seoTitle: "What does 'as const' mean in TypeScript?"
-slug: "what-are-const-assertions-in-typescript"
+description: What are const assertions? Do you know the difference between the weird 'const as const' and Object.freeze?
+seoTitle: What does 'as const' mean in TypeScript?
+slug: what-are-const-assertions-in-typescript
 machineOwnedTranslation: true
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 
 This article complements my video on the same topic! Watch it here:
