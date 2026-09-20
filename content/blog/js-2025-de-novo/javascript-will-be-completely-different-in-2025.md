@@ -2,11 +2,8 @@
 title: '"JavaScript Will Be Completely Different in 2025"'
 pubDate: 2024-10-16T11:00:01.000Z
 updatedDate: 2026-07-16T17:50:52.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: '"JavaScript may change quite a bit in 2025, some very interesting proposals were approved, check them out!"'
 slug: javascript-will-be-completely-different-in-2025

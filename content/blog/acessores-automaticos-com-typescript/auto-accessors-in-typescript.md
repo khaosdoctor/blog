@@ -2,9 +2,8 @@
 title: Do you already know about auto-accessors in TypeScript?
 pubDate: 2024-03-20T11:00:23.000Z
 updatedDate: 2026-07-16T17:57:47.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 lang: en
 description: Have you heard about auto-accessors? Do you know what this feature is? Then let's understand better how it works!
 seoTitle: Auto-accessors in TypeScript

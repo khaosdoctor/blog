@@ -2,15 +2,8 @@
 title: Cost Optimization with Kubernetes and AKS
 pubDate: 2020-09-03T15:41:57.000Z
 updatedDate: 2026-07-16T16:25:10.000Z
-category: infra
-tags:
-  - kubernetes
-  - azure
-  - cloud
-  - containers
-  - docker
-  - technology
-  - development
+category: technology
+tags: ["kubernetes", "azure", "cloud", "containers", "docker", "infrastructure"]
 lang: en
 description: Kubernetes is often seen as a much more expensive approach than normal for most applications. Want to know how you can efficiently optimize your costs?
 seoDescription: Kubernetes is often seen as a much more expensive approach than normal for most applications. How can you efficiently optimize your costs?

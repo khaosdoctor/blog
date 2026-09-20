@@ -2,10 +2,8 @@
 title: Salary negotiation for devs - tips and tricks
 pubDate: 2021-11-14T11:03:48.000Z
 updatedDate: 2026-07-16T16:11:19.000Z
-category: career
-tags:
-  - video
-  - career
+category: "career"
+tags: ["video"]
 lang: en
 description: Ever thought about getting salary negotiation tips for devs? In this video I'll show you the main tips I wish I'd known when I started my career and I'll share several resources so you can also negotiate the best salaries
 slug: salary-negotiation-for-devs-tips-and-tricks

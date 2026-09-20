@@ -2,12 +2,8 @@
 title: TypeScript 5.3 What's New
 pubDate: 2023-08-30T09:00:30.000Z
 updatedDate: 2026-07-16T15:57:03.000Z
-category: typescript
-tags:
-  - typescript
-  - development
-  - nodejs
-  - javascript
+category: technology
+tags: ["typescript", "javascript"]
 lang: en
 description: Let's understand what could come in TS 5.3 with this amazing list of features!
 slug: whats-new-in-ts-5-3

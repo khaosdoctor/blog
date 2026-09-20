@@ -2,12 +2,8 @@
 title: All about the new Docker compose file watch
 pubDate: 2023-07-06T11:00:05.000Z
 updatedDate: 2026-07-16T15:59:28.000Z
-category: infra
-tags:
-  - docker
-  - containers
-  - development
-  - devops
+category: technology
+tags: ["docker", "containers", "devops", "infrastructure"]
 lang: en
 description: Recently Docker announced a new API for Docker compose that allows you to take automatic actions based on modified files! Let's understand all about it!
 seoDescription: Recently Docker announced a new API for Docker compose that allows you to take actions based on modified files! Let's understand it!

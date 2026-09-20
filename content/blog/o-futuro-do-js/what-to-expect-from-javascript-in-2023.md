@@ -2,12 +2,8 @@
 title: What to expect from JavaScript in 2023
 pubDate: 2022-08-27T00:09:44.000Z
 updatedDate: 2026-07-16T16:07:06.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - development
-  - typescript
+category: technology
+tags: ["javascript"]
 lang: en
 description: What does JavaScript have in store for us in 2023? In this post, I bring the main proposals that could become reality next year!
 slug: what-to-expect-from-javascript-in-2023

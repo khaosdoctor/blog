@@ -2,12 +2,8 @@
 title: Debugging containers with Docker Gremlin
 pubDate: 2023-06-22T11:00:32.000Z
 updatedDate: 2026-07-16T15:59:53.000Z
-category: infra
-tags:
-  - docker
-  - containers
-  - development
-  - devops
+category: technology
+tags: ["docker", "containers", "devops", "infrastructure"]
 lang: en
 description: You've been debugging your Docker containers wrong this entire time and I can prove it! Let's discover Gremlin, the extension that will change everything!
 seoDescription: You've been debugging your Docker containers wrong I can prove it! Let's discover Gremlin, the extension that will change everything!

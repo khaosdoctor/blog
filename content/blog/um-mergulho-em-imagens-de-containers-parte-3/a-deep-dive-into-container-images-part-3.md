@@ -2,14 +2,8 @@
 title: A Deep Dive into Container Images - Part 3
 pubDate: 2020-08-14T17:34:25.000Z
 updatedDate: 2026-07-16T16:26:37.000Z
-category: infra
-tags:
-  - docker
-  - containers
-  - javascript
-  - development
-  - technology
-  - typescript
+category: technology
+tags: ["docker", "containers", "javascript", "typescript", "infrastructure", "nodejs"]
 series: container-images
 seriesOrder: 3
 lang: en

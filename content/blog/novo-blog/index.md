@@ -4,8 +4,6 @@ pubDate: 2026-09-11
 lang: pt
 category: meta
 tags:
-  - meta
-  - blog
   - news
   - personal
 series: sobre-escrever

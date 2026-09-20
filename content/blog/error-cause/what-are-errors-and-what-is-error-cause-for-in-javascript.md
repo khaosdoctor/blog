@@ -2,12 +2,8 @@
 title: What are errors and what does error.cause do in JavaScript?
 pubDate: 2023-01-18T11:00:30.000Z
 updatedDate: 2026-07-16T16:04:10.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - typescript
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: Error handling is one of the most important and most difficult skills for any developer. But almost nobody knows there's a much easier way to handle your errors.
 seoTitle: What are errors in JavaScript and what is error.cause?

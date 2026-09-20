@@ -2,9 +2,8 @@
 title: "TypeScript good and bad practices - #SemanaTS day 3"
 pubDate: 2023-04-05T11:00:41.000Z
 updatedDate: 2026-07-16T16:02:06.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 series: typescript-week
 seriesOrder: 3
 lang: en

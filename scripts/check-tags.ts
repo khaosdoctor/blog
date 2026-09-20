@@ -12,7 +12,7 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { KNOWN_TAGS } from '../src/i18n/tags.ts'
-import { count, fail as failLine, frontmatterOf, heading, ok } from './lib/cli.ts'
+import { count, fail as failLine, frontmatterOf, heading, ok, tagsOf } from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 
@@ -24,9 +24,7 @@ function readVocabulary(): Map<string, string[]> {
     const dir = join(SOURCE_DIR, entry.name)
     for (const file of readdirSync(dir)) {
       if (!/\.mdx?$/.test(file)) continue
-      const line = /^tags:\s*\[(.*?)\]$/m.exec(frontmatterOf(readFileSync(join(dir, file), 'utf8')))
-      if (line === null) continue
-      for (const [, tag] of line[1].matchAll(/"([^"]+)"/g)) {
+      for (const tag of tagsOf(frontmatterOf(readFileSync(join(dir, file), 'utf8')))) {
         tags.set(tag, [...(tags.get(tag) ?? []), join(dir, file)])
       }
     }

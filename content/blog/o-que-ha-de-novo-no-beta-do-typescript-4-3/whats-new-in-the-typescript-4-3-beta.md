@@ -2,11 +2,8 @@
 title: What's New in the TypeScript 4.3 Beta
 pubDate: 2021-05-10T18:38:14.000Z
 updatedDate: 2026-07-16T16:15:49.000Z
-category: typescript
-tags:
-  - drop
-  - typescript
-  - javascript
+category: technology
+tags: ["drop", "typescript", "javascript"]
 lang: en
 description: Let's understand everything about what just came out for TypeScript 4.3 and what you can already test!
 slug: whats-new-in-the-typescript-4-3-beta

@@ -3,8 +3,6 @@ title: I'm back!
 pubDate: 2026-09-11
 category: meta
 tags:
-  - meta
-  - blog
   - news
   - personal
 series: sobre-escrever

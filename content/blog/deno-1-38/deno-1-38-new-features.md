@@ -2,11 +2,8 @@
 title: .env Support, API Changes and Deno 1.38 Features
 pubDate: 2024-01-03T11:00:52.000Z
 updatedDate: 2026-07-16T15:54:48.000Z
-category: javascript
-tags:
-  - deno
-  - typescript
-  - development
+category: technology
+tags: ["deno", "typescript", "javascript"]
 lang: en
 description: .env file support, test runner in the REPL, unix socket support and much more in the new Deno version!
 slug: deno-1-38-new-features

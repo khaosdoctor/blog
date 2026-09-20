@@ -2,9 +2,8 @@
 title: '"Should You Be Using Enums in TypeScript?"'
 pubDate: 2024-04-17T11:00:42.000Z
 updatedDate: 2026-07-16T17:56:58.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 lang: en
 description: "\"You've probably heard someone say \\\"Don't use Enums\\\"... But why does nobody like enums in TypeScript? Does that even make sense?\""
 slug: should-you-be-using-enums-in-typescript

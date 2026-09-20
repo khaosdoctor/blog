@@ -2,9 +2,8 @@
 title: Typing environment variables the right way with TS
 pubDate: 2024-07-19T11:00:44.000Z
 updatedDate: 2026-07-16T17:54:50.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 lang: en
 description: Probably one of the biggest problems we face in TypeScript, discover the solution for typing envs and how to apply it in your project!
 slug: typing-environment-variables-the-right-way-with-ts

@@ -2,11 +2,8 @@
 title: Applying Two Factor Authentication to SSH
 pubDate: 2020-11-05T22:07:56.000Z
 updatedDate: 2026-07-16T16:21:44.000Z
-category: infra
-tags:
-  - azure
-  - cloud
-  - security
+category: technology
+tags: ["azure", "cloud", "security", "infrastructure"]
 lang: en
 description: These days, using only passwords or public keys is no longer the answer, we need to take security further by applying two-factor authentication to our servers.
 seoTitle: Using Two-Factor Authentication with SSH

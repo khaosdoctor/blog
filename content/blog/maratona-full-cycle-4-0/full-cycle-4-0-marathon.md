@@ -2,15 +2,8 @@
 title: Full Cycle 4.0 Marathon
 pubDate: 2020-08-29T02:48:18.000Z
 updatedDate: 2026-07-16T16:25:45.000Z
-category: infra
-tags:
-  - azure
-  - cloud
-  - containers
-  - docker
-  - video
-  - talk
-  - kubernetes
+category: technology
+tags: ["azure", "cloud", "containers", "docker", "video", "talk", "kubernetes", "infrastructure"]
 lang: en
 description: In this amazing talk, we discuss clouds in general and how they differ from each other. Then I show six demonstrations of how you can deploy your service to Azure effortlessly!
 slug: full-cycle-4-0-marathon

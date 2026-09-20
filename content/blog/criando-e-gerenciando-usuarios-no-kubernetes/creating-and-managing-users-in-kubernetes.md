@@ -2,17 +2,8 @@
 title: Creating and managing users in Kubernetes
 pubDate: 2021-02-11T13:00:00.000Z
 updatedDate: 2026-07-16T16:18:34.000Z
-category: infra
-tags:
-  - kubernetes
-  - aks
-  - cloud
-  - azure
-  - containers
-  - devops
-  - docker
-  - microservices
-  - security
+category: technology
+tags: ["kubernetes", "aks", "cloud", "azure", "containers", "devops", "docker", "microservices", "security", "infrastructure"]
 lang: en
 description: Using the same configuration file for all users can be a major problem for your cluster's security! Learn how to create new users to improve the audit trail and security of your applications!
 seoDescription: Learn how to create new users to improve the audit trail and security of your applications using Kubernetes.

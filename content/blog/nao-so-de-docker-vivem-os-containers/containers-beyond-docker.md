@@ -2,13 +2,8 @@
 title: Containers Beyond Docker
 pubDate: 2021-05-13T20:18:00.000Z
 updatedDate: 2026-07-16T16:15:15.000Z
-category: infra
-tags:
-  - containerd
-  - containers
-  - docker
-  - video
-  - golang
+category: technology
+tags: ["containerd", "containers", "docker", "video", "golang", "infrastructure"]
 lang: en
 description: Want to learn more about containers? Check out this collection of content we discussed in an incredible live stream!
 seoTitle: Containers with containerd and Golang

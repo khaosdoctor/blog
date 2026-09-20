@@ -2,14 +2,8 @@
 title: Elevating microservices with service meshes
 pubDate: 2020-08-21T20:42:36.000Z
 updatedDate: 2026-07-16T16:26:11.000Z
-category: infra
-tags:
-  - containers
-  - kubernetes
-  - architecture
-  - cloud
-  - development
-  - technology
+category: technology
+tags: ["containers", "kubernetes", "architecture", "cloud", "infrastructure"]
 lang: en
 description: How great would it be if you had complete control over your distributed applications so you could know everything about them?
 slug: leveling-up-microservices-with-service-meshes

@@ -2,11 +2,8 @@
 title: Cronjobs in the cloud with Deno Cron
 pubDate: 2024-01-17T11:00:19.000Z
 updatedDate: 2026-07-16T15:54:01.000Z
-category: javascript
-tags:
-  - deno
-  - typescript
-  - development
+category: technology
+tags: ["deno", "typescript", "javascript"]
 lang: en
 description: Probably the functionality that everyone has had to use at some point now has a completely serverless equivalent. Let's understand Deno Cron
 slug: cron-jobs-in-the-cloud-with-deno-cron

@@ -2,12 +2,8 @@
 title: '"Understanding timers/promises and AbortControllers in Node.js"'
 pubDate: 2022-03-14T14:00:00.000Z
 updatedDate: 2026-07-16T16:10:41.000Z
-category: javascript
-tags:
-  - javascript
-  - nodejs
-  - development
-  - architecture
+category: technology
+tags: ["javascript", "nodejs", "architecture"]
 lang: en
 description: '"Learn everything about new ways to cancel asynchronous functions and declare time intervals with promises in Node.js"'
 slug: understanding-timers-promises-and-abortcontrollers-in-nodejs

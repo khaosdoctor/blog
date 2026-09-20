@@ -6,7 +6,7 @@ category: opinion
 tags:
   - backlog-newsletter
   - career
-  - opinion
+  - ai
 lang: en
 description: What happened to a profession that once prided itself on being super smart and focused on what it does? Did devs stop caring about their work?
 slug: backlog-9-what-happened-to-the-devs

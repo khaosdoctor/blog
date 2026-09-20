@@ -2,13 +2,8 @@
 title: "Hipsters.tech #212 - Microsoft Cloud Technologies"
 pubDate: 2020-08-04T20:21:26.000Z
 updatedDate: 2026-07-16T16:27:11.000Z
-category: infra
-tags:
-  - podcasts
-  - azure
-  - cloud
-  - development
-  - technology
+category: technology
+tags: ["podcasts", "azure", "cloud", "infrastructure"]
 lang: en
 description: Learn how Microsoft's cloud technologies work and how to make the most of them in this amazing podcast!
 slug: hipsters-tech-212-microsoft-cloud-technologies

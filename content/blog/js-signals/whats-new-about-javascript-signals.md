@@ -2,12 +2,8 @@
 title: What's New About JavaScript Signals
 pubDate: 2024-08-21T11:00:14.000Z
 updatedDate: 2026-07-16T17:53:49.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - development
-  - signals
+category: technology
+tags: ["javascript", "signals"]
 lang: en
 description: What is the new JavaScript signals proposal? How does it work and what is it for?
 slug: whats-new-about-javascript-signals

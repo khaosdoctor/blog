@@ -2,12 +2,8 @@
 title: Removing duplicate items in JavaScript ES6
 pubDate: 2021-09-08T12:00:00.000Z
 updatedDate: 2026-07-16T16:12:41.000Z
-category: javascript
-tags:
-  - javascript
-  - performance
-  - ecmascript
-  - es2020
+category: technology
+tags: ["javascript", "performance"]
 lang: en
 description: One of the biggest challenges for developers when using Maps and Sets is removing duplicate objects that are not primitives. Learn the best way to make this change.
 seoDescription: One of the biggest challenges when using Maps and Sets is removing duplicate objects that are not primitives. Learn the best way to make this change.

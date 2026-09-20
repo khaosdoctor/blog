@@ -2,9 +2,10 @@
 title: "Backlog #10 - Slopware: The End of Well-Made Code"
 pubDate: 2025-03-20T11:00:10.000Z
 updatedDate: 2026-07-16T17:47:54.000Z
-category: career
+category: opinion
 tags:
   - backlog-newsletter
+  - ai
 lang: en
 description: Do you know what Slopware is? Well, let me introduce you to something that will probably leave you quite concerned.
 seoTitle: The End of Well-Made Code. Meet "Slopware"

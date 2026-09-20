@@ -2,13 +2,8 @@
 title: "The Complete Guide to gRPC Part 4: Streams"
 pubDate: 2021-07-07T12:00:00.000Z
 updatedDate: 2026-07-16T16:13:40.000Z
-category: infra
-tags:
-  - grpc
-  - javascript
-  - protobuf
-  - architecture
-  - series
+category: technology
+tags: ["grpc", "javascript", "protobuf", "architecture", "infrastructure"]
 series: grpc
 seriesOrder: 4
 lang: en

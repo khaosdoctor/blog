@@ -2,12 +2,8 @@
 title: 10 things you didn't know NPM was capable of doing
 pubDate: 2021-10-21T13:55:00.000Z
 updatedDate: 2026-07-16T16:11:54.000Z
-category: javascript
-tags:
-  - video
-  - javascript
-  - npm
-  - typescript
+category: technology
+tags: ["video", "javascript", "npm"]
 lang: en
 description: Did you know that NPM is not just a package manager? I'll show you the 10 coolest NPM commands that I bet you didn't know about!
 slug: npm-10-hidden-features

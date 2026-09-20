@@ -2,13 +2,8 @@
 title: "\"What's New in ECMAScript 2023?\""
 pubDate: 2023-05-04T10:00:18.000Z
 updatedDate: 2026-07-16T16:00:40.000Z
-category: typescript
-tags:
-  - ecmascript
-  - javascript
-  - typescript
-  - nodejs
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: '"ECMAScript 2023 is officially finalized, and we already know which features will arrive in the new JavaScript specification"'
 seoDescription: '"ECMAScript 2023 is officially finalized and we already know which features will come in the new JavaScript specification"'

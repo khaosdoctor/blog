@@ -2,9 +2,8 @@
 title: "Advanced TypeScript Techniques - #SemanaTS day 4"
 pubDate: 2023-04-06T11:00:47.000Z
 updatedDate: 2026-07-16T16:01:51.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 series: typescript-week
 seriesOrder: 4
 lang: en

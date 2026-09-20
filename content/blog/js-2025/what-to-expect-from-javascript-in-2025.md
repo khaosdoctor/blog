@@ -2,11 +2,8 @@
 title: What to Expect from JavaScript in 2025
 pubDate: 2024-07-24T11:00:49.000Z
 updatedDate: 2026-07-16T17:54:37.000Z
-category: typescript
-tags:
-  - ecmascript
-  - javascript
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: What to expect from JavaScript in 2025? Learn about the major proposals and features you may receive in the future!
 slug: what-to-expect-from-javascript-in-2025

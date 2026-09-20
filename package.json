@@ -24,6 +24,7 @@
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
     "translate:local": "node scripts/translate.ts",
+    "sync:metadata": "node scripts/sync-metadata.ts",
     "check:translations": "node scripts/check-translations.ts",
     "clean:translations": "node scripts/clean-translations.ts",
     "check:output": "node scripts/check-output.ts",

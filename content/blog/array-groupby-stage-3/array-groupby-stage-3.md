@@ -2,11 +2,8 @@
 title: Grouping with Array.prototype.groupBy
 pubDate: 2022-01-12T15:00:00.000Z
 updatedDate: 2026-07-16T16:11:06.000Z
-category: javascript
-tags:
-  - javascript
-  - development
-  - ecmascript
+category: technology
+tags: ["javascript"]
 lang: en
 description: No more grouping objects and keys by hand or reaching for external libraries. JavaScript now has a native grouping method!
 slug: array-groupby-stage-3

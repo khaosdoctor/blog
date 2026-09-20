@@ -2,21 +2,8 @@
 title: Custom metrics with AKS
 pubDate: 2021-02-09T13:00:00.000Z
 updatedDate: 2026-07-16T16:18:46.000Z
-category: infra
-tags:
-  - kubernetes
-  - azure
-  - containers
-  - monitor
-  - devops
-  - cloud
-  - technology
-  - aks
-  - azure monitor
-  - prometheus
-  - golang
-  - nodejs
-  - docker
+category: technology
+tags: ["kubernetes", "azure", "containers", "monitor", "devops", "cloud", "aks", "azure monitor", "prometheus", "golang", "nodejs", "docker", "infrastructure", "observability"]
 lang: en
 description: Monitoring is very important for distributed applications. Learn how to create and monitor your applications with custom Prometheus metrics for Azure Monitor.
 seoTitle: Custom metrics with AKS and Azure Monitor

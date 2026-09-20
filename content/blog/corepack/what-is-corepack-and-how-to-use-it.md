@@ -2,9 +2,8 @@
 title: What is Corepack and how can you use it?
 pubDate: 2024-07-11T11:00:51.000Z
 updatedDate: 2026-07-16T17:55:13.000Z
-category: javascript
-tags:
-  - nodejs
+category: technology
+tags: ["nodejs", "javascript", "npm"]
 lang: en
 description: Learn how to use Corepack, the tool causing controversy in the Node.js world
 slug: what-is-corepack-and-how-to-use-it

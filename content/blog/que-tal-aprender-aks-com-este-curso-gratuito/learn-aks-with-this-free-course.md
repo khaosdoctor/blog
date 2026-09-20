@@ -2,13 +2,8 @@
 title: Want to learn AKS with this FREE course?
 pubDate: 2020-10-23T14:34:51.000Z
 updatedDate: 2026-07-16T16:22:19.000Z
-category: infra
-tags:
-  - azure
-  - containers
-  - kubernetes
-  - video
-  - cloud
+category: technology
+tags: ["azure", "containers", "kubernetes", "video", "cloud", "infrastructure"]
 lang: en
 description: In this free 8-hour training, I show how we can learn Kubernetes from zero to being capable of managing our own applications!
 slug: learn-aks-with-this-free-course

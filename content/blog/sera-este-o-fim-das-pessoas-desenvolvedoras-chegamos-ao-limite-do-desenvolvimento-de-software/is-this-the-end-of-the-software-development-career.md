@@ -2,12 +2,8 @@
 title: '"Is this the end of the software development career?"'
 pubDate: 2020-10-02T21:47:10.000Z
 updatedDate: 2026-07-16T16:23:07.000Z
-category: opinion
-tags:
-  - opinion
-  - technology
-  - development
-  - career
+category: "opinion"
+tags: ["career", "ai"]
 lang: en
 description: '"Are technology advancements and the current state of the software development market contributing to a decline in the \"Developer\" profession? Are we digging our own graves?"'
 seoDescription: '"Are we digging our own graves by evolving our ecosystem even more? Discover how the current state of technology can affect the future of developers"'

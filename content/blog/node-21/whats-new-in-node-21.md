@@ -2,10 +2,8 @@
 title: Node 21 Release Highlights!
 pubDate: 2023-11-10T16:22:47.000Z
 updatedDate: 2026-07-16T15:55:22.000Z
-category: javascript
-tags:
-  - nodejs
-  - javascript
+category: technology
+tags: ["nodejs", "javascript"]
 lang: en
 description: Learn about the major features coming in Node 21 and 21.1!
 slug: whats-new-in-node-21

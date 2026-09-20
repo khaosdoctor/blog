@@ -2,12 +2,8 @@
 title: What is the new number sequence proposal with Iterator.range in JavaScript
 pubDate: 2023-02-16T11:00:08.000Z
 updatedDate: 2026-07-16T16:03:35.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - development
-  - typescript
+category: technology
+tags: ["javascript"]
 lang: en
 description: An API you never imagine you need until you do! Learn about sequences in JavaScript!
 seoTitle: Understand ranges in JavaScript with the new Number.range

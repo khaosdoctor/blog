@@ -2,9 +2,8 @@
 title: TypeScript's Biggest Update in Years - TypeScript 5.5
 pubDate: 2024-07-10T17:23:32.000Z
 updatedDate: 2026-07-16T17:55:26.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 lang: en
 description: Learn everything about TypeScript's biggest update in years!
 seoTitle: What's New in TypeScript 5.5?

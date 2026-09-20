@@ -2,11 +2,8 @@
 title: Using JWT tokens securely
 pubDate: 2022-08-18T14:00:00.000Z
 updatedDate: 2026-07-16T16:07:18.000Z
-category: javascript
-tags:
-  - javascript
-  - security
-  - typescript
+category: technology
+tags: ["javascript", "security", "typescript", "nodejs"]
 lang: en
 description: You've been using JWT tokens insecurely in all your projects! In this article you'll learn how to protect your tokens against attacks!
 seoTitle: You're using JWT wrong! Using tokens securely

@@ -2,12 +2,8 @@
 title: "TypeScript 5.2's New Feature: Introducing Using"
 pubDate: 2023-08-03T11:00:11.000Z
 updatedDate: 2026-07-16T15:58:29.000Z
-category: typescript
-tags:
-  - typescript
-  - javascript
-  - nodejs
-  - development
+category: technology
+tags: ["typescript", "javascript"]
 lang: en
 description: TypeScript 5.2 is implementing a new keyword called using. But do you know what it's for?
 seoTitle: Everything about TypeScript 5.2's "using" and its benefits

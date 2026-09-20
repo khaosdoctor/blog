@@ -2,12 +2,8 @@
 title: Understanding Threading in Node.js with Rodrigo Branas
 pubDate: 2020-11-20T16:31:32.000Z
 updatedDate: 2026-07-16T16:21:18.000Z
-category: javascript
-tags:
-  - javascript
-  - nodejs
-  - threads
-  - performance
+category: technology
+tags: ["javascript", "nodejs", "threads", "performance", "video", "talk"]
 lang: en
 description: In this incredible live stream, we talked about the concept of worker threads and how threads work on modern computers.
 slug: understanding-threading-nodejs-rodrigo-branas

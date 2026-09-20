@@ -2,12 +2,8 @@
 title: Hosting your Docker images in your own registry
 pubDate: 2021-04-13T13:00:00.000Z
 updatedDate: 2026-07-16T16:16:37.000Z
-category: infra
-tags:
-  - docker
-  - containers
-  - technology
-  - development
+category: technology
+tags: ["docker", "containers", "infrastructure"]
 lang: en
 description: One of the coolest things about Docker is that you already have, out of the box, a huge repository of images called Docker Hub where you can download and host your images publicly (and even privately, for a fee).
 slug: hosting-your-docker-images-in-your-own-registry

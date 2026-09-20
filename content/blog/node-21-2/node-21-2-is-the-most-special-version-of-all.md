@@ -2,11 +2,8 @@
 title: Node 21.2 is the most special version of all!
 pubDate: 2023-11-24T23:50:58.000Z
 updatedDate: 2026-07-16T15:55:11.000Z
-category: javascript
-tags:
-  - nodejs
-  - javascript
-  - development
+category: technology
+tags: ["nodejs", "javascript", "tests"]
 lang: en
 description: Join me in understanding what changed in Node.js version 21.2, why this is one of the most special versions of all! And what it means!
 seoTitle: Node 21.2 improves the test runner with Date Mocks support

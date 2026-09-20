@@ -2,7 +2,7 @@
 title: "Backlog #8 - My journey with Vim. Six months in, what changed?"
 pubDate: 2025-02-20T11:00:21.000Z
 updatedDate: 2026-07-16T17:48:17.000Z
-category: career
+category: technology
 tags:
   - backlog-newsletter
   - vim

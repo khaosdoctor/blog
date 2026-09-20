@@ -2,12 +2,8 @@
 title: Node.js 20 is out! Learn about the new features
 pubDate: 2023-04-27T10:00:07.000Z
 updatedDate: 2026-07-16T16:01:05.000Z
-category: javascript
-tags:
-  - nodejs
-  - javascript
-  - ecmascript
-  - development
+category: technology
+tags: ["nodejs", "javascript"]
 lang: en
 description: Another year, another official Node.js version is out. Version 20 brings significant changes, learn all about them here!
 seoTitle: What are the new features that Node.js 20 brought?

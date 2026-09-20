@@ -2,9 +2,8 @@
 title: ES2021 is Approved! Check Out the JavaScript Updates
 pubDate: 2021-07-14T13:00:00.000Z
 updatedDate: 2026-07-16T16:13:28.000Z
-category: javascript
-tags:
-  - javascript
+category: technology
+tags: ["javascript"]
 lang: en
 description: Want to know what's coming in ES2021? Let's understand it part by part!
 slug: es2021-approved-javascript-features

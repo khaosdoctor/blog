@@ -2,11 +2,8 @@
 title: How I Implemented Date Mocks in Node.js Core
 pubDate: 2024-07-31T11:00:32.000Z
 updatedDate: 2026-07-16T17:54:23.000Z
-category: javascript
-tags:
-  - nodejs
-  - javascript
-  - open source
+category: technology
+tags: ["nodejs", "javascript", "open source", "tests"]
 lang: en
 description: Ever wanted to contribute to an open source project? Let me explain how I added my code to Node.js!
 seoTitle: "Implementing Date Mocks in the Node Test Runner: A Story"

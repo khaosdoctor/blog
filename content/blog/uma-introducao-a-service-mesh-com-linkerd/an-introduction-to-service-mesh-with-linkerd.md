@@ -2,15 +2,8 @@
 title: An Introduction to Service Mesh with Linkerd
 pubDate: 2020-09-10T21:26:02.000Z
 updatedDate: 2026-07-16T16:24:46.000Z
-category: infra
-tags:
-  - kubernetes
-  - containers
-  - linkerd
-  - architecture
-  - technology
-  - development
-  - cloud
+category: technology
+tags: ["kubernetes", "containers", "linkerd", "architecture", "cloud", "infrastructure"]
 lang: en
 description: Observability, logging, traffic control. Everything you've always wanted for microservices in a simple and fast way with Linkerd
 slug: an-introduction-to-service-mesh-with-linkerd

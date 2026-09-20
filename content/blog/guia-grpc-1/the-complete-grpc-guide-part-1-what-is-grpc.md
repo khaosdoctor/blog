@@ -2,16 +2,8 @@
 title: '"The complete gRPC guide part 1: What is gRPC?"'
 pubDate: 2021-04-20T11:00:00.000Z
 updatedDate: 2026-07-16T16:16:26.000Z
-category: infra
-tags:
-  - grpc
-  - series
-  - javascript
-  - typescript
-  - development
-  - protobuf
-  - rest
-  - architecture
+category: technology
+tags: ["grpc", "javascript", "typescript", "protobuf", "rest", "architecture", "infrastructure"]
 series: grpc
 seriesOrder: 1
 lang: en

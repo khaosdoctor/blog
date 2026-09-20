@@ -2,11 +2,8 @@
 title: '"Will JavaScript stop being single-threaded? Understanding Module Expressions"'
 pubDate: 2022-12-08T13:00:41.000Z
 updatedDate: 2026-07-16T16:04:57.000Z
-category: typescript
-tags:
-  - ecmascript
-  - javascript
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: "\"What if JavaScript were as good with multiple threads as it behaves today with just one? Let's understand Block Expressions!\""
 seoTitle: '"What are Module Expressions in JavaScript"'

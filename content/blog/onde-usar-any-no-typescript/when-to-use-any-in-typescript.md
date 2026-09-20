@@ -2,10 +2,8 @@
 title: Where to use ANY in TypeScript
 pubDate: 2024-08-07T11:00:19.000Z
 updatedDate: 2026-07-16T17:54:12.000Z
-category: typescript
-tags:
-  - typescript
-  - javascript
+category: technology
+tags: ["typescript", "javascript"]
 lang: en
 description: We already know that "any" is a bad usage pattern, but learn about some use cases where any is our only option!
 slug: when-to-use-any-in-typescript

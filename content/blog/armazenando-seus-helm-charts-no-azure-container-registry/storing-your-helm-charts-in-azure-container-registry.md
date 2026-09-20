@@ -2,16 +2,8 @@
 title: Storing your Helm Charts in Azure Container Registry
 pubDate: 2021-03-30T13:00:00.000Z
 updatedDate: 2026-07-16T16:17:13.000Z
-category: infra
-tags:
-  - helm
-  - kubernetes
-  - containers
-  - azure
-  - acr
-  - docker
-  - aks
-  - cloud
+category: technology
+tags: ["helm", "kubernetes", "containers", "azure", "acr", "docker", "aks", "cloud", "infrastructure"]
 lang: en
 description: Helm has a lot of amazing tooling around it, but chart storage has always been a problem. Learn how we can make the process much easier!
 seoDescription: Helm has amazing tooling, but chart storage has always been a problem. Learn how we can make the process much easier!

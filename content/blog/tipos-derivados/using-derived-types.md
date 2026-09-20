@@ -2,10 +2,8 @@
 title: Using derived types
 pubDate: 2024-09-11T11:00:14.000Z
 updatedDate: 2026-07-16T17:51:23.000Z
-category: typescript
-tags:
-  - typescript
-  - javascript
+category: technology
+tags: ["typescript", "javascript"]
 lang: en
 description: When should we be smarter about coupling our types to other types? When does repeating code make sense?
 slug: using-derived-types

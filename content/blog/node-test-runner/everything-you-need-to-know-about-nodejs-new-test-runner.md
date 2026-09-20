@@ -2,11 +2,8 @@
 title: Everything you need to know about Node.js's new test runner
 pubDate: 2022-05-25T11:53:00.000Z
 updatedDate: 2026-07-16T16:09:19.000Z
-category: javascript
-tags:
-  - nodejs
-  - javascript
-  - development
+category: technology
+tags: ["nodejs", "javascript", "tests"]
 lang: en
 description: Learn everything about Node.js 18's new test runner and how you can use it to test your code.
 slug: everything-you-need-to-know-about-nodejs-new-test-runner

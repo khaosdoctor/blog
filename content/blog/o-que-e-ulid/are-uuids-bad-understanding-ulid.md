@@ -2,11 +2,8 @@
 title: Are UUIDs bad? Understanding ULID
 pubDate: 2024-08-14T11:00:09.000Z
 updatedDate: 2026-07-16T17:54:00.000Z
-category: meta
-tags:
-  - theory
-  - computing
-  - architecture
+category: technology
+tags: ["theory", "computing", "architecture", "databases"]
 lang: en
 description: How can you implement random IDs that are also sortable? Meet ULIDs and what they promise to change!
 slug: are-uuids-bad-understanding-ulid

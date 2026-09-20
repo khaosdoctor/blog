@@ -2,12 +2,8 @@
 title: "\"We're at 4k! Thank you!\""
 pubDate: 2020-12-09T17:33:25.000Z
 updatedDate: 2026-07-16T16:20:19.000Z
-category: meta
-tags:
-  - blog
-  - events
-  - news
-  - info
+category: "meta"
+tags: ["events", "news"]
 lang: en
 description: "\"Thank you for reaching 4k followers! To celebrate this milestone, I'm running some awesome giveaways!\""
 slug: we-are-4k-thank-you

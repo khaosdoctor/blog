@@ -2,18 +2,8 @@
 title: Making VSCode your only development environment with Docker and Kubernetes
 pubDate: 2020-10-05T00:34:43.000Z
 updatedDate: 2026-07-16T16:22:55.000Z
-category: infra
-tags:
-  - kubernetes
-  - docker
-  - containers
-  - vscode
-  - azure
-  - cloud
-  - development
-  - technology
-  - video
-  - workshop
+category: technology
+tags: ["kubernetes", "docker", "containers", "vscode", "azure", "cloud", "video", "workshop", "infrastructure", "talk"]
 lang: en
 description: Ever thought about never having to leave your favorite editor to develop native Kubernetes applications? What if I told you this is possible, and very easy?
 seoTitle: Making VSCode your only development environment

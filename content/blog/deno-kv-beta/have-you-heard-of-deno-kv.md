@@ -2,11 +2,8 @@
 title: '"Do you already know Deno KV?"'
 pubDate: 2023-07-20T11:00:50.000Z
 updatedDate: 2026-07-16T15:59:17.000Z
-category: javascript
-tags:
-  - deno
-  - databases
-  - typescript
+category: technology
+tags: ["deno", "databases", "typescript", "javascript"]
 lang: en
 description: "\"Have you heard of the new Deno KV? Then it's time to discover this tool that could save your life\""
 seoTitle: '"Principles of Deno KV"'

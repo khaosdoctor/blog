@@ -2,12 +2,8 @@
 title: A Deep Dive into Container Images - Part 1
 pubDate: 2020-07-24T13:00:00.000Z
 updatedDate: 2026-07-16T16:28:31.000Z
-category: infra
-tags:
-  - containers
-  - docker
-  - development
-  - technology
+category: technology
+tags: ["containers", "docker", "infrastructure"]
 series: container-images
 seriesOrder: 1
 lang: en

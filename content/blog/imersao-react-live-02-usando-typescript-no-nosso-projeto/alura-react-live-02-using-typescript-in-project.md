@@ -2,13 +2,8 @@
 title: "Alura React Live #02 - Using TypeScript in our project"
 pubDate: 2020-07-29T23:28:30.000Z
 updatedDate: 2026-07-16T16:27:45.000Z
-category: typescript
-tags:
-  - video
-  - typescript
-  - react
-  - development
-  - technology
+category: technology
+tags: ["video", "typescript", "react"]
 lang: en
 description: Do you know TypeScript? Did you know we can use TypeScript on the front-end? Let's explore an application and understand how TypeScript works using React!
 seoDescription: Do you know TypeScript? Did you know we can use TypeScript on the front-end? Let's explore an application and understand how TypeScript works on the front!

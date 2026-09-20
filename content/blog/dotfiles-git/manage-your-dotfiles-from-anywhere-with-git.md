@@ -2,14 +2,8 @@
 title: Manage your dotfiles from anywhere with Git
 pubDate: 2021-03-23T13:00:00.000Z
 updatedDate: 2026-07-16T16:17:37.000Z
-category: infra
-tags:
-  - github
-  - git
-  - cloud
-  - technology
-  - virtual machines
-  - tips
+category: technology
+tags: ["github", "git", "cloud", "virtual machines", "tips", "infrastructure"]
 lang: en
 description: Configuring a new computer is one of the most tedious tasks any developer has to do when switching machines, but what if it were much easier?
 slug: manage-your-dotfiles-from-anywhere-with-git

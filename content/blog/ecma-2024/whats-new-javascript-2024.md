@@ -2,10 +2,8 @@
 title: What's New in JavaScript in 2024
 pubDate: 2024-07-17T11:00:20.000Z
 updatedDate: 2026-07-16T17:55:01.000Z
-category: typescript
-tags:
-  - ecmascript
-  - javascript
+category: technology
+tags: ["javascript"]
 lang: en
 description: Find out everything new in the latest version of JavaScript in 2024!
 slug: whats-new-javascript-2024

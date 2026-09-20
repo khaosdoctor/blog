@@ -2,20 +2,8 @@
 title: "#DockerSP - Understanding the container ecosystem beyond Docker"
 pubDate: 2021-03-26T00:20:12.000Z
 updatedDate: 2026-07-16T16:17:25.000Z
-category: infra
-tags:
-  - video
-  - talk
-  - containerd
-  - containers
-  - docker
-  - kubernetes
-  - cri
-  - oci
-  - cri-o
-  - devops
-  - grpc
-  - technology
+category: technology
+tags: ["video", "talk", "containerd", "containers", "docker", "kubernetes", "cri", "oci", "cri-o", "devops", "grpc", "infrastructure"]
 lang: en
 description: Watch the full video of my talk about the container ecosystem beyond Docker with the Docker SP team!
 slug: understanding-container-ecosystem-beyond-docker

@@ -2,11 +2,8 @@
 title: You will never finish anything - Lessons from a decade of mistakes
 pubDate: 2023-08-26T12:48:12.000Z
 updatedDate: 2026-07-16T15:57:27.000Z
-category: opinion
-tags:
-  - career
-  - opinion
-  - personal
+category: "opinion"
+tags: ["career", "personal"]
 lang: en
 description: What to do when you realize that the control you thought you had over your life was just an illusion you created yourself?
 slug: you-will-never-finish-anything-lessons-from-a-decade-of-mistakes

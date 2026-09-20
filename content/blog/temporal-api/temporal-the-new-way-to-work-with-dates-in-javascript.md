@@ -2,12 +2,8 @@
 title: "Temporal: the new way to work with dates in JavaScript"
 pubDate: 2021-09-24T00:49:00.000Z
 updatedDate: 2026-07-16T16:12:18.000Z
-category: javascript
-tags:
-  - javascript
-  - typescript
-  - development
-  - ecmascript
+category: technology
+tags: ["javascript"]
 lang: en
 description: Learn the new JavaScript specification for dates that will replace Date.
 seoTitle: Forget Date and embrace the new way to manipulate dates in JavaScript

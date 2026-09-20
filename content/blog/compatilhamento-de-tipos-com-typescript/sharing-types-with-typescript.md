@@ -2,10 +2,8 @@
 title: Sharing Types with TypeScript
 pubDate: 2022-04-11T14:00:00.000Z
 updatedDate: 2026-07-16T16:09:54.000Z
-category: typescript
-tags:
-  - typescript
-  - development
+category: technology
+tags: ["typescript", "architecture"]
 lang: en
 description: One of the biggest problems we have in TypeScript projects is sharing types across several projects. Let's look at some techniques to mitigate that!
 seoDescription: One of the biggest problems we have in TypeScript projects is sharing types across several projects. Let's learn how to make this better!

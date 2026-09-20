@@ -2,9 +2,8 @@
 title: "Type-level programming - #TypeScriptWeek day 5"
 pubDate: 2023-04-07T11:00:08.000Z
 updatedDate: 2026-07-16T16:01:39.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 series: typescript-week
 seriesOrder: 5
 lang: en

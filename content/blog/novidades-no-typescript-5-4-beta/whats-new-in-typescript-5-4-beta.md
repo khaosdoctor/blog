@@ -2,9 +2,8 @@
 title: What's New in TypeScript 5.4
 pubDate: 2024-02-14T11:00:19.000Z
 updatedDate: 2026-07-16T15:53:14.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 lang: en
 description: See the main changes in the TypeScript 5.4 beta, including the new NoInfer type with detailed explanations!
 slug: whats-new-in-typescript-5-4-beta

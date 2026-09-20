@@ -45,14 +45,28 @@
 // `anthropic` provider imports the package itself, at the point it needs one.
 
 import { spawn } from 'node:child_process'
-import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type Anthropic from '@anthropic-ai/sdk'
 import { asLocale, type Locale } from '../src/i18n/locales.ts'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 import { slugify } from '../src/lib/slugify.ts'
-import { bold, count, dim, fail, field, frontmatterOf, heading, ok, postIndex, warn } from './lib/cli.ts'
+import {
+  bold,
+  count,
+  dim,
+  fail,
+  field,
+  frontmatterLine,
+  hash,
+  heading,
+  ok,
+  postIndex,
+  splitFrontmatter,
+  TRANSLATABLE_FIELDS,
+  translatableOf,
+  warn,
+} from './lib/cli.ts'
 
 const SOURCE_DIR = 'content/blog'
 // Lives directly in content/blog, not one level down inside a post folder like
@@ -111,10 +125,6 @@ function parseArgs() {
   }
 }
 
-function hash(value: string): string {
-  return createHash('sha256').update(value).digest('hex').slice(0, 16)
-}
-
 function readCache(): Cache {
   if (!existsSync(CACHE_FILE)) return {}
   return JSON.parse(readFileSync(CACHE_FILE, 'utf8')) as Cache
@@ -124,27 +134,6 @@ function readCache(): Cache {
 function sourceFile(slug: string): string | null {
   return postIndex(join(SOURCE_DIR, slug)) ?? null
 }
-
-/** Frontmatter stays machine-readable, so split it off and translate only prose. */
-function splitFrontmatter(raw: string): { frontmatter: string; body: string } {
-  const frontmatter = frontmatterOf(raw)
-  if (frontmatter === '') return { frontmatter: '', body: raw }
-  return { frontmatter, body: raw.slice(`---\n${frontmatter}\n---`.length).replace(/^\n/, '') }
-}
-
-/** Copies a frontmatter key through byte for byte, whatever shape its value has. */
-function frontmatterLine(frontmatter: string, key: string): string | null {
-  const re = new RegExp(`^${key}:.*(?:\\n(?:[ \\t]+-[^\\n]*))*`, 'm')
-  const match = re.exec(frontmatter)
-  return match === null ? null : match[0]
-}
-
-/**
- * The human-facing strings worth translating in frontmatter. Everything else
- * (dates, category, tags, series) is copied verbatim instead, or dropped: see
- * buildFrontmatter.
- */
-const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription'] as const
 
 type ExistingTranslation = { file: string; slug: string; machineOwned: boolean }
 
@@ -388,6 +377,9 @@ if (PROVIDER === 'openai-compatible' && BASE_URL.length === 0) {
 }
 
 const cache = readCache()
+// A renamed or deleted post leaves its entry behind, and nothing else ever looks at it again.
+const orphans = Object.keys(cache).filter((slug) => sourceFile(slug) === null)
+for (const slug of orphans) delete cache[slug]
 const sources = readdirSync(SOURCE_DIR, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
@@ -417,7 +409,7 @@ for (const post of sources) {
   // is a page nobody reads made of source nobody should paraphrase.
   if (field(frontmatter, 'noindex') === 'true') continue
 
-  const sourceHash = hash(raw)
+  const sourceHash = hash(translatableOf(raw))
   const entry = cache[post.slug]
   const postDir = join(SOURCE_DIR, post.slug)
   const existing = findExistingTranslation(postDir, args.locale)
@@ -453,6 +445,13 @@ if (overrides.length > 0) {
 if (args.dryRun) {
   console.log(changed.map((post) => post.slug).join('\n'))
   process.exit(0)
+}
+
+if (orphans.length > 0) {
+  writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2))
+  warn(
+    `dropped ${count(orphans.length, 'cache entry', 'cache entries')} with no post behind them: ${orphans.join(', ')}`,
+  )
 }
 
 let translated = 0

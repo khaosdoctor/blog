@@ -2,12 +2,8 @@
 title: Safer code with Shadow Realms in JavaScript
 pubDate: 2022-06-21T13:00:00.000Z
 updatedDate: 2026-07-16T16:08:44.000Z
-category: javascript
-tags:
-  - javascript
-  - nodejs
-  - ecmascript
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: One of the most interesting proposals in JavaScript recently has been making waves. Learn what shadow realms are and how it will be possible to execute code more securely.
 seoDescription: One of the most interesting proposals in JavaScript recently. What are shadow realms and how do they improve your code security!

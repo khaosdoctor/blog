@@ -2,11 +2,8 @@
 title: Atomic operations with Deno KV
 pubDate: 2023-07-27T08:00:25.000Z
 updatedDate: 2026-07-16T15:59:05.000Z
-category: javascript
-tags:
-  - deno
-  - typescript
-  - databases
+category: technology
+tags: ["deno", "typescript", "databases", "javascript"]
 lang: en
 description: Deno KV is advancing faster and faster. Let's learn what atomic transactions are and how they're useful in a KV database.
 slug: atomic-operations-with-deno-kv

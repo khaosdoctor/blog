@@ -2,14 +2,8 @@
 title: gRPC with Node.js at EnterJS 2020
 pubDate: 2020-12-03T20:55:44.000Z
 updatedDate: 2026-07-16T16:20:31.000Z
-category: infra
-tags:
-  - grpc
-  - events
-  - talk
-  - video
-  - javascript
-  - nodejs
+category: technology
+tags: ["grpc", "events", "talk", "video", "javascript", "nodejs", "infrastructure"]
 lang: en
 description: Want to know how gRPC works in practice with Node.js? In this talk I'll present the full concept of gRPC and see how it all works!
 seoTitle: Understand gRPC with Node.js in practice

@@ -2,11 +2,8 @@
 title: TypeScript 5.0's Official Features
 pubDate: 2023-03-23T11:00:38.000Z
 updatedDate: 2026-07-16T16:03:10.000Z
-category: typescript
-tags:
-  - typescript
-  - development
-  - technology
+category: technology
+tags: ["typescript"]
 lang: en
 description: It's official! TypeScript has released version 5.0, and I'm going to tell you all about what's new!
 slug: typescript-5-official-updates

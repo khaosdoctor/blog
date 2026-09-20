@@ -2,14 +2,8 @@
 title: '"Learn Everything About Your Services with Jaeger and Linkerd"'
 pubDate: 2020-09-14T17:16:46.000Z
 updatedDate: 2026-07-16T16:24:20.000Z
-category: infra
-tags:
-  - kubernetes
-  - linkerd
-  - jaeger
-  - containers
-  - development
-  - technology
+category: technology
+tags: ["kubernetes", "linkerd", "jaeger", "containers", "infrastructure", "observability"]
 lang: en
 description: "\"Want to observe all the calls to your system in depth and understand when everything happened? Let's install Jaeger and have all that power!\""
 slug: know-everything-about-your-services-with-jaeger-and-linkerd

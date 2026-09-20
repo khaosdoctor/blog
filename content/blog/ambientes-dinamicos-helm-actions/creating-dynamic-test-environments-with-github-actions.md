@@ -2,13 +2,8 @@
 title: Creating test environments dynamically with GitHub Actions
 pubDate: 2021-06-09T13:00:00.000Z
 updatedDate: 2026-07-16T16:14:27.000Z
-category: infra
-tags:
-  - github
-  - kubernetes
-  - helm
-  - aks
-  - ci
+category: technology
+tags: ["github", "kubernetes", "helm", "aks", "ci", "infrastructure"]
 lang: en
 description: Ever imagined having a different environment for every feature you want to test? So how about doing that with GitHub Actions and the power of Kubernetes?
 slug: creating-dynamic-test-environments-with-github-actions

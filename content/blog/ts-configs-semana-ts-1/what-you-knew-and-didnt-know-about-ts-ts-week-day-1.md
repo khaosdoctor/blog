@@ -2,11 +2,8 @@
 title: What you knew and didn't know about TS - TS Week day 1
 pubDate: 2023-04-03T11:00:04.000Z
 updatedDate: 2026-07-16T16:02:32.000Z
-category: typescript
-tags:
-  - typescript
-  - javascript
-  - development
+category: technology
+tags: ["typescript", "javascript"]
 series: typescript-week
 seriesOrder: 1
 lang: en

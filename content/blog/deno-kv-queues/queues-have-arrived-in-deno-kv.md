@@ -2,11 +2,8 @@
 title: Queues have arrived in Deno KV
 pubDate: 2024-01-10T11:00:32.000Z
 updatedDate: 2026-07-16T15:54:36.000Z
-category: javascript
-tags:
-  - deno
-  - typescript
-  - development
+category: technology
+tags: ["deno", "typescript", "javascript", "pubsub"]
 lang: en
 description: The simplest way to build message-based systems is now Deno Queues, let's understand everything about this new tool!
 seoTitle: Discover Deno Queues

@@ -2,11 +2,8 @@
 title: Using Mocks with Node Test Runner
 pubDate: 2024-06-05T11:00:45.000Z
 updatedDate: 2026-07-16T17:56:17.000Z
-category: javascript
-tags:
-  - nodejs
-  - javascript
-  - typescript
+category: technology
+tags: ["nodejs", "javascript", "tests"]
 lang: en
 description: How to use mocks, stubs and spies in your tests using the native Node.js Test Runner
 slug: using-mocks-with-the-node-test-runner

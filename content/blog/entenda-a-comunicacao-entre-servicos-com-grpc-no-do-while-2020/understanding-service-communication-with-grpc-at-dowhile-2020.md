@@ -2,15 +2,8 @@
 title: '"Understanding service communication with gRPC at DoWhile 2020"'
 pubDate: 2020-11-30T14:52:51.000Z
 updatedDate: 2026-07-16T16:20:54.000Z
-category: infra
-tags:
-  - events
-  - talk
-  - workshop
-  - grpc
-  - architecture
-  - development
-  - javascript
+category: technology
+tags: ["events", "talk", "workshop", "grpc", "architecture", "javascript", "infrastructure"]
 lang: en
 description: '"Want to learn how to retire REST from your service-to-service communication using gRPC? Join me for this FREE workshop!"'
 slug: understanding-service-communication-with-grpc-at-dowhile-2020

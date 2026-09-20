@@ -2,10 +2,8 @@
 title: JavaScript gains new Set methods
 pubDate: 2024-07-04T11:00:40.000Z
 updatedDate: 2026-07-16T17:55:39.000Z
-category: typescript
-tags:
-  - ecmascript
-  - javascript
+category: technology
+tags: ["javascript"]
 lang: en
 description: JavaScript has just gained new Set methods in 2024, let's explore them!
 seoTitle: Everything about the new Set methods in JavaScript

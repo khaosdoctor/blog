@@ -2,13 +2,8 @@
 title: Meet GitHub Container Registry
 pubDate: 2020-09-18T22:59:27.000Z
 updatedDate: 2026-07-16T16:24:09.000Z
-category: infra
-tags:
-  - docker
-  - containers
-  - github
-  - development
-  - technology
+category: technology
+tags: ["docker", "containers", "github", "infrastructure", "ci"]
 lang: en
 description: Have you ever thought about the convenience of storing your Docker images in the same place where you version your code?
 slug: meet-the-github-container-registry

@@ -2,12 +2,8 @@
 title: '"What is NPM package provenance?"'
 pubDate: 2023-05-12T11:00:16.000Z
 updatedDate: 2026-07-16T16:00:29.000Z
-category: security
-tags:
-  - security
-  - nodejs
-  - javascript
-  - development
+category: technology
+tags: ["security", "nodejs", "javascript", "npm"]
 lang: en
 description: '"NPM launched a quite interesting feature that will greatly improve the security of our packages. Learn about package provenance!"'
 slug: what-is-npm-package-provenance

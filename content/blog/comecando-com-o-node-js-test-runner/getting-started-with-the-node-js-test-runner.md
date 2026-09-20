@@ -2,11 +2,8 @@
 title: Getting Started with the Node.js Test Runner
 pubDate: 2024-05-30T11:00:15.000Z
 updatedDate: 2026-07-16T17:56:29.000Z
-category: javascript
-tags:
-  - nodejs
-  - typescript
-  - tests
+category: technology
+tags: ["nodejs", "typescript", "tests", "javascript"]
 lang: en
 description: "Learn how to start writing your tests with Node.js in the simplest, easiest way possible: using the Node.js Test Runner"
 seoTitle: How to write tests with the Node.js Test Runner

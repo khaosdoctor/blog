@@ -1,8 +1,8 @@
 /**
  * The label a tag wears on the page, per language. Tags are written in English
  * in the frontmatter and the URL is built from that word, so only what the
- * reader sees changes here: `/tags/development/` reads "desenvolvimento" on a
- * Portuguese page and "development" on an English one.
+ * reader sees changes here: `/tags/tests/` reads "testes" on a Portuguese page
+ * and "tests" on an English one.
  *
  * A tag Portuguese uses in English (kubernetes, deploy, docker) has no entry and
  * falls through to the tag itself.
@@ -13,12 +13,12 @@
 /** Every tag that has been decided about. `check-tags.ts` fails on one that has not. */
 export const KNOWN_TAGS = [
   'acr',
+  'ai',
   'aks',
   'architecture',
   'azure',
   'azure monitor',
   'backlog-newsletter',
-  'blog',
   'bots',
   'career',
   'ci',
@@ -33,12 +33,9 @@ export const KNOWN_TAGS = [
   'databases',
   'deno',
   'design',
-  'development',
   'devops',
   'docker',
   'drop',
-  'ecmascript',
-  'es2020',
   'events',
   'git',
   'github',
@@ -47,10 +44,8 @@ export const KNOWN_TAGS = [
   'grpc',
   'harperdb',
   'helm',
-  'hipsters',
   'history',
   'infrastructure',
-  'info',
   'jaeger',
   'javascript',
   'jest',
@@ -58,13 +53,13 @@ export const KNOWN_TAGS = [
   'kubernetes',
   'linkerd',
   'meetup',
-  'meta',
   'microservices',
   'mongodb',
   'monitor',
   'news',
   'nodejs',
   'npm',
+  'observability',
   'oci',
   'open source',
   'opinion',
@@ -78,10 +73,8 @@ export const KNOWN_TAGS = [
   'react',
   'rest',
   'security',
-  'series',
   'signals',
   'talk',
-  'technology',
   'telegram',
   'tests',
   'theory',
@@ -105,19 +98,17 @@ export const TAG_LABELS: Record<string, Record<string, string>> = {
   containers: { pt: 'contêineres' },
   cryptography: { pt: 'criptografia' },
   databases: { pt: 'bancos de dados' },
-  development: { pt: 'desenvolvimento' },
   events: { pt: 'eventos' },
   history: { pt: 'história' },
   infrastructure: { pt: 'infraestrutura' },
   microservices: { pt: 'microsserviços' },
   news: { pt: 'notícias' },
+  observability: { pt: 'observabilidade' },
   opinion: { pt: 'opinião' },
   performance: { pt: 'desempenho' },
   personal: { pt: 'pessoal' },
   productivity: { pt: 'produtividade' },
   security: { pt: 'segurança' },
-  series: { pt: 'série' },
-  technology: { pt: 'tecnologia' },
   tests: { pt: 'testes' },
   theory: { pt: 'teoria' },
   tips: { pt: 'dicas' },

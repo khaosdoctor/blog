@@ -2,12 +2,8 @@
 title: "Cryptography #1 - Asymmetric Cryptography with RSA"
 pubDate: 2024-03-06T11:00:32.000Z
 updatedDate: 2026-07-16T15:52:25.000Z
-category: security
-tags:
-  - security
-  - development
-  - cryptography
-  - series
+category: technology
+tags: ["security", "cryptography", "typescript"]
 series: cryptography-beginners
 seriesOrder: 1
 lang: en

@@ -2,10 +2,8 @@
 title: Deno 1.40 Release Highlights
 pubDate: 2024-02-28T11:00:45.000Z
 updatedDate: 2026-07-16T15:52:50.000Z
-category: javascript
-tags:
-  - deno
-  - typescript
+category: technology
+tags: ["deno", "typescript", "javascript"]
 lang: en
 description: Understand the main changes in Deno 1.40 and how they directly impact your experience with the tool!
 slug: whats-new-in-deno-1-40

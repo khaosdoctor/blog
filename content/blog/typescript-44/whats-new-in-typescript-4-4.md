@@ -2,11 +2,8 @@
 title: What's new in TypeScript 4.4
 pubDate: 2021-09-15T11:00:00.000Z
 updatedDate: 2026-07-16T16:12:30.000Z
-category: typescript
-tags:
-  - typescript
-  - javascript
-  - development
+category: technology
+tags: ["typescript", "javascript"]
 lang: en
 description: Let's dive deeper into TypeScript 4.4's new features and understand what's new in each one!
 slug: whats-new-in-typescript-4-4

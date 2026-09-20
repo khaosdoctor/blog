@@ -2,16 +2,8 @@
 title: Kubernetes without Docker? – Understanding OCI, CRI and the container ecosystem
 pubDate: 2021-02-02T13:00:00.000Z
 updatedDate: 2026-07-16T16:19:22.000Z
-category: infra
-tags:
-  - docker
-  - containerd
-  - oci
-  - cri
-  - kubernetes
-  - containers
-  - architecture
-  - technology
+category: technology
+tags: ["docker", "containerd", "oci", "cri", "kubernetes", "containers", "architecture", "infrastructure"]
 lang: en
 description: Recently Kubernetes began deprecating Docker. What does this mean for you? What is this alphabet soup of OCI, CRI, RunC? Let's dive in and learn more about the container ecosystem!
 seoTitle: OCI, CRI, Runtimes? Understanding the container ecosystem.

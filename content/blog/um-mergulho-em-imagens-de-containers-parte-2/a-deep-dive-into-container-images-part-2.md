@@ -2,13 +2,8 @@
 title: A Deep Dive into Container Images - Part 2
 pubDate: 2020-07-29T13:00:00.000Z
 updatedDate: 2026-07-16T16:27:56.000Z
-category: infra
-tags:
-  - containers
-  - docker
-  - golang
-  - development
-  - technology
+category: technology
+tags: ["containers", "docker", "golang", "infrastructure"]
 series: container-images
 seriesOrder: 2
 lang: en

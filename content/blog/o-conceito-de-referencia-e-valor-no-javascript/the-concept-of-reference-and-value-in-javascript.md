@@ -2,10 +2,8 @@
 title: '"The concept of \"reference\" and \"value\" in JavaScript"'
 pubDate: 2024-02-21T11:00:38.000Z
 updatedDate: 2026-07-16T15:53:01.000Z
-category: javascript
-tags:
-  - javascript
-  - typescript
+category: technology
+tags: ["javascript"]
 lang: en
 description: '"Understand the differences between reference and value in JavaScript: primitives are copied, objects create shared pointers. Learn cloning techniques."'
 seoDescription: '"Understand the differences between reference and value in JavaScript: primitives are copied, objects create shared pointers."'

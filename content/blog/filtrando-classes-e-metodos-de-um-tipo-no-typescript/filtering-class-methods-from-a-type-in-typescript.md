@@ -2,9 +2,8 @@
 title: Filtering classes and methods from a type in TypeScript
 pubDate: 2024-04-03T11:00:57.000Z
 updatedDate: 2026-07-16T17:57:24.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 lang: en
 description: Learn how to create a type in TypeScript that can help you build filtering functionality by removing methods from classes!
 slug: filtering-class-methods-from-a-type-in-typescript

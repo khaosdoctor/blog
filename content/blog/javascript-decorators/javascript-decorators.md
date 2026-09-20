@@ -2,12 +2,8 @@
 title: JavaScript Decorators
 pubDate: 2022-11-04T14:00:14.000Z
 updatedDate: 2026-07-16T16:05:19.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - development
-  - typescript
+category: technology
+tags: ["javascript", "typescript"]
 lang: en
 description: One of the most important proposals for JavaScript has just reached stage 3! Understand what decorators are and why they are not the only novelty of this proposal!
 seoDescription: One of the most important proposals for JavaScript is at stage 3! What are decorators and why are they not the only novelty of this proposal?

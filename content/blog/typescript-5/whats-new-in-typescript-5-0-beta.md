@@ -2,13 +2,8 @@
 title: What's New in TypeScript 5.0 Beta
 pubDate: 2023-02-02T11:11:51.000Z
 updatedDate: 2026-07-16T16:03:46.000Z
-category: typescript
-tags:
-  - typescript
-  - development
-  - ecmascript
-  - javascript
-  - nodejs
+category: technology
+tags: ["typescript", "javascript"]
 lang: en
 description: TypeScript 5.0 beta is out! Time to discover what's new in this version of the superset we all love!
 seoTitle: TypeScript 5.0 Beta What's New

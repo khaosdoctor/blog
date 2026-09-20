@@ -2,11 +2,8 @@
 title: '"Pipeline operators in JavaScript"'
 pubDate: 2022-04-04T14:00:00.000Z
 updatedDate: 2026-07-16T16:10:07.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: '"Learn everything about the proposal gaining significant adoption in ECMAScript, the pipeline operators."'
 slug: pipeline-operators-in-javascript

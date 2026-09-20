@@ -2,17 +2,8 @@
 title: Controlling containers from inside your application with ContainerD
 pubDate: 2021-02-04T14:00:00.000Z
 updatedDate: 2026-07-16T16:19:10.000Z
-category: infra
-tags:
-  - containerd
-  - containers
-  - docker
-  - oci
-  - cri
-  - golang
-  - devops
-  - kubernetes
-  - technology
+category: technology
+tags: ["containerd", "containers", "docker", "oci", "cri", "golang", "devops", "kubernetes", "infrastructure"]
 lang: en
 description: Ever thought of a Docker alternative? What about manipulating containers programmatically in your API? Let's integrate your app with the containers world!
 slug: controlling-containers-from-inside-your-application-with-containerd

@@ -2,9 +2,8 @@
 title: "External types and declaration packages - #TypeScript Week day 2"
 pubDate: 2023-04-04T11:00:24.000Z
 updatedDate: 2026-07-16T16:02:20.000Z
-category: typescript
-tags:
-  - typescript
+category: technology
+tags: ["typescript"]
 series: typescript-week
 seriesOrder: 2
 lang: en

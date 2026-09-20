@@ -2,11 +2,8 @@
 title: Simpler CLIs with Util.parseArgs
 pubDate: 2022-10-20T13:00:04.000Z
 updatedDate: 2026-07-16T16:05:43.000Z
-category: javascript
-tags:
-  - nodejs
-  - javascript
-  - typescript
+category: technology
+tags: ["nodejs", "javascript", "typescript"]
 lang: en
 description: Learn how Node.js made building command-line tools easier with the new parseArgs method!
 slug: simpler-clis-with-util-parseargs

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -109,6 +110,54 @@ export function field(frontmatter: string, key: string): string | null {
   const match = new RegExp(`^${key}:\\s*(.*)$`, 'm').exec(frontmatter)
   if (match === null) return null
   return match[1].trim().replace(/^["'](.*)["']$/, '$1')
+}
+
+/** A frontmatter key with its value byte for byte, block list included. */
+export function frontmatterLine(frontmatter: string, key: string): string | null {
+  const re = new RegExp(`^${key}:.*(?:\\n(?:[ \\t]+-[^\\n]*))*`, 'm')
+  const match = re.exec(frontmatter)
+  return match === null ? null : match[0]
+}
+
+/** The tags list, whether written inline (`tags: ["a", "b"]`) or as a block list. */
+export function tagsOf(frontmatter: string): string[] {
+  const line = frontmatterLine(frontmatter, 'tags')
+  if (line === null) return []
+  const inline = /^tags:\s*\[(.*)\]\s*$/.exec(line)
+  const items =
+    inline === null
+      ? line
+          .split('\n')
+          .slice(1)
+          .map((item) => item.replace(/^\s+-\s*/, ''))
+      : inline[1].split(',')
+  return items.map((item) => item.trim().replace(/^["'](.*)["']$/, '$1')).filter((item) => item !== '')
+}
+
+/** Frontmatter stays machine-readable, so split it off from the prose. */
+export function splitFrontmatter(raw: string): { frontmatter: string; body: string } {
+  const frontmatter = frontmatterOf(raw)
+  if (frontmatter === '') return { frontmatter: '', body: raw }
+  return { frontmatter, body: raw.slice(`---\n${frontmatter}\n---`.length).replace(/^\n/, '') }
+}
+
+/** The human-facing frontmatter strings translate.ts sends to the model. Everything else is copied or dropped. */
+export const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription'] as const
+
+/**
+ * Exactly what a translation is made from: the body and the translatable
+ * fields. Hashing this instead of the whole file means a category, tag, date or
+ * quoting change never re-translates prose that did not move.
+ */
+export function translatableOf(raw: string): string {
+  const { frontmatter, body } = splitFrontmatter(raw)
+  const fields = TRANSLATABLE_FIELDS.map((key) => `${key}: ${field(frontmatter, key) ?? ''}`)
+  return [...fields, body].join('\n')
+}
+
+/** The short content hash the translation cache stores per post. */
+export function hash(value: string): string {
+  return createHash('sha256').update(value).digest('hex').slice(0, 16)
 }
 
 export type Failure = { check: string; detail: string; file: string }

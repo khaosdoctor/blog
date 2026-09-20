@@ -2,11 +2,8 @@
 title: What are "do expressions" in JavaScript?
 pubDate: 2022-09-07T13:00:17.000Z
 updatedDate: 2026-07-16T16:06:41.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
-  - development
+category: technology
+tags: ["javascript"]
 lang: en
 description: Understand what one of the most famous and important forms of expressions coming to JavaScript soon is!
 seoTitle: What are "do expressions" in JavaScript?

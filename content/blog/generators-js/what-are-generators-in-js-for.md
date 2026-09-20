@@ -2,10 +2,8 @@
 title: '"What are generators for in JS?"'
 pubDate: 2023-01-05T13:00:46.000Z
 updatedDate: 2026-07-16T16:04:21.000Z
-category: javascript
-tags:
-  - javascript
-  - ecmascript
+category: technology
+tags: ["javascript"]
 lang: en
 description: "\"Generators are not a recent API in JavaScript, yet they remain little known. Let's learn what generators are for, how you can use them in your applications, and how to take your skills to the next level with this feature.\""
 seoDescription: "\"Generators are not a recent API in JavaScript, yet they remain little known. Let's learn what generators are for and how you can use them in your applications.\""

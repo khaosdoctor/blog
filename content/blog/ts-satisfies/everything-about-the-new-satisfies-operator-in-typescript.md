@@ -2,10 +2,8 @@
 title: Everything about the new satisfies operator in TypeScript
 pubDate: 2022-10-05T13:00:52.000Z
 updatedDate: 2026-07-16T16:05:55.000Z
-category: typescript
-tags:
-  - typescript
-  - javascript
+category: technology
+tags: ["typescript", "javascript"]
 lang: en
 description: In TypeScript 4.9 beta, we got a new operator, "satisfies". Let's understand how this new operator can be useful and why it's so cool!
 seoDescription: In TypeScript 4.9 beta, we got a new operator, "satisfies". Let's understand how this new operator can be useful.
