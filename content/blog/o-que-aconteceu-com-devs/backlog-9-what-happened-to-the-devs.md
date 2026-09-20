@@ -1,12 +1,13 @@
 ---
-title: "Backlog #9 - What happened to devs?"
+title: "What happened to devs?"
 pubDate: 2025-03-06T11:00:40.000Z
 updatedDate: 2026-07-16T17:48:05.000Z
 category: opinion
 tags:
   - backlog-newsletter
-  - career
   - ai
+series: backlog
+seriesOrder: 10
 lang: en
 description: What happened to a profession that once prided itself on being super smart and focused on what it does? Did devs stop caring about their work?
 slug: backlog-9-what-happened-to-the-devs

@@ -142,16 +142,23 @@ export function splitFrontmatter(raw: string): { frontmatter: string; body: stri
 }
 
 /** The human-facing frontmatter strings translate.ts sends to the model. Everything else is copied or dropped. */
-export const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription'] as const
+export const TRANSLATABLE_FIELDS = ['title', 'description', 'seoTitle', 'seoDescription', 'seriesName'] as const
 
 /**
  * Exactly what a translation is made from: the body and the translatable
  * fields. Hashing this instead of the whole file means a category, tag, date or
  * quoting change never re-translates prose that did not move.
+ *
+ * seriesName joined later and only appears when set, so the hash of every post
+ * without one stayed what the cache already held.
  */
 export function translatableOf(raw: string): string {
   const { frontmatter, body } = splitFrontmatter(raw)
-  const fields = TRANSLATABLE_FIELDS.map((key) => `${key}: ${field(frontmatter, key) ?? ''}`)
+  const fields = TRANSLATABLE_FIELDS.filter((key) => key !== 'seriesName').map(
+    (key) => `${key}: ${field(frontmatter, key) ?? ''}`,
+  )
+  const seriesName = field(frontmatter, 'seriesName')
+  if (seriesName !== null) fields.push(`seriesName: ${seriesName}`)
   return [...fields, body].join('\n')
 }
 

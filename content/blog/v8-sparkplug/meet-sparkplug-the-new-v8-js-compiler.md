@@ -3,7 +3,7 @@ title: Meet SparkPlug, the new JS compiler for V8
 pubDate: 2021-08-17T20:16:48.000Z
 updatedDate: 2026-07-16T16:13:06.000Z
 category: technology
-tags: ["javascript", "nodejs", "architecture"]
+tags: ["javascript", "architecture", "performance"]
 lang: en
 description: Meet the reason for a 15% performance boost in V8-based browsers and how it will change your code!
 slug: meet-sparkplug-the-new-v8-js-compiler

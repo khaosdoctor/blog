@@ -3,7 +3,7 @@ title: "Podcast #FalaDev - Let's Talk About Microservices"
 pubDate: 2021-01-08T17:42:39.000Z
 updatedDate: 2026-07-16T16:19:58.000Z
 category: technology
-tags: ["podcasts", "architecture", "microservices", "events"]
+tags: ["podcasts", "architecture", "microservices", "video"]
 lang: en
 description: "Do you know what microservices are? Want to participate in a really interesting discussion about best practices and how we work with them? Then join #FalaDev"
 seoDescription: "Want to participate in a really interesting discussion about best practices and how we work with them? Then join #FalaDev"

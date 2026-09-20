@@ -2,8 +2,6 @@
 
 `AGENTS.md` at the root is the real instruction file. Read it before touching anything. Everything below is repeated from it because these are the rules broken most often.
 
-`content/internal/HANDOFF.md` is where the last session left things: current state, the shell and cache traps that waste an hour, and what was deliberately left undone. It is gitignored, so it exists only on this machine. Read it at the start of a session and rewrite it at the end.
-
 ## TypeScript
 
 New code is `.ts`, or `.astro` with a typed frontmatter block. Reach for `.mjs` only when something genuinely refuses a `.ts`, and say in one line what refused it.

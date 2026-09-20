@@ -3,7 +3,7 @@ title: What's New in TypeScript 4.0
 pubDate: 2020-08-31T20:45:39.000Z
 updatedDate: 2026-07-16T16:25:22.000Z
 category: technology
-tags: ["typescript"]
+tags: ["typescript", "javascript"]
 lang: en
 description: Let's dive into the newest TypeScript update! Version 4.0!
 slug: whats-new-in-typescript-4-0

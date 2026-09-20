@@ -1,9 +1,11 @@
 ---
-title: "Backlog #4 - The first programming language"
+title: "The first programming language"
 pubDate: 2024-12-25T11:00:16.000Z
 updatedDate: 2026-07-16T17:49:37.000Z
 category: technology
 tags: ["backlog-newsletter", "computing", "history"]
+series: backlog
+seriesOrder: 5
 lang: en
 description: What if I told you the first programming language came out of a loom? Let's understand what sewing has to do with code!
 slug: backlog-4-first-programming-language

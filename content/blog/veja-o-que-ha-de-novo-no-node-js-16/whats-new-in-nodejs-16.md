@@ -3,7 +3,7 @@ title: See what's new in Node.js 16
 pubDate: 2021-05-19T17:46:04.000Z
 updatedDate: 2026-07-16T16:15:02.000Z
 category: technology
-tags: ["nodejs", "javascript", "drop"]
+tags: ["nodejs", "javascript"]
 lang: en
 description: Come learn what's new in version 16 of the world's most famous JavaScript runtime!
 slug: whats-new-in-nodejs-16

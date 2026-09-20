@@ -111,6 +111,7 @@ const RETIRED: Record<string, string> = {
   '/tags/signals/': '/tags/javascript/',
   '/tags/technology/': '/technology/',
   '/tags/theory/': '/tags/computing/',
+  '/tags/virtual-machines/': '/tags/infrastructure/',
 }
 
 const tags = new Set<string>()

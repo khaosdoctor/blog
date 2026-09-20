@@ -3,7 +3,7 @@ title: Why Do Black Fridays Go Wrong? - Hipsters.talks
 pubDate: 2020-11-30T03:21:41.000Z
 updatedDate: 2026-07-16T16:21:05.000Z
 category: technology
-tags: ["video", "podcasts", "career", "ci", "cloud"]
+tags: ["video", "podcasts"]
 lang: en
 description: Want to know why Black Fridays go wrong? Join me and other amazing guests in this sensational webcast!
 slug: why-black-fridays-go-wrong

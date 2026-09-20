@@ -5,6 +5,7 @@ updatedDate: 2026-07-16T16:02:32.000Z
 category: technology
 tags: ["typescript", "javascript"]
 series: typescript-week
+seriesName: "TS Week"
 seriesOrder: 1
 lang: en
 description: Learn everything about TypeScript and how you can take your first steps in this technology that is growing more and more!

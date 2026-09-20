@@ -3,7 +3,7 @@ title: Integrating Azure Active Directory into AKS
 pubDate: 2021-04-06T13:00:00.000Z
 updatedDate: 2026-07-16T16:16:49.000Z
 category: technology
-tags: ["aks", "kubernetes", "azure", "security", "cloud", "containers", "devops", "infrastructure"]
+tags: ["aks", "kubernetes", "azure", "security", "cloud", "infrastructure"]
 lang: en
 description: Let's learn how to keep your cluster even more secure with the Azure AD integration with AKS, making cluster administration even easier.
 slug: integrating-azure-active-directory-with-aks

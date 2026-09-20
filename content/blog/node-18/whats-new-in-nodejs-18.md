@@ -3,7 +3,7 @@ title: "\"What's New in Node.js 18!\""
 pubDate: 2022-05-04T14:00:00.000Z
 updatedDate: 2026-07-16T16:09:30.000Z
 category: technology
-tags: ["nodejs", "javascript"]
+tags: ["nodejs", "javascript", "tests"]
 lang: en
 description: '"Learn everything about Node.js 2022 release and how it can (and will) impact the ecosystem as a whole with the addition of incredible APIs and new import models."'
 seoDescription: '"Learn everything about Node.js 2022 release and how it can (and will) impact the ecosystem as a whole with the addition of incredible APIs."'

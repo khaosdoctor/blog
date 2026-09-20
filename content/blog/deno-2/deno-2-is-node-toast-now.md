@@ -3,7 +3,7 @@ title: "Deno 2.0: Is Node.js Already a Thing of the Past?"
 pubDate: 2024-10-30T11:00:52.000Z
 updatedDate: 2026-07-16T17:50:40.000Z
 category: technology
-tags: ["deno", "typescript", "javascript"]
+tags: ["deno", "typescript", "javascript", "npm", "open source"]
 lang: en
 description: Deno finally reached version 2.0! Find out what's new in the most popular TypeScript runtime and why it can replace Node.js
 seoTitle: Will Deno 2.0 Replace Node.js?

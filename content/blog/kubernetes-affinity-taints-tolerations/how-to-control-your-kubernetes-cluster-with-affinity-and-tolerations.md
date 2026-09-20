@@ -3,7 +3,7 @@ title: '"How to take control of your Kubernetes cluster with affinity and tolera
 pubDate: 2021-03-02T12:00:00.000Z
 updatedDate: 2026-07-16T16:17:48.000Z
 category: technology
-tags: ["kubernetes", "aks", "azure", "cloud", "containers", "devops", "docker", "infrastructure"]
+tags: ["kubernetes", "containers", "devops", "infrastructure"]
 lang: en
 description: "\"Do you control your Kubernetes cluster? Let's learn techniques and concepts that will help you have control of your applications within the distributed model\""
 slug: how-to-control-your-kubernetes-cluster-with-affinity-and-tolerations

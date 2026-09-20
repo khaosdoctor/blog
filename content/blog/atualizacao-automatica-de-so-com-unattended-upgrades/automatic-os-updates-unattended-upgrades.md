@@ -3,7 +3,7 @@ title: Automatic OS Updates with Unattended Upgrades
 pubDate: 2020-11-11T16:10:23.000Z
 updatedDate: 2026-07-16T16:21:31.000Z
 category: technology
-tags: ["cloud", "security", "architecture", "infrastructure"]
+tags: ["security", "infrastructure", "linux"]
 lang: en
 description: How about configuring your server so it never needs your input again to install security updates?
 seoTitle: Updating VMs Automatically with Unattended Upgrades

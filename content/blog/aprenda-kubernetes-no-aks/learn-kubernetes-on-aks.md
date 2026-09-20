@@ -3,7 +3,7 @@ title: "#FullstackImmersion - Scaling infinitely with Kubernetes"
 pubDate: 2021-02-05T01:00:00.000Z
 updatedDate: 2026-07-16T16:18:58.000Z
 category: technology
-tags: ["kubernetes", "aks", "azure", "containers", "docker", "containerd", "cloud", "devops", "events", "video", "workshop", "infrastructure"]
+tags: ["kubernetes", "aks", "azure", "containers", "docker", "cloud", "events", "video", "infrastructure", "talk"]
 lang: en
 description: Learn what Docker is and what Kubernetes is in a simple and quick talk!
 slug: learn-kubernetes-on-aks

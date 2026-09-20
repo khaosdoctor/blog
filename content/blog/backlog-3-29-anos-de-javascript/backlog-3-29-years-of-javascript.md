@@ -1,9 +1,11 @@
 ---
-title: "Backlog #3 - 29 years of JavaScript!"
+title: "29 years of JavaScript!"
 pubDate: 2024-12-12T11:00:40.000Z
 updatedDate: 2026-07-16T17:49:51.000Z
 category: technology
 tags: ["backlog-newsletter", "javascript", "computing", "history"]
+series: backlog
+seriesOrder: 4
 lang: en
 description: December 4th, 1995 was a special day because it was the release of the language everyone loves to hate! Let's get into the history of JavaScript!
 slug: backlog-3-29-years-of-javascript

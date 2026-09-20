@@ -3,8 +3,9 @@ title: A Deep Dive into Container Images - Part 1
 pubDate: 2020-07-24T13:00:00.000Z
 updatedDate: 2026-07-16T16:28:31.000Z
 category: technology
-tags: ["containers", "docker", "infrastructure"]
+tags: ["containers", "docker", "infrastructure", "security"]
 series: container-images
+seriesName: "A deep dive into container images"
 seriesOrder: 1
 lang: en
 description: Learn what different types of container images are for and how to choose the best image for your project!

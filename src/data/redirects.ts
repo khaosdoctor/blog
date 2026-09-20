@@ -538,6 +538,11 @@ export const redirects: Redirect[] = [
     note: 'tag archive',
   },
   {
+    from: '/tag/linux/',
+    to: '/tags/linux/',
+    note: 'tag archive',
+  },
+  {
     from: '/tag/meetup/',
     to: '/tags/meetup/',
     note: 'tag archive',
@@ -714,8 +719,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/virtual-machines/',
-    to: '/tags/virtual-machines/',
-    note: 'tag archive',
+    to: '/tags/infrastructure/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/vpn/',
@@ -730,6 +735,11 @@ export const redirects: Redirect[] = [
   {
     from: '/tag/workshop/',
     to: '/tags/workshop/',
+    note: 'tag archive',
+  },
+  {
+    from: '/tag/writing/',
+    to: '/tags/writing/',
     note: 'tag archive',
   },
   {
@@ -805,6 +815,11 @@ export const redirects: Redirect[] = [
   {
     from: '/tags/theory/',
     to: '/tags/computing/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/virtual-machines/',
+    to: '/tags/infrastructure/',
     note: 'retired page',
   },
   {

@@ -3,7 +3,7 @@ title: Deno now has a native database
 pubDate: 2023-04-19T11:00:53.000Z
 updatedDate: 2026-07-16T16:01:17.000Z
 category: technology
-tags: ["typescript", "deno"]
+tags: ["typescript", "deno", "databases"]
 lang: en
 description: Deno surprises us again with a native key-value database implemented directly in the global namespace! Let's understand how it works!
 seoTitle: Native key-value storage with Deno KV

@@ -3,7 +3,7 @@ title: Using Assertion Functions in TypeScript
 pubDate: 2024-06-14T11:00:51.000Z
 updatedDate: 2026-07-16T17:56:05.000Z
 category: technology
-tags: ["typescript", "nodejs", "deno"]
+tags: ["typescript"]
 lang: en
 description: Learn how to use one of the most important and yet least known features of TypeScript! Assertion functions
 slug: using-assertion-functions-in-typescript

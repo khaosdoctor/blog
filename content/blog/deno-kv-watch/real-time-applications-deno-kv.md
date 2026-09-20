@@ -3,7 +3,7 @@ title: Real-time applications with Deno KV
 pubDate: 2024-01-24T11:00:34.000Z
 updatedDate: 2026-07-16T15:53:37.000Z
 category: technology
-tags: ["deno", "typescript", "javascript"]
+tags: ["deno", "typescript", "javascript", "databases"]
 lang: en
 description: Creating real-time applications became much easier with a new tool released by Deno in version 1.38.5, the watch mode!
 slug: real-time-applications-deno-kv

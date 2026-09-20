@@ -1,9 +1,11 @@
 ---
-title: "Backlog #2 - Working hard won't get you that far"
+title: "Working hard won't get you that far"
 pubDate: 2024-11-28T11:00:38.000Z
 updatedDate: 2026-07-16T17:50:05.000Z
 category: "opinion"
-tags: ["backlog-newsletter", "career"]
+tags: ["backlog-newsletter", "career", "personal"]
+series: backlog
+seriesOrder: 3
 lang: en
 description: Talent is a myth, work and effort are nothing without context. In this edition, we're going to explore why success is pure luck, or almost...
 seoTitle: Working hard won't get you that far

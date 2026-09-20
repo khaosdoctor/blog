@@ -1,5 +1,5 @@
 ---
-title: "Backlog #8 - My journey with Vim. Six months in, what changed?"
+title: "My journey with Vim. Six months in, what changed?"
 pubDate: 2025-02-20T11:00:21.000Z
 updatedDate: 2026-07-16T17:48:17.000Z
 category: technology
@@ -7,6 +7,11 @@ tags:
   - backlog-newsletter
   - vim
   - productivity
+  - tools
+  - personal
+  - vscode
+series: backlog
+seriesOrder: 9
 lang: en
 description: I uninstalled VSCode completely and switched to Vim. After 6 months of use, was that a good idea?
 seoTitle: Everything I learned about Vim after 6 months of continuous use

@@ -3,7 +3,7 @@ title: Hello, World!
 pubDate: 2020-07-23T00:23:11.000Z
 updatedDate: 2026-07-16T16:28:42.000Z
 category: "meta"
-tags: ["news"]
+tags: ["news", "personal"]
 lang: en
 description: After months of researching and working toward a new phase of content production, this blog has finally come to life!
 slug: hello-world

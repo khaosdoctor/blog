@@ -3,7 +3,7 @@ title: Code anywhere with Codespaces
 pubDate: 2020-08-13T22:20:32.000Z
 updatedDate: 2026-07-16T16:26:49.000Z
 category: technology
-tags: ["docker", "containers", "cloud", "infrastructure"]
+tags: ["docker", "containers", "cloud", "infrastructure", "vscode", "github"]
 lang: en
 description: What would your life be like if you could have your computer everywhere without ever actually having it?
 slug: write-code-anywhere-with-codespaces

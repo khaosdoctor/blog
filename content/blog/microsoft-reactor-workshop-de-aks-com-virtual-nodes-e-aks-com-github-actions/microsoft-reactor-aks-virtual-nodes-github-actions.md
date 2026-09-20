@@ -3,7 +3,7 @@ title: "Microsoft Reactor: Workshop on AKS with Virtual Nodes and AKS with GitHu
 pubDate: 2020-10-01T17:17:34.000Z
 updatedDate: 2026-07-16T16:23:20.000Z
 category: technology
-tags: ["azure", "kubernetes", "docker", "github", "ci", "containers", "video", "workshop", "infrastructure"]
+tags: ["azure", "kubernetes", "github", "ci", "containers", "video", "workshop", "infrastructure"]
 lang: en
 description: A free workshop on how we can harness the power of Virtual Nodes to create applications that scale infinitely, and how we can automate the deployment of all this using GitHub Actions and AKS!
 seoTitle: Learn everything about GitHub Actions with Kubernetes in this workshop!

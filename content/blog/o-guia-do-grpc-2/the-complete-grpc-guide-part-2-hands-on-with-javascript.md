@@ -3,7 +3,7 @@ title: "The complete gRPC guide part 2: Hands-on with JavaScript"
 pubDate: 2021-05-12T13:00:00.000Z
 updatedDate: 2026-07-16T16:15:27.000Z
 category: technology
-tags: ["grpc", "javascript", "protobuf", "nodejs", "infrastructure"]
+tags: ["grpc", "javascript", "protobuf", "nodejs"]
 series: grpc
 seriesOrder: 2
 lang: en

@@ -3,7 +3,7 @@ title: From zero to automation with GitHub Actions in 7 minutes
 pubDate: 2020-05-08T03:00:00.000Z
 updatedDate: 2026-07-16T16:29:04.000Z
 category: technology
-tags: ["containers", "docker", "infrastructure", "ci", "azure"]
+tags: ["containers", "infrastructure", "ci", "azure", "github"]
 lang: en
 description: How to start from scratch and automate your entire container pipeline in less than 7 minutes! All with GitHub Actions
 slug: from-zero-to-github-actions-automation-in-7-minutes

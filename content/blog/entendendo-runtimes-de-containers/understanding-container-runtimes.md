@@ -3,7 +3,7 @@ title: Understanding container runtimes
 pubDate: 2021-02-18T12:37:00.000Z
 updatedDate: 2026-07-16T16:18:24.000Z
 category: technology
-tags: ["cloud", "containerd", "containers", "cri", "devops", "docker", "kubernetes", "microservices", "oci", "cri-o", "infrastructure"]
+tags: ["containerd", "containers", "cri", "devops", "docker", "kubernetes", "oci", "cri-o", "infrastructure"]
 lang: en
 description: Did you know there are different types of container runtimes? What if we understood a bit more about the differences between them?
 seoTitle: Understanding the differences between containerd and CRI-O runtimes

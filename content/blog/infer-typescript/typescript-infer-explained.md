@@ -3,7 +3,7 @@ title: What is Infer in TypeScript and What Does It Do?
 pubDate: 2022-04-18T14:00:00.000Z
 updatedDate: 2026-07-16T16:09:42.000Z
 category: technology
-tags: ["typescript", "javascript"]
+tags: ["typescript"]
 lang: en
 description: If you've written TypeScript code, you may not have seen the famous infer instruction yet. But believe me, one day it will appear and you'll know what it is!
 seoDescription: If you've written TypeScript code, you may not have seen the famous infer instruction yet. But one day it will appear and you'll know what it is!

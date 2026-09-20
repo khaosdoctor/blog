@@ -6,6 +6,7 @@ category: meta
 tags:
   - news
   - personal
+  - writing
 series: sobre-escrever
 seriesName: Minhas motivações para escrever
 seriesOrder: 1

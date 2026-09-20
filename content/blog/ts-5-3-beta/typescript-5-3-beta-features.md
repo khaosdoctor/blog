@@ -3,7 +3,7 @@ title: What's New in TypeScript 5.3 - Beta!
 pubDate: 2023-11-01T21:21:53.000Z
 updatedDate: 2026-07-16T15:55:35.000Z
 category: technology
-tags: ["typescript", "javascript", "deno"]
+tags: ["typescript", "javascript"]
 lang: en
 description: Let's understand all the new features of TypeScript 5.3 beta version!
 slug: typescript-5-3-beta-features

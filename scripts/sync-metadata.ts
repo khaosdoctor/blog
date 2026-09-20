@@ -42,7 +42,7 @@ import {
 const DIR = 'content/blog'
 const CACHE_FILE = join(DIR, '.translation-cache.json')
 const TAGS_FILE = 'content/tags.json'
-const FIELDS = ['category', 'tags']
+const FIELDS = ['category', 'tags', 'series', 'seriesOrder']
 
 type Cache = Record<string, { sourceHash: string; translatedAt: string }>
 
@@ -97,9 +97,24 @@ for (const file of postFiles(DIR)) {
   let out = raw
   for (const key of FIELDS) {
     const wanted = frontmatterLine(sourceFrontmatter, key)
-    const current = frontmatterLine(frontmatterOf(out), key)
-    if (wanted === null || current === null || wanted === current) continue
-    out = out.replace(current, wanted)
+    const frontmatter = frontmatterOf(out)
+    const current = frontmatterLine(frontmatter, key)
+    if (wanted === current) continue
+    if (wanted === null) {
+      out = out.replace(`${current}\n`, '')
+      continue
+    }
+    if (current !== null) {
+      out = out.replace(current, wanted)
+      continue
+    }
+    // A key the translation never had goes right after the last synced key it does have.
+    const anchor = FIELDS.slice(0, FIELDS.indexOf(key))
+      .map((earlier) => frontmatterLine(frontmatter, earlier))
+      .filter((line) => line !== null)
+      .at(-1)
+    if (anchor === undefined) continue
+    out = out.replace(anchor, `${anchor}\n${wanted}`)
   }
   if (out !== raw) {
     writeFileSync(file, out)

@@ -3,7 +3,7 @@ title: Introducing the KEDA HTTP Add-on
 pubDate: 2021-07-02T20:01:58.000Z
 updatedDate: 2026-07-16T16:13:51.000Z
 category: technology
-tags: ["keda", "kubernetes", "containers", "infrastructure"]
+tags: ["keda", "kubernetes", "containers", "infrastructure", "helm", "architecture", "open source"]
 lang: en
 description: Learn how to scale your Kubernetes applications based on HTTP requests in Kubernetes with the KEDA HTTP Add-on
 slug: introducing-the-keda-http-add-on

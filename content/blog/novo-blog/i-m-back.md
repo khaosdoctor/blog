@@ -5,7 +5,9 @@ category: meta
 tags:
   - news
   - personal
+  - writing
 series: sobre-escrever
+seriesName: "My motivations for writing"
 seriesOrder: 1
 lang: en
 description: After more than a year, I'm back to writing. This post talks about what I went through during this time and explains why I disappeared.

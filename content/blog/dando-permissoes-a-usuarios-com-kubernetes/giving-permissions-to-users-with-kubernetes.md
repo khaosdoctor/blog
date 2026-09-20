@@ -3,7 +3,7 @@ title: Granting permissions to users with Kubernetes
 pubDate: 2021-02-23T12:00:00.000Z
 updatedDate: 2026-07-16T16:18:12.000Z
 category: technology
-tags: ["kubernetes", "aks", "azure", "containers", "devops", "infrastructure"]
+tags: ["kubernetes", "aks", "azure", "devops", "infrastructure", "security"]
 lang: en
 description: We know how to create users in Kubernetes, now let's learn how to grant them permissions using Roles and ClusterRoles!
 seoDescription: We know how to create users in Kubernetes, let's learn how to grant them permissions using Roles and ClusterRoles!

@@ -3,8 +3,9 @@ title: '"The complete gRPC guide part 1: What is gRPC?"'
 pubDate: 2021-04-20T11:00:00.000Z
 updatedDate: 2026-07-16T16:16:26.000Z
 category: technology
-tags: ["grpc", "javascript", "typescript", "protobuf", "rest", "architecture", "infrastructure"]
+tags: ["grpc", "javascript", "typescript", "protobuf", "rest", "architecture", "microservices"]
 series: grpc
+seriesName: "The complete gRPC guide"
 seriesOrder: 1
 lang: en
 description: '"In this series of articles we will learn everything there is to learn about gRPC and how we use this incredible tool in our applications!"'

@@ -3,7 +3,7 @@ title: "The complete gRPC guide part 3: Types everywhere with TypeScript!"
 pubDate: 2021-05-26T15:10:32.000Z
 updatedDate: 2026-07-16T16:14:51.000Z
 category: technology
-tags: ["grpc", "typescript", "nodejs", "protobuf", "rest", "architecture", "infrastructure"]
+tags: ["grpc", "typescript", "nodejs", "protobuf"]
 series: grpc
 seriesOrder: 3
 lang: en

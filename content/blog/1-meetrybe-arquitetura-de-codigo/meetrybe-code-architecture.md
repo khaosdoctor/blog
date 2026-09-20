@@ -3,7 +3,7 @@ title: "Meetup: 1st Meetrybe - Code architecture"
 pubDate: 2020-07-25T17:01:16.000Z
 updatedDate: 2026-07-16T16:28:20.000Z
 category: technology
-tags: ["video", "meetup", "architecture"]
+tags: ["video", "meetup", "architecture", "talk"]
 lang: en
 description: On the 25th I took part in the first Meetrybe, the Trybe school's online meetup, with several heavyweight people talking about software architecture. See how it went!
 seoDescription: On the 25th I took part in the first Meetrybe, the Trybe school's online meetup, with several heavyweight people talking about software architecture

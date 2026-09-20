@@ -54,6 +54,7 @@
   "keda": {},
   "kubernetes": {},
   "linkerd": {},
+  "linux": {},
   "meetup": {},
   "microservices": {
     "pt": "microsserviços"
@@ -105,10 +106,10 @@
   "typescript": {},
   "video": {},
   "vim": {},
-  "virtual machines": {
-    "pt": "máquinas virtuais"
-  },
   "vpn": {},
   "vscode": {},
-  "workshop": {}
+  "workshop": {},
+  "writing": {
+    "pt": "escrita"
+  }
 }

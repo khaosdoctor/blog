@@ -1,9 +1,11 @@
 ---
-title: "Backlog #6 - Are you a good dev?"
+title: "Are you a good dev?"
 pubDate: 2025-01-23T11:00:04.000Z
 updatedDate: 2026-07-16T17:48:55.000Z
 category: "career"
-tags: ["backlog-newsletter"]
+tags: ["backlog-newsletter", "opinion"]
+series: backlog
+seriesOrder: 7
 lang: en
 description: What makes a good dev a good dev? What is a strong engineer and a weak engineer? Are you one of the good ones?
 seoTitle: Can you measure efficiency in tech?

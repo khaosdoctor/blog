@@ -3,7 +3,7 @@ title: First steps with Neovim
 pubDate: 2024-09-25T11:00:53.000Z
 updatedDate: 2026-07-16T17:51:09.000Z
 category: technology
-tags: ["vim", "tools"]
+tags: ["vim", "tools", "linux", "productivity"]
 lang: en
 description: I surrendered to Vim and it wasn't easy to get it the way I wanted. So I want to teach you so you don't have to go through the same problem!
 seoTitle: How to install and configure Neovim with LazyVim

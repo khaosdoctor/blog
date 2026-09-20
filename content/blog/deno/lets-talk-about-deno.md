@@ -3,7 +3,7 @@ title: Let's talk about Deno
 pubDate: 2022-12-21T12:00:14.000Z
 updatedDate: 2026-07-16T16:04:43.000Z
 category: technology
-tags: ["deno", "javascript", "typescript"]
+tags: ["deno", "javascript", "typescript", "npm", "security", "open source"]
 lang: en
 description: Is Node.js finally dying? Is this the time to migrate to Deno? Let's understand everything about it in this article!
 seoDescription: Is Node finally dying? Is this the time to migrate to Deno? Let's understand everything about it in this article!

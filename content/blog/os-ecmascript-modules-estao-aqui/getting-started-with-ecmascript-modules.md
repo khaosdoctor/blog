@@ -3,7 +3,7 @@ title: Getting Started with ECMAScript Modules
 pubDate: 2021-06-23T11:00:00.000Z
 updatedDate: 2026-07-16T16:14:16.000Z
 category: technology
-tags: ["javascript", "nodejs"]
+tags: ["javascript", "nodejs", "typescript"]
 lang: en
 description: ES Modules are the next generation of module imports in JavaScript. Learn how this feature promises to revolutionize what we know.
 slug: getting-started-with-ecmascript-modules

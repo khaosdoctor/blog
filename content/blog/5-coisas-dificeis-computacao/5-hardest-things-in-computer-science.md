@@ -3,7 +3,7 @@ title: The 5 hardest things in computing
 pubDate: 2022-08-03T14:00:00.000Z
 updatedDate: 2026-07-16T16:07:31.000Z
 category: "opinion"
-tags: ["architecture"]
+tags: ["architecture", "computing"]
 lang: en
 description: After almost 11 years in this career, I decided to write a bit about the things I find most complex in programming, and it's not writing code!
 slug: 5-hardest-things-in-computer-science

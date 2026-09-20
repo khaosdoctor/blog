@@ -3,7 +3,7 @@ title: Why You Should Reconsider Using Date.now
 pubDate: 2022-06-28T07:00:00.000Z
 updatedDate: 2026-07-16T16:08:32.000Z
 category: technology
-tags: ["nodejs", "javascript", "typescript"]
+tags: ["nodejs", "javascript", "performance"]
 lang: en
 description: In this article I'll show you why Date.now() is very problematic, especially when we need to measure time or measure duration with JavaScript and why you need to stop using it.
 seoDescription: In this article I'll show you why Date.now() is very problematic and why you need to stop using it.

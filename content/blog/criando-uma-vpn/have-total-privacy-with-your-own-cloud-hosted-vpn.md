@@ -3,7 +3,7 @@ title: Have total privacy with your own VPN hosted in the cloud
 pubDate: 2020-10-27T17:51:53.000Z
 updatedDate: 2026-07-16T16:22:08.000Z
 category: technology
-tags: ["azure", "security", "cloud", "vpn", "infrastructure"]
+tags: ["azure", "security", "cloud", "vpn", "infrastructure", "linux"]
 lang: en
 description: Ever thought about having a VPN server just for yourself? Something that definitely doesn't generate logs and has no one spying on you? Then why not create one?
 seoTitle: How to create your own VPN quickly and easily

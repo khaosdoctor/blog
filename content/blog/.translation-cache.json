@@ -64,35 +64,35 @@
     "translatedAt": "2026-09-13T01:06:10.787Z"
   },
   "backlog-0": {
-    "sourceHash": "2a738078136158f9",
+    "sourceHash": "5ccd5a793b9c6ae4",
     "translatedAt": "2026-09-13T01:06:10.787Z"
   },
   "backlog-1-o-primeiro-pc-de-todos": {
-    "sourceHash": "814161bacc66e05f",
+    "sourceHash": "8932e9b7518d66a4",
     "translatedAt": "2026-09-13T01:06:10.788Z"
   },
   "backlog-2": {
-    "sourceHash": "97d50bc88c228e1b",
+    "sourceHash": "9bdec75b9883fd52",
     "translatedAt": "2026-09-13T01:06:10.788Z"
   },
   "backlog-3-29-anos-de-javascript": {
-    "sourceHash": "7c8f6f9fc65cb4d6",
+    "sourceHash": "1838bbed1f7d0178",
     "translatedAt": "2026-09-13T01:07:33.740Z"
   },
   "backlog-7-as-10-licoes-que-mudaram-a-minha-vida-como-dev-copy": {
-    "sourceHash": "1ac52f1b275fedae",
+    "sourceHash": "456b94f8e3752b1c",
     "translatedAt": "2026-09-13T01:07:33.740Z"
   },
   "backlog-bom-dev": {
-    "sourceHash": "13c5b940a7ad6856",
+    "sourceHash": "f0c73d5258a424aa",
     "translatedAt": "2026-09-13T01:07:33.741Z"
   },
   "backlog-primeira-linguagem": {
-    "sourceHash": "9d4d7092bac05d4d",
+    "sourceHash": "201135054f391ab4",
     "translatedAt": "2026-09-13T01:07:33.741Z"
   },
   "backlog-vim": {
-    "sourceHash": "e73ac14182400851",
+    "sourceHash": "aa76bbc7fac5bed0",
     "translatedAt": "2026-09-13T01:09:15.504Z"
   },
   "boas-praticas-em-projetos-harperdb-com-typescript": {
@@ -284,7 +284,7 @@
     "translatedAt": "2026-09-13T01:36:47.607Z"
   },
   "guia-grpc-1": {
-    "sourceHash": "41c682fb01adc18c",
+    "sourceHash": "91fe0bcbdbcea313",
     "translatedAt": "2026-09-13T01:36:47.611Z"
   },
   "harperdb-kubernetes": {
@@ -472,7 +472,7 @@
     "translatedAt": "2026-09-13T01:36:47.615Z"
   },
   "o-que-aconteceu-com-devs": {
-    "sourceHash": "921a99e05c533caf",
+    "sourceHash": "1e001ec0a23a1290",
     "translatedAt": "2026-09-13T01:36:47.616Z"
   },
   "o-que-e-open-source": {
@@ -580,7 +580,7 @@
     "translatedAt": "2026-09-13T01:36:47.618Z"
   },
   "slopware": {
-    "sourceHash": "c979069f5c31c5ff",
+    "sourceHash": "0567d82bef438038",
     "translatedAt": "2026-09-13T01:36:47.620Z"
   },
   "somos-4k-muito-obrigado": {
@@ -620,7 +620,7 @@
     "translatedAt": "2026-09-13T01:36:47.619Z"
   },
   "ts-configs-semana-ts-1": {
-    "sourceHash": "a9fa8c7c4ec920dc",
+    "sourceHash": "f7d99991d63b3e97",
     "translatedAt": "2026-09-13T01:36:47.622Z"
   },
   "ts-envs": {
@@ -664,7 +664,7 @@
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "um-mergulho-em-imagens-de-containers-parte-1": {
-    "sourceHash": "8a977e5a26dbf461",
+    "sourceHash": "5df6708d4925881a",
     "translatedAt": "2026-09-13T01:36:47.622Z"
   },
   "um-mergulho-em-imagens-de-containers-parte-2": {
@@ -688,7 +688,7 @@
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "novo-blog": {
-    "sourceHash": "d10c5d5a2e99b4c8",
+    "sourceHash": "1a9659a0e1d209be",
     "translatedAt": "2026-09-13T01:36:47.613Z"
   }
 }
