@@ -4,7 +4,7 @@ import { join } from 'node:path'
 // The same function the tag route uses, so a generated redirect can never point
 // at a slug the site spells differently.
 import { slugify } from '../src/lib/slugify.ts'
-import { count, frontmatterOf, heading, ok, postIndex } from './lib/cli.ts'
+import { count, frontmatterOf, heading, ok, postIndex, tagsOf } from './lib/cli.ts'
 
 heading('build-redirects: regenerating src/data/redirects.ts')
 
@@ -85,6 +85,28 @@ if (NEWSLETTER_SLUGS.length === 0) {
   throw new Error('NEWSLETTER_SLUGS is empty, the newsletter redirect rules would silently disappear')
 }
 
+/**
+ * Pages this site served and then retired. Categories folded into technology in
+ * September 2026 go to the tag that kept their name; tags merged or dropped in
+ * the same pass go to their replacement, or to the tag index when nothing
+ * replaced them. Ghost's /tag/<name>/ for each follows the same target.
+ */
+const RETIRED: Record<string, string> = {
+  '/infra/': '/tags/infrastructure/',
+  '/javascript/': '/tags/javascript/',
+  '/security/': '/tags/security/',
+  '/typescript/': '/tags/typescript/',
+  '/tags/blog/': '/meta/',
+  '/tags/development/': '/tags/',
+  '/tags/ecmascript/': '/tags/javascript/',
+  '/tags/es2020/': '/tags/javascript/',
+  '/tags/hipsters/': '/tags/podcasts/',
+  '/tags/info/': '/tags/news/',
+  '/tags/meta/': '/meta/',
+  '/tags/series/': '/series/',
+  '/tags/technology/': '/technology/',
+}
+
 const tags = new Set<string>()
 const categories = new Set<string>()
 /** Only categories with a published post get a page, so only those are valid targets. */
@@ -110,8 +132,7 @@ for (const entry of readdirSync(SOURCE_DIR, { withFileTypes: true })) {
     if (listed) liveCategories.add(name)
   }
   if (!listed) continue
-  const tagLine = /^tags:\s*\[(.*)\]/m.exec(frontmatter)?.[1] ?? ''
-  for (const match of tagLine.matchAll(/"([^"]+)"/g)) tags.add(match[1])
+  for (const tag of tagsOf(frontmatter)) tags.add(tag)
 }
 
 const rows: { from: string; to: string; note: string }[] = []
@@ -131,6 +152,12 @@ for (const category of [...categories].sort()) {
     to: live ? `/${category}/` : NEWSLETTER_TARGET,
     note: live ? 'tag became a category' : 'category has no published posts yet',
   })
+}
+
+for (const [from, to] of Object.entries(RETIRED)) {
+  rows.push({ from, to, note: 'retired page' })
+  const tag = /^\/tags\/(.+)\/$/.exec(from)?.[1]
+  if (tag !== undefined) rows.push({ from: `/tag/${tag}/`, to, note: 'retired tag archive' })
 }
 
 // Ghost chrome with no equivalent here.

@@ -88,6 +88,16 @@ export const redirects: Redirect[] = [
     note: 'newsletter issue',
   },
   {
+    from: '/infra/',
+    to: '/tags/infrastructure/',
+    note: 'retired page',
+  },
+  {
+    from: '/javascript/',
+    to: '/tags/javascript/',
+    note: 'retired page',
+  },
+  {
     from: '/ls-news-1/',
     to: '/',
     note: 'newsletter issue',
@@ -268,6 +278,11 @@ export const redirects: Redirect[] = [
     note: 'Ghost feed path',
   },
   {
+    from: '/security/',
+    to: '/tags/security/',
+    note: 'retired page',
+  },
+  {
     from: '/sitemap-authors.xml',
     to: '/sitemap-index.xml',
     note: 'Ghost sitemap',
@@ -303,6 +318,11 @@ export const redirects: Redirect[] = [
     note: 'tag archive',
   },
   {
+    from: '/tag/ai/',
+    to: '/tags/ai/',
+    note: 'tag archive',
+  },
+  {
     from: '/tag/aks/',
     to: '/tags/aks/',
     note: 'tag archive',
@@ -329,8 +349,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/blog/',
-    to: '/tags/blog/',
-    note: 'tag archive',
+    to: '/meta/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/bots/',
@@ -399,8 +419,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/development/',
-    to: '/tags/development/',
-    note: 'tag archive',
+    to: '/tags/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/devops/',
@@ -419,13 +439,13 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/ecmascript/',
-    to: '/tags/ecmascript/',
-    note: 'tag archive',
+    to: '/tags/javascript/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/es2020/',
-    to: '/tags/es2020/',
-    note: 'tag archive',
+    to: '/tags/javascript/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/events/',
@@ -469,8 +489,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/hipsters/',
-    to: '/tags/hipsters/',
-    note: 'tag archive',
+    to: '/tags/podcasts/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/history/',
@@ -479,13 +499,13 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/info/',
-    to: '/tags/info/',
-    note: 'tag archive',
+    to: '/tags/news/',
+    note: 'retired tag archive',
   },
   {
-    from: '/tag/infra/',
-    to: '/infra/',
-    note: 'tag became a category',
+    from: '/tag/infrastructure/',
+    to: '/tags/infrastructure/',
+    note: 'tag archive',
   },
   {
     from: '/tag/jaeger/',
@@ -494,8 +514,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/javascript/',
-    to: '/javascript/',
-    note: 'tag became a category',
+    to: '/tags/javascript/',
+    note: 'tag archive',
   },
   {
     from: '/tag/jest/',
@@ -525,7 +545,7 @@ export const redirects: Redirect[] = [
   {
     from: '/tag/meta/',
     to: '/meta/',
-    note: 'tag became a category',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/microservices/',
@@ -555,6 +575,11 @@ export const redirects: Redirect[] = [
   {
     from: '/tag/npm/',
     to: '/tags/npm/',
+    note: 'tag archive',
+  },
+  {
+    from: '/tag/observability/',
+    to: '/tags/observability/',
     note: 'tag archive',
   },
   {
@@ -588,6 +613,11 @@ export const redirects: Redirect[] = [
     note: 'tag archive',
   },
   {
+    from: '/tag/productivity/',
+    to: '/tags/productivity/',
+    note: 'tag archive',
+  },
+  {
     from: '/tag/prometheus/',
     to: '/tags/prometheus/',
     note: 'tag archive',
@@ -614,13 +644,13 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/security/',
-    to: '/security/',
-    note: 'tag became a category',
+    to: '/tags/security/',
+    note: 'tag archive',
   },
   {
     from: '/tag/series/',
-    to: '/tags/series/',
-    note: 'tag archive',
+    to: '/series/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/signals/',
@@ -634,8 +664,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/technology/',
-    to: '/tags/technology/',
-    note: 'tag archive',
+    to: '/technology/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/telegram/',
@@ -669,8 +699,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/typescript/',
-    to: '/typescript/',
-    note: 'tag became a category',
+    to: '/tags/typescript/',
+    note: 'tag archive',
   },
   {
     from: '/tag/video/',
@@ -701,5 +731,55 @@ export const redirects: Redirect[] = [
     from: '/tag/workshop/',
     to: '/tags/workshop/',
     note: 'tag archive',
+  },
+  {
+    from: '/tags/blog/',
+    to: '/meta/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/development/',
+    to: '/tags/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/ecmascript/',
+    to: '/tags/javascript/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/es2020/',
+    to: '/tags/javascript/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/hipsters/',
+    to: '/tags/podcasts/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/info/',
+    to: '/tags/news/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/meta/',
+    to: '/meta/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/series/',
+    to: '/series/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/technology/',
+    to: '/technology/',
+    note: 'retired page',
+  },
+  {
+    from: '/typescript/',
+    to: '/tags/typescript/',
+    note: 'retired page',
   },
 ]
