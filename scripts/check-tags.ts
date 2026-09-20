@@ -1,13 +1,13 @@
 /**
- * Fails when a post carries a tag that `src/i18n/tags.ts` has never seen.
+ * Fails when a post carries a tag that `content/tags.json` has never seen.
  *
  *   node scripts/check-tags.ts
  *
  * Tags are written in English and the URL is built from that word, so a new one
- * needs a decision: a Portuguese label in TAG_LABELS, or a place in KNOWN_TAGS
- * saying the word reads the same in both languages. Neither can be guessed from
- * the tag itself, and without one a Portuguese page shows an English chip with
- * nothing to say it happened.
+ * needs a decision: a Portuguese label, or an empty entry saying the word reads
+ * the same in both languages. Neither can be guessed from the tag itself, and
+ * without one a Portuguese page shows an English chip with nothing to say it
+ * happened.
  */
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -41,11 +41,9 @@ const missing = [...vocabulary.keys()].filter((tag) => !seen.has(tag)).sort()
 if (missing.length > 0) {
   for (const tag of missing) {
     const where = vocabulary.get(tag) ?? []
-    failLine(`"${tag}" is not in KNOWN_TAGS, first used by ${where[0]}`)
+    failLine(`"${tag}" is not in content/tags.json, first used by ${where[0]}`)
   }
-  failLine(
-    'Add them to KNOWN_TAGS in src/i18n/tags.ts, plus an entry in TAG_LABELS when Portuguese reads one differently.',
-  )
+  failLine('Add them to content/tags.json: an empty object, or { "pt": "..." } when Portuguese reads one differently.')
   process.exit(1)
 }
 

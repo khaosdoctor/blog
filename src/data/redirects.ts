@@ -334,8 +334,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/azure-monitor/',
-    to: '/tags/azure-monitor/',
-    note: 'tag archive',
+    to: '/tags/observability/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/azure/',
@@ -374,8 +374,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/codespaces/',
-    to: '/tags/codespaces/',
-    note: 'tag archive',
+    to: '/tags/cloud/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/computing/',
@@ -519,8 +519,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/jest/',
-    to: '/tags/jest/',
-    note: 'tag archive',
+    to: '/tags/tests/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/keda/',
@@ -559,8 +559,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/monitor/',
-    to: '/tags/monitor/',
-    note: 'tag archive',
+    to: '/tags/observability/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/news/',
@@ -654,8 +654,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/signals/',
-    to: '/tags/signals/',
-    note: 'tag archive',
+    to: '/tags/javascript/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/talk/',
@@ -679,8 +679,8 @@ export const redirects: Redirect[] = [
   },
   {
     from: '/tag/theory/',
-    to: '/tags/theory/',
-    note: 'tag archive',
+    to: '/tags/computing/',
+    note: 'retired tag archive',
   },
   {
     from: '/tag/threads/',
@@ -733,8 +733,18 @@ export const redirects: Redirect[] = [
     note: 'tag archive',
   },
   {
+    from: '/tags/azure-monitor/',
+    to: '/tags/observability/',
+    note: 'retired page',
+  },
+  {
     from: '/tags/blog/',
     to: '/meta/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/codespaces/',
+    to: '/tags/cloud/',
     note: 'retired page',
   },
   {
@@ -763,8 +773,18 @@ export const redirects: Redirect[] = [
     note: 'retired page',
   },
   {
+    from: '/tags/jest/',
+    to: '/tags/tests/',
+    note: 'retired page',
+  },
+  {
     from: '/tags/meta/',
     to: '/meta/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/monitor/',
+    to: '/tags/observability/',
     note: 'retired page',
   },
   {
@@ -773,8 +793,18 @@ export const redirects: Redirect[] = [
     note: 'retired page',
   },
   {
+    from: '/tags/signals/',
+    to: '/tags/javascript/',
+    note: 'retired page',
+  },
+  {
     from: '/tags/technology/',
     to: '/technology/',
+    note: 'retired page',
+  },
+  {
+    from: '/tags/theory/',
+    to: '/tags/computing/',
     note: 'retired page',
   },
   {

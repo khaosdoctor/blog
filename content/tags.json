@@ -1,0 +1,114 @@
+{
+  "acr": {},
+  "ai": {},
+  "aks": {},
+  "architecture": {
+    "pt": "arquitetura"
+  },
+  "azure": {},
+  "backlog-newsletter": {},
+  "bots": {},
+  "career": {
+    "pt": "carreira"
+  },
+  "ci": {},
+  "cloud": {},
+  "computing": {
+    "pt": "computação"
+  },
+  "containerd": {},
+  "containers": {
+    "pt": "contêineres"
+  },
+  "cri": {},
+  "cri-o": {},
+  "cryptography": {
+    "pt": "criptografia"
+  },
+  "databases": {
+    "pt": "bancos de dados"
+  },
+  "deno": {},
+  "design": {},
+  "devops": {},
+  "docker": {},
+  "drop": {},
+  "events": {
+    "pt": "eventos"
+  },
+  "git": {},
+  "github": {},
+  "golang": {},
+  "grammy": {},
+  "grpc": {},
+  "harperdb": {},
+  "helm": {},
+  "history": {
+    "pt": "história"
+  },
+  "infrastructure": {
+    "pt": "infraestrutura"
+  },
+  "jaeger": {},
+  "javascript": {},
+  "keda": {},
+  "kubernetes": {},
+  "linkerd": {},
+  "meetup": {},
+  "microservices": {
+    "pt": "microsserviços"
+  },
+  "mongodb": {},
+  "news": {
+    "pt": "notícias"
+  },
+  "nodejs": {},
+  "npm": {},
+  "observability": {
+    "pt": "observabilidade"
+  },
+  "oci": {},
+  "open source": {},
+  "opinion": {
+    "pt": "opinião"
+  },
+  "performance": {
+    "pt": "desempenho"
+  },
+  "personal": {
+    "pt": "pessoal"
+  },
+  "podcasts": {},
+  "productivity": {
+    "pt": "produtividade"
+  },
+  "prometheus": {},
+  "protobuf": {},
+  "pubsub": {},
+  "react": {},
+  "rest": {},
+  "security": {
+    "pt": "segurança"
+  },
+  "talk": {},
+  "telegram": {},
+  "tests": {
+    "pt": "testes"
+  },
+  "threads": {},
+  "tips": {
+    "pt": "dicas"
+  },
+  "tools": {
+    "pt": "ferramentas"
+  },
+  "typescript": {},
+  "video": {},
+  "vim": {},
+  "virtual machines": {
+    "pt": "máquinas virtuais"
+  },
+  "vpn": {},
+  "vscode": {},
+  "workshop": {}
+}

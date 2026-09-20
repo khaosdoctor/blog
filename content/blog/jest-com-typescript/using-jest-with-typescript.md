@@ -3,7 +3,7 @@ title: Using Jest with TypeScript
 pubDate: 2024-06-19T11:00:32.000Z
 updatedDate: 2026-07-16T17:55:51.000Z
 category: technology
-tags: ["tests", "typescript", "jest", "nodejs"]
+tags: ["tests", "typescript", "nodejs"]
 lang: en
 description: Learn how to configure your application to run automated tests with Jest written in TypeScript
 slug: using-jest-with-typescript

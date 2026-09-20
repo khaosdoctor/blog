@@ -1,6 +1,6 @@
 /**
  * Copies category and tags from every source post into the translations beside
- * it, then drops tags nothing uses any more from src/i18n/tags.ts.
+ * it, then drops tags nothing uses any more from content/tags.json.
  *
  *   node scripts/sync-metadata.ts
  *
@@ -17,8 +17,8 @@
  * only metadata moved and the entry is bumped. Otherwise translate.ts still owes
  * that post a run.
  *
- * KNOWN_TAGS and TAG_LABELS only shrink here. A new tag needs a decision about
- * its Portuguese label, which is check-tags.ts's job to demand.
+ * content/tags.json only shrinks here. A new tag needs a decision about its
+ * Portuguese label, which is check-tags.ts's job to demand.
  */
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -41,7 +41,7 @@ import {
 
 const DIR = 'content/blog'
 const CACHE_FILE = join(DIR, '.translation-cache.json')
-const TAGS_FILE = 'src/i18n/tags.ts'
+const TAGS_FILE = 'content/tags.json'
 const FIELDS = ['category', 'tags']
 
 type Cache = Record<string, { sourceHash: string; translatedAt: string }>
@@ -66,20 +66,13 @@ function sameTranslatable(file: string, source: string, cachedHash: string): boo
   return false
 }
 
-/** Removes list entries and label lines for tags no post uses. Returns what went. */
+/** Removes the tags no post uses from content/tags.json. Returns what went. */
 function pruneKnownTags(used: Set<string>): string[] {
-  const lines = readFileSync(TAGS_FILE, 'utf8').split('\n')
-  const pruned: string[] = []
-  const kept = lines.filter((line) => {
-    const entry = /^ {2}'([^']+)',$/.exec(line) ?? /^ {2}(?:'([^']+)'|([\w-]+)): \{.*\},$/.exec(line)
-    if (entry === null) return true
-    const tag = entry[1] ?? entry[2]
-    if (used.has(tag)) return true
-    pruned.push(tag)
-    return false
-  })
-  if (pruned.length > 0) writeFileSync(TAGS_FILE, kept.join('\n'))
-  return [...new Set(pruned)].sort()
+  const tags = JSON.parse(readFileSync(TAGS_FILE, 'utf8')) as Record<string, unknown>
+  const pruned = Object.keys(tags).filter((tag) => !used.has(tag))
+  for (const tag of pruned) delete tags[tag]
+  if (pruned.length > 0) writeFileSync(TAGS_FILE, `${JSON.stringify(tags, null, 2)}\n`)
+  return pruned.sort()
 }
 
 heading('sync-metadata: copying category and tags into translations')

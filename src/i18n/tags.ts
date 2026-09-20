@@ -1,121 +1,35 @@
 /**
- * The label a tag wears on the page, per language. Tags are written in English
- * in the frontmatter and the URL is built from that word, so only what the
- * reader sees changes here: `/tags/tests/` reads "testes" on a Portuguese page
- * and "tests" on an English one.
+ * The tag vocabulary lives in `content/tags.json`, next to `categories.json`:
+ * every key is a tag a post may carry, and its value holds the label per
+ * language for the ones that read differently. Tags are written in English in
+ * the frontmatter and the URL is built from that word, so only what the reader
+ * sees changes: `/tags/tests/` reads "testes" on a Portuguese page and "tests"
+ * on an English one. A tag Portuguese uses in English (kubernetes, docker) has
+ * an empty object and falls through to itself.
  *
- * A tag Portuguese uses in English (kubernetes, deploy, docker) has no entry and
- * falls through to the tag itself.
- *
- * A leaf module: importing nothing is what lets `scripts/check-tags.ts` read it.
+ * `scripts/check-tags.ts` fails on a tag missing from the file, and
+ * `scripts/sync-metadata.ts` drops the keys no post uses any more.
  */
+import { readFileSync } from 'node:fs'
 
-/** Every tag that has been decided about. `check-tags.ts` fails on one that has not. */
-export const KNOWN_TAGS = [
-  'acr',
-  'ai',
-  'aks',
-  'architecture',
-  'azure',
-  'azure monitor',
-  'backlog-newsletter',
-  'bots',
-  'career',
-  'ci',
-  'cloud',
-  'codespaces',
-  'computing',
-  'containerd',
-  'containers',
-  'cri',
-  'cri-o',
-  'cryptography',
-  'databases',
-  'deno',
-  'design',
-  'devops',
-  'docker',
-  'drop',
-  'events',
-  'git',
-  'github',
-  'golang',
-  'grammy',
-  'grpc',
-  'harperdb',
-  'helm',
-  'history',
-  'infrastructure',
-  'jaeger',
-  'javascript',
-  'jest',
-  'keda',
-  'kubernetes',
-  'linkerd',
-  'meetup',
-  'microservices',
-  'mongodb',
-  'monitor',
-  'news',
-  'nodejs',
-  'npm',
-  'observability',
-  'oci',
-  'open source',
-  'opinion',
-  'performance',
-  'personal',
-  'podcasts',
-  'productivity',
-  'prometheus',
-  'protobuf',
-  'pubsub',
-  'react',
-  'rest',
-  'security',
-  'signals',
-  'talk',
-  'telegram',
-  'tests',
-  'theory',
-  'threads',
-  'tips',
-  'tools',
-  'typescript',
-  'video',
-  'vim',
-  'virtual machines',
-  'vpn',
-  'vscode',
-  'workshop',
-]
+type Labelled = string | Partial<Record<string, string>>
 
-/** Only the tags that read differently. Everything else is the same word. */
-export const TAG_LABELS: Record<string, Record<string, string>> = {
-  architecture: { pt: 'arquitetura' },
-  career: { pt: 'carreira' },
-  computing: { pt: 'computação' },
-  containers: { pt: 'contêineres' },
-  cryptography: { pt: 'criptografia' },
-  databases: { pt: 'bancos de dados' },
-  events: { pt: 'eventos' },
-  history: { pt: 'história' },
-  infrastructure: { pt: 'infraestrutura' },
-  microservices: { pt: 'microsserviços' },
-  news: { pt: 'notícias' },
-  observability: { pt: 'observabilidade' },
-  opinion: { pt: 'opinião' },
-  performance: { pt: 'desempenho' },
-  personal: { pt: 'pessoal' },
-  productivity: { pt: 'produtividade' },
-  security: { pt: 'segurança' },
-  tests: { pt: 'testes' },
-  theory: { pt: 'teoria' },
-  tips: { pt: 'dicas' },
-  tools: { pt: 'ferramentas' },
-  'virtual machines': { pt: 'máquinas virtuais' },
+let cache: Record<string, Labelled> | null = null
+
+function load(): Record<string, Labelled> {
+  if (cache !== null) return cache
+  const parsed: unknown = JSON.parse(readFileSync('content/tags.json', 'utf8'))
+  cache = typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, Labelled>) : {}
+  return cache
 }
 
+/** Every tag that has been decided about. */
+export const KNOWN_TAGS: readonly string[] = Object.keys(load())
+
 export function tagLabel(tag: string, locale: string): string {
-  return TAG_LABELS[tag]?.[locale] ?? tag
+  const entry = load()[tag]
+  if (entry === undefined) return tag
+  // A bare string is the Portuguese label, the same shorthand categories.json allows.
+  if (typeof entry === 'string') return locale === 'pt' ? entry : tag
+  return entry[locale] ?? tag
 }

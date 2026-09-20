@@ -96,15 +96,21 @@ const RETIRED: Record<string, string> = {
   '/javascript/': '/tags/javascript/',
   '/security/': '/tags/security/',
   '/typescript/': '/tags/typescript/',
+  '/tags/azure-monitor/': '/tags/observability/',
   '/tags/blog/': '/meta/',
+  '/tags/codespaces/': '/tags/cloud/',
   '/tags/development/': '/tags/',
   '/tags/ecmascript/': '/tags/javascript/',
   '/tags/es2020/': '/tags/javascript/',
   '/tags/hipsters/': '/tags/podcasts/',
   '/tags/info/': '/tags/news/',
+  '/tags/jest/': '/tags/tests/',
   '/tags/meta/': '/meta/',
+  '/tags/monitor/': '/tags/observability/',
   '/tags/series/': '/series/',
+  '/tags/signals/': '/tags/javascript/',
   '/tags/technology/': '/technology/',
+  '/tags/theory/': '/tags/computing/',
 }
 
 const tags = new Set<string>()

@@ -46,7 +46,7 @@ The first four are required. The schema is `src/content.config.ts`.
 | `description` | one sentence, used as the meta description and the hover-preview excerpt |
 | `draft` | keeps the post out of the build. Defaults to `true` |
 | `lang` | the language it was written in. Defaults to `pt` |
-| `tags` | many and free-form, written in English. Each one gets `/tags/<tag>/`, and `src/i18n/tags.ts` holds the Portuguese label |
+| `tags` | many, written in English. Each one gets `/tags/<tag>/`, and `content/tags.json` lists every tag with its Portuguese label |
 | `updatedDate` | shown beside the publication date |
 | `heroImage`, `heroImageAlt` | the cover image and its alt text |
 | `series`, `seriesName`, `seriesOrder` | the series slug, its display title, and this part's position |
@@ -69,6 +69,7 @@ The first four are required. The schema is `src/content.config.ts`.
 | `node scripts/build-icons.ts` | regenerate the PWA icons from `public/favicon.svg` |
 | `node scripts/build-og.ts` | regenerate the social cards in `public/og/`, both languages. Renders in Chromium, so the card carries real text |
 | `node scripts/translate.ts` | translate changed posts in place, through the `claude` CLI and its logged-in session. `TRANSLATE_PROVIDER` switches to an API key or a local model |
+| `npm run sync:metadata` | copy `category` and `tags` from each post into its translations, and drop unused tags from `content/tags.json`. Manual, after editing metadata |
 | `node scripts/clean-translations.ts` | strip agent artifacts from translated files |
 
 
@@ -80,10 +81,11 @@ The first four are required. The schema is `src/content.config.ts`.
 | `content/blog/<post>/<slug>.mdx` | a translation of that post, identified by its `lang` |
 | `content/bookmarks.json`, `content/dead-images.json` | metadata captured at migration time so the build step doesn't need to be online |
 | `content/categories.json` | what each section is about, per language. Shown on the section page |
+| `content/tags.json` | every tag a post may carry, with its label per language when the word differs |
 | `src/pages/` | routes: `/<slug>/`, `/<category>/`, `/tags/`, `/series/`, and the same set again under `/en/` |
 | `src/components/` | the component set posts can use |
 | `src/plugins/` | the remark and rehype plugins that turn markdown into figures, embeds and margin notes |
-| `src/i18n/` | the UI strings per language, and the Portuguese labels for the English tag vocabulary |
+| `src/i18n/` | the UI strings per language, and the loader for `content/tags.json` |
 | `public/og/` | the social cards, Portuguese at the root and English under `og/en/` |
 | `tests/e2e/` | the browser suite |
 | `worker/` | Cloudflare Worker that rebuilds the site when a scheduled post is due |
