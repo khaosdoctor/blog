@@ -176,7 +176,7 @@ for (const page of pages) {
 
 // 4. The feeds, the sitemap and the scheduler manifest all exist. The manifest is
 // also parsed, at the top, because check 1 is written against it.
-for (const required of ['rss.xml', 'sitemap-index.xml', 'scheduled.json', '404.html', 'robots.txt']) {
+for (const required of ['rss.xml', 'sitemap-index.xml', 'scheduled.json', 'social.json', '404.html', 'robots.txt']) {
   if (!files.includes(join(DIST, required))) {
     failures.push({ check: 'missing artifact', detail: required, file: join(DIST, required) })
   }

@@ -87,6 +87,7 @@ const ROUTES: Record<string, 'per-locale' | 'shared' | 'source-only'> = {
   'rss.xml.ts': 'per-locale',
   'scheduled.json.ts': 'shared',
   'search.astro': 'per-locale',
+  'social.json.ts': 'shared',
   'series/[name].astro': 'per-locale',
   'series/index.astro': 'per-locale',
   'tags/[tag]/[...page].astro': 'per-locale',
