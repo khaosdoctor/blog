@@ -12,7 +12,8 @@ export default defineConfig({
   // These pages are static and small, so a worker spends its time waiting on
   // navigation rather than on a core. Half the cores, the default, left most of
   // them idle.
-  workers: '100%',
+  workers: '75%',
+  retries: 1,
   use: {
     baseURL: 'http://localhost:4322',
     channel: 'chrome',
