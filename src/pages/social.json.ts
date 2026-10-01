@@ -1,5 +1,6 @@
 import { getCollection } from 'astro:content'
 import type { APIRoute } from 'astro'
+import { SOURCE_LOCALE } from '../i18n/locales'
 import { localePath } from '../i18n/ui'
 import { folderOf, PUBLISH_CUTOFF, slugOf, urlOf } from '../lib/posts'
 import { categoryOgImage } from '../lib/seo'
@@ -18,7 +19,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   const entries = [...Map.groupBy(recent, folderOf)]
     .map(([folder, posts]) => {
-      const source = posts.find((post) => post.filePath?.endsWith('/index.mdx')) ?? posts[0]
+      const source = posts.find((post) => post.data.lang === SOURCE_LOCALE) ?? posts[0]
       return {
         folder,
         pubDate: source.data.pubDate.toISOString(),
