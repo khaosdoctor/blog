@@ -24,6 +24,14 @@ Rationale belongs in `docs/`, not in a block above a function.
 
 No em-dashes anywhere. Banned words, comments included: land/lands/landed, sweep, gap, flip, surface as a verb, flag as a verb, gate/gated, sits, cheap, entirely, turns out, clobber, delve, leverage, utilize, seamless, crucial, showcase. No "it's X, not Y" negated contrast.
 
+## Talking to Lucas
+
+These govern the reply, not the code. The full version is in `AGENTS.md`.
+
+- "You're right" is the whole reply. Never append what you got wrong, never narrate a correction.
+- Never explain something he did not ask about. Not what you verified, not what you skipped.
+- Report the finding, not the process. Short by default.
+
 ## Before you finish
 
 ```

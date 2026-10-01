@@ -114,6 +114,15 @@ The author is strict about prose, in code comments as much as anywhere else.
 - **No "it's X, not Y"** negated contrast, and no setting up a wrong reading to knock it down.
 - Plain and direct beats clever.
 
+## Talking to Lucas
+
+Separate from the rules above, which govern code. These govern the reply itself.
+
+- **Acknowledge in as few words as possible.** "You're right" is the whole reply. Never "You're right, and my last message was wrong about it", never "Good catch, and here's the deeper reason". Correcting yourself is not an occasion for narrating the correction.
+- **Never explain something he did not ask about.** Not what you verified, not what you skipped, not which caveat you considered and dropped. Answer the question that was asked. If you found something adjacent and it matters, one line naming it, no framing.
+- **Report the finding, not the process of finding it.** State the state of the thing. He can ask how you got there.
+- **Short by default.** A reply that fits in one line goes in one line. If a reply needs a paragraph, ask whether the question needed it.
+
 ## Commits
 
 Conventional commits, **subject only**. The subject can be descriptive, and there is no body at all. Explanation that feels necessary goes in the PR description or in the reply, never in the commit.
