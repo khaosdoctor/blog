@@ -8,6 +8,10 @@ New code is `.ts`, or `.astro` with a typed frontmatter block. Reach for `.mjs` 
 
 The `.mjs` files still in `src/plugins/`, `src/integrations/` and `astro.config.mjs` predate this. Convert one while you are already changing it, with real hast and mdast types rather than a rename that leaves every parameter an implicit `any`.
 
+## Icons
+
+Icons come from pixelarticons.com. Fetch `https://unpkg.com/pixelarticons@latest/svg/<name>.svg` and paste the `d` attribute into the wrapper the other icons share. Never draw path data by hand, and never add the package as a dependency: these are inlined SVGs. A hand-made glyph looks smooth next to hard pixel edges and no check in `npm run check` sees it, so look at the result in a browser.
+
 ## Comments
 
 Comments are rare and say why, never what. Only comment code a reader would otherwise stop at.
