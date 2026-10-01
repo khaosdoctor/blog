@@ -147,6 +147,7 @@ const pt = {
   linkedinProfile: 'Perfil no LinkedIn',
   twitterProfile: 'Perfil no Twitter',
   youtubeChannel: 'Canal no YouTube',
+  rssFeed: 'Feed RSS',
   ossTitle: 'Código aberto',
   ossDescription:
     'Cada projeto de código aberto, fonte e ferramenta usados para construir este site, com um link para cada um.',
@@ -307,6 +308,7 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     linkedinProfile: 'LinkedIn profile',
     twitterProfile: 'Twitter profile',
     youtubeChannel: 'YouTube channel',
+    rssFeed: 'RSS feed',
     ossTitle: 'Open source',
     ossDescription: 'Every open source project, typeface and tool this site is built on, with a link to each.',
     ossIntro: 'This site is built on the work of a lot of people.',

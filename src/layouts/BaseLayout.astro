@@ -25,6 +25,7 @@ import Footnotes from '../components/Footnotes.astro'
 import HoverPreviews from '../components/HoverPreviews.astro'
 import Github from '../components/icons/Github.astro'
 import LinkedIn from '../components/icons/LinkedIn.astro'
+import Rss from '../components/icons/Rss.astro'
 import Twitter from '../components/icons/Twitter.astro'
 import Youtube from '../components/icons/Youtube.astro'
 import MathCopy from '../components/MathCopy.astro'
@@ -211,6 +212,9 @@ const webmcpData = await buildWebmcpData()
           </a>
           <a href={YOUTUBE_URL} rel="noopener" class="icon-link" aria-label={t(locale, 'youtubeChannel')}>
             <Youtube />
+          </a>
+          <a href={localePath(locale, '/rss.xml')} rel="noopener" class="icon-link" aria-label={t(locale, 'rssFeed')}>
+            <Rss />
           </a>
         </p>
       </div>
