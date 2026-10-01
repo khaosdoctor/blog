@@ -1,16 +1,5 @@
 /**
  * Publishes scheduled posts at their exact minute.
- *
- * The build emits /scheduled.json listing every post whose pubDate is still in
- * the future. This Worker runs on a one-minute cron, and when a post's pubDate
- * falls inside the minute that just passed it fires a repository_dispatch, which
- * rebuilds and deploys the site. The post is live within about a minute of the
- * time it was set to.
- *
- * Deliberately stateless: the window check means no KV, no dedupe bookkeeping,
- * and no way to get stuck. The price of that is a single shot per post: no tick
- * ever looks at a past minute again, so the window is anchored to the minute the
- * tick was scheduled for and never to the clock at the moment it happens to run.
  */
 export type Env = {
   /** Fine-grained PAT with contents:write on the blog repo. */
