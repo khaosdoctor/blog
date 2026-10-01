@@ -82,12 +82,15 @@ jobs:
           fi
 
           # The model only ever adds or updates the translation beside a
-          # post, never the source itself. A touched index file means it
-          # edited a source post, which is not its job.
-          if echo "$CHANGES" | cut -c4- | grep -qE '/index\.mdx?$'; then
-            echo "::error::The model changed a source index.md(x) file. Refusing to hand this off."
-            exit 1
-          fi
+          # post, never the source itself. A source carries no
+          # machineOwnedTranslation, which is what separates it from the
+          # output the model writes.
+          while IFS= read -r file; do
+            if ! grep -q '^machineOwnedTranslation: true' "$file"; then
+              echo "::error::The model changed $file, which is not a machine-owned translation. Refusing to hand this off."
+              exit 1
+            fi
+          done <<< "$CHANGES"
 
           # Stage only the files that actually changed, keeping their
           # content/blog/... path, so the artifact carries a handful of

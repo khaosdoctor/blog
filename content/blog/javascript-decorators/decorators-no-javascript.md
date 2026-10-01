@@ -3,6 +3,7 @@ title: "Decorators no JavaScript"
 pubDate: 2022-11-04T14:00:14.000Z
 updatedDate: 2026-07-16T16:05:19.000Z
 lang: pt
+slug: javascript-decorators
 category: technology
 tags: ["javascript", "typescript"]
 description: "Uma das propostas mais importantes do JavaScript acabou de chegar no estágio 3! Entenda o que são decorators e por que eles não são a única novidade dessa proposta!"

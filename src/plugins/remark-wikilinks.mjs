@@ -7,9 +7,9 @@
 // not exist at all fails the build, which is the only way a typo gets caught.
 //
 // A wikilink is always written as [[folder-name]], the Portuguese slug, because
-// that is the one Obsidian autocompletes. A translation lives beside its source
-// in the same folder, named after its own slug (content/blog/<folder>/<file>.mdx),
-// with its own `lang` frontmatter. A wikilink resolves in the locale of the page
+// that is the one Obsidian autocompletes. The source lives in that folder named
+// after the same slug, and a translation beside it named after its own, told apart
+// by their `lang` frontmatter. A wikilink resolves in the locale of the page
 // it is written on, so an English page links the English file in that folder.
 // When that file does not exist yet the link falls back to another locale, with
 // that locale's title: the reader is going to arrive at a Portuguese article, so
@@ -18,7 +18,7 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import GithubSlugger from 'github-slugger'
 import { visit } from 'unist-util-visit'
-import { asLocale, postUrl } from '../i18n/locales.ts'
+import { asLocale, postUrl, SOURCE_LOCALE } from '../i18n/locales.ts'
 import { slugFrom } from '../lib/post-file.ts'
 import { localeFromFile } from './mdx-util.mjs'
 
@@ -74,14 +74,14 @@ function index() {
 }
 
 /**
- * The reader's own locale first, then whatever else has the post. Insertion order
- * makes that fallback the source-language post whenever one exists, since files
- * are read in sorted order and index.mdx sorts before any translation's filename.
+ * The reader's own locale first, then the source-language post. The fallback is
+ * named rather than left to insertion order, which used to put the source first
+ * because its file was called index.
  */
 function resolve(slug, locale) {
   const byLocale = index().get(slug)
   if (byLocale === undefined) return undefined
-  return byLocale.get(locale) ?? byLocale.values().next().value
+  return byLocale.get(locale) ?? byLocale.get(SOURCE_LOCALE) ?? byLocale.values().next().value
 }
 
 /**
@@ -125,7 +125,7 @@ export function remarkWikilinks() {
         if (post === undefined) {
           throw new Error(
             `${file.path ?? 'a post'}: [[${slug}]] points at no post, in any locale. ` +
-              `Expected ${BASE}/${slug}/index.mdx. Fix the link or create the post.`,
+              `Expected ${BASE}/${slug}/${slug}.md. Fix the link or create the post.`,
           )
         }
 

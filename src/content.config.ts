@@ -10,7 +10,10 @@ const blog = defineCollection({
     base: './content/blog',
     // The default id honours a frontmatter `slug`, so a translation whose slug
     // equals its directory name would claim the same id and replace the other.
-    generateId: ({ entry }) => entry.replace(/\.mdx?$/, '').replace(/\/index$/, ''),
+    // The lang prefix is what stops a source and a translation that slugify
+    // alike from claiming one id: array-groupby-stage-3 is titled the same in
+    // both languages, and its filenames are identical.
+    generateId: ({ entry, data }) => `${data.lang ?? SOURCE_LOCALE}/${entry.replace(/\.mdx?$/, '')}`,
   }),
   schema: ({ image }) =>
     z.object({

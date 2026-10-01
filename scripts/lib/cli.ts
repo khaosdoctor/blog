@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { SOURCE_LOCALE } from '../../src/i18n/locales.ts'
 
 /**
  * Shared terminal output for the build scripts. Plain ANSI, no dependency: this
@@ -76,13 +77,23 @@ export function walkFiles(dir: string): string[] {
     .map((entry) => join(entry.parentPath, entry.name))
 }
 
-/** One post is one folder, so its source is the index file inside it. */
+/**
+ * A post's source is the file in its folder carrying the source locale, not a
+ * filename: a post is named after its slug, so `index` says nothing.
+ */
 export function postIndex(dir: string): string | undefined {
-  return ['index.mdx', 'index.md'].map((name) => join(dir, name)).find(existsSync)
+  const found: string[] = []
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() || !/\.mdx?$/.test(entry.name)) continue
+    const full = join(dir, entry.name)
+    const lang = /^lang:\s*["']?([a-z]{2})/m.exec(frontmatterOf(readFileSync(full, 'utf8')))?.[1]
+    if (lang === undefined || lang === SOURCE_LOCALE) found.push(full)
+  }
+  return found.sort()[0]
 }
 
 /**
- * Every .md/.mdx file one level under `root`: a post folder's own index plus the
+ * Every .md/.mdx file one level under `root`: a post folder's source plus the
  * translations beside it. `index: false` keeps only the translations.
  */
 export function postFiles(root: string, options: { index?: boolean } = {}): string[] {
@@ -92,10 +103,12 @@ export function postFiles(root: string, options: { index?: boolean } = {}): stri
   for (const folder of readdirSync(root, { withFileTypes: true })) {
     if (!folder.isDirectory()) continue
     const dir = join(root, folder.name)
+    const source = postIndex(dir)
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory() || !/\.mdx?$/.test(entry.name)) continue
-      if (!keepIndex && /^index\.mdx?$/.test(entry.name)) continue
-      found.push(join(dir, entry.name))
+      const full = join(dir, entry.name)
+      if (!keepIndex && full === source) continue
+      found.push(full)
     }
   }
   return found

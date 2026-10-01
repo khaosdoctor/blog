@@ -28,10 +28,10 @@ async function postDirs(): Promise<string[]> {
 
 async function postUrl(post: string): Promise<string> {
   const files = await readdir(join(POSTS, post))
-  const index = ['index.mdx', 'index.md'].find((name) => files.includes(name))
-  if (index === undefined) throw new Error(`${join(POSTS, post)} holds lab sources but has no index.mdx.`)
-  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(await readFile(join(POSTS, post, index), 'utf8'))?.[1] ?? ''
-  return urlFor(post, index, frontmatter)
+  const source = [`${post}.md`, `${post}.mdx`].find((name) => files.includes(name))
+  if (source === undefined) throw new Error(`${join(POSTS, post)} holds lab sources but no ${post}.md(x).`)
+  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(await readFile(join(POSTS, post, source), 'utf8'))?.[1] ?? ''
+  return urlFor(post, source, frontmatter)
 }
 
 /** A fence long enough to survive a source file that contains one itself. */

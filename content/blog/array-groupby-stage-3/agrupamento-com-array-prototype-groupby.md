@@ -3,6 +3,7 @@ title: "Agrupamento com Array.prototype.groupBy"
 pubDate: 2022-01-12T15:00:00.000Z
 updatedDate: 2026-07-16T16:11:06.000Z
 lang: pt
+slug: array-groupby-stage-3
 category: technology
 tags: ["javascript"]
 description: "Chega de agrupar objetos e chaves manualmente ou usar bibliotecas externas. O JavaScript agora pode contar com um método nativo de agrupamento!"

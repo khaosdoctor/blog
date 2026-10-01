@@ -7,7 +7,7 @@
  * Exits non-zero on anything that would ship broken content.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { FRAME_HOSTS, MENTIONABLE_HOSTS, SCRIPT_HOSTS } from '../src/lib/embed-hosts.ts'
 import { MDX_COMPONENT_PATTERN, RETIRED_COMPONENT_PATTERN } from '../src/lib/mdx-component-names.ts'
 import { urlFor } from '../src/lib/post-dates.ts'
@@ -60,9 +60,9 @@ if (files.includes(manifestPath)) {
 // 1. Every non-draft post is either on the site or waiting in the manifest, and
 // never both or neither. The two conditions come from one instant in one build,
 // so a post that is in both states, or in neither, means they came apart.
-// One post is one folder holding index.md(x) and its images, so the slug is the
-// folder name. Anything else in content/blog (a stray note, a loose file) is not
-// a post and is deliberately not checked.
+// One post is one folder holding its source, its translations and its images, so
+// the slug is the folder name. Anything else in content/blog (a stray note, a
+// loose file) is not a post and is deliberately not checked.
 const postSources = new Map<string, { file: string; source: string }>()
 for (const entry of readdirSync(CONTENT, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue
@@ -76,12 +76,12 @@ const postFolders = [...postSources.keys()]
 const expected = postFolders.filter((slug) => !scheduled.has(slug))
 
 /**
- * Where a folder's own index renders. Almost always `/<folder>/`, but a folder whose
- * index is English resolves to `/en/<slug>/`, which several drafts already are. Same
- * rule as everywhere else, imported rather than restated.
+ * Where a folder's own source renders. Almost always `/<folder>/`, but a folder
+ * whose source is English resolves to `/en/<slug>/`. Same rule as everywhere else,
+ * imported rather than restated.
  */
 function pageFor(slug: string, post: { file: string; source: string }): string {
-  const url = urlFor(slug, post.file.endsWith('.md') ? 'index.md' : 'index.mdx', frontmatterOf(post.source))
+  const url = urlFor(slug, basename(post.file), frontmatterOf(post.source))
   return join(DIST, url.replace(/^\/|\/$/g, ''), 'index.html')
 }
 

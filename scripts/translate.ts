@@ -4,7 +4,7 @@
  * Every post is written in one language (`lang` in its frontmatter). This script
  * translates the ones that changed into the other locale and writes the result
  * into the SAME FOLDER as the source, named after its own slug:
- * content/blog/<folder>/index.md (or .mdx for older posts) is the source, and
+ * content/blog/<folder>/<slug>.md is the source, and
  * content/blog/<folder>/<translated-slug>.md is the translation. The folder is
  * the pairing, there is no separate collection and no `translationOf` key.
  *
@@ -130,7 +130,7 @@ function readCache(): Cache {
   return JSON.parse(readFileSync(CACHE_FILE, 'utf8')) as Cache
 }
 
-/** One post is one folder, so the file to read is the index inside it. */
+/** One post is one folder, so the file to read is the source-language one inside it. */
 function sourceFile(slug: string): string | null {
   return postIndex(join(SOURCE_DIR, slug)) ?? null
 }
@@ -142,9 +142,10 @@ function findExistingTranslation(postDir: string, locale: Locale): ExistingTrans
   for (const entry of readdirSync(postDir, { withFileTypes: true })) {
     if (entry.isDirectory()) continue
     if (!/\.mdx?$/.test(entry.name)) continue
-    if (/^index\.mdx?$/.test(entry.name)) continue
     const full = join(postDir, entry.name)
     const { frontmatter } = splitFrontmatter(readFileSync(full, 'utf8'))
+    // The source carries no machineOwnedTranslation, so it is told apart from a
+    // translation by its locale rather than by its filename.
     if (field(frontmatter, 'lang') !== locale) continue
     const slug = field(frontmatter, 'slug') ?? entry.name.replace(/\.mdx?$/, '')
     // Absent counts as owned by a person, so a post written by hand in both

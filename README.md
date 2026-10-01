@@ -20,16 +20,17 @@ Node 26 or newer.
 ## Writing
 
 Most of the writing actually happens in Obsidian. So nothing is really happening
-here other than the build. The directory title is the slug, the index is the post.
+here other than the build. The directory title is the slug, and the post file is
+named after that same slug.
 
 ```
 content/blog/deno-3/
-  index.mdx
+  deno-3.md
   screenshot.png
 ```
 
-Images live next to the post and are written as `./screenshot.png`. `index.mdx` is the post; any other markdown file
-beside it is a translation of it, identified by its own `lang`, and shares those same images.
+Images live next to the post and are written as `./screenshot.png`. `deno-3.md` is the post; any other markdown file
+beside it is a translation of it, named after its own slug, identified by its own `lang`, and shares those same images.
 
 **The build fetches only its own media.** Bookmark cards, tweets and embeds render from data in the repo. `prebuild`
 downloads any remote image a post still references into the post's own directory and rewrites the reference.
