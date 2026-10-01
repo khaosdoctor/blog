@@ -63,8 +63,24 @@ function sameJsonIgnoringKeyOrder(a: Buffer, b: Buffer): boolean {
   }
 }
 
+/** `generatedAt` is the build's own clock reading, so it cannot match across two builds. */
+function sameJsonIgnoringGeneratedAt(a: Buffer, b: Buffer): boolean {
+  const strip = (buffer: Buffer): string => {
+    const { generatedAt, ...rest } = JSON.parse(buffer.toString('utf8')) as Record<string, unknown>
+    return JSON.stringify(sortedJson(rest))
+  }
+  try {
+    return strip(a) === strip(b)
+  } catch {
+    return false
+  }
+}
+
 function acceptableDifference(relPath: string, a: Buffer, b: Buffer): boolean {
   if (relPath === 'scheduled.json') return true
+  // Both carry the instant the build read the clock, so two builds never agree
+  // on it. Everything else in the two files must match.
+  if (relPath === 'social.json') return sameJsonIgnoringGeneratedAt(a, b)
   if (relPath === 'pagefind/pagefind-entry.json') return sameJsonIgnoringKeyOrder(a, b)
   return false
 }
