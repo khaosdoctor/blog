@@ -79,7 +79,7 @@ The first four are required. The schema is `src/content.config.ts`.
 | Path | What it is |
 |---|---|
 | `content/blog/` | the posts, in the language they were written in |
-| `content/blog/<post>/<slug>.mdx` | a translation of that post, identified by its `lang` |
+| `content/blog/<post>/<slug>.md` | a translation of that post, identified by its `lang` |
 | `content/bookmarks.json`, `content/dead-images.json` | metadata captured at migration time so the build step doesn't need to be online |
 | `content/categories.json` | what each section is about, per language. Shown on the section page |
 | `content/tags.json` | every tag a post may carry, with its label per language when the word differs |

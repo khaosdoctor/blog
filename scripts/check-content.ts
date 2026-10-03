@@ -5,8 +5,8 @@
  * a reference with no definition survives as the literal text `[^1]`. Both were
  * reproduced against this pipeline before this guard existed.
  *
- * Also rejects a markdown link to another post: those are written as wikilinks,
- * so the link graph and Obsidian see every one.
+ * Also rejects a markdown link to another post, which is written as a wikilink
+ * so the link graph and Obsidian see every one, and any .mdx file.
  */
 import { readFileSync } from 'node:fs'
 import { basename, dirname } from 'node:path'
@@ -44,6 +44,10 @@ function postFolders(files: string[]): Map<string, string> {
 function check(file: string, folders: Map<string, string>): void {
   const raw = readFileSync(file, 'utf8')
   const body = withoutCode(raw.replace(/^---\n[\s\S]*?\n---\n/, ''))
+
+  if (file.endsWith('.mdx')) {
+    failures.push({ file, detail: 'posts are .md, so Obsidian reads them; rename it' })
+  }
 
   for (const match of body.matchAll(POST_LINK)) {
     const path = match[1].endsWith('/') ? match[1] : `${match[1]}/`
