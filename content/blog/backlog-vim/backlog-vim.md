@@ -19,7 +19,7 @@ draft: false
 visibility: public
 seoTitle: Tudo que eu aprendi sobre Vim em 6 meses de uso contínuo
 ---
-Há mais ou menos 6 meses eu resolvi que era hora de deixar de lado o preciosismo e largar meu editor de longa data (VSCode) e começar a usar esse tão famoso **Vim**. Quando terminei de configurar e estava satisfeito com meu progresso inicial, escrevi [esse artigo](/instalando-e-configurando-o-neovim/). Nele, eu documentei grande parte da minha jornada através da instalação e das primeiras impressões com o Vim, mas eu não quis me estender muito sobre o uso porque eu não tinha usado o editor por tempo o suficiente para ter opiniões (e nem estatísticas) sobre o uso dele.
+Há mais ou menos 6 meses eu resolvi que era hora de deixar de lado o preciosismo e largar meu editor de longa data (VSCode) e começar a usar esse tão famoso **Vim**. Quando terminei de configurar e estava satisfeito com meu progresso inicial, escrevi [[instalando-e-configurando-o-neovim|esse artigo]]. Nele, eu documentei grande parte da minha jornada através da instalação e das primeiras impressões com o Vim, mas eu não quis me estender muito sobre o uso porque eu não tinha usado o editor por tempo o suficiente para ter opiniões (e nem estatísticas) sobre o uso dele.
 
 Agora é diferente. Depois de 6 meses usando **somente** o Neovim como meu editor principal (na real, como o único editor) eu quero destrinchar tudo que eu aprendi, o que eu ganhei, o que eu perdi, o que eu mais gostei e o que eu achei estranho nessa nova experiência.
 

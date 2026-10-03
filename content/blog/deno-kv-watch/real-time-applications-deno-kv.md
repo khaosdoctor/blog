@@ -20,15 +20,15 @@ Deno once again innovated a lot in relation to what can be done with the runtime
 
 ## KV Watch
 
-A while ago I published an article here talking about Deno's new key-value database, [Deno KV](/deno-kv-beta/).
+A while ago I published an article here talking about Deno's new key-value database, [[deno-kv-beta|Deno KV]].
 
 Just to remind us what KV is. It is a database in the key-value model, meaning we don't have structures like tables and so on, most of our logical operations are done on top of values stored in keys that follow a textual pattern, for example, the likes on a post with the ID `1234` could be represented by a number stored in the key `posts:1234:likes`
 
-KV has several really interesting APIs, like [queues](/deno-kv-queues/) and [cron](/deno-cron/), but the one that makes all of this possible is **watch**.
+KV has several really interesting APIs, like [[deno-kv-queues|queues]] and [[deno-cron|cron]], but the one that makes all of this possible is **watch**.
 
 With this new API, Deno KV can observe changes in real-time on the keys, so whenever one of these keys changes, we can emit an event somewhere notifying of that change.
 
-The new API works through an [async iterator](/async-iterators-js/) that will return the new value of the watched key:
+The new API works through an [[async-iterators-js|async iterator]] that will return the new value of the watched key:
 
 ```ts
 const db = await Deno.openKv()

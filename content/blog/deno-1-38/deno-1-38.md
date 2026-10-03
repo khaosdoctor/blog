@@ -61,7 +61,7 @@ addEventListener('hmr', (e) => {
 
 ## Suporte a .env
 
-Como [o Node já fez antes](/dotenv-nodejs/), agora é a vez do Deno ter suporte nativo a arquivos `.env`, isso é inesperado, já que o Deno tem suporte através da standard library para o módulo dotenv, mas agora você pode usar direto da linha de comando.
+Como [[dotenv-nodejs|o Node já fez antes]], agora é a vez do Deno ter suporte nativo a arquivos `.env`, isso é inesperado, já que o Deno tem suporte através da standard library para o módulo dotenv, mas agora você pode usar direto da linha de comando.
 
 Imagine que você tenha um arquivo `.env` na sua raiz do projeto, para executar esse arquivo diretamente você pode passar a opção `--env` para o `deno run`:
 

@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-As I [always do here](/veja-o-que-ha-de-novo-no-node-js-16/), let's talk about another sensational Node.js release. **Version 18 was announced in April 2022!** And you must be wondering: So what?
+As I [[veja-o-que-ha-de-novo-no-node-js-16|always do here]], let's talk about another sensational Node.js release. **Version 18 was announced in April 2022!** And you must be wondering: So what?
 
 Whether you're a JavaScript dev or not, this Node.js version brought a series of very interesting changes to the runtime itself, and some of these changes are so important that they can inspire other runtimes to do the same, so let's take a look at everything we have here!
 

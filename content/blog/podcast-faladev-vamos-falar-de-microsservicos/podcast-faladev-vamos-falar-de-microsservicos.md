@@ -20,6 +20,6 @@ Neste podcast falamos sobre como podemos entender microsserviços, como eles fun
 
 -   [Microsserviços: dos grandes monólitos às pequenas rotas](https://medium.com/@khaosdoctor/microserviços-dos-grandes-monólitos-às-pequenas-rotas-fbfd4ee99f36)
 -   [Ajude a gente a traduzir o site do TypeScript para PT-BR](https://github.com/microsoft/TypeScript-Website/issues/233#issuecomment-664529171)
--   [Trabalhando com Linkerd](/uma-introducao-a-service-mesh-com-linkerd/)
--   [Jaeger e Linkerd](/saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd/)
--   [O que são service meshes](/service-mesh-1/)
+-   [[uma-introducao-a-service-mesh-com-linkerd|Trabalhando com Linkerd]]
+-   [[saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd|Jaeger e Linkerd]]
+-   [[service-mesh-1|O que são service meshes]]

@@ -176,7 +176,7 @@ console.log(c.value);
 
 We would have exactly the same result. But of course, this is a simple example. When we have complex computations inside a class, it makes sense not to have to run them every time.
 
-He also proposes using [decorators](/javascript-decorators/), creating a decorator called `signal`:
+He also proposes using [[javascript-decorators|decorators]], creating a decorator called `signal`:
 
 ```js
 export function signal(target) {
@@ -222,6 +222,6 @@ export class Counter {
 
 ## Conclusion
 
-While the proposal is still at stage 1, I think it can make some progress by the end of next year (as I mentioned in my [predictions](/js-2025/)), if that happens, React's entire state model could become obsolete, as well as the state models of all frontend frameworks, because JavaScript would implement this natively.
+While the proposal is still at stage 1, I think it can make some progress by the end of next year (as I mentioned in my [[js-2025|predictions]]), if that happens, React's entire state model could become obsolete, as well as the state models of all frontend frameworks, because JavaScript would implement this natively.
 
 I'm particularly excited about this possibility. What about you? Let me know on my socials!

@@ -14,7 +14,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-When working with microservices, we always hear that **monitoring** and **observability** are key metrics to keep our ecosystem cohesive, functional, and maintain sanity about what's happening. We talked about this in the [#FalaDev podcast I participated in with several guests](/podcast-faladev-vamos-falar-de-microsservicos/).
+When working with microservices, we always hear that **monitoring** and **observability** are key metrics to keep our ecosystem cohesive, functional, and maintain sanity about what's happening. We talked about this in the [[podcast-faladev-vamos-falar-de-microsservicos|#FalaDev podcast I participated in with several guests]].
 
 After all, in distributed systems, the complexity is not in the unit itself, but in how these units interact with each other. And if we don't know what's happening in our ecosystem, we can't diagnose, understand, and much less respond to incidents in a timely manner.
 

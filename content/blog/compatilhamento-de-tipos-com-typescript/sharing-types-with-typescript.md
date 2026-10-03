@@ -49,7 +49,7 @@ That way, when we have some very big version transition in the backend, we can k
 
 ## Using gRPC
 
-Another option would be using an external DTO through gRPC, as I've already explained [in my gRPC series](/guia-grpc-1/) here on the blog.
+Another option would be using an external DTO through gRPC, as I've already explained [[guia-grpc-1|in my gRPC series]] here on the blog.
 
 gRPC working together with Protobuf lets us share types in the most rigid way possible, since without that payload file, the service wouldn't work. However, that would imply that you need to implement a new pipeline just to deal with protobuf itself and all the files.
 

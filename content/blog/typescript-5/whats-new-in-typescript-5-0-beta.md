@@ -27,7 +27,7 @@ Then check out [this tutorial](https://code.visualstudio.com/Docs/languages/type
 
 ## Decorators are finally stable
 
-For many years, TypeScript used its own implementation of [decorators](/javascript-decorators/), a proposal we've discussed here on the blog, with this proposal promoted to stage 3 in TC39, it's now possible to use decorators without setting the `--experimentalDecorators` flag or the same option in `tsconfig.json`.
+For many years, TypeScript used its own implementation of [[javascript-decorators|decorators]], a proposal we've discussed here on the blog, with this proposal promoted to stage 3 in TC39, it's now possible to use decorators without setting the `--experimentalDecorators` flag or the same option in `tsconfig.json`.
 
 To explain what a decorator is in summary, imagine we have a class like this:
 
@@ -128,7 +128,7 @@ function debug (originalMethod: any, context: ClassMethodDecoratorContext) {
 }
 ```
 
-Notice that, in addition to logging that we enter and exit the method, we also log the name of the method. But that's not all, the context also has a function called `addInitializer` which we discussed [in the article about decorators](/javascript-decorators/). This method is a way to create a hook at the beginning of the constructor (or in the static initialization block itself of a class). A classic JavaScript example:
+Notice that, in addition to logging that we enter and exit the method, we also log the name of the method. But that's not all, the context also has a function called `addInitializer` which we discussed [[javascript-decorators|in the article about decorators]]. This method is a way to create a hook at the beginning of the constructor (or in the static initialization block itself of a class). A classic JavaScript example:
 
 ```ts
 class Person {
@@ -476,7 +476,7 @@ In the new version of TypeScript, the compiler is much smarter and can now infer
 - `bundler` value is now an option for `moduleResolution` in `tsconfig.json` that models the way bundlers like webpack work to resolve modules.
 - New custom flags to configure how each type of import works
 - Support for `export type * as foo from 'package.ts'`
-- Support for [satisfies](/ts-satisfies/) and [`@overload`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#overload-support-in-jsdoc) in JSDoc
+- Support for [[ts-satisfies|satisfies]] and [`@overload`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#overload-support-in-jsdoc) in JSDoc
 - [Performance improvements](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#speed-memory-and-package-size-optimizations) between 80 and 90% and package size reduction of 58% (TypeScript got smaller and faster, much faster)
 
 See the [official documentation](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta) on the TypeScript website for a more complete list with smaller changes and more!

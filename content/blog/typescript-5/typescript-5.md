@@ -24,7 +24,7 @@ Depois veja [esse tutorial](https://code.visualstudio.com/Docs/languages/typescr
 
 ## Decorators estão finalmente estáveis
 
-Por muitos anos, o TS usava uma implementação própria dos [decorators](/javascript-decorators/), uma proposta que já comentamos aqui no blog, com a promoção dessa proposta para o estágio 3 no TC39, agora é possível usar os decorators sem precisar setar a flag `--experimentalDecorators` ou a opção de mesmo nome no `tsconfig.json`.
+Por muitos anos, o TS usava uma implementação própria dos [[javascript-decorators|decorators]], uma proposta que já comentamos aqui no blog, com a promoção dessa proposta para o estágio 3 no TC39, agora é possível usar os decorators sem precisar setar a flag `--experimentalDecorators` ou a opção de mesmo nome no `tsconfig.json`.
 
 Para explicarmos o que é um decorator em sumário, imagine que temos uma classe assim:
 
@@ -125,7 +125,7 @@ function debug (originalMethod: any, context: ClassMethodDecoratorContext) {
 }
 ```
 
-Veja que, além de logar que entramos e saímos do método, vamos também logar o nome do método. Mas isso não é tudo, o contexto também tem uma função chamada `addInitializer` que já comentamos [no artigo sobre decorators](/javascript-decorators/). Esse método é uma forma de criarmos um hook no início do construtor (ou no próprio bloco de inicialização estática de uma classe). Um exemplo clássico do JS:
+Veja que, além de logar que entramos e saímos do método, vamos também logar o nome do método. Mas isso não é tudo, o contexto também tem uma função chamada `addInitializer` que já comentamos [[javascript-decorators|no artigo sobre decorators]]. Esse método é uma forma de criarmos um hook no início do construtor (ou no próprio bloco de inicialização estática de uma classe). Um exemplo clássico do JS:
 
 ```ts
 class Person {
@@ -473,7 +473,7 @@ Na nova versão do TS, o compilador está bem mais inteligente e já consegue in
 -   Valor `bundler` é agora uma opção para o `moduleResolution` no `tsconfig.json` que modela a forma como bundlers como webpack funcionam para resolver módulos.
 -   Novas flags customizadas para configurar como cada tipo de import funciona
 -   Suporte para `export type * as foo from 'pacote.ts'`
--   Suporte para [satisfies](/ts-satisfies/) e [`@overload`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#overload-support-in-jsdoc) no JSDoc
+-   Suporte para [[ts-satisfies|satisfies]] e [`@overload`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#overload-support-in-jsdoc) no JSDoc
 -   [Melhorias](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta/#speed-memory-and-package-size-optimizations) de performance entre 80 e 90% e redução do tamanho do pacote em 58% (o TS ficou menor e mais rápido, MUITO mais rápido)
 
 Veja a [documentação oficial](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-beta) no site do TS para uma lista mais completa com mudanças menores e até mais!

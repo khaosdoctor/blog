@@ -15,7 +15,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-In the [previous post](/um-mergulho-em-imagens-de-containers-parte-1/?utm_source=series&utm_medium=post&utm_campaign=deep_dive_2) of our series we talked a bit about what container images are and how they are divided. We covered what a `slim` image is, a `full` image, and we talked about `alpine` images. But what impact does this have on your application?
+In the [[um-mergulho-em-imagens-de-containers-parte-1|previous post]] of our series we talked a bit about what container images are and how they are divided. We covered what a `slim` image is, a `full` image, and we talked about `alpine` images. But what impact does this have on your application?
 
 ## The Application
 

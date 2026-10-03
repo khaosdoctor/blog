@@ -141,7 +141,7 @@ console.log(a === b) // 0x89ac === 0x89ac? true
 
 ## Cloning
 
-Para sair desse problema e evitar que a gente modifique a variável original, existe o conceito de **clonagem**. Isso inclusive é um tema bastante interessante porque foi um dos temas do [artigo sobre os novos métodos de arrays](/array-es13/) aqui do blog.
+Para sair desse problema e evitar que a gente modifique a variável original, existe o conceito de **clonagem**. Isso inclusive é um tema bastante interessante porque foi um dos temas do [[array-es13|artigo sobre os novos métodos de arrays]] aqui do blog.
 
 Quando clonamos um objeto, estamos pegando todas as propriedades do objeto original e jogando em outro ponteiro diferente, de forma que se mudarmos esse objeto, não vamos alterar a variável original. O mais comum era fazermos algo assim:
 

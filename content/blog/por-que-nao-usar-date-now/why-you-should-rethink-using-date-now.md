@@ -170,7 +170,7 @@ Before sharing the code, there are some notes:
 
 -   This code only works on macOS, but you can freely modify it to run on Linux
 -   You'll probably need to use `sudo`
--   You need to have a Node version compatible with [ESModules](/os-ecmascript-modules-estao-aqui/) (>=12)
+-   You need to have a Node version compatible with [[os-ecmascript-modules-estao-aqui|ESModules]] (>=12)
 -   This is a more updated version of the code in [the article I mentioned](https://blog.insiderattack.net/how-not-to-measure-time-in-programming-11089d546180)
 
 ```js

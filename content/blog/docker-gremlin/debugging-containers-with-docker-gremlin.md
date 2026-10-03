@@ -56,7 +56,7 @@ A technique many people use is to simply enter the container with `docker exec -
 
 ![](./image.png)
 
-If we try any other tool, we'll see they don't exist either. This is true for most, if not all, production containers. Even more so in containers with images built [from scratch](/um-mergulho-em-imagens-de-containers-parte-1/#imagens-scratch), which are images with no base operating system. They're basically just a binary, so we can't do even that.
+If we try any other tool, we'll see they don't exist either. This is true for most, if not all, production containers. Even more so in containers with images built [[um-mergulho-em-imagens-de-containers-parte-1#imagens-scratch|from scratch]], which are images with no base operating system. They're basically just a binary, so we can't do even that.
 
 This approach is fine in most cases when we're going to replace the container, but it's another way to clutter our environment. And that's where Gremlin comes in.
 

@@ -9,7 +9,7 @@ description: "Como utilizar mocks, stubs e spies no seu teste usando o Node.js T
 heroImage: "./cover.png"
 draft: false
 ---
-No [artigo anterior](/comecando-com-o-node-js-test-runner/) eu mostrei como podemos começar a usar o **Node.js Test Runner**. Agora, como a gente faz mais do que só "começar" com o Node.js Test Runner?
+No [[comecando-com-o-node-js-test-runner|artigo anterior]] eu mostrei como podemos começar a usar o **Node.js Test Runner**. Agora, como a gente faz mais do que só "começar" com o Node.js Test Runner?
 
 Depois de alguns feedbacks de alunos e leitores, muita gente me pediu pra continuar porque não existem muitos conteúdos sobre o test runner em português, então bora continuar! Vou tentar fazer vários artigos, não necessariamente conectados sobre o que eu passo com o NTR e como a gente pode resolver alguns casos comuns usando ele.
 

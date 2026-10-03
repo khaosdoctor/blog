@@ -11,7 +11,7 @@ draft: false
 seoTitle: "Utilizando Two-Factor Authentication com SSH"
 seoDescription: "Usar só senhas ou chaves não é mais seguro. Precisamos levar a segurança um passo a diante com autenticação de dois fatores em nossos servidores."
 ---
-Já estamos muito acostumados com SSH para logarmos em máquinas virtuais, como fizemos no nosso [post onde criamos uma VPN](/criando-uma-vpn/). Porém, sabemos que o SSH aceita diversos níveis de segurança quando se trata de acesso local.
+Já estamos muito acostumados com SSH para logarmos em máquinas virtuais, como fizemos no nosso [[criando-uma-vpn|post onde criamos uma VPN]]. Porém, sabemos que o SSH aceita diversos níveis de segurança quando se trata de acesso local.
 
 O primeiro nível de segurança – e o mais fraco – é uma senha alfanumérica, este é o meio mais fraco porque a comunicação entre o seu computador e o servidor, mesmo sendo pelo protocolo do SSH, ainda transmite sua senha em texto plano, um ataque bem direcionado poderia capturar a sua senha e utilizá-la, se você não estiver utilizando nenhum túnel.
 

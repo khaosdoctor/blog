@@ -14,13 +14,13 @@ seoDescription: "Neste capítulo da nossa série sobre gRPC, vamos aprender a co
 ---
 ---
 
-No nosso [artigo anterior do guia](/o-guia-do-grpc-2/) vimos como podemos integrar o gRPC com JavaScript de uma forma bem simples e rápida. Agora chegou a hora de subirmos mais um nível e adicionarmos os tipos à esta aplicação! E, quando eu falo de tipos automaticamente pensamos em **TypeScript**!
+No nosso [[o-guia-do-grpc-2|artigo anterior do guia]] vimos como podemos integrar o gRPC com JavaScript de uma forma bem simples e rápida. Agora chegou a hora de subirmos mais um nível e adicionarmos os tipos à esta aplicação! E, quando eu falo de tipos automaticamente pensamos em **TypeScript**!
 
 Para este artigo vamos converter a nossa [API gRPC de notas](https://github.com/khaosdoctor/grpc-guide-part2-javascript-sample) para utilizar TypeScript. Mas primeiro, vamos entender o que significa "converter para TypeScript" e o que queremos dizer quando fazemos isso usando gRPC, ainda mais quando usamos gRPC com JavaScript.
 
 ## O que é converter?
 
-Como já mencionei [na primeira parte deste guia](/guia-grpc-1/), o gRPC, apesar de ser uma tecnologia estabelecida, não tem uma documentação e nem um conjunto de ferramentas muito boa para algumas linguagens, infelizmente uma dessas linguagens é o [JavaScript](https://docs.microsoft.com/javascript/?WT.mc_id=opensource-0000-ludossan)...
+Como já mencionei [[guia-grpc-1|na primeira parte deste guia]], o gRPC, apesar de ser uma tecnologia estabelecida, não tem uma documentação e nem um conjunto de ferramentas muito boa para algumas linguagens, infelizmente uma dessas linguagens é o [JavaScript](https://docs.microsoft.com/javascript/?WT.mc_id=opensource-0000-ludossan)...
 
 No entanto, o ferramental que temos para [JS](https://docs.microsoft.com/javascript/?WT.mc_id=opensource-0000-ludossan) funciona muito bem, apesar de ser um pouco complicado e meio obscuro de ser usado. Com uma base mais sólida basta que adicionemos as declarações de tipos para aqueles arquivos que já foram gerados pelo compilador.
 
@@ -28,7 +28,7 @@ Com isso, "converter" uma aplicação para TypeScript, em suma, significa que te
 
 Infelizmente o problema que temos volta-se novamente às ferramentas que temos para JavaScript. Por exemplo, temos dois pacotes oficiais, um mais antigo, chamado apenas de `grpc` que foi o primeiro pacote de implementação gRPC para JavaScript, mas este pacote está aos poucos sendo substituído pelo pacote `@grpc/grpc-js`, que não possui o loader de arquivos `.proto`, deixando o pacote mais leve e com menos dependências, já que ele terceiriza essa funcionalidade para outro pacote específico chamado `@grpc/proto-loader`.
 
-> Usamos ambos os pacotes no [artigo anterior dessa série](/o-guia-do-grpc-2/)
+> Usamos ambos os pacotes no [[o-guia-do-grpc-2|artigo anterior dessa série]]
 
 As diferenças entre estes pacotes vão além de serem somente um uma variação do outro, ou então terem menos coisas juntas. A realidade é que o pacote `grpc` é mais bem implementado porque está conosco há muito mais tempo, enquanto, por exemplo, o pacote `@grpc/grpc-js` não possui algumas implementações, como a `grpc.Server.bind()`.
 

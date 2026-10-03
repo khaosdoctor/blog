@@ -81,7 +81,7 @@ A clássica piada do desenvolvedor sênior que responde tudo com "depende" tem u
 
 Ele comparava a programação a um pacto: Você sempre sacrifica algo para obter uma solução, porque qualquer escolha tem efeitos colaterais.
 
-O importante é lembrar que você nunca vai tomar boas decisões, você sempre vai tomar decisões que são boas para algo e ruins para outro algo, um exemplo clássico disso é segurança: Quanto melhor e mais resistente o algoritmo de criptografia, mais lento ele vai ser. Ou então quando eu comentei no meu [artigo sobre RSA](/criptografia-assimetrica-com-rsa/), as chaves podem ser arbitrariamente grandes, mas existe um ponto onde ela é **suficiente**.
+O importante é lembrar que você nunca vai tomar boas decisões, você sempre vai tomar decisões que são boas para algo e ruins para outro algo, um exemplo clássico disso é segurança: Quanto melhor e mais resistente o algoritmo de criptografia, mais lento ele vai ser. Ou então quando eu comentei no meu [[criptografia-assimetrica-com-rsa|artigo sobre RSA]], as chaves podem ser arbitrariamente grandes, mas existe um ponto onde ela é **suficiente**.
 
 Os suecos tem uma palavra chamada [**lagom**](https://en.wikipedia.org/wiki/Lagom#:~:text=Lagom%20\(pronounced%20%5Bˈlɑ̂ːɡɔm%5D%2C,\(in%20matter%20of%20amounts\).), que é uma forma de dizer "apenas o suficiente" ou "nem mais, nem menos". Esse conceito resume bem essa lição: A melhor escolha é aquela que equilibra necessidades sem excessos.
 
@@ -132,7 +132,7 @@ Mas também não se acomode demais nas coisas que você está fazendo e nem foqu
 
 ## 10 - Talk is cheap
 
-Durante todos esses anos, eu acabei notando que a máxima "Quem muito fala pouco faz" foi se tornando cada vez mais verdade (inclusive temos [uma edição só falando disso](/backlog-5-o-show-da-bolha/)). No mundo atual, isso se intensifica ainda mais com a explosão de influenciadores e o excesso de informações despejadas sobre nós. **Não acredite em influenciadores**, seja você a sua própria influência.
+Durante todos esses anos, eu acabei notando que a máxima "Quem muito fala pouco faz" foi se tornando cada vez mais verdade (inclusive temos [[backlog-5-o-show-da-bolha-dev|uma edição só falando disso]]). No mundo atual, isso se intensifica ainda mais com a explosão de influenciadores e o excesso de informações despejadas sobre nós. **Não acredite em influenciadores**, seja você a sua própria influência.
 
 O ponto é que você não deve acreditar somente no que as pessoas falam pra você, muita gente fala demais, vende coisas demais mas nunca de fato coloca a mão na massa. A prova disso é que a maioria das pessoas que criaram coisas incríveis sequer tem rede social ou, se tem, mantêm um perfil super discreto.
 

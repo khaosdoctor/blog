@@ -99,7 +99,7 @@ try {
 
 ## Top-level await
 
-Isso já está disponível no Node.js há um tempo, mas desde que temos os [ESModules](/os-ecmascript-modules-estao-aqui/) já é possível realizar o top-level await, ou seja, um `await` fora de uma `async function`:
+Isso já está disponível no Node.js há um tempo, mas desde que temos os [[os-ecmascript-modules-estao-aqui|ESModules]] já é possível realizar o top-level await, ou seja, um `await` fora de uma `async function`:
 
 ```js
 // index.mjs

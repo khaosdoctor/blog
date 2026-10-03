@@ -9,7 +9,7 @@ description: "A integração mais esperada entre o Docker e a Azure chegou às m
 heroImage: "./cover.png"
 draft: false
 ---
-Comentamos [neste post](/executando-containers-no-azure-container-instancies-com-docker/) que o Docker estaria ganhando uma integração **nativa** com a Azure! Com essa integração o deploy de uma imagem docker direto para o [Azure Container Instances (ACI)](https://docs.microsoft.com/azure/container-instances/quickstart-docker-cli?WT.mc_id=blog-personal-ludossan) seria tão fácil quando um único  comando no Docker CLI.
+Comentamos [[executando-containers-no-azure-container-instancies-com-docker|neste post]] que o Docker estaria ganhando uma integração **nativa** com a Azure! Com essa integração o deploy de uma imagem docker direto para o [Azure Container Instances (ACI)](https://docs.microsoft.com/azure/container-instances/quickstart-docker-cli?WT.mc_id=blog-personal-ludossan) seria tão fácil quando um único  comando no Docker CLI.
 
 A integração já estava presente no Docker Edge, que é a versão beta do Docker. Agora temos a excelente [notícia](https://azure.microsoft.com/blog/azure-container-instances-docker-integration-now-in-docker-desktop-stable-release/?WT.mc_id=blog-personal-ludossan) de que esta integração chegou para todos os usuários do Docker! E, junto com ela, agora **temos a mesma integração direto no [VSCode](https://code.visualstudio.com/?WT.mc_id=blog-personal-ludossan)**!
 

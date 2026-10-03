@@ -139,7 +139,7 @@ Uma outra forma de pensar nele é como "Não use esse parâmetro como candidato 
 
 ## groupBy em Objetos e Maps
 
-Seguindo as propostas de agrupamentos (como a do [Array](/array-groupby-stage-3/)), agora temos os métodos estáticos `Object.groupBy` e `Map.groupBy`. Que, basicamente, recebem um iterável e transformam esse iterável em um objeto ou um map agrupado por uma determinada função.
+Seguindo as propostas de agrupamentos (como a do [[array-groupby-stage-3|Array]]), agora temos os métodos estáticos `Object.groupBy` e `Map.groupBy`. Que, basicamente, recebem um iterável e transformam esse iterável em um objeto ou um map agrupado por uma determinada função.
 
 > Essa proposta já estava na lista de propostas do TC39 há um bom tempo
 

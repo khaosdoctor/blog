@@ -9,9 +9,9 @@ description: "Agora é oficial! O TypeScript lançou a sua versão 5.0 e eu vou 
 heroImage: "./cover.png"
 draft: false
 ---
-Agora é oficial! No meu [último post](/typescript-5/) sobre esse assunto, eu tratei o lançamento semi-oficial do TS 5.0. A versão beta estava quase pronta mas ainda não estava totalmente 100%, por isso estou cobrindo um novo lançamento aqui com todas as funcionalidades oficiais que foram lançadas na última versão do nosso amigo azul!
+Agora é oficial! No meu [[typescript-5|último post]] sobre esse assunto, eu tratei o lançamento semi-oficial do TS 5.0. A versão beta estava quase pronta mas ainda não estava totalmente 100%, por isso estou cobrindo um novo lançamento aqui com todas as funcionalidades oficiais que foram lançadas na última versão do nosso amigo azul!
 
-A grande maioria das funcionalidades se manteve, então o [post](/typescript-5/) ainda é válido e eu não vou me repetir aqui, mas vou mostrar as principais diferenças desde o RC beta e a release oficial.
+A grande maioria das funcionalidades se manteve, então o [[typescript-5|post]] ainda é válido e eu não vou me repetir aqui, mas vou mostrar as principais diferenças desde o RC beta e a release oficial.
 
 ## Decorators
 
@@ -61,7 +61,7 @@ Basicamente é uma função que retorna uma função. A diferença entre o RC e 
 
 ## Module Resolution = Bundler
 
-Uma outra mudança que foi introduzida no TypeScript 5.0 na verdade é uma adição a uma modificação criada no 4.7. Nessa versão, a chave `module` recebeu duas novas opções, `node16` e `nodenext` que modelavam precisamente a forma como o Node.js tratava os [ESModules](/os-ecmascript-modules-estao-aqui/). No entanto, o Node tem várias restrições que não existem em outras ferramentas, a principal delas sendo que os arquivos importados precisam ter a extensão explicitamente descrita:
+Uma outra mudança que foi introduzida no TypeScript 5.0 na verdade é uma adição a uma modificação criada no 4.7. Nessa versão, a chave `module` recebeu duas novas opções, `node16` e `nodenext` que modelavam precisamente a forma como o Node.js tratava os [[os-ecmascript-modules-estao-aqui|ESModules]]. No entanto, o Node tem várias restrições que não existem em outras ferramentas, a principal delas sendo que os arquivos importados precisam ter a extensão explicitamente descrita:
 
 ```ts
 import * as utils from './utils.mjs'
@@ -91,6 +91,6 @@ Além disso, a migração para módulos transformou o TS em um foguete, tendo o 
 
 Todas as demais modificações continuaram iguais, então eu fortemente recomendo que você leia o artigo original sobre as mudanças que vieram no RC, porque elas são muito úteis e podem te ajudar a ter mais ferramental para criar suas aplicações.
 
-[Novidades do TypeScript 5.0 Beta](/typescript-5/)
+[[typescript-5|Novidades do TypeScript 5.0 Beta]]
 
 Esse foi um artigo curto, mas que vale a pena ser destacado, principalmente pelos ganhos de performance e modificações notáveis no coração do TypeScript.

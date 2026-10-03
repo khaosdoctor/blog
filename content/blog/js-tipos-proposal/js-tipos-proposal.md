@@ -73,7 +73,7 @@ Isso não era um grande problema em 2012 porque muitos browsers não tinham atua
 
 Então não era um grande problema adicionar mais um componente para essa compilação, inclusive, a etapa de criar um bundle de código em um único arquivo super otimizado era bastante comum, não era nenhum problema completar a pipeline com mais uma etapa que, na maior parte, ia só remover os tipos do seu código para fazer com que ele fosse um código JavaScript válido de novo.
 
-Mas com o passar do tempo, os browsers começaram a ficar ainda mais estáveis e começaram a ter suporte nativos a [módulos](/os-ecmascript-modules-estao-aqui/) então a etapa de bundling se tornou mais uma etapa opcional de otimização do que uma etapa necessária de compatibilidade, então o TypeScript acabou se tornando a pedra no sapato porque agora ele adicionava uma etapa que talvez não precisava existir.
+Mas com o passar do tempo, os browsers começaram a ficar ainda mais estáveis e começaram a ter suporte nativos a [[os-ecmascript-modules-estao-aqui|módulos]] então a etapa de bundling se tornou mais uma etapa opcional de otimização do que uma etapa necessária de compatibilidade, então o TypeScript acabou se tornando a pedra no sapato porque agora ele adicionava uma etapa que talvez não precisava existir.
 
 Isso foi mitigado com a funcionalidade já presente do TypeScript poder checar tipos de arquivos JavaScript também, sem precisar de um arquivo com extensão diferente, se tornando mais um linter do que um type checker de verdade. Então você poderia escrever um código igual a esse:
 
@@ -188,7 +188,7 @@ Se você não sabe como o JavaScript evolui e quer entender um pouco mais sobre 
 
 ![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
 
-Enquanto ela não chegar pelo menos no **estágio 3** não temos como dizer que ela vai ou não ser no futuro, e essa resposta pode demorar **anos**. Como foi, por exemplo, o caso [da proposta do temporal](/temporal-api/) que está aberta há pelo menos 4 anos.
+Enquanto ela não chegar pelo menos no **estágio 3** não temos como dizer que ela vai ou não ser no futuro, e essa resposta pode demorar **anos**. Como foi, por exemplo, o caso [[temporal-api|da proposta do temporal]] que está aberta há pelo menos 4 anos.
 
 Então só nos resta esperar e, claro, comentar e ajudar na discussão da proposta lá no Github!
 

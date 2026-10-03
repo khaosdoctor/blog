@@ -9,7 +9,7 @@ description: "O Deno KV está avançando cada vez mais rápido, vamos aprender o
 heroImage: "./cover.png"
 draft: false
 ---
-No [outro artigo](/deno-kv-beta/) comentamos sobre a nova versão beta fechada do Deno KV e também falamos sobre o conceito de chave e valor. Mas, infelizmente, como o artigo já estava meio grande, algumas coisas ficaram de fora, uma dessas coisas foi a incrível capacidade de atomicidade do KV.
+No [[deno-kv-beta|outro artigo]] comentamos sobre a nova versão beta fechada do Deno KV e também falamos sobre o conceito de chave e valor. Mas, infelizmente, como o artigo já estava meio grande, algumas coisas ficaram de fora, uma dessas coisas foi a incrível capacidade de atomicidade do KV.
 
 Mas o que é ser atômico? E o que isso significa no contexto de um banco de dados desse porte?
 

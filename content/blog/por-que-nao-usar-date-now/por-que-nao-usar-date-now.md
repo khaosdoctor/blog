@@ -167,7 +167,7 @@ Antes de compartilhar os códigos, existem algumas notas:
 
 -   Esse código só funciona no MacOS, mas você pode modificar livremente para rodar no Linux
 -   Você provavelmente vai precisar usar o `sudo`
--   Você precisa ter uma versão do Node compatível com [ESModules](/os-ecmascript-modules-estao-aqui/) (>=12)
+-   Você precisa ter uma versão do Node compatível com [[os-ecmascript-modules-estao-aqui|ESModules]] (>=12)
 -   Essa é uma versão mais atualizada do código presente no [artigo que comentei](https://blog.insiderattack.net/how-not-to-measure-time-in-programming-11089d546180)
 
 ```js

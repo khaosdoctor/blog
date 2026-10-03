@@ -17,7 +17,7 @@ Seven years ago, people asked for Sets to have more methods beyond the standard 
 
 Well, 7 years later, [this proposal](https://github.com/tc39/proposal-set-methods) has finally reached stage 4! In other words, it's finally going to be implemented in JavaScript and browsers!
 
-> If you don't know what sets are: they're nothing more than structures similar to arrays, but they can only store a value once (we covered these techniques [here](/removendo-itens-duplicados-no-javascript-es6/)). It's a way to deduplicate an array efficiently.
+> If you don't know what sets are: they're nothing more than structures similar to arrays, but they can only store a value once (we covered these techniques [[removendo-itens-duplicados-no-javascript-es6|here]]). It's a way to deduplicate an array efficiently.
 
 From now on, we have the following new methods on sets:
 

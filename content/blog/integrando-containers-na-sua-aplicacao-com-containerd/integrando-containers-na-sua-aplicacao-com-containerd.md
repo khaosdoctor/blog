@@ -9,7 +9,7 @@ description: "Já pensou em uma alternativa ao Docker? Que tal manipular contain
 heroImage: "./cover.png"
 draft: false
 ---
-Como já falamos no [artigo anterior](/oci-cri-docker-ecossistema-de-containers/), o Kubernetes recentemente marcou o Docker como depreciado, ou seja, não poderemos mais usar a integração com o Docker diretamente de dentro de um Pod a não ser que instalemos ele manualmente.
+Como já falamos no [[oci-cri-docker-ecossistema-de-containers|artigo anterior]], o Kubernetes recentemente marcou o Docker como depreciado, ou seja, não poderemos mais usar a integração com o Docker diretamente de dentro de um Pod a não ser que instalemos ele manualmente.
 
 Neste mesmo artigo falei sobre o que isso significa para o ecossistema e apresentei a [Open Container Initiative (OCI)](https://opencontainers.org/), que é a responsável por criar o padrão que seguimos para que os runtimes de containers possam executar o mesmo tipo de imagem. Todas as imagens compatíveis com o OCI poderão ser executadas por qualquer runtime também compatível, isso abre portas para a criação de diferentes runtimes.
 

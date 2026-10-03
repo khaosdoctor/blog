@@ -18,7 +18,7 @@ Eu não gosto de chamar de _técnicas avançadas_, mas, na falta de um nome melh
 
 ## Satisfies
 
-Essa é uma "técnica" super recente, eu [já falei dela](/ts-satisfies/) aqui no blog antes. Eu não chamaria nem técnica porque ela é um operador novo, porém o uso desse operador é uma técnica bem interessante! Esse é o `satisfies`.
+Essa é uma "técnica" super recente, eu [[ts-satisfies|já falei dela]] aqui no blog antes. Eu não chamaria nem técnica porque ela é um operador novo, porém o uso desse operador é uma técnica bem interessante! Esse é o `satisfies`.
 
 Quando estamos lidando com tipos, um dos problemas que ocorrem frequentemente é que os tipos mais genéricos que são inferidos pelo compilador acabam por passar por cima dos tipos mais específicos que a gente quer, vamos a um exemplo que a gente já usou antes, com os pontos 3D:
 

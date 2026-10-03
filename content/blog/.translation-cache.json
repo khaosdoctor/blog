@@ -4,11 +4,11 @@
     "translatedAt": "2026-09-13T00:59:53.834Z"
   },
   "150-palestras": {
-    "sourceHash": "2d7184a578a9e4c5",
+    "sourceHash": "90b1670e6fc24996",
     "translatedAt": "2026-09-13T01:00:02.736Z"
   },
   "5-coisas-dificeis-computacao": {
-    "sourceHash": "61af0bba31c7e2e1",
+    "sourceHash": "c954c64e1c565273",
     "translatedAt": "2026-09-13T01:01:26.221Z"
   },
   "5-dicas-de-cfp": {
@@ -16,7 +16,7 @@
     "translatedAt": "2026-09-13T01:01:34.453Z"
   },
   "acessores-automaticos-com-typescript": {
-    "sourceHash": "d0f275bf58dab683",
+    "sourceHash": "9ae883566b63a210",
     "translatedAt": "2026-09-13T01:01:46.992Z"
   },
   "ambientes-dinamicos-helm-actions": {
@@ -24,11 +24,11 @@
     "translatedAt": "2026-09-13T01:03:28.495Z"
   },
   "aplicando-two-factor-authentication-no-ssh": {
-    "sourceHash": "a6be00e0dbd138dd",
+    "sourceHash": "67c0713ed1c6dfcf",
     "translatedAt": "2026-09-13T01:04:39.410Z"
   },
   "aprenda-kubernetes-no-aks": {
-    "sourceHash": "02c561e64678832e",
+    "sourceHash": "705130d7e08784de",
     "translatedAt": "2026-09-13T01:04:39.410Z"
   },
   "apresentando-o-keda-http-add-on": {
@@ -36,11 +36,11 @@
     "translatedAt": "2026-09-13T01:04:39.411Z"
   },
   "armazenando-seus-helm-charts-no-azure-container-registry": {
-    "sourceHash": "7e8781723a4cf2a3",
+    "sourceHash": "4ae5d6613f1cd40a",
     "translatedAt": "2026-09-13T01:04:39.411Z"
   },
   "array-es13": {
-    "sourceHash": "e297476969024ab3",
+    "sourceHash": "9f633d66995d1d8f",
     "translatedAt": "2026-09-13T01:05:10.861Z"
   },
   "array-groupby-stage-3": {
@@ -48,7 +48,7 @@
     "translatedAt": "2026-09-13T01:05:10.862Z"
   },
   "assertion-functions": {
-    "sourceHash": "78722d9d93e36d16",
+    "sourceHash": "764499d80457ea69",
     "translatedAt": "2026-09-13T01:05:10.862Z"
   },
   "async-iterators-js": {
@@ -56,15 +56,15 @@
     "translatedAt": "2026-08-28T01:33:56.436Z"
   },
   "atualizacao-automatica-de-so-com-unattended-upgrades": {
-    "sourceHash": "09927ea48b19e7f3",
+    "sourceHash": "e966ca11611aac8e",
     "translatedAt": "2026-09-13T01:05:10.862Z"
   },
   "azure-ad-aks": {
-    "sourceHash": "990983202d4af73e",
+    "sourceHash": "a52e584eb1edc924",
     "translatedAt": "2026-09-13T01:06:10.787Z"
   },
   "backlog-0": {
-    "sourceHash": "5ccd5a793b9c6ae4",
+    "sourceHash": "9c5cc95201d2da87",
     "translatedAt": "2026-09-13T01:06:10.787Z"
   },
   "backlog-1-o-primeiro-pc-de-todos": {
@@ -72,7 +72,7 @@
     "translatedAt": "2026-09-13T01:06:10.788Z"
   },
   "backlog-2": {
-    "sourceHash": "9bdec75b9883fd52",
+    "sourceHash": "2f283bbcc7d461cb",
     "translatedAt": "2026-09-13T01:06:10.788Z"
   },
   "backlog-3-29-anos-de-javascript": {
@@ -80,7 +80,7 @@
     "translatedAt": "2026-09-13T01:07:33.740Z"
   },
   "backlog-7-as-10-licoes-que-mudaram-a-minha-vida-como-dev-copy": {
-    "sourceHash": "456b94f8e3752b1c",
+    "sourceHash": "525a6094f16b6908",
     "translatedAt": "2026-09-13T01:07:33.740Z"
   },
   "backlog-bom-dev": {
@@ -92,7 +92,7 @@
     "translatedAt": "2026-09-13T01:07:33.741Z"
   },
   "backlog-vim": {
-    "sourceHash": "aa76bbc7fac5bed0",
+    "sourceHash": "98f0ff42d56371aa",
     "translatedAt": "2026-09-13T01:09:15.504Z"
   },
   "boas-praticas-em-projetos-harperdb-com-typescript": {
@@ -100,15 +100,15 @@
     "translatedAt": "2026-08-28T01:38:39.187Z"
   },
   "boas-praticas-ts-semana-ts-3": {
-    "sourceHash": "390d98b47418818c",
+    "sourceHash": "75370f0ce9e06a43",
     "translatedAt": "2026-09-13T01:09:15.505Z"
   },
   "comecando-com-o-node-js-test-runner": {
-    "sourceHash": "9446c0e203597e50",
+    "sourceHash": "142f351648eb25f6",
     "translatedAt": "2026-09-13T01:09:15.505Z"
   },
   "compatilhamento-de-tipos-com-typescript": {
-    "sourceHash": "900e32bd257462e3",
+    "sourceHash": "122edec592730fdb",
     "translatedAt": "2026-09-13T01:09:15.505Z"
   },
   "conheca-o-github-container-registry": {
@@ -120,7 +120,7 @@
     "translatedAt": "2026-09-13T01:36:47.600Z"
   },
   "criando-e-gerenciando-usuarios-no-kubernetes": {
-    "sourceHash": "f562a4921ea19dab",
+    "sourceHash": "8d24016a45c686f1",
     "translatedAt": "2026-09-13T01:36:47.603Z"
   },
   "criando-uma-vpn": {
@@ -136,23 +136,23 @@
     "translatedAt": "2026-08-28T01:00:15.010Z"
   },
   "dando-permissoes-a-usuarios-com-kubernetes": {
-    "sourceHash": "5c122f04832eae94",
+    "sourceHash": "a224730b155519ed",
     "translatedAt": "2026-09-13T01:36:47.601Z"
   },
   "deno": {
-    "sourceHash": "e162c215181855bb",
+    "sourceHash": "29784284f5309ae0",
     "translatedAt": "2026-09-13T01:36:47.602Z"
   },
   "deno-1-38": {
-    "sourceHash": "93dd1c4e3db0e42d",
+    "sourceHash": "8de885891e3afe66",
     "translatedAt": "2026-09-13T01:36:47.603Z"
   },
   "deno-2": {
-    "sourceHash": "c2c2f6cfd79178bd",
+    "sourceHash": "ee8498dbed10416a",
     "translatedAt": "2026-09-13T01:36:47.602Z"
   },
   "deno-cron": {
-    "sourceHash": "29d2ac8dd1d95c9c",
+    "sourceHash": "c09c30618ae90b3d",
     "translatedAt": "2026-09-13T01:36:47.598Z"
   },
   "deno-kv": {
@@ -160,19 +160,19 @@
     "translatedAt": "2026-09-13T01:36:47.601Z"
   },
   "deno-kv-beta": {
-    "sourceHash": "b1c65c36b4dd2d3f",
+    "sourceHash": "3b8ed56fad62a33e",
     "translatedAt": "2026-09-13T01:36:47.605Z"
   },
   "deno-kv-chega-ao-npm": {
-    "sourceHash": "23db9c0a39b6ff07",
+    "sourceHash": "28413d89e6fea0e5",
     "translatedAt": "2026-09-13T01:36:47.602Z"
   },
   "deno-kv-queues": {
-    "sourceHash": "7fe7175af44adfb3",
+    "sourceHash": "7fcbf4f512ac3e53",
     "translatedAt": "2026-09-13T01:36:47.604Z"
   },
   "deno-kv-watch": {
-    "sourceHash": "758612bf875bd58d",
+    "sourceHash": "1b560d409269ab01",
     "translatedAt": "2026-09-13T01:36:47.603Z"
   },
   "deploy-de-imagens-docker-do-vscode-para-a-azure": {
@@ -192,7 +192,7 @@
     "translatedAt": "2026-09-13T01:36:47.604Z"
   },
   "docker-gremlin": {
-    "sourceHash": "3c016d74b467dfe5",
+    "sourceHash": "2784bc43577192ca",
     "translatedAt": "2026-09-13T01:36:47.604Z"
   },
   "docker-registry-local": {
@@ -200,7 +200,7 @@
     "translatedAt": "2026-09-13T01:36:47.604Z"
   },
   "dockersp-entendendo-o-ecossistema-de-containers-alem-do-docker": {
-    "sourceHash": "35bf013d5eb25eec",
+    "sourceHash": "aea4caabd5c5e2e8",
     "translatedAt": "2026-09-13T01:36:47.604Z"
   },
   "dotenv-nodejs": {
@@ -212,19 +212,19 @@
     "translatedAt": "2026-09-13T01:36:47.606Z"
   },
   "drop-o-jeito-mais-simples-de-aprender-kubernetes": {
-    "sourceHash": "51a177423930943e",
+    "sourceHash": "50446eb3bb198eb8",
     "translatedAt": "2026-09-13T01:36:47.605Z"
   },
   "ecma-2023": {
-    "sourceHash": "0c0bb9713261e17e",
+    "sourceHash": "62fd2417667da551",
     "translatedAt": "2026-09-13T01:36:47.608Z"
   },
   "ecma-2024": {
-    "sourceHash": "9dfc522a70b129f6",
+    "sourceHash": "25891bfc7e58fd01",
     "translatedAt": "2026-09-13T01:36:47.605Z"
   },
   "ecma-2024-sets": {
-    "sourceHash": "0fbf449c8e64facd",
+    "sourceHash": "5bb83f923e27b9c7",
     "translatedAt": "2026-09-13T01:36:47.605Z"
   },
   "entenda-a-comunicacao-entre-servicos-com-grpc-no-do-while-2020": {
@@ -232,7 +232,7 @@
     "translatedAt": "2026-09-13T01:36:47.606Z"
   },
   "entenda-o-que-e-as-const-no-typescript": {
-    "sourceHash": "05221106fc4f4e0a",
+    "sourceHash": "8f659e48f46c3811",
     "translatedAt": "2026-09-13T01:36:47.605Z"
   },
   "entendendo-maps-no-javascript": {
@@ -240,7 +240,7 @@
     "translatedAt": "2026-08-28T20:19:24.725Z"
   },
   "entendendo-runtimes-de-containers": {
-    "sourceHash": "a1c6074dbfe61ec2",
+    "sourceHash": "d4759f5ab4980ab1",
     "translatedAt": "2026-09-13T01:36:47.606Z"
   },
   "entendendo-threading-no-node-js-com-rodrigo-branas": {
@@ -252,7 +252,7 @@
     "translatedAt": "2026-09-13T01:36:47.608Z"
   },
   "enums-no-typescript": {
-    "sourceHash": "13f1490ff8ffe21d",
+    "sourceHash": "da5f22912a3db611",
     "translatedAt": "2026-09-13T01:36:47.608Z"
   },
   "error-cause": {
@@ -268,7 +268,7 @@
     "translatedAt": "2026-09-13T01:36:47.607Z"
   },
   "faca-codigo-em-qualquer-lugar-com-os-codespaces": {
-    "sourceHash": "4def5578816b2997",
+    "sourceHash": "e5b81d5c1e2d0e2b",
     "translatedAt": "2026-09-13T01:36:47.609Z"
   },
   "filtrando-classes-e-metodos-de-um-tipo-no-typescript": {
@@ -280,11 +280,11 @@
     "translatedAt": "2026-09-13T01:36:47.607Z"
   },
   "grpc-com-node-js-no-enterjs-2020": {
-    "sourceHash": "fa082b67a8d7c579",
+    "sourceHash": "f59581f736cf98f8",
     "translatedAt": "2026-09-13T01:36:47.607Z"
   },
   "guia-grpc-1": {
-    "sourceHash": "91fe0bcbdbcea313",
+    "sourceHash": "5bd810ad431c4d63",
     "translatedAt": "2026-09-13T01:36:47.611Z"
   },
   "harperdb-kubernetes": {
@@ -312,7 +312,7 @@
     "translatedAt": "2026-09-13T01:36:47.610Z"
   },
   "integrando-containers-na-sua-aplicacao-com-containerd": {
-    "sourceHash": "9bc166e49b5401e5",
+    "sourceHash": "5c0d06e4b36232a5",
     "translatedAt": "2026-09-13T01:36:47.612Z"
   },
   "interfaces-estaticas-typescript": {
@@ -324,23 +324,23 @@
     "translatedAt": "2026-09-13T01:36:47.610Z"
   },
   "jest-com-typescript": {
-    "sourceHash": "603435b2fe1238c5",
+    "sourceHash": "b75fa415b63f62c5",
     "translatedAt": "2026-09-13T01:36:47.609Z"
   },
   "js-2025": {
-    "sourceHash": "ebcfcddb77b98383",
+    "sourceHash": "ed3ee1f9a0b42f6e",
     "translatedAt": "2026-09-13T01:36:47.610Z"
   },
   "js-2025-de-novo": {
-    "sourceHash": "22a8bfd0bf2f4bef",
+    "sourceHash": "18324ae9cf8cea9c",
     "translatedAt": "2026-09-13T01:36:47.609Z"
   },
   "js-signals": {
-    "sourceHash": "72a4b0ec42689fa9",
+    "sourceHash": "c420576ac41cb619",
     "translatedAt": "2026-09-13T01:36:47.610Z"
   },
   "js-tipos-proposal": {
-    "sourceHash": "1853dd2e3810e852",
+    "sourceHash": "77360d61cd4ff9d8",
     "translatedAt": "2026-09-13T01:36:47.610Z"
   },
   "jwt-seguro": {
@@ -352,7 +352,7 @@
     "translatedAt": "2026-09-13T01:36:47.611Z"
   },
   "kv-atomic-ops": {
-    "sourceHash": "8a17e594cba16e01",
+    "sourceHash": "7d9fb6bfa5b4046c",
     "translatedAt": "2026-09-13T01:36:47.611Z"
   },
   "maratona-full-cycle-4-0": {
@@ -364,7 +364,7 @@
     "translatedAt": "2026-09-13T01:36:47.614Z"
   },
   "metricas-customizadas-com-aks": {
-    "sourceHash": "c0971ccaff4d0efb",
+    "sourceHash": "d8e7ed7c6da4005a",
     "translatedAt": "2026-09-13T01:36:47.613Z"
   },
   "microsoft-reactor-workshop-de-aks-com-virtual-nodes-e-aks-com-github-actions": {
@@ -376,15 +376,15 @@
     "translatedAt": "2026-08-17T22:56:12.822Z"
   },
   "mocks-no-core-do-node-js": {
-    "sourceHash": "1780b7d69d5f9813",
+    "sourceHash": "db177b2b59d93a6f",
     "translatedAt": "2026-09-13T01:36:47.613Z"
   },
   "module-expressions-js": {
-    "sourceHash": "639ada518de111a6",
+    "sourceHash": "8ff4dc823bdec52d",
     "translatedAt": "2026-09-13T01:36:47.612Z"
   },
   "nao-so-de-docker-vivem-os-containers": {
-    "sourceHash": "dacaf2dc17ab59e0",
+    "sourceHash": "cb328986b3537661",
     "translatedAt": "2026-09-13T01:36:47.611Z"
   },
   "negociacao-salarial-para-devs-o-que-eu-queria-saber": {
@@ -392,43 +392,43 @@
     "translatedAt": "2026-09-13T01:36:47.611Z"
   },
   "news-js-2022": {
-    "sourceHash": "ec4b094b42a74ceb",
+    "sourceHash": "5e08b594ab7236ab",
     "translatedAt": "2026-09-13T01:36:47.612Z"
   },
   "node-18": {
-    "sourceHash": "99ace6b05cd88f07",
+    "sourceHash": "8b20630cb7f8fb69",
     "translatedAt": "2026-09-13T01:36:47.614Z"
   },
   "node-20": {
-    "sourceHash": "b94849cb21a3367b",
+    "sourceHash": "b891faec7178a833",
     "translatedAt": "2026-09-13T01:36:47.612Z"
   },
   "node-21": {
-    "sourceHash": "0ebb2c310c4931c7",
+    "sourceHash": "b97ecfacfbd14c50",
     "translatedAt": "2026-09-13T01:36:47.612Z"
   },
   "node-21-2": {
-    "sourceHash": "592606ba448e7e20",
+    "sourceHash": "90aeaba4008dbfda",
     "translatedAt": "2026-09-13T01:36:47.613Z"
   },
   "node-test-runner": {
-    "sourceHash": "8ea2ac8b6042cd20",
+    "sourceHash": "963ee650a74e308b",
     "translatedAt": "2026-09-13T01:36:47.614Z"
   },
   "node-test-runner-mocks": {
-    "sourceHash": "1959c26db71bd08f",
+    "sourceHash": "aa8d08ccf39dd170",
     "translatedAt": "2026-09-13T01:36:47.614Z"
   },
   "novidades-do-deno-1-4": {
-    "sourceHash": "a017d37f534d7801",
+    "sourceHash": "7afa419e4a37c8b5",
     "translatedAt": "2026-09-13T01:36:47.613Z"
   },
   "novidades-no-typescript-5-0": {
-    "sourceHash": "f43ee302174683b1",
+    "sourceHash": "321aa3d866f5a1e5",
     "translatedAt": "2026-09-13T01:36:47.613Z"
   },
   "novidades-no-typescript-5-4-beta": {
-    "sourceHash": "ded9a470e8bbb5f8",
+    "sourceHash": "cad9a110da745c10",
     "translatedAt": "2026-09-13T01:36:47.613Z"
   },
   "novos-tipos-js": {
@@ -448,27 +448,27 @@
     "translatedAt": "2026-09-13T01:36:47.614Z"
   },
   "o-conceito-de-referencia-e-valor-no-javascript": {
-    "sourceHash": "4f1602109560ac51",
+    "sourceHash": "09a892086bd191bc",
     "translatedAt": "2026-09-13T01:37:57.731Z"
   },
   "o-futuro-do-js": {
-    "sourceHash": "201214d1e07628e4",
+    "sourceHash": "b33534659b413e2f",
     "translatedAt": "2026-09-13T01:36:47.614Z"
   },
   "o-guia-do-grpc-2": {
-    "sourceHash": "928a350092db6fcc",
+    "sourceHash": "afacb74d81fd12a9",
     "translatedAt": "2026-09-13T01:36:47.615Z"
   },
   "o-guia-do-grpc-3": {
-    "sourceHash": "8c33c22004916954",
+    "sourceHash": "e766dc95d45f7250",
     "translatedAt": "2026-09-13T01:36:47.615Z"
   },
   "o-guia-do-grpc-4": {
-    "sourceHash": "6fa2e1d713a6bc28",
+    "sourceHash": "a26246a03530f3d6",
     "translatedAt": "2026-09-13T01:36:47.615Z"
   },
   "o-nodejs-agora-roda-typescript-nativamente": {
-    "sourceHash": "175c240969cb5d48",
+    "sourceHash": "1f5c5c13dee08dde",
     "translatedAt": "2026-09-13T01:36:47.615Z"
   },
   "o-que-aconteceu-com-devs": {
@@ -520,11 +520,11 @@
     "translatedAt": "2026-09-13T01:36:47.617Z"
   },
   "pipeline-operators-javascript": {
-    "sourceHash": "c3cf47248a0c7390",
+    "sourceHash": "6c8f4a9bcf0e85aa",
     "translatedAt": "2026-09-13T01:36:47.616Z"
   },
   "podcast-faladev-vamos-falar-de-microsservicos": {
-    "sourceHash": "0dd40c9e5caa51fe",
+    "sourceHash": "16173567b9cd49d8",
     "translatedAt": "2026-09-13T01:36:47.616Z"
   },
   "por-que-black-fridays-dao-errado": {
@@ -540,7 +540,7 @@
     "translatedAt": "2026-09-13T01:36:47.616Z"
   },
   "por-que-nao-usar-date-now": {
-    "sourceHash": "4ed67405e14c4fc8",
+    "sourceHash": "2a0eb58334759484",
     "translatedAt": "2026-09-13T01:36:47.618Z"
   },
   "programacao-orientada-a-tipos-semanats-dia-5": {
@@ -560,11 +560,11 @@
     "translatedAt": "2026-08-17T22:56:12.934Z"
   },
   "saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd": {
-    "sourceHash": "a35798e7c7bb0e08",
+    "sourceHash": "881209f8f9154d50",
     "translatedAt": "2026-09-13T01:36:47.617Z"
   },
   "semana-ts-2": {
-    "sourceHash": "c73163acd969a656",
+    "sourceHash": "19de255fc9c41153",
     "translatedAt": "2026-09-13T01:36:47.619Z"
   },
   "sera-este-o-fim-das-pessoas-desenvolvedoras-chegamos-ao-limite-do-desenvolvimento-de-software": {
@@ -580,7 +580,7 @@
     "translatedAt": "2026-09-13T01:36:47.618Z"
   },
   "slopware": {
-    "sourceHash": "0567d82bef438038",
+    "sourceHash": "40b49b96a5f0b863",
     "translatedAt": "2026-09-13T01:36:47.620Z"
   },
   "somos-4k-muito-obrigado": {
@@ -588,7 +588,7 @@
     "translatedAt": "2026-09-13T01:36:47.618Z"
   },
   "tecnicas-avancadas-com-typescript-semanats-dia-4": {
-    "sourceHash": "79b5ae64c592937d",
+    "sourceHash": "7675a50a07fcd5ee",
     "translatedAt": "2026-09-13T01:36:47.620Z"
   },
   "telegram-grammy-bot": {
@@ -600,11 +600,11 @@
     "translatedAt": "2026-09-13T01:36:47.620Z"
   },
   "timers-abort-controllers": {
-    "sourceHash": "89b6c504ef9c6959",
+    "sourceHash": "105c632f140b86a2",
     "translatedAt": "2026-09-13T01:36:47.620Z"
   },
   "tipos-derivados": {
-    "sourceHash": "2249c428ef07f71b",
+    "sourceHash": "6c136add460b39a9",
     "translatedAt": "2026-09-13T01:36:47.619Z"
   },
   "tornando-o-vscode-o-seu-unico-ambiente-de-desenvolvimento-com-docker-e-kubernetes": {
@@ -612,11 +612,11 @@
     "translatedAt": "2026-09-13T01:36:47.618Z"
   },
   "ts-5-3-beta": {
-    "sourceHash": "c9d8b59ae1de38bd",
+    "sourceHash": "88055e68daf6e714",
     "translatedAt": "2026-09-13T01:36:47.619Z"
   },
   "ts-53-alpha": {
-    "sourceHash": "c4b78ab6abf6bc46",
+    "sourceHash": "246af028b22b595b",
     "translatedAt": "2026-09-13T01:36:47.619Z"
   },
   "ts-configs-semana-ts-1": {
@@ -640,7 +640,7 @@
     "translatedAt": "2026-08-28T20:40:27.376Z"
   },
   "type-testing": {
-    "sourceHash": "b673476952f081bc",
+    "sourceHash": "13d97b9cd5a1587a",
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "types-versus-interfaces-no-typescript-em-2024": {
@@ -652,15 +652,15 @@
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "typescript-47": {
-    "sourceHash": "afaf1dd993e1c300",
+    "sourceHash": "9bfbb457c77c8dc3",
     "translatedAt": "2026-09-13T01:36:47.622Z"
   },
   "typescript-5": {
-    "sourceHash": "142c3a472ca2b5a7",
+    "sourceHash": "fc1de4cd0133312e",
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "typescript-55": {
-    "sourceHash": "554cd6f6f00b5a02",
+    "sourceHash": "4f962bb9842a9fbb",
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "um-mergulho-em-imagens-de-containers-parte-1": {
@@ -668,15 +668,15 @@
     "translatedAt": "2026-09-13T01:36:47.622Z"
   },
   "um-mergulho-em-imagens-de-containers-parte-2": {
-    "sourceHash": "59b790a5a1df9414",
+    "sourceHash": "949ab4cc6554ae28",
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "um-mergulho-em-imagens-de-containers-parte-3": {
-    "sourceHash": "e05bae7c9e87e8ac",
+    "sourceHash": "a9bcd85b32c91fa2",
     "translatedAt": "2026-09-13T01:36:47.621Z"
   },
   "uma-introducao-a-service-mesh-com-linkerd": {
-    "sourceHash": "aabfa760ed136e12",
+    "sourceHash": "f08de7e5cbdbbcee",
     "translatedAt": "2026-09-13T01:36:47.622Z"
   },
   "v8-sparkplug": {

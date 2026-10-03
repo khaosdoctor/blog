@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-In the [previous article](/comecando-com-o-node-js-test-runner/) I showed how we can start using the **Node.js Test Runner**. Now, how do we do more than just "get started" with the Node.js Test Runner?
+In the [[comecando-com-o-node-js-test-runner|previous article]] I showed how we can start using the **Node.js Test Runner**. Now, how do we do more than just "get started" with the Node.js Test Runner?
 
 After getting feedback from students and readers, many people asked me to continue because there isn't much content about the test runner in Portuguese, so let's keep going! I'll try to write several articles, not necessarily connected, about what I cover with NTR and how we can solve some common cases using it.
 

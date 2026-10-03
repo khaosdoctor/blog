@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-We [recently](/service-mesh-1/) discussed **Service Mesh** and how this architectural pattern can save your project by giving it more observability and ease of use.
+We [[service-mesh-1|recently]] discussed **Service Mesh** and how this architectural pattern can save your project by giving it more observability and ease of use.
 
 We talked about Service Mesh in a very conceptual way. Now let's get hands-on and create our own mesh using [Linkerd](https://linkerd.io/)!
 

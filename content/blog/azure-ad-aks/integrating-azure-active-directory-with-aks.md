@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-We've already gone through articles on [how to create users](/criando-e-gerenciando-usuarios-no-kubernetes/) and also how to assign [permissions to these users using RBAC](/dando-permissoes-a-usuarios-com-kubernetes/). But using Kubernetes to handle user management, while simple, isn't very practical precisely because of the distributed nature of clusters.
+We've already gone through articles on [[criando-e-gerenciando-usuarios-no-kubernetes|how to create users]] and also how to assign [[dando-permissoes-a-usuarios-com-kubernetes|permissions to these users using RBAC]]. But using Kubernetes to handle user management, while simple, isn't very practical precisely because of the distributed nature of clusters.
 
 When we create a cluster, there are two security best practices we should consider. The first is the control you have over Azure's own resources, like the cluster itself and every object inside its resource group. The other best practice is the control over what your users can do and see inside that cluster.
 

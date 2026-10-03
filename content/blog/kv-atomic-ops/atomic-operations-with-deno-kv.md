@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-In [another article](/deno-kv-beta/) we discussed the new closed beta version of Deno KV and also talked about the concept of key and value. But unfortunately, since the article was already quite large, some things were left out, one of those things was the incredible atomicity capability of KV.
+In [[deno-kv-beta|another article]] we discussed the new closed beta version of Deno KV and also talked about the concept of key and value. But unfortunately, since the article was already quite large, some things were left out, one of those things was the incredible atomicity capability of KV.
 
 But what does it mean to be atomic? And what does that mean in the context of a key-value database like this?
 

@@ -12,13 +12,13 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-Deno has reached [version 1.40](https://deno.com/blog/v1.40) and this is one of the coolest versions yet! First, because it includes the addition of the [Temporal API](/temporal-api/) that I've been talking about here since 2020! And I think it's the first runtime to actually implement this functionality!
+Deno has reached [version 1.40](https://deno.com/blog/v1.40) and this is one of the coolest versions yet! First, because it includes the addition of the [[temporal-api|Temporal API]] that I've been talking about here since 2020! And I think it's the first runtime to actually implement this functionality!
 
 Beyond that, a series of other features that I'll go through here one by one!
 
 ## Temporal API
 
-The Temporal API is the new way to handle dates in JavaScript. I talked a lot about it in [this article](/temporal-api/) and showed all the details, so I won't go into too much detail here, but essentially, Deno is the first runtime to implement this API completely.
+The Temporal API is the new way to handle dates in JavaScript. I talked a lot about it in [[temporal-api|this article]] and showed all the details, so I won't go into too much detail here, but essentially, Deno is the first runtime to implement this API completely.
 
 It's still behind an `--unstable-temporal` flag, but you can already use it the way the [official documentation](https://tc39.es/proposal-temporal/docs/) describes! If you run a terminal with `deno --unstable-temporal`, you can already do some tests:
 
@@ -70,7 +70,7 @@ console.log(import.meta.filename) // /Users/lucas/repos/deno/teste.ts
 
 ## Decorators
 
-Finally we're going to have native support for [decorators](/javascript-decorators/), a proposal that's in final stage and should arrive in browsers soon! After more than 5 years of waiting, the new proposal combines all the previous proposals into one.
+Finally we're going to have native support for [[javascript-decorators|decorators]], a proposal that's in final stage and should arrive in browsers soon! After more than 5 years of waiting, the new proposal combines all the previous proposals into one.
 
 A classic example we can give is `@trace`, which is used to debug any function by logging to the console before and after execution:
 

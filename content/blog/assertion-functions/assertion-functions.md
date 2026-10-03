@@ -15,7 +15,7 @@ Recentemente vi um pessoal postando uma "novidade":
 
 No canal dele, o Primeagen mostrou como se faz o que ele chamou de "negative space programming", fico feliz que esse assunto tenha aparecido em canais grandes, mas essa técnica não é nova, existe há muitos e muitos anos, inclusive o próprio TypeScript tem uma função que faz exatamente isso, só que com tipos.[^n1]
 
-Assertion functions são parte de um conjunto chamado de **Type Guards**. Junto com os [enums](/enums-no-typescript/), essas duas funções são uma das poucas que fazem o TypeScript sair do mundo da compilação e ir para o mundo do runtime, ou seja, o código que você escreve ali é, de fato, executado em runtime.
+Assertion functions são parte de um conjunto chamado de **Type Guards**. Junto com os [[enums-no-typescript|enums]], essas duas funções são uma das poucas que fazem o TypeScript sair do mundo da compilação e ir para o mundo do runtime, ou seja, o código que você escreve ali é, de fato, executado em runtime.
 
 ## Type Guards e branded types
 
@@ -109,7 +109,7 @@ Além dos type guards, temos uma outra variação que é tão importante quanto.
 
 ## Assertion functions
 
-Funções de asserção são exatamente o tipo de técnica que ele está usando no corte que deixei no início do artigo. No JavaScript normal, isso é traduzido para o uso de `assert` (que no caso, ele importou do módulo `node:console` mas ele existe em um módulo a parte, o `node:assert`, que falei no [artigo sobre o Node Test Runner](/comecando-com-o-node-js-test-runner/))
+Funções de asserção são exatamente o tipo de técnica que ele está usando no corte que deixei no início do artigo. No JavaScript normal, isso é traduzido para o uso de `assert` (que no caso, ele importou do módulo `node:console` mas ele existe em um módulo a parte, o `node:assert`, que falei no [[comecando-com-o-node-js-test-runner|artigo sobre o Node Test Runner]])
 
 A ideia é que, ao invés de retornar um boolean, nós não retornamos, vamos parar a execução do programa e lançar uma exceção porque esse é um valor inesperado. Ela é uma variação dos type guards, porém de forma mais estrita.
 

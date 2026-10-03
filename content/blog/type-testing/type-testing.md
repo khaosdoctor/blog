@@ -74,7 +74,7 @@ Mas o vitest não é o único que faz isso. Outra lib muito interessante que é 
 
 ## TSD
 
-O [TSD](https://github.com/SamVerschueren/tsd) é uma biblioteca de testes de tipos focada especificamente em testar arquivos de declaração `.d.ts` (a gente falou sobre eles na [#SemanaTS](/semana-ts-2/)). A grande ideia desse pacote é que você pode usá-lo como se fosse o compilador nativo do TypeScript, porém com uma vantagem: seu código não vai ser executado de forma alguma.
+O [TSD](https://github.com/SamVerschueren/tsd) é uma biblioteca de testes de tipos focada especificamente em testar arquivos de declaração `.d.ts` (a gente falou sobre eles na [[semana-ts-2|#SemanaTS]]). A grande ideia desse pacote é que você pode usá-lo como se fosse o compilador nativo do TypeScript, porém com uma vantagem: seu código não vai ser executado de forma alguma.
 
 Ele procura arquivos com a extensão `.test-d.ts`, esses arquivos não são executados e muito menos compilados da forma nativa. O que vai acontecer é que o TSD vai procurar por asserções como `expectError` ou `expectType` e analisar o resultado delas contra os tipos que você escreveu no seu arquivo original.
 

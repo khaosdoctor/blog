@@ -11,11 +11,11 @@ description: "Como construir uma imagem rápida, leve e eficiente para a sua apl
 heroImage: "./cover.png"
 draft: false
 ---
-No [artigo anterior](/um-mergulho-em-imagens-de-containers-parte-2/) falamos como podemos criar uma imagem Docker da melhor maneira para linguagens consideradas estáticas, como o C ou o Go. Neste artigo vamos explorar um pouco mais a criação de imagens utilizando linguagens **dinâmicas**, como o Python ou o JavaScript.
+No [[um-mergulho-em-imagens-de-containers-parte-2|artigo anterior]] falamos como podemos criar uma imagem Docker da melhor maneira para linguagens consideradas estáticas, como o C ou o Go. Neste artigo vamos explorar um pouco mais a criação de imagens utilizando linguagens **dinâmicas**, como o Python ou o JavaScript.
 
 ## Adeus Imagens Scratch
 
-Como falamos lá no [primeiro artigo](/um-mergulho-em-imagens-de-containers-parte-1/), temos um tipo de imagem chamada **scratch**, que é uma imagem completamente vazia, realmente so um filesystem vazio. Utilizamos este tipo de imagem para construir nosso container no artigo anterior.
+Como falamos lá no [[um-mergulho-em-imagens-de-containers-parte-1|primeiro artigo]], temos um tipo de imagem chamada **scratch**, que é uma imagem completamente vazia, realmente so um filesystem vazio. Utilizamos este tipo de imagem para construir nosso container no artigo anterior.
 
 Porém, a péssima notícia é que não podemos utilizar este tipo de imagem para poder criar nossos containers dinâmicos, pois vamos precisar do runtime da linguagem instalado no sistema operacional, então vamos estar utilizando somente as imagens **full**, **slim** e **alpine**.
 

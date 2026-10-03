@@ -21,7 +21,7 @@ In this video I explain a bit more about the process of releasing new JavaScript
 
 Most of these changes are documented in TC39 notes, the _technical committee #39_, which is the technical committee that evaluates and discusses the future of the language specifically. These notes are public and you can view all of them in the [official committee repository](https://github.com/tc39/notes/tree/main/meetings/2023-03).
 
-Just as I do with other technologies, JS is no different! In [2022](/news-js-2022/) I published an article about that year's news and even dared to [predict what would come this year](/o-futuro-do-js/). Was I right?
+Just as I do with other technologies, JS is no different! In [[news-js-2022|2022]] I published an article about that year's news and even dared to [[o-futuro-do-js|predict what would come this year]]. Was I right?
 
 ## Array.findLast
 
@@ -217,6 +217,6 @@ console.log(weak.get(key));
 
 ## Conclusion
 
-Many of the features I predicted in my [last article](/o-futuro-do-js/) ended up being promoted to higher stages or discarded, some even got dedicated articles, while others remain exactly as they were a year ago.
+Many of the features I predicted in my [[o-futuro-do-js|last article]] ended up being promoted to higher stages or discarded, some even got dedicated articles, while others remain exactly as they were a year ago.
 
 This specification update doesn't touch much of what we use day-to-day, but it promises to be a great quality-of-life improvement for those using more specialized features that can certainly have a significant impact on efficiency and performance.

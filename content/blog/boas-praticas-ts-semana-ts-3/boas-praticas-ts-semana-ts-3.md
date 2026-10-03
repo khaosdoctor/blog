@@ -193,7 +193,7 @@ No nosso retorno estamos especificamente dizendo que a função vai sempre retor
 
 ![](./image-79.png)
 
-Podemos usar várias outras técnicas pra deixar a função completamente TypeSafe. Dentre elas o uso do `infer` (que eu já expliquei [aqui](/infer-typescript/)), faz um type narrowing no nosso generic para garantir que só vamos usar números maiores que zero:
+Podemos usar várias outras técnicas pra deixar a função completamente TypeSafe. Dentre elas o uso do `infer` (que eu já expliquei [[infer-typescript|aqui]]), faz um type narrowing no nosso generic para garantir que só vamos usar números maiores que zero:
 
 ![](./image-80.png)
 

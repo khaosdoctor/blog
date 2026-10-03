@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 heroImageAlt: "Um alvo cheio de dardos verdes e vermelhos"
 draft: false
 ---
-Como eu já mencionei [nesse outro artigo](/node-18/), o Node.js 18 veio cheio de novidades, entre eles a disponibilidade global do comando `fetch` e o começo da adoção do prefixo `node:` para importação de módulos do sistema que, inclusive, vamos precisar usar para falar de outra adição: o **test runner** nativo do sistema.
+Como eu já mencionei [[node-18|nesse outro artigo]], o Node.js 18 veio cheio de novidades, entre eles a disponibilidade global do comando `fetch` e o começo da adoção do prefixo `node:` para importação de módulos do sistema que, inclusive, vamos precisar usar para falar de outra adição: o **test runner** nativo do sistema.
 
 ## O que é um test runner
 

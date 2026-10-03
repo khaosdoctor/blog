@@ -18,7 +18,7 @@ Recently I saw some folks posting a "new thing":
 
 On his channel, Primeagen showed how to do what he called "negative space programming". I'm glad this subject showed up on big channels, but this technique isn't new, it's been around for many, many years, and TypeScript itself has a function that does exactly this, only with types.[^n1]
 
-Assertion functions are part of a set called **Type Guards**. Together with [enums](/enums-no-typescript/), these two functions are some of the few that take TypeScript out of the compilation world and into the runtime world, meaning the code you write there is, in fact, executed at runtime.
+Assertion functions are part of a set called **Type Guards**. Together with [[enums-no-typescript|enums]], these two functions are some of the few that take TypeScript out of the compilation world and into the runtime world, meaning the code you write there is, in fact, executed at runtime.
 
 ## Type Guards and branded types
 
@@ -112,7 +112,7 @@ Besides type guards, we have another variation that is just as important. Assert
 
 ## Assertion functions
 
-Assertion functions are exactly the kind of technique he's using in the clip I left at the beginning of the article. In plain JavaScript, this translates into using `assert` (which in his case he imported from the `node:console` module, but it exists in a separate module, `node:assert`, which I talked about in the [article about the Node Test Runner](/comecando-com-o-node-js-test-runner/))
+Assertion functions are exactly the kind of technique he's using in the clip I left at the beginning of the article. In plain JavaScript, this translates into using `assert` (which in his case he imported from the `node:console` module, but it exists in a separate module, `node:assert`, which I talked about in the [[comecando-com-o-node-js-test-runner|article about the Node Test Runner]])
 
 The idea is that, instead of returning a boolean, we don't return anything, we stop the program's execution and throw an exception because this is an unexpected value. It's a variation of type guards, but stricter.
 

@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-A little over a year ago, I had the great pleasure of working on the [Node.js core](https://github.com/nodejs/node/pull/48638), and it was one of the most interesting experiences I've had. If you're using Node today, there's my code in there! I'm now returning to help grow the community around it. But what I want to tell you here is how [Date mocks](/node-test-runner-mocks/) work inside the [Node Test Runner](/comecando-com-o-node-js-test-runner/), piece by piece.
+A little over a year ago, I had the great pleasure of working on the [Node.js core](https://github.com/nodejs/node/pull/48638), and it was one of the most interesting experiences I've had. If you're using Node today, there's my code in there! I'm now returning to help grow the community around it. But what I want to tell you here is how [[node-test-runner-mocks|Date mocks]] work inside the [[comecando-com-o-node-js-test-runner|Node Test Runner]], piece by piece.
 
 The goal of this article is to document what was done in this feature, but also to show that it's not that complex to understand the open source code we have out there. You can also contribute to the project you love most.
 
@@ -760,7 +760,7 @@ runAll() { // L728
 
 ## And that's it?
 
-That was the end of the timers implementation. But the work wasn't done. Since the article is already long, I won't post much more about that. The tests for this feature were another matter entirely. In total I must have spent at least 13 hours on this project, plus about 3 months on comments, resolutions, and everything else. In the end, this feature was implemented in Node version 21.2 (there's even a [post](/node-21-2/) explaining how to use it).
+That was the end of the timers implementation. But the work wasn't done. Since the article is already long, I won't post much more about that. The tests for this feature were another matter entirely. In total I must have spent at least 13 hours on this project, plus about 3 months on comments, resolutions, and everything else. In the end, this feature was implemented in Node version 21.2 (there's even a [[node-21-2|post]] explaining how to use it).
 
 ![](./image-8.png "You can see I was pretty happy")
 

@@ -11,7 +11,7 @@ draft: false
 seoTitle: "Métricas customizadas com AKS e Azure Monitor"
 seoDescription: "Monitoramento é muito importante para aplicações distribuídas. Aprenda a criar e monitorar suas aplicações com métricas customizadas para o Azure Monitor."
 ---
-Quando trabalhamos com microsserviços, sempre ouvimos falar que o **monitoramento** e a **observabilidade** são métricas chave para que possamos ter sucesso em manter nosso ecossistema coeso, funcional e não ficarmos loucos com o que está acontecendo. Falamos isto no [podcast #FalaDev que participei junto de vários convidados](/podcast-faladev-vamos-falar-de-microsservicos/).
+Quando trabalhamos com microsserviços, sempre ouvimos falar que o **monitoramento** e a **observabilidade** são métricas chave para que possamos ter sucesso em manter nosso ecossistema coeso, funcional e não ficarmos loucos com o que está acontecendo. Falamos isto no [[podcast-faladev-vamos-falar-de-microsservicos|podcast #FalaDev que participei junto de vários convidados]].
 
 Afinal, em sistemas distribuídos, a complexidade não está na unidade, mas sim em como essas unidades interagem umas com as outras. E, se não soubermos o que está acontecendo no nosso ecossistema, não podemos diagnosticar, entender e muito menos responder a incidentes em tempo hábil.
 

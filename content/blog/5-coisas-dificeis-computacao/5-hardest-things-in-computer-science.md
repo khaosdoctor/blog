@@ -81,7 +81,7 @@ The second case is much more serious, because the contract is established, excep
 
 ![We always think the solution is to create something new our own way](./standards-2x-56de64.png)
 
-This is one of the most interesting things [gRPC](/guia-grpc-1/) tries to solve in part, mainly with the use of indexes to describe the position of fields instead of using the field name to identify the data (besides the fact that we get a big saving in space).
+This is one of the most interesting things [[guia-grpc-1|gRPC]] tries to solve in part, mainly with the use of indexes to describe the position of fields instead of using the field name to identify the data (besides the fact that we get a big saving in space).
 
 Finally, the eternal problem of _variable casing_, which will never be solved because some people prefer to use `camelCase`, while others prefer `snake_case`. In some cases, the problem runs deeper with legacy systems that don't accept different casings, in other cases we have an internal communication problem, anyway, it's the same case as tabs vs spaces (but this one at least has some kind of benefit).
 

@@ -82,7 +82,7 @@ E isso até que faz sentido, mas se a gente for na dessa de tirar o código Type
 
 ### Enums geram código em runtime
 
-Por padrão, o TS não deve gerar código em tempo de execução, mas tem algumas coisas que quebram essa regra como [decorators](/javascript-decorators/) e enums.
+Por padrão, o TS não deve gerar código em tempo de execução, mas tem algumas coisas que quebram essa regra como [[javascript-decorators|decorators]] e enums.
 
 Isso significa que o código que você vê no final não está apenas removendo o enum, mas cada enum gera um objeto JS.
 

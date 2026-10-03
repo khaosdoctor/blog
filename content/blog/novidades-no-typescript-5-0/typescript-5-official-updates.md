@@ -12,9 +12,9 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-It's official! In my [last post](/typescript-5/) on this subject, I covered the semi-official release of TS 5.0. The beta version was almost ready but still wasn't fully 100%, so I'm covering a new release here with all the official features that came out in the latest version of our blue friend!
+It's official! In my [[typescript-5|last post]] on this subject, I covered the semi-official release of TS 5.0. The beta version was almost ready but still wasn't fully 100%, so I'm covering a new release here with all the official features that came out in the latest version of our blue friend!
 
-The vast majority of the features stayed the same, so the [post](/typescript-5/) is still valid and I won't repeat myself here, but I'll show you the main differences since the RC beta and the official release.
+The vast majority of the features stayed the same, so the [[typescript-5|post]] is still valid and I won't repeat myself here, but I'll show you the main differences since the RC beta and the official release.
 
 ## Decorators
 
@@ -64,7 +64,7 @@ Basically it's a function that returns a function. The difference between the RC
 
 ## Module Resolution = Bundler
 
-Another change that was introduced in TypeScript 5.0 is actually an addition to a modification created in 4.7. In that version, the `module` key received two new options, `node16` and `nodenext` that precisely modeled how Node.js handled [ESModules](/os-ecmascript-modules-estao-aqui/). However, Node has several restrictions that don't exist in other tools, the main one being that imported files need to have the extension explicitly specified:
+Another change that was introduced in TypeScript 5.0 is actually an addition to a modification created in 4.7. In that version, the `module` key received two new options, `node16` and `nodenext` that precisely modeled how Node.js handled [[os-ecmascript-modules-estao-aqui|ESModules]]. However, Node has several restrictions that don't exist in other tools, the main one being that imported files need to have the extension explicitly specified:
 
 ```ts
 import * as utils from './utils.mjs'
@@ -94,6 +94,6 @@ Also, the migration to modules turned TS into a rocket, with performance increas
 
 All other changes remained the same, so I strongly recommend you read the original article about the changes that came in the RC, because they are very useful and can help you have more tools to build your applications.
 
-[TypeScript 5.0 Beta Features](/typescript-5/)
+[[typescript-5|TypeScript 5.0 Beta Features]]
 
 This was a short article, but worth highlighting, especially for the performance gains and notable changes in TypeScript's heart.

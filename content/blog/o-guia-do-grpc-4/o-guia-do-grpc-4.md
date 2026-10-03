@@ -169,7 +169,7 @@ Neste arquivo coloquei aproximadamente 200 notas:
 
 > Lembrando que 200 notas não é, nem de perto, uma quantidade grande de dados. Este é apenas um exemplo.
 
-Agora, carregamos o arquivo no topo do nosso servidor com `require` (lembrando que isto não funciona para [ES Modules](/os-ecmascript-modules-estao-aqui/):
+Agora, carregamos o arquivo no topo do nosso servidor com `require` (lembrando que isto não funciona para [[os-ecmascript-modules-estao-aqui|ES Modules]]:
 
 ```js
 const grpc = require('grpc')

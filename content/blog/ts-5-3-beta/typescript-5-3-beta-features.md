@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-As usual, another TypeScript version is out and I'm here to tell you more about it! This time we'll even compare it with what I proposed in the [previous article](/ts-53-alpha/) when we talked about the alpha version!
+As usual, another TypeScript version is out and I'm here to tell you more about it! This time we'll even compare it with what I proposed in the [[ts-53-alpha|previous article]] when we talked about the alpha version!
 
 Let's go!
 

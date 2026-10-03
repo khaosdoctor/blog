@@ -16,7 +16,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-We've reached the **second part of our series** on what gRPC is and how we can use it efficiently to replace what we use today with REST. In the [first part of this series](/guia-grpc-1/) I gave the full explanation of how gRPC works internally and how it's assembled in a standard HTTP/2 request with a binary payload using **protobuf** as the encoding layer.
+We've reached the **second part of our series** on what gRPC is and how we can use it efficiently to replace what we use today with REST. In the [[guia-grpc-1|first part of this series]] I gave the full explanation of how gRPC works internally and how it's assembled in a standard HTTP/2 request with a binary payload using **protobuf** as the encoding layer.
 
 In this part of the series, we'll dive into how gRPC works for **JavaScript**. Let's run through our agenda for today.
 

@@ -142,7 +142,7 @@ Another way to think about it: "don't use this parameter as a candidate for infe
 
 ## groupBy on Objects and Maps
 
-Following the grouping proposals (like the one for [Array](/array-groupby-stage-3/)), we now have the static methods `Object.groupBy` and `Map.groupBy`. They take an iterable and transform it into an object or map, grouping the values by a function you provide.
+Following the grouping proposals (like the one for [[array-groupby-stage-3|Array]]), we now have the static methods `Object.groupBy` and `Map.groupBy`. They take an iterable and transform it into an object or map, grouping the values by a function you provide.
 
 > This proposal has been on the TC39 proposals list for quite a while
 

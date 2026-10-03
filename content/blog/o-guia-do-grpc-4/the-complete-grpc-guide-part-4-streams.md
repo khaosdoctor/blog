@@ -170,7 +170,7 @@ In this file I put approximately 200 notes:
 
 > Remember that 200 notes is not, by far, a large amount of data. This is just an example.
 
-Now, we load the file at the top of our server with `require` (remember that this does not work for [ES Modules](/os-ecmascript-modules-estao-aqui/)):
+Now, we load the file at the top of our server with `require` (remember that this does not work for [[os-ecmascript-modules-estao-aqui|ES Modules]]):
 
 ```js
 const grpc = require('grpc')

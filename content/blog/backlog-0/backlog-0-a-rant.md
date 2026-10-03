@@ -25,7 +25,7 @@ I wanted to send this email now (we can call it a pre-newsletter) to tell you a 
 
 I've been creating content since 2014. That's 10 years publishing on the internet: articles, videos, podcasts, talks, appearances on other people's channels, more than 2000 pieces of content in total... Creating content is, at the same time, how I document what I learn and how I give back to the community that gave me so much. I can say, without hesitating, that I wouldn't be where I am today if it weren't for creating content.
 
-But creating content is a lot more than just writing a text, putting together an article, making a video. What you see there is the final result of many hours of work and, sometimes, years of research and experience. A lot of my articles over on my [blog](/) took hours to write – some, like the one about [RSA cryptography](/criptografia-assimetrica-com-rsa/), took days! Between researching something, summarising it, checking it, writing it, checking it again and, at the end, trying to find a way to make the content catchy but educational at the same time.
+But creating content is a lot more than just writing a text, putting together an article, making a video. What you see there is the final result of many hours of work and, sometimes, years of research and experience. A lot of my articles over on my [blog](/) took hours to write – some, like the one about [[criptografia-assimetrica-com-rsa|RSA cryptography]], took days! Between researching something, summarising it, checking it, writing it, checking it again and, at the end, trying to find a way to make the content catchy but educational at the same time.
 
 ### The salaried creator® challenge
 

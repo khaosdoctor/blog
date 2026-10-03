@@ -9,7 +9,7 @@ description: "O banco de dados mais legal do mundo acabou de chegar para os usu�
 heroImage: "./cover.png"
 draft: false
 ---
-A gente já trocou uma ideia sobre o [Deno KV aqui](/deno-kv-beta/) no passado, mas a grande diferença é que esse banco de dados só funcionava no Deno, até agora!
+A gente já trocou uma ideia sobre o [[deno-kv-beta|Deno KV aqui]] no passado, mas a grande diferença é que esse banco de dados só funcionava no Deno, até agora!
 
 A galera acabou de anunciar o [pacote do Deno KV para o NPM](https://www.npmjs.com/package/@deno/kv)! Permitindo que qualquer usuário do Node já possa utilizar o banco também, mesmo isso já sendo possível com o [binário](https://github.com/denoland/denokv) do KV sendo publicado de forma standalone.
 

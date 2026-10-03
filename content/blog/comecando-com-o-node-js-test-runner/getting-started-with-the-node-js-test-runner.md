@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-I've been talking a lot about the Test Runner in a bunch of places (including [here on the blog](/node-test-runner/)), and I recently took part in a really cool podcast with Ryan talking more about this tool that showed up not long ago and has already won everyone's heart.
+I've been talking a lot about the Test Runner in a bunch of places (including [[node-test-runner|here on the blog]]), and I recently took part in a really cool podcast with Ryan talking more about this tool that showed up not long ago and has already won everyone's heart.
 
 You can watch the video right below:
 
@@ -23,7 +23,7 @@ So what now? How do we start writing a test using the Node.js Test Runner (NTR) 
 
 ## Setting up the environment
 
-Unlike most test runners such as [Jest](/jest-com-typescript/), you don't need to install any kind of dependency to use the NTR, you just need Node.js version 20 or higher installed on your machine and you're good to go.
+Unlike most test runners such as [[jest-com-typescript|Jest]], you don't need to install any kind of dependency to use the NTR, you just need Node.js version 20 or higher installed on your machine and you're good to go.
 
 To find out whether everything is in place, run the command `node --test` in an empty folder.[^n1] Since node won't find any files, your output should look like this:
 
@@ -244,7 +244,7 @@ The Node.js Test Runner supports several coverage reporting tools, the main one 
 
 ## TypeScript
 
-One of the coolest things about the Node.js Test Runner is the direct integration with TypeScript through _loaders_ (now called _importers_), like [TSX](/tsx-loader/) (which I've also written about [here](/tsx-loader/)).
+One of the coolest things about the Node.js Test Runner is the direct integration with TypeScript through _loaders_ (now called _importers_), like [[tsx-loader|TSX]] (which I've also written about [[tsx-loader|here]]).
 
 To get the TS integration going, let's set it up in the project, first we install the two dependencies:
 

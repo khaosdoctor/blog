@@ -21,7 +21,7 @@ I don't like calling them _advanced techniques_, but lacking a better name to de
 
 ## Satisfies
 
-This is a super recent "technique", I [already talked about it](/ts-satisfies/) here on the blog before. I wouldn't even call it a technique because it's a new operator, but the use of this operator is quite an interesting technique! This is `satisfies`.
+This is a super recent "technique", I [[ts-satisfies|already talked about it]] here on the blog before. I wouldn't even call it a technique because it's a new operator, but the use of this operator is quite an interesting technique! This is `satisfies`.
 
 When we are dealing with types, one of the problems that frequently occurs is that the more generic types inferred by the compiler end up overriding the more specific types we want. Let's look at an example we already used, with 3D points:
 

@@ -21,7 +21,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-About 6 months ago I decided it was time to drop the fussiness, leave behind my long-time editor (VSCode) and start using this famous **Vim** everyone talks about. When I finished configuring it and was happy with my initial progress, I wrote [this article](/instalando-e-configurando-o-neovim/). In it, I documented most of my journey through the installation and my first impressions of Vim, but I didn't want to go too deep into actually using it because I hadn't used the editor long enough to have opinions (or statistics) about it.
+About 6 months ago I decided it was time to drop the fussiness, leave behind my long-time editor (VSCode) and start using this famous **Vim** everyone talks about. When I finished configuring it and was happy with my initial progress, I wrote [[instalando-e-configurando-o-neovim|this article]]. In it, I documented most of my journey through the installation and my first impressions of Vim, but I didn't want to go too deep into actually using it because I hadn't used the editor long enough to have opinions (or statistics) about it.
 
 Now it's different. After 6 months using **only** Neovim as my main editor (in reality, as my only editor) I want to break down everything I learned, what I gained, what I lost, what I liked the most and what I found strange in this new experience.
 

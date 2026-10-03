@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-In another [article here on the blog](/comecando-com-o-node-js-test-runner/) I talked about how we get started with the Node.js Test Runner to write our tests. Many people have sent me messages asking what the difference is between Node Test Runner and [Jest](https://jestjs.io), and how we can get started with Jest and TypeScript.
+In another [[comecando-com-o-node-js-test-runner|article here on the blog]] I talked about how we get started with the Node.js Test Runner to write our tests. Many people have sent me messages asking what the difference is between Node Test Runner and [Jest](https://jestjs.io), and how we can get started with Jest and TypeScript.
 
 Since this is a topic I constantly have to look up too, because the ways to do this change every day, I'll create this article with what **I think** is the most common way to do it and with the fewest steps possible.
 
@@ -142,7 +142,7 @@ const config: JestConfigWithTsJest = {
 export default config;
 ```
 
-Now, if we run our test, it will work normally. But what if we make a small change and want to use [ESM](/os-ecmascript-modules-estao-aqui/)?
+Now, if we run our test, it will work normally. But what if we make a small change and want to use [[os-ecmascript-modules-estao-aqui|ESM]]?
 
 ## Using ESModules
 

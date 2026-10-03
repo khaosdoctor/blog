@@ -61,7 +61,7 @@ Bill Gates was born in 1955, at the perfect time to take advantage of the person
 
 ![Bill Gates and His Kids Went to Lakeside School in Seattle](./5a1c67373dbef4a7748b7fb5-998a14.webp "Escola Lakeside em Washington")
 
-On top of that, another improbable coincidence is that, if you remember [the last edition](/backlog-1-o-primeiro-pc-de-todos/), back then computers used time sharing, meaning they were connected to a nearby mainframe.
+On top of that, another improbable coincidence is that, if you remember [[backlog-1-o-primeiro-pc-de-todos|the last edition]], back then computers used time sharing, meaning they were connected to a nearby mainframe.
 
 Because he lived close to the University of Washington, which had a mainframe and terminals available for night use. He spent nights programming, thanks to understanding parents who let him stay out late. The effort counted, but the context was essential.
 

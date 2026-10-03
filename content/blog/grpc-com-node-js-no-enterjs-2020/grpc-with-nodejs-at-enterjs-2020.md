@@ -15,6 +15,6 @@ heroImage: ./cover-en.png
 
 In September I had the pleasure of participating in an online conference held in Germany where I talked more about gRPC with Node.js on the theoretical side and gave some examples of how we can code our application using the gRPC communication model.
 
-Taking advantage of the fact that [DoWhile](/entenda-a-comunicacao-entre-servicos-com-grpc-no-do-while-2020/) is coming! Check out the theoretical part before the practical part in this talk!
+Taking advantage of the fact that [[entenda-a-comunicacao-entre-servicos-com-grpc-no-do-while-2020|DoWhile]] is coming! Check out the theoretical part before the practical part in this talk!
 
 ![](https://vimeo.com/476516779)

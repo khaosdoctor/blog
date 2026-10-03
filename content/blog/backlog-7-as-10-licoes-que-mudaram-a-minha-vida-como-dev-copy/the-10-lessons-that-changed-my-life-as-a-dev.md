@@ -84,7 +84,7 @@ The classic joke about the senior developer who answers everything with "it depe
 
 He compared programming to a pact: you always sacrifice something to get a solution, because any choice has side effects.
 
-The important thing to remember is that you'll never make good decisions, you'll always make decisions that are good for something and bad for something else. A classic example of this is security: the better and more resistant the encryption algorithm, the slower it will be. Or like I mentioned in my [article about RSA](/criptografia-assimetrica-com-rsa/), keys can be arbitrarily large, but there's a point where they're **enough**.
+The important thing to remember is that you'll never make good decisions, you'll always make decisions that are good for something and bad for something else. A classic example of this is security: the better and more resistant the encryption algorithm, the slower it will be. Or like I mentioned in my [[criptografia-assimetrica-com-rsa|article about RSA]], keys can be arbitrarily large, but there's a point where they're **enough**.
 
 Swedes have a word called [**lagom**](https://en.wikipedia.org/wiki/Lagom#:~:text=Lagom%20\(pronounced%20%5Bˈlɑ̂ːɡɔm%5D%2C,\(in%20matter%20of%20amounts\).), which is a way of saying "just enough" or "neither more nor less". That concept sums up this lesson well: the best choice is the one that balances needs without excess.
 
@@ -135,7 +135,7 @@ But don't get too comfortable in what you're doing either, and don't focus only 
 
 ## 10 - Talk is cheap
 
-Through all these years, I ended up noticing that the saying "those who talk a lot do little" became more and more true (we even have [an issue just about this](/backlog-5-o-show-da-bolha/)). In today's world, that gets even more intense with the explosion of influencers and the flood of information dumped on us. **Don't believe influencers**, be your own influence.
+Through all these years, I ended up noticing that the saying "those who talk a lot do little" became more and more true (we even have [[backlog-5-o-show-da-bolha-dev|an issue just about this]]). In today's world, that gets even more intense with the explosion of influencers and the flood of information dumped on us. **Don't believe influencers**, be your own influence.
 
 The point is that you shouldn't only believe what people tell you, plenty of people talk too much, sell too much but never actually get their hands dirty. The proof is that most of the people who created incredible things don't even have social media or, if they do, keep a very low key profile.
 

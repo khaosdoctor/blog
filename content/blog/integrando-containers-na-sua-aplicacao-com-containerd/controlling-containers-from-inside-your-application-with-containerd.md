@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-As we discussed in the [previous article](/oci-cri-docker-ecossistema-de-containers/), Kubernetes recently deprecated Docker, meaning we can't use Docker integration directly from inside a Pod unless we install it manually.
+As we discussed in the [[oci-cri-docker-ecossistema-de-containers|previous article]], Kubernetes recently deprecated Docker, meaning we can't use Docker integration directly from inside a Pod unless we install it manually.
 
 In that same article, I talked about what this means for the ecosystem and introduced the [Open Container Initiative (OCI)](https://opencontainers.org/), which is responsible for creating the standard that container runtimes follow to execute the same type of image. All OCI-compatible images can be executed by any runtime that is also compatible, which opens doors to the creation of different runtimes.
 

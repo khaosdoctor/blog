@@ -23,7 +23,7 @@ Então, como será que vamos ter o JavaScript em 2023?
 
 ## JSON Modules e Import Assertions
 
-Essas duas propostas caminham muito juntas, porém são duas propostas independentes. No [ESM](/os-ecmascript-modules-estao-aqui/), não é possíve importar JSON diretamente como a gente faz com o CommonJS, por isso a proposta de [JSON Modules](https://github.com/tc39/proposal-json-modules) cai como uma luva! A ideia é permitir que a gente possa importar arquivos JSON diretamente do arquivo de código.
+Essas duas propostas caminham muito juntas, porém são duas propostas independentes. No [[os-ecmascript-modules-estao-aqui|ESM]], não é possíve importar JSON diretamente como a gente faz com o CommonJS, por isso a proposta de [JSON Modules](https://github.com/tc39/proposal-json-modules) cai como uma luva! A ideia é permitir que a gente possa importar arquivos JSON diretamente do arquivo de código.
 
 Já a segunda proposta, os [import assertions](https://github.com/tc39/proposal-import-assertions) permite que você adicione metadados adicionais sobre o tipo de módulo que está sendo importado, para ter uma forma padrão de importarmos arquivos que não são JS:
 
@@ -138,7 +138,7 @@ console.log(grupo) // =>  { impar: [1, 3, 5], par: [2, 4] }
 
 Essa é uma [proposta](https://github.com/tc39/proposal-temporal) que não vou ficar tanto tempo explicando, mas essa é a que eu mais espero que aconteça. Eu já escrevi sobre o temporal em outro artigo:
 
-[Esqueça o Date e abrace a nova forma de manipular datas no JavaScript](/temporal-api/)
+[[temporal-api|Esqueça o Date e abrace a nova forma de manipular datas no JavaScript]]
 
 O objetivo do temporal é criar não só uma modificação, mas uma API completa que vai substituir completamente a API `Date` do JavaScript, que é realmente muito ruim de ser utilizada, por um modelo baseado no `moment.js` (tanto que quem mantinha o moment foram as mesmas pessoas que mantém essa proposta), ou seja, a ideia é implementar o moment nativamente no JavaScript.
 

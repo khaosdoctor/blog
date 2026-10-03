@@ -15,14 +15,14 @@ Olá pessoal! Mais uma vez estou com o grande Wesley Willians para conversarmos 
 
 Neste vídeo comentamos diversos links uteis, aqui estão a lista deles:
 
-[OCI, CRI, Runtimes? Entendendo o ecossistema de containers.](/oci-cri-docker-ecossistema-de-containers/)
+[[oci-cri-docker-ecossistema-de-containers|OCI, CRI, Runtimes? Entendendo o ecossistema de containers.]]
 
-[Que tal aprender AKS com este curso GRATUITO?](/que-tal-aprender-aks-com-este-curso-gratuito/)
+[[que-tal-aprender-aks-com-este-curso-gratuito|Que tal aprender AKS com este curso GRATUITO?]]
 
-[Deploy de imagens Docker: Do VSCode para a Azure](/deploy-de-imagens-docker-do-vscode-para-a-azure/)
+[[deploy-de-imagens-docker-do-vscode-para-a-azure|Deploy de imagens Docker: Do VSCode para a Azure]]
 
-[Conheça o GitHub Container Registry](/conheca-o-github-container-registry/)
+[[conheca-o-github-container-registry|Conheça o GitHub Container Registry]]
 
-[Executando Containers no Azure Container Instancies com Docker](/executando-containers-no-azure-container-instancies-com-docker/)
+[[executando-containers-no-azure-container-instancies-com-docker|Executando Containers no Azure Container Instancies com Docker]]
 
 https://www.freecodecamp.org/news/what-is-docker-used-for-a-docker-container-tutorial-for-beginners/

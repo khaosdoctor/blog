@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-I've been talking about [Deno](/deno/) for a while now, and I've already [discussed Deno KV here](/deno-kv/) when it was still an alpha experiment with no defined API. Now we finally have the **official** beta version that's being tested.
+I've been talking about [[deno|Deno]] for a while now, and I've already [[deno-kv|discussed Deno KV here]] when it was still an alpha experiment with no defined API. Now we finally have the **official** beta version that's being tested.
 
 ## What are KV databases
 

@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 draft: false
 seoTitle: "Conheça as Deno Queues"
 ---
-Desde que o [Deno KV](/deno-kv-beta/) foi lançado, a equipe do Deno está fazendo um excelente trabalho em adicionar mais funcionalidades ao que poderia ser só um simples banco de dados chave-valor, mas agora ele é muito mais do que isso!
+Desde que o [[deno-kv-beta|Deno KV]] foi lançado, a equipe do Deno está fazendo um excelente trabalho em adicionar mais funcionalidades ao que poderia ser só um simples banco de dados chave-valor, mas agora ele é muito mais do que isso!
 
 Uma das mais novas introduções à caixa de ferramentas do Deno é o uso de filas através do **Deno Queues**.
 
@@ -118,7 +118,7 @@ db.listenQueue(async (msg) => {
 await db.enqueue({ nonce: crypto.randomUUID() })
 ```
 
-Perceba que estamos verificando a mensagem duas vezes, a primeira para saber se o valor do nonce existe na chave de nonces, se não, isso significa que já processamos a mensagem, se sim, vamos abrir uma [transação atômica](/kv-atomic-ops/), checar novamente se a versão corresponde com a versão que estamos para verificar se a chave não sofreu alguma alteração, já que é possível que outro processo possa ter modificado.
+Perceba que estamos verificando a mensagem duas vezes, a primeira para saber se o valor do nonce existe na chave de nonces, se não, isso significa que já processamos a mensagem, se sim, vamos abrir uma [[kv-atomic-ops|transação atômica]], checar novamente se a versão corresponde com a versão que estamos para verificar se a chave não sofreu alguma alteração, já que é possível que outro processo possa ter modificado.
 
 Inclusive, misturar as operações atômicas com o Deno Queues é uma ideia super interessante porque abre portas totalmente novas pra que você possa compor aplicações ainda mais complexas.
 

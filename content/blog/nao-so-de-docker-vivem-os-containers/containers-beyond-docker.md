@@ -21,8 +21,8 @@ We talked for nearly two hours about all aspects of containers and their tools! 
 
 ## Content discussed:
 
--   [Understanding the Kubernetes API](/drop-o-jeito-mais-simples-de-aprender-kubernetes/)
--   [Hosting Your Own Registry](/docker-registry-local/)
--   [OCI Artifacts with Helm](/armazenando-seus-helm-charts-no-azure-container-registry/)
--   [Understanding Container Runtimes](/entendendo-runtimes-de-containers/)
--   [Controlling Containers from Within Your Application with ContainerD](/integrando-containers-na-sua-aplicacao-com-containerd/)
+-   [[drop-o-jeito-mais-simples-de-aprender-kubernetes|Understanding the Kubernetes API]]
+-   [[docker-registry-local|Hosting Your Own Registry]]
+-   [[armazenando-seus-helm-charts-no-azure-container-registry|OCI Artifacts with Helm]]
+-   [[entendendo-runtimes-de-containers|Understanding Container Runtimes]]
+-   [[integrando-containers-na-sua-aplicacao-com-containerd|Controlling Containers from Within Your Application with ContainerD]]

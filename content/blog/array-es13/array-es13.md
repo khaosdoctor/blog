@@ -178,7 +178,7 @@ console.log(x.toSpliced(1,1,"Cobra"))
 console.log(x.with(1, "Cobra"))
 ```
 
-É esperado que essa funcionalidade saia na próxima versão do ECMAScript, junto com várias funcionalidades super legais que eu já contei [aqui](/o-futuro-do-js/).
+É esperado que essa funcionalidade saia na próxima versão do ECMAScript, junto com várias funcionalidades super legais que eu já contei [[o-futuro-do-js|aqui]].
 
 [^n1]: Você pode achar essa documentação no [site da MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort).
 

@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-We've talked a bit about Linkerd in a [previous post](/uma-introducao-a-service-mesh-com-linkerd/), and now, to expand our knowledge about service mesh even further, let's discuss an interesting concept that we'll explore more carefully in other articles. But here we'll have a practical example! **Tracing.**
+We've talked a bit about Linkerd in a [[uma-introducao-a-service-mesh-com-linkerd|previous post]], and now, to expand our knowledge about service mesh even further, let's discuss an interesting concept that we'll explore more carefully in other articles. But here we'll have a practical example! **Tracing.**
 
 ## Tracing
 
@@ -55,7 +55,7 @@ But enough concepts! The best way to explain what Jaeger is through practice! So
 
 ## Applying Tracing
 
-> To start, I'll assume you already have the cluster created and Linkerd installed. If you haven't installed everything yet, go back to [the previous article](/uma-introducao-a-service-mesh-com-linkerd/) and follow the tutorial to the end.
+> To start, I'll assume you already have the cluster created and Linkerd installed. If you haven't installed everything yet, go back to [[uma-introducao-a-service-mesh-com-linkerd|the previous article]] and follow the tutorial to the end.
 
 With our cluster configured and Linkerd already installed, let's start by installing the [all-in-one](https://www.jaegertracing.io/docs/1.8/getting-started/#all-in-one) configuration, which provides a single image containing all the elements needed for Jaeger tracing to work smoothly.
 

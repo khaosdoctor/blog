@@ -11,7 +11,7 @@ heroImageAlt: "Logo do Node.js"
 draft: false
 seoDescription: "Saiba tudo sobre o lançamento de 2022 do Node.js e como isso pode (e vai) impactar o ecossistema como um todo com a adição de APIs incríveis."
 ---
-Como eu [sempre faço por aqui](/veja-o-que-ha-de-novo-no-node-js-16/), vamos falar de mais um lançamento sensacional do Node.js, a **versão 18 foi anunciada em Abril de 2022**! E você deve estar se perguntando: E dai?
+Como eu [[veja-o-que-ha-de-novo-no-node-js-16|sempre faço por aqui]], vamos falar de mais um lançamento sensacional do Node.js, a **versão 18 foi anunciada em Abril de 2022**! E você deve estar se perguntando: E dai?
 
 Para você que é dev JavaScript ou não, essa versão do Node.js trouxe uma série de mudanças muito interessantes para o runtime em si, e algumas dessas mudanças são tão importantes que podem inspirar outros runtimes a fazerem o mesmo, então bora dar uma olhada em tudo que a gente tem por ai!
 

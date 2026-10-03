@@ -80,6 +80,6 @@ Agora podemos rodar o comando `sudo unattended-upgrades --dry-run` para poder te
 
 Com a instalação destes pacotes podemos ficar mais tranquilos em relação a atualizações de sistemas operacionais e também podemos manter as nossas VMs atualizadas de forma mais concisa.
 
-Se você leu [o último artigo sobre criar uma VPN própria](/criando-uma-vpn/), a aplicação desta técnica e também [2FA usando SSH](/aplicando-two-factor-authentication-no-ssh/) podem ser uma boa pedida para deixar a sua VM rodando tranquilamente!
+Se você leu [[criando-uma-vpn|o último artigo sobre criar uma VPN própria]], a aplicação desta técnica e também [[aplicando-two-factor-authentication-no-ssh|2FA usando SSH]] podem ser uma boa pedida para deixar a sua VM rodando tranquilamente!
 
 Até mais!

@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 draft: false
 seoTitle: "Entendendo as diferenças entre os runtimes containerd e CRI-O"
 ---
-Nós comentamos no [último post sobre o assunto](/oci-cri-docker-ecossistema-de-containers/) sobre como os runtimes de containers funcionam, além disso falamos sobre o que é o OCI, o que é um CRI e também [criamos um container usando ContainerD](/integrando-containers-na-sua-aplicacao-com-containerd/) diretamente através da integração com a aplicação.
+Nós comentamos no [[oci-cri-docker-ecossistema-de-containers|último post sobre o assunto]] sobre como os runtimes de containers funcionam, além disso falamos sobre o que é o OCI, o que é um CRI e também [[integrando-containers-na-sua-aplicacao-com-containerd|criamos um container usando ContainerD]] diretamente através da integração com a aplicação.
 
 Porém, o ContainerD não é o único runtime existente, vamos entender um pouco sobre o que é o ContainerD, quais as suas vantagens e desvantagens sobre o seu par CRI-O e como o Docker se encaixa nisso tudo.
 
@@ -69,7 +69,7 @@ O containerd é essa implementação, de forma que outras ferramentas podem tamb
 
 Além do containerd, outro runtime famoso é o [CRI-O](https://cri-o.io). O CRI vem de Container Runtime Interface, que é um plugin que expõe uma interface que permite que um Kubelet (agent que roda dentro de cada nó dentro de um cluster do Kubernetes) use diferentes tipos de runtime compatíveis com a especificação da OCI sem precisar de recompilação ou reinicialização. O runC é o runtime mais famoso, porém temos outros como o [crun](https://github.com/containers/crun), [railcar](https://github.com/oracle/railcar) e o [kata](https://katacontainers.io).
 
-> Não vamos entrar em detalhes sobre o porquê do Kubernetes precisar de um CRI, pois já falamos sobre tudo isso [no post anterior](/oci-cri-docker-ecossistema-de-containers/)
+> Não vamos entrar em detalhes sobre o porquê do Kubernetes precisar de um CRI, pois já falamos sobre tudo isso [[oci-cri-docker-ecossistema-de-containers|no post anterior]]
 
 Tendo em vista tudo isso, o CRI-O foi criado especificamente para permitir que o Kubernetes execute containers sem muito código ou ferramentas externas. Isto porque o CRI-O é construído em diversas bibliotecas diferentes, veja alguns de seus componentes:
 

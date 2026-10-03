@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-One of the big advantages of understanding how the [container ecosystem](/oci-cri-docker-ecossistema-de-containers/) works is that we can figure out when the same standard can be used for several different specifications.
+One of the big advantages of understanding how the [[oci-cri-docker-ecossistema-de-containers|container ecosystem]] works is that we can figure out when the same standard can be used for several different specifications.
 
 Last year, [Helm](https://helm.sh) announced it would support [OCI Artifacts](https://docs.microsoft.com/azure/container-registry/container-registry-image-formats?WT.mc_id=containers-20841-ludossan#oci-artifacts), which are nothing more than an [open OCI specification](https://github.com/opencontainers/distribution-spec) for distributing container images and other kinds of data, called artifacts. This specification, like every other OCI specification, is agnostic of providers, tools or clouds, which makes it a fantastic thing to work with.
 

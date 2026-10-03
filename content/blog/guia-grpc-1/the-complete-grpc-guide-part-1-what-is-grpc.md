@@ -322,7 +322,7 @@ Regardless of the drawbacks and everything the technology has to offer, we have 
 
 ## Kubernetes
 
-Kubernetes itself uses gRPC as a means of communication between the Kubelet and CRIs that make up the container execution platform (as we've already discussed in several articles, such as [this](/oci-cri-docker-ecossistema-de-containers/), [this](/entendendo-runtimes-de-containers/) and [this](/dockersp-entendendo-o-ecossistema-de-containers-alem-do-docker/)).
+Kubernetes itself uses gRPC as a means of communication between the Kubelet and CRIs that make up the container execution platform (as we've already discussed in several articles, such as [[oci-cri-docker-ecossistema-de-containers|this]], [[entendendo-runtimes-de-containers|this]] and [[dockersp-entendendo-o-ecossistema-de-containers-alem-do-docker|this]]).
 
 The ease of implementing an interface using protobuf facilitates communication between teams, especially a team like Kubernetes's, which has to support a large number of providers that aren't even well known.
 

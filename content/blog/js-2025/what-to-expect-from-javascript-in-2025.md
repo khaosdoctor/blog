@@ -134,18 +134,18 @@ Besides these proposals, there are other proposals that were also discussed, but
 
 ### Proposals that stayed in the same place
 
--   [Async Iterators](https://github.com/tc39/proposal-async-iterator-helpers) (2): A sequence of helper methods for Async Iterators (which I already talked about [here](/async-iterators-js/))
+-   [Async Iterators](https://github.com/tc39/proposal-async-iterator-helpers) (2): A sequence of helper methods for Async Iterators (which I already talked about [[async-iterators-js|here]])
 -   [Base64](https://github.com/tc39/proposal-arraybuffer-base64) (3): Something I've needed many times, converting ByteArrays (UInt8Arrays, SharedArrays) to base64 and vice versa, today we don't have a native method.
 -   [Cancellation](https://github.com/tc39/proposal-cancellation/) (1): Ability to cancel promises mid-flight
--   [Explicit Resource Management](https://github.com/tc39/proposal-explicit-resource-management) (3): This is the proposal for [Using](/ts-using/) that's at stage 3
+-   [Explicit Resource Management](https://github.com/tc39/proposal-explicit-resource-management) (3): This is the proposal for [[ts-using|Using]] that's at stage 3
 -   [Intl.DurationFormat](https://github.com/tc39/proposal-intl-duration-format) (3): Part of the effort to localize the Web using a native way to transform time into duration.
 -   [Intl.MessageFormat](https://github.com/tc39/proposal-intl-messageformat/issues/58) (1): The same as before but for arbitrary texts to be converted and interpolated with variables.
--   [ShadowRealm](https://github.com/tc39/proposal-shadowrealm) (2): A way to execute user code in a separate domain (I talked about it [here](/shadow-realms/))
+-   [ShadowRealm](https://github.com/tc39/proposal-shadowrealm) (2): A way to execute user code in a separate domain (I talked about it [[shadow-realms|here]])
 -   [Shared struct](https://github.com/tc39/proposal-structs) (1): The ability to add immutable objects (structs) in JS
 -   [Signals](https://github.com/tc39/proposal-signals) (1): A way to work with state (à la React) natively with a single protocol
 -   [Smart Units](https://github.com/tc39/proposal-smart-unit-preferences) (1): Another one from the localization effort, intending to add units automatically according to the locale
 -   [Source Maps](https://docs.google.com/presentation/d/1H6nu-Q0FllP2rsnCRxepiB_iBgsA0TMba5FGntDL5fg/edit?usp=sharing) (0): Creates a formal specification for the (already existing) sourcemaps.
--   [Temporal](https://github.com/tc39/proposal-temporal) (3): The proposal for the new JavaScript date API (details [here](/temporal-api/))
+-   [Temporal](https://github.com/tc39/proposal-temporal) (3): The proposal for the new JavaScript date API (details [[temporal-api|here]])
 
 ### Proposals that had or may have advances
 

@@ -9,7 +9,7 @@ description: "Vamos entender todas as novidades da versão beta do TypeScript 5.
 heroImage: "./cover.png"
 draft: false
 ---
-Como é de praxe, mais uma versão do TypeScript está liberada e eu estou aqui para contar mais sobre ela! Dessa vez a gente vai até fazer uma comparação com o que eu propus no [outro artigo](/ts-53-alpha/) quando falamos da versão alpha!
+Como é de praxe, mais uma versão do TypeScript está liberada e eu estou aqui para contar mais sobre ela! Dessa vez a gente vai até fazer uma comparação com o que eu propus no [[ts-53-alpha|outro artigo]] quando falamos da versão alpha!
 
 Vamos lá!
 

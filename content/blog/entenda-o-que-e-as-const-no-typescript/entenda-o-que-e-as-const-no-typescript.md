@@ -22,7 +22,7 @@ const foo = {
 } as const
 ```
 
-Inclusive, a gente até chegou a falar dele quando falamos sobre [enums](/enums-no-typescript/) aqui no blog. Você pode imaginar que, por ter um `as`, isso deve ser algum tipo de type casting, ou seja, estamos trocando um tipo pelo outro e forçando o TS a aceitar isso, o que é uma má prática. Mas não!
+Inclusive, a gente até chegou a falar dele quando falamos sobre [[enums-no-typescript|enums]] aqui no blog. Você pode imaginar que, por ter um `as`, isso deve ser algum tipo de type casting, ou seja, estamos trocando um tipo pelo outro e forçando o TS a aceitar isso, o que é uma má prática. Mas não!
 
 Este tipo de técnica é chamada de [**const assertions**](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions) e, como o nome diz, é uma asserção, ou seja, estamos dando mais informações sobre um tipo para o TypeScript. Mas o que estamos dizendo para ele?
 

@@ -23,7 +23,7 @@ Currently, we have version 18 as the active version until October 2023, then we 
 
 ## Permission System
 
-Node is following [Deno](/deno/)'s lead again. To give some context, Deno has a permissions system for files, where each executable has specific permissions to perform tasks like reading files, network access, environment variables, and so on.
+Node is following [[deno|Deno]]'s lead again. To give some context, Deno has a permissions system for files, where each executable has specific permissions to perform tasks like reading files, network access, environment variables, and so on.
 
 So, for example, if we want to run a program that reads a file, we need to execute it with a flag called `--allow-read`. Similarly, Node has just implemented an experimental permissions system for running programs.
 
@@ -58,7 +58,7 @@ Adding this permissions system is really important because it shifts the runtime
 
 Finally we have a stable test runner in Node.js! And we won't need other libraries like Jest, Ava, Mocha, and so on. Version 20 includes changes that made the runner stable, making it possible to run your tests in production!
 
-I [wrote an article about Node's test runner](/node-test-runner/) a while back, where I talk about what the runner had, but now we have more features like **watch mode**, **mocking**, and the ability for `node --test` to run files in parallel.
+I [[node-test-runner|wrote an article about Node's test runner]] a while back, where I talk about what the runner had, but now we have more features like **watch mode**, **mocking**, and the ability for `node --test` to run files in parallel.
 
 Here's an example from Node's site showing all its new features:
 
@@ -84,7 +84,7 @@ Similarly, other APIs are being optimized and modified to become even faster so 
 
 Following `deno compile`, Node is also bringing initial support for files compiled as a single executable, containing all the tools needed to run the runtime and your code even if Node isn't installed on the machine.
 
-This is amazing because it allows Node applications to be installed much faster and much safer, since you can, for example, start a container _[from scratch](/um-mergulho-em-imagens-de-containers-parte-3/)_ with just your application running inside. This drastically reduces the attack surface.
+This is amazing because it allows Node applications to be installed much faster and much safer, since you can, for example, start a container _[[um-mergulho-em-imagens-de-containers-parte-3|from scratch]]_ with just your application running inside. This drastically reduces the attack surface.
 
 The problem is that we still can't send more than a single file to be executed as a SEA, but we have initial support that requires a prepared blob and an initial configuration file like this:
 

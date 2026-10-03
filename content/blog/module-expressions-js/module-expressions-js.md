@@ -22,7 +22,7 @@ Agora estamos dando um passo à frente com essa ideia com a proposta de **[Modul
 
 Quando queremos rodar algum tipo de computação assíncrona em JavaScript, usando alguma API (ou até mesmo em outra janela do browser) encontramos um problema que é essencialmente inerente a como o JavaScript foi construído. Por ser um ambiente que foi pensado para ser executado em um único thread, muitas vezes essas APIs não permitem o compartilhamento de memória entre, por exemplo, um Web Worker e a página principal.
 
-Um exemplo disso é quando precisamos rodar um código do usuário dentro de um ambiente controlado, um sandbox, para isso podemos criar um web worker (ou até mesmo um [Shadow Realm](/shadow-realms/) que vai garantir que o mesmo espaço de memória não seja compartilhado, isso é algo bom. Mas como passamos essa função para esse novo "realm"?
+Um exemplo disso é quando precisamos rodar um código do usuário dentro de um ambiente controlado, um sandbox, para isso podemos criar um web worker (ou até mesmo um [[shadow-realms|Shadow Realm]] que vai garantir que o mesmo espaço de memória não seja compartilhado, isso é algo bom. Mas como passamos essa função para esse novo "realm"?
 
 Algumas bibliotecas que implementam padrões de execução multi-thread, como o [ParallelJS](https://github.com/parallel-js/parallel.js) e o [Greenlet](https://github.com/developit/greenlet), usam uma estratégia interessante: Transformar o código em uma string ou um blob para que ele possa ser enviado via mensagem para o executor.
 
@@ -55,7 +55,7 @@ E se a gente pudesse empacotar um módulo, literalmente criar uma sequência de 
 
 É ai que entram as Module Expressions.
 
-A ideia das Module Expressions é bastante simples e muito parecida com as [Do Expressions](/do-expressions/) que eu já cobri aqui no blog. Esse seria um exemplo de implementação:
+A ideia das Module Expressions é bastante simples e muito parecida com as [[do-expressions|Do Expressions]] que eu já cobri aqui no blog. Esse seria um exemplo de implementação:
 
 ```js title="Exemplo da proposta"
 let mod = module {

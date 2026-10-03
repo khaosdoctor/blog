@@ -16,7 +16,7 @@ heroImage: ./cover-en.png
 
 After almost 6 years creating content, I figured it was time to pass on some of the knowledge I picked up along the way. So I decided to put together this video series about tech events.
 
-If you haven't seen the first video in the series yet, just [click here](/5-dicas-de-cfp/) for the main call for papers tips that fit really well with what's in today's video!
+If you haven't seen the first video in the series yet, just [[5-dicas-de-cfp|click here]] for the main call for papers tips that fit really well with what's in today's video!
 
 ## Annotated links
 

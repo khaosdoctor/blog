@@ -22,7 +22,7 @@ Eu quis mandar esse email agora (podemos chamar de pré-newsletter) para contar 
 
 Crio conteúdo desde 2014. São 10 anos publicando na internet: textos, vídeos, podcasts, palestras, participações em outros canais, no total são mais de 2000 conteúdos... A criação de conteúdo é, simultaneamente, minha forma de documentar o que aprendo e minha maneira de retribuir à comunidade que me proporcionou tanto. Posso dizer, sem hesitar, que não teria chegado onde estou hoje se não fosse por criar conteúdo.
 
-Porém, criação de conteúdo é muito mais do que só escrever um texto, criar um artigo, fazer um vídeo. Aquilo que você vê ali é o resultado final de muitas horas de trabalho e, as vezes, anos de pesquisa e experiência. Muitos dos meus artigos lá no meu [blog](/) demoraram horas para serem escritos – alguns, como o de [criptografia RSA](/criptografia-assimetrica-com-rsa/), levaram dias! Entre pesquisar algo, resumir, verificar, escrever, verificar novamente e, no final, tentar arrumar um jeito de deixar o conteúdo chamativo, mas ao mesmo tempo educativo.
+Porém, criação de conteúdo é muito mais do que só escrever um texto, criar um artigo, fazer um vídeo. Aquilo que você vê ali é o resultado final de muitas horas de trabalho e, as vezes, anos de pesquisa e experiência. Muitos dos meus artigos lá no meu [blog](/) demoraram horas para serem escritos – alguns, como o de [[criptografia-assimetrica-com-rsa|criptografia RSA]], levaram dias! Entre pesquisar algo, resumir, verificar, escrever, verificar novamente e, no final, tentar arrumar um jeito de deixar o conteúdo chamativo, mas ao mesmo tempo educativo.
 
 ### O desafio do Criador CLT®
 

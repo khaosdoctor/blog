@@ -53,4 +53,4 @@ Under the hood, what auto-accessors do is exactly what we did in the first snipp
 
 In general, this feature isn't something very related to logic, but rather to quality of life, especially when we're creating decorators that need several getters and setters.
 
-[^n1]: We already talked about decorators [here](/javascript-decorators/).
+[^n1]: We already talked about decorators [[javascript-decorators|here]].

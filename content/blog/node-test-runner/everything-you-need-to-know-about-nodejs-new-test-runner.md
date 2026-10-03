@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-As I've mentioned [in another article](/node-18/), Node.js 18 came with lots of new features, including global availability of the `fetch` command and the start of adopting the `node:` prefix for importing system modules, which, by the way, we'll need to use to discuss another addition: the **native test runner**.
+As I've mentioned [[node-18|in another article]], Node.js 18 came with lots of new features, including global availability of the `fetch` command and the start of adopting the `node:` prefix for importing system modules, which, by the way, we'll need to use to discuss another addition: the **native test runner**.
 
 ## What is a test runner
 

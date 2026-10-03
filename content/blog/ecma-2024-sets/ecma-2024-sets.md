@@ -14,7 +14,7 @@ Há 7 anos atrás, uma galera pediu para que os Sets tivessem outros métodos al
 
 Bom, 7 anos depois, [essa proposta](https://github.com/tc39/proposal-set-methods) finalmente chegou no estágio 4! Ou seja, ela vai finalmente ser implementada no JavaScript e nos browsers!
 
-> Se você não sabe o que são sets. Eles nada mais são do que estruturas parecidas com arrays, porém que só podem armazenar um valor uma única vez (já cobrimos essas técnicas [aqui](/removendo-itens-duplicados-no-javascript-es6/)). É uma forma de deduplicar um array de forma eficiente.
+> Se você não sabe o que são sets. Eles nada mais são do que estruturas parecidas com arrays, porém que só podem armazenar um valor uma única vez (já cobrimos essas técnicas [[removendo-itens-duplicados-no-javascript-es6|aqui]]). É uma forma de deduplicar um array de forma eficiente.
 
 A partir de agora, temos os seguintes novos métodos nos sets:
 

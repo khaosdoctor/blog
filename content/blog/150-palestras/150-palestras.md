@@ -13,7 +13,7 @@ draft: false
 
 Depois de quase 6 anos criando conteúdo, eu achei que estava na hora de passar um pouco do conhecimento que eu adquiri nesse meio tempo para frente. E por isso resolvi montar essa série de vídeos sobre eventos de tecnologia.
 
-Se você ainda não viu o primeiro vídeo da série, é só [clicar aqui](/5-dicas-de-cfp/) pra ter as principais dicas de call for papers que vão se alinhar muito bem com o que tem no vídeo de hoje!
+Se você ainda não viu o primeiro vídeo da série, é só [[5-dicas-de-cfp|clicar aqui]] pra ter as principais dicas de call for papers que vão se alinhar muito bem com o que tem no vídeo de hoje!
 
 ## Links comentados
 

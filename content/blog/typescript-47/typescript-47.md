@@ -15,7 +15,7 @@ O TypeScript 4.7 chegou e, como não podemos deixar de lado, vamos passar pelas 
 
 ## ESModules com suporte no Node.js
 
-Já faz um tempo que o Node.js está com suporte para ESM (inclusive [temos artigos aqui no blog](/os-ecmascript-modules-estao-aqui/) sobre isso), porém o TypeScript não estava exatamente acompanhando o que estava acontecendo, principalmente porque foi uma das mudanças mais críticas que aconteceram no ecossistema, já que todo o Node.js foi construído no modelo CommonJS (CJS).
+Já faz um tempo que o Node.js está com suporte para ESM (inclusive [[os-ecmascript-modules-estao-aqui|temos artigos aqui no blog]] sobre isso), porém o TypeScript não estava exatamente acompanhando o que estava acontecendo, principalmente porque foi uma das mudanças mais críticas que aconteceram no ecossistema, já que todo o Node.js foi construído no modelo CommonJS (CJS).
 
 Interoperabilidade entre os dois modos de importação não é só complexo, mas também traz diversos problemas e novos desafios, especialmente nas funcionalidades mais antigas. Apesar do suporte ao ESM já estar no TypeScript como experimental desde o 4.5, ainda não era o momento de lançar ele como funcionalidade completa.
 
@@ -222,7 +222,7 @@ const errorMap = new ErrorMap() // tipo é Map<string, Error>
 
 ## `extends` disponível para tipos `infer`
 
-Recentemente eu postei [aqui no blog](/infer-typescript/) um artigo sobre o que é o `infer` no TS. Em suma, ele permite que a gente extraia o tipo de uma variável quando estamos utilizando em uma clausula `extends`, por exemplo, quando queremos pegar o primeiro elemento de uma tupla somente se ele for uma string:
+Recentemente eu postei [[infer-typescript|aqui no blog]] um artigo sobre o que é o `infer` no TS. Em suma, ele permite que a gente extraia o tipo de uma variável quando estamos utilizando em uma clausula `extends`, por exemplo, quando queremos pegar o primeiro elemento de uma tupla somente se ele for uma string:
 
 ```ts
 type FirstIfString<T> = T extends [infer S, ...unknown[]] ? (S extends string ? S : never) : never

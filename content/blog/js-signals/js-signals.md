@@ -173,7 +173,7 @@ console.log(c.value);
 
 A gente teria exatamente o mesmo resultado. Mas, claro, esse é um exemplo simples. Quando temos computações complexas dentro de uma classe, faria sentido não ter que executá-las sempre.
 
-Ele também propõe o uso em [decorators](/javascript-decorators/), criando um decorator chamado `signal`:
+Ele também propõe o uso em [[javascript-decorators|decorators]], criando um decorator chamado `signal`:
 
 ```js
 export function signal(target) {
@@ -219,6 +219,6 @@ export class Counter {
 
 ## Conclusão
 
-Enquanto a proposta ainda está em estágio 1, eu acho que ela pode ter algum avanço até o fim do ano que vem (como eu falei nas minhas [previsões](/js-2025/)), se isso acontecer, todo o modelo de estados do React pode ficar obsoleto, assim como os modelos de estado de todos os frameworks frontend, porque o JS implementaria isso nativamente.
+Enquanto a proposta ainda está em estágio 1, eu acho que ela pode ter algum avanço até o fim do ano que vem (como eu falei nas minhas [[js-2025|previsões]]), se isso acontecer, todo o modelo de estados do React pode ficar obsoleto, assim como os modelos de estado de todos os frameworks frontend, porque o JS implementaria isso nativamente.
 
 Eu estou particularmente animado com essa possibilidade. E você? Me conta lá nas minhas redes!

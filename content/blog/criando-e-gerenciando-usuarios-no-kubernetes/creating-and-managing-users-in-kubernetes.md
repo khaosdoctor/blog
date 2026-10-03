@@ -259,7 +259,7 @@ kubectl config set-context lucas-token-context \
 
 ## Conclusion
 
-We've seen how we can create users in Kubernetes through digital certificates and tokens. In future articles, we'll explore how to complete the picture by giving them different permission levels with roles. Be sure to follow [the continuation of this series](/dando-permissoes-a-usuarios-com-kubernetes/).
+We've seen how we can create users in Kubernetes through digital certificates and tokens. In future articles, we'll explore how to complete the picture by giving them different permission levels with roles. Be sure to follow [[dando-permissoes-a-usuarios-com-kubernetes|the continuation of this series]].
 
 With this, your cluster's security will increase greatly and you'll become able to understand and manage users so that no one can do anything other than what you're allowing. Improving the audit trail in the process.
 

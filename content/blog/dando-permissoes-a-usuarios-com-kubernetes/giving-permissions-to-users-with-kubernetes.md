@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-In the [previous article](/criando-e-gerenciando-usuarios-no-kubernetes/), we discussed how to create users in Kubernetes so we don't have the problem of everyone having the same level of access across all namespaces. However, we didn't elaborate on how we can actually grant those permissions.
+In the [[criando-e-gerenciando-usuarios-no-kubernetes|previous article]], we discussed how to create users in Kubernetes so we don't have the problem of everyone having the same level of access across all namespaces. However, we didn't elaborate on how we can actually grant those permissions.
 
 Let's understand more about how RBAC (Role Based Access Control) works and how we can take advantage of it to use our cluster more securely.
 
@@ -47,7 +47,7 @@ There are some important rules to know before we get started:
 
 ## Defining our permissions
 
-In the [previous article](/criando-e-gerenciando-usuarios-no-kubernetes/) we created a user named Lucas who is part of the development team. Let's imagine we also created other users in the system to complete our team:
+In the [[criando-e-gerenciando-usuarios-no-kubernetes|previous article]] we created a user named Lucas who is part of the development team. Let's imagine we also created other users in the system to complete our team:
 
 - Ana, who is the development area coordinator (leader of the `devs` group, which Lucas is part of)
 - Thiago, who is the BI area manager (leader of the `bi` group)

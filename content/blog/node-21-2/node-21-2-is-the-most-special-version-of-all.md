@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-I recently posted [an article](/node-21/) discussing the new features in Node version 21, but one of those updates was left out!
+I recently posted [[node-21|an article]] discussing the new features in Node version 21, but one of those updates was left out!
 
 And this is precisely the [version 21.2](https://nodejs.org/en/blog/release/v21.2.0) of the runtime that, for me, is the most special version of all, because this time I was there helping to make Node even better!
 
@@ -28,7 +28,7 @@ That's right! After almost 3 years away from the open source community, I decide
 
 Because I'm in it! 😎, just kidding! Of course this version is special to me, but it's also special for another reason, **this will be the first time we have the ability to test 100% of an application with Node's native test runner!**
 
-Node added support for a [native test runner](/node-test-runner/) a few versions ago, but unfortunately the tool's support was quite odd. We couldn't mock anything, there was no good way to make code assertions, and the output was questionable.
+Node added support for a [[node-test-runner|native test runner]] a few versions ago, but unfortunately the tool's support was quite odd. We couldn't mock anything, there was no good way to make code assertions, and the output was questionable.
 
 Gradually, the test runner improved and is becoming increasingly important in the ecosystem. So much that in version 20 it's already possible to use it normally to test most of the applications we create.
 
@@ -42,7 +42,7 @@ The complete module documentation is already live in the newest version of [Node
 
 https://nodejs.org/dist/latest-v21.x/docs/api/test.html#dates
 
-First, it's important that you read my [original article about the test runner](/node-test-runner/) to understand how it works, but essentially, we have a `--test` flag that can be passed to the Node command. This flag will execute any files passed after it as a test and report in text format.
+First, it's important that you read my [[node-test-runner|original article about the test runner]] to understand how it works, but essentially, we have a `--test` flag that can be passed to the Node command. This flag will execute any files passed after it as a test and report in text format.
 
 ```shell
 node --test arquivo.test.js

@@ -36,7 +36,7 @@ if (typeof foo === 'string') {
 // aqui fora ele continua sendo string | number
 ```
 
-Outro uso comum desse tipo de função é quando queremos criar [type guards](/assertion-functions/), ou seja, queremos trazer essa checagem para fora do if e reutilizar, podemos fazer assim:
+Outro uso comum desse tipo de função é quando queremos criar [[assertion-functions|type guards]], ou seja, queremos trazer essa checagem para fora do if e reutilizar, podemos fazer assim:
 
 ```ts
 function isString (v: unknown) {
@@ -205,7 +205,7 @@ let myRegex = /@typedef \{import\((?<importPath>.+)\)\.(?<importedEntity>[a-zA-Z
 
 ## Suporte para os novos métodos do Set
 
-O TS agora vai suportar os novos métodos dos Sets que vieram no [ECMAScript 2024](/ecma-2024-sets/) mesmo que eles ainda não tenham sido completamente implementados. Não vou dar detalhes aqui porque você pode ver no artigo que eu linkei que tem todas as explicações sobre cada método.
+O TS agora vai suportar os novos métodos dos Sets que vieram no [[ecma-2024-sets|ECMAScript 2024]] mesmo que eles ainda não tenham sido completamente implementados. Não vou dar detalhes aqui porque você pode ver no artigo que eu linkei que tem todas as explicações sobre cada método.
 
 ## Outras mudanças
 

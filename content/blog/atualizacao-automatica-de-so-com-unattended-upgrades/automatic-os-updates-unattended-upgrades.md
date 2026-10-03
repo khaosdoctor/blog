@@ -83,6 +83,6 @@ Now we can run the command `sudo unattended-upgrades --dry-run` to test whether 
 
 By installing these packages we can relax a bit about operating system updates and we can also keep our VMs updated in a more concise way.
 
-If you read [the last article about building your own VPN](/criando-uma-vpn/), applying this technique along with [2FA using SSH](/aplicando-two-factor-authentication-no-ssh/) can be a good call to leave your VM running smoothly!
+If you read [[criando-uma-vpn|the last article about building your own VPN]], applying this technique along with [[aplicando-two-factor-authentication-no-ssh|2FA using SSH]] can be a good call to leave your VM running smoothly!
 
 See you around!

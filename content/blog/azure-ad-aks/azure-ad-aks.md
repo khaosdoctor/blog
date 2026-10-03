@@ -9,7 +9,7 @@ description: "Vamos aprender como manter seu cluster ainda mais seguro com a int
 heroImage: "./cover.png"
 draft: false
 ---
-Já passamos por artigos sobre [como criar usuários](/criando-e-gerenciando-usuarios-no-kubernetes/) e também como atribuir [permissões a estes usuários usando RBAC](/dando-permissoes-a-usuarios-com-kubernetes/). Porém, utilizar o Kubernetes para poder realizar gerenciamentos de usuários, apesar de simples, não é muito prático justamente por conta da natureza distribuída dos clusters.
+Já passamos por artigos sobre [[criando-e-gerenciando-usuarios-no-kubernetes|como criar usuários]] e também como atribuir [[dando-permissoes-a-usuarios-com-kubernetes|permissões a estes usuários usando RBAC]]. Porém, utilizar o Kubernetes para poder realizar gerenciamentos de usuários, apesar de simples, não é muito prático justamente por conta da natureza distribuída dos clusters.
 
 Quando criamos um cluster, temos duas boas práticas de segurança que devemos considerar. A primeira é o controle que você tem sobre os recursos da própria Azure, como o próprio cluster e todos os objetos que estão dentro do resource group dele, a outra boa prática é o controle sobre o que seus usuários podem fazer e ver dentro desse cluster.
 

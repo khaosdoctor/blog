@@ -76,7 +76,7 @@ This wasn't a big problem in 2012 because many browsers didn't have constant upd
 
 So adding another component to that compilation wasn't a big problem, in fact, the step of creating a code bundle in a single super optimized file was quite common, it wasn't any problem to complete the pipeline with another step that, for the most part, would just remove the types from your code to make it valid JavaScript code again.
 
-But as time went on, browsers became even more stable and started having native support for [modules](/os-ecmascript-modules-estao-aqui/) so the bundling step became more of an optional optimization step than a necessary compatibility step, so TypeScript ended up becoming the thorn in the side because now it added a step that maybe didn't need to exist.
+But as time went on, browsers became even more stable and started having native support for [[os-ecmascript-modules-estao-aqui|modules]] so the bundling step became more of an optional optimization step than a necessary compatibility step, so TypeScript ended up becoming the thorn in the side because now it added a step that maybe didn't need to exist.
 
 This was mitigated with TypeScript's already present feature of being able to check types in JavaScript files as well, without needing a file with a different extension, becoming more of a linter than a true type checker. So you could write code like this:
 
@@ -191,7 +191,7 @@ If you don't know how JavaScript evolves and want to understand a bit more about
 
 ![](https://www.youtube.com/watch?v=hDQu3AvvDfg)
 
-As long as it doesn't reach at least **stage 3**, we can't say whether it will or won't be in the future, and this answer can take **years**. As it was, for example, the case of the [temporal proposal](/temporal-api/) which has been open for at least 4 years.
+As long as it doesn't reach at least **stage 3**, we can't say whether it will or won't be in the future, and this answer can take **years**. As it was, for example, the case of the [[temporal-api|temporal proposal]] which has been open for at least 4 years.
 
 So we can only wait and, of course, comment and help in the discussion of the proposal there on Github!
 

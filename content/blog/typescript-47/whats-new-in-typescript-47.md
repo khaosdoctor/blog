@@ -17,7 +17,7 @@ TypeScript 4.7 has arrived and, as we cannot overlook it, we will go through the
 
 ## ESModules Support in Node.js
 
-Node.js has had ESM support for a while now (and [we even have articles here on the blog](/os-ecmascript-modules-estao-aqui/) about it), but TypeScript was not exactly keeping up with what was happening, mainly because it was one of the most critical changes that happened in the ecosystem, since all of Node.js was built on the CommonJS (CJS) model.
+Node.js has had ESM support for a while now (and [[os-ecmascript-modules-estao-aqui|we even have articles here on the blog]] about it), but TypeScript was not exactly keeping up with what was happening, mainly because it was one of the most critical changes that happened in the ecosystem, since all of Node.js was built on the CommonJS (CJS) model.
 
 Interoperability between the two import modes is not only complex, but also brings various problems and new challenges, especially with older features. Despite ESM support already being in TypeScript as experimental since 4.5, it was not yet time to release it as a complete feature.
 
@@ -224,7 +224,7 @@ const errorMap = new ErrorMap() // tipo é Map<string, Error>
 
 ## `extends` Available for `infer` Types
 
-Recently I posted [here on the blog](/infer-typescript/) an article about what `infer` is in TypeScript. In short, it allows us to extract the type of a variable when we are using it in an `extends` clause, for example, when we want to get the first element of a tuple only if it's a string:
+Recently I posted [[infer-typescript|here on the blog]] an article about what `infer` is in TypeScript. In short, it allows us to extract the type of a variable when we are using it in an `extends` clause, for example, when we want to get the first element of a tuple only if it's a string:
 
 ```ts
 type FirstIfString<T> = T extends [infer S, ...unknown[]] ? (S extends string ? S : never) : never

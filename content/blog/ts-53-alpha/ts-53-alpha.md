@@ -68,7 +68,7 @@ Hoje isso não é possível.
 
 Existe um problema quando se trabalha com monorepos em quase todas as linguagens, porém em TypeScript isso é pior. Porque quando temos pacotes que dependem de outros pacotes, isso acaba invariavelmente gerando uma quantidade absurda de complexidade, principalmente para o TypeScript.
 
-Se você tem 10 níveis de pacotes que dependem entre si, o TS precisa inferir todos os tipos de todos os pacotes ele mesmo, começando de baixo para cima e ir gerando os [arquivos declarativos](/semana-ts-2/) de cada pacote para importar no pacote de cima. E isso é muito lento.
+Se você tem 10 níveis de pacotes que dependem entre si, o TS precisa inferir todos os tipos de todos os pacotes ele mesmo, começando de baixo para cima e ir gerando os [[semana-ts-2|arquivos declarativos]] de cada pacote para importar no pacote de cima. E isso é muito lento.
 
 E como não existe uma forma mais rápida de fazer isso sem mudar no compilador, porque outras ferramentas como o esbuild ou até mesmo o swc não são inteligentes o suficientes pra isso, sobra para o TS inferir tudo, e ele não é necessariamente o compilador mais exigente de todos.
 

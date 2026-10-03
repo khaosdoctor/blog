@@ -20,7 +20,7 @@ Atualmente, nós temos a versão 18 sendo a versão ativa atual até outubro de 
 
 ## Sistema de permissões
 
-O Node segue nos passos do [Deno](/deno/) mais uma vez. Para dar um contexto, o Deno possui um sistema de permissões de arquivos, onde cada executável tem permissões específicas para poder executar tarefas, como ler arquivos, rede, variáveis de ambiente e etc.
+O Node segue nos passos do [[deno|Deno]] mais uma vez. Para dar um contexto, o Deno possui um sistema de permissões de arquivos, onde cada executável tem permissões específicas para poder executar tarefas, como ler arquivos, rede, variáveis de ambiente e etc.
 
 Então, por exemplo, se quisermos rodar um programa que leia um arquivo, vamos precisar executar esse programa com uma flag chamada `--allow-read`. Da mesma forma, o Node acabou de implementar de forma experimental um sistema de permissões para os programas em execução.
 
@@ -55,7 +55,7 @@ A adição desse sistema de permissões é super importante porque move o runtim
 
 Finalmente temos um test runner estável no Node.js! E não precisaremos mais de outras bibliotecas como o Jest, Ava, Mocha e etc. A versão 20 inclui modificações que tornaram o runner estável, sendo possível rodar seus testes em produção!
 
-Eu [escrevi um artigo sobre o test runner do Node](/node-test-runner/) há um tempo, nele eu falo um pouco de tudo que o runner tinha, porém agora temos mais funcionalidades como o **watch mode**, **mocking** e a capacidade do `node --test` rodar os arquivos de forma paralela.
+Eu [[node-test-runner|escrevi um artigo sobre o test runner do Node]] há um tempo, nele eu falo um pouco de tudo que o runner tinha, porém agora temos mais funcionalidades como o **watch mode**, **mocking** e a capacidade do `node --test` rodar os arquivos de forma paralela.
 
 Esse é um exemplo tirado do site do Node com todas as novas funcionalidades dele:
 
@@ -81,7 +81,7 @@ Da mesma forma, outras APIs estão sendo otimizadas e modificadas a fim de ficar
 
 Também nos passos do `deno compile`, o Node está trazendo um suporte inicial a arquivos que são compilados como um único executável, contendo todas as ferramentas necessárias para poder rodar o runtime e o seu código mesmo se o Node não estiver instalado na máquina.
 
-Isso é sensacional porque permite que a instalação de aplicações com Node seja muito mais rápida e muito mais segura, já que você pode, por exemplo, iniciar um container _[from scratch](/um-mergulho-em-imagens-de-containers-parte-3/)_ somente com a sua aplicação rodando dentro. O que reduz drásticamente a área de ataques.
+Isso é sensacional porque permite que a instalação de aplicações com Node seja muito mais rápida e muito mais segura, já que você pode, por exemplo, iniciar um container _[[um-mergulho-em-imagens-de-containers-parte-3|from scratch]]_ somente com a sua aplicação rodando dentro. O que reduz drásticamente a área de ataques.
 
 O problema é que ainda não conseguimos mandar mais do que um único arquivo para ser executado como um SEA, mas já temos um suporte inicial que exige um blob preparado e um arquivo inicial de configuração como esse:
 

@@ -9,7 +9,7 @@ description: "Observabilidade, logging, controle de tráfego. Tudo o que você s
 heroImage: "./cover.png"
 draft: false
 ---
-Conversamos [recentemente](/service-mesh-1/) sobre **Service Mesh** e como este padrão de arquitetura pode salvar seu projeto de forma que ele ganhe mais observabilidade e facilidade de utilização.
+Conversamos [[service-mesh-1|recentemente]] sobre **Service Mesh** e como este padrão de arquitetura pode salvar seu projeto de forma que ele ganhe mais observabilidade e facilidade de utilização.
 
 Falamos de Service Mesh de forma muito conceitual. Agora vamos colocar a mão na massa e criar nossa própria mesh utilizando o [Linkerd](https://linkerd.io/)!
 

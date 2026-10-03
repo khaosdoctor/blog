@@ -71,7 +71,7 @@ Today this isn't possible.
 
 There's a problem when working with monorepos in almost all languages, but in TypeScript it's worse. Because when you have packages that depend on other packages, it inevitably generates an absurd amount of complexity, especially for TypeScript.
 
-If you have 10 levels of packages depending on each other, TS needs to infer all the types of all packages itself, starting from the bottom up and generating the [declarative files](/semana-ts-2/) for each package to import into the package above. And that's very slow.
+If you have 10 levels of packages depending on each other, TS needs to infer all the types of all packages itself, starting from the bottom up and generating the [[semana-ts-2|declarative files]] for each package to import into the package above. And that's very slow.
 
 And since there's no faster way to do this without changing the compiler, because other tools like esbuild or even swc aren't smart enough for that, TypeScript has to infer everything, and it's not necessarily the most performant compiler out there.
 

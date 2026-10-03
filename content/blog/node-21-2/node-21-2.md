@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 draft: false
 seoTitle: "Node 21.2 melhora o test runner com suporte a Date Mocks"
 ---
-Eu postei recentemente [um artigo](/node-21/) comentando sobre as novidades da versão 21 do Node, porém uma dessas atualizações ficou de fora!
+Eu postei recentemente [[node-21|um artigo]] comentando sobre as novidades da versão 21 do Node, porém uma dessas atualizações ficou de fora!
 
 E essa é justamente a [versão 21.2](https://nodejs.org/en/blog/release/v21.2.0) do runtime que, para mim, é a versão mais especial de todas, porque dessa vez eu estava lá ajudando a tornar o Node ainda melhor!
 
@@ -25,7 +25,7 @@ Isso ai! Depois de quase 3 anos fora do ambiente open source, eu resolvi voltar 
 
 Porque eu estou nela! 😎, brincadeira! Claro que essa versão é especial para mim, mas ela também é especial por um outro motivo, **essa vai ser a primeira vez que temos capacidade de testar 100% de uma aplicação com o test runner nativo do Node!**
 
-O Node adicionou suporte a um [test runner nativo](/node-test-runner/) há algumas versões atrás, mas infelizmente o suporte da ferramenta era bem... Estranho. Não tínhamos como fazer mocks, não existia uma forma legal de fazer asserções de código e o output era bem duvidoso.
+O Node adicionou suporte a um [[node-test-runner|test runner nativo]] há algumas versões atrás, mas infelizmente o suporte da ferramenta era bem... Estranho. Não tínhamos como fazer mocks, não existia uma forma legal de fazer asserções de código e o output era bem duvidoso.
 
 Aos poucos, o test runner foi melhorando e está se tornando cada vez mais importante no ecossistema. Tanto que na versão 20 já é possível utilizar ele normalmente para poder testar grande parte das aplicações que criamos.
 
@@ -39,7 +39,7 @@ A documentação completa do módulo está já ao vivo na versão mais nova [das
 
 https://nodejs.org/dist/latest-v21.x/docs/api/test.html#dates
 
-Antes de tudo, é importante que você leia o meu [artigo original sobre o test runner](/node-test-runner/) para entender como ele funciona, mas essencialmente, temos uma flag `--test` que pode ser passada para o comando do Node, essa flag vai executar quaisquer arquivos que sejam passados depois como um teste e vai reportar no formato de texto.
+Antes de tudo, é importante que você leia o meu [[node-test-runner|artigo original sobre o test runner]] para entender como ele funciona, mas essencialmente, temos uma flag `--test` que pode ser passada para o comando do Node, essa flag vai executar quaisquer arquivos que sejam passados depois como um teste e vai reportar no formato de texto.
 
 ```shell
 node --test arquivo.test.js

@@ -59,7 +59,7 @@ Existem duas formas de se perceber isso, a primeira é através do uso e a segun
 -   Como você obtem a biblioteca no geral? Via NPM, via CDN? Outro jeito?
 -   Como você importa essa lib no seu código? Ela tem um objeto global? Ela usa `require` ou usa `import/export`?
 
-Geralmente libs que são modulares vão ter um dos dois tipos de chamadas, ou com `const lib = require('lib')` ou `import x from 'lib'`. No nosso caso podemos ver que nossa biblioteca é um módulo, e mais do que isso, ela é um módulo que usa [ESModules](/os-ecmascript-modules-estao-aqui/) por causa das exportações usando `export`.
+Geralmente libs que são modulares vão ter um dos dois tipos de chamadas, ou com `const lib = require('lib')` ou `import x from 'lib'`. No nosso caso podemos ver que nossa biblioteca é um módulo, e mais do que isso, ela é um módulo que usa [[os-ecmascript-modules-estao-aqui|ESModules]] por causa das exportações usando `export`.
 
 Essa identificação é super importante porque vai dizer como vamos definir os tipos. Mas primeiro, precisamos definir esses tipos em algum lugar. A boa prática é criar um arquivo `index.d.ts` dentro de uma pasta que tenha o mesmo nome da biblioteca, no nosso caso é só criar um arquivo `index.d.ts` junto ao `index.js`.
 

@@ -30,7 +30,7 @@ Mais informações estão na [documentação do MDN](https://developer.mozilla.o
 
 ## Array grouping
 
-Com a inclusão do V8 na versão 11.8, agora temos os métodos de [agrupamento de arrays](https://github.com/tc39/proposal-array-grouping), eu já [escrevi sobre eles antes](/array-groupby-stage-3/) aqui no blog, mas houve uma pequena mudança na API, ao invés de ser um método do [protótipo](https://medium.com/trainingcenter/heran%C3%A7a-e-prot%C3%B3tipos-no-javascript-2c1e60e005a2) do array, o `groupBy` agora é um método estático que pode ser usado como:
+Com a inclusão do V8 na versão 11.8, agora temos os métodos de [agrupamento de arrays](https://github.com/tc39/proposal-array-grouping), eu já [[array-groupby-stage-3|escrevi sobre eles antes]] aqui no blog, mas houve uma pequena mudança na API, ao invés de ser um método do [protótipo](https://medium.com/trainingcenter/heran%C3%A7a-e-prot%C3%B3tipos-no-javascript-2c1e60e005a2) do array, o `groupBy` agora é um método estático que pode ser usado como:
 
 ```js
 const array = [1, 2, 3, 4, 5];

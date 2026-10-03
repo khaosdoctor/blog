@@ -50,4 +50,4 @@ Por baixo dos panos, o que os acessores automáticos vão fazer é exatamente o 
 
 No geral, essa feature não é algo muito relacionado à lógica, mas sim a qualidade de vida, especialmente quando vamos criar decorators que precisam de vários getters e setters.
 
-[^n1]: A gente já falou sobre decorators [aqui](/javascript-decorators/).
+[^n1]: A gente já falou sobre decorators [[javascript-decorators|aqui]].

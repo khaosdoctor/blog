@@ -17,15 +17,15 @@ O Deno mais uma vez inovou bastante em relação ao que pode ser feito com o run
 
 ## KV Watch
 
-Há um tempo eu publiquei um artigo aqui falando sobre o novo banco de dados chave-valor do Deno, o [Deno KV](/deno-kv-beta/).
+Há um tempo eu publiquei um artigo aqui falando sobre o novo banco de dados chave-valor do Deno, o [[deno-kv-beta|Deno KV]].
 
 Só pra gente relembrar o que é o KV. Ele é um banco de dados no modelo chave-valor, ou seja, não temos estruturas como tabelas e etc, a maioria das nossas operações lógicas são feitas em cima de valores armazenados em chaves que seguem um padrão textual, por exemplo, os likes em um post com o ID `1234` poderia ser representado por um número armazenado na chave `posts:1234:likes`
 
-O KV tem várias APIs super interessantes, como as [filas](/deno-kv-queues/) e o [cron](/deno-cron/), mas a que torna tudo isso possível é o **watch**.
+O KV tem várias APIs super interessantes, como as [[deno-kv-queues|filas]] e o [[deno-cron|cron]], mas a que torna tudo isso possível é o **watch**.
 
 Com essa nova API, o Deno KV pode observar mudanças em tempo real nas chaves, então sempre que uma dessas chaves mudar, a gente pode emitir um evento para algum lugar avisando dessa mudança.
 
-A nova API funciona a partir de um [async iterator](/async-iterators-js/) que vai retornar o novo valor da chave observada:
+A nova API funciona a partir de um [[async-iterators-js|async iterator]] que vai retornar o novo valor da chave observada:
 
 ```ts
 const db = await Deno.openKv()

@@ -26,7 +26,7 @@ Em resumo, o Deno é um outro runtime criado pelo Ryan Dahl, o mesmo criador do 
 
 Deno é escrito em Rust e roda TypeScript nativamente, então você não precisa de uma etapa de compilação ou algo do tipo para poder rodar seu código, é como se, automaticamente, ele entendesse tudo que você quisesse fazer com o TypeScript e já interpretasse o código como JavaScript diretamente. Mas eu não vou me estender nisso aqui, temos um artigo aqui no blog que fala só sobre Deno:
 
-[Vamos falar sobre o Deno](/deno/)
+[[deno|Vamos falar sobre o Deno]]
 
 ## Deno 2.0
 
@@ -37,8 +37,8 @@ O Deno 2.0 ainda se mantém fiel às funcionalidades que ele veio inicialmente p
 
 As principais propostas do Deno eram que:
 
--   Ele teria suporte **nativo** a TypeScript, o que significa que você não teria que instalar nem o TypeScript nem nenhuma outra biblioteca como o [TSX](/tsx-loader/) para executar TS no runtime
--   Construído usando Web Standards, ou seja, ele teria implementações que seguissem estritamente as propostas do TC39 e da IETF. Isso é tão verdade que o Deno foi o primeiro runtime que implementou o [Temporal](/temporal-api/), mas não só isso, [Promises](https://dev.to/_staticvoid/series/1993), Fetch, [ESM](/os-ecmascript-modules-estao-aqui/) e muitos outros já estão implementados nativamente
+-   Ele teria suporte **nativo** a TypeScript, o que significa que você não teria que instalar nem o TypeScript nem nenhuma outra biblioteca como o [[tsx-loader|TSX]] para executar TS no runtime
+-   Construído usando Web Standards, ou seja, ele teria implementações que seguissem estritamente as propostas do TC39 e da IETF. Isso é tão verdade que o Deno foi o primeiro runtime que implementou o [[temporal-api|Temporal]], mas não só isso, [Promises](https://dev.to/_staticvoid/series/1993), Fetch, [[os-ecmascript-modules-estao-aqui|ESM]] e muitos outros já estão implementados nativamente
 -   Ele teria todas as ferramentas necessárias para poder criar e manter um projeto a longo prazo como: Linter, Formatter, Type Checker, um framework de testes, habilidade de compilar para um executável e mais
 -   Segurança em primeiro lugar com sistemas de permissões e etc
 
@@ -59,7 +59,7 @@ Além disso outras funcionalidades que já existiam agora estão melhores:
 
 -   `deno fmt` agora também formata HTML, CSS e YAML
 -   `deno lint` agora tem regras específicas do Node e pode arrumar erros automaticamente com `deno lint --fix`
--   `deno test` suporta o [Node.js Test Runner](/comecando-com-o-node-js-test-runner/)
+-   `deno test` suporta o [[comecando-com-o-node-js-test-runner|Node.js Test Runner]]
 -   `deno task` também roda scripts do `package.json`
 -   A documentação gerada pelo `deno doc` agora é mais bonita com um layout melhor
 -   `deno compile` suporta assinar pacotes e ícones no Windows

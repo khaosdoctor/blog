@@ -92,7 +92,7 @@ The usage is quite simple and straightforward, which made this update one of the
 
 ### setTimeout and setImmediate
 
-To illustrate, we'll use [ECMAScript modules](/os-ecmascript-modules-estao-aqui/), which allow us to use the `await` keyword at the top-level, that is, outside of an `async` function. Therefore, we'll use `import` to import our modules.
+To illustrate, we'll use [[os-ecmascript-modules-estao-aqui|ECMAScript modules]], which allow us to use the `await` keyword at the top-level, that is, outside of an `async` function. Therefore, we'll use `import` to import our modules.
 
 ```js
 import { setTimeout } from 'timers/promises'

@@ -25,7 +25,7 @@ Now we are taking a step forward with this idea with the **[Module Expressions](
 
 When we want to run some kind of asynchronous computation in JavaScript, using some API (or even in another browser window) we encounter a problem that is essentially inherent to how JavaScript was built. Because it is an environment that was designed to run on a single thread, often these APIs do not allow memory sharing between, for example, a Web Worker and the main page.
 
-An example of this is when we need to run user code inside a controlled environment, a sandbox. For this we can create a web worker (or even a [Shadow Realm](/shadow-realms/) that will ensure that the same memory space is not shared, which is a good thing. But how do we pass this function to this new "realm"?
+An example of this is when we need to run user code inside a controlled environment, a sandbox. For this we can create a web worker (or even a [[shadow-realms|Shadow Realm]] that will ensure that the same memory space is not shared, which is a good thing. But how do we pass this function to this new "realm"?
 
 Some libraries that implement multi-threaded execution patterns, like [ParallelJS](https://github.com/parallel-js/parallel.js) and [Greenlet](https://github.com/developit/greenlet), use an interesting strategy: Transform the code into a string or a blob so that it can be sent via message to the executor.
 
@@ -58,7 +58,7 @@ What if we could package a module, literally create a sequence of lines of code 
 
 That's where Module Expressions come in.
 
-The idea of Module Expressions is quite simple and very similar to [Do Expressions](/do-expressions/) that I already covered here on the blog. This would be an example of implementation:
+The idea of Module Expressions is quite simple and very similar to [[do-expressions|Do Expressions]] that I already covered here on the blog. This would be an example of implementation:
 
 ```js title="Example from the proposal"
 let mod = module {

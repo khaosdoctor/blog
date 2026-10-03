@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 draft: false
 seoTitle: "Implementando Date Mocks no Node Test Runner: Uma História"
 ---
-Há um pouco mais de um ano, eu tive o grande prazer de trabalhar no [core do Node.js](https://github.com/nodejs/node/pull/48638), e foi uma das experiências mais interessantes que eu já tive (então se você tá usando Node hoje, tem código meu ai!), tanto que agora estou voltando a trabalhar e ajudar a comunidade a crescer em volta dele também, porém, o que eu quero te contar aqui é como funcionam os [Date mocks](/node-test-runner-mocks/) dentro do [Node Test Runner](/comecando-com-o-node-js-test-runner/), parte a parte!
+Há um pouco mais de um ano, eu tive o grande prazer de trabalhar no [core do Node.js](https://github.com/nodejs/node/pull/48638), e foi uma das experiências mais interessantes que eu já tive (então se você tá usando Node hoje, tem código meu ai!), tanto que agora estou voltando a trabalhar e ajudar a comunidade a crescer em volta dele também, porém, o que eu quero te contar aqui é como funcionam os [[node-test-runner-mocks|Date mocks]] dentro do [[comecando-com-o-node-js-test-runner|Node Test Runner]], parte a parte!
 
 O objetivo desse artigo é tanto documentar o que foi feito nesta funcionalidade, mas também mostrar como não é tão complexo entender o código open source que temos por ai, e que você também pode contribuir para o projeto que mais curte.
 
@@ -757,7 +757,7 @@ runAll() { // L728
 
 ## E acaba por ai?
 
-Essa foi a final da implementação dos timers, mas o trabalho não acabou. Como o artigo está longo eu não vou postar muito mais sobre isso. Os testes para essa funcionalidade foram outro tempo a parte, no total devo ter gasto pelo menos 13 horas nesse projeto, além de uns 3 meses em comentários, resoluções e tudo mais. No final, essa funcionalidade foi implementada na versão 21.2 do Node (tem até um [post](/node-21-2/) explicando como usar).
+Essa foi a final da implementação dos timers, mas o trabalho não acabou. Como o artigo está longo eu não vou postar muito mais sobre isso. Os testes para essa funcionalidade foram outro tempo a parte, no total devo ter gasto pelo menos 13 horas nesse projeto, além de uns 3 meses em comentários, resoluções e tudo mais. No final, essa funcionalidade foi implementada na versão 21.2 do Node (tem até um [[node-21-2|post]] explicando como usar).
 
 ![](./image-8.png "Dá pra ver que eu estava bem feliz")
 

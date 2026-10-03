@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 draft: false
 seoTitle: "Como criar testes com o Node.js Test Runner"
 ---
-Eu ando falando bastante do Test Runner em vários lugares (inclusive [aqui no blog](/node-test-runner/)), recentemente participei de um podcast super legal com o Ryan falando mais sobre essa ferramenta que chegou faz pouco tempo e já ganhou o coração de todo mundo.
+Eu ando falando bastante do Test Runner em vários lugares (inclusive [[node-test-runner|aqui no blog]]), recentemente participei de um podcast super legal com o Ryan falando mais sobre essa ferramenta que chegou faz pouco tempo e já ganhou o coração de todo mundo.
 
 Você pode assistir o vídeo aqui embaixo:
 
@@ -20,7 +20,7 @@ Mas e ai? Como a gente começa a fazer um teste usando o Node.js Test Runner (NT
 
 ## Preparando o ambiente
 
-Diferente da maioria dos test runners como o [Jest](/jest-com-typescript/), você não precisa baixar nenhum tipo de dependência pra usar o NTR, é só ter a o Node.js na versão 20 ou superior instalada na sua máquina e está tudo certo.
+Diferente da maioria dos test runners como o [[jest-com-typescript|Jest]], você não precisa baixar nenhum tipo de dependência pra usar o NTR, é só ter a o Node.js na versão 20 ou superior instalada na sua máquina e está tudo certo.
 
 Para saber se você tem tudo certo, é só rodar o comando `node --test` em uma pasta vazia.[^n1] Como o node não vai encontrar nenhum arquivo, a sua saída deve ser essa:
 
@@ -241,7 +241,7 @@ O Node.js Test Runner suporta várias ferramentas de report de coverage, a princ
 
 ## TypeScript
 
-Uma das coisas mais legais do Node.js Test Runner é a integração direta com o TypeScript através dos _loaders_ (agora chamados de _importers_), como o [TSX](/tsx-loader/) (que eu também já escrevi [aqui](/tsx-loader/)).
+Uma das coisas mais legais do Node.js Test Runner é a integração direta com o TypeScript através dos _loaders_ (agora chamados de _importers_), como o [[tsx-loader|TSX]] (que eu também já escrevi [[tsx-loader|aqui]]).
 
 Para podermos iniciar a integração com o TS, vamos fazer o setup do mesmo no projeto, primeiro instalamos as duas dependências:
 

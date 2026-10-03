@@ -102,7 +102,7 @@ try {
 
 ## Top-level await
 
-This has been available in Node.js for a while, but since we have [ESModules](/os-ecmascript-modules-estao-aqui/) it's already possible to perform top-level await, that is, an `await` outside of an `async function`:
+This has been available in Node.js for a while, but since we have [[os-ecmascript-modules-estao-aqui|ESModules]] it's already possible to perform top-level await, that is, an `await` outside of an `async function`:
 
 ```js
 // index.mjs

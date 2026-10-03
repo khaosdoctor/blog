@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-We discussed in [the previous post on the topic](/oci-cri-docker-ecossistema-de-containers/) how container runtimes work, and we also talked about what OCI is, what CRI is, and even [created a container using ContainerD](/integrando-containers-na-sua-aplicacao-com-containerd/) directly through application integration.
+We discussed in [[oci-cri-docker-ecossistema-de-containers|the previous post on the topic]] how container runtimes work, and we also talked about what OCI is, what CRI is, and even [[integrando-containers-na-sua-aplicacao-com-containerd|created a container using ContainerD]] directly through application integration.
 
 However, ContainerD is not the only runtime that exists. Let's understand what ContainerD is, its advantages and disadvantages compared to its counterpart CRI-O, and how Docker fits into all of this.
 
@@ -72,7 +72,7 @@ Containerd is this implementation, so that other tools can also build their runt
 
 Besides containerd, another famous runtime is [CRI-O](https://cri-o.io). CRI stands for Container Runtime Interface, which is a plugin that exposes an interface allowing a Kubelet (an agent that runs inside each node within a Kubernetes cluster) to use different runtime types compatible with the OCI specification without needing recompilation or reboot. RunC is the most famous runtime, but we have others like [crun](https://github.com/containers/crun), [railcar](https://github.com/oracle/railcar), and [kata](https://katacontainers.io).
 
-> We won't go into details about why Kubernetes needs a CRI, as we already covered all of that [in the previous post](/oci-cri-docker-ecossistema-de-containers/)
+> We won't go into details about why Kubernetes needs a CRI, as we already covered all of that [[oci-cri-docker-ecossistema-de-containers|in the previous post]]
 
 Given all that, CRI-O was created specifically to allow Kubernetes to run containers without much code or external tools. This is because CRI-O is built on several different libraries, see some of its components:
 

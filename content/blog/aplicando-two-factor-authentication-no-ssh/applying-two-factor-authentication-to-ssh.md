@@ -14,7 +14,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-We're already very used to SSH for logging into virtual machines, like we did in our [post where we created a VPN](/criando-uma-vpn/). But we know SSH accepts several levels of security when it comes to local access.
+We're already very used to SSH for logging into virtual machines, like we did in our [[criando-uma-vpn|post where we created a VPN]]. But we know SSH accepts several levels of security when it comes to local access.
 
 The first level of security, and the weakest, is an alphanumeric password. This is the weakest means because the communication between your computer and the server, even going over the SSH protocol, still transmits your password in plain text. A well targeted attack could capture your password and use it, if you're not using any tunnel.
 

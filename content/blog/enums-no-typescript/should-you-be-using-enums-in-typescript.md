@@ -85,7 +85,7 @@ And that kind of makes sense, but if we're going to remove the TypeScript code, 
 
 ### Enums generate code at runtime
 
-By default, TS shouldn't generate code at runtime, but there are some things that break this rule like [decorators](/javascript-decorators/) and enums.
+By default, TS shouldn't generate code at runtime, but there are some things that break this rule like [[javascript-decorators|decorators]] and enums.
 
 This means that the code you see in the end isn't just removing the enum, but each enum generates a JS object.
 

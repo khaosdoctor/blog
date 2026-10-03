@@ -51,7 +51,7 @@ Quando isso acontece a gente diz que o tipo é **acoplado**, porque o tipo deriv
 
 ## Vale a pena acoplar?
 
-Tipos acoplados, ou derivados, são ótimos quando a gente está tratando do mesmo "domínio", por exemplo, como eu comentei lá no [último artigo sobre enums](/enums-no-typescript/), geralmente quando estamos usando enums, uma opção é criar objetos com [`as const`](/entenda-o-que-e-as-const-no-typescript/) e ai criar a lista de valores como um tipo separado:
+Tipos acoplados, ou derivados, são ótimos quando a gente está tratando do mesmo "domínio", por exemplo, como eu comentei lá no [[enums-no-typescript|último artigo sobre enums]], geralmente quando estamos usando enums, uma opção é criar objetos com [[entenda-o-que-e-as-const-no-typescript|as const]] e ai criar a lista de valores como um tipo separado:
 
 ```ts
 const envs = {

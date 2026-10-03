@@ -57,7 +57,7 @@ Metrics-server is running at https://algundns.subdominio.tld:443/api/v1/namespac
 
 The Kubernetes API is a simple REST server, but the security features used to keep your cluster secure, since this API has total control within the control plane, are well-developed.
 
-The use of digital certificates attached to [user](/criando-e-gerenciando-usuarios-no-kubernetes/) and [RBAC](/dando-permissoes-a-usuarios-com-kubernetes/) objects of the system (or even using more advanced techniques [like AD](/azure-ad-aks/)) are employed to protect the information.
+The use of digital certificates attached to [[criando-e-gerenciando-usuarios-no-kubernetes|user]] and [[dando-permissoes-a-usuarios-com-kubernetes|RBAC]] objects of the system (or even using more advanced techniques [[azure-ad-aks|like AD]]) are employed to protect the information.
 
 Since we're just doing a demonstration, we can use `kubectl` itself to manage this access for us, since it has all access data for all clusters. We just need to run `kubectl proxy &` to run a background process that will do port forwarding of the kubernetes API to a local port, so we can access the API data without worrying about permission settings.
 

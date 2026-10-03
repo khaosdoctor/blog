@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-Not long ago I made a series of [predictions for JS in 2025](/js-2025/), and I wasn't that far off from reality! TC39 met this week in Tokyo to discuss the proposals that would move forward in the next versions of JS, this was the 104th meeting of the committee since its creation.
+Not long ago I made a series of [[js-2025|predictions for JS in 2025]], and I wasn't that far off from reality! TC39 met this week in Tokyo to discuss the proposals that would move forward in the next versions of JS, this was the 104th meeting of the committee since its creation.
 
 As always, Rob Palmer, one of the TC39 members, posts on his [Twitter](https://x.com/robpalmer2/status/1843448233340875143?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1843448233340875143%7Ctwgr%5E%7Ctwcon%5Es1_c10&ref_url=https%3A%2F%2Fsocket.dev%2Fblog%2Ftc39-advances-10-ecmascript-proposals-key-features-to-watch) everything that will be discussed during the meetings. This year's agenda items were:
 

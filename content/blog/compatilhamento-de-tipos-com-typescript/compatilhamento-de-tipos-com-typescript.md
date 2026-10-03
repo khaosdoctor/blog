@@ -46,7 +46,7 @@ Dessa forma, quando temos alguma transição de versão muito grande no backend,
 
 ## Uso de gRPC
 
-Outra opção seria utilizar uma DTO externa através de gRPC, como eu já expliquei [na minha série sobre gRPC](/guia-grpc-1/) aqui no blog.
+Outra opção seria utilizar uma DTO externa através de gRPC, como eu já expliquei [[guia-grpc-1|na minha série sobre gRPC]] aqui no blog.
 
 O gRPC trabalhando em conjunto com o Protobuf permite que façamos o compartilhamento de tipos da forma mais rígida possível, já que sem esse arquivo de payload, o serviço não funcionaria. Porém, isso implicaria que você precisa implementar uma nova pipeline só para lidar com o protobuf em si e todos os arquivos.
 

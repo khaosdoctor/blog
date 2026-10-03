@@ -87,7 +87,7 @@ If this cronjob fails, it will have a retry in 1 second, then 4 then 8. You can 
 
 ## Limitations and details
 
-For now the [cron documentation](https://docs.deno.com/kv/manual/cron) says that it is only possible to create cronjobs at the top-level. That is, **it is not possible to create a cron inside a function** or within any scope, so you must already know what needs to be executed beforehand. To create dynamic cronjobs [queues](/deno-kv-queues/) can be a good option!
+For now the [cron documentation](https://docs.deno.com/kv/manual/cron) says that it is only possible to create cronjobs at the top-level. That is, **it is not possible to create a cron inside a function** or within any scope, so you must already know what needs to be executed beforehand. To create dynamic cronjobs [[deno-kv-queues|queues]] can be a good option!
 
 Also, **Deno Cron's timezone is UTC, regardless of location.**
 

@@ -58,7 +58,7 @@ Bill Gates nasceu em 1955, na época perfeita para aproveitar a revolução dos 
 
 ![Bill Gates and His Kids Went to Lakeside School in Seattle](./5a1c67373dbef4a7748b7fb5-998a14.webp "Escola Lakeside em Washington")
 
-Além disso, outra coincidência improvável é que, se você lembrar [da última edição](/backlog-1-o-primeiro-pc-de-todos/), na época os computadores usavam tempo compartilhado, ou seja, eles eram conectados a um mainframe próximo.
+Além disso, outra coincidência improvável é que, se você lembrar [[backlog-1-o-primeiro-pc-de-todos|da última edição]], na época os computadores usavam tempo compartilhado, ou seja, eles eram conectados a um mainframe próximo.
 
 Por morar próximo à Universidade de Washington, que tinha um mainframe e terminais disponíveis para uso noturno. Ele passava madrugadas programando, graças a pais compreensivos que o deixavam ficar fora até tarde. O esforço contou, mas o contexto foi essencial.
 

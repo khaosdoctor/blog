@@ -53,7 +53,7 @@ Uma técnica que muitas pessoas utilizam é simplesmente entrar no container com
 
 ![](./image.png)
 
-Se tentarmos qualquer outra ferramenta, vamos ver que elas também não existem. E isso é verdade na maioria, se não em todos, os containers de produção. Ainda mais em containers onde podemos ter imagens montadas [from scratch](/um-mergulho-em-imagens-de-containers-parte-1/#imagens-scratch), que são imagens que não possuem nenhum sistema operacional de base, elas são basicamente um binário e nada mais, portanto, nem isso vamos conseguir fazer.
+Se tentarmos qualquer outra ferramenta, vamos ver que elas também não existem. E isso é verdade na maioria, se não em todos, os containers de produção. Ainda mais em containers onde podemos ter imagens montadas [[um-mergulho-em-imagens-de-containers-parte-1#imagens-scratch|from scratch]], que são imagens que não possuem nenhum sistema operacional de base, elas são basicamente um binário e nada mais, portanto, nem isso vamos conseguir fazer.
 
 Essa saída é ok na maioria dos casos quando vamos substituir o container, mas é mais uma forma de "sujar" o nosso ambiente. E é ai que o gremlin entra.
 

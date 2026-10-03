@@ -54,7 +54,7 @@ When this happens we say the type is **coupled**, because the derived type depen
 
 ## Is coupling worth it?
 
-Coupled, or derived types, are great when we're dealing with the same "domain". For example, as I mentioned in the [last article on enums](/enums-no-typescript/), usually when we're using enums, one option is to create objects with [`as const`](/entenda-o-que-e-as-const-no-typescript/) and then create the list of values as a separate type:
+Coupled, or derived types, are great when we're dealing with the same "domain". For example, as I mentioned in the [[enums-no-typescript|last article on enums]], usually when we're using enums, one option is to create objects with [[entenda-o-que-e-as-const-no-typescript|as const]] and then create the list of values as a separate type:
 
 ```ts
 const envs = {

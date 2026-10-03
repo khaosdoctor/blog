@@ -33,7 +33,7 @@ More information is available in the [MDN documentation](https://developer.mozil
 
 ## Array grouping
 
-With the inclusion of V8 version 11.8, we now have the [array grouping methods](https://github.com/tc39/proposal-array-grouping). I've already [written about them before](/array-groupby-stage-3/) here on the blog, but there was a small change to the API. Instead of being a method on the array [prototype](https://medium.com/trainingcenter/heran%C3%A7a-e-prot%C3%B3tipos-no-javascript-2c1e60e005a2), `groupBy` is now a static method that can be used like this:
+With the inclusion of V8 version 11.8, we now have the [array grouping methods](https://github.com/tc39/proposal-array-grouping). I've already [[array-groupby-stage-3|written about them before]] here on the blog, but there was a small change to the API. Instead of being a method on the array [prototype](https://medium.com/trainingcenter/heran%C3%A7a-e-prot%C3%B3tipos-no-javascript-2c1e60e005a2), `groupBy` is now a static method that can be used like this:
 
 ```js
 const array = [1, 2, 3, 4, 5];

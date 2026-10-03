@@ -196,7 +196,7 @@ In our return we're specifically saying that the function is always going to ret
 
 ![](./image-79.png)
 
-We can use several other techniques to make the function completely TypeSafe. Among them using `infer` (which I already explained [here](/infer-typescript/)), doing type narrowing on our generic to guarantee we're only going to use numbers greater than zero:
+We can use several other techniques to make the function completely TypeSafe. Among them using `infer` (which I already explained [[infer-typescript|here]]), doing type narrowing on our generic to guarantee we're only going to use numbers greater than zero:
 
 ![](./image-80.png)
 

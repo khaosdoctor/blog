@@ -26,7 +26,7 @@ So, what will JavaScript look like in 2023?
 
 ## JSON Modules and Import Assertions
 
-These two proposals work closely together, but they are two separate proposals. In [ESM](/os-ecmascript-modules-estao-aqui/), it's not possible to import JSON directly like we do with CommonJS. That's why the [JSON Modules](https://github.com/tc39/proposal-json-modules) proposal is perfect! The idea is to allow us to import JSON files directly from code files.
+These two proposals work closely together, but they are two separate proposals. In [[os-ecmascript-modules-estao-aqui|ESM]], it's not possible to import JSON directly like we do with CommonJS. That's why the [JSON Modules](https://github.com/tc39/proposal-json-modules) proposal is perfect! The idea is to allow us to import JSON files directly from code files.
 
 The second proposal, [import assertions](https://github.com/tc39/proposal-import-assertions), allows you to add additional metadata about the type of module being imported, to have a standard way of importing files that are not JS:
 
@@ -141,7 +141,7 @@ console.log(grupo) // =>  { impar: [1, 3, 5], par: [2, 4] }
 
 This is a [proposal](https://github.com/tc39/proposal-temporal) that I won't spend much time explaining, but it's the one I most hope happens. I've already written about Temporal in another article:
 
-[Forget Date and embrace the new way to handle dates in JavaScript](/temporal-api/)
+[[temporal-api|Forget Date and embrace the new way to handle dates in JavaScript]]
 
 The goal of Temporal is to create not just a modification, but a complete API that will completely replace JavaScript's `Date` API, which is really difficult to use, with a model based on `moment.js` (in fact, the people who maintained Moment were the same people who maintain this proposal). In other words, the idea is to implement Moment natively in JavaScript.
 

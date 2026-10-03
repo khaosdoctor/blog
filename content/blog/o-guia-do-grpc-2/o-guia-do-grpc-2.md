@@ -15,7 +15,7 @@ seoDescription: "Entenda o que é o gRPC para JavaScript, como funciona uma cham
 ---
 ---
 
-Chegamos à **segunda parte da nossa série** sobre o que é o gRPC e como podemos utilizá-lo de forma eficiente para substituir o que utilizamos hoje com o ReST. Na [primeira parte desta série](/guia-grpc-1/) dei toda a explicação de como funciona o gRPC por dentro e como ele é montado em uma requisição HTTP/2 padrão com um payload binário usando o **protobuf** como camada de encoding.
+Chegamos à **segunda parte da nossa série** sobre o que é o gRPC e como podemos utilizá-lo de forma eficiente para substituir o que utilizamos hoje com o ReST. Na [[guia-grpc-1|primeira parte desta série]] dei toda a explicação de como funciona o gRPC por dentro e como ele é montado em uma requisição HTTP/2 padrão com um payload binário usando o **protobuf** como camada de encoding.
 
 Nesta parte da série, vamos mergulhar nas implementações de como o gRPC funciona para **JavaScript**. Vamos então dar uma passada rápida pela nossa agenda de hoje.
 

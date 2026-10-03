@@ -62,7 +62,7 @@ There are two ways to notice this, the first is through usage and the second is 
 - How do you get the library overall? Via NPM, via CDN? Another way?
 - How do you import this lib in your code? Does it have a global object? Does it use `require` or `import/export`?
 
-Usually libs that are modular will have one of two types of calls, either with `const lib = require('lib')` or `import x from 'lib'`. In our case we can see that our library is a module, and more than that, it's a module that uses [ESModules](/os-ecmascript-modules-estao-aqui/) because of exports using `export`.
+Usually libs that are modular will have one of two types of calls, either with `const lib = require('lib')` or `import x from 'lib'`. In our case we can see that our library is a module, and more than that, it's a module that uses [[os-ecmascript-modules-estao-aqui|ESModules]] because of exports using `export`.
 
 This identification is super important because it will tell us how we'll define the types. But first, we need to define these types somewhere. The best practice is to create an `index.d.ts` file inside a folder that has the same name as the library, in our case we just need to create an `index.d.ts` file alongside the `index.js`.
 

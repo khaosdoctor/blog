@@ -17,7 +17,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-In my [previous Backlog](/o-que-aconteceu-com-devs/), I addressed a topic that has been bothering me a lot over the last few months: the fact that developers today are becoming increasingly lazy and delegating more and more tasks to AI. Since then we've had the advent of this, which I'm now naming as **Slopware**:
+In my [[o-que-aconteceu-com-devs|previous Backlog]], I addressed a topic that has been bothering me a lot over the last few months: the fact that developers today are becoming increasingly lazy and delegating more and more tasks to AI. Since then we've had the advent of this, which I'm now naming as **Slopware**:
 
 > ✨ [https://t.co/6TyHKajGaJ](https://t.co/6TyHKajGaJ) has now gone from \$0 to \$1 million ARR in just 17 days! 💸 Revenue update: \$87,000 MRR (which is \$1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: [https://t.co/uc1J8Ia7QZ](https://t.co/uc1J8Ia7QZ) 📊 Stats update: 320,000 people have now flown in the… [https://t.co/scrq1lSJOT](https://t.co/scrq1lSJOT) [pic.twitter.com/NCc50FOgJa](https://t.co/NCc50FOgJa) — @levelsio (@levelsio) [March 11, 2025](https://twitter.com/levelsio/status/1899596115210891751?ref_src=twsrc%5Etfw)
 >

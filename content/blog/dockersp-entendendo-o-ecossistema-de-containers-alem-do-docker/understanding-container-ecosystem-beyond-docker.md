@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-Today I had the great pleasure of being with the folks from [DockerSP](https://www.meetup.com/Docker-Sao-Paulo/) to talk a bit more about the container ecosystem! In this video we'll dive deeper into what I talked about [in this post](/integrando-containers-na-sua-aplicacao-com-containerd/), giving some more context and history!
+Today I had the great pleasure of being with the folks from [DockerSP](https://www.meetup.com/Docker-Sao-Paulo/) to talk a bit more about the container ecosystem! In this video we'll dive deeper into what I talked about [[integrando-containers-na-sua-aplicacao-com-containerd|in this post]], giving some more context and history!
 
 ![](https://www.youtube.com/watch?v=gAcTFfTL1NU)
 

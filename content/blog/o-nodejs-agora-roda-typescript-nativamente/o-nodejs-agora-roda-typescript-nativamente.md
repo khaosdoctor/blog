@@ -15,9 +15,9 @@ Mas o que é essa coisa toda de Node.js rodando TypeScript?
 
 ## O Node roda TS?
 
-Em algumas edições [anteriores](/tsx-loader/), eu falei que era possível rodar TypeScript nativamente no Node usando o TSX. Historicamente, esse sempre foi o caso, porque não tínhamos como rodar nenhum tipo de arquivo além de JavaScript com o Node. E ainda não temos.
+Em algumas edições [[tsx-loader|anteriores]], eu falei que era possível rodar TypeScript nativamente no Node usando o TSX. Historicamente, esse sempre foi o caso, porque não tínhamos como rodar nenhum tipo de arquivo além de JavaScript com o Node. E ainda não temos.
 
-O que acontece é que podemos utilizar _loaders_. Loaders são hooks especiais que permitem que a gente modifique o comportamento do _module loader_ nativo, utilizado quando carregamos qualquer módulo [ESM](/os-ecmascript-modules-estao-aqui/). Esses loaders são bastante poderosos porque eles permitem, entre outras coisas, que a gente faça ações diretamente com o código que será carregado em memória. Que é exatamente como o **TSX** se comporta.
+O que acontece é que podemos utilizar _loaders_. Loaders são hooks especiais que permitem que a gente modifique o comportamento do _module loader_ nativo, utilizado quando carregamos qualquer módulo [[os-ecmascript-modules-estao-aqui|ESM]]. Esses loaders são bastante poderosos porque eles permitem, entre outras coisas, que a gente faça ações diretamente com o código que será carregado em memória. Que é exatamente como o **TSX** se comporta.
 
 Mas agora isso não é mais necessário! A partir da versão [22.6 do Node](https://nodejs.org/en/blog/release/v22.6.0) duas novas flags experimentais foram adicionadas:[^n1]
 

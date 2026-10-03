@@ -42,7 +42,7 @@ Codespaces are built on top of another existing Microsoft solution called [Visua
 
 Remote Development connects to another computer running a small server on the other end. In other words, you can separate the editor's processing from its interface. That way you can practically run VS Code anywhere, because any browser that supports recent JavaScript can run the editor's interface.
 
-And then we add another amazing technology: **containers**. As you may have already seen [right here on the blog](/executando-containers-no-azure-container-instancies-com-docker/?utm_source=blog&utm_medium=post&utm_campaign=codespaces), containers are an incredible technology that lets you run practically any application in a self-contained way without depending on external libraries. Codespaces take many advantages from this, especially for building the images for the machines that will run.
+And then we add another amazing technology: **containers**. As you may have already seen [[executando-containers-no-azure-container-instancies-com-docker|right here on the blog]], containers are an incredible technology that lets you run practically any application in a self-contained way without depending on external libraries. Codespaces take many advantages from this, especially for building the images for the machines that will run.
 
 That way we can have a container that contains all the tools needed for our project to run, because it's **fully customizable**.
 

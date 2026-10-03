@@ -12,7 +12,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-We already discussed [Deno KV here](/deno-kv-beta/) in the past, but the big difference is that this database only worked on Deno, until now!
+We already discussed [[deno-kv-beta|Deno KV here]] in the past, but the big difference is that this database only worked on Deno, until now!
 
 The team just announced the [Deno KV package for NPM](https://www.npmjs.com/package/@deno/kv)! Allowing any Node.js user to use the database too, even though it was already possible with the [binary](https://github.com/denoland/denokv) of KV being published standalone.
 

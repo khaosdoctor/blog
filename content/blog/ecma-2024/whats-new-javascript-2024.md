@@ -18,7 +18,7 @@ The [127th committee member meeting happened on June 26, 2024](https://github.co
 
 ## Synchronous Grouping in Maps and Objects
 
-Very similar to [another proposal we talked about here](/array-groupby-stage-3/), now we have a new method in `Map` and `Object`, the `groupBy`. What it does is allow us to group array items following a function. When used in a map, it gives us a map back, but we can use it in an object too.
+Very similar to [[array-groupby-stage-3|another proposal we talked about here]], now we have a new method in `Map` and `Object`, the `groupBy`. What it does is allow us to group array items following a function. When used in a map, it gives us a map back, but we can use it in an object too.
 
 ```js
 Map.groupBy([1,2,3,4,5,6], (v) => v % 2 === 0 ? 'par' : 'impar')

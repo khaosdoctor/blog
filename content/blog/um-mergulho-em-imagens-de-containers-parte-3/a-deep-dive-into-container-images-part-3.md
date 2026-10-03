@@ -14,11 +14,11 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-In the [previous article](/um-mergulho-em-imagens-de-containers-parte-2/) we discussed how to create a Docker image the best way for languages considered static, like C or Go. In this article we will explore a bit more about creating images using **dynamic** languages, like Python or JavaScript.
+In the [[um-mergulho-em-imagens-de-containers-parte-2|previous article]] we discussed how to create a Docker image the best way for languages considered static, like C or Go. In this article we will explore a bit more about creating images using **dynamic** languages, like Python or JavaScript.
 
 ## Goodbye Scratch Images
 
-As we discussed in the [first article](/um-mergulho-em-imagens-de-containers-parte-1/), we have a type of image called **scratch**, which is a completely empty image, really just an empty filesystem. We used this type of image to build our container in the previous article.
+As we discussed in the [[um-mergulho-em-imagens-de-containers-parte-1|first article]], we have a type of image called **scratch**, which is a completely empty image, really just an empty filesystem. We used this type of image to build our container in the previous article.
 
 However, the bad news is that we cannot use this type of image to create our dynamic containers, because we need the language runtime installed in the operating system, so we will only be using **full**, **slim**, and **alpine** images.
 

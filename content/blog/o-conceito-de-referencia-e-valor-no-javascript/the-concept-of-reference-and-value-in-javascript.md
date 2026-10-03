@@ -144,7 +144,7 @@ console.log(a === b) // 0x89ac === 0x89ac? true
 
 ## Cloning
 
-To get out of this problem and avoid modifying the original variable, there's the concept of **cloning**. This is actually a very interesting topic because it was one of the themes in the [article about new array methods](/array-es13/) here on the blog.
+To get out of this problem and avoid modifying the original variable, there's the concept of **cloning**. This is actually a very interesting topic because it was one of the themes in the [[array-es13|article about new array methods]] here on the blog.
 
 When we clone an object, we're taking all the properties of the original object and putting them into another different pointer, so if we change that object, we won't alter the original variable. The most common way was to do something like this:
 

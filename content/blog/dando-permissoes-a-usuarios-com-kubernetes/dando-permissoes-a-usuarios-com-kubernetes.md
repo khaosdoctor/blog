@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 draft: false
 seoDescription: "Já sabemos como criar usuários no Kubernetes, vamos aprender como podemos fazer com que eles tenham suas permissões definidas com Roles e ClusterRoles!"
 ---
-No [último artigo](/criando-e-gerenciando-usuarios-no-kubernetes/), conversamos sobre como podemos criar usuários no Kubernetes para que não tenhamos mais o problema de todo mundo ter o mesmo grau de acesso em todos os namespaces. Porém, não chegamos a elaborar sobre como podemos, de fato, dar essas permissões.
+No [[criando-e-gerenciando-usuarios-no-kubernetes|último artigo]], conversamos sobre como podemos criar usuários no Kubernetes para que não tenhamos mais o problema de todo mundo ter o mesmo grau de acesso em todos os namespaces. Porém, não chegamos a elaborar sobre como podemos, de fato, dar essas permissões.
 
 Vamos entender um pouco mais sobre como funciona o RBAC (Role Based Access Control) e como podemos tirar vantagem disso para podermos usar nosso cluster com mais segurança.
 
@@ -44,7 +44,7 @@ Existem algumas regras importantes para saber antes de começarmos a colocar a m
 
 ## Definindo nossas permissões
 
-No [artigo anterior](/criando-e-gerenciando-usuarios-no-kubernetes/) criamos um usuário chamado Lucas, que faz parte da equipe de desenvolvimento, vamos imaginar que também criamos outros usuários no sistema para completar nosso time:
+No [[criando-e-gerenciando-usuarios-no-kubernetes|artigo anterior]] criamos um usuário chamado Lucas, que faz parte da equipe de desenvolvimento, vamos imaginar que também criamos outros usuários no sistema para completar nosso time:
 
 -   Ana, que é a coordenadora da área de desenvolvimento (líder do grupo `devs`, do qual Lucas faz parte)
 -   Thiago, que é o gerente da área de BI (líder do grupo `bi`)

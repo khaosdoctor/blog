@@ -9,7 +9,7 @@ description: "Que tal observar a fundo TODAS as chamadas do seu sistema e conseg
 heroImage: "./cover.png"
 draft: false
 ---
-Já falamos um pouco sobre o Linkerd no [último post](/uma-introducao-a-service-mesh-com-linkerd/), agora, para podermos estender ainda mais o nosso conhecimento sobre service mesh, vamos falar de um conceito interessante que vamos explorar com mais calma em outros artigos. Mas aqui vamos ter um exemplo prático! O **Tracing.**
+Já falamos um pouco sobre o Linkerd no [[uma-introducao-a-service-mesh-com-linkerd|último post]], agora, para podermos estender ainda mais o nosso conhecimento sobre service mesh, vamos falar de um conceito interessante que vamos explorar com mais calma em outros artigos. Mas aqui vamos ter um exemplo prático! O **Tracing.**
 
 ## Tracing
 
@@ -52,7 +52,7 @@ Mas chega de conceitos! A melhor forma de explicar o que é o Jaeger é através
 
 ## Aplicando Tracing
 
-> Para começar, vou assumir que você já está com o cluster criado e com o Linkerd Instalado, se você ainda não instalou tudo, volta para [o artigo anterior](/uma-introducao-a-service-mesh-com-linkerd/) e siga o tutorial até o final
+> Para começar, vou assumir que você já está com o cluster criado e com o Linkerd Instalado, se você ainda não instalou tudo, volta para [[uma-introducao-a-service-mesh-com-linkerd|o artigo anterior]] e siga o tutorial até o final
 
 Com o nosso cluster configurado e o Linkerd já instalado, vamos começar instalando a configuração [all-in-one](https://www.jaegertracing.io/docs/1.8/getting-started/#all-in-one), que provê uma única imagem que contém todos os elementos necessários para que o tracing do Jaeger funcione tranquilamente.
 

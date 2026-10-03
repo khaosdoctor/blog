@@ -13,7 +13,7 @@ draft: false
 heroImage: ./cover-en.png
 ---
 
-Since [Deno KV](/deno-kv-beta/) was released, the Deno team has been doing excellent work adding more features to what could have been just a simple key-value database, but now it's much more than that!
+Since [[deno-kv-beta|Deno KV]] was released, the Deno team has been doing excellent work adding more features to what could have been just a simple key-value database, but now it's much more than that!
 
 One of the newest additions to Deno's toolkit is the use of queues through **Deno Queues**.
 
@@ -121,7 +121,7 @@ db.listenQueue(async (msg) => {
 await db.enqueue({ nonce: crypto.randomUUID() })
 ```
 
-Notice that we're checking the message twice. First, to see if the nonce value exists in the nonces key. If not, it means we've already processed the message. If yes, we'll open an [atomic transaction](/kv-atomic-ops/) and check again if the version matches the version we're checking to verify that the key hasn't been changed, since it's possible another process could have modified it.
+Notice that we're checking the message twice. First, to see if the nonce value exists in the nonces key. If not, it means we've already processed the message. If yes, we'll open an [[kv-atomic-ops|atomic transaction]] and check again if the version matches the version we're checking to verify that the key hasn't been changed, since it's possible another process could have modified it.
 
 In fact, mixing atomic operations with Deno Queues is a really interesting idea because it opens up entirely new doors for you to build even more complex applications.
 

@@ -9,13 +9,13 @@ description: "Entenda as principais mudanças no Deno 1.40 e como elas impactam 
 heroImage: "./cover.png"
 draft: false
 ---
-O Deno chegou na [versão 1.40](https://deno.com/blog/v1.40) e essa é uma das versões mais legais de todas! Primeiro, porque ela tem a adição da [Temporal API](/temporal-api/) que eu estou falando aqui desde 2020! E eu acho que é o primeiro runtime a implementar essa funcionalidade de fato!
+O Deno chegou na [versão 1.40](https://deno.com/blog/v1.40) e essa é uma das versões mais legais de todas! Primeiro, porque ela tem a adição da [[temporal-api|Temporal API]] que eu estou falando aqui desde 2020! E eu acho que é o primeiro runtime a implementar essa funcionalidade de fato!
 
 Além disso, uma série de outras novidades que eu vou passar por aqui uma por uma!
 
 ## Temporal API
 
-A temporal API é a nova forma de lidar com as datas no JavaScript, eu falei muito sobre ela [neste artigo](/temporal-api/) e mostrei todos os detalhes, então não vou entrar em muitos detalhes aqui, mas essencialmente, o Deno é o primeiro runtime que implementa essa API completamente.
+A temporal API é a nova forma de lidar com as datas no JavaScript, eu falei muito sobre ela [[temporal-api|neste artigo]] e mostrei todos os detalhes, então não vou entrar em muitos detalhes aqui, mas essencialmente, o Deno é o primeiro runtime que implementa essa API completamente.
 
 Ela ainda está por trás de uma flag `--unstable-temporal` mas você já pode utilizar da mesma forma que a [documentação oficial](https://tc39.es/proposal-temporal/docs/) informa! Se você rodar um terminal com `deno --unstable-temporal`, você já pode fazer alguns testes:
 
@@ -67,7 +67,7 @@ console.log(import.meta.filename) // /Users/lucas/repos/deno/teste.ts
 
 ## Decorators
 
-Finalmente vamos ter suporte nativo a [decorators](/javascript-decorators/), uma proposta que está no estágio final e deve chegar nos browsers logo mais! Depois de mais de 5 anos em espera, a nova proposta junta todas as propostas anteriores em uma só.
+Finalmente vamos ter suporte nativo a [[javascript-decorators|decorators]], uma proposta que está no estágio final e deve chegar nos browsers logo mais! Depois de mais de 5 anos em espera, a nova proposta junta todas as propostas anteriores em uma só.
 
 Um exemplo clássico que a gente pode dar é o `@trace` que serve para debugar qualquer função colocando um console antes e depois da execução:
 

@@ -10,7 +10,7 @@ heroImage: "./cover.png"
 draft: false
 seoTitle: "Princípios do Deno KV"
 ---
-Já faz um tempo que eu comecei a falar de [Deno](/deno/), inclusive já [falei aqui sobre o Deno KV](/deno-kv/) quando ele ainda era uma experimentação alpha sem API definida. Agora sim temos a versão beta **oficial** que está sendo testada.
+Já faz um tempo que eu comecei a falar de [[deno|Deno]], inclusive já [[deno-kv|falei aqui sobre o Deno KV]] quando ele ainda era uma experimentação alpha sem API definida. Agora sim temos a versão beta **oficial** que está sendo testada.
 
 ## O que são bancos KV
 

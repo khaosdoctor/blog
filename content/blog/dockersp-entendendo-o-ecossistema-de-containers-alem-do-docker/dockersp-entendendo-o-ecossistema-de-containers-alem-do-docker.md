@@ -9,7 +9,7 @@ description: "Veja o vídeo completo da minha talk sobre o ecossistema de contai
 heroImage: "./cover.png"
 draft: false
 ---
-Hoje tive o grande prazer de estar com a galera do [DockerSP](https://www.meetup.com/Docker-Sao-Paulo/) para falar um pouco mais sobre o ecossistema de containers! Neste vídeo vamos dar uma pincelada mais profunda sobre o que falei [neste post](/integrando-containers-na-sua-aplicacao-com-containerd/), dando um pouco mais de contexto e história!
+Hoje tive o grande prazer de estar com a galera do [DockerSP](https://www.meetup.com/Docker-Sao-Paulo/) para falar um pouco mais sobre o ecossistema de containers! Neste vídeo vamos dar uma pincelada mais profunda sobre o que falei [[integrando-containers-na-sua-aplicacao-com-containerd|neste post]], dando um pouco mais de contexto e história!
 
 ![](https://www.youtube.com/watch?v=gAcTFfTL1NU)
 

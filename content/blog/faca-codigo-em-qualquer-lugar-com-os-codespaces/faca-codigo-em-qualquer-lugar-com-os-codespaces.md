@@ -39,7 +39,7 @@ Os Codespaces são construídos em cima de uma outra solução já existente da 
 
 O Remote Development se conecta a um outro computador rodando um pequeno servidor do outro lado. Ou seja, você consegue separar o processamento do editor, da interface. Dessa forma você consegue praticamente rodar o VSCode em qualquer lugar, porque todo o browser que suporte JavaScript mais recente consegue executar a interface do editor.
 
-E então unimos outra tecnologia sensacional que são os **containers**. Como você já deve ter visto [aqui mesmo no blog](/executando-containers-no-azure-container-instancies-com-docker/?utm_source=blog&utm_medium=post&utm_campaign=codespaces), os containers são uma tecnologia incrível que permite que você rode praticamente todas as aplicações de forma auto contida sem dependender de bibliotecas externas. Os Codespaces tiram muitas vantagens disso principalmente para que eles possam construir as imagens das máquinas que vão executar.
+E então unimos outra tecnologia sensacional que são os **containers**. Como você já deve ter visto [[executando-containers-no-azure-container-instancies-com-docker|aqui mesmo no blog]], os containers são uma tecnologia incrível que permite que você rode praticamente todas as aplicações de forma auto contida sem dependender de bibliotecas externas. Os Codespaces tiram muitas vantagens disso principalmente para que eles possam construir as imagens das máquinas que vão executar.
 
 Dessa forma podemos ter um container que contém todas as ferramentas necessárias para o nosso projeto rodar, porque ele é **completamente customizável**.
 
