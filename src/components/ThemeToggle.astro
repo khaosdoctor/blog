@@ -1,6 +1,6 @@
 ---
 import { type Locale, t } from '../i18n/ui'
-import Monitor from './icons/Monitor.astro'
+import Invert from './icons/Invert.astro'
 import Moon from './icons/Moon.astro'
 import Sun from './icons/Sun.astro'
 
@@ -22,7 +22,7 @@ const { locale } = Astro.props
   <button type="button" class="tt-open" aria-haspopup="true" aria-expanded="false" aria-controls="tt-menu">
     <Sun class="tt-icon" data-value="light" hidden />
     <Moon class="tt-icon" data-value="dark" hidden />
-    <Monitor class="tt-icon" data-value="system" hidden />
+    <Invert class="tt-icon" data-value="system" hidden />
   </button>
   <div id="tt-menu" class="tt-menu" hidden>
     <button type="button" class="tt-option" data-value="light">
@@ -34,7 +34,7 @@ const { locale } = Astro.props
       <span class="tt-option-label"></span>
     </button>
     <button type="button" class="tt-option" data-value="system">
-      <Monitor class="tt-option-icon" />
+      <Invert class="tt-option-icon" />
       <span class="tt-option-label"></span>
     </button>
   </div>
