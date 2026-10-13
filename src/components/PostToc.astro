@@ -54,6 +54,33 @@ const tree = treeOf(flat)
           <TocBranch items={tree} locale={locale} />
         </div>
       </nav>
+      {/* Runs during parse so the panel is placed before first paint. `main` is
+          already open here and its box does not depend on the article inside it. */}
+      <script is:inline>
+        {
+          const toc = document.getElementById('post-toc')
+          const main = document.getElementById('main-content')
+          if (toc && main) {
+            const PANEL_REM = 15
+            const GAP_REM = 1.5
+            const fit = () => {
+              const room = main.getBoundingClientRect().left
+              const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+              const panel = PANEL_REM * rem
+              const gutter = 1.5 * rem
+              const fits = room >= panel + gutter + GAP_REM * rem
+              document.documentElement.dataset.tocMode = fits ? 'panel' : 'handle'
+              if (!fits) return
+              toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - 4 * rem)}px`)
+            }
+            fit()
+            // Switching the body face reflows in two passes; anything counting
+            // frames reads the intermediate width.
+            new ResizeObserver(fit).observe(main)
+            addEventListener('resize', fit, { passive: true })
+          }
+        }
+      </script>
     </>
   )
 }
@@ -217,29 +244,6 @@ const tree = treeOf(flat)
 
     const eased = matchMedia('(prefers-reduced-motion: no-preference)').matches
 
-    const article = document.querySelector('article')
-    const PANEL_REM = 15
-    const GAP_REM = 1.5
-
-    const fitMode = (): void => {
-      if (article === null) return
-      const room = article.getBoundingClientRect().left
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-      const panel = PANEL_REM * rem
-      const gutter = 1.5 * rem
-      const fits = room >= panel + gutter + GAP_REM * rem
-      document.documentElement.dataset.tocMode = fits ? 'panel' : 'handle'
-      if (!fits) return
-      toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - 4 * rem)}px`)
-    }
-
-    fitMode()
-
-    // Switching the body face reflows in two passes; anything counting frames
-    // reads the intermediate width.
-    if (article !== null) new ResizeObserver(fitMode).observe(article)
-
-    addEventListener('resize', fitMode, { passive: true })
     // A heading level with the window top is already behind the reader.
     const LOOKAHEAD = 120
 
