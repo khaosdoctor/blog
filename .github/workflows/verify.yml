@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # The cache-parity steps below purge the Actions cache entry and dispatch
     # a fresh Build on a real divergence, on top of the job's default read.
     permissions:

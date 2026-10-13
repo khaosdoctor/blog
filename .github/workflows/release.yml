@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     steps:
       - uses: actions/checkout@v4
@@ -130,4 +130,4 @@ jobs:
             --title "v${VERSION}" \
             --notes-file /tmp/changelog.md
 
-          gh workflow run build.yml
+          gh workflow run build.yml --ref main -f deploy=true

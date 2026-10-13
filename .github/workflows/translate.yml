@@ -32,7 +32,7 @@ jobs:
   # model gets a job of its own. It hands its output over as an artifact and
   # never holds a token that could write to the repo.
   translate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     outputs:
@@ -125,7 +125,7 @@ jobs:
   review:
     needs: translate
     if: needs.translate.outputs.changed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       pull-requests: write
