@@ -58,7 +58,7 @@
     "rehype-callouts": "^2.2.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "textmode.js": "^0.17.1",
     "vue": "^3.5.41"
   },
@@ -81,6 +81,6 @@
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2",
     "typescript": "^6.0.3",
-    "wrangler": "^4.127.1"
+    "wrangler": "^4.150.0"
   }
 }
