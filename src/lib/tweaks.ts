@@ -22,7 +22,7 @@ export const conwayMaximumGenerationsPerSecond = 25
 export const conwayDefaultAutoFeedSeconds = 3
 export const conwayMinimumAutoFeedSeconds = 0
 export const conwayMaximumAutoFeedSeconds = 20
-export const conwayDefaultOpacity = 0.03
+export const conwayDefaultOpacity = 0.08
 export const conwayMinimumOpacity = 0
 export const conwayMaximumOpacity = 0.5
 
