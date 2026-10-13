@@ -34,7 +34,7 @@ const tree = treeOf(flat)
 
 {
   flat.length > 1 && (
-    <>
+    <div class="rail">
       <button
         class="handle"
         type="button"
@@ -54,34 +54,7 @@ const tree = treeOf(flat)
           <TocBranch items={tree} locale={locale} />
         </div>
       </nav>
-      {/* Runs during parse so the panel is placed before first paint. `main` is
-          already open here and its box does not depend on the article inside it. */}
-      <script is:inline>
-        {
-          const toc = document.getElementById('post-toc')
-          const main = document.getElementById('main-content')
-          if (toc && main) {
-            const PANEL_REM = 15
-            const GAP_REM = 1.5
-            const fit = () => {
-              const room = main.getBoundingClientRect().left
-              const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-              const panel = PANEL_REM * rem
-              const gutter = 1.5 * rem
-              const fits = room >= panel + gutter + GAP_REM * rem
-              document.documentElement.dataset.tocMode = fits ? 'panel' : 'handle'
-              if (!fits) return
-              toc.style.setProperty('--toc-left', `${Math.max(gutter, room - panel - 4 * rem)}px`)
-            }
-            fit()
-            // Switching the body face reflows in two passes; anything counting
-            // frames reads the intermediate width.
-            new ResizeObserver(fit).observe(main)
-            addEventListener('resize', fit, { passive: true })
-          }
-        }
-      </script>
-    </>
+    </div>
   )
 }
 
@@ -92,23 +65,48 @@ const tree = treeOf(flat)
     --toc-paper: var(--bg);
   }
 
+  :global(main):has(> .rail) {
+    position: relative;
+  }
+
+  /* Fills the page margin left of `main` from top to bottom, so the panel can
+     stick beside the article and the container query can ask whether it fits. */
+  .rail {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 100%;
+    inline-size: calc((100vw - 100%) / 2);
+    container: toc-rail / inline-size;
+  }
+
   .toc {
     position: fixed;
-    /* 38% pairs with the 64vh cap below: translateY(-50%) means the top edge is
-       this minus half the height, and lower values push it under the header. */
-    inset-block-start: 38%;
-    transform: translateY(-50%);
-    inset-inline-start: var(--toc-left, var(--gutter));
+    inset-block: 50% auto;
+    inset-inline: auto 0;
     z-index: 2;
-    inline-size: 13rem;
-    max-block-size: 64vh;
+    transform: translate(100%, -50%);
+    inline-size: min(75vw, 20rem);
+    max-block-size: 60vh;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 1rem 0.7rem;
     border: 3px double var(--toc-ink);
-    background: transparent;
+    border-inline-end: 0;
+    background: var(--bg);
     color: var(--toc-ink);
     font-family: var(--font-mono);
+    display: none;
+    transition:
+      transform var(--duration) var(--ease),
+      display var(--duration) var(--ease) allow-discrete;
+  }
+
+  .toc[data-open='true'] {
+    display: block;
+    transform: translate(0, -50%);
+    @starting-style {
+      transform: translate(100%, -50%);
+    }
   }
 
   .list {
@@ -156,79 +154,26 @@ const tree = treeOf(flat)
     display: block;
   }
 
-  /* Starting guess only, until the script writes `data-toc-mode`. */
-  @media (min-width: 72rem) {
+  /* 18rem is the 15rem panel plus a gutter on each side. */
+  @container toc-rail (min-width: 18rem) {
+    .toc,
+    .toc[data-open='true'] {
+      position: sticky;
+      inset-block-start: calc(var(--icon-btn-hit) + 2rem);
+      inset-inline: auto;
+      transform: none;
+      inline-size: 15rem;
+      max-block-size: 64vh;
+      margin-inline: auto min(4rem, 100cqi - 15rem - var(--gutter));
+      font-size: 1rem;
+      display: block;
+      border: 3px double var(--toc-ink);
+      transition: none;
+    }
+
     .handle {
       display: none;
     }
-  }
-
-  :root[data-toc-mode='handle'] .handle {
-    display: block;
-  }
-
-  /* Duplicated below for `[data-toc-mode='handle']`; the two cannot be one rule. */
-  @media (max-width: 71.99rem) {
-    .toc {
-      inset-block: 50% auto;
-      inset-inline: auto 0;
-      transform: translate(100%, -50%);
-      inline-size: min(75vw, 20rem);
-      max-block-size: 60vh;
-      background: var(--bg);
-      border-inline-end: 0;
-      display: none;
-      transition:
-        transform var(--duration) var(--ease),
-        display var(--duration) var(--ease) allow-discrete;
-    }
-
-    .toc[data-open='true'] {
-      display: block;
-      transform: translate(0, -50%);
-      @starting-style {
-        transform: translate(100%, -50%);
-      }
-    }
-  }
-
-  :root[data-toc-mode='handle'] .toc {
-    inset-block: 50% auto;
-    inset-inline: auto 0;
-    transform: translate(100%, -50%);
-    inline-size: min(75vw, 20rem);
-    max-block-size: 60vh;
-    background: var(--bg);
-    border-inline-end: 0;
-    display: none;
-    transition:
-      transform var(--duration) var(--ease),
-      display var(--duration) var(--ease) allow-discrete;
-  }
-
-  :root[data-toc-mode='handle'] .toc[data-open='true'] {
-    display: block;
-    transform: translate(0, -50%);
-    @starting-style {
-      transform: translate(100%, -50%);
-    }
-  }
-
-  :root[data-toc-mode='panel'] .toc {
-    inset-block-start: 38%;
-    inset-block-end: auto;
-    inset-inline: var(--toc-left, var(--gutter)) auto;
-    transform: translateY(-50%);
-    max-block-size: 64vh;
-    inline-size: 15rem;
-    font-size: 1rem;
-    display: block;
-    border: 3px double var(--toc-ink);
-    background: var(--bg);
-  }
-
-  :root[data-toc-mode='panel'] .handle {
-    display: none;
   }
 </style>
 
@@ -403,7 +348,7 @@ const tree = treeOf(flat)
 
       toc.addEventListener('click', (event) => {
         if ((event.target as HTMLElement).closest('a') === null) return
-        if (document.documentElement.dataset.tocMode === 'panel') return
+        if (!handle.checkVisibility()) return
         setOpen(false)
       })
 
