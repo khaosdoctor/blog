@@ -302,6 +302,44 @@ footer .icon-link:focus-visible {
   outline-offset: 2px;
 }
 
+footer .human-badge {
+  display: inline-flex;
+  margin-inline-start: 0.5rem;
+  padding: 0;
+}
+
+footer .human-badge:hover,
+footer .human-badge:focus-visible {
+  background: none;
+}
+
+footer .human-badge:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+footer .human-badge .badge-dark {
+  display: none;
+}
+
+:root[data-theme='dark'] footer .human-badge .badge-light {
+  display: none;
+}
+
+:root[data-theme='dark'] footer .human-badge .badge-dark {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) footer .human-badge .badge-light {
+    display: none;
+  }
+
+  :root:not([data-theme='light']) footer .human-badge .badge-dark {
+    display: block;
+  }
+}
+
 h1,
 h2,
 h3,

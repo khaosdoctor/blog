@@ -56,7 +56,7 @@ const LANGUAGE_NEUTRAL_KEYS = new Set([
  * everywhere. Every other literal in a user-visible attribute has to come from
  * t(), because the page it renders on can be in either language.
  */
-const LANGUAGE_NEUTRAL_TEXT = new Set(['Lucas Santos', 'Spotify', 'Slides'])
+const LANGUAGE_NEUTRAL_TEXT = new Set(['Lucas Santos', 'Spotify', 'Slides', 'Made by Human'])
 
 /**
  * How each route relates to the languages.
