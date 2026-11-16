@@ -43,11 +43,17 @@
   "https://2ality.com/2022/08/node-util-parseargs.html#parseargs-tokens": null,
   "https://2ality.com/2022/08/node-util-parseargs.html#using-tokens-to-implement-subcommands": null,
   "https://abdullah.today/encrypted-dotfiles/": null,
+  "https://addyosmani.com/blog/cognitive-surrender/": {
+    "title": "Cognitive Surrender | AddyOsmani.com",
+    "description": "Cognitive offloading is delegating to the AI and still owning the answer. Cognitive surrender is when the AI's output quietly becomes your output and there i...",
+    "publisher": "AddyOsmani.com"
+  },
   "https://adlega.com/blog/indie-hackers-a-new-path-in-tech-entrepreneurship/": {
     "title": "Indie Hackers: A New Path in Tech Entrepreneurship",
     "description": "Indie hackers are independent entrepreneurs who bootstrap profitable online businesses without venture capital. Learn the philosophy, economics, build-in-public culture, and how they",
     "publisher": "Adlega Blog"
   },
+  "https://aibubblefaq.com/guides/ai-bubble-vs-dot-com-bubble": null,
   "https://aka.ms/aks-bootcamp": {
     "title": "Info",
     "description": "At sunset, Mont-Saint Michel rises from the waters",
@@ -203,10 +209,15 @@
   "https://babeljs.io/repl#?browsers=defaults%2C%20not%20ie%2011%2C%20not%20ie_mob%2011&build=&builtIns=false&corejs=3.21&spec=false&loose=false&code_lz=MYewdgzgLgBFICECGECmA2ALDAvDAFACYCUuAfDAgK4BmNqATgHQ0MgC2RxT8AylAwCWYAOb4A5ACMUGTOOIAoBaEixpaACqoAHrDziAFlCgAHCAC4A9JYA2EJGHgQmhVADdxMAD4UApDxAAVRMTRgBhGXxSHzhEGSx8X2IgA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=true&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=env%2Cstage-0&prettier=false&targets=Node-16&version=7.17.8&externalPlugins=&assumptions=%7B%7D": {
     "title": "Babel"
   },
+  "https://ben.stolovitz.com/posts/consider-the-chairmaker/": {
+    "title": "Consider the chairmaker",
+    "description": "Software engineering is currently artisanal, but AI is making software much cheaper to make. What can we learn from the history of industrial design? Can we bring taste into a world of programming no…"
+  },
   "https://betrybe.com": {
     "title": "Trybe | Cursos de Inteligência Artificial e Tecnologia",
     "description": "Aprenda Inteligência Artificial, Programação e Product Managment com cursos feitos para o seu momento de vida e objetivos de carreira, de forma prática e em comunidade."
   },
+  "https://blog.bustikiller.com/2026/09/25/one-month-without-ai.html": null,
   "https://blog.clareglinka.com/2016/01/08/saving-dotfiles-with-symlinks-on-osx/": {
     "title": "Saving dotfiles with symlinks on OSX | Clare Codes"
   },
@@ -227,11 +238,6 @@
   "https://blog.lsantos.dev/?utm_source=medium&utm_medium=article&utm_campaign=dev_articles": {
     "title": "Lucas Santos",
     "description": "Conteúdos sobre tecnologia e programação escritos pelo Google Developer Expert, Docker Captain e Microsoft MVP Lucas Santos"
-  },
-  "https://blog.lsantos.dev/executando-containers-no-azure-container-instancies-com-docker/": {
-    "title": "Executando Containers no Azure Container Instancies com Docker",
-    "description": "Já imaginou como seria se você pudesse executar diretamente um container em uma infraestrutura cloud sem precisar fazer nada novo?",
-    "publisher": "Lucas Santos"
   },
   "https://blog.lsantos.dev/signup?utm_source=medium&utm_medium=article&utm_campaign=dev_articles": {
     "title": "Lucas Santos - Assine a Newsletter",
@@ -1234,6 +1240,10 @@
     "description": "Explore our guides and examples to integrate Stripe."
   },
   "https://doi.org/10.1145/3386327": null,
+  "https://dontpastetheai.com": {
+    "title": "Don",
+    "description": "If someone asks you something, send your answer. Not the AI"
+  },
   "https://dotfiles.github.io/": {
     "title": "GitHub does dotfiles - dotfiles.github.io"
   },
@@ -1461,6 +1471,10 @@
     "title": "Turing completeness - Wikipedia"
   },
   "https://en.wikipedia.org/wiki/Vi_\\(text_editor\\": null,
+  "https://enigma.lsantos.dev": {
+    "title": "Enigma JS | Lucas Santos",
+    "description": "A fully functional Enigma I implementation"
+  },
   "https://esbuild.github.io": {
     "title": "esbuild - An extremely fast bundler for the web"
   },
@@ -1483,6 +1497,7 @@
     "description": "Fast, unopinionated, minimalist web framework for Node.js",
     "publisher": "Express.js"
   },
+  "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fonline.visual-paradigm.com%2Frepository%2Fimages%2Fc6fc1dda-1bac-40be-918f-63d09008d6de%2Ffive-stages-of-grief-design%2Fillustrated-5-stages-of-grief.png&f=1&nofb=1&ipt=d048e735d203661e20d1b40ff40345dc2b4973b23eaec111809f2bc9fab21875&ipo=images": null,
   "https://faun.pub/running-harperdb-in-kubernetes-in-one-command-8c87e2788eb6": null,
   "https://fernandodoglio.substack.com/": {
     "title": "The Rambling of an old developer - by Fernando Doglio | Substack",
@@ -2056,6 +2071,11 @@
   "https://github.com/khaosdoctor/js-containerd-example/tree/main/child-process/static": {
     "title": "js-containerd-example/child-process/static at main · khaosdoctor/js-containerd-example",
     "description": "Codebase for my talk about integrating JS with containerd - khaosdoctor/js-containerd-example",
+    "publisher": "GitHub"
+  },
+  "https://github.com/khaosdoctor/libfprint-elan-0c28-patch": {
+    "title": "GitHub - khaosdoctor/libfprint-elan-0c28-patch: libfprint for Arch with press capture and SIGFM matching for the ELAN 04f3:0c28 fingerprint reader",
+    "description": "libfprint for Arch with press capture and SIGFM matching for the ELAN 04f3:0c28 fingerprint reader - khaosdoctor/libfprint-elan-0c28-patch",
     "publisher": "GitHub"
   },
   "https://github.com/khaosdoctor/my-notes": {
@@ -2953,6 +2973,7 @@
   "https://instagram.lsantos.dev": {
     "title": "Instagram"
   },
+  "https://intuitionlabs.ai/articles/ai-bubble-vs-dot-com-comparison": null,
   "https://istio.io/": {
     "title": "Istio",
     "description": "A service mesh for observability, security in depth, and management that speeds deployment cycles."
@@ -3334,6 +3355,15 @@
     "description": "Download the official OpenVPN Connect client VPN software for your operating system, developed and maintained by our experts. Get started with our VPN software.",
     "publisher": "OpenVPN"
   },
+  "https://osr.im/articles/craft": null,
+  "https://oss.lsantos.dev/opensynapse": {
+    "title": "opensynapse",
+    "description": "Remap buttons, set DPI and lighting on Razer mice from Linux."
+  },
+  "https://oss.lsantos.dev/proton-drive-linux-fs": {
+    "title": "proton-drive-linux-fs",
+    "description": "FUSE virtual filesystem for Proton Drive on Linux."
+  },
   "https://patorjk.com/software/taag/#p=display&f=ANSI%20Regular&t=lsantos.dev": {
     "title": "Text to ASCII Art Generator (TAAG)",
     "description": "An online text conversion tool for changing text into ASCII art pictures. The output can be used to decorate emails, online profiles, IMs, and more!"
@@ -3392,6 +3422,9 @@
   "https://qz.com/1740052/microsoft-shares-plan-to-make-anyone-a-software-developer/": null,
   "https://ramdajs.com": {
     "title": "Ramda Documentation"
+  },
+  "https://readhacker.news/s/774Ln": {
+    "title": "blog dds: 2026-10-08 — Thinking will become a hobby"
   },
   "https://registry.npmjs.org/-/npm/v1/attestations/@socketsecurity%2fcli@0.5.1": null,
   "https://resend.com/docs/introduction": {
@@ -3842,6 +3875,11 @@
     "description": "Docker Desktop is collaborative containerization software for developers. Get started and download Docker Desktop today on Mac, Windows, or Linux.",
     "publisher": "Docker"
   },
+  "https://www.forbes.com/councils/forbestechcouncil/2025/11/26/cognitive-debt-the-hidden-cost-of-generative-ai/": {
+    "title": "Cognitive Debt: The Hidden Cost Of Generative AI",
+    "description": "Using an AI output is harder than it first appears.",
+    "publisher": "Forbes"
+  },
   "https://www.freecodecamp.org/news/author/_staticvoid/": null,
   "https://www.freecodecamp.org/news/what-is-docker-used-for-a-docker-container-tutorial-for-beginners/": {
     "title": "What is Docker Used For? A Docker Container Tutorial for Beginners",
@@ -4026,6 +4064,7 @@
     "title": "sigstore",
     "description": "![sigstore logo][logo]"
   },
+  "https://www.ssp.sh/brain/the-problem-is-not-the-ai-code-but-nobody-knows-anything-anymore/": null,
   "https://www.staging-typescript.org/docs/home": null,
   "https://www.techradar.com/news/should-you-set-up-your-own-vpn-server": {
     "title": "Should you set up your own VPN server?",
@@ -4295,6 +4334,7 @@
     "description": "AI in a Box. But a different box.Get a dbrand skin and screen protector at https://dbrand.com/rabbitMKBHD Merch: http://shop.MKBHD.comTech I'm using right no...",
     "publisher": "YouTube"
   },
+  "https://www.youtube.com/watch?v=dyEpDobnkmA": null,
   "https://www.youtube.com/watch?v=eppWQKUixmI": {
     "title": "O livro que resume todos os livros - as regras não escritas da engenharia",
     "description": "Bora entender um pouco sobre as regras não escritas da engenharia, um livro sensacional que foi escrito em 1944, revisado em 2001 e que ainda é extremamente ...",
