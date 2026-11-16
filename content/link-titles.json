@@ -11,7 +11,10 @@
     "publisher": "GitHub"
   },
   "http://goto.ucsd.edu/~pvekris/docs/safets.pdf": null,
-  "http://lsantos.dev": null,
+  "http://lsantos.dev": {
+    "title": "Lucas Santos",
+    "description": "I'm Lucas Santos, a Brazilian software engineer in Stockholm with over a decade of experience. Backend, Node.js, open source, and building stuff."
+  },
   "http://macoratti.net/Default.aspx": null,
   "http://npm.im/keychain": null,
   "http://npm.im/tsyringe": null,
@@ -50,24 +53,23 @@
   },
   "https://adlega.com/blog/indie-hackers-a-new-path-in-tech-entrepreneurship/": {
     "title": "Indie Hackers: A New Path in Tech Entrepreneurship",
-    "description": "Indie hackers are independent entrepreneurs who bootstrap profitable online businesses without venture capital. Learn the philosophy, economics, build-in-public culture, and how they",
+    "description": "Indie hackers are independent entrepreneurs who bootstrap profitable online businesses without venture capital. Learn the philosophy, economics, build-in-public culture, and how they're reshaping tech…",
     "publisher": "Adlega Blog"
   },
-  "https://aibubblefaq.com/guides/ai-bubble-vs-dot-com-bubble": null,
   "https://aka.ms/aks-bootcamp": {
-    "title": "Info",
-    "description": "At sunset, Mont-Saint Michel rises from the waters",
-    "publisher": "Sök – Microsoft Bing"
+    "title": "O passado segue de pé",
+    "description": "Vistas impressionantes e estruturas firmemente ass",
+    "publisher": "Pesquisa - Microsoft Bing"
   },
   "https://aka.ms/fullcycle/az-free": {
-    "title": "Info",
-    "description": "At sunset, Mont-Saint Michel rises from the waters",
-    "publisher": "Sök – Microsoft Bing"
+    "title": "O passado segue de pé",
+    "description": "Vistas impressionantes e estruturas firmemente ass",
+    "publisher": "Pesquisa - Microsoft Bing"
   },
   "https://aka.ms/fullcycle/learn": {
-    "title": "Info",
-    "description": "At sunset, Mont-Saint Michel rises from the waters",
-    "publisher": "Sök – Microsoft Bing"
+    "title": "O passado segue de pé",
+    "description": "Vistas impressionantes e estruturas firmemente ass",
+    "publisher": "Pesquisa - Microsoft Bing"
   },
   "https://amzn.to/3b9EELZ": {
     "title": "Operadores Do Kubernetes | Amazon.com.br",
@@ -77,7 +79,10 @@
     "title": "Kubernetes: Tudo sobre orquestração de contêineres eBook : Santos, Lucas: Amazon.com.br: Loja Kindle",
     "description": "Kubernetes: Tudo sobre orquestração de contêineres eBook : Santos, Lucas: Amazon.com.br: Loja Kindle"
   },
-  "https://api.harperdb.io/#25977fef-53e8-40bf-a26a-43369bc3721c": null,
+  "https://api.harperdb.io/#25977fef-53e8-40bf-a26a-43369bc3721c": {
+    "title": "Operations API Overview | Harper Docs",
+    "description": "The Operations API provides a comprehensive set of capabilities for configuring, deploying, administering, and controlling Harper. It is the primary programmatic interface for all administrative and o…"
+  },
   "https://apps.timwhitlock.info/unicode/inspect?s=%F0%9F%98%B5%E2%80%8D%F0%9F%92%AB": {
     "title": "Unicode character inspector: 😵‍💫",
     "description": "Inspecting UTF-8 encoding of: 😵‍💫",
@@ -93,6 +98,7 @@
     "description": "I purchased an iPad Pro with the Smart Keyboard and Pencil to use as my main computer. Can it replace my local workstation? Is it powerful enough for my day-to-day tasks? Let's find out.",
     "publisher": "Fatih Arslan"
   },
+  "https://arstechnica.com/ai/2026/10/ai-coding-agents-generate-more-code-but-not-more-software/": null,
   "https://arxiv.org/pdf/2409.15152": null,
   "https://asdf-vm.com/": {
     "title": "asdf",
@@ -215,9 +221,13 @@
   },
   "https://betrybe.com": {
     "title": "Trybe | Cursos de Inteligência Artificial e Tecnologia",
-    "description": "Aprenda Inteligência Artificial, Programação e Product Managment com cursos feitos para o seu momento de vida e objetivos de carreira, de forma prática e em comunidade."
+    "description": "Treinamento em IA para empresas e cursos práticos de inteligência artificial, programação e produto. Workshops ao vivo, conteúdos gratuitos e parceria com 16 seccionais da OAB."
   },
-  "https://blog.bustikiller.com/2026/09/25/one-month-without-ai.html": null,
+  "https://blog.bustikiller.com/2026/09/25/one-month-without-ai.html": {
+    "title": "One month without AI",
+    "description": "Several months ago, I decided that AI contributions were no longer welcome in a FOSS project I am building and maintaining - LibreWeddingPlanner. It’s not that it got a lot of contributions with AI —…",
+    "publisher": "Bustikiller's Blog"
+  },
   "https://blog.clareglinka.com/2016/01/08/saving-dotfiles-with-symlinks-on-osx/": {
     "title": "Saving dotfiles with symlinks on OSX | Clare Codes"
   },
@@ -232,12 +242,14 @@
   "https://blog.insiderattack.net/how-not-to-measure-time-in-programming-11089d546180": null,
   "https://blog.insiderattack.net/how-not-to-measure-time-in-programming-11089d546180#:~:text=Experiment%203%20%E2%80%94%20Comparison": null,
   "https://blog.lsantos.dev": {
-    "title": "Lucas Santos",
-    "description": "Conteúdos sobre tecnologia e programação escritos pelo Google Developer Expert, Docker Captain e Microsoft MVP Lucas Santos"
+    "title": "Lucas Santos: Blog",
+    "description": "Artigos sobre desenvolvimento, tecnologia e opinião.",
+    "publisher": "lsantos.dev"
   },
   "https://blog.lsantos.dev/?utm_source=medium&utm_medium=article&utm_campaign=dev_articles": {
-    "title": "Lucas Santos",
-    "description": "Conteúdos sobre tecnologia e programação escritos pelo Google Developer Expert, Docker Captain e Microsoft MVP Lucas Santos"
+    "title": "Lucas Santos: Blog",
+    "description": "Artigos sobre desenvolvimento, tecnologia e opinião.",
+    "publisher": "lsantos.dev"
   },
   "https://blog.lsantos.dev/signup?utm_source=medium&utm_medium=article&utm_campaign=dev_articles": {
     "title": "Lucas Santos - Assine a Newsletter",
@@ -245,9 +257,9 @@
     "publisher": "Lucas Santos"
   },
   "https://blog.lsantos.dev/tag/deno": {
-    "title": "deno - Lucas Santos",
-    "description": "Conteúdos sobre tecnologia e programação escritos pelo Google Developer Expert, Docker Captain e Microsoft MVP Lucas Santos",
-    "publisher": "Lucas Santos"
+    "title": "LS: deno",
+    "description": "Artigos marcados com deno.",
+    "publisher": "lsantos.dev"
   },
   "https://bolt.new": {
     "title": "Bolt AI builder: Websites, apps & prototypes",
@@ -274,28 +286,32 @@
     "description": "Carbon is the easiest way to create and share beautiful images of your source code."
   },
   "https://cerebrascoder.com": {
-    "title": "Cerebras",
-    "description": "Cerebras powers the world's fastest AI inference on the biggest wafer chip. Cerebras CS-4 delivers up to 30x faster inference than GPUs."
+    "title": "Cerebras Code: Fast AI Coding with GLM-4.7",
+    "description": "Code, debug, and refactor with GLM-4.7 on Cerebras at 1,000+ tokens per second. Use Cerebras Code with Cline, OpenCode, Crush, and more."
+  },
+  "https://claude.ai/artifact/NYa8GL2HD9HKGoFFDzfGLP": {
+    "title": "Claude Artifact",
+    "description": "Try out Artifacts created by Claude users"
   },
   "https://code.visualstudio.com": {
-    "title": "Visual Studio Code - The open source AI code editor | Your home for multi-agent development",
-    "description": "Visual Studio Code is a free, open source AI code editor. Build with AI agents that plan, code, and debug for you. Manage multi-agent workflows across environments on Linux, macOS, and Windows."
+    "title": "Visual Studio Code - Build what comes next",
+    "description": "Code with precision, collaborate with agents, and continue your work wherever you are with Visual Studio Code."
   },
   "https://code.visualstudio.com/?WT.mc_id=blog-devto-ludossan": {
-    "title": "Visual Studio Code - The open source AI code editor | Your home for multi-agent development",
-    "description": "Visual Studio Code is a free, open source AI code editor. Build with AI agents that plan, code, and debug for you. Manage multi-agent workflows across environments on Linux, macOS, and Windows."
+    "title": "Visual Studio Code - Build what comes next",
+    "description": "Code with precision, collaborate with agents, and continue your work wherever you are with Visual Studio Code."
   },
   "https://code.visualstudio.com/?WT.mc_id=blog-personal-ludossan": {
-    "title": "Visual Studio Code - The open source AI code editor | Your home for multi-agent development",
-    "description": "Visual Studio Code is a free, open source AI code editor. Build with AI agents that plan, code, and debug for you. Manage multi-agent workflows across environments on Linux, macOS, and Windows."
+    "title": "Visual Studio Code - Build what comes next",
+    "description": "Code with precision, collaborate with agents, and continue your work wherever you are with Visual Studio Code."
   },
   "https://code.visualstudio.com/?WT.mc_id=opensource-0000-ludossan": {
-    "title": "Visual Studio Code - The open source AI code editor | Your home for multi-agent development",
-    "description": "Visual Studio Code is a free, open source AI code editor. Build with AI agents that plan, code, and debug for you. Manage multi-agent workflows across environments on Linux, macOS, and Windows."
+    "title": "Visual Studio Code - Build what comes next",
+    "description": "Code with precision, collaborate with agents, and continue your work wherever you are with Visual Studio Code."
   },
   "https://code.visualstudio.com/?WT.mc_id=personal-blog-ludossan": {
-    "title": "Visual Studio Code - The open source AI code editor | Your home for multi-agent development",
-    "description": "Visual Studio Code is a free, open source AI code editor. Build with AI agents that plan, code, and debug for you. Manage multi-agent workflows across environments on Linux, macOS, and Windows."
+    "title": "Visual Studio Code - Build what comes next",
+    "description": "Code with precision, collaborate with agents, and continue your work wherever you are with Visual Studio Code."
   },
   "https://code.visualstudio.com/Docs/languages/typescript#_using-newer-typescript-versions": {
     "title": "TypeScript in Visual Studio Code",
@@ -339,7 +355,10 @@
     "title": "Telegram Bot API",
     "description": "The Bot API is an HTTP-based interface created for developers keen on building bots for Telegram. To learn how to create…"
   },
-  "https://coreos.com/rkt/": null,
+  "https://coreos.com/rkt/": {
+    "title": "Red Hat OpenShift",
+    "description": "An application innovation platform delivering a comprehensive experience with tools to empower organizations to modernize and build new applications, accelerate AI adoption, and fuel growth."
+  },
   "https://cri-o.io": {
     "title": "cri-o",
     "description": "Lightweight Container Runtime for Kubernetes"
@@ -356,10 +375,11 @@
     "title": "The RSA Cryptosystem - Concepts | Practical Cryptography for Developers"
   },
   "https://dash.deno.com/kv": {
-    "title": "Deno Deploy",
-    "description": "Deno Deploy: deploy JavaScript globally to the edge."
+    "title": "Sign In | Deploy"
   },
-  "https://dash.deno.com/playground/good-gecko-26": null,
+  "https://dash.deno.com/playground/good-gecko-26": {
+    "title": "Sign In | Deploy"
+  },
   "https://dataexplorer.azure.com": {
     "title": "Azure Data Explorer"
   },
@@ -424,7 +444,7 @@
     "publisher": "Deno"
   },
   "https://deno.com/deploy/docs/kv": {
-    "title": "KV on Deno Deploy",
+    "title": "Deno KV Quick Start",
     "description": "In-depth documentation, guides, and reference materials for building secure, high-performance JavaScript and TypeScript applications with Deno",
     "publisher": "Deno"
   },
@@ -495,7 +515,7 @@
   },
   "https://deno.land/manual@v1.29.1/getting_started/configuration_file": {
     "title": "Config files",
-    "description": "How Deno projects are configured: first-class package.json support, the deno.json file for Deno",
+    "description": "How Deno projects are configured: first-class package.json support, the deno.json file for Deno's own tooling, .jsonc support and discovery, and an overview of what you can configure. See the deno.jso…",
     "publisher": "Deno"
   },
   "https://deno.land/manual@v1.32.4/runtime/kv": {
@@ -930,26 +950,26 @@
   },
   "https://developers.google.com/protocol-buffers/docs/encoding": {
     "title": "Encoding",
-    "description": "Explains how Protocol Buffers encodes data to files or to the wire."
+    "description": "Explains how Protobuf encodes data to files or to the wire."
   },
   "https://developers.google.com/protocol-buffers/docs/encoding#strings": {
     "title": "Encoding",
-    "description": "Explains how Protocol Buffers encodes data to files or to the wire."
+    "description": "Explains how Protobuf encodes data to files or to the wire."
   },
   "https://developers.google.com/protocol-buffers/docs/proto3#enum": {
     "title": "Language Guide (proto 3)",
-    "description": "Covers how to use the proto3 revision of the Protocol Buffers language in your project."
+    "description": "Covers how to use the proto3 revision of the Protobuf language in your project."
   },
   "https://developers.google.com/protocol-buffers/docs/proto3#scalar": {
     "title": "Language Guide (proto 3)",
-    "description": "Covers how to use the proto3 revision of the Protocol Buffers language in your project."
+    "description": "Covers how to use the proto3 revision of the Protobuf language in your project."
   },
   "https://developers.google.com/protocol-buffers/docs/reference/csharp/class/google/protobuf/well-known-types/empty": {
     "title": "Google.Protobuf.WellKnownTypes.Empty Class Reference"
   },
   "https://developers.google.com/protocol-buffers/docs/tutorials": {
     "title": "Tutorials",
-    "description": "Each tutorial in this section shows you how to implement a simple application using protocol buffers in your favourite language, introducing you to the language"
+    "description": "Each tutorial in this section shows you how to implement a simple application using Protobuf in your favourite language, introducing you to the language's Protobuf API as well as showing you the basic…"
   },
   "https://developers.mews.com/why-we-should-all-be-testing-our-typescript-types/": {
     "title": "Why we should all be testing our Typescript types",
@@ -978,8 +998,8 @@
     "publisher": "Docker"
   },
   "https://docs.deno.com/kv/manual/cron": {
-    "title": "Scheduling cron tasks",
-    "description": "In-depth documentation, guides, and reference materials for building secure, high-performance JavaScript and TypeScript applications with Deno",
+    "title": "Cron",
+    "description": "Scheduling and managing cron jobs in Deno Deploy, including defining cron jobs in code, execution lifecycle, retries, and observability.",
     "publisher": "Deno"
   },
   "https://docs.docker.com/compose/file-watch/": {
@@ -1236,13 +1256,17 @@
     "publisher": "Python documentation"
   },
   "https://docs.stripe.com/": {
-    "title": "Documentation",
-    "description": "Explore our guides and examples to integrate Stripe."
+    "title": "Documentação",
+    "description": "Conheça nossos guias e exemplos para integração da Stripe."
   },
   "https://doi.org/10.1145/3386327": null,
   "https://dontpastetheai.com": {
-    "title": "Don",
-    "description": "If someone asks you something, send your answer. Not the AI"
+    "title": "Don't paste the AI, please.",
+    "description": "If someone asks you something, send your answer. Not the AI's."
+  },
+  "https://dontpastetheai.com/pt-br": {
+    "title": "Não cole da IA, por favor.",
+    "description": "Se te perguntarem algo, mande a sua resposta. Não a da IA."
   },
   "https://dotfiles.github.io/": {
     "title": "GitHub does dotfiles - dotfiles.github.io"
@@ -1541,6 +1565,11 @@
     "description": "Emulating a 4-Bit Virtual Machine in (TypeScript\\JavaScript) (just Types no Script) - README.md",
     "publisher": "Gist"
   },
+  "https://gist.github.com/jbreckmckye/32587f2907e473dd06d68b0362fb0048": {
+    "title": "The CloudFlare outage was a good thing",
+    "description": "The CloudFlare outage was a good thing. GitHub Gist: instantly share code, notes, and snippets.",
+    "publisher": "Gist"
+  },
   "https://gist.github.com/khaosdoctor/549d1a62e840974e8cd75518d1826273": {
     "title": "RSA keyset generation using Euler's totient under 100 lines",
     "description": "RSA keyset generation using Euler's totient under 100 lines - rsa-euler.ts",
@@ -1724,7 +1753,7 @@
   },
   "https://github.com/asw101": {
     "title": "asw101 - Overview",
-    "description": "Open Source Engineering + Developer Relations at @Microsoft + @Azure - asw101",
+    "description": "Principal Software Engineer (Cloud Native OSS) at @Microsoft + @Azure - asw101",
     "publisher": "GitHub"
   },
   "https://github.com/augustohp": {
@@ -1843,13 +1872,13 @@
     "publisher": "GitHub"
   },
   "https://github.com/features/codespaces": {
-    "title": "GitHub Codespaces",
+    "title": "GitHub Codespaces · Cloud Development Environment · GitHub",
     "description": "GitHub Codespaces gets you up and coding faster with fully configured, secure cloud development environments native to GitHub.",
     "publisher": "GitHub"
   },
   "https://github.com/folke": {
     "title": "folke - Overview",
-    "description": "folke has 132 repositories available. Follow their code on GitHub.",
+    "description": "folke has 133 repositories available. Follow their code on GitHub.",
     "publisher": "GitHub"
   },
   "https://github.com/fromdeno/deno2node": {
@@ -1994,7 +2023,7 @@
   },
   "https://github.com/khaosdoctor/blog-theme/issues/new?title=[BUG]:%20&labels=bug&assignees=khaosdoctor": {
     "title": "Build software better, together",
-    "description": "GitHub is where people build software. More than 150 million people use GitHub to discover, fork, and contribute to over 420 million projects.",
+    "description": "GitHub is where people build software. More than 225 million people use GitHub to discover, fork, and contribute to over 800 million projects.",
     "publisher": "GitHub"
   },
   "https://github.com/khaosdoctor/containerd-integration-example": {
@@ -2155,7 +2184,7 @@
   },
   "https://github.com/khaosdoctor/zaqar/packages/404513": {
     "title": "Build software better, together",
-    "description": "GitHub is where people build software. More than 150 million people use GitHub to discover, fork, and contribute to over 420 million projects.",
+    "description": "GitHub is where people build software. More than 225 million people use GitHub to discover, fork, and contribute to over 800 million projects.",
     "publisher": "GitHub"
   },
   "https://github.com/kubernetes-incubator/rktlet": {
@@ -2215,7 +2244,7 @@
   },
   "https://github.com/microsoft/TypeScript/issues/33892": {
     "title": "Allow specifying interface implements clauses for the static side of classes · Issue #33892 · microsoft/TypeScript",
-    "description": "Search Terms class static side syntax interface type expression Suggestion Currently, you can only specify the static side interface of a class with a declaration. From the handbook: const Clock: C...",
+    "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output. - Allow specifying interface implements clauses for the static side of classes · Issue #33892 · microsoft/TypeScript",
     "publisher": "GitHub"
   },
   "https://github.com/microsoft/TypeScript/issues/34516": {
@@ -2280,7 +2309,7 @@
   },
   "https://github.com/nodejs/docker-node/blob/1d6a051d71e817f3947612a260ddcb02e48c2f74/14/stretch/Dockerfile": {
     "title": "docker-node/14/stretch/Dockerfile at 1d6a051d71e817f3947612a260ddcb02e48c2f74 · nodejs/docker-node",
-    "description": "Official Docker Image for Node.js :whale: :turtle: :rocket: - nodejs/docker-node",
+    "description": "Official Docker Images for Node.js :whale: :turtle: :rocket: - nodejs/docker-node",
     "publisher": "GitHub"
   },
   "https://github.com/nodejs/node/blob/74ddce8853e8c3de90f1037940ee5dcf38201b65/lib/internal/test_runner/mock/mock_timers.js": {
@@ -2369,8 +2398,8 @@
     "publisher": "GitHub"
   },
   "https://github.com/nvm-sh/nvm": {
-    "title": "GitHub - nvm-sh/nvm: Node Version Manager - POSIX-compliant bash script to manage multiple active node.js versions. $nvm: 3ArcxqLtXMmBnWbbtfwQgVL3MNnDsggzgGDtXMnjpump",
-    "description": "Node Version Manager - POSIX-compliant bash script to manage multiple active node.js versions. $nvm: 3ArcxqLtXMmBnWbbtfwQgVL3MNnDsggzgGDtXMnjpump - nvm-sh/nvm",
+    "title": "GitHub - nvm-sh/nvm: Node Version Manager - POSIX-compliant bash script to manage multiple active node.js versions.",
+    "description": "Node Version Manager - POSIX-compliant bash script to manage multiple active node.js versions. - nvm-sh/nvm",
     "publisher": "GitHub"
   },
   "https://github.com/opencontainers/distribution-spec": {
@@ -2395,7 +2424,7 @@
   },
   "https://github.com/opencontainers/runc/releases": {
     "title": "Releases · opencontainers/runc",
-    "description": "CLI tool for spawning and running containers according to the OCI specification - opencontainers/runc",
+    "description": "CLI tool for spawning and running containers according to the OCI specification - Releases · opencontainers/runc",
     "publisher": "GitHub"
   },
   "https://github.com/opencontainers/runtime-spec/blob/master/spec.md": {
@@ -2410,7 +2439,7 @@
   },
   "https://github.com/orgs/kedacore/teams/keda-maintainers": {
     "title": "Build software better, together",
-    "description": "GitHub is where people build software. More than 150 million people use GitHub to discover, fork, and contribute to over 420 million projects.",
+    "description": "GitHub is where people build software. More than 225 million people use GitHub to discover, fork, and contribute to over 800 million projects.",
     "publisher": "GitHub"
   },
   "https://github.com/orta": {
@@ -2450,7 +2479,7 @@
   },
   "https://github.com/settings/tokens": {
     "title": "Build software better, together",
-    "description": "GitHub is where people build software. More than 150 million people use GitHub to discover, fork, and contribute to over 420 million projects.",
+    "description": "GitHub is where people build software. More than 225 million people use GitHub to discover, fork, and contribute to over 800 million projects.",
     "publisher": "GitHub"
   },
   "https://github.com/sindresorhus/meow": {
@@ -2624,8 +2653,8 @@
     "publisher": "GitHub"
   },
   "https://github.com/tc39/proposal-intl-messageformat/issues/58": {
-    "title": "Issue · tc39/proposal-intl-messageformat",
-    "description": "TC39 Proposal for Intl.MessageFormat. Contribute to tc39/proposal-intl-messageformat development by creating an account on GitHub.",
+    "title": "Please remove onError parameter from format/formatToParts · Issue #58 · tc39/proposal-intl-messageformat",
+    "description": "Currently, the format/formatToParts function 1.3.3 Intl.MessageFormat.prototype.format ( [ values [ , onError ] ] ) and 1.3.4 Intl.MessageFormat.prototype.formatToParts ( [ values [ , onError ] ] )...",
     "publisher": "GitHub"
   },
   "https://github.com/tc39/proposal-intl-numberformat-v3": {
@@ -2846,7 +2875,9 @@
     "title": "Download and install - The Go Programming Language"
   },
   "https://google.github.io/styleguide/jsguide.html": {
-    "title": "Google JavaScript Style Guide"
+    "title": "Google JavaScript Style Guide",
+    "description": "Style guides for Google-originated open-source projects",
+    "publisher": "Google Style Guides"
   },
   "https://grammy.dev": {
     "title": "grammY",
@@ -2875,6 +2906,9 @@
   "https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/": {
     "title": "Your GraphQL guide to handling JWTs on frontend clients",
     "description": "JWTs are a popular way of handling auth. Learn what a JWT is, pros/cons, and best practices in implementing JWT on the client-side with security in mind."
+  },
+  "https://heatherburns.tech/2025/10/22/democracy-and-the-open-internet-die-in-daylight/": {
+    "title": "Democracy and the open internet die in daylight – Hi, I'm Heather Burns"
   },
   "https://helm.sh": {
     "title": "Helm"
@@ -2937,13 +2971,16 @@
   },
   "https://hub.docker.com/extensions/docker/gremlin-extension": null,
   "https://hub.docker.com/r/harperdb/harperdb": {
-    "title": "harperdb/harperdb - Docker Image"
+    "title": "harperdb/harperdb - Docker Image",
+    "description": "Harper is a globally-distributed edge application platform."
   },
   "https://hub.docker.com/r/khaosdoctor/go-vote-api": {
-    "title": "khaosdoctor/go-vote-api - Docker Image"
+    "title": "khaosdoctor/go-vote-api - Docker Image",
+    "description": "Explore images from khaosdoctor/go-vote-api on Docker Hub. No description provided."
   },
   "https://hub.docker.com/r/khaosdoctor/go-vote-api-exporter": {
-    "title": "khaosdoctor/go-vote-api-exporter - Docker Image"
+    "title": "khaosdoctor/go-vote-api-exporter - Docker Image",
+    "description": "Explore images from khaosdoctor/go-vote-api-exporter on Docker Hub. No description provided."
   },
   "https://hub.docker.com/repository/docker/khaosdoctor/simple-node-api": null,
   "https://hurl.dev": {
@@ -2973,7 +3010,6 @@
   "https://instagram.lsantos.dev": {
     "title": "Instagram"
   },
-  "https://intuitionlabs.ai/articles/ai-bubble-vs-dot-com-comparison": null,
   "https://istio.io/": {
     "title": "Istio",
     "description": "A service mesh for observability, security in depth, and management that speeds deployment cycles."
@@ -2995,8 +3031,8 @@
     "description": "Install Jest using your favorite package manager:"
   },
   "https://jscomplete.com/learn/the-difference-between-callbacks-and-promises": {
-    "title": "Software we build and run — AZ.dev",
-    "description": "AZ is a software firm. We build software and run it. Learn, our adaptive learning product, reports its status live on this page.",
+    "title": "Personal learning paths and conversation practice — AZ.dev",
+    "description": "Personal learning paths that start where you are, an AI voice tutor that teaches you out loud, and role-play practice for hard conversations, scored afterward.",
     "publisher": "AZ.dev"
   },
   "https://jwt.io": {
@@ -3026,7 +3062,7 @@
   },
   "https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/": {
     "title": "Introducing Container Runtime Interface (CRI) in Kubernetes",
-    "description": "Editor",
+    "description": "Editor's note: this post is part of a series of in-depth articles on what's new in Kubernetes 1.5 At the lowest layers of a Kubernetes node is the software that, among other things, starts and stops c…",
     "publisher": "Kubernetes"
   },
   "https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/": {
@@ -3108,15 +3144,29 @@
     "title": "Lodash Documentation"
   },
   "https://lovable.dev": null,
-  "https://lsantos.dev": null,
-  "https://lsantos.dev/": null,
-  "https://lsantos.dev/?utm_source=blog&utm_medium=hello_world_post&utm_campaign=hello_world": null,
+  "https://lsantos.dev": {
+    "title": "Lucas Santos",
+    "description": "I'm Lucas Santos, a Brazilian software engineer in Stockholm with over a decade of experience. Backend, Node.js, open source, and building stuff."
+  },
+  "https://lsantos.dev/": {
+    "title": "Lucas Santos",
+    "description": "I'm Lucas Santos, a Brazilian software engineer in Stockholm with over a decade of experience. Backend, Node.js, open source, and building stuff."
+  },
+  "https://lsantos.dev/?utm_source=blog&utm_medium=hello_world_post&utm_campaign=hello_world": {
+    "title": "Lucas Santos",
+    "description": "I'm Lucas Santos, a Brazilian software engineer in Stockholm with over a decade of experience. Backend, Node.js, open source, and building stuff."
+  },
   "https://lsantos.dev/keychain-pull": {
     "title": "Add type definitions for Keychain NPM module by khaosdoctor · Pull Request #64842 · DefinitelyTyped/DefinitelyTyped",
     "description": "Please fill in this template. Use a meaningful title for the pull request. Include the name of the package modified. Test the change in your own code. (Compile and run.) Add or edit tests to re...",
     "publisher": "GitHub"
   },
   "https://macoratti.net/Default.aspx": null,
+  "https://madebyhuman.iamjarl.com/badges": {
+    "title": "Made by Human Badges | Free, open-source SVG",
+    "description": "Free SVG badges that signal human creativity and intentional AI collaboration. Pick the badge that matches how you build.",
+    "publisher": "Made by Human"
+  },
   "https://maggiepint.com/2017/04/09/fixing-javascript-date-getting-started/": {
     "title": "Fixing JavaScript Date – Getting Started",
     "description": "I’ve been off the blog for a while, which has to do with a lot of things going on in my life. That said, I’m happy to report that I’m back with stories about a big project –…",
@@ -3126,6 +3176,10 @@
     "title": "Fixing JavaScript Date – Web Compatibility and Reality",
     "description": "In my previous post, I discussed things that could be fixed in JavaScript’s date implementation – if we wanted to. In this post, I’ll discuss things that can’t be fixed &#82…",
     "publisher": "Maggie's Blog"
+  },
+  "https://manuelmoreale.com/thoughts/look-another-ai-browser": {
+    "title": "Look, another AI browser – Manu",
+    "description": "Yesterday, OpenAI announced Atlas, its AI browser. To the surprise of literally nobody, it’s Chromium with AI slapped on top. Perplexity also has a …"
   },
   "https://marketplace.visualstudio.com/items?itemName=gabrielepmattia.wordcount&WT.mc_id=blog-devto-ludossan": {
     "title": "Word Count - Visual Studio Marketplace",
@@ -3212,7 +3266,7 @@
   },
   "https://mvp.microsoft.com/?WT.mc_id=personal-blog-ludossan": {
     "title": "MVP Communities",
-    "description": "Transform your passion and skills into globally recognized community leadership. Whether you"
+    "description": "Transform your passion and skills into globally recognized community leadership. Whether you're a student expert or technology professional or industry leader, you belong here. Join us and make a real…"
   },
   "https://news.lsantos.dev": {
     "title": "ls -news | Um newsletter por Lucas Santos",
@@ -3222,7 +3276,7 @@
   "https://ngrok.io": {
     "title": "ngrok: deliver your apps, APIs, and AI on local and prod",
     "description": "ngrok is developer infrastructure that routes and secures traffic to your apps, APIs, and AI models, wherever they run. Start on localhost, ship to prod.",
-    "publisher": "ngrok.com"
+    "publisher": "ngrok"
   },
   "https://nnja.medium.com/the-ultimate-guide-to-memorable-tech-talks-part-1-an-introduction-771811787338": null,
   "https://nodejs.org": {
@@ -3234,46 +3288,46 @@
     "description": "Node.js® is a free, open-source, cross-platform JavaScript runtime environment that lets developers create servers, web apps, command line tools and scripts."
   },
   "https://nodejs.org/api/assert.html": {
-    "title": "Assert | Node.js v26.8.1 Documentation"
+    "title": "Assert | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/buffer.html#class-blob": {
-    "title": "Buffer | Node.js v26.8.1 Documentation"
+    "title": "Buffer | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/cli.html#--experimental-loadermodule": {
-    "title": "Command-line API | Node.js v26.8.1 Documentation"
+    "title": "Command-line API | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/crypto.html#crypto_crypto_randomuuid_options": {
-    "title": "Crypto | Node.js v26.8.1 Documentation"
+    "title": "Crypto | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/esm.html#esm_json_modules": {
-    "title": "Modules: ECMAScript modules | Node.js v26.8.1 Documentation"
+    "title": "Modules: ECMAScript modules | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/esm.html#esm_urls": {
-    "title": "Modules: ECMAScript modules | Node.js v26.8.1 Documentation"
+    "title": "Modules: ECMAScript modules | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/module.html#enabling": {
-    "title": "Modules: `node:module` API | Node.js v26.8.1 Documentation"
+    "title": "Modules: `node:module` API | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/module.html#transpilation": {
-    "title": "Modules: `node:module` API | Node.js v26.8.1 Documentation"
+    "title": "Modules: `node:module` API | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/n-api.html": {
-    "title": "Node-API | Node.js v26.8.1 Documentation"
+    "title": "Node-API | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/readline.html": {
-    "title": "Readline | Node.js v26.8.1 Documentation"
+    "title": "Readline | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/test.html": {
-    "title": "Test runner | Node.js v26.8.1 Documentation"
+    "title": "Test runner | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/timers.html#timers-promises-api": {
-    "title": "Timers | Node.js v26.8.1 Documentation"
+    "title": "Timers | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/typescript.html": {
-    "title": "Modules: TypeScript | Node.js v26.8.1 Documentation"
+    "title": "Modules: TypeScript | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/api/worker_threads.html#class-broadcastchannel-extends-eventtarget": {
-    "title": "Worker threads | Node.js v26.8.1 Documentation"
+    "title": "Worker threads | Node.js v26.13.1 Documentation"
   },
   "https://nodejs.org/dist/latest-v18.x/docs/api/test.html": {
     "title": "Test runner | Node.js v18.20.8 Documentation"
@@ -3355,7 +3409,16 @@
     "description": "Download the official OpenVPN Connect client VPN software for your operating system, developed and maintained by our experts. Get started with our VPN software.",
     "publisher": "OpenVPN"
   },
-  "https://osr.im/articles/craft": null,
+  "https://osr.im/articles/craft": {
+    "title": "Craft over prompts",
+    "description": "I ran out of Claude Code tokens the other day and, for a few minutes, it felt like I had forgotten how to write code.",
+    "publisher": "Oscar Marion"
+  },
+  "https://osr.im/articles/craft/": {
+    "title": "Craft over prompts",
+    "description": "I ran out of Claude Code tokens the other day and, for a few minutes, it felt like I had forgotten how to write code.",
+    "publisher": "Oscar Marion"
+  },
   "https://oss.lsantos.dev/opensynapse": {
     "title": "opensynapse",
     "description": "Remap buttons, set DPI and lighting on Razer mice from Linux."
@@ -3398,8 +3461,8 @@
     "description": "Prometheus project documentation for Exporters and integrations"
   },
   "https://protobuf.dev/": {
-    "title": "Protocol Buffers",
-    "description": "Protocol Buffers are language-neutral, platform-neutral extensible mechanisms for serializing structured data."
+    "title": "Protobuf",
+    "description": "Protobuf is a language-neutral, platform-neutral extensible mechanism for serializing structured data."
   },
   "https://pt.wikipedia.org/wiki/Calend%C3%A1rio_Fixo_Internacional": {
     "title": "Calendário Fixo Internacional – Wikipédia, a enciclopédia livre"
@@ -3423,6 +3486,10 @@
   "https://ramdajs.com": {
     "title": "Ramda Documentation"
   },
+  "https://read.readwise.io/later/read/01m50n0v3vp2hv8wr1yh8pc412": {
+    "title": "Reader",
+    "description": "Read and highlight anything"
+  },
   "https://readhacker.news/s/774Ln": {
     "title": "blog dds: 2026-10-08 — Thinking will become a hobby"
   },
@@ -3443,22 +3510,28 @@
     "publisher": "Robin Pokorny"
   },
   "https://rocketseat.com.br/": {
-    "title": "Ecossistema completo para desenvolver talentos digitais",
+    "title": "O MENOR PREÇO DO ANO para aprender tecnologia e IA | Rocketseat",
     "description": "Aprenda com especialistas, desenvolva competências alinhadas ao mercado digital e evolua por meio de cursos, graduações e soluções para empresas.",
     "publisher": "Rocketseat"
   },
-  "https://satanacchio.hashnode.dev/everything-you-need-to-know-about-nodejs-type-stripping#heading-why-typescript": null,
+  "https://satanacchio.hashnode.dev/everything-you-need-to-know-about-nodejs-type-stripping#heading-why-typescript": {
+    "title": "Node.js Type Stripping Explained",
+    "description": "Discover everything about Node.js TypeScript integration, the technical details, benefits, and reasoning behind this highly anticipated feature.",
+    "publisher": "Marco's Blog"
+  },
   "https://search.sigstore.dev/?logIndex=15574424": {
     "title": "Rekor Search",
     "description": "Search the Rekor public transparency log"
   },
   "https://shattered.io": {
-    "title": "Shattered",
-    "description": "Shattered covers AI, cybersecurity, cloud computing, hardware, software, startups, gaming, and mobile technology."
+    "title": "Shattered: Gaming, AI, Security & PC Hardware News",
+    "description": "Shattered covers gaming, esports, AI models, security, privacy, crypto and PC hardware with tested how-to guides, head-to-head comparisons and daily news.",
+    "publisher": "Shattered"
   },
   "https://shattered.io/": {
-    "title": "Shattered",
-    "description": "Shattered covers AI, cybersecurity, cloud computing, hardware, software, startups, gaming, and mobile technology."
+    "title": "Shattered: Gaming, AI, Security & PC Hardware News",
+    "description": "Shattered covers gaming, esports, AI models, security, privacy, crypto and PC hardware with tested how-to guides, head-to-head comparisons and daily news.",
+    "publisher": "Shattered"
   },
   "https://shell.azure.com/?WT.mc_id=blog-personal-ludossan": {
     "title": "Microsoft Azure"
@@ -3485,8 +3558,12 @@
     "title": "npm Registry Code Signing",
     "description": "Socket explains the newly released npm provenance provided by GitHub."
   },
-  "https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=290;drc=9013bf7765d7febaa58224542782307fa952ac14": null,
-  "https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=465;drc=55cbb2ce3be503d9096688b72d5af0e40a9e598b": null,
+  "https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=290;drc=9013bf7765d7febaa58224542782307fa952ac14": {
+    "title": "Sign in - Google Accounts"
+  },
+  "https://source.chromium.org/chromium/chromium/src/+/main:v8/src/baseline/baseline-compiler.cc;l=465;drc=55cbb2ce3be503d9096688b72d5af0e40a9e598b": {
+    "title": "Sign in - Google Accounts"
+  },
   "https://speakerdeck.com/khaosdoctor": {
     "title": "Lucas Santos (@khaosdoctor) on Speaker Deck"
   },
@@ -3511,7 +3588,10 @@
   "https://speakerdeck.com/player/e21b68c7db134ade9b2dad81246a3e53": {
     "title": "Entendendo o ecossistema de containers - Speaker Deck"
   },
-  "https://squidit.com.br/": null,
+  "https://squidit.com.br/": {
+    "title": "Squid - Real People Make Culture",
+    "description": "A Squid é uma empresa de tecnologia com 11 anos de experiência em marketing de influência, conectando marcas a resultados reais por meio de dados, criatividade e uma comunidade de mais de 300 mil crea…"
+  },
   "https://stackoverflow.com/a/26391999/4186093": null,
   "https://stackoverflow.com/a/29416340": null,
   "https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp": null,
@@ -3520,7 +3600,7 @@
     "title": "JavaScript Standard Style"
   },
   "https://stateofjs.com/": {
-    "title": "Redirecting to: /en-US"
+    "title": "State of JavaScript"
   },
   "https://studio.harperdb.io": {
     "title": "Studio :: HarperDB",
@@ -3545,7 +3625,7 @@
   },
   "https://t.co/NCc50FOgJa": {
     "title": "@levelsio (@levelsio) on X",
-    "description": "✨ https://t.co/6TyHKajGaJ has now gone from $0 to $1 million ARR in just 17 days! 💸 Revenue update: $87,000 MRR (which is $1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: htt…",
+    "description": "✨ https://t.co/UVJczDtWZ5 has now gone from $0 to $1 million ARR in just 17 days! 💸 Revenue update: $87,000 MRR (which is $1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: htt…",
     "publisher": "X (formerly Twitter)"
   },
   "https://t.co/OrTgUJzKLa": {
@@ -3641,7 +3721,7 @@
   },
   "https://twitter.com/Paty_Go": {
     "title": "Patyk (@Paty_Go) on X",
-    "description": "268 followers · 560 following. Joined Aug 2009. See the latest conversations with @Paty_Go",
+    "description": "270 followers · 561 following. Joined Aug 2009. See the latest conversations with @Paty_Go",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/ThatArrowsmith/status/1896186694614802432?ref_src=twsrc%5Etfw": {
@@ -3675,13 +3755,13 @@
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/_StaticVoid/status/1604132910768029700": {
-    "title": "X on X",
-    "description": "X on X",
+    "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
+    "description": "To revisando um código aqui, várias coisinhas e tals, mas ai cheguei em um lugar com callbacks. Fui ver a data do código, 2 meses atrás... Aí não né meu irmão em Cristo...",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/_StaticVoid/status/1708966256487911727": {
     "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
-    "description": "Quem aqui sabia dessa? O ECMAScript (aka #JavaScript) tem uma seção na spec (13.3.12) chamada Meta Properties. Entre essas propriedades tem uma chamada `https://t.co/JdTADIVvwi` https://t.co/RKtDQxY90…",
+    "description": "Quem aqui sabia dessa? O ECMAScript (aka #JavaScript) tem uma seção na spec (13.3.12) chamada Meta Properties. Entre essas propriedades tem uma chamada `https://t.co/ih6kN6ra4D` https://t.co/Rop5BklJa…",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/_StaticVoid/status/1733098042390106571?ref_src=twsrc%5Etfw": {
@@ -3701,7 +3781,7 @@
   },
   "https://twitter.com/_staticvoid": {
     "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
-    "description": "Specialist Engineer in 🇸🇪 • 🏆 @GoogleDevExpert • 🏆 @MVPAward •🧠 INTJ-T• ⚛️ I like complicated beep boops",
+    "description": "Specialist Engineer in 🇸🇪 • 🏆 @GoogleDevExpert • 🏆 @MVPAward •🧠 INTJ-A• ⚛️ I like complicated beep boops",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/eminetto": {
@@ -3709,8 +3789,14 @@
     "description": "Software developer, Teacher, speaker. Principal Software Engineer at @picpay. Co-organizer of @gopherconbrasil. @GoogleDevExpert in Go",
     "publisher": "X (formerly Twitter)"
   },
-  "https://twitter.com/hashtag/AKS?src=hash&ref_src=twsrc%5Etfw": null,
-  "https://twitter.com/hashtag/Kubernetes?src=hash&ref_src=twsrc%5Etfw": null,
+  "https://twitter.com/hashtag/AKS?src=hash&ref_src=twsrc%5Etfw": {
+    "title": "X - The Everything App",
+    "publisher": "X (formerly Twitter)"
+  },
+  "https://twitter.com/hashtag/Kubernetes?src=hash&ref_src=twsrc%5Etfw": {
+    "title": "X - The Everything App",
+    "publisher": "X (formerly Twitter)"
+  },
   "https://twitter.com/igorhalfeld": {
     "title": "Igor ➔ extcontabilidade.com.br (@igorhalfeld) on X",
     "description": "Building @extcontabilidad #buildinpublic #indiehacker Tweets in 🇺🇸 & 🇧🇷",
@@ -3723,12 +3809,12 @@
   },
   "https://twitter.com/levelsio/status/1899596115210891751?ref_src=twsrc%5Etfw": {
     "title": "@levelsio (@levelsio) on X",
-    "description": "✨ https://t.co/6TyHKajGaJ has now gone from $0 to $1 million ARR in just 17 days! 💸 Revenue update: $87,000 MRR (which is $1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: htt…",
+    "description": "✨ https://t.co/UVJczDtWZ5 has now gone from $0 to $1 million ARR in just 17 days! 💸 Revenue update: $87,000 MRR (which is $1M ARR) My first project ever to go up this fast 🤯 Only 3 ads left now: htt…",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/levelsio?ref_src=twsrc%5Etfw": {
     "title": "@levelsio (@levelsio) on X",
-    "description": "💸https://t.co/sQ0aiU7v02 📸https://t.co/lAyoqmSBRX $80K/m 🎮https://t.co/tF49atJ396 $44K/m 🏡https://t.co/1oqUgfD6CZ $23K/m 👙@X $20K/m 🌍https://t.co/UXK5AFqCaQ $15K/m 💾https://t.co/T74ZwJ1F0C 🏩ht…",
+    "description": "💸https://t.co/sQ0aiU7v02 📸https://t.co/lAyoqmSBRX $68K/m 🎮https://t.co/tF49atJ396 $44K/m 🏡https://t.co/1oqUgfD6CZ $23K/m 👙@X $20K/m 🌍https://t.co/UXK5AFqCaQ $7K/m 🏩https://t.co/4p4dzTDVN6 $3K/m…",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/marcelgsantos/status/1599800850880532480": {
@@ -3743,7 +3829,7 @@
   },
   "https://twitter.com/o_gabsferreira": {
     "title": "Gabs Ferreira (@o_gabsferreira) on X",
-    "description": "Criador. Falo sobre tecnologia, carreira internacional e pessoas.",
+    "description": "Mentoria de carreira internacional: https://t.co/0KRet3fnzp Vagas remotas pra devs: https://t.co/0KRet3fnzp Dev Advocate na @searchapi_io 🐙",
     "publisher": "X (formerly Twitter)"
   },
   "https://twitter.com/roziscoding": {
@@ -3753,7 +3839,7 @@
   },
   "https://twitter.lsantos.dev": {
     "title": "Lucas Santos 🇧🇷🇸🇪 (@_StaticVoid) on X",
-    "description": "Specialist Engineer in 🇸🇪 • 🏆 @GoogleDevExpert • 🏆 @MVPAward •🧠 INTJ-T• ⚛️ I like complicated beep boops",
+    "description": "Specialist Engineer in 🇸🇪 • 🏆 @GoogleDevExpert • 🏆 @MVPAward •🧠 INTJ-A• ⚛️ I like complicated beep boops",
     "publisher": "X (formerly Twitter)"
   },
   "https://type-level-typescript.com": {
@@ -3771,8 +3857,8 @@
     "title": "undici | Node.js Undici"
   },
   "https://unix.foo/posts/last-people-who-know-how-it-works/": {
-    "title": "The Last People Who Know How It Works · unix.foo",
-    "description": "You only ever know the things you can lose to.",
+    "title": "The Last People Who Know How It Works",
+    "description": "What we lose when we no longer have to learn how our computers work.",
     "publisher": "unix.foo"
   },
   "https://unsplash.com/?utm_source=medium&utm_medium=referral": null,
@@ -3794,7 +3880,7 @@
   },
   "https://vercel.com/docs": {
     "title": "Vercel Documentation",
-    "description": "Vercel is the AI Cloud - a unified platform for building, deploying, and scaling AI-powered applications and agentic workloads."
+    "description": "Find guides and reference documentation for building, deploying, and managing applications with Vercel, including the CLI, SDKs, and APIs."
   },
   "https://vercel.com/docs/fundamentals": {
     "title": "Vercel fundamental concepts",
@@ -3802,7 +3888,7 @@
   },
   "https://vim-adventures.com": {
     "title": "Learn VIM while playing a game - VIM Adventures",
-    "description": "VIM Adventures is an online game based on VIM"
+    "description": "VIM Adventures is an online game based on VIM's keyboard shortcuts. It's the \"Zelda meets text editing\" game. So come have some fun and learn some VIM!"
   },
   "https://vimeo.com/476516779": {
     "title": "enterJS 2020: gRPC with Node.js (Lucas Santos) - TN",
@@ -3819,8 +3905,8 @@
     "publisher": "Attention Deficit Marketing Disorder (ADMD)"
   },
   "https://www.advancedcustomfields.com/blog/acf-plugin-no-longer-available-on-wordpress-org/": {
-    "title": "ACF | ACF Plugin no longer available on WordPress.org",
-    "description": "We were saddened and appalled by Matt Mullenweg’s actions this morning appropriating the Advanced Custom Fields plugin that our ACF team has been actively",
+    "title": "ACF | Advanced Custom Fields availability on WordPress.org: latest update",
+    "description": "Current status: Advanced Custom Fields (ACF®) is available in the WordPress.org plugin directory, where the ACF team at WP Engine publishes and maintains",
     "publisher": "ACF"
   },
   "https://www.chaijs.com": {
@@ -3840,9 +3926,13 @@
   "https://www.crockford.com/base32.html": {
     "title": "Base 32"
   },
+  "https://www.currentaffairs.org/news/why-were-banning-ai": {
+    "title": "Why We’re Banning AI",
+    "description": "We urgently need to protect human thought and creativity. Our magazine is committing itself to remaining handmade. Ensure every publication you support does the same."
+  },
   "https://www.devmedia.com.br/hashmap-java-trabalhando-com-listas-key-value/29811": {
     "title": "HashMap Java: Trabalhando com Listas key-value",
-    "description": "Veja neste artigo detalhes do funcionamento do HashMap em Java, assim como seu atributo Load Factor, que � pouco comentado e pouco usado. Leia agora!",
+    "description": "Veja neste artigo detalhes do funcionamento do HashMap em Java, assim como seu atributo Load Factor, que é pouco comentado e pouco usado. Leia agora!",
     "publisher": "DevMedia"
   },
   "https://www.docker.com/blog/docker-engine-1-11-runc/": {
@@ -3852,7 +3942,7 @@
   },
   "https://www.docker.com/blog/running-a-container-in-aci-with-docker-desktop-edge/": {
     "title": "Docker Blog | Docker",
-    "description": "The Minimus registry goes offline on October 22. Here is the migration path, the free help Docker is offering, and where to start.",
+    "description": "Give AI coding agents live web access with the Firecrawl kit for Docker Sandboxes. Learn to search, scrape, and crawl websites with network controls.",
     "publisher": "Docker"
   },
   "https://www.docker.com/blog/what-is-containerd-runtime/": {
@@ -3907,6 +3997,10 @@
     "description": "A home VPN can be a handy tool if you're traveling.",
     "publisher": "How-To Geek"
   },
+  "https://www.human-made.work": {
+    "title": "Made By Humans",
+    "description": "The official website that verifies if your work is 100% human-made."
+  },
   "https://www.instagram.com/p/Ch9cIUdL4Am/": {
     "title": "Instagram"
   },
@@ -3949,8 +4043,13 @@
     "publisher": "LinkedIn"
   },
   "https://www.linkedin.com/posts/jhonathansoares_10-anos-de-conselhos-sobre-programa%C3%A7%C3%A3o-em-activity-7275651115512135680-RIcm/?utm_source=share&utm_medium=member_desktop": {
-    "title": "+10 anos de conselhos sobre programação em 60 segundos: - Aprenda a usar debugger profundamente. - Escreva código como se você fosse mantê-lo para sempre. Provavelmente, você vai. - Deixe o código… | Jhonathan de Souza Soares | 65 comments",
+    "title": "+10 anos de conselhos sobre programação em 60 segundos: - Aprenda a usar debugger profundamente. - Escreva código como se você fosse mantê-lo para sempre. Provavelmente, você vai. - Deixe o código… | Jhonathan de Souza Soares | 63 comments",
     "description": "+10 anos de conselhos sobre programação em 60 segundos: - Aprenda a usar debugger profundamente. - Escreva código como se você fosse mantê-lo para sempre. Provavelmente, você vai. - Deixe o código mel…",
+    "publisher": "LinkedIn"
+  },
+  "https://www.linkedin.com/posts/krisjenkins_lots-of-people-are-worried-about-vibe-coding-share-7474751832821571584-DpiB/": {
+    "title": "Lots of people are worried about Vibe Coding, and rightly so, but the thing that worries me far more is Vibe Management. Vibe Management goes like this: Someone in middle management is told to come… | Kris Jenkins | 45 comments",
+    "description": "Lots of people are worried about Vibe Coding, and rightly so, but the thing that worries me far more is Vibe Management. Vibe Management goes like this: Someone in middle management is told to come up…",
     "publisher": "LinkedIn"
   },
   "https://www.linkedin.com/posts/lsantosdev_javascript-typescript-js-activity-7018656849465892864-6cmM?utm_source=share&utm_medium=member_desktop": {
@@ -4004,12 +4103,12 @@
     "publisher": "OMG! Ubuntu"
   },
   "https://www.postman.com/": {
-    "title": "Postman: The World's Leading API Platform | Sign Up for Free",
-    "description": "Accelerate API development with Postman's all-in-one platform. Streamline collaboration and simplify the API lifecycle for faster, better results. Learn more."
+    "title": "API engineering for your agents",
+    "description": "Go faster from development to production with higher accuracy and fewer tokens."
   },
   "https://www.raspberrypi.org/": {
     "title": "Teach, learn, and make with the Raspberry Pi Foundation",
-    "description": "We are a charity with the mission to enable young people to realise their full potential through the power of computing and digital technologies.",
+    "description": "We are an independent, global charity with the mission to enable all young people to realise their full potential through the power of computing and AI.",
     "publisher": "Raspberry Pi Foundation"
   },
   "https://www.revenera.com/blog/software-composition-analysis/the-story-behind-colors-js-and-faker-js/": {
@@ -4058,17 +4157,22 @@
     "description": "Self-belief, pragmatism, speed, and technical ability"
   },
   "https://www.servermania.com/kb/articles/setup-personal-vpn-server/": {
-    "title": "Setting Up a VPN on a Debian Dedicated Server | ServerMania"
+    "title": "Setting Up a VPN on a Debian Dedicated Server | ServerMania",
+    "description": "Learn the best practices for setting up a VPN on your Debian dedicated server to enhance security and privacy. Read the article for step-by-step guidance."
   },
   "https://www.sigstore.dev/": {
-    "title": "sigstore",
-    "description": "![sigstore logo][logo]"
+    "title": "Sigstore",
+    "description": "sign. verify. protect. Make sure your software is what it claims to be."
   },
-  "https://www.ssp.sh/brain/the-problem-is-not-the-ai-code-but-nobody-knows-anything-anymore/": null,
+  "https://www.ssp.sh/brain/the-problem-is-not-the-ai-code-but-nobody-knows-anything-anymore/": {
+    "title": "The Problem is not the AI Code, but Nobody Knows Anything Anymore",
+    "description": "If we think writing code is dead, and AI is generating all codebases, I still think the bigger problem is people or full teams not knowing anything anymore about the system...",
+    "publisher": "Simon Späti's Second Brain"
+  },
   "https://www.staging-typescript.org/docs/home": null,
   "https://www.techradar.com/news/should-you-set-up-your-own-vpn-server": {
     "title": "Should you set up your own VPN server?",
-    "description": "For the DIY&rsquo;ers amongst us",
+    "description": "For the DIY’ers amongst us",
     "publisher": "TechRadar"
   },
   "https://www.tnmoc.org/software": {
@@ -4161,8 +4265,8 @@
     "title": "Oracle VirtualBox"
   },
   "https://www.vpnmentor.com/blog/understanding-five-eyes-concept": {
-    "title": "What Are the 5/9/14 Eyes Countries? Surveillance in 2026",
-    "description": "Here",
+    "title": "What Are the 5/9/14 Eyes Countries? Surveillance",
+    "description": "Here's all you need to know about the 5/9/14 Eyes Alliances. Learn which nations share intelligence, what data is collected, and how to protect your privacy.",
     "publisher": "vpnMentor"
   },
   "https://www.wolframalpha.com/input?i=%28698%5E343%29+mod+3977": {
@@ -4186,9 +4290,14 @@
   "https://www.youtube.com/redirect?redir_token=QUFFLUhqa05peURIMk9MZkRPN2dKZVU5MmlGRnJ3QkxtQXxBQ3Jtc0tra1VSd1hHLWRpWkthYmpmY1JtRk83b3o3MUFLTUdPdF9lalA0QWdRSFFWdU9DMWRVYy1LZkZaNE1OLTA2ckNqM2hlSnlGUUVZdldFbDZiazdpS2lVM0p6c2pPVTBEbnR2WnpOM0dRYVRWVFJMUmpKcw%3D%3D&q=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fcardosoanacp%2F&v=3fmUp3PICLo&event=video_description": {
     "title": "YouTube"
   },
+  "https://www.youtube.com/watch?v=--LEDxMs4yk": {
+    "title": "What does an amplifier actually do?",
+    "description": "What is an amplifier, why do you need one? And what do they even do?What is a DAC?: https://youtu.be/HOvubnenXyoRead more headphone, IEM, amp, and DAC Review...",
+    "publisher": "YouTube"
+  },
   "https://www.youtube.com/watch?v=1F3kyNy7djM": {
     "title": "- YouTube",
-    "description": "Se alla dina favoriter bland videor och musik, ladda upp originalinnehåll och dela allt med vänner, familj och hela världen på YouTube."
+    "description": "Aproveite vídeos e músicas que você ama, envie e compartilhe conteúdo original com amigos, parentes e o mundo no YouTube."
   },
   "https://www.youtube.com/watch?v=2LYPyUk-L0k": {
     "title": "⚔️ XSS Attack (Como Funciona e Como Prevenir Ataques) // Dicionário do Programador",
@@ -4203,6 +4312,16 @@
   "https://www.youtube.com/watch?v=5RVRbDHFhNw": {
     "title": "Building A Complete API with GRPC ft Lucas Santos of Microsoft | HackBuddy",
     "description": "Farmers is proud to sponsor HackBuddy! Find your next developer or software engineering job at https://farmers.com/careers!HTTP and JSON have been and still ...",
+    "publisher": "YouTube"
+  },
+  "https://www.youtube.com/watch?v=6Buceb8ePrE": {
+    "title": "Fix Things = Fix Yourself",
+    "description": "Aproveite vídeos e músicas que você ama, envie e compartilhe conteúdo original com amigos, parentes e o mundo no YouTube.",
+    "publisher": "YouTube"
+  },
+  "https://www.youtube.com/watch?v=7fQCX4HeSJI": {
+    "title": "How headphones work, as fast as possible! Planar, Electrostatic, Dynamic and BA explained",
+    "description": "GoldenSound walks you through the differences between the major types of drivers that are used in headphones (and IEMs)!Previous 'explained' series videos:DA...",
     "publisher": "YouTube"
   },
   "https://www.youtube.com/watch?v=9z3o7s-2fcI": {
@@ -4235,6 +4354,11 @@
     "description": "6 anos e 150 palestras depois, eu queria passar pra você o que eu aprendi com minha experiência como palestrante em eventos de tecnologia.🔗 Esse vídeo tem c...",
     "publisher": "YouTube"
   },
+  "https://www.youtube.com/watch?v=HOvubnenXyo": {
+    "title": "What is a DAC and why do you need one?",
+    "description": "What is a Digital to Analog Converter, and why do you need one? And how do they even work?What is an amplifier?: https://youtu.be/--LEDxMs4ykRead more headph...",
+    "publisher": "YouTube"
+  },
   "https://www.youtube.com/watch?v=IACHfKmZMr8": {
     "title": "Vibe Coding Is The Future",
     "description": "Andrej Karpathy recently coined the term “vibe coding” to describe how LLMs are getting so good that devs can simply “give in to the vibes, embrace exponenti...",
@@ -4247,7 +4371,7 @@
   },
   "https://www.youtube.com/watch?v=JcZnqWYmBww": {
     "title": "- YouTube",
-    "description": "Se alla dina favoriter bland videor och musik, ladda upp originalinnehåll och dela allt med vänner, familj och hela världen på YouTube."
+    "description": "Aproveite vídeos e músicas que você ama, envie e compartilhe conteúdo original com amigos, parentes e o mundo no YouTube."
   },
   "https://www.youtube.com/watch?v=M-VU0fLjIUU": {
     "title": "This Is A Game Changer",
@@ -4319,6 +4443,11 @@
     "description": "Nessa live vamos desenvolver uma aplicação Node.js aplicando uma arquitetura em camadas que ajuda na manutenibilidade do projeto, vem com a gente que vai ser...",
     "publisher": "YouTube"
   },
+  "https://www.youtube.com/watch?v=XOKrXBeZl1Q": {
+    "title": "Meu Maior Medo em Relação à IA Já Está Acontecendo",
+    "description": "🔥 Conheça o HostGator AllPass e ganhe mais 5% de desconto:https://www.hostgator.com.br/53137-147-3-59.htmlUse o cupom ATTEKITA5OFFO meu maior medo em relaçã...",
+    "publisher": "YouTube"
+  },
   "https://www.youtube.com/watch?v=aUXnhVrT4CI": {
     "title": "Die Z3 von Konrad Zuse im Deutschen Museum",
     "description": "Die im Krieg zerstörte Z3 von Konrad Zuse, die 1941 erstmals voll funktionsfähig war, gilt als erstes frei programmierbares vollautomatisches Rechengerät übe...",
@@ -4329,12 +4458,21 @@
     "description": "The Cult of Done manifesto was written in 2009. I read it that same year, as the ideas swept through the maker community.https://medium.com/@bre/the-cult-of-...",
     "publisher": "YouTube"
   },
+  "https://www.youtube.com/watch?v=d8ug0NbaIds": {
+    "title": "Audio amp classes as fast as possible!",
+    "description": "What is the actual difference between a Class A, Class AB and Class D amplifier? GoldenSound breaks them down in under 10 minutes!Transistor Biasing Explaine...",
+    "publisher": "YouTube"
+  },
   "https://www.youtube.com/watch?v=ddTV12hErTc&pp=ygUObWtiZCByYWJiaXQgcjE%3D": {
     "title": "Rabbit R1: Barely Reviewable",
     "description": "AI in a Box. But a different box.Get a dbrand skin and screen protector at https://dbrand.com/rabbitMKBHD Merch: http://shop.MKBHD.comTech I'm using right no...",
     "publisher": "YouTube"
   },
-  "https://www.youtube.com/watch?v=dyEpDobnkmA": null,
+  "https://www.youtube.com/watch?v=dyEpDobnkmA": {
+    "title": "Opus 5.5 is disturbing",
+    "description": "The app I use in the video: https://enjoy.dev/v/opus-5-5/This same video on X: https://x.com/atmoio/status/2103895436360884389The course I teach: https://shi...",
+    "publisher": "YouTube"
+  },
   "https://www.youtube.com/watch?v=eppWQKUixmI": {
     "title": "O livro que resume todos os livros - as regras não escritas da engenharia",
     "description": "Bora entender um pouco sobre as regras não escritas da engenharia, um livro sensacional que foi escrito em 1944, revisado em 2001 e que ainda é extremamente ...",
@@ -4385,6 +4523,11 @@
     "description": "Accompanying lecture notes: https://www.cl.cam.ac.uk/teaching/2122/ConcDisSys/dist-sys-notes.pdfFull lecture series: https://www.youtube.com/playlist?list=PL...",
     "publisher": "YouTube"
   },
+  "https://www.youtube.com/watch?v=moXqSeVQ1Fk": {
+    "title": "How to Turn ADHD Into a Genius-Level Advantage",
+    "description": "🧠 You know what you need to do. So why can’t you get yourself to do it?Take my free quiz and get strategies tailored to what’s keeping you stuck👉🏻 https:/...",
+    "publisher": "YouTube"
+  },
   "https://www.youtube.com/watch?v=nTfTVCAPn5o": {
     "title": "Criptografia aplicada usando #javascript",
     "description": "O que a antiga Roma e outras figuras histórias de 2000 anos podem ensinar pra gente sobre proteção de dados e segurança com criptografia? Nesse vídeo a gente...",
@@ -4392,7 +4535,7 @@
   },
   "https://www.youtube.com/watch?v=ngz_iER7654": {
     "title": "- YouTube",
-    "description": "Se alla dina favoriter bland videor och musik, ladda upp originalinnehåll och dela allt med vänner, familj och hela världen på YouTube."
+    "description": "Aproveite vídeos e músicas que você ama, envie e compartilhe conteúdo original com amigos, parentes e o mundo no YouTube."
   },
   "https://www.youtube.com/watch?v=qB_B5mkDpIA": {
     "title": "Workshop: AKS com Virtual Nodes e GitHub Actions",
@@ -4416,7 +4559,7 @@
   },
   "https://www.youtube.com/watch?v=tYy3HTR0f90": {
     "title": "Node Summit - Creating dynamic testing environments with Kubernetes, Nodejs, Azure DevOps, and Helm",
-    "description": "Se alla dina favoriter bland videor och musik, ladda upp originalinnehåll och dela allt med vänner, familj och hela världen på YouTube.",
+    "description": "Aproveite vídeos e músicas que você ama, envie e compartilhe conteúdo original com amigos, parentes e o mundo no YouTube.",
     "publisher": "YouTube"
   },
   "https://www.youtube.com/watch?v=u8qk9l304K0": {
@@ -4496,7 +4639,7 @@
   },
   "https://x.com/levelsio": {
     "title": "@levelsio (@levelsio) on X",
-    "description": "💸https://t.co/sQ0aiU7v02 📸https://t.co/lAyoqmSBRX $80K/m 🎮https://t.co/tF49atJ396 $44K/m 🏡https://t.co/1oqUgfD6CZ $23K/m 👙@X $20K/m 🌍https://t.co/UXK5AFqCaQ $15K/m 💾https://t.co/T74ZwJ1F0C 🏩ht…",
+    "description": "💸https://t.co/sQ0aiU7v02 📸https://t.co/lAyoqmSBRX $68K/m 🎮https://t.co/tF49atJ396 $44K/m 🏡https://t.co/1oqUgfD6CZ $23K/m 👙@X $20K/m 🌍https://t.co/UXK5AFqCaQ $7K/m 🏩https://t.co/4p4dzTDVN6 $3K/m…",
     "publisher": "X (formerly Twitter)"
   },
   "https://x.com/ljharb/status/1843884468647682382": {
@@ -4524,6 +4667,16 @@
     "title": "Yegor Denisov-Blanch (@yegordb) on X",
     "description": "Another way to look at this is counting code commits. While this is a flawed way to measure productivity, it reveals inactivity: ~58% make <3 commits/month, aligning with our metric. The other 42% mak…",
     "publisher": "X (formerly Twitter)"
+  },
+  "https://yieldcode.blog/post/the-curse-of-the-senior-engineer/": {
+    "title": "The Curse of the Senior Software Engineer - Dmitry Kudryavtsev",
+    "description": "While looking for a job recently, I stumbled upon an interesting phenomen that I consider to be a curse for senior software engineers.",
+    "publisher": "Dmitry Kudryavtsev"
+  },
+  "https://yieldcode.blog/post/your-team-might-be-holding-you-back/": {
+    "title": "Why your team might be holding you back - Dmitry Kudryavtsev",
+    "description": "A tale on why software engineering might not be a team sports after all, despite what eveyrone wants us to believe",
+    "publisher": "Dmitry Kudryavtsev"
   },
   "https://youtu.be/VQFvugpxNJE?si=0vfYqCuB_7R7G2Dn&t=335": {
     "title": "Why \"vibe coding\" is NOT my future",

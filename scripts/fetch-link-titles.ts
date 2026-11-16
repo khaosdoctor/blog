@@ -5,6 +5,8 @@
  *   node scripts/fetch-link-titles.ts               # fetch what is missing
  *   node scripts/fetch-link-titles.ts --retry-failed # try the dead ones again
  *   node scripts/fetch-link-titles.ts --dry-run      # report only
+ *   node scripts/fetch-link-titles.ts --dev          # what `npm run dev` runs: failures not stored
+ *   node scripts/fetch-link-titles.ts --refresh      # refetch every stored title, keep it on failure
  *
  * The browser cannot do this itself: reading another origin's <title> is what
  * CORS exists to stop. So it happens here and ships as data.
@@ -16,7 +18,8 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { bold, count, dim, heading, list, ok, postFiles, warn } from './lib/cli.ts'
 
-const CONTENT_DIR = 'content/blog'
+// Drafts too, so the dev server can preview their links. CI has no drafts folder.
+const CONTENT_DIRS = ['content/blog', 'content/internal/draft ideas']
 const CACHE = 'content/link-titles.json'
 const CONCURRENCY = 8
 const TIMEOUT = 10_000
@@ -24,6 +27,12 @@ const DESCRIPTION_MAX = 200
 const REFRESH_HOPS = 3
 const DRY_RUN = process.argv.includes('--dry-run')
 const RETRY_FAILED = process.argv.includes('--retry-failed')
+// Run beside the dev server, often offline: a failure stays unrecorded so the
+// next run tries it again instead of storing it as dead.
+const DEV = process.argv.includes('--dev')
+// Fetches every stored title again, for when the parser changes. A failure keeps
+// the title already stored rather than replacing it with null.
+const REFRESH = process.argv.includes('--refresh')
 
 // Sent because a bare fetch is refused outright by a good number of these hosts.
 const USER_AGENT =
@@ -49,8 +58,10 @@ function linksIn(body: string): string[] {
 
 function collect(): string[] {
   const urls = new Set<string>()
-  for (const file of postFiles(CONTENT_DIR)) {
-    for (const url of linksIn(readFileSync(file, 'utf8'))) urls.add(url)
+  for (const dir of CONTENT_DIRS) {
+    for (const file of postFiles(dir)) {
+      for (const url of linksIn(readFileSync(file, 'utf8'))) urls.add(url)
+    }
   }
   return [...urls].sort()
 }
@@ -77,13 +88,18 @@ function clean(text: string | undefined): string {
   return text === undefined ? '' : decode(decode(text)).replace(/\s+/g, ' ').trim()
 }
 
-/** A meta tag writes its two attributes in either order, so both arrangements are tried. */
+/**
+ * A meta tag writes its two attributes in either order, so both arrangements are
+ * tried. The value ends at the quote that opened it: `content="Don't"` holds an
+ * apostrophe.
+ */
 function metaContent(html: string, key: string): string {
   const attribute = key.startsWith('og:') ? 'property' : 'name'
   const quoted = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const forward = new RegExp(`<meta[^>]+${attribute}=["']${quoted}["'][^>]*content=["']([^"']*)["']`, 'i')
-  const reverse = new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]*${attribute}=["']${quoted}["']`, 'i')
-  return clean(forward.exec(html)?.[1] ?? reverse.exec(html)?.[1])
+  const value = `(["'])((?:(?!\\1).)*)\\1`
+  const forward = new RegExp(`<meta[^>]+${attribute}=["']${quoted}["'][^>]*content=${value}`, 'is')
+  const reverse = new RegExp(`<meta[^>]+content=${value}[^>]*${attribute}=["']${quoted}["']`, 'is')
+  return clean(forward.exec(html)?.[2] ?? reverse.exec(html)?.[2])
 }
 
 /**
@@ -150,7 +166,8 @@ async function run(urls: string[], cache: Cache): Promise<void> {
 
   async function worker(): Promise<void> {
     for (let url = queue.shift(); url !== undefined; url = queue.shift()) {
-      cache[url] = await fetchMeta(url)
+      const meta = await fetchMeta(url)
+      if (meta !== null || !(DEV || REFRESH)) cache[url] = meta
       done += 1
       if (done % 25 === 0) console.log(dim(`  ${done}/${urls.length}`))
     }
@@ -163,7 +180,11 @@ heading('fetch-link-titles: reading the titles behind the external links')
 
 const urls = collect()
 const cache = readCache()
-const missing = urls.filter((url) => (RETRY_FAILED ? cache[url] == null : !(url in cache)))
+const missing = urls.filter((url) => {
+  if (REFRESH) return cache[url] != null
+  if (RETRY_FAILED) return cache[url] == null
+  return !(url in cache)
+})
 
 console.log(`${bold(String(urls.length))} external links, ${count(missing.length, 'title', 'titles')} to fetch`)
 
