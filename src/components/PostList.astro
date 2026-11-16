@@ -39,6 +39,7 @@ const showScheduled = import.meta.env.DEV
               [scheduled]
             </span>
           )}
+          {post.data.draft && <span class="listing-scheduled">[draft]</span>}
           {post.data.title}
         </a>
         <span class="listing-leader" aria-hidden="true">

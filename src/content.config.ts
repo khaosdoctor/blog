@@ -1,20 +1,51 @@
 import { defineCollection, z } from 'astro:content'
-import { glob } from 'astro/loaders'
+import { existsSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { glob, type Loader } from 'astro/loaders'
 import { LOCALES, SOURCE_LOCALE } from './i18n/locales.ts'
 import { labSources } from './lib/lab-sources'
 
 // Exactly one level deep, so a stray note anywhere else cannot fail the build.
+// The dev server also reads drafts, so they can be checked before they ship.
+const POSTS = import.meta.env.DEV ? ['blog/*/*.md', 'internal/draft ideas/*/*.md'] : 'blog/*/*.md'
+
+type Entry = { data: Record<string, unknown>; filePath?: string }
+
+// A heroImage pointing at a missing file runs the dev server out of memory
+// rather than failing, and a draft never reaches the build that would catch it.
+// The page cover is generated either way; only og:image falls back to the category card.
+function dropMissingHero<T extends Entry>(entry: T): T {
+  const hero = entry.data.heroImage
+  if (typeof hero !== 'string' || entry.filePath === undefined) return entry
+  if (existsSync(join(dirname(entry.filePath), hero))) return entry
+  console.warn(`${entry.filePath}: heroImage ${hero} does not exist, ignored on the dev server`)
+  const { heroImage: _missing, ...data } = entry.data
+  return { ...entry, data }
+}
+
+function devSafe(loader: Loader): Loader {
+  if (!import.meta.env.DEV) return loader
+  return {
+    ...loader,
+    load: (context) => loader.load({ ...context, parseData: (props) => context.parseData(dropMissingHero(props)) }),
+  }
+}
+
 const blog = defineCollection({
-  loader: glob({
-    pattern: '*/*.md',
-    base: './content/blog',
-    // The default id honours a frontmatter `slug`, so a translation whose slug
-    // equals its directory name would claim the same id and replace the other.
-    // The lang prefix is what stops a source and a translation that slugify
-    // alike from claiming one id: array-groupby-stage-3 is titled the same in
-    // both languages, and its filenames are identical.
-    generateId: ({ entry, data }) => `${data.lang ?? SOURCE_LOCALE}/${entry.replace(/\.md$/, '')}`,
-  }),
+  loader: devSafe(
+    glob({
+      pattern: POSTS,
+      base: './content',
+      // The default id honours a frontmatter `slug`, so a translation whose slug
+      // equals its directory name would claim the same id and replace the other.
+      // The lang prefix is what stops a source and a translation that slugify
+      // alike from claiming one id: array-groupby-stage-3 is titled the same in
+      // both languages, and its filenames are identical.
+      // Only folder/file, so a draft keeps the id it will have once published.
+      generateId: ({ entry, data }) =>
+        `${data.lang ?? SOURCE_LOCALE}/${entry.split('/').slice(-2).join('/').replace(/\.md$/, '')}`,
+    }),
+  ),
   schema: ({ image }) =>
     z.object({
       title: z.string(),

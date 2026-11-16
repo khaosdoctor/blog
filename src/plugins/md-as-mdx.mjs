@@ -22,7 +22,7 @@ import { parseFrontmatter } from '@astrojs/internal-helpers/frontmatter'
 const MDX_PLUGIN = '@mdx-js/rolldown'
 const MDX_POSTPROCESS = '@astrojs/mdx-postprocess'
 const MD_PLUGIN = 'astro:markdown'
-const CONTENT_MD = /content\/blog\/[^/]+\/[^/]+\.md$/
+const CONTENT_MD = /content\/(blog|internal\/draft ideas)\/[^/]+\/[^/]+\.md$/
 
 function safeParseFrontmatter(code, id) {
   try {

@@ -15,7 +15,7 @@
     "node": ">=26.0.0"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "node scripts/fetch-link-titles.ts --dev & NODE_ENV=development astro dev",
     "vendor": "node scripts/vendor-media.ts",
     "links": "node scripts/fetch-link-titles.ts",
     "cover": "node scripts/cover.ts",

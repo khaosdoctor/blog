@@ -4,7 +4,10 @@
 // Forms: [[slug]], [[slug|label]], [[slug#heading]], [[slug#heading|label]].
 // A link to a draft still links, and carries the same "not written yet" marker
 // the series table of contents uses, so the two agree. A link to a slug that does
-// not exist at all fails the build, which is the only way a typo gets caught.
+// not exist at all prints a warning and renders as the same marker with no
+// href, so a post can name articles nobody has written yet. A typo shows up
+// only as that warning. The dev server also resolves folders in the drafts
+// directory, which the build never reads.
 //
 // A wikilink is always written as [[folder-name]], the Portuguese slug, because
 // that is the one Obsidian autocompletes. The source lives in that folder named
@@ -23,6 +26,9 @@ import { slugFrom } from '../lib/post-file.ts'
 import { localeFromFile } from './mdx-util.mjs'
 
 const BASE = 'content/blog'
+// Read after BASE, so a published folder wins over a stale draft copy.
+const DRAFTS = 'content/internal/draft ideas'
+const dirs = () => (process.env.NODE_ENV === 'development' ? [BASE, DRAFTS] : [BASE])
 // Exported so the MDX transform cache can scan a post's raw text for the same
 // targets this plugin resolves, without keeping a second copy of the syntax.
 export const PATTERN = /\[\[([^\]|#]+)(#[^\]|]+)?(?:\|([^\]]+))?\]\]/g
@@ -54,20 +60,22 @@ function index() {
   if (posts !== null) return posts
   posts = new Map()
 
-  // Sorted, so the fallback a page gets never depends on directory order.
-  const dirs = readdirSync(BASE, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort()
-  for (const dirEntry of dirs) {
-    const dir = `${BASE}/${dirEntry}`
-    for (const name of readdirSync(dir).sort()) {
-      if (!/\.mdx?$/.test(name)) continue
-      const front = read(`${dir}/${name}`)
-      if (front === null) continue
+  for (const base of dirs()) {
+    // Sorted, so the fallback a page gets never depends on directory order.
+    const folders = readdirSync(base, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort()
+    for (const dirEntry of folders) {
+      const dir = `${base}/${dirEntry}`
+      for (const name of readdirSync(dir).sort()) {
+        if (!/\.mdx?$/.test(name)) continue
+        const front = read(`${dir}/${name}`)
+        if (front === null) continue
 
-      const url = postUrl(front.slug ?? slugFrom(dirEntry, name), front.lang)
-      record(dirEntry, front.lang, { draft: front.draft, title: front.title ?? dirEntry, url })
+        const url = postUrl(front.slug ?? slugFrom(dirEntry, name), front.lang)
+        record(dirEntry, front.lang, { draft: front.draft, title: front.title ?? dirEntry, url })
+      }
     }
   }
   return posts
@@ -122,17 +130,24 @@ export function remarkWikilinks() {
         const slug = target.trim()
         const post = resolve(slug, locale)
 
-        if (post === undefined) {
-          throw new Error(
-            `${file.path ?? 'a post'}: [[${slug}]] points at no post, in any locale. ` +
-              `Expected ${BASE}/${slug}/${slug}.md. Fix the link or create the post.`,
-          )
-        }
-
         if (match.index > cursor) {
           children.push({ type: 'text', value: node.value.slice(cursor, match.index) })
         }
         cursor = match.index + raw.length
+
+        if (post === undefined) {
+          console.warn(
+            `${file.path ?? 'a post'}: [[${slug}]] points at no post, in any locale. ` +
+              `Expected ${BASE}/${slug}/${slug}.md. Rendered as unwritten text.`,
+          )
+          // An <a> without href: styled like an unwritten link, nothing to follow.
+          children.push({
+            type: 'unwrittenLink',
+            data: { hName: 'a', hProperties: { className: ['link-unwritten'], title: NOT_WRITTEN_YET[locale] } },
+            children: [{ type: 'text', value: (label ?? slug).trim() }],
+          })
+          continue
+        }
 
         // The title comes from the post that was resolved, not from the source
         // language: an English page linking a post nobody has translated yet shows

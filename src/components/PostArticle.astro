@@ -37,7 +37,7 @@ const listed = !post.data.noindex
     lang={locale}
     authorName={authorName}
   />
-  <h1>{post.data.title}</h1>
+  <h1>{post.data.draft && '[DRAFT] '}{post.data.title}</h1>
   <div class="meta">
     <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
     <span aria-hidden="true">·</span>

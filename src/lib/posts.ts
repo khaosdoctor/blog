@@ -31,15 +31,17 @@ export function isScheduled(post: Post): boolean {
 
 async function getPublished(): Promise<Post[]> {
   // A scheduled post is held back from the build and listed in scheduled.json
-  // instead. The dev server keeps it so it can be read before it is due, which
-  // is the only difference between the two and must stay behind this flag:
-  // check-output.ts asserts a post is either on the built site or in that
-  // manifest, never both.
+  // instead. The dev server keeps it, and every draft, so they can be read before
+  // they ship. That difference must stay behind this flag: check-output.ts
+  // asserts a post is either on the built site or in that manifest, never both.
   const posts = await getCollection(
     'blog',
-    ({ data }) => !data.draft && (import.meta.env.DEV || data.pubDate <= PUBLISH_CUTOFF),
+    ({ data }) => import.meta.env.DEV || (!data.draft && data.pubDate <= PUBLISH_CUTOFF),
   )
-  return posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  // Drafts first, which only the dev server ever has.
+  return posts.sort(
+    (a, b) => Number(b.data.draft) - Number(a.data.draft) || b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  )
 }
 
 export async function getPublishedPosts(lang: Locale = SOURCE_LOCALE): Promise<Post[]> {
