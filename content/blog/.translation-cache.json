@@ -96,8 +96,8 @@
     "translatedAt": "2026-09-13T01:09:15.504Z"
   },
   "boas-praticas-em-projetos-harperdb-com-typescript": {
-    "sourceHash": "56c23e0df8129584",
-    "translatedAt": "2026-08-28T01:38:39.187Z"
+    "sourceHash": "2e1ae0ba961a3394",
+    "translatedAt": "2026-11-16T18:28:08.477Z"
   },
   "boas-praticas-ts-semana-ts-3": {
     "sourceHash": "75370f0ce9e06a43",
@@ -236,8 +236,8 @@
     "translatedAt": "2026-09-13T01:36:47.605Z"
   },
   "entendendo-maps-no-javascript": {
-    "sourceHash": "96c67919e3d9ae08",
-    "translatedAt": "2026-08-28T20:19:24.725Z"
+    "sourceHash": "0f611450c6094a56",
+    "translatedAt": "2026-11-16T18:28:08.480Z"
   },
   "entendendo-runtimes-de-containers": {
     "sourceHash": "d4759f5ab4980ab1",
@@ -372,8 +372,8 @@
     "translatedAt": "2026-09-13T01:36:47.610Z"
   },
   "migrando-uma-aplicacao-legada-de-mongodb-para-harperdb": {
-    "sourceHash": "488e8f6b9c9c2edb",
-    "translatedAt": "2026-08-17T22:56:12.822Z"
+    "sourceHash": "006aab3c2daebb02",
+    "translatedAt": "2026-11-16T18:28:08.481Z"
   },
   "mocks-no-core-do-node-js": {
     "sourceHash": "db177b2b59d93a6f",
@@ -556,8 +556,8 @@
     "translatedAt": "2026-09-13T01:36:47.617Z"
   },
   "replicacao-de-dados-multi-node-com-harperdb-pubsub": {
-    "sourceHash": "f9c0a0f44b71fdb2",
-    "translatedAt": "2026-08-17T22:56:12.934Z"
+    "sourceHash": "764b428759e41575",
+    "translatedAt": "2026-11-16T18:29:10.279Z"
   },
   "saiba-de-tudo-sobre-seus-servicos-com-jaeger-e-linkerd": {
     "sourceHash": "881209f8f9154d50",
@@ -690,5 +690,13 @@
   "novo-blog": {
     "sourceHash": "1a9659a0e1d209be",
     "translatedAt": "2026-09-13T01:36:47.613Z"
+  },
+  "my-relationship-with-ai-at-the-moment": {
+    "sourceHash": "bc55ccc44c9c49fb",
+    "translatedAt": "2026-11-16T18:28:08.482Z"
+  },
+  "we-are-not-special": {
+    "sourceHash": "02d415426de30c99",
+    "translatedAt": "2026-11-16T18:29:10.279Z"
   }
 }

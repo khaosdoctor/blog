@@ -146,15 +146,13 @@ But, to [think as a hobby](https://readhacker.news/s/774Ln) is something I won't
 
 Above all things, I am a curious soul, that will never cease to be amazed by the weird joy of solving problems.
 
-[^1]: It's pretty funny, because this AI bubble is [very much alike](https://aibubblefaq.com/guides/ai-bubble-vs-dot-com-bubble) but [not the same](https://intuitionlabs.ai/articles/ai-bubble-vs-dot-com-comparison) as the original dot-com bubble
-[^4]: You also know who I am talking about
 [^5-about-people-fighting-back]: This is sort of happening, you can see [multiple](https://blog.bustikiller.com/2026/09/25/one-month-without-ai.html) [people](https://www.ssp.sh/brain/the-problem-is-not-the-ai-code-but-nobody-knows-anything-anymore/) [already](https://unix.foo/posts/last-people-who-know-how-it-works/) [doing](https://osr.im/articles/craft) it. BigTechs pushed AI so hard down the throats of customers that people started to fight back on their own.
 [^6]: I actually kinda hated myself for a bit for doing that in the beginning
 [^7]: Or maybe they're expensive because everyone is doing it?
 [^8-what-is-pre-training?]: In simple terms. Pre-training is when you give a model its core data to understand the world. This usually requires all the human knowledge combined, which comprises petabytes of information and thousands of servers with parallel processing to be able to be done in a reasonable time.
 [^16]: Being completely honest, writing the code was one of the most boring parts of it. It was nice to see how it worked inside, but that's basically it... Nothing fancy.
 [^17]: Yes, I have one. And yes, it's physical
-[^18-what-is-rice]: Race Intended (I think?) Cosmetic Enhancement, it originally came from drag racing. Eventually it became a term for _"customizing your ::insert thing here:: until it becomes another thing"_. In the Linux community, it's widely used to describe heavily personalizing your OS.
+[^18-what-is-rice]: Race Inspired Cosmetic Enhancement, it originally came from drag racing. Eventually it became a term for _"customizing your ::insert thing here:: until it becomes another thing"_. In the Linux community, it's widely used to describe heavily personalizing your OS.
 [^19]: This project was so old I had everything planned, really
 [^20]: Technically, not the __ONLY__ because we always had nocode and lowcode, but these were so bad that I am not even counting it
 [^21-who-is-dhh]: Creator of Ruby on Rails

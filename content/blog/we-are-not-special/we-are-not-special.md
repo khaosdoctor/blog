@@ -10,7 +10,7 @@ series: ai-and-us
 seriesOrder: 2
 description: Why do developers consider themselves so special? Are we really?
 draft: false
-heroImage: "./cover-en.png"
+heroImage: ./cover-en.png
 ---
 This post originally came from a paragraph of the [[my-relationship-with-ai-at-the-moment|other article in this series]] because I thought it was too big of a topic to be left aside. But, why do programmers think so highly about themselves?
 

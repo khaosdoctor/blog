@@ -1,58 +1,60 @@
 ---
-title: "Migrando uma aplicação legada de MongoDB para HarperDB"
+title: "Migrando uma aplicação legada do MongoDB para o HarperDB"
 pubDate: 2022-03-02T19:51:23.000Z
-lang: "pt"
 category: technology
 tags: ["mongodb", "harperdb", "databases", "typescript", "infrastructure", "docker", "architecture"]
-description: "Há algumas semanas dei uma palestra no canal do HarperDB sobre como migrar uma aplicação legada de MongoDB para HarperDB. Esse é o tutorial escrito, com a mão na massa, dessa palestra."
-draft: false
+lang: pt
+description: "Há algumas semanas dei uma talk no canal do HarperDB sobre como podemos migrar uma aplicação legada do MongoDB para o HarperDB. Esta é a versão escrita e mão na massa daquela talk."
+slug: "migrando-uma-aplicacao-legada-de-mongodb-para-harperdb"
 machineOwnedTranslation: true
+draft: false
 heroImage: "./cover.png"
 ---
-Há algumas semanas eu dei uma palestra no canal do HarperDB sobre como podemos migrar uma aplicação legada de MongoDB pra HarperDB. Se você não viu, pode assistir aqui:
+
+Há algumas semanas dei uma talk no canal do HarperDB sobre como podemos migrar uma aplicação legada do MongoDB para o HarperDB. Se você não viu, pode assistir aqui:
 
 ![](https://www.youtube.com/watch?v=1F3kyNy7djM)
 
-Esse post vai ser um tutorial escrito sobre o processo. Então, se você não pode assistir o vídeo, ou quer guardar o conteúdo pra outra hora, esse post é pra você.
+Este post vai ser um tutorial escrito do processo. Então, se você não pode assistir ao vídeo, ou quer guardar o conteúdo para outro momento, é isso que você procura.
 
-- [Objetivo](#objective)
-- [Configuração](#setup)
-- [Configurando o banco de dados](#setting-up-the-database)
-- [Migrando o código](#migrating-the-code)
-  - [Entendendo a aplicação](#understanding-the-application)
-  - [Criando o cliente](#create-the-client)
-  - [Migrando os repositórios](#migrating-repositories)
-  - [Retoques finais](#final-touches)
-- [Testando](#testing)
+- [Objetivo](#objetivo)
+- [Setup](#setup)
+- [Configurando o banco de dados](#configurando-o-banco-de-dados)
+- [Migrando o código](#migrando-o-código)
+  - [Entendendo a aplicação](#entendendo-a-aplicação)
+  - [Criando o client](#criando-o-client)
+  - [Migrando os repositórios](#migrando-os-repositórios)
+  - [Ajustes finais](#ajustes-finais)
+- [Testando](#testando)
 - [Custom Functions](#custom-functions)
 
 ## Objetivo
 
-Eu criei esse tutorial porque esse é um cenário real. Muita gente lida com aplicações legadas no dia a dia, e algumas das mudanças que precisam fazer envolvem migrar de uma stack de tecnologia pra outra.
+Criei este tutorial porque este é um cenário real. Muita gente lida com aplicações legadas no dia a dia, e algumas das mudanças que precisam fazer incluem migrações de uma stack de tecnologia para outra.
 
-Foi por isso que essa aplicação foi escolhida especificamente, porque é um exemplo real de como podemos migrar uma aplicação legada de uma stack de tecnologia pra outra. Ela é antiga, usa bibliotecas antigas e define bem os padrões de onde a gente **não** quer mexer.
+É por isso que esta aplicação foi escolhida especificamente, porque é um exemplo real de como podemos migrar uma aplicação legada de uma stack de tecnologia para outra. Ela é velha, usa bibliotecas velhas e define nossos limites sobre onde **não** queremos mexer.
 
-Nesse caso, o objetivo é fazer a migração completa sem mexer em muito código, e sem precisar tocar em nada que a gente não queira tocar. Por sorte, essa aplicação é implementada usando uma arquitetura meio MVC, então existem camadas em cima de camadas, o que facilita abstrair a maior parte da funcionalidade em lugares separados e deixar o código mais legível. Isso também nos permite mudar só o código que a gente quer mudar, e não a aplicação inteira.
+Neste caso, o objetivo é fazer a migração completa sem mexer em muito código, e sem ter que tocar em nenhum código que não queremos tocar. Por sorte, essa aplicação é implementada usando uma arquitetura mais ou menos MVC, então existem camadas sobre camadas, o que facilita abstrair a maior parte da funcionalidade para lugares separados e deixar o código mais legível. Além disso, isso permite que a gente altere só o código que queremos alterar, e não a aplicação inteira.
 
-## Configuração
+## Setup
 
 Não vou explicar exatamente o que é o HarperDB ou como ele funciona, mas vou te mostrar como começar com o básico.
 
-Então, a primeira coisa que você precisa fazer é criar uma conta no [site do HarperDB](http://www.harperdb.com/). Isso vai te dar acesso ao Harper Studio, que vai ser a ferramenta que vamos usar pra criar e gerenciar o banco.
+A primeira coisa que você precisa fazer é criar uma conta no [site do HarperDB](http://www.harperdb.com/). Isso vai te dar a possibilidade de usar o Harper Studio, que vai ser a ferramenta que usaremos para criar e gerenciar o banco de dados.
 
-A segunda coisa é clonar o [repositório da aplicação](https://github.com/khaosdoctor/harperdb-migration-demo). A aplicação tem três branches:
+A segunda coisa é clonar o [repositório da aplicação](https://github.com/khaosdoctor/harperdb-migration-demo), a aplicação tem três branches:
 
-- `main` é a branch onde vamos fazer nosso trabalho.
-- `migrated` é a branch com todo o trabalho pronto, se precisar espiar alguma coisa no final do processo, pode usar essa branch.
-- `migrated-custom-functions` é a branch que contém o código migrado, além da implementação das custom functions.
+- `main` é a branch onde vamos trabalhar.
+- `migrated` é a branch com todo o trabalho feito, se você precisar espiar alguma coisa no fim do processo, pode usar essa branch.
+- `migrated-custom-functions` é a branch que contém o código migrado, mais a implementação das custom functions.
 
-Depois de clonar, a primeira coisa que você precisa fazer é ir até o diretório `backend` e rodar `npm install`. Isso vai instalar todas as dependências necessárias pra rodar a aplicação.
+Depois de clonar, a primeira coisa que você precisa fazer é ir até o diretório `backend` e rodar `npm install`. Isso vai instalar todas as dependências necessárias para rodar a aplicação.
 
-> É bom ter o [Docker](https://docker.com) instalado também, já que vamos mexer com frontend, backend e banco de dados. E vamos usar tudo dentro de um container usando o Docker Compose.
+> É bom ter o [Docker](https://docker.com) instalado também, já que vamos mexer com um frontend, um backend e um banco de dados. E vamos usar tudo dentro de um container com o Docker Compose.
 
 ## Configurando o banco de dados
 
-A primeira coisa que precisamos fazer é configurar o banco de dados, nesse caso, o Harper. Então vamos até o arquivo `docker-compose.yml`, que agora está assim:
+A primeira coisa que precisamos fazer é configurar o banco de dados, neste caso, o Harper. Então vamos até o arquivo `docker-compose.yml`, que agora está assim:
 
 ```yml
 version: '3.7'
@@ -69,7 +71,7 @@ services:
     depends_on:
       - database
 
-  # ... coisas do frontend que não importam agora ...
+  # ... frontend stuff we don't care about ...
 
   database:
     image: mvertes/alpine-mongo
@@ -82,7 +84,7 @@ volumes:
   mongodb:
 ```
 
-A gente precisa mudar o banco de dados pra usar o Harper e o backend pra refletir essa mudança. Primeiro vamos mudar o `services.database` pra ficar assim:
+Precisamos mudar o banco de dados para usar o Harper e o backend para refletir essa mudança. Primeiro vamos mudar o `services.database` para ficar assim:
 
 ```yml
 database:
@@ -98,11 +100,11 @@ database:
     - CUSTOM_FUNCTIONS=true
 ```
 
-Primeiro trocamos a imagem, pra baixar a última versão do Harper. Depois abrimos as duas portas, uma pra conexão com o banco e outra pras custom functions (que roda na 9926); depois disso, configuramos nossos volumes pra não perder os dados caso precisemos deletar o container; e por último, configuramos as variáveis de ambiente do banco.
+Primeiro mudamos a imagem, para podermos baixar a última versão do Harper. Depois abrimos as duas portas, a da conexão com o banco e a das custom functions (que funciona na 9926); feito isso, configuramos nossos volumes para não perdermos os dados caso precisemos deletar o container; e por último, definimos as variáveis de ambiente do banco de dados.
 
-> Estou usando senhas simples aqui, mas o ideal é configurar isso em runtime.
+> Estou usando senhas em texto puro aqui, mas o ideal é definir isso em tempo de execução.
 
-Depois, vamos mudar o `services.backend` pra ficar assim:
+Depois, vamos mudar o `services.backend` para ficar assim:
 
 ```yml
 backend:
@@ -119,9 +121,9 @@ backend:
     - database
 ```
 
-A única mudança real que fizemos aqui foi trocar a URI do banco pra usar a porta dele, e configurar o usuário e senha.
+A única mudança real que fizemos aqui foi alterar a URI do banco para usar a porta do banco de dados, e definir o usuário e a senha do banco.
 
-E no final, precisamos mudar o nome do nosso volume – que era `mongodb` – pra `db`.
+E, no fim, precisamos mudar o nome do nosso volume, que era `mongodb`, para `db`.
 
 ```yml
 volumes:
@@ -170,31 +172,31 @@ volumes:
   db:
 ```
 
-Agora vá até o [HarperDB Studio](https://studio.harperdb.io), abra sua organização e adicione uma nova Instance. No menu modal, selecione "Register User-installed Instance" e preencha as seguintes informações:
+Agora vá até [o studio do HarperDB](https://studio.harperdb.io), abra sua organização e adicione uma nova Instance. No menu modal, selecione "Register User-installed Instance" e preencha as seguintes informações:
 
-- **Nome**: ship-manager
-- **Usuário e senha**: admin
+- **Name**: ship-manager
+- **Username and password**: admin
 - **Host**: localhost
-- **Porta**: 9925
-- **SSL**: Não
+- **Port**: 9925
+- **SSL**: No
 
-Ainda não clique em "Instance Details", vamos precisar subir nossos containers primeiro. Então vá no terminal e digite `docker compose up -d database` pra subir só a instância do banco, espere alguns segundos e rode `docker compose logs database` pra conferir o log, deve estar pronto. Aí sim você pode clicar em "Instance Details", selecionar o tier gratuito e confirmar.
+Não clique em "Instance Deails" ainda, precisamos subir nossos containers primeiro. Então vá até seu terminal e digite `docker compose up -d database` para subir apenas a instância do banco, espere alguns segundos e rode `docker compose logs database` para conferir o log, ele deve estar pronto. Aí você pode clicar em "Instance Details", selecionar o free tier e confirmar.
 
-Vai levar alguns minutos até a conexão ser feita:
+A conexão vai levar alguns minutos para ser feita:
 
-![Descrição da imagem](./j233pcwxwlt8d6icanks-99609f.png)
+![Image description](./j233pcwxwlt8d6icanks-99609f.png)
 
-Assim que o status estiver "OK", abra o banco e crie um novo schema (o mesmo nome que você usou na variável de ambiente `DATABASE_DBNAME` do backend).
+Assim que o status estiver "OK", abra o banco e crie um novo schema (o mesmo que você usou na variável de ambiente `DATABASE_DBNAME` do backend).
 
-![Descrição da imagem](./aeiw3lpb6706vpb88u0g-0205aa.png)
+![Image description](./aeiw3lpb6706vpb88u0g-0205aa.png)
 
-Depois de criar, vamos criar duas tabelas, uma chamada `ports` e outra chamada `ships`, ambas com o "Hash Attribute" como `_id`:
+Depois da criação, vamos criar duas tabelas, uma chamada `ports` e outra chamada `ships`, ambas vão ter o "Hash Attribute" como `_id`:
 
-![Descrição da imagem](./y3wd0jyd17nyuco3hx2x-491448.png)
+![Image description](./y3wd0jyd17nyuco3hx2x-491448.png)
 
-Em seguida, vá até a aba "functions" na barra preta no topo da página, e crie um novo projeto chamado `api`:
+Em seguida, vá até a aba "functions" na faixa preta no topo da página, e crie um novo projeto chamado `api`:
 
-![Descrição da imagem](./up43t0bwmgbrrbacm7ao-a9f177.png)
+![Image description](./up43t0bwmgbrrbacm7ao-a9f177.png)
 
 Isso vai habilitar e ativar as custom functions.
 
@@ -202,18 +204,18 @@ Isso vai habilitar e ativar as custom functions.
 
 ## Migrando o código
 
-Pra migrar o código existente a gente precisa entender um pouco da arquitetura por trás dele. Tem alguma documentação no README, mas ela não explica todas as partes. Então vamos passar pelo código e ver o que precisamos fazer.
+Para migrar o código existente precisamos entender um pouco da arquitetura por trás dele. Você tem alguma documentação no arquivo README, mas ela não explica todas as partes. Então vamos passar pelo código e ver o que precisamos fazer.
 
 ### Entendendo a aplicação
 
 A aplicação é dividida em três partes dentro de `backend/src`:
 
-- `data`: é o equivalente ao `model`, é aqui que a gente se conecta com o banco, tem clients pra trazer dados de fontes externas, e tem a lógica pra interagir com o banco. Idealmente, esse é o único lugar que precisamos mudar, já que todos os documentos aqui são retornados como instâncias de objetos de domínio como `Ship` e `Port`.
-- `domain`: é o equivalente à `entity`, é aqui que definimos os objetos de domínio, como `Ship` e `Port`.
-- `services`: é o equivalente ao `controller`, é aqui que definimos os serviços que interagem com os objetos de domínio.
-- `presentation`: é o equivalente à `view`, é aqui que definimos a camada de apresentação, as rotas ReST e todas as partes interativas da aplicação.
+- `data`: É o equivalente ao `model`, aqui é onde nos conectamos ao banco de dados, temos clients para trazer dados de fontes externas, e temos a lógica para interagir com o banco. Idealmente, este é o único lugar que precisamos mudar, já que todos os documentos aqui são retornados como instâncias de objetos de domínio como `Ship` e `Port`.
+- `domain`: É o equivalente à `entity`, aqui é onde definimos os objetos de domínio, como `Ship` e `Port`.
+- `services`: É o equivalente ao `controller`, aqui é onde definimos os serviços que interagem com os objetos de domínio.
+- `presentation`: É o equivalente à `view`, aqui é onde definimos a camada de apresentação, as rotas ReST e todas as partes interativas da aplicação.
 
-Também temos dois arquivos importantes, o ponto de entrada da nossa aplicação em `backend/src/app.ts` e o arquivo de configuração em `backend/src/app-config.ts`. Primeiro vamos precisar mudar o arquivo `app-config.ts` pra refletir as mudanças que fizemos no banco, é isso que devemos escrever:
+Também temos dois arquivos importantes, o entrypoint da nossa app em `backend/src/app.ts` e o arquivo de configuração em `backend/src/app-config.ts`. Vamos precisar mudar o arquivo `app-config.ts` primeiro para refletir as mudanças que fizemos no banco, é isso que devemos escrever:
 
 ```typescript
 import env from 'sugar-env'
@@ -233,12 +235,12 @@ export const config = {
 }
 ```
 
-A próxima coisa que vamos fazer é mudar o arquivo `app.ts` pra refletir o que queremos ter no final. Esse é o arquivo atual:
+A próxima coisa que vamos fazer é mudar o arquivo `app.ts` para refletir o que queremos ter no fim. Este é o arquivo atual:
 
 ```ts
 import routes from './routes'
 import mongodb from '../data/connections/mongodb'
-// Outros imports...
+// Other imports...
 
 export const app = expresso(async (app: Express, appConfig: typeof config) => {
   const connection = await mongodb.createConnection(appConfig.database.mongodb)
@@ -249,21 +251,21 @@ export const app = expresso(async (app: Express, appConfig: typeof config) => {
   const shipRepository = new ShipRepository(connection)
   const shipService = new ShipService(shipRepository, portService)
 
-  // Rotas...
+  // Routes...
 })
 ```
 
-Como você pode ver, estamos importando uma conexão com o MongoDB, e passando ela adiante pros repositórios, então essa é a parte que precisamos mudar, vamos precisar remover o mongo por completo e substituir pelo cliente do harperdb.
+Como você pode ver, estamos importando uma conexão com o MongoDB, e passando ela adiante para os repositórios, então essa é a parte que precisamos mudar, vamos precisar remover o mongo por completo e substituir pelo client do harperdb.
 
-A forma como queremos fazer isso é ter uma classe `HarperDBClient`, que vai ser o equivalente à conexão do `mongodb`, e vamos usá-la pra dar aos repositórios uma conexão válida com a API do Harper.
+A forma como queremos fazer isso é ter uma classe `HarperDBClient`, que vai ser o equivalente à conexão do `mongodb`, e vamos usá-la para dar aos repositórios uma conexão válida com a API do Harper.
 
-Esse cliente deve receber só a configuração do HarperDB presente no `app-config.ts` e nos dar uma conexão válida com a API. Então vamos escrever isso:
+Esse client deve apenas pegar a config do HarperDB presente no `app-config.ts` e nos dar uma conexão válida com a API. Então vamos escrever isso:
 
 ```ts
 import routes from './routes'
 import type { config } from '../app-config'
 import { HarperDBClient } from '../data/clients/HarperDBClient'
-// Outros imports...
+// Other imports...
 
 export const app = expresso(async (app: Express, appConfig: typeof config) => {
   const client = new HarperDBClient(appConfig.database.harperdb)
@@ -274,19 +276,19 @@ export const app = expresso(async (app: Express, appConfig: typeof config) => {
   const shipRepository = new ShipRepository(client)
   const shipService = new ShipService(shipRepository, portService)
 
-  // Rotas...
+  // Routes...
 })
 ```
 
-E aí podemos remover completamente o import do `mongodb`, e substituir pela classe `HarperDBClient`.
+E podemos remover completamente o import do `mongodb`, e substituir pela classe `HarperDBClient`.
 
-Depois disso, podemos começar a codar nosso cliente!
+Depois disso, podemos começar a codar nosso client!
 
-### Criando o cliente
+### Criando o client
 
-Pra começar a criar nosso cliente, primeiro vamos precisar deletar o arquivo `mongodb` dentro de `data/connections` e substituir por um `HarperDBClient` dentro de `data/clients`. Esse arquivo vai ser uma classe que implementa a interface `HarperDBClient`.
+Para começar a criar nosso client, vamos precisar primeiro deletar o arquivo `mongodb` dentro de `data/connections` e substituir por um `HarperDBClient` dentro de `data/clients`. Esse arquivo vai ser uma classe que vai implementar a interface `HarperDBClient`.
 
-A primeira coisa que vamos fazer é instalar o pacote `axios` com `npm install axios`. Depois vamos começar criando uma classe que recebe a configuração do HarperDB e implementa a interface `HarperDBClient`:
+A primeira coisa que vamos fazer é instalar o pacote `axios` com `npm install axios`. Depois vamos começar criando uma classe que recebe a config do HarperDB e implementa a interface `HarperDBClient`:
 
 ```ts
 import { config } from '../../app-config'
@@ -313,11 +315,11 @@ export class HarperDBClient {
 }
 ```
 
-O que estamos fazendo aqui é só criar o cliente inicial que vai ser usado em todas as chamadas ReST internas da API.
+O que estamos fazendo aqui é só criar o client inicial que vai ser usado em todas as chamadas ReST internas da API.
 
-> **Nota:** você também pode usar `import type { config } from '../app-config'` pra importar só os tipos.
+> **Nota:** Você pode usar `import type { config } from '../app-config'` para importar somente os tipos também.
 
-Agora vamos criar a primeira função, que vai ser usada pra listar todas as entidades de um determinado tipo. Isso vai ser feito usando nosso bom e velho SQL. Mas também queremos tipar isso direito! Então vamos criar uma função que retorna uma lista de entidades:
+Agora vamos criar a primeira função, que vai ser usada para listar todas as entidades de uma dada entidade. Isso vai ser feito usando nosso bom e velho SQL. Mas também queremos tipar isso direitinho! Então vamos criar uma função que vai retornar uma lista de entidades:
 
 ```ts
 async SQLFindAll<Entity> (tableName: string, projection: string = '*', whereClause: string = '') {
@@ -329,11 +331,11 @@ async SQLFindAll<Entity> (tableName: string, projection: string = '*', whereClau
 }
 ```
 
-Nessa função estamos recebendo um parâmetro de tipo que é a entidade que estamos retornando. Os outros parâmetros especificam o nome da tabela, os campos que queremos retornar, e a cláusula where.
+Nesta função estamos recebendo um parâmetro de tipo que é a entidade que estamos retornando. Os outros parâmetros especificam o nome da tabela, os campos que queremos retornar, e a cláusula where.
 
-Todas as chamadas da API do Harper vão pra rota raiz, e são todas requisições POST. O que realmente define nossa ação é o payload dessa requisição, então vamos usar o método `post` no `client` pra fazer a chamada. Que vai retornar uma lista da entidade dada.
+Todas as chamadas à API do Harper são feitas para a rota raiz, e todas são requisições POST. O que realmente define nossa ação é o payload daquela requisição, então vamos usar o método `post` do `client` para fazer a chamada. O que vai retornar uma lista da entidade dada.
 
-A próxima coisa que vamos fazer é criar uma função que retorna uma única entidade, é bem parecida com a de cima, mas nesse caso vamos usar uma função nativa do HarperDB chamada `search_by_hash`:
+A próxima coisa que vamos fazer é criar uma função que vai retornar uma única entidade, é bem parecida com a de cima, mas neste caso vamos usar uma função nativa do HarperDB chamada `search_by_hash`:
 
 ```ts
 async NoSQLFindByID<Entity> (recordID: string | number, tableName: string, projection: string[] = ['*']) {
@@ -348,11 +350,11 @@ async NoSQLFindByID<Entity> (recordID: string | number, tableName: string, proje
 }
 ```
 
-Nessa função, vamos só receber o ID do registro, o nome da tabela, e os campos que queremos retornar. Como você pode ver, o payload da requisição mudou bastante. Também vamos receber uma lista de campos pra retornar, mas usamos o `*` pra pegar todos os campos por padrão.
+Nesta função, vamos receber apenas o ID do registro, o nome da tabela, e os campos que queremos retornar. Como você pode ver, o payload da requisição mudou bastante. Também vamos receber uma lista de campos para retornar, mas vamos usar o `*` para pegar todos os campos por padrão.
 
-Outro ponto importante de notar é que, mesmo retornando uma única entidade, o Harper retorna um array dessa entidade na resposta. Então precisamos pegar o primeiro elemento do array.
+Outro ponto importante de notar é que, mesmo retornando uma única entidade, o Harper devolve um array daquela entidade na resposta. Então vamos precisar fatiar o array para pegar o primeiro elemento.
 
-Pra próxima função vamos precisar criar alguns tipos mais intrincados, essas são as funções `update` e `upsert`, a diferença entre elas e as outras é que elas têm um tipo de retorno diferente pra cada chamada. Então o que vamos fazer é criar um tipo base e estender ele conforme necessário.
+Para a próxima função vamos precisar criar alguns tipos mais complicados, são as funções `update` e `upsert`, a diferença entre elas e as outras é que elas têm um tipo de retorno diferente para cada chamada. Então o que vamos fazer é criar um tipo base e estendê-lo conforme a necessidade.
 
 Vamos adicionar isso no topo do nosso arquivo:
 
@@ -371,7 +373,7 @@ interface HarperNoSQLUpdateType extends HarperNoSQLReturnTypeBase {
 }
 ```
 
-Agora que temos os tipos base e estendidos, só precisamos criar um tipo que junta eles, e escolhe o certo dependendo da chamada da função:
+Agora temos o tipo base e os estendidos, tudo que precisamos fazer é criar um tipo que vai juntar os dois, e escolher o certo com base na chamada da função:
 
 ```ts
 type HarperNoSQLReturnType<T> = T extends 'upsert'
@@ -381,9 +383,9 @@ type HarperNoSQLReturnType<T> = T extends 'upsert'
   : never
 ```
 
-Esse tipo vai checar se um determinado parâmetro de tipo é `upsert` ou `update`, e vai retornar o tipo certo baseado nisso.
+Esse tipo vai checar se um dado parâmetro de tipo é `upsert` ou `update`, e vai retornar o tipo certo com base nisso.
 
-E podemos usar isso nas nossas funções:
+E podemos usá-lo nas nossas funções:
 
 ```ts
 async NoSQLUpsert (records: Object[], tableName: string) {
@@ -407,9 +409,9 @@ async NoSQLUpdate (records: Record<string, any>, tableName: string) {
 }
 ```
 
-> Mesmo não usando a função `update`, achei válido colocar ela aqui pra vermos como funciona.
+> Mesmo que não vamos usar a função `update`, achei que seria legal adicioná-la aqui para podermos ver como ela funciona.
 
-E é isso, nosso cliente já está pronto pra ser usado! Assim que ele fica:
+E é isso, nosso client já está pronto para ser usado! É assim que ele fica:
 
 ```ts
 import { config } from '../../app-config'
@@ -496,7 +498,7 @@ export class HarperDBClient {
 
 ### Migrando os repositórios
 
-Se você der uma olhada bem de perto no diretório `data/repositories`, vai ver que existem dois repositórios, um pra entidade `Ship` e outro pra entidade `Port`. Se você abrir um deles vai ver que eles são bem parecidos entre si:
+Se você olhar de perto o diretório `data/repositories`, vai ver que existem dois repositórios, um para a entidade `Ship` e um para a entidade `Port`. Se você abrir um deles vai ver que são quase iguais entre si:
 
 ```ts
 import { Db } from 'mongodb'
@@ -518,21 +520,21 @@ export class PortRepository extends MongodbEventRepository<Port> {
 }
 ```
 
-A única mudança é o nome da entidade. Então por que não aproveitar a herança de classes pra facilitar isso? Vamos criar uma classe `BaseRepository` que vai ser estendida pelas classes `PortRepository` e `ShipRepository`.
+A única mudança é o nome da entidade. Então por que não usamos herança de classes para facilitar isso? Vamos criar uma classe `BaseRepository` que vai ser estendida pelas classes `PortRepository` e `ShipRepository`.
 
-Primeiro, precisamos respeitar as bibliotecas de event sourcing que estamos usando. O [paradox](https://github.com/irontitan/paradox) é uma biblioteca que tem uma classe `MongodbEventRepository` que podemos estender no código original. Como não estamos mais usando o Mongo, precisamos ver como a biblioteca estende o código, e se você olhar [o código dela](https://github.com/irontitan/paradox/blob/master/src/classes/repositories/MongodbEventRepository.ts#L13) vai ver que ela usa um parâmetro de tipo pra especificar o tipo da entidade, e estende a classe `EventRepository` com esse tipo:
+Primeiro, precisamos estar de acordo com as bibliotecas de event sourcing que estamos usando, o [paradox](https://github.com/irontitan/paradox) é uma biblioteca que tem uma classe `MongodbEventRepository` que podemos estender no código original, como não estamos mais usando o Mongo, precisamos checar como a biblioteca estende o código, e se você olhar [o código dela](https://github.com/irontitan/paradox/blob/master/src/classes/repositories/MongodbEventRepository.ts#L13) vai ver que ela usa um parâmetro de tipo para especificar o tipo da entidade, e estende a classe `EventRepository` com aquele tipo:
 
 ```ts
 export abstract class MongodbEventRepository<TEntity extends IEventEntity> extends EventRepository<TEntity>
 ```
 
-A gente não pode estender a classe `EventRepository` diretamente porque ela é feita pra bancos NoSQL, então vamos estender a entidade diretamente:
+Não podemos estender a classe `EventRepository` diretamente porque ela foi feita para bancos de dados NoSQL, então vamos estender a entidade diretamente:
 
 ```ts
 export class BaseRepository<Entity extends IEventEntity> {}
 ```
 
-Nosso construtor é simples, vamos só criar três variáveis protegidas. Uma vai ser a entidade com a qual estamos trabalhando, porque precisamos saber que tipo de classe criar; a segunda vai ser o cliente do banco, que é nosso cliente HarperDB; e a última é o nome da tabela.
+Nosso construtor é simples, vamos apenas criar três variáveis protegidas. Uma vai ser a entidade com a qual estamos trabalhando, porque precisamos saber que tipo de classe criar; a segunda vai ser o client do banco de dados, que é nosso client do HarperDB; e a última é o nome da tabela.
 
 ```ts
 import { HarperDBClient } from '../clients/HarperDBClient'
@@ -551,13 +553,13 @@ export class BaseRepository<Entity extends IEventEntity> {
 }
 ```
 
-Agora vamos dar uma olhada nas funções usadas pelos serviços, vamos ver que temos três principais: `getAll`, `save`, e `findById`. Vamos criá-las no nosso repositório base, essas são as regras:
+Depois precisamos dar uma olhada nas funções que são usadas pelos services, vamos ver que temos três principais: `getAll`, `save` e `findById`. Vamos criá-las no nosso repositório base, estas são as regras:
 
 - `getAll` vai retornar todas as entidades da tabela.
 - `save` vai salvar uma nova entidade ou atualizar uma existente.
 - `findById` vai retornar uma entidade pelo seu ID.
 
-Começando pela mais simples, `getAll`, vamos só chamar a função `SQLFindAll` no cliente do banco, e passar o nome da tabela e a projeção.
+Começando pela mais simples, `getAll`, vamos apenas chamar a função `SQLFindAll` do client do banco, e vamos passar o nome da tabela e a projeção.
 
 ```ts
 async getAll (): Promise<Entity[]> {
@@ -566,17 +568,17 @@ async getAll (): Promise<Entity[]> {
 }
 ```
 
-No final da função, precisamos pegar a lista de eventos que retornamos e adicioná-los à sua entidade, e então retornar a entidade, que vai conter o reducer pra aplicar os eventos à entidade.
+No fim da função, precisamos pegar a lista de eventos que retornamos e adicioná-los à sua entidade, depois retornar a entidade, que vai conter o reducer para aplicar os eventos à entidade.
 
-O único detalhe aqui é a tipagem, já que só estamos interessados nos eventos, vamos usar `{ events: Entity['events'] }` como o tipo do documento. E aí vamos usar a função `search_json` pra filtrar as entidades deletadas.
+O único detalhe aqui são as tipagens, como estamos interessados somente nos eventos, vamos usar `{ events: Entity['events'] }` como o tipo do documento. E depois vamos usar a função `search_json` para filtrar as entidades deletadas.
 
-> Essa segunda parte é importante porque, em event sourcing, a gente nunca realmente deleta alguma coisa, só adicionamos um evento de deleção que vai preencher um campo `deletedAt` na entidade. Então, se quisermos pegar todas as entidades, vamos precisar filtrar as deletadas.
+> Esta segunda parte é importante porque, em event sourcing, nunca deletamos nada de verdade, apenas adicionamos um evento de delete que vai preencher um campo `deletedAt` na entidade. Então, se queremos pegar todas as entidades, vamos precisar filtrar as deletadas.
 
-Em seguida, vamos pra função `findById`. Essa vai ser um pouco mais complicada já que estamos usando o MongoDB com ObjectIDs, então esperamos esse tipo de objeto no nosso código. Então precisamos continuar usando eles.
+Em seguida, vamos para a função `findById`. Essa vai ser um pouco mais complicada já que estamos usando MongoDB com ObjectIDs, então esperamos esse tipo de objeto no nosso código. Então precisamos continuar usando eles.
 
-> É uma boa prática remover todos os OIDs do código e usar outro tipo de identificador, como UUIDs, pra facilitar a troca entre bancos de dados. Principalmente porque o Harper não entende OIDs como um Objeto, mas sim como uma string.
+> É uma boa prática remover todos os OIDs do código e usar outro tipo de identificador, como UUIDs, para que possamos trocar de banco de dados facilmente. Principalmente porque o Harper não entende OIDs como um Object, e sim como uma string.
 
-Nossa função vai precisar chamar a função `NoSQLFindByID` no cliente do banco, e vamos passar o nome da tabela, o ID do registro, e a projeção, e ela deve retornar `null` caso a entidade não exista.
+Nossa função vai precisar chamar a função `NoSQLFindByID` do client do banco, e vamos passar o nome da tabela, o ID do registro e a projeção, e ela deve retornar null caso a entidade não exista.
 
 ```ts
 async findById (id: string | ObjectId): Promise<Entity | null> {
@@ -589,9 +591,9 @@ async findById (id: string | ObjectId): Promise<Entity | null> {
 }
 ```
 
-A última função é a `save`, que vai ser um pouco mais complicada. Vamos precisar chamar a função `NoSQLUpsert` no cliente do banco, e passar o nome da tabela, e a entidade a ser inserida ou atualizada. Mas não podemos simplesmente usar a entidade diretamente, precisamos clonar ela, então vamos instalar o `lodash.clonedeep` com `npm install lodash.clonedeep`.
+A última função é a `save`, que vai ser um pouco mais complicada. Vamos precisar chamar a função `NoSQLUpsert` do client do banco, e vamos passar o nome da tabela e a entidade a ser feito o upsert. Mas não podemos usar a entidade diretamente, precisamos cloná-la, então vamos instalar o `lodash.clonedeep` usando `npm install lodash.clonedeep`.
 
-Depois, vamos importar ele como `import cloneDeep from 'lodash.clonedeep'`. E usar assim:
+Depois, vamos importá-lo como `import cloneDeep from 'lodash.clonedeep'`. E usá-lo assim:
 
 ```ts
 async save (entity: Entity): Promise<Entity> {
@@ -607,9 +609,9 @@ async save (entity: Entity): Promise<Entity> {
 }
 ```
 
-Estamos montando o documento dentro da função, e então concatenando os eventos pendentes (eventos que estão na entidade, mas ainda não persistidos no banco) com os eventos persistidos (eventos que já estão persistidos no banco). Depois vamos chamar a função `NoSQLUpsert` no cliente do banco, passando o nome da tabela e o documento a ser inserido.
+Estamos montando o documento dentro da função, depois concatenando os eventos pendentes (eventos que estão na entidade, mas ainda não persistidos no banco) aos eventos persistidos (eventos que já estão persistidos no banco). Depois vamos chamar a função `NoSQLUpsert` do client do banco, e vamos passar o nome da tabela e o documento a ser feito o upsert.
 
-Também podemos conferir o ID inserido pra garantir e, no final, confirmar os eventos, o que basicamente concatena os eventos pendentes aos persistidos, e limpa o array de eventos pendentes.
+Também podemos checar o ID inserido para ter certeza e, no fim, vamos confirmar os eventos, o que essencialmente vai concatenar os eventos pendentes aos eventos persistidos, e limpar o array de eventos pendentes.
 
 O código final fica assim:
 
@@ -662,7 +664,7 @@ export class BaseRepository<Entity extends IEventEntity> {
 }
 ```
 
-Depois só precisamos estender essa classe nos outros repositórios, assim:
+Depois é só estender essa classe nos nossos outros repositórios, assim:
 
 ```ts
 import { HarperDBClient } from '../clients/HarperDBClient'
@@ -676,7 +678,7 @@ export class PortRepository extends BaseRepository<Port> {
 }
 ```
 
-E o repositório de navios fica assim:
+E o repositório de ship vai ficar assim:
 
 ```ts
 import { Ship } from '../../domain/ship/entity'
@@ -690,13 +692,13 @@ export class ShipRepository extends BaseRepository<Ship> {
 }
 ```
 
-### Retoques finais
+### Ajustes finais
 
-Como mencionei antes, estamos usando MongoDB com ObjectIDs, então esperamos esse tipo de objeto no nosso código. Mas o Harper não entende esses OIDs como Objetos, e sim como strings.
+Como mencionei antes, estamos usando MongoDB com ObjectIDs, então esperamos esse tipo de objeto no nosso código. Mas o Harper não entende esses OIDs como Objects, e sim como strings.
 
-O problema é que a biblioteca `ObjectId` tem duas funções, `equals` e `toHexString`, e elas não existem em strings, então precisamos mudar toda ocorrência dessas funções pra `.toString()`.
+O problema é que a biblioteca `ObjectId` tem duas funções, a `equals` e a `toHexString`, e elas não existem em strings, então precisamos mudar toda ocorrência dessas funções para `.toString()`.
 
-Se você procurar no seu editor pela palavra `.equals` vai encontrar três arquivos com 4 ocorrências. Vamos substituir por `.toString()` e a comparação com `equals` vira a boa e velha comparação `===`.
+Se você buscar no seu editor pela palavra `.equals` vai encontrar três arquivos com 4 ocorrências. Vamos substituí-las por `.toString()` e a comparação com `equals` vai virar a boa e velha comparação com `===`.
 
 `domain/port/events/ShipDockedEvent.ts`:
 
@@ -885,21 +887,21 @@ export class PortService {
 
 ## Testando
 
-Agora terminamos! Vamos testar a aplicação executando o arquivo docker compose com `docker compose up` e navegando até `localhost`:
+Agora terminamos! Vamos testar a aplicação executando o arquivo do docker compose com `docker compose up` e navegando até `localhost`:
 
-![Descrição da imagem](./tg5gmrjot26x8yv6v90f-c2beb4.png)
+![Image description](./tg5gmrjot26x8yv6v90f-c2beb4.png)
 
-Vamos criar um novo porto e ver como fica:
+Vamos criar um novo port e ver como fica:
 
-![Descrição da imagem](./p3wtc2wwvy31lf6xj7ul-b4fd61.png)
+![Image description](./p3wtc2wwvy31lf6xj7ul-b4fd61.png)
 
 E conferir no harper:
 
-![Descrição da imagem](./fcaix0qropvygiul7fa9-473d2e.png)
+![Image description](./fcaix0qropvygiul7fa9-473d2e.png)
 
 ## Custom Functions
 
-Pra incluir as custom functions, vamos mudar a aba `functions` no Harper Studio pra incluir o seguinte código:
+Para incluir as custom functions, vamos mudar a aba `functions` no Harper Studio para incluir o seguinte código:
 
 ```js
 'use strict'
@@ -934,13 +936,13 @@ module.exports = async (server, { hdbCore }) => {
 }
 ```
 
-Vamos colocar isso no arquivo de exemplo dentro do projeto que criamos antes:
+Vamos colocar isso dentro do arquivo de exemplo, dentro do projeto que criamos antes:
 
-![Descrição da imagem](./w4pzob42dexq5lhp2b3k-8b7eef.png)
+![Image description](./w4pzob42dexq5lhp2b3k-8b7eef.png)
 
-O que isso vai fazer é adicionar uma nova rota no servidor que vai nos permitir consultar os navios e portos diretamente, sem precisar da query SQL em `/ships` ou `/ports`.
+O que isso vai fazer é adicionar uma nova rota ao servidor que vai nos permitir consultar os ships e os ports diretamente, sem a necessidade da query SQL dentro de `/ships` ou `/ports`.
 
-Depois de salvar o arquivo, vamos voltar pro nosso cliente HarperDB e mudar a função `findAll` pra chamar a nova rota de porto e a nova rota de entidade:
+Depois de salvar o arquivo, vamos voltar ao nosso client do HarperDB e mudar a função `findAll` para chamar a nova porta e a nova rota de entidade:
 
 ```ts
 async SQLFindAll<Entity> (tableName: string) {
@@ -950,4 +952,4 @@ async SQLFindAll<Entity> (tableName: string) {
 }
 ```
 
-Agora podemos subir nosso servidor com `docker compose up --build=backend` e navegar até `localhost` pra ver que está tudo funcionando como esperado.
+Agora podemos subir nosso servidor com `docker compose up --build=backend` e navegar até `localhost` para ver que tudo está funcionando como esperado.
