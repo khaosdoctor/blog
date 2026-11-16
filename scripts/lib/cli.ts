@@ -78,18 +78,24 @@ export function walkFiles(dir: string): string[] {
 }
 
 /**
- * A post's source is the file in its folder carrying the source locale, not a
- * filename: a post is named after its slug, so `index` says nothing.
+ * A post's source is the file a person wrote, found by frontmatter rather than
+ * filename: a post is named after its slug, so `index` says nothing. The source
+ * locale wins when a folder holds hand-written files in both languages; a post
+ * written only in English has its English file as the source.
  */
 export function postIndex(dir: string): string | undefined {
-  const found: string[] = []
+  const preferred: string[] = []
+  const written: string[] = []
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory() || !/\.mdx?$/.test(entry.name)) continue
     const full = join(dir, entry.name)
-    const lang = /^lang:\s*["']?([a-z]{2})/m.exec(frontmatterOf(readFileSync(full, 'utf8')))?.[1]
-    if (lang === undefined || lang === SOURCE_LOCALE) found.push(full)
+    const front = frontmatterOf(readFileSync(full, 'utf8'))
+    if (/^machineOwnedTranslation:\s*true/m.test(front)) continue
+    const lang = /^lang:\s*["']?([a-z]{2})/m.exec(front)?.[1]
+    if (lang === undefined || lang === SOURCE_LOCALE) preferred.push(full)
+    else written.push(full)
   }
-  return found.sort()[0]
+  return preferred.sort()[0] ?? written.sort()[0]
 }
 
 /**

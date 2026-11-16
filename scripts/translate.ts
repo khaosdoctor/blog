@@ -16,6 +16,9 @@
  *
  *   node scripts/translate.ts [--locale en] [--only slug] [--all] [--dry-run]
  *
+ * Without --locale it runs once per locale, so a post written in either
+ * language is translated into the other.
+ *
  * Two separate questions. Who owns a translation is answered by its own
  * frontmatter: only `machineOwnedTranslation: true` may be rewritten, and absent
  * counts as owned by a person. Whether it is stale is answered by the source
@@ -44,11 +47,11 @@
 // Type-only, so the default claude-cli path runs with nothing installed: the
 // `anthropic` provider imports the package itself, at the point it needs one.
 
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type Anthropic from '@anthropic-ai/sdk'
-import { asLocale, type Locale } from '../src/i18n/locales.ts'
+import { asLocale, LOCALES, type Locale } from '../src/i18n/locales.ts'
 import { sanitizeCaption } from '../src/lib/sanitizeCaption.ts'
 import { slugify } from '../src/lib/slugify.ts'
 import {
@@ -118,7 +121,7 @@ function parseArgs() {
     return argv[index + 1] ?? null
   }
   return {
-    locale: (value('locale') ?? 'en') as Locale,
+    locale: value('locale') as Locale | null,
     only: value('only'),
     all: argv.includes('--all'),
     dryRun: argv.includes('--dry-run'),
@@ -356,7 +359,18 @@ function buildFrontmatter(original: string, fields: Map<string, string>, locale:
   return lines.join('\n')
 }
 
-const args = parseArgs()
+const parsed = parseArgs()
+
+if (parsed.locale === null) {
+  const failed = LOCALES.filter(
+    (locale) =>
+      spawnSync(process.execPath, [process.argv[1], ...process.argv.slice(2), '--locale', locale], { stdio: 'inherit' })
+        .status !== 0,
+  )
+  process.exit(failed.length > 0 ? 1 : 0)
+}
+
+const args = { ...parsed, locale: parsed.locale }
 
 heading('translate: translating changed posts')
 
