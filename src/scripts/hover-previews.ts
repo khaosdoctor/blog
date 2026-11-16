@@ -108,7 +108,12 @@ function named(title: string | null | undefined): string {
 async function getExternalMeta(href: string, linkText: string): Promise<Meta> {
   const url = new URL(href)
   const host = url.hostname.replace(/^www\./, '')
-  const known = (await loadExternalMeta())[href] ?? (await loadExternalMeta())[href.replace(/\/$/, '')]
+  // The cache is keyed by the URL as written in the post, before rehype-external-links tagged it.
+  url.searchParams.delete('utm_source')
+  url.searchParams.delete('utm_medium')
+  const written = url.href
+  const meta = await loadExternalMeta()
+  const known = meta[written] ?? meta[written.replace(/\/$/, '')]
 
   return {
     title: named(known?.title) || linkText.trim() || host,
