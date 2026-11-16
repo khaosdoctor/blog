@@ -23,6 +23,11 @@ const MDX_PLUGIN = '@mdx-js/rolldown'
 const MDX_POSTPROCESS = '@astrojs/mdx-postprocess'
 const MD_PLUGIN = 'astro:markdown'
 const CONTENT_MD = /content\/(blog|internal\/draft ideas)\/[^/]+\/[^/]+\.md$/
+// Since Astro 7.4 the build imports a content .md entry as `post.md?astroMarkdownContentEntry`,
+// while the dev server still uses the bare path. Every check here runs on the bare path.
+const ENTRY_FLAG = /\?astroMarkdownContentEntry$/
+const MD_OR_MDX = /\.mdx?(\?astroMarkdownContentEntry)?$/
+const bare = (id) => id.replace(ENTRY_FLAG, '')
 
 function safeParseFrontmatter(code, id) {
   try {
@@ -88,13 +93,13 @@ function mdAsVitePlugin() {
       const mdxPlugin = resolved.plugins.find((p) => p.name === MDX_PLUGIN)
       const postprocessPlugin = resolved.plugins.find((p) => p.name === MDX_POSTPROCESS)
       const mdPlugin = resolved.plugins.find((p) => p.name === MD_PLUGIN)
-
-      if (mdxPlugin?.transform?.filter?.id instanceof RegExp) {
-        mdxPlugin.transform.filter.id = /\.mdx?$/
-      }
-
-      if (postprocessPlugin?.transform?.filter?.id instanceof RegExp) {
-        postprocessPlugin.transform.filter.id = /\.mdx?$/
+      for (const plugin of [mdxPlugin, postprocessPlugin]) {
+        if (!(plugin?.transform?.filter?.id instanceof RegExp)) continue
+        plugin.transform.filter.id = MD_OR_MDX
+        const originalTransform = plugin.transform.handler
+        plugin.transform.handler = function (code, id) {
+          return originalTransform.call(this, code, bare(id))
+        }
       }
 
       if (mdxPlugin?.resolveId?.handler) {
@@ -112,7 +117,7 @@ function mdAsVitePlugin() {
       if (mdPlugin?.load?.handler) {
         const originalLoad = mdPlugin.load.handler
         mdPlugin.load.handler = async function (id) {
-          if (CONTENT_MD.test(id)) return undefined
+          if (CONTENT_MD.test(bare(id))) return undefined
           return originalLoad.call(this, id)
         }
       }
