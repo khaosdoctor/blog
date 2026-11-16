@@ -91,7 +91,7 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     list-style-position: inside;
   }
 
-  /* Out over the card's padding and back, so a fill reaches the frame. */
+  /* Out over the card's padding and back, so the current part's bar meets the frame. */
   li {
     margin-inline: calc(var(--toc-pad) * -1);
     padding-inline: calc(var(--toc-indent) + var(--toc-pad)) var(--toc-pad);
@@ -103,21 +103,28 @@ const seriesHref = localePath(locale, `/series/${series}/`)
     margin-block-start: 0.25rem;
   }
 
+  .unwritten {
+    color: var(--link-unwritten);
+  }
+
   .current {
-    background: var(--accent-day, var(--accent));
-    color: var(--bg);
+    --mark: var(--accent-day, var(--accent));
+    --mark-at: calc(var(--toc-indent) + var(--toc-pad) - 0.9rem);
+    background: linear-gradient(
+      to right,
+      transparent var(--mark-at),
+      var(--mark) var(--mark-at) calc(var(--mark-at) + 5px),
+      color-mix(in oklab, var(--mark) 22%, transparent) calc(var(--mark-at) + 5px)
+    );
+  }
+
+  .current,
+  .current strong {
+    color: var(--fg);
   }
 
   .current::marker {
-    color: var(--bg);
-  }
-
-  .current .marker {
-    color: inherit;
-  }
-
-  .unwritten {
-    color: var(--link-unwritten);
+    color: var(--mark);
   }
 
   .marker {
