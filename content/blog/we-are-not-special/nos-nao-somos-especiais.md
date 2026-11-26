@@ -10,7 +10,7 @@ slug: nos-nao-somos-especiais
 series: ai-and-us
 seriesOrder: 2
 heroImage: ./cover.png
-machineOwnedTranslation: true
+machineOwnedTranslation: false
 description: Por que os desenvolvedores se acham tão especiais? Será que somos mesmo?
 draft: false
 ---
