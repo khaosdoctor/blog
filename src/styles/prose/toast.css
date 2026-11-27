@@ -1,6 +1,6 @@
 .toast {
   position: fixed;
-  inset-block-end: 1.5rem;
+  inset-block-end: calc(1.5rem + var(--toc-bar-size, 0px));
   inset-inline: 0;
   z-index: 2;
   width: fit-content;

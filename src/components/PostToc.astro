@@ -1,6 +1,8 @@
 ---
 import type { MarkdownHeading } from 'astro'
 import { type Locale, t } from '../i18n/ui'
+import ChevronUp from './icons/ChevronUp.astro'
+import ListBox from './icons/ListBox.astro'
 import TocBranch, { type TocItem } from './TocBranch.astro'
 
 interface Props {
@@ -35,18 +37,10 @@ const tree = treeOf(flat)
 {
   flat.length > 1 && (
     <div class="rail">
-      <button
-        class="handle"
-        type="button"
-        aria-expanded="false"
-        aria-controls="post-toc"
-        aria-label={t(locale, 'openContents')}
-      >
-        <svg class="handle-icon" aria-hidden="true" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
-          <rect x="0" y="2" width="16" height="1.5" rx="0.5" />
-          <rect x="0" y="7.25" width="12" height="1.5" rx="0.5" />
-          <rect x="0" y="12.5" width="16" height="1.5" rx="0.5" />
-        </svg>
+      <button class="bar" type="button" aria-expanded="false" aria-controls="post-toc">
+        <ListBox />
+        <span class="bar-label">{t(locale, 'contents')}</span>
+        <ChevronUp class="bar-chevron" />
       </button>
       <div class="dock">
         <nav id="post-toc" class="toc" aria-labelledby="toc-title" data-open="false">
@@ -62,13 +56,18 @@ const tree = treeOf(flat)
 
 <style>
   .toc,
-  .handle {
+  .bar {
     --toc-ink: light-dark(#000000, #ffffff);
     --toc-paper: var(--bg);
   }
 
   :global(main):has(> .rail) {
     position: relative;
+  }
+
+  /* Room under the footer, so the bar never covers its last line. */
+  :global(body) {
+    padding-block-end: var(--toc-bar-size, 0px);
   }
 
   /* Fills the page margin left of `main` from top to bottom, so the panel can
@@ -83,31 +82,33 @@ const tree = treeOf(flat)
 
   .toc {
     position: fixed;
-    inset-block: 50% auto;
-    inset-inline: auto 0;
-    z-index: 2;
-    transform: translate(100%, -50%);
-    inline-size: min(75vw, 20rem);
-    max-block-size: 60vh;
+    inset-block: auto var(--toc-bar-size, 0px);
+    inset-inline: 0;
+    z-index: 3;
+    max-block-size: 60dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 1rem 0.7rem;
-    border: 3px double var(--toc-ink);
-    border-inline-end: 0;
+    padding: 1rem var(--gutter);
+    border-block-start: 3px double var(--toc-ink);
     background: var(--bg);
     color: var(--toc-ink);
     font-family: var(--font-mono);
     display: none;
     transition:
       transform var(--duration) var(--ease),
+      opacity var(--duration) var(--ease),
       display var(--duration) var(--ease) allow-discrete;
+    transform: translateY(1rem);
+    opacity: 0;
   }
 
   .toc[data-open='true'] {
     display: block;
-    transform: translate(0, -50%);
+    transform: none;
+    opacity: 1;
     @starting-style {
-      transform: translate(100%, -50%);
+      transform: translateY(1rem);
+      opacity: 0;
     }
   }
 
@@ -115,7 +116,9 @@ const tree = treeOf(flat)
     padding-inline-start: 1.2rem;
   }
 
+  /* The bar already shows the title; hidden, it still names the nav. */
   .title {
+    display: none;
     margin: 0 0 1.5rem;
     padding-inline-start: 0.3rem;
     font-family: var(--font-display);
@@ -126,34 +129,55 @@ const tree = treeOf(flat)
     color: light-dark(#000000, #ffffff);
   }
 
-  .handle {
+  .bar {
     position: fixed;
-    inset-block-start: 50%;
-    inset-inline: auto 0;
-    transform: translateY(-50%);
+    inset-block-end: 0;
+    inset-inline: 0;
     z-index: 3;
-    display: grid;
-    place-items: center;
-    min-inline-size: calc(var(--icon-btn-hit) / 2);
-    block-size: 7rem;
-    padding: 0 0.4rem;
-    border: 3px double var(--toc-ink);
-    border-inline-end: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-block-size: var(--icon-btn-hit);
+    padding: 0.7rem var(--gutter) calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    border: 0;
+    border-block-start: 3px double var(--toc-ink);
     background: var(--bg);
     color: var(--toc-ink);
-    font-family: var(--font-mono);
-    font-size: 1.2rem;
-    line-height: 1;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    text-shadow: 1px 0 currentColor;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: transform var(--duration) var(--ease);
   }
 
-  .rail:has(.toc[data-open='true']) .handle {
-    transform: translate(calc(-1 * min(75vw, 20rem)), -50%);
+  .bar:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -4px;
   }
 
-  .handle-icon {
-    display: block;
+  .bar-label {
+    flex: 1;
+    text-align: start;
+  }
+
+  .bar :global(.bar-chevron) {
+    transition: rotate var(--duration) var(--ease);
+  }
+
+  .bar[aria-expanded='true'] :global(.bar-chevron) {
+    rotate: 180deg;
+  }
+
+  /* The open drawer runs the full height, with its controls at the bottom. */
+  :global(body:has(.shell[data-menu-open]) .rail > :is(.bar, .dock > .toc)) {
+    visibility: hidden;
+  }
+
+  @media print {
+    .bar {
+      display: none;
+    }
   }
 
   .dock {
@@ -188,10 +212,16 @@ const tree = treeOf(flat)
       font-size: 1rem;
       display: block;
       border: 3px double var(--toc-ink);
+      padding: 1rem 0.7rem;
+      opacity: 1;
       transition: none;
     }
 
-    .handle {
+    .title {
+      display: block;
+    }
+
+    .bar {
       display: none;
     }
   }
@@ -199,7 +229,7 @@ const tree = treeOf(flat)
 
 <script>
   const toc = document.querySelector<HTMLElement>('.toc')
-  const handle = document.querySelector<HTMLButtonElement>('.handle')
+  const bar = document.querySelector<HTMLButtonElement>('.rail > .bar')
 
   if (toc !== null) {
     const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')]
@@ -358,26 +388,38 @@ const tree = treeOf(flat)
       if (hideFull()) event.stopImmediatePropagation()
     })
 
-    if (handle !== null) {
+    if (bar !== null) {
       const setOpen = (open: boolean): void => {
         toc.dataset.open = String(open)
-        handle.setAttribute('aria-expanded', String(open))
+        bar.setAttribute('aria-expanded', String(open))
+        // The list is `display: none` until now, so it could not follow the reader.
+        if (open && current !== null) reveal(current)
       }
 
-      handle.addEventListener('click', () => setOpen(toc.dataset.open !== 'true'))
+      bar.addEventListener('click', () => setOpen(toc.dataset.open !== 'true'))
 
       toc.addEventListener('click', (event) => {
         if ((event.target as HTMLElement).closest('a') === null) return
-        if (!handle.checkVisibility()) return
+        if (!bar.checkVisibility()) return
         setOpen(false)
+      })
+
+      addEventListener('pointerdown', (event) => {
+        const target = event.target as Node
+        if (!toc.contains(target) && !bar.contains(target)) setOpen(false)
       })
 
       addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') return
         if (toc.dataset.open !== 'true') return
         setOpen(false)
-        handle.focus()
+        bar.focus()
       })
+
+      // Read by the panel, the footer and the toast; zero while the side outline replaces the bar.
+      new ResizeObserver(() => {
+        document.documentElement.style.setProperty('--toc-bar-size', `${bar.offsetHeight}px`)
+      }).observe(bar, { box: 'border-box' })
     }
   }
 </script>

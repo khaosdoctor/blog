@@ -87,14 +87,12 @@ for (const [lang, pages] of Object.entries(PAGES)) {
 const TAP_TARGETS = [
   { name: 'credits link', selector: 'footer .credits a', path: '/en/', minWidth: 44, minHeight: 44 },
   { name: 'hamburger', selector: '.menu-toggle', path: '/en/', minWidth: 44, minHeight: 44 },
-  // The TOC pull tab is half an icon button wide by design (flush with the
-  // screen edge, cannot be overshot); the height is what carries the target.
   {
-    name: 'toc handle',
-    selector: '.handle',
+    name: 'toc bar',
+    selector: '.rail > .bar',
     path: '/en/a-deep-dive-into-container-images-part-1/',
-    minWidth: 20,
-    minHeight: 100,
+    minWidth: 393,
+    minHeight: 44,
   },
 ]
 
@@ -117,18 +115,34 @@ test('hamburger opens the drawer with nav links at 393px', async ({ page }) => {
   await expect(page.locator('.nav-links a', { hasText: 'SERIES' })).toBeVisible()
 })
 
-test('the toc tab slides the outline in at 393px', async ({ page }) => {
+test('the bottom bar opens the outline above itself at 393px', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 850 })
   await page.goto('/en/a-deep-dive-into-container-images-part-1/')
-  await page.click('.handle')
-  await expect(page.locator('.toc')).toBeVisible()
+  const bar = page.locator('.rail > .bar')
+  const toc = page.locator('.toc')
+  await bar.click()
+  await expect(toc).toBeVisible()
   // Polled: the panel is mid-slide right after the click.
   await expect
     .poll(async () => {
-      const box = await page.locator('.toc').boundingBox()
-      return box ? box.x + box.width : Number.POSITIVE_INFINITY
+      const [panel, strip] = [await toc.boundingBox(), await bar.boundingBox()]
+      if (panel === null || strip === null) return Number.POSITIVE_INFINITY
+      return Math.abs(panel.y + panel.height - strip.y)
     })
-    .toBeLessThanOrEqual(394)
+    .toBeLessThanOrEqual(1)
+
+  // In the gutter, where there is no link to follow.
+  await page.mouse.click(5, 200)
+  await expect(toc).toBeHidden()
+
+  await bar.click()
+  await toc.locator('a').nth(1).click()
+  await expect(toc).toBeHidden()
+
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight))
+  const credits = await page.locator('footer .credits a').first().boundingBox()
+  const strip = await bar.boundingBox()
+  expect((credits?.y ?? 0) + (credits?.height ?? 0)).toBeLessThanOrEqual(strip?.y ?? 0)
 })
 
 test('long unbroken tokens wrap instead of scrolling the page', async ({ page }) => {
