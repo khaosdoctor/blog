@@ -6,6 +6,7 @@ import { formatDate, type Post, slugOf, urlOf } from '../lib/posts'
 import { chipColor, type getSeriesNavigation, slugify } from '../lib/taxonomy'
 import Authors from './Authors.astro'
 import CoverHero from './CoverHero.astro'
+import DiscussButton from './DiscussButton.astro'
 import ReadingTime from './ReadingTime.astro'
 import SeriesToc from './SeriesToc.astro'
 import ShareButton from './ShareButton.astro'
@@ -68,6 +69,7 @@ const listed = !post.data.noindex
     }
     <span aria-hidden="true">·</span>
     <ShareButton locale={locale} />
+    <DiscussButton locale={locale} title={post.data.title} />
   </div>
   <Authors authors={post.data.authors} locale={locale} />
   <slot name="banner" />
@@ -107,7 +109,8 @@ const listed = !post.data.noindex
     )
   }
   <div class="post-share">
-    <ShareButton locale={locale} class="share-bottom" />
+    <ShareButton locale={locale} class="action-bottom" />
+    <DiscussButton locale={locale} title={post.data.title} class="action-bottom" />
   </div>
   {
     series !== null && (
@@ -150,6 +153,7 @@ const listed = !post.data.noindex
   .post-share {
     display: flex;
     justify-content: flex-end;
+    gap: 0.5rem;
     margin-block-start: 2rem;
     padding-block-start: 1rem;
     border-block-start: 1px solid var(--rule);

@@ -1,0 +1,113 @@
+.action-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.action-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border: var(--btn-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: max(0.75rem, 12px);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.action-btn > * {
+  position: relative;
+}
+
+.action-btn:hover,
+.action-btn:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.action-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 47.99rem) {
+  .action-label {
+    display: none;
+  }
+
+  .action-btn {
+    padding: 0;
+    border: 0;
+    min-inline-size: var(--icon-btn-hit);
+    min-block-size: var(--icon-btn-hit);
+  }
+
+  .action-btn::before {
+    content: '';
+    position: absolute;
+    inline-size: var(--icon-btn-chip);
+    block-size: var(--icon-btn-chip);
+    border: var(--btn-border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    pointer-events: none;
+  }
+
+  .action-btn:hover::before,
+  .action-btn:focus-visible::before {
+    border-color: var(--accent);
+  }
+}
+
+.action-menu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-end: 0;
+  margin-block-start: 0.3rem;
+  padding: 0.35rem 0;
+  border: 3px double var(--fg);
+  border-radius: var(--radius);
+  background: var(--bg);
+  min-inline-size: 11rem;
+  z-index: 60;
+  font-family: var(--font-mono);
+  font-size: max(0.75rem, 12px);
+}
+
+.action-bottom .action-menu {
+  inset-block-start: auto;
+  inset-block-end: 100%;
+  margin-block-start: 0;
+  margin-block-end: 0.3rem;
+}
+
+.action-menu .action-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  color: var(--fg);
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  inline-size: 100%;
+  white-space: nowrap;
+}
+
+.action-menu .action-item:hover,
+.action-menu .action-item:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.action-item svg {
+  flex-shrink: 0;
+}

@@ -1,0 +1,70 @@
+---
+import { type Locale, t } from '../i18n/ui'
+import Message from './icons/Message.astro'
+
+interface Props {
+  locale: Locale
+  title: string
+  class?: string
+}
+
+const { locale, title, class: className } = Astro.props
+
+const markdownUrl = new URL(`${Astro.url.pathname}index.md`, Astro.site).href
+const prompt = encodeURIComponent(t(locale, 'discussPrompt', title, markdownUrl))
+
+// Gemini is absent because it ignores a prompt passed in the URL.
+const agents = [
+  { name: 'ChatGPT', url: 'https://chatgpt.com/?q=' },
+  { name: 'Claude', url: 'https://claude.ai/new?q=' },
+  { name: 'Perplexity', url: 'https://www.perplexity.ai/search?q=' },
+]
+---
+
+<details class:list={['action-wrap', 'discuss', className]} data-pagefind-ignore>
+  <summary class="action-btn" aria-label={t(locale, 'discussWith')}>
+    <Message />
+    <span class="action-label">{t(locale, 'discussWith').toLowerCase()}</span>
+  </summary>
+  <div class="action-menu">
+    {
+      agents.map(({ name, url }) => (
+        <a class="action-item" href={`${url}${prompt}`} target="_blank" rel="noopener noreferrer">
+          {name}
+        </a>
+      ))
+    }
+  </div>
+</details>
+
+<style>
+  summary {
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
+
+<script>
+  function closeDiscussMenus(except?: Node) {
+    for (const menu of document.querySelectorAll<HTMLDetailsElement>('.discuss[open]')) {
+      if (except && menu.contains(except)) continue
+      menu.open = false
+    }
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element
+    closeDiscussMenus(target.closest('.action-item') ? undefined : target)
+  })
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return
+    const open = document.querySelector<HTMLDetailsElement>('.discuss[open]')
+    if (!open) return
+    open.querySelector('summary')?.focus()
+    closeDiscussMenus()
+  })
+</script>

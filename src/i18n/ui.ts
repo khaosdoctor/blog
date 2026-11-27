@@ -58,6 +58,9 @@ const pt = {
   share: 'Compartilhar',
   copyLink: 'Copiar link',
   linkCopied: 'link copiado',
+  discussWith: 'Discutir com',
+  discussPrompt:
+    'Estou lendo o artigo "%s" em %s\nMe ajude a entender os conceitos dele. Esteja pronto para explicar, dar exemplos ou ajudar a depurar com base no texto.',
   quoteCopied: 'citação copiada',
   formulaCopied: 'fórmula copiada',
   sourceCopied: 'código copiado',
@@ -219,6 +222,9 @@ export const ui: Record<Locale, Record<UIKey, string>> = {
     share: 'Share',
     copyLink: 'Copy link',
     linkCopied: 'link copied',
+    discussWith: 'Discuss with',
+    discussPrompt:
+      'I\'m reading the article "%s" at %s\nHelp me understand its concepts. Be ready to explain them, give examples, or help me debug based on it.',
     quoteCopied: 'quote copied',
     formulaCopied: 'formula copied',
     sourceCopied: 'source copied',
