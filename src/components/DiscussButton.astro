@@ -11,13 +11,15 @@ interface Props {
 const { locale, title, class: className } = Astro.props
 
 const markdownUrl = new URL(`${Astro.url.pathname}index.md`, Astro.site).href
-const prompt = encodeURIComponent(t(locale, 'discussPrompt', title, markdownUrl))
+const prompt = t(locale, 'discussPrompt', title, markdownUrl)
+const query = `?q=${encodeURIComponent(prompt)}`
 
-// Gemini is absent because it ignores a prompt passed in the URL.
+// Gemini ignores a prompt in the URL, so its prompt travels by clipboard.
 const agents = [
-  { name: 'ChatGPT', url: 'https://chatgpt.com/?q=' },
-  { name: 'Claude', url: 'https://claude.ai/new?q=' },
-  { name: 'Perplexity', url: 'https://www.perplexity.ai/search?q=' },
+  { name: 'ChatGPT', href: `https://chatgpt.com/${query}` },
+  { name: 'Claude', href: `https://claude.ai/new${query}` },
+  { name: 'Gemini', href: 'https://gemini.google.com/app', copy: prompt },
+  { name: 'Perplexity', href: `https://www.perplexity.ai/search${query}` },
 ]
 ---
 
@@ -28,9 +30,14 @@ const agents = [
   </summary>
   <div class="action-menu">
     {
-      agents.map(({ name, url }) => (
-        <a class="action-item" href={`${url}${prompt}`} target="_blank" rel="noopener noreferrer">
+      agents.map(({ name, href, copy }) => (
+        <a class="action-item" href={href} data-copy-prompt={copy} target="_blank" rel="noopener noreferrer">
           {name}
+          {copy && (
+            <small data-copy-hint hidden>
+              {t(locale, 'copiesPrompt')}
+            </small>
+          )}
         </a>
       ))
     }
@@ -55,8 +62,12 @@ const agents = [
     }
   }
 
+  for (const hint of document.querySelectorAll<HTMLElement>('[data-copy-hint]')) hint.hidden = false
+
   document.addEventListener('click', (event) => {
     const target = event.target as Element
+    const prompt = target.closest<HTMLElement>('[data-copy-prompt]')?.dataset.copyPrompt
+    if (prompt) navigator.clipboard?.writeText(prompt).catch(() => {})
     closeDiscussMenus(target.closest('.action-item') ? undefined : target)
   })
 
