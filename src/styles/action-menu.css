@@ -13,7 +13,7 @@
   padding: 0.15rem 0.55rem;
   border: var(--btn-border);
   border-radius: var(--radius);
-  background: transparent;
+  background: var(--bg);
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: max(0.75rem, 12px);
@@ -44,6 +44,7 @@
   .action-btn {
     padding: 0;
     border: 0;
+    background: transparent;
     min-inline-size: var(--icon-btn-hit);
     min-block-size: var(--icon-btn-hit);
   }

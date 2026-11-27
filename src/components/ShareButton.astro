@@ -10,7 +10,7 @@ const { locale, class: className } = Astro.props
 ---
 
 <span
-  class:list={['action-wrap', 'share-wrap', className]}
+  class:list={['action-wrap', 'share-wrap', 'no-preview', className]}
   data-share-label={t(locale, 'share')}
   data-share-copied={t(locale, 'linkCopied')}
 >

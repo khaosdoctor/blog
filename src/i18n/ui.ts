@@ -58,7 +58,7 @@ const pt = {
   share: 'Compartilhar',
   copyLink: 'Copiar link',
   linkCopied: 'link copiado',
-  discussWith: 'Discutir com',
+  discussWith: 'Discutir',
   copiesPrompt: '(copia o prompt)',
   discussPrompt:
     'Estou lendo o artigo "%s" em %s\nMe ajude a entender os conceitos dele. Esteja pronto para explicar, dar exemplos ou ajudar a depurar com base no texto.',
